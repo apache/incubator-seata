@@ -96,9 +96,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         1000L);
 
     /**
-     * The constant ASYN_COMMITTING_RETRY_PERIOD.
+     * The constant ASYNC_COMMITTING_RETRY_PERIOD.
      */
-    protected static final long ASYN_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
+    protected static final long ASYNC_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
         ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
 
     /**
@@ -113,15 +113,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD, 1000L);
 
     /**
-     * The Transaction undolog delete period.
+     * The Transaction undo log delete period.
      */
-    protected static final long UNDOLOG_DELETE_PERIOD = CONFIG.getLong(
+    protected static final long UNDO_LOG_DELETE_PERIOD = CONFIG.getLong(
         ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
 
     /**
-     * The Transaction undolog delay delete period
+     * The Transaction undo log delay delete period
      */
-    protected static final long UNDOLOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
+    protected static final long UNDO_LOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
@@ -130,6 +130,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
         ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
+
+    private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
 
     private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("RetryRollbacking", 1));
@@ -251,13 +254,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                         + ", cannot find channel by resourceId[" + sagaResourceId + "]");
                     return BranchStatus.PhaseTwo_CommitFailed_Retryable;
                 }
-                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(sagaChannel,
+                BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(sagaChannel,
                     request);
                 return response.getBranchStatus();
             } else {
                 BranchSession branchSession = globalSession.getBranch(branchId);
                 if (null != branchSession) {
-                    BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                    BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(resourceId,
                         branchSession.getClientId(), request);
                     return response.getBranchStatus();
                 } else {
@@ -302,16 +305,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                         + ", cannot find channel by resourceId[" + sagaResourceId + "]");
                     return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
                 }
-                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(sagaChannel,
+                BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(sagaChannel,
                     request);
                 return response.getBranchStatus();
             } else {
 
                 BranchSession branchSession = globalSession.getBranch(branchId);
-
-                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
-                    branchSession.getClientId(), request);
-                return response.getBranchStatus();
+                if (null != branchSession) {
+                    BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(resourceId,
+                        branchSession.getClientId(), request);
+                    return response.getBranchStatus();
+                } else {
+                    return BranchStatus.PhaseTwo_Rollbacked;
+                }
             }
 
         } catch (IOException | TimeoutException e) {
@@ -381,12 +387,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         long now = System.currentTimeMillis();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
+                //prevent repeated rollback
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                    continue;
+                }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
+                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
+                        rollbackingSession.clean();
+                    }
                     /**
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.error("GlobalSession rollback retry timeout [{}]", rollbackingSession.getXid());
+                    LOGGER.error("GlobalSession rollback retry timeout and removed [{}]", rollbackingSession.getXid());
                     continue;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -414,7 +427,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("GlobalSession commit retry timeout [{}]", committingSession.getXid());
+                    LOGGER.error("GlobalSession commit retry timeout and removed [{}]", committingSession.getXid());
                     continue;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -510,7 +523,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception async committing ... ", e);
             }
-        }, 0, ASYN_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
             try {
@@ -526,7 +539,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception undoLog deleting ... ", e);
             }
-        }, UNDOLOG_DELAY_DELETE_PERIOD, UNDOLOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+        }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -534,7 +547,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         if (!(request instanceof AbstractTransactionRequestToTC)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC)request;
+        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
         return transactionRequest.handle(context);
@@ -565,7 +578,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
         // 2. second close netty flow
         if (messageSender instanceof RpcServer) {
-            ((RpcServer)messageSender).destroy();
+            ((RpcServer) messageSender).destroy();
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();

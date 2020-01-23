@@ -33,8 +33,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Tm rpc client test.
  *
- * @author jimin.jm @alibaba-inc.com xiajun.0706@163.com
- * @date 2019 /01/25
+ * @author slievrly xiajun.0706@163.com
  */
 public class TmRpcClientTest {
 

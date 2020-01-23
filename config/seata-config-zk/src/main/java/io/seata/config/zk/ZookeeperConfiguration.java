@@ -16,7 +16,6 @@
 package io.seata.config.zk;
 
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -48,7 +47,6 @@ import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
  * The type Zookeeper configuration.
  *
  * @author crazier.huang
- * @date 2019 /2/18
  */
 public class ZookeeperConfiguration extends AbstractConfiguration {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
@@ -102,13 +100,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
         }
-        FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
-            @Override
-            public String call() {
-                String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-                String value = zkClient.readData(path);
-                return StringUtils.isNullOrEmpty(value) ? defaultValue : value;
-            }
+        FutureTask<String> future = new FutureTask<>(() -> {
+            String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+            String value1 = zkClient.readData(path);
+            return StringUtils.isNullOrEmpty(value1) ? defaultValue : value1;
         });
         CONFIG_EXECUTOR.execute(future);
         try {
@@ -121,17 +116,14 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
-        FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-                if (!zkClient.exists(path)) {
-                    zkClient.create(path, content, CreateMode.PERSISTENT);
-                } else {
-                    zkClient.writeData(path, content);
-                }
-                return true;
+        FutureTask<Boolean> future = new FutureTask<>(() -> {
+            String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+            if (!zkClient.exists(path)) {
+                zkClient.create(path, content, CreateMode.PERSISTENT);
+            } else {
+                zkClient.writeData(path, content);
             }
+            return true;
         });
         CONFIG_EXECUTOR.execute(future);
         try {
@@ -149,12 +141,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
-        FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-                return zkClient.delete(path);
-            }
+        FutureTask<Boolean> future = new FutureTask<>(() -> {
+            String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+            return zkClient.delete(path);
         });
         CONFIG_EXECUTOR.execute(future);
         try {
@@ -216,7 +205,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     /**
      * The type Zk listener.
      */
-    public class ZKListener implements IZkDataListener {
+    public static class ZKListener implements IZkDataListener {
 
         private String path;
         private ConfigurationChangeListener listener;
@@ -233,7 +222,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         }
 
         @Override
-        public void handleDataChange(String s, Object o) throws Exception {
+        public void handleDataChange(String s, Object o) {
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(s).setNewValue(o.toString())
                 .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
@@ -241,7 +230,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         }
 
         @Override
-        public void handleDataDeleted(String s) throws Exception {
+        public void handleDataDeleted(String s) {
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(s).setChangeType(
                 ConfigurationChangeType.DELETE);
             listener.onProcessEvent(event);

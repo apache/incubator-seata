@@ -81,7 +81,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>0.9.0</seata.version>
+<seata.version>1.0.0</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
@@ -115,9 +115,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
   
-**Dingtalk**
-
-<img src="https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240"  height="300" width="300">
+<img src="https://img.alicdn.com/tfs/TB1CR2orKT2gK0jSZFvXXXnFXXa-1798-588.jpg"  height="200" width="630">
 
 
 ## Seata ecosystem
@@ -126,7 +124,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 * [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
 * [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
-* [Awesome Seata](https://github.com/seata/awesome-seata) - Description of Seata related projects 
+* [Awesome Seata](https://github.com/seata/awesome-seata) - Seata's slides and videa address in meetup
 * [Seata Website](https://github.com/seata/seata.github.io) - Seata official website
 
 ## Contributors
@@ -184,6 +182,18 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='乾动新能源' height='40'  src='http://www.cangowin.com/images/logo.png'  /img>
     <img alt='路客精品民宿' height='40'  src='https://img.alicdn.com/tfs/TB1CCavoBr0gK0jSZFnXXbRRXXa-240-100.png'  /img>
     <img alt='深圳好尔美' height='40'  src='https://img.alicdn.com/tfs/TB1IIivoxD1gK0jSZFyXXciOVXa-200-130.png'  /img>
+    <img alt='浙大睿医' height='40'  src='https://img.alicdn.com/tfs/TB1kQThrFY7gK0jSZKzXXaikpXa-220-110.jpg'  /img>
+    <img alt='居然之家' height='40'  src='https://img.alicdn.com/tfs/TB1LK6jrUT1gK0jSZFrXXcNCXXa-180-54.png'  /img>
+    <img alt='臻善科技' height='40'  src='http://www.gisquest.com/static/web/img/img-1.png?v=v3'  /img>
+    <img alt='中国支付通' height='40'  src='http://www.chinasmartpay.com/img/index_logo.png'  /img>
+    <img alt='众网小贷' height='40'  src='http://imassbank.com/images/zw_logo.png'  /img>
+    <img alt='谐云科技' height='40'  src='https://img.alicdn.com/tfs/TB1V1YlrRv0gK0jSZKbXXbK2FXa-514-160.png'  /img>
+    <img alt='浙江甄品' height='40'  src='https://img.alicdn.com/tfs/TB1oC2prND1gK0jSZFyXXciOVXa-246-124.jpg'  /img>
+    <img alt='深圳海豚网' height='40'  src='https://img.alicdn.com/tfs/TB1defkrLb2gK0jSZK9XXaEgFXa-434-146.jpg'  /img>
+    <img alt='汇通天下' height='40'  src='https://img.alicdn.com/tfs/TB1uIHmrHr1gK0jSZR0XXbP8XXa-1024-568.png'  /img>
+    <img alt='九机网' height='40'  src='https://img.alicdn.com/tfs/TB1ERHlrUY1gK0jSZFMXXaWcVXa-120-60.png'  /img>
+    <img alt='有好东西' height='40'  src='https://img.alicdn.com/tfs/TB1LT2lrNn1gK0jSZKPXXXvUXXa-300-300.jpg'  /img>
+    <img alt='南京智慧盾' height='40'  src='https://img.alicdn.com/tfs/TB1s2LprUY1gK0jSZFCXXcwqXXa-618-148.jpg'  /img>
 </div>
 
 

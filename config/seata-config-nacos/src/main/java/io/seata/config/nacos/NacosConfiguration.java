@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Nacos configuration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /2/1
+ * @author slievrly
  */
 public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
@@ -195,13 +194,11 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosNameSpaceFileKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + PRO_NAMESPACE_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
     }
 
     private static String getNacosAddrFileKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + PRO_SERVER_ADDR_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
     @Override
@@ -212,7 +209,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     /**
      * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination
      */
-    public class NacosListener extends AbstractSharedListener {
+    public static class NacosListener extends AbstractSharedListener {
         private final String dataId;
         private final ConfigurationChangeListener listener;
 

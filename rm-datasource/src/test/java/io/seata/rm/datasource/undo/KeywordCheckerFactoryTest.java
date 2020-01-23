@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/18
  */
 public class KeywordCheckerFactoryTest {
 
@@ -30,8 +29,6 @@ public class KeywordCheckerFactoryTest {
         KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
         Assertions.assertNotNull(keywordCheckerFactory);
 
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            KeywordCheckerFactory.getKeywordChecker("unknow");
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
     }
 }

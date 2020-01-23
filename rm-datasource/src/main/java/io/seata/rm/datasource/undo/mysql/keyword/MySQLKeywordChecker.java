@@ -15,8 +15,8 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  * The type MySQL keyword checker.
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/3/5 MySQL keyword checker
  */
 public class MySQLKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;

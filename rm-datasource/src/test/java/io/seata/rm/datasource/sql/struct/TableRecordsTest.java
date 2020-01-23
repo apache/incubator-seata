@@ -85,7 +85,8 @@ public class TableRecordsTest {
         MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(proxy, "table_records_test");
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(proxy.getPlainConnection(),
+            "table_records_test", proxy.getResourceId());
 
         ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
@@ -103,7 +104,8 @@ public class TableRecordsTest {
         MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(proxy, "table_records_test");
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(proxy.getPlainConnection(),
+            "table_records_test", proxy.getResourceId());
 
         ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
@@ -122,11 +124,7 @@ public class TableRecordsTest {
         Assertions.assertEquals(0, empty.size());
         Assertions.assertEquals(0, empty.getRows().size());
         Assertions.assertEquals(0, empty.pkRows().size());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            empty.add(new Row());
-        });
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            empty.getTableMeta();
-        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.add(new Row()));
+        Assertions.assertThrows(UnsupportedOperationException.class, empty::getTableMeta);
     }
 }

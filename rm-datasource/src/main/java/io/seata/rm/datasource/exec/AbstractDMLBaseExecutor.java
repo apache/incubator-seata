@@ -18,7 +18,7 @@ package io.seata.rm.datasource.exec;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +84,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Throwable the throwable
      */
     protected T executeAutoCommitTrue(Object[] args) throws Throwable {
-        AbstractConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         try {
             connectionProxy.setAutoCommit(false);
             return new LockRetryPolicy(connectionProxy.getTargetConnection()).execute(() -> {
@@ -100,7 +100,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             }
             throw e;
         } finally {
-            ((ConnectionProxy) connectionProxy).getContext().reset();
+            connectionProxy.getContext().reset();
             connectionProxy.setAutoCommit(true);
         }
     }

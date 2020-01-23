@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author guoyao
- * @date 2019-10-14
  */
 public class TableMetaCacheFactoryTest {
 

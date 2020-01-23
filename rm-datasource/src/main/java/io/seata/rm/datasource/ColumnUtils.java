@@ -15,9 +15,9 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,6 @@ import java.util.List;
 /**
  * column utils
  * @author jsbxyyx
- * @date 2019/09/17
  */
 public final class ColumnUtils {
 

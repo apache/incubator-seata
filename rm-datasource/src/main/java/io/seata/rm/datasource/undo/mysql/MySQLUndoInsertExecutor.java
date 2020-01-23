@@ -20,8 +20,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -29,6 +29,7 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type My sql undo insert executor.
@@ -52,7 +53,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
-        if (afterImageRows == null || afterImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(afterImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);

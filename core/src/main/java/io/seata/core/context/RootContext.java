@@ -16,8 +16,8 @@
 package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.model.BranchType;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +26,13 @@ import java.util.Map;
 /**
  * The type Root context.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RootContext {
+
+    private RootContext() {
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
 
@@ -55,7 +59,7 @@ public class RootContext {
         }
 
         String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType) && xidType.indexOf("_") > -1) {
+        if (StringUtils.isNotBlank(xidType) && xidType.contains("_")) {
             return xidType.split("_")[0];
         }
 
@@ -78,7 +82,7 @@ public class RootContext {
      */
     public static void bind(String xid) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind " + xid);
+            LOGGER.debug("bind {}", xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
     }

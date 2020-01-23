@@ -44,7 +44,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Consul configuration.
  *
  * @author xingfudeshi @gmail.com
- * @date 2019 /05/05
  */
 public class ConsulConfiguration extends AbstractConfiguration {
     private volatile static ConsulConfiguration instance;
@@ -97,18 +96,14 @@ public class ConsulConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
             timeoutMills);
-        consulNotifierExecutor.execute(() -> {
-            complete(getConsulClient().getKVValue(dataId), configFuture);
-        });
+        consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId), configFuture));
         return (String)configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        consulNotifierExecutor.execute(() -> {
-            complete(getConsulClient().setKVValue(dataId, content), configFuture);
-        });
+        consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(dataId, content), configFuture));
         return (Boolean)configFuture.get();
     }
 
@@ -128,9 +123,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
-        consulNotifierExecutor.execute(() -> {
-            complete(getConsulClient().deleteKVValue(dataId), configFuture);
-        });
+        consulNotifierExecutor.execute(() -> complete(getConsulClient().deleteKVValue(dataId), configFuture));
         return (Boolean)configFuture.get();
     }
 
@@ -208,7 +201,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     /**
      * The type Consul listener.
      */
-    public class ConsulListener implements ConfigurationChangeListener {
+    public static class ConsulListener implements ConfigurationChangeListener {
 
         private final ConfigurationChangeListener listener;
         private final String dataId;

@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.config;
 
 import java.util.concurrent.CountDownLatch;
@@ -25,8 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/11/18
+ * @author slievrly
  */
 class FileConfigurationTest {
 
@@ -45,8 +43,7 @@ class FileConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
         fileConfig.addConfigListener("service.disableGlobalTransaction", (event) -> {
-            Assertions.assertTrue(
-                Boolean.parseBoolean(event.getNewValue()) == !Boolean.parseBoolean(event.getOldValue()));
+            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
             countDownLatch.countDown();
         });
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));

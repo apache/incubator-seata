@@ -19,13 +19,12 @@ import java.util.HashMap;
 
 import io.seata.spring.boot.autoconfigure.properties.file.ClientProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
+import io.seata.spring.boot.autoconfigure.properties.file.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.SpringProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.SupportProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigEtcd3Properties;
@@ -45,7 +44,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 public class StarterConstants {
     private static final int MAP_CAPACITY = 64;
@@ -59,8 +57,7 @@ public class StarterConstants {
     public static final String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
     public static final String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
-    public static final String SUPPORT_PREFIX = CLIENT_PREFIX + ".support";
-    public static final String SPRING_PREFIX = SUPPORT_PREFIX + ".spring";
+    public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
 
     public static final String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     public static final String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -88,10 +85,9 @@ public class StarterConstants {
             put(LOCK_PREFIX, LockProperties.class);
             put(SERVICE_PREFIX, ServiceProperties.class);
             put(SHUTDOWN_PREFIX, ShutdownProperties.class);
-            put(SPRING_PREFIX, SpringProperties.class);
-            put(SUPPORT_PREFIX, SupportProperties.class);
             put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             put(UNDO_PREFIX, UndoProperties.class);
+            put(LOG_PREFIX, LogProperties.class);
             put(TRANSPORT_PREFIX, TransportProperties.class);
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
@@ -123,22 +119,13 @@ public class StarterConstants {
     public static String NORMALIZED_KEY_VGROUP_MAPPING = "vgroupMapping";
     public static String SPECIAL_KEY_GROUPLIST = "grouplist";
     public static String NORMALIZED_KEY_GROUPLIST = "grouplist";
-    public static String SPECIAL_KEY_DATASOURCE_AUTOPROXY = "datasource.autoproxy";
-    public static String NORMALIZED_KEY_DATASOURCE_AUTOPROXY = "datasourceAutoproxy";
     public static String SPECIAL_KEY_UNDO = "client.undo.";
-    public static String NORMALIZED_KEY_UNDO = "client.undo.";
     public static String SPECIAL_KEY_CLIENT = "client.";
-    public static String NORMALIZED_KEY_CLIENT = "client.";
     public static String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
-    public static String NORMALIZED_KEY_CLIENT_LOCK = "client.rm.lock.";
     public static String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
-    public static String NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
 
     public static String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
-    public static String NORMALIZED_KEY_REGISTRY_ZK = "registry.zk.";
     public static String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
-    public static String NORMALIZED_KEY_CONFIG_ZK = "config.zk.";
     public static String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
-    public static String NORMALIZED_KEY_CONFIG_APOLLO = "config.apollo.";
 
 }
