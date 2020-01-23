@@ -13,19 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.druid;
+package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The class MySqlOperateRecognizerHolder
  *
  * @author: Zhibei Hao
  */
-public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
-    private static final String MYSQL = "mysql";
+@LoadLevel(name = JdbcConstants.MYSQL)
+public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
@@ -48,10 +51,5 @@ public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder 
             return new MySQLSelectForUpdateRecognizer(sql, ast);
         }
         return null;
-    }
-
-    @Override
-    public String getDbType() {
-        return MYSQL;
     }
 }

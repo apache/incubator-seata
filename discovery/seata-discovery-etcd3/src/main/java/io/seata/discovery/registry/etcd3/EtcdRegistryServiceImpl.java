@@ -167,12 +167,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     public void unsubscribe(String cluster, Watch.Listener listener) throws Exception {
         Set<Watch.Listener> subscribeSet = listenerMap.get(cluster);
         if (null != subscribeSet) {
-            Set<Watch.Listener> newSubscribeSet = new HashSet<>();
-            for (Watch.Listener eventListener : subscribeSet) {
-                if (!eventListener.equals(listener)) {
-                    newSubscribeSet.add(eventListener);
-                }
-            }
+            Set<Watch.Listener> newSubscribeSet = subscribeSet.stream()
+                    .filter(eventListener -> !eventListener.equals(listener))
+                    .collect(Collectors.toSet());
             listenerMap.put(cluster, newSubscribeSet);
         }
         watcherMap.remove(cluster).stop();
@@ -276,8 +273,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @return
      */
     private String getClusterName() {
-        String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
         return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 

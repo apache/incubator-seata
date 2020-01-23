@@ -15,12 +15,13 @@
  */
 package io.seata.rm.datasource.sql;
 
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.druid.MySQLDeleteRecognizer;
-import io.seata.sqlparser.druid.MySQLInsertRecognizer;
-import io.seata.sqlparser.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.sqlparser.druid.MySQLUpdateRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleSelectForUpdateRecognizer;
@@ -93,7 +94,7 @@ public class SQLVisitorFactoryTest {
         Assertions.assertTrue(recognizer instanceof OracleSelectForUpdateRecognizer);
 
         //test for do not support db
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
     }
 
     @Test

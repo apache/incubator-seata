@@ -28,6 +28,8 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.saga.engine.StateMachineConfig;
+import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.serializer.Serializer;
@@ -119,7 +121,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 if (machineContext != null) {
                     machineContext.put(DomainConstants.VAR_NAME_GLOBAL_TX, globalTransaction);
                 }
-                context.setVariable(DomainConstants.VAR_NAME_ROOT_CONTEXT_HOLDER, RootContext.entries());
 
             } catch (ExecutionException e) {
 
@@ -130,6 +131,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 throw new EngineExecutionException(e,
                         e.getCode() + ", TransName:" + transactionInfo.getName() + ", XID: " + xid + ", Reason: " + e
                                 .getMessage(), FrameworkErrorCode.TransactionManagerError);
+            }
+            finally {
+                if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_ASYNC_EXECUTION))) {
+                    RootContext.unbind();
+                }
             }
         }
     }
@@ -196,11 +202,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                                 .getMessage(), e);
             } finally {
                 // clear
-                Map<String, String> rootContextEntries = (Map<String, String>) context.getVariable(
-                        DomainConstants.VAR_NAME_ROOT_CONTEXT_HOLDER);
-                if (rootContextEntries != null) {
-                    rootContextEntries.clear();
-                }
+                RootContext.unbind();
                 sagaTransactionalTemplate.triggerAfterCompletion();
                 sagaTransactionalTemplate.cleanUp();
             }
@@ -404,7 +406,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             executeUpdate(stateLogStoreSqls.getRecordStateFinishedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE,
                     stateInstance);
 
-            branchReport(stateInstance, context);
+            //A switch to skip branch report on branch success, in order to optimize performance
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            if (!(stateMachineConfig instanceof DbStateMachineConfig
+                    && !((DbStateMachineConfig)stateMachineConfig).isRmReportSuccessEnable()
+                    && ExecutionStatus.SU.equals(stateInstance.getStatus()))) {
+                branchReport(stateInstance, context);
+            }
         }
     }
 

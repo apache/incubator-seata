@@ -128,6 +128,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         contextBuilder.withStateMachineContextVariables(contextVariables);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext processContext = contextBuilder.build();
 
         if (instance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
@@ -231,6 +233,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withOperationName(DomainConstants.OPERATION_NAME_FORWARD).withAsyncCallback(callback)
             .withStateMachineInstance(stateMachineInstance).withStateInstance(lastForwardState).withStateMachineConfig(
                 getStateMachineConfig()).withStateMachineEngine(this);
+
+        contextBuilder.withIsAsyncExecution(async);
 
         ProcessContext context = contextBuilder.build();
 
@@ -456,6 +460,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withOperationName(DomainConstants.OPERATION_NAME_COMPENSATE).withAsyncCallback(callback)
             .withStateMachineInstance(stateMachineInstance).withStateMachineConfig(getStateMachineConfig())
             .withStateMachineEngine(this);
+
+        contextBuilder.withIsAsyncExecution(async);
 
         ProcessContext context = contextBuilder.build();
 

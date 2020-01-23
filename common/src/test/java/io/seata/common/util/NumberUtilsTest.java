@@ -13,17 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.file;
+package io.seata.common.util;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SUPPORT_PREFIX;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * @author xingfudeshi@gmail.com
+ * @author caioguedes
  */
-@Component
-@ConfigurationProperties(prefix = SUPPORT_PREFIX)
-public class SupportProperties {
+public class NumberUtilsTest {
+
+    @Test
+    public void testToInReturnDefaultValueWithNull() {
+        Assertions.assertEquals(10, NumberUtils.toInt(null, 10));
+    }
+
+    @Test
+    public void testToInReturnDefaultValueWithFormatIsInvalid() {
+        Assertions.assertEquals(10, NumberUtils.toInt("nine", 10));
+    }
+
+    @Test
+    public void testToInReturnParsedValue() {
+        Assertions.assertEquals(10, NumberUtils.toInt("10", 9));
+    }
 }

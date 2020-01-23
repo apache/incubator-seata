@@ -31,26 +31,17 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CLIENT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CLIENT_LOCK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CONFIG_APOLLO;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CONFIG_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT_LOCK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_APOLLO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
@@ -61,19 +52,19 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
+        return (Configuration) Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
             @Override
             public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
                 throws Throwable {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result = null;
-                    String rawDataId = (String)args[0];
+                    String rawDataId = (String) args[0];
                     if (args.length == 1) {
                         result = get(convertDataId(rawDataId));
                     } else if (args.length == 2) {
                         result = get(convertDataId(rawDataId), args[1]);
                     } else if (args.length == 3) {
-                        result = get(convertDataId(rawDataId), args[1], (Long)args[2]);
+                        result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
                     }
                     if (null != result) {
                         return result;
@@ -128,36 +119,33 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (rawDataId.endsWith(SPECIAL_KEY_GROUPLIST)) {
             return StarterConstants.SERVICE_PREFIX + "." + NORMALIZED_KEY_GROUPLIST;
         }
-        if (rawDataId.endsWith(SPECIAL_KEY_DATASOURCE_AUTOPROXY)) {
-            return StarterConstants.SPRING_PREFIX + "." + NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
-        }
         if (rawDataId.startsWith(SPECIAL_KEY_UNDO)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_UNDO);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_UNDO);
             return StarterConstants.UNDO_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CLIENT_LOCK)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CLIENT_LOCK);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CLIENT_LOCK);
             return StarterConstants.LOCK_PREFIX + "." + StringFormatUtils.minusToCamel(
                 StringFormatUtils.dotToCamel(suffix));
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CLIENT)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CLIENT);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CLIENT);
             return StarterConstants.CLIENT_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
         if (rawDataId.startsWith(SPECIAL_KEY_TRANSPORT_THREAD_FACTORY)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_TRANSPORT_THREAD_FACTORY);
             return StarterConstants.THREAD_FACTORY_PREFIX + "." + StringFormatUtils.minusToCamel(suffix);
         }
         if (rawDataId.startsWith(SPECIAL_KEY_REGISTRY_ZK)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_REGISTRY_ZK);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_REGISTRY_ZK);
             return StarterConstants.REGISTRY_ZK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CONFIG_ZK)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CONFIG_ZK);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CONFIG_ZK);
             return StarterConstants.CONFIG_ZK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CONFIG_APOLLO)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CONFIG_APOLLO);
+            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CONFIG_APOLLO);
             return StarterConstants.CONFIG_APOLLO_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
 
