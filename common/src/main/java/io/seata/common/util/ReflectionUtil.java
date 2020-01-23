@@ -18,6 +18,7 @@ package io.seata.common.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -198,4 +199,13 @@ public class ReflectionUtil {
         return interfaces;
     }
 
+    public static void modifyStaticFinalField(Class cla, String modifyFieldName, Object newValue)
+        throws NoSuchFieldException, IllegalAccessException {
+        Field field = cla.getDeclaredField(modifyFieldName);
+        field.setAccessible(true);
+        Field modifiers = field.getClass().getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+        field.set(cla, newValue);
+    }
 }
