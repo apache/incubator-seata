@@ -96,10 +96,10 @@ public class SQLVisitorFactoryTest {
         Assertions.assertTrue(recognizer.get(0) instanceof OracleSelectForUpdateRecognizer);
 
         //test for do not support db
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
             SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
         });
-
+        
 
         //TEST FOR Multi-SQL
 
@@ -182,9 +182,7 @@ public class SQLVisitorFactoryTest {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
         });
-
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
-    }
+ }
 
     @Test
     public void testSqlRecognizerLoading() {
