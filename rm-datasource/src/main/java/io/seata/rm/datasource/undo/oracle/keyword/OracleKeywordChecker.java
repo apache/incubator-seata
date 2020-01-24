@@ -15,18 +15,20 @@
  */
 package io.seata.rm.datasource.undo.oracle.keyword;
 
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.sqlparser.util.JdbcConstants;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type oracle sql keyword checker.
  *
  * @author ccg
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;
 
@@ -504,11 +506,5 @@ public class OracleKeywordChecker implements KeywordChecker {
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
         //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
-    }
-
-    @Override
-    public String getDbType()
-    {
-        return JdbcConstants.ORACLE;
     }
 }
