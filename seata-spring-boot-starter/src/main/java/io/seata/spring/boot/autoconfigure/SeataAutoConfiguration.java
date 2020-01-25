@@ -29,6 +29,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR;
 
 /**
@@ -41,13 +42,14 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
-    @Bean
+    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
+    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
     public SpringApplicationContextProvider springApplicationContextProvider() {
         return new SpringApplicationContextProvider();
     }
 
     @Bean
-    @DependsOn({"springApplicationContext"})
+    @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
     public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties) {
         if (LOGGER.isInfoEnabled()) {

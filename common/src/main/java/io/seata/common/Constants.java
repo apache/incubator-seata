@@ -111,4 +111,8 @@ public class Constants {
      * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
      */
     public static final String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    /**
+     * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
+     */
+    public static final String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
 }
