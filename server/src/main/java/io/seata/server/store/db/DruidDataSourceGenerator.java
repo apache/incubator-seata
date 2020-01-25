@@ -25,7 +25,6 @@ import javax.sql.DataSource;
  * The type Druid data source generator.
  *
  * @author zhangsen
- * @data 2019 /4/28
  */
 @LoadLevel(name = "druid")
 public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {

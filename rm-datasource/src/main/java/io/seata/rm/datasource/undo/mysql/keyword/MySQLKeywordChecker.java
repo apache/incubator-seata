@@ -15,40 +15,25 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
-import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type MySQL keyword checker.
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/3/5 MySQL keyword checker
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLKeywordChecker implements KeywordChecker {
-    private static volatile KeywordChecker keywordChecker = null;
-    private Set<String> keywordSet;
+    private static Set<String> keywordSet;
 
-    private MySQLKeywordChecker() {
+    static {
         keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static KeywordChecker getInstance() {
-        if (keywordChecker == null) {
-            synchronized (MySQLKeywordChecker.class) {
-                if (keywordChecker == null) {
-                    keywordChecker = new MySQLKeywordChecker();
-                }
-            }
-        }
-        return keywordChecker;
     }
 
     /**

@@ -16,14 +16,12 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.google.common.collect.Lists;
-import com.sun.org.apache.xpath.internal.operations.String;
 import io.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class TableMetaTest {
 
@@ -33,7 +31,7 @@ public class TableMetaTest {
         Assertions.assertEquals(tableMeta, tableMeta);
         Assertions.assertEquals(tableMeta, new TableMeta());
         Assertions.assertEquals(tableMeta.hashCode(), tableMeta.hashCode());
-        Assertions.assertNotEquals(tableMeta, new String());
+        Assertions.assertNotEquals(tableMeta, "");
 
         TableMeta other = new TableMeta();
         other.setTableName("");
@@ -52,8 +50,8 @@ public class TableMetaTest {
     public void testGetColumnMeta() {
         TableMeta tableMeta = new TableMeta();
         tableMeta.getAllColumns().put("id", new ColumnMeta());
-        tableMeta.getAllColumns().put("`name`", new ColumnMeta());
-        Assertions.assertNotNull(tableMeta.getColumnMeta("`id`"));
+        tableMeta.getAllColumns().put("name", new ColumnMeta());
+        Assertions.assertNull(tableMeta.getColumnMeta("`id`"));
         Assertions.assertNotNull(tableMeta.getColumnMeta("name"));
     }
 
@@ -116,9 +114,7 @@ public class TableMetaTest {
     public void testContainsPK() {
         TableMeta tableMeta = new TableMeta();
         Assertions.assertFalse(tableMeta.containsPK(null));
-        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> {
-            tableMeta.containsPK(Lists.newArrayList("id"));
-        });
+        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> tableMeta.containsPK(Lists.newArrayList("id")));
         Assertions.assertEquals(tableMeta.getTableName() + " needs to contain the primary key.",
             exception.getMessage());
         IndexMeta primary = new IndexMeta();

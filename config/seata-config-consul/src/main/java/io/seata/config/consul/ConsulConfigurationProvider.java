@@ -21,7 +21,6 @@ import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/05/05
  */
 @LoadLevel(name = "Consul", order = 1)
 public class ConsulConfigurationProvider implements ConfigurationProvider {

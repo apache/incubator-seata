@@ -26,8 +26,8 @@ import java.util.List;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLSelectRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +35,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Select for update executor.
  *
- * @author sharajava
- *
  * @param <S> the type parameter
+ * @author sharajava
  */
 public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
@@ -59,7 +58,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     public T doExecute(Object... args) throws Throwable {
         Connection conn = statementProxy.getConnection();
         DatabaseMetaData dbmd = conn.getMetaData();
-        T rs = null;
+        T rs;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
@@ -75,7 +74,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
             } else if (dbmd.supportsSavepoints()) {
                 /*
                  * In order to release the local db lock when global lock conflict
-                 * create a save point if original auto commit was false, then use the save point here to release db lock during global lock checking if necessary
+                 * create a save point if original auto commit was false, then use the save point here to release db
+                 * lock during global lock checking if necessary
                  */
                 sp = conn.setSavepoint();
             } else {
@@ -133,7 +133,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         return rs;
     }
 
-    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));

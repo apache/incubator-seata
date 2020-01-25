@@ -1,0 +1,41 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "useBuiltIns": "usage",
+        "corejs": "core-js@3",
+      }
+    ],
+    "@babel/preset-react"
+  ],
+  "plugins": [
+    "@babel/plugin-transform-runtime",
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        "loose": true
+      }
+    ],
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "@common": "./ggeditor/common",
+          "@components": "./ggeditor/components",
+          "@helpers": "./ggeditor/helpers",
+          "@utils": "./ggeditor/utils"
+        }
+      }
+    ],
+    [
+      "transform-inline-environment-variables",
+      {
+        "include": [
+          "GG_EDITOR_VERSION"
+        ]
+      }
+    ]
+  ]
+}

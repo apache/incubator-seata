@@ -41,12 +41,13 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.rpc.netty.NettyServerConfig.SERVER_CHANNEL_CLAZZ;
+
 /**
  * The type Rpc remoting server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author xingfudeshi@gmail.com
- * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
@@ -123,7 +124,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     @Override
     public void start() {
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
-            .channel(nettyServerConfig.SERVER_CHANNEL_CLAZZ)
+            .channel(SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
             .option(ChannelOption.SO_REUSEADDR, true)
             .childOption(ChannelOption.SO_KEEPALIVE, true)
@@ -147,13 +148,9 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                 }
             });
 
-        if (nettyServerConfig.isEnableServerPooledByteBufAllocator()) {
-            this.serverBootstrap.childOption(ChannelOption.ALLOCATOR, NettyServerConfig.DIRECT_BYTE_BUF_ALLOCATOR);
-        }
-
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
-            LOGGER.info("Server started ... ");
+            LOGGER.info("Seata-Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
             future.channel().closeFuture().sync();

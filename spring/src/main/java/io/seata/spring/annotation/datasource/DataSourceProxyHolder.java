@@ -15,16 +15,15 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.rm.datasource.DataSourceProxy;
-
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.rm.datasource.DataSourceProxy;
 
 /**
  * the type data source proxy holder
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/08/23
  */
 public class DataSourceProxyHolder {
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -38,7 +37,7 @@ public class DataSourceProxyHolder {
      * the type holder
      */
     private static class Holder {
-        private static DataSourceProxyHolder INSTANCE;
+        private static final DataSourceProxyHolder INSTANCE;
 
         static {
             INSTANCE = new DataSourceProxyHolder();

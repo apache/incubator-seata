@@ -33,7 +33,6 @@ import java.lang.reflect.Field;
 
 /**
  * @author wangwei
- * @date 2019/10/24
  */
 class DefaultFailureHandlerImplTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImplTest.class);
@@ -72,6 +71,7 @@ class DefaultFailureHandlerImplTest {
             }
         });
     }
+
     @Test
     void onBeginFailure() {
         RootContext.bind(DEFAULT_XID);
@@ -89,7 +89,7 @@ class DefaultFailureHandlerImplTest {
         failureHandler.onCommitFailure(tx, new MyRuntimeException("").getCause());
 
         // get timer
-        Class c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
+        Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
         Field field = c.getDeclaredField("timer");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
@@ -115,7 +115,7 @@ class DefaultFailureHandlerImplTest {
         failureHandler.onRollbackFailure(tx, new MyRuntimeException("").getCause());
 
         // get timer
-        Class c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
+        Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
         Field field = c.getDeclaredField("timer");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);

@@ -22,13 +22,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 @Component
 @ConfigurationProperties(prefix = CONFIG_PREFIX)
 public class ConfigProperties {
     /**
-     * file、nacos、apollo、zk、consul、etcd3
+     * file, nacos, apollo, zk, consul, etcd3
      */
     private String type = "file";
 

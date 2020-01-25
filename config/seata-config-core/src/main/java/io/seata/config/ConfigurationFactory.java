@@ -19,14 +19,19 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Configuration factory.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author Geng Zhang
  */
 public final class ConfigurationFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
+
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
@@ -50,14 +55,17 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
-            : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
+        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
+            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-
-        } catch (Exception ignore) {
-
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("load extConfiguration:{}",
+                    extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
@@ -84,7 +92,7 @@ public final class ConfigurationFactory {
     }
 
     private static Configuration buildConfiguration() {
-        ConfigType configType = null;
+        ConfigType configType;
         String configTypeName = null;
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
@@ -95,18 +103,20 @@ public final class ConfigurationFactory {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
         if (ConfigType.File == configType) {
-            String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + NAME_KEY;
+            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-            } catch (Exception ignore) {
-
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("load extConfiguration:{}",
+                        extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
             }
-            
+
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())

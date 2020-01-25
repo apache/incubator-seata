@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
  * The type Data base lock store.
  *
  * @author zhangsen
- * @date 2019 /4/25
  */
 @LoadLevel(name = "db")
 public class LockStoreDataBaseDAO implements LockStore, Initialize {
@@ -222,6 +221,52 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             ps.setString(1, lockDOs.get(0).getXid());
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 2, lockDOs.get(i).getRowKey());
+            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(String xid, Long branchId) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            //batch release lock by branch
+            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranch(lockTable, dbType);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setString(1, xid);
+            ps.setLong(2, branchId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(String xid, List<Long> branchIds) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            StringJoiner sj = new StringJoiner(",");
+            branchIds.stream().forEach(branchId -> sj.add("?"));
+            //batch release lock by branch list
+            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranchs(lockTable, sj.toString(), dbType);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setString(1, xid);
+            for (int i = 0; i < branchIds.size(); i++) {
+                ps.setLong(i + 2, branchIds.get(i));
             }
             ps.executeUpdate();
         } catch (SQLException e) {

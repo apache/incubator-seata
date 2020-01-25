@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 
 /**
  * The type Table meta.
@@ -34,7 +35,13 @@ import io.seata.common.util.CollectionUtils;
 public class TableMeta {
     private String tableName;
 
+    /**
+     * key: column name
+     */
     private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    /**
+     * key: index name
+     */
     private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
 
     /**
@@ -62,15 +69,7 @@ public class TableMeta {
      * @return the column meta
      */
     public ColumnMeta getColumnMeta(String colName) {
-        ColumnMeta col = allColumns.get(colName);
-        if (col == null) {
-            if (colName.charAt(0) == '`') {
-                col = allColumns.get(colName.substring(1, colName.length() - 1));
-            } else {
-                col = allColumns.get("`" + colName + "`");
-            }
-        }
-        return col;
+        return allColumns.get(colName);
     }
 
     /**
@@ -154,6 +153,15 @@ public class TableMeta {
      */
     public String getPkName() {
         return getPrimaryKeyOnlyName().get(0);
+    }
+
+    /**
+     * Gets add escape pk name.
+     * @param dbType
+     * @return
+     */
+    public String getEscapePkName(String dbType) {
+        return ColumnUtils.addEscape(getPkName(), dbType);
     }
 
     /**

@@ -24,6 +24,8 @@ import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,9 +35,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class Server {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     private static final int MIN_SERVER_POOL_SIZE = 100;
     private static final int MAX_SERVER_POOL_SIZE = 500;
@@ -67,7 +71,7 @@ public class Server {
         //server port
         rpcServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());
-        //log store mode : file、db
+        //log store mode : file, db
         SessionHolder.init(parameterParser.getStoreMode());
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
@@ -84,7 +88,12 @@ public class Server {
         }
         XID.setPort(rpcServer.getListenPort());
 
-        rpcServer.init();
+        try {
+            rpcServer.init();
+        } catch (Throwable e) {
+            LOGGER.error("rpcServer init error:{}", e.getMessage(), e);
+            System.exit(-1);
+        }
 
         System.exit(0);
     }

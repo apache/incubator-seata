@@ -16,11 +16,11 @@
 package io.seata.rm.datasource;
 
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -110,8 +110,9 @@ public abstract class AbstractConnectionProxy implements Connection {
         if (RootContext.inGlobalTransaction()) {
             SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
             if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-                final String tableName = sqlRecognizer.getTableName();
-                TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getDataSourceProxy(), tableName);
+                String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
+                TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
+                    tableName,getDataSourceProxy().getResourceId());
                 targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
             }
         }

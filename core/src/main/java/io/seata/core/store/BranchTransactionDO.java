@@ -24,7 +24,6 @@ import io.seata.core.model.BranchStatus;
  * branch transaction data object
  *
  * @author zhangsen
- * @date 2019 /3/26
  */
 public class BranchTransactionDO {
 
@@ -37,8 +36,6 @@ public class BranchTransactionDO {
     private String resourceGroupId;
 
     private String resourceId;
-
-    private String lockKey;
 
     private String branchType;
 
@@ -140,24 +137,6 @@ public class BranchTransactionDO {
      */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
-    }
-
-    /**
-     * Gets lock key.
-     *
-     * @return the lock key
-     */
-    public String getLockKey() {
-        return lockKey;
-    }
-
-    /**
-     * Sets lock key.
-     *
-     * @param lockKey the lock key
-     */
-    public void setLockKey(String lockKey) {
-        this.lockKey = lockKey;
     }
 
     /**

@@ -15,19 +15,18 @@
  */
 package io.seata.saga.engine.strategy.impl;
 
-import io.seata.saga.engine.strategy.StatusDecisionStrategy;
+import java.util.Date;
+import java.util.List;
+
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
+import io.seata.saga.engine.strategy.StatusDecisionStrategy;
 import io.seata.saga.engine.utils.ExceptionUtils;
+import io.seata.saga.engine.utils.ExceptionUtils.NetExceptionType;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import io.seata.saga.engine.utils.ExceptionUtils.NetExceptionType;
-
-import java.util.Date;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,51 +40,14 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStatusDecisionStrategy.class);
 
-    @Override
-    public void decideOnEndState(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-
-        if (ExecutionStatus.RU.equals(stateMachineInstance.getCompensationStatus())) {
-
-            CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
-            decideMachineCompensateStatus(stateMachineInstance, compensationHolder);
-        } else {
-            Object failEndStateFlag = context.getVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG);
-            boolean isComeFromFailEndState = (failEndStateFlag != null && (Boolean) failEndStateFlag);
-            decideMachineForwardExecutionStatus(stateMachineInstance, exp, isComeFromFailEndState);
-        }
-
-        if (stateMachineInstance.getCompensationStatus() != null
-            && DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))
-            && ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
-
-            stateMachineInstance.setCompensationStatus(ExecutionStatus.FA);
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("StateMachine Instance[id:{},name:{}] execute finish with status[{}], compensation status [{}].",
-                stateMachineInstance.getId(), stateMachineInstance.getStateMachine().getName(),
-                stateMachineInstance.getStatus(), stateMachineInstance.getCompensationStatus());
-        }
-    }
-
-    @Override
-    public void decideOnTaskStateFail(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-        if (!decideMachineForwardExecutionStatus(stateMachineInstance, exp, true)) {
-
-            stateMachineInstance.setCompensationStatus(ExecutionStatus.UN);
-        }
-        stateMachineInstance.setRunning(false);
-        stateMachineInstance.setGmtEnd(new Date());
-        stateMachineInstance.setException(exp);
-    }
-
     /**
      * decide machine compensate status
      *
      * @param stateMachineInstance
      * @param compensationHolder
      */
-    public static void decideMachineCompensateStatus(StateMachineInstance stateMachineInstance, CompensationHolder compensationHolder) {
+    public static void decideMachineCompensateStatus(StateMachineInstance stateMachineInstance,
+                                                     CompensationHolder compensationHolder) {
         if (stateMachineInstance.getStatus() == null || ExecutionStatus.RU.equals(stateMachineInstance.getStatus())) {
 
             stateMachineInstance.setStatus(ExecutionStatus.UN);
@@ -94,7 +56,8 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
             boolean hasCompensateSUorUN = false;
             for (StateInstance forCompensateState : compensationHolder.getStatesForCompensation().values()) {
-                if (ExecutionStatus.UN.equals(forCompensateState.getStatus()) || ExecutionStatus.SU.equals(forCompensateState.getStatus())) {
+                if (ExecutionStatus.UN.equals(forCompensateState.getStatus()) || ExecutionStatus.SU.equals(
+                    forCompensateState.getStatus())) {
                     hasCompensateSUorUN = true;
                     break;
                 }
@@ -123,52 +86,14 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
     }
 
     /**
-     * Determine the forward execution state of the state machine
-     *
-     * @param stateMachineInstance
-     * @param exp
-     * @param specialPolicy
-     * @return
-     */
-    @Override
-    public boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp, boolean specialPolicy) {
-        boolean result = false;
-
-        if (stateMachineInstance.getStatus() == null || ExecutionStatus.RU.equals(stateMachineInstance.getStatus())) {
-            result = true;
-
-            List<StateInstance> stateList = stateMachineInstance.getStateList();
-
-            boolean hasSetStatus = setMachineStatusBasedOnStateList(stateMachineInstance, stateList);
-
-            if (!hasSetStatus) {
-                setMachineStatusBasedOnException(stateMachineInstance, exp);
-            }
-
-            if (specialPolicy && ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
-                for (StateInstance stateInstance : stateMachineInstance.getStateList()) {
-                    if (!stateInstance.isIgnoreStatus() && (stateInstance.isForUpdate() || stateInstance.isForCompensation())) {
-                        stateMachineInstance.setStatus(ExecutionStatus.UN);
-                        break;
-                    }
-                }
-                if (ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
-                    stateMachineInstance.setStatus(ExecutionStatus.FA);
-                }
-            }
-        }
-        return result;
-
-    }
-
-    /**
      * set machine status based on state list
      *
      * @param stateMachineInstance
      * @param stateList
      * @return
      */
-    public static boolean setMachineStatusBasedOnStateList(StateMachineInstance stateMachineInstance, List<StateInstance> stateList) {
+    public static boolean setMachineStatusBasedOnStateList(StateMachineInstance stateMachineInstance,
+                                                           List<StateInstance> stateList) {
         boolean hasSetStatus = false;
         if (stateList != null && stateList.size() > 0) {
 
@@ -222,8 +147,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
         } else {
             NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
             if (t != null) {
-                if (t.equals(NetExceptionType.CONNECT_EXCEPTION)
-                    || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)
+                if (t.equals(NetExceptionType.CONNECT_EXCEPTION) || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)
                     || t.equals(NetExceptionType.NOT_NET_EXCEPTION)) {
                     stateMachineInstance.setStatus(ExecutionStatus.FA);
                 } else if (t.equals(NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
@@ -233,5 +157,86 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                 stateMachineInstance.setStatus(ExecutionStatus.UN);
             }
         }
+    }
+
+    @Override
+    public void decideOnEndState(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+
+        if (ExecutionStatus.RU.equals(stateMachineInstance.getCompensationStatus())) {
+
+            CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
+            decideMachineCompensateStatus(stateMachineInstance, compensationHolder);
+        } else {
+            Object failEndStateFlag = context.getVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG);
+            boolean isComeFromFailEndState = failEndStateFlag != null && (Boolean)failEndStateFlag;
+            decideMachineForwardExecutionStatus(stateMachineInstance, exp, isComeFromFailEndState);
+        }
+
+        if (stateMachineInstance.getCompensationStatus() != null && DomainConstants.OPERATION_NAME_FORWARD.equals(
+            context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME)) && ExecutionStatus.SU.equals(
+            stateMachineInstance.getStatus())) {
+
+            stateMachineInstance.setCompensationStatus(ExecutionStatus.FA);
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "StateMachine Instance[id:{},name:{}] execute finish with status[{}], compensation status [{}].",
+                stateMachineInstance.getId(), stateMachineInstance.getStateMachine().getName(),
+                stateMachineInstance.getStatus(), stateMachineInstance.getCompensationStatus());
+        }
+    }
+
+    @Override
+    public void decideOnTaskStateFail(ProcessContext context, StateMachineInstance stateMachineInstance,
+                                      Exception exp) {
+        if (!decideMachineForwardExecutionStatus(stateMachineInstance, exp, true)) {
+
+            stateMachineInstance.setCompensationStatus(ExecutionStatus.UN);
+        }
+        stateMachineInstance.setRunning(false);
+        stateMachineInstance.setGmtEnd(new Date());
+        stateMachineInstance.setException(exp);
+    }
+
+    /**
+     * Determine the forward execution state of the state machine
+     *
+     * @param stateMachineInstance
+     * @param exp
+     * @param specialPolicy
+     * @return
+     */
+    @Override
+    public boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp,
+                                                       boolean specialPolicy) {
+        boolean result = false;
+
+        if (stateMachineInstance.getStatus() == null || ExecutionStatus.RU.equals(stateMachineInstance.getStatus())) {
+            result = true;
+
+            List<StateInstance> stateList = stateMachineInstance.getStateList();
+
+            boolean hasSetStatus = setMachineStatusBasedOnStateList(stateMachineInstance, stateList);
+
+            if (!hasSetStatus) {
+                setMachineStatusBasedOnException(stateMachineInstance, exp);
+            }
+
+            if (specialPolicy && ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
+                for (StateInstance stateInstance : stateMachineInstance.getStateList()) {
+                    if (!stateInstance.isIgnoreStatus() && (stateInstance.isForUpdate() || stateInstance
+                        .isForCompensation())) {
+                        stateMachineInstance.setStatus(ExecutionStatus.UN);
+                        break;
+                    }
+                }
+                if (ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
+                    stateMachineInstance.setStatus(ExecutionStatus.FA);
+                }
+            }
+        }
+        return result;
+
     }
 }

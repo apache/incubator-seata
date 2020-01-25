@@ -15,19 +15,22 @@
  */
 package io.seata.saga.engine.config;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
-import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
+import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 
 /**
  * DbStateMachineConfig
@@ -38,22 +41,30 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbStateMachineConfig.class);
 
-    private static final int          DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
+    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
 
-    private DataSource                dataSource;
-    private String                    applicationId;
-    private String                    txServiceGroup;
-    private String                    tablePrefix           = "seata_";
-    private String                    dbType;
-    private int                       transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
+    private DataSource dataSource;
+    private String applicationId;
+    private String txServiceGroup;
+    private String tablePrefix = "seata_";
+    private String dbType;
+    private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
+    private boolean                   rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
+
+    public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
+        try (Connection con = dataSource.getConnection()) {
+            DatabaseMetaData metaData = con.getMetaData();
+            return metaData.getDatabaseProductName();
+        }
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
         dbType = getDbTypeFromDataSource(dataSource);
 
-        if(getStateLogStore() == null){
+        if (getStateLogStore() == null) {
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
             dbStateLogStore.setDataSource(dataSource);
             dbStateLogStore.setTablePrefix(tablePrefix);
@@ -61,8 +72,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
             dbStateLogStore.setSeqGenerator(getSeqGenerator());
 
-            if(sagaTransactionalTemplate == null){
-                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
+            if (sagaTransactionalTemplate == null) {
+                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate
+                    = new DefaultSagaTransactionalTemplate();
                 defaultSagaTransactionalTemplate.setTimeout(transOperationTimeout);
                 defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
                 defaultSagaTransactionalTemplate.setApplicationId(applicationId);
@@ -76,7 +88,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             setStateLogStore(dbStateLogStore);
         }
 
-        if(getStateLangStore() == null){
+        if (getStateLangStore() == null) {
             DbStateLangStore dbStateLangStore = new DbStateLangStore();
             dbStateLangStore.setDataSource(dataSource);
             dbStateLangStore.setTablePrefix(tablePrefix);
@@ -90,25 +102,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     @Override
     public void destroy() throws Exception {
-        if((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)){
+        if ((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)) {
             ((DisposableBean)sagaTransactionalTemplate).destroy();
-        }
-    }
-
-    public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
-            DatabaseMetaData metaData = con.getMetaData();
-            return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: {}",e.getMessage(), e);
-                }
-            }
         }
     }
 
@@ -162,5 +157,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setTransOperationTimeout(int transOperationTimeout) {
         this.transOperationTimeout = transOperationTimeout;
+    }
+
+    public boolean isRmReportSuccessEnable() {
+        return rmReportSuccessEnable;
+    }
+
+    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
+        this.rmReportSuccessEnable = rmReportSuccessEnable;
     }
 }

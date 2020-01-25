@@ -45,7 +45,7 @@ public class RMHandlerAT extends AbstractRMHandler {
         DataSourceManager dataSourceManager = (DataSourceManager)getResourceManager();
         DataSourceProxy dataSourceProxy = dataSourceManager.get(request.getResourceId());
         if (dataSourceProxy == null) {
-            LOGGER.warn("Failed to get dataSourceProxy for delete undolog on " + request.getResourceId());
+            LOGGER.warn("Failed to get dataSourceProxy for delete undolog on {}", request.getResourceId());
             return;
         }
         Date logCreatedSave = getLogCreated(request.getSaveDays());
@@ -68,7 +68,7 @@ public class RMHandlerAT extends AbstractRMHandler {
                 }
             } while (deleteRows == LIMIT_ROWS);
         } catch (Exception e) {
-            LOGGER.error("Failed to delete expired undo_log，error:{}", e.getMessage(), e);
+            LOGGER.error("Failed to delete expired undo_log, error:{}", e.getMessage(), e);
         } finally {
             if (conn != null) {
                 try {
@@ -85,7 +85,7 @@ public class RMHandlerAT extends AbstractRMHandler {
             saveDays = UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
         }
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, 0 - saveDays);
+        calendar.add(Calendar.DATE, -saveDays);
         return calendar.getTime();
     }
 
