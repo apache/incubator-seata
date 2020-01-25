@@ -20,7 +20,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.config.FileConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.context.SeataSpringApplicationContextHolder;
+import io.seata.spring.boot.autoconfigure.util.SpringApplicationContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author zhangheng
  **/
-@Import(SeataSpringApplicationContextHolder.class)
+@Import(SpringApplicationContext.class)
 @org.springframework.context.annotation.Configuration
 public class RedisAutoInjectionTypeConvertTest {
     private static AnnotationConfigApplicationContext applicationContex;
@@ -48,7 +48,6 @@ public class RedisAutoInjectionTypeConvertTest {
     RegistryRedisProperties registryRedisProperties() {
         return new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
     }
-
 
     @Test
     public void testReadConfigurationItems() {

@@ -13,30 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.config.springcloud;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import io.seata.common.holder.ObjectHolder;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 /**
  * @author xingfudeshi@gmail.com
+ * The type spring application context
  */
-@Component
-@ConfigurationProperties(prefix = CONFIG_PREFIX)
-public class ConfigProperties {
-    /**
-     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
-     */
-    private String type = "file";
-
-    public String getType() {
-        return type;
-    }
-
-    public ConfigProperties setType(String type) {
-        this.type = type;
-        return this;
+public class SpringApplicationContext implements ApplicationContextAware {
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
     }
 }

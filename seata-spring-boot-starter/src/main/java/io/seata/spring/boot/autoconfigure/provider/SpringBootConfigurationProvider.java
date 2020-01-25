@@ -21,15 +21,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
 import io.seata.spring.boot.autoconfigure.util.StringFormatUtils;
-import io.seata.spring.context.SeataSpringApplicationContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.context.ApplicationContext;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
@@ -94,7 +95,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         String propertySuffix = getPropertySuffix(dataId);
         Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
         if (null != propertyClass) {
-            Object propertyObject = SeataSpringApplicationContextHolder.getApplicationContext().getBean(propertyClass);
+            Object propertyObject = ObjectHolder.INSTANCE.getObject(ApplicationContext.class).getBean(propertyClass);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
