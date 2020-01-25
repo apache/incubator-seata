@@ -20,7 +20,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.config.FileConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.boot.autoconfigure.util.SpringApplicationContext;
+import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author zhangheng
  **/
-@Import(SpringApplicationContext.class)
+@Import(SpringApplicationContextProvider.class)
 @org.springframework.context.annotation.Configuration
 public class RedisAutoInjectionTypeConvertTest {
     private static AnnotationConfigApplicationContext applicationContex;

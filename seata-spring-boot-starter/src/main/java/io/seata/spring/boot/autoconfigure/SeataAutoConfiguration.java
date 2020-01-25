@@ -18,7 +18,7 @@ package io.seata.spring.boot.autoconfigure;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.util.SpringApplicationContext;
+import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,8 +42,8 @@ public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
     @Bean
-    public SpringApplicationContext springApplicationContext() {
-        return new SpringApplicationContext();
+    public SpringApplicationContextProvider springApplicationContextProvider() {
+        return new SpringApplicationContextProvider();
     }
 
     @Bean

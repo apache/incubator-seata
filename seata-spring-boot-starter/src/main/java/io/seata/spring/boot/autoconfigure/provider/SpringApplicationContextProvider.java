@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.springcloud;
+package io.seata.spring.boot.autoconfigure.provider;
 
 import io.seata.common.holder.ObjectHolder;
 import org.springframework.beans.BeansException;
@@ -24,9 +24,9 @@ import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 /**
  * @author xingfudeshi@gmail.com
- * The type spring application context
+ * The type spring application context provider
  */
-public class SpringApplicationContext implements ApplicationContextAware {
+public class SpringApplicationContextProvider implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
