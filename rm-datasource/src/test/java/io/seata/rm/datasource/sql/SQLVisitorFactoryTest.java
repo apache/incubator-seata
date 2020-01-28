@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql;
 
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
@@ -93,7 +94,7 @@ public class SQLVisitorFactoryTest {
         Assertions.assertTrue(recognizer instanceof OracleSelectForUpdateRecognizer);
 
         //test for do not support db
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
     }
 
     @Test
