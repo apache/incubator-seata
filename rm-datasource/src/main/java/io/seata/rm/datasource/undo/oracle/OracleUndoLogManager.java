@@ -16,11 +16,16 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import java.io.ByteArrayInputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.BlobUtils;
+import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -65,6 +70,13 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
                                                 byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
+    }
+
+    @Override
+    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
+        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+        return rollbackInfo;
     }
 
     @Override
