@@ -18,6 +18,7 @@ package io.seata.sqlparser.druid.postgresql;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
+import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -27,6 +28,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  *
  * @author will.zjw
  */
+@LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
 
     @Override
@@ -51,10 +53,5 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
             return new PostgresqlSelectForUpdateRecognizer(sql, ast);
         }
         return null;
-    }
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.POSTGRESQL;
     }
 }

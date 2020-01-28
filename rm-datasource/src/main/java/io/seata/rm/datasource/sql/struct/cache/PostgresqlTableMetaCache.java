@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
@@ -35,6 +36,7 @@ import java.sql.Statement;
  *
  * @author jaspercloud
  */
+@LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     private static volatile TableMetaCache tableMetaCache = null;
@@ -187,10 +189,5 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 stmt.close();
             }
         }
-    }
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.POSTGRESQL;
     }
 }
