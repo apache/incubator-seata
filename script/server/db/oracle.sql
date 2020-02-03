@@ -37,7 +37,6 @@ CREATE TABLE branch_table
 );
 
 CREATE INDEX idx_xid ON branch_table (xid);
-CREATE INDEX idx_gmt_create ON branch_table (gmt_create);
 
 -- the table to store lock data
 CREATE TABLE lock_table

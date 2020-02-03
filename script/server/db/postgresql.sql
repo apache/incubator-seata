@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS public.branch_table
 );
 
 CREATE INDEX idx_xid ON public.branch_table (xid);
-CREATE INDEX idx_gmt_create ON public.branch_table (gmt_create);
 
 -- the table to store lock data
 CREATE TABLE IF NOT EXISTS public.lock_table

@@ -34,8 +34,7 @@ CREATE TABLE IF NOT EXISTS `branch_table`
     `gmt_create`        DATETIME(6),
     `gmt_modified`      DATETIME(6),
     PRIMARY KEY (`branch_id`),
-    KEY `idx_xid` (`xid`),
-    KEY `idx_gmt_create` (`gmt_create`)
+    KEY `idx_xid` (`xid`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
 
