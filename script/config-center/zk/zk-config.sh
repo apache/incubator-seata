@@ -18,67 +18,77 @@
 # This script need to rely on zk.
 
 
-for line in $(cat zk-params.txt); do
-	key=${line%%=*}
-	value=${line#*=}
-	case ${key} in
-	zkAddr)
-		zkAddr=${value}
-		;;
-	zkHome)
-		zkHome=${value}
-		;;
-	*)
-		echo "Invalid parameter，please refer to zk-params.txt"
-		exit 1
-		;;
-	esac
+while getopts ":h:p:z:" opt
+do
+  case $opt in
+  h)
+    host=$OPTARG
+    ;;
+  p)
+    port=$OPTARG
+    ;;
+  z)
+    zkHome=$OPTARG
+    ;;
+  ?)
+    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] [-z zkHome] \033[0m"
+    exit 1
+    ;;
+  esac
 done
 
-if [[ -z ${zkAddr} || -z ${zkHome} ]]; then
-	echo " \033[31m Incomplete parameters, please fill in the complete parameters: zkAddr:$zkAddr, zkHome:$zkHome \033[0m"
-	exit 1
+if [[ -z ${host} ]]; then
+    host=localhost
+fi
+if [[ -z ${port} ]]; then
+    port=2181
+fi
+if [[ -z ${zkHome} ]]; then
+    echo "\033[31m zk home is empty, please usage option: [-z zkHome] \033[0m"
+    exit 1
 fi
 
+zkAddr=$host:$port
+
 root="/seata"
-tempLog=$(mktemp -t zk-config.log)
+tempLog=$(mktemp -u)
 
 echo "ZK address is $zkAddr"
 echo "ZK home is $zkHome"
 echo "ZK config root node is $root"
 
 function check_node() {
-	$2/bin/zkCli.sh -server $1 ls ${root} >/dev/null 2>${tempLog}
+	"$2"/bin/zkCli.sh -server "$1" ls ${root} >/dev/null 2>"${tempLog}"
 }
 
 function create_node() {
-	$2/bin/zkCli.sh -server $1 create ${root} "" >/dev/null
+	"$2"/bin/zkCli.sh -server "$1" create ${root} "" >/dev/null
 }
 
 function create_subNode() {
-	$2/bin/zkCli.sh -server $1 create "${root}/$3" "$4" >/dev/null
+	"$2"/bin/zkCli.sh -server "$1" create "${root}/$3" "$4" >/dev/null
 }
 
 function delete_node() {
-	$2/bin/zkCli.sh -server $1 rmr ${root} "" >/dev/null
+	"$2"/bin/zkCli.sh -server $1 rmr ${root} "" >/dev/null
 }
 
-check_node ${zkAddr} ${zkHome}
+check_node "${zkAddr}" "${zkHome}"
 
-if [[ $(cat ${tempLog}) =~ "No such file or directory" ]]; then
+if [[ $(cat "${tempLog}") =~ "No such file or directory" ]]; then
 	echo "\033[31m ZK home is error, please enter correct zk home! \033[0m"
 	exit 1
-elif [[ $(cat ${tempLog}) =~ "Exception" ]]; then
+elif [[ $(cat "${tempLog}") =~ "Exception" ]]; then
 	echo "\033[31m Exception error, please check zk cluster status or if the zk address is entered correctly! \033[0m"
 	exit 1
-elif [[ $(cat ${tempLog}) =~ "Node does not exist" ]]; then
-	create_node ${zkAddr} ${zkHome}
+elif [[ $(cat "${tempLog}") =~ "Node does not exist" ]]; then
+	create_node "${zkAddr}" "${zkHome}"
 else
 	read -p "${root} node already exists, now delete ${root} node in zk, y/n: " result
 	if [[ ${result} == "y" ]]; then
 		echo "Delete ${root} node..."
-		delete_node ${zkAddr} ${zkHome}
-		create_node ${zkAddr} ${zkHome}
+		delete_node "${zkAddr}" "${zkHome}"
+		create_node "${zkAddr}" "${zkHome}"
 	else
 		exit 0
 	fi
@@ -88,5 +98,5 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 	key=${line%%=*}
 	value=${line#*=}
 	echo "Set" "${key}" "=" "${value}"
-	create_subNode ${zkAddr} ${zkHome} ${key} ${value}
+	create_subNode "${zkAddr}" "${zkHome}" "${key}" "${value}"
 done
