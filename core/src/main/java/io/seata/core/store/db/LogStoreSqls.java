@@ -142,20 +142,20 @@ public class LogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_MYSQL = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(6), now(6))";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_ORACLE.
      */
     public static final String INSERT_BRANCH_TRANSACTION_ORACLE = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, systimestamp, systimestamp)";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL = "update " + BRANCH_TABLE_PLACEHOLD
-        + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now() where "
+        + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now(6) where "
         + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
@@ -163,7 +163,7 @@ public class LogStoreSqls {
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
         + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
-        + " = sysdate where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
+        + " = systimestamp where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
         + " = ?";
 
     /**
@@ -184,14 +184,14 @@ public class LogStoreSqls {
      */
     public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
         + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? order by "
-        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
+        + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
     /**
      * The constant QUERY_BRANCH_TRANSACTION_XIDS.
      */
     public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS + " from "
         + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ") order by "
-        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
+        + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
     /**
      * The constant CHECK_MAX_TRANS_ID.
