@@ -116,6 +116,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
         ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
 
+    private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
+
     private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("RetryRollbacking", 1));
 
@@ -266,11 +269,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     continue;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
+                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
+                        rollbackingSession.clean();
+                    }
                     /**
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.error("GlobalSession rollback retry timeout [{}]", rollbackingSession.getXid());
+                    LOGGER.error("GlobalSession rollback retry timeout and removed [{}]", rollbackingSession.getXid());
                     continue;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -298,7 +304,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("GlobalSession commit retry timeout [{}]", committingSession.getXid());
+                    LOGGER.error("GlobalSession commit retry timeout and removed [{}]", committingSession.getXid());
                     continue;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
