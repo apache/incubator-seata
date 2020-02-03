@@ -67,9 +67,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                         result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
                     }
                     if (null != result) {
+                        //If the return type is String,need to convert the object to string
+                        if (method.getReturnType().equals(String.class)) {
+                            return String.valueOf(result);
+                        }
                         return result;
                     }
-
                 }
 
                 return method.invoke(originalConfiguration, args);
