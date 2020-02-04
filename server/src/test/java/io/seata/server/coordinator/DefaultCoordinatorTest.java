@@ -96,7 +96,6 @@ public class DefaultCoordinatorTest {
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
         core = new DefaultCore(serverMessageSender);
-//        defaultCoordinator.init();
     }
 
     @BeforeEach
@@ -104,20 +103,21 @@ public class DefaultCoordinatorTest {
         deleteAndCreateDataFile();
     }
 
-
     @Test
     public void branchCommit() throws TransactionException {
         BranchStatus result = null;
         String xid = null;
+        GlobalSession globalSession = null;
         try {
             xid = core.begin(applicationId, txServiceGroup, txName, timeout);
             Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
-            result = core.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
+            globalSession = SessionHolder.findGlobalSession(xid);
+            result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
