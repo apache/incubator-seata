@@ -37,7 +37,7 @@ public class ATCore extends AbstractCore {
     }
 
     @Override
-    public BranchType getBranchType() {
+    public BranchType getHandleBranchType() {
         return BranchType.AT;
     }
 

@@ -31,7 +31,7 @@ public class TccCore extends AbstractCore {
     }
 
     @Override
-    public BranchType getBranchType() {
+    public BranchType getHandleBranchType() {
         return BranchType.TCC;
     }
 }

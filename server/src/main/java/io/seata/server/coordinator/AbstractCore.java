@@ -63,7 +63,7 @@ public abstract class AbstractCore implements Core {
         this.messageSender = messageSender;
     }
 
-    public abstract BranchType getBranchType();
+    public abstract BranchType getHandleBranchType();
 
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,

@@ -112,7 +112,7 @@ public class DefaultCoordinatorTest {
         try {
             xid = core.begin(applicationId, txServiceGroup, txName, timeout);
             Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
-            result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = core.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }

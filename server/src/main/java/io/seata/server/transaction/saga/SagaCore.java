@@ -50,7 +50,7 @@ public class SagaCore extends AbstractCore {
     }
 
     @Override
-    public BranchType getBranchType() {
+    public BranchType getHandleBranchType() {
         return BranchType.SAGA;
     }
 

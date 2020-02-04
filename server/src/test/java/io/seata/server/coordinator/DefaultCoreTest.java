@@ -364,7 +364,7 @@ public class DefaultCoreTest {
         }
 
         @Override
-        public BranchType getBranchType() {
+        public BranchType getHandleBranchType() {
             return BranchType.AT;
         }
     }

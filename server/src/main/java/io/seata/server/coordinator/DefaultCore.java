@@ -60,7 +60,7 @@ public class DefaultCore implements Core {
                 new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
         if (CollectionUtils.isNotEmpty(allCore)) {
             for (AbstractCore core : allCore) {
-                coreMap.put(core.getBranchType(), core);
+                coreMap.put(core.getHandleBranchType(), core);
             }
         }
     }
@@ -72,11 +72,11 @@ public class DefaultCore implements Core {
      * @return the core
      */
     public AbstractCore getCore(BranchType branchType) {
-        AbstractCore rm = coreMap.get(branchType);
-        if (rm == null) {
+        AbstractCore core = coreMap.get(branchType);
+        if (core == null) {
             throw new NotSupportYetException("unsupported type:" + branchType.name());
         }
-        return rm;
+        return core;
     }
 
     /**
