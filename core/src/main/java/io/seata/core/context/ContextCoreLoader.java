@@ -15,6 +15,8 @@
  */
 package io.seata.core.context;
 
+import java.util.Optional;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
@@ -24,17 +26,12 @@ import io.seata.common.loader.EnhancedServiceLoader;
  */
 public class ContextCoreLoader {
 
-    private static class ContextCoreHolder {
-        private static ContextCore instance;
+    private ContextCoreLoader() {
 
-        static {
-            ContextCore contextCore = EnhancedServiceLoader.load(ContextCore.class);
-            if (contextCore == null) {
-                // Default
-                contextCore = new ThreadLocalContextCore();
-            }
-            instance = contextCore;
-        }
+    }
+
+    private static class ContextCoreHolder {
+        private static final ContextCore INSTANCE = Optional.ofNullable(EnhancedServiceLoader.load(ContextCore.class)).orElse(new ThreadLocalContextCore());
     }
 
     /**
@@ -43,7 +40,7 @@ public class ContextCoreLoader {
      * @return the context core
      */
     public static ContextCore load() {
-        return ContextCoreHolder.instance;
+        return ContextCoreHolder.INSTANCE;
     }
 
 }
