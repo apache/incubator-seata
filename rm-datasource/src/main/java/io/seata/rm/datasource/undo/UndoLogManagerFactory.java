@@ -15,19 +15,17 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.loader.EnhancedServiceLoader;
-
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * @author jsbxyyx
  */
 public class UndoLogManagerFactory {
 
-    private static volatile Map<String, UndoLogManager> undoLogManagerMap;
+    private static final Map<String, UndoLogManager> UNDO_LOG_MANAGER_MAP = new ConcurrentHashMap<>();
 
     /**
      * get undo log manager.
@@ -36,22 +34,12 @@ public class UndoLogManagerFactory {
      * @return undo log manager.
      */
     public static UndoLogManager getUndoLogManager(String dbType) {
-        if (undoLogManagerMap == null) {
-            synchronized (UndoLogManagerFactory.class) {
-                if (undoLogManagerMap == null) {
-                    Map<String, UndoLogManager> initializedMap = new HashMap<>();
-                    List<UndoLogManager> undoLogList = EnhancedServiceLoader.loadAll(UndoLogManager.class);
-                    for (UndoLogManager undoLog : undoLogList) {
-                        initializedMap.put(undoLog.getDbType(), undoLog);
-                    }
-                    undoLogManagerMap = initializedMap;
-                }
-            }
+        if (UNDO_LOG_MANAGER_MAP.get(dbType) != null) {
+            return UNDO_LOG_MANAGER_MAP.get(dbType);
         }
-        if (undoLogManagerMap.containsKey(dbType)) {
-            return undoLogManagerMap.get(dbType);
-        }
-        throw new NotSupportYetException("not support dbType[" + dbType + "]");
+        UndoLogManager undoLogManager = EnhancedServiceLoader.load(UndoLogManager.class, dbType);
+        UNDO_LOG_MANAGER_MAP.putIfAbsent(dbType, undoLogManager);
+        return undoLogManager;
     }
 
 }
