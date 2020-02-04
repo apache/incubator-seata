@@ -163,7 +163,17 @@ public final class ColumnUtils {
             boolean check = keywordChecker.check(colName);
             if (!check) {
                 boolean uppercase = isUppercase(colName);
-                if (uppercase) {
+                if (uppercase && isOracle(dbType)) {
+                    // oracle
+                    // we are recommend table name and column name must uppercase.
+                    // if exists full uppercase, the table name or column name does't bundle escape symbol.
+                    return colName;
+                }
+                boolean containsUppercase = containsUppercase(colName);
+                if (!containsUppercase && isPostgresql(dbType)) {
+                    // postgresql
+                    // we are recommend table name and column name must lowercase.
+                    // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
                     return colName;
                 }
             }
@@ -179,6 +189,14 @@ public final class ColumnUtils {
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
 
+    private static boolean isPostgresql(String dbType) {
+        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.POSTGRESQL);
+    }
+
+    private static boolean isOracle(String dbType) {
+        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.ORACLE);
+    }
+
     private static boolean isUppercase(String colName) {
         if (colName == null) {
             return false;
@@ -190,5 +208,18 @@ public final class ColumnUtils {
             }
         }
         return true;
+    }
+
+    private static boolean containsUppercase(String colName) {
+        if (colName == null) {
+            return false;
+        }
+        char[] chars = colName.toCharArray();
+        for (char ch : chars) {
+            if (ch >= 'A' && ch <= 'Z') {
+                return true;
+            }
+        }
+        return false;
     }
 }
