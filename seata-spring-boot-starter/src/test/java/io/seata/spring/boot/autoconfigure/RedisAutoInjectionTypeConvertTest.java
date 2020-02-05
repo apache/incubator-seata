@@ -20,32 +20,46 @@ import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.config.FileConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import org.junit.jupiter.api.Assertions;
+import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
- * @Author zhangheng
+ * @author zhangheng
  **/
+@Import(SpringApplicationContextProvider.class)
+@org.springframework.context.annotation.Configuration
 public class RedisAutoInjectionTypeConvertTest {
-
+    private static AnnotationConfigApplicationContext applicationContex;
 
     @BeforeAll
-    public static void initApplicationContext() {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring/redis_auto_injectio_test.xml");
-        applicationContext.getBeansOfType(RegistryRedisProperties.class);
+    public static void initContext() {
+        applicationContex = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
+    }
+
+    @Bean
+    RegistryRedisProperties registryRedisProperties() {
+        return new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
     }
 
     @Test
-    public void testRegister() throws Exception {
-
+    public void testReadConfigurationItems() {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-        int db = currentConfiguration.getInt("registry.redis.db");
-        Assertions.assertEquals(1,db);
+        assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
+        assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
+        assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
+    }
+
+    @AfterAll
+    public static void closeContext() {
+        applicationContex.close();
     }
 }

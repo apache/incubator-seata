@@ -15,26 +15,20 @@
  */
 package io.seata.config.springcloud;
 
+import io.seata.common.holder.ObjectHolder;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.env.Environment;
 
-public class SpringContextProvider implements ApplicationContextAware {
-    private static ApplicationContext applicationContext;
-    private static Environment environment;
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
+/**
+ * @author xingfudeshi@gmail.com
+ * The type spring application context provider
+ */
+public class SpringApplicationContextProvider implements ApplicationContextAware {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringContextProvider.applicationContext = applicationContext;
-        SpringContextProvider.environment = applicationContext.getEnvironment();
-    }
-
-    public static Environment getEnvironment() {
-        return environment;
-    }
-
-    public static ApplicationContext getApplicationContext() {
-        return applicationContext;
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
     }
 }

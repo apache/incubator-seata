@@ -107,4 +107,12 @@ public class Constants {
      * default charset is utf-8
      */
     public static final Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_CHARSET_NAME);
+    /**
+     * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
+     */
+    public static final String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    /**
+     * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
+     */
+    public static final String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
 }
