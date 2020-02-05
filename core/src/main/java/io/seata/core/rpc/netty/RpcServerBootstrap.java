@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Rpc server bootstrap.
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 2019-11-23
+ * @since 1.1.0
  */
 public class RpcServerBootstrap implements RemotingServer {
 
@@ -149,10 +149,6 @@ public class RpcServerBootstrap implements RemotingServer {
 
                 }
             });
-
-        if (nettyServerConfig.isEnableServerPooledByteBufAllocator()) {
-            this.serverBootstrap.childOption(ChannelOption.ALLOCATOR, NettyServerConfig.DIRECT_BYTE_BUF_ALLOCATOR);
-        }
 
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
