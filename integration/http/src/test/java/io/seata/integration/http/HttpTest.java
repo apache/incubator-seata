@@ -17,7 +17,6 @@ package io.seata.integration.http;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
 import org.junit.jupiter.api.Assertions;
@@ -30,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.HashMap;
 import java.util.Map;
 
 import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
@@ -97,7 +97,7 @@ class HttpTest {
                 "}";
         Person person = JSON.parseObject(str, Person.class);
 
-        Map<String, Object> map = Maps.newHashMap();
+        Map<String, Object> map = new HashMap<>();
         map.put("name", "zhangsan");
         map.put("age", 15);
 
@@ -126,7 +126,7 @@ class HttpTest {
 
     private void consumerGetStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
-        Map<String, String> params = Maps.newHashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("name", "zhangsan");
 
         String str = "{\n" +
