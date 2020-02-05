@@ -1,0 +1,2 @@
+io.seata.sqlparser.druid.mysql.MySQLOperateRecognizerHolder
+io.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder

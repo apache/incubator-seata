@@ -32,11 +32,10 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**

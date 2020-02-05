@@ -51,7 +51,7 @@ public class EnhancedServiceLoader<S> {
     private static final String SEATA_DIRECTORY = "META-INF/seata/";
 
     private static final ConcurrentMap<Class<?>, EnhancedServiceLoader<?>> SERVICE_LOADERS =
-            new ConcurrentHashMap<Class<?>, EnhancedServiceLoader<?>>();
+            new ConcurrentHashMap<>();
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>();
 
     private final Class<S> type;
@@ -252,7 +252,7 @@ public class EnhancedServiceLoader<S> {
     private S getExtension(ExtensionURL url, ClassLoader loader, Class[] argTypes,
                            Object[] args) {
         if (url == null) {
-            throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
+            throw new EnhancedServiceNotFoundException("service provider not found");
         }
         if (Scope.SINGLETON.equals(url.getScope())) {
             Holder<Object> holder = extensionInstances.get(url);
