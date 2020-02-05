@@ -26,34 +26,34 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 @Component
 @ConfigurationProperties(prefix = LOCK_PREFIX)
 public class LockProperties {
-    private int lockRetryInterval = 10;
-    private int lockRetryTimes = 30;
-    private boolean lockRetryPolicyBranchRollbackOnConflict = true;
+    private int retryInterval = 10;
+    private int retryTimes = 30;
+    private boolean retryPolicyBranchRollbackOnConflict = true;
 
-    public int getLockRetryInterval() {
-        return lockRetryInterval;
+    public int getRetryInterval() {
+        return retryInterval;
     }
 
-    public LockProperties setLockRetryInterval(int lockRetryInterval) {
-        this.lockRetryInterval = lockRetryInterval;
+    public LockProperties setRetryInterval(int retryInterval) {
+        this.retryInterval = retryInterval;
         return this;
     }
 
-    public int getLockRetryTimes() {
-        return lockRetryTimes;
+    public int getRetryTimes() {
+        return retryTimes;
     }
 
-    public LockProperties setLockRetryTimes(int lockRetryTimes) {
-        this.lockRetryTimes = lockRetryTimes;
+    public LockProperties setRetryTimes(int retryTimes) {
+        this.retryTimes = retryTimes;
         return this;
     }
 
-    public boolean isLockRetryPolicyBranchRollbackOnConflict() {
-        return lockRetryPolicyBranchRollbackOnConflict;
+    public boolean isRetryPolicyBranchRollbackOnConflict() {
+        return retryPolicyBranchRollbackOnConflict;
     }
 
-    public LockProperties setLockRetryPolicyBranchRollbackOnConflict(boolean lockRetryPolicyBranchRollbackOnConflict) {
-        this.lockRetryPolicyBranchRollbackOnConflict = lockRetryPolicyBranchRollbackOnConflict;
+    public LockProperties setRetryPolicyBranchRollbackOnConflict(boolean retryPolicyBranchRollbackOnConflict) {
+        this.retryPolicyBranchRollbackOnConflict = retryPolicyBranchRollbackOnConflict;
         return this;
     }
 }

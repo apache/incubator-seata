@@ -17,12 +17,13 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
-import io.seata.spring.boot.autoconfigure.properties.file.ClientProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LogProperties;
+import io.seata.spring.boot.autoconfigure.properties.file.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ThreadFactoryProperties;
+import io.seata.spring.boot.autoconfigure.properties.file.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
@@ -55,6 +56,7 @@ public class StarterConstants {
     public static final String SERVICE_PREFIX = SEATA_PREFIX + ".service";
     public static final String CLIENT_PREFIX = SEATA_PREFIX + ".client";
     public static final String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
+    public static final String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     public static final String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
@@ -81,7 +83,8 @@ public class StarterConstants {
         private static final long serialVersionUID = -8902807645596274597L;
 
         {
-            put(CLIENT_PREFIX, ClientProperties.class);
+            put(CLIENT_RM_PREFIX, RmProperties.class);
+            put(CLIENT_TM_PREFIX, TmProperties.class);
             put(LOCK_PREFIX, LockProperties.class);
             put(SERVICE_PREFIX, ServiceProperties.class);
             put(SHUTDOWN_PREFIX, ShutdownProperties.class);
@@ -115,17 +118,18 @@ public class StarterConstants {
     /**
      * The following special keys need to be normalized.
      */
-    public static String SPECIAL_KEY_VGROUP_MAPPING = "service.vgroup_mapping";
-    public static String NORMALIZED_KEY_VGROUP_MAPPING = "vgroupMapping";
-    public static String SPECIAL_KEY_GROUPLIST = "grouplist";
-    public static String NORMALIZED_KEY_GROUPLIST = "grouplist";
-    public static String SPECIAL_KEY_UNDO = "client.undo.";
-    public static String SPECIAL_KEY_CLIENT = "client.";
-    public static String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
-    public static String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
+    public static final String SPECIAL_KEY_VGROUP_MAPPING = "service.vgroup_mapping";
+    public static final String NORMALIZED_KEY_VGROUP_MAPPING = "vgroupMapping";
+    public static final String SPECIAL_KEY_GROUPLIST = "grouplist";
+    public static final String NORMALIZED_KEY_GROUPLIST = "grouplist";
+    public static final String SPECIAL_KEY_UNDO = "client.undo.";
+    public static final String SPECIAL_KEY_CLIENT_RM = "client.rm.";
+    public static final String SPECIAL_KEY_CLIENT_TM = "client.tm.";
+    public static final String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
+    public static final String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
 
-    public static String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
-    public static String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
-    public static String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
+    public static final String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
+    public static final String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
+    public static final String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
 
 }
