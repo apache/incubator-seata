@@ -30,7 +30,6 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
-import static com.alipay.lookout.common.LookoutConstants.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
@@ -54,6 +53,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UN
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.util.StringFormatUtils.DOT;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -178,7 +178,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      */
     private String getPropertyPrefix(String dataId) {
         return StringFormatUtils.underlineToCamel(
-            StringFormatUtils.minusToCamel(StringUtils.substringBeforeLast(dataId, DOT)));
+            StringFormatUtils.minusToCamel(StringUtils.substringBeforeLast(dataId, String.valueOf(DOT))));
     }
 
     /**
@@ -188,7 +188,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return propertySuffix
      */
     private String getPropertySuffix(String dataId) {
-        return StringUtils.substringAfterLast(dataId, DOT);
+        return StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
     }
 
     /**
