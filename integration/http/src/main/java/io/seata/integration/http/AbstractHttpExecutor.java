@@ -19,7 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -36,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -84,7 +84,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         if (entity != null) {
             httpPost.setEntity(entity);
         }
-        Map<String, String> headers = Maps.newHashMap();
+        Map<String, String> headers = new HashMap<>();
 
         buildPostHeaders(headers, paramObject);
         return wrapHttpExecute(returnType, httpClient, httpPost, headers);
@@ -100,7 +100,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
 
         HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
-        Map<String, String> headers = Maps.newHashMap();
+        Map<String, String> headers = new HashMap<>();
 
         buildGetHeaders(headers, paramObject);
         return wrapHttpExecute(returnType, httpClient, httpGet, headers);

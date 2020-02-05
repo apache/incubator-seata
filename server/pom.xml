@@ -83,6 +83,18 @@
             <artifactId>jcommander</artifactId>
         </dependency>
 
+        <!-- only for event bus -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
