@@ -179,7 +179,7 @@ public final class ColumnUtils {
             }
         }
 
-        StringBuilder result = new StringBuilder(2 + colName.length());
+        StringBuilder result = new StringBuilder(2 * (String.valueOf(escape.value).length()) + colName.length());
         return result.append(escape.value).append(colName).append(escape.value).toString();
     }
 
