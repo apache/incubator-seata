@@ -87,13 +87,13 @@ public class DefaultRemotingParser {
      * @param beanName the bean name
      * @return boolean boolean
      */
-    public boolean isRemoting(Object bean, String beanName) {
+    public RemotingParser isRemoting(Object bean, String beanName) {
         for (RemotingParser remotingParser : allRemotingParsers) {
             if (remotingParser.isRemoting(bean, beanName)) {
-                return true;
+                return remotingParser;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -159,8 +159,8 @@ public class DefaultRemotingParser {
      * @param beanName the bean name
      * @return remoting desc
      */
-    public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName) {
-        RemotingDesc remotingBeanDesc = getServiceDesc(bean, beanName);
+    public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName, RemotingParser remotingParser) {
+        RemotingDesc remotingBeanDesc = remotingParser.getServiceDesc(bean, beanName);
         if (remotingBeanDesc == null) {
             return null;
         }
@@ -168,7 +168,7 @@ public class DefaultRemotingParser {
 
         Class<?> interfaceClass = remotingBeanDesc.getInterfaceClass();
         Method[] methods = interfaceClass.getMethods();
-        if (isService(bean, beanName)) {
+        if (remotingParser.isService(bean, beanName)) {
             try {
                 //service bean, registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();
@@ -195,7 +195,7 @@ public class DefaultRemotingParser {
                 throw new FrameworkException(t, "parser remoting service error");
             }
         }
-        if (isReference(bean, beanName)) {
+        if (remotingParser.isReference(bean, beanName)) {
             //reference bean, TCC proxy
             remotingBeanDesc.setReference(true);
         }
