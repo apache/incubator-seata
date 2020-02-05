@@ -6,7 +6,7 @@ seata:
   use-jdk-proxy: false
   client:
     rm:
-      sync-commit-buffer-limit: 1000
+      async-commit-buffer-limit: 1000
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: true
