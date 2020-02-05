@@ -36,16 +36,14 @@ public class SevenZUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        try {
-            SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
-            SevenZOutputFile z7z = new SevenZOutputFile(channel);
+        SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
+        try (SevenZOutputFile z7z = new SevenZOutputFile(channel)) {
             SevenZArchiveEntry entry = new SevenZArchiveEntry();
             entry.setName("sevenZip");
             entry.setSize(bytes.length);
             z7z.putArchiveEntry(entry);
             z7z.write(bytes);
             z7z.closeArchiveEntry();
-            z7z.close();
             return channel.array();
         } catch (IOException e) {
             throw new RuntimeException("SevenZ compress error", e);
@@ -56,10 +54,9 @@ public class SevenZUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(bytes);
-            SevenZFile sevenZFile = new SevenZFile(channel);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(bytes);
+        try (SevenZFile sevenZFile = new SevenZFile(channel)) {
             byte[] buffer = new byte[BUFFER_SIZE];
             while (sevenZFile.getNextEntry() != null) {
                 int n;
@@ -67,7 +64,6 @@ public class SevenZUtil {
                     out.write(buffer, 0, n);
                 }
             }
-            sevenZFile.close();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("SevenZ decompress error", e);

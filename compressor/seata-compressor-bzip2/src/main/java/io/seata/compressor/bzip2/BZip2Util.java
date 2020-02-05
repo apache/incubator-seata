@@ -35,11 +35,9 @@ public class BZip2Util {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            CBZip2OutputStream bzip2 = new CBZip2OutputStream(bos);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (CBZip2OutputStream bzip2 = new CBZip2OutputStream(bos)) {
             bzip2.write(bytes);
-            bzip2.close();
             return bos.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("BZip2 compress error", e);
@@ -50,16 +48,14 @@ public class BZip2Util {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            CBZip2InputStream bzip2 = new CBZip2InputStream(bis);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        try (CBZip2InputStream bzip2 = new CBZip2InputStream(bis)) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int n;
             while ((n = bzip2.read(buffer)) > -1) {
                 out.write(buffer, 0, n);
             }
-            bzip2.close();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("BZip2 decompress error", e);

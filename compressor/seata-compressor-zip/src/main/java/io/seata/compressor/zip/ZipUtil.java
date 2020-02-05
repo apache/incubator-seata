@@ -35,15 +35,13 @@ public class ZipUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ZipOutputStream zip = new ZipOutputStream(out);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ZipOutputStream zip = new ZipOutputStream(out)) {
             ZipEntry entry = new ZipEntry("zip");
             entry.setSize(bytes.length);
             zip.putNextEntry(entry);
             zip.write(bytes);
             zip.closeEntry();
-            zip.close();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Zip compress error", e);
@@ -54,9 +52,8 @@ public class ZipUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(bytes));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(bytes))) {
             byte[] buffer = new byte[BUFFER_SIZE];
             while (zip.getNextEntry() != null) {
                 int n;
@@ -64,7 +61,6 @@ public class ZipUtil {
                     out.write(buffer, 0, n);
                 }
             }
-            zip.close();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("Zip decompress error", e);
