@@ -44,8 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Default server message listener.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/18
+ * @author slievrly
  */
 public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerMessageListenerImpl.class);
@@ -86,16 +85,21 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             return;
         }
         if (message instanceof MergedWarpMessage) {
-            AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage)message).msgs.size()];
+            AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
             for (int i = 0; i < results.length; i++) {
-                final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(i);
+                final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
                 results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
             getServerMessageSender().sendResponse(request, ctx.channel(), resultMessage);
         } else if (message instanceof AbstractResultMessage) {
-            transactionMessageHandler.onResponse((AbstractResultMessage)message, rpcContext);
+            transactionMessageHandler.onResponse((AbstractResultMessage) message, rpcContext);
+        } else {
+            // the single send request message
+            final AbstractMessage msg = (AbstractMessage) message;
+            AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
+            getServerMessageSender().sendResponse(request, ctx.channel(), result);
         }
     }
 

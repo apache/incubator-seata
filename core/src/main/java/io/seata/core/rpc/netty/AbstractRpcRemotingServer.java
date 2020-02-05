@@ -38,9 +38,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * The type Rpc remoting server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author xingfudeshi@gmail.com
- * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements ServerMessageSender {
 

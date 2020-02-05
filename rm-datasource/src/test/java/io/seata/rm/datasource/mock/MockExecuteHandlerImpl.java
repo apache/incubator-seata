@@ -18,12 +18,12 @@ package io.seata.rm.datasource.mock;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
 /**
   * @author will
-  * @date 2019/8/16
   */
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 

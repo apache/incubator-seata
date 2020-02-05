@@ -22,13 +22,13 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 @Component
 @ConfigurationProperties(prefix = CONFIG_APOLLO_PREFIX)
 public class ConfigApolloProperties {
     private String appId = "seata-server";
     private String apolloMeta = "http://192.168.1.204:8801";
+    private String namespace = "application";
 
     public String getAppId() {
         return appId;
@@ -45,6 +45,15 @@ public class ConfigApolloProperties {
 
     public ConfigApolloProperties setApolloMeta(String apolloMeta) {
         this.apolloMeta = apolloMeta;
+        return this;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public ConfigApolloProperties setNamespace(String namespace) {
+        this.namespace = namespace;
         return this;
     }
 }

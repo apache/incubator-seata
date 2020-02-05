@@ -52,8 +52,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Abstract rpc remoting.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
+ * @author slievrly
  */
 public abstract class AbstractRpcRemoting implements Disposable {
 
@@ -214,43 +213,42 @@ public abstract class AbstractRpcRemoting implements Disposable {
         futures.put(rpcMessage.getId(), messageFuture);
 
         if (address != null) {
-            ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-            BlockingQueue<RpcMessage> basket = map.get(address);
-            if (basket == null) {
-                map.putIfAbsent(address, new LinkedBlockingQueue<>());
-                basket = map.get(address);
-            }
-            basket.offer(rpcMessage);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("offer message: " + rpcMessage.getBody());
-            }
-            if (!isSending) {
-                synchronized (mergeLock) {
-                    mergeLock.notifyAll();
+            /*
+            The batch send.
+            Object From big to small: RpcMessage -> MergedWarpMessage -> AbstractMessage
+            @see AbstractRpcRemotingClient.MergedSendRunnable
+            */
+            if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+                ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
+                BlockingQueue<RpcMessage> basket = map.get(address);
+                if (basket == null) {
+                    map.putIfAbsent(address, new LinkedBlockingQueue<>());
+                    basket = map.get(address);
+                }
+                basket.offer(rpcMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("offer message: {}", rpcMessage.getBody());
+                }
+                if (!isSending) {
+                    synchronized (mergeLock) {
+                        mergeLock.notifyAll();
+                    }
+                }
+            } else {
+                // the single send.
+                sendSingleRequest(channel, msg, rpcMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("send this msg[{}] by single send.", msg);
                 }
             }
         } else {
-            ChannelFuture future;
-            channelWriteableCheck(channel, msg);
-            future = channel.writeAndFlush(rpcMessage);
-            future.addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) {
-                    if (!future.isSuccess()) {
-                        MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-                        if (messageFuture != null) {
-                            messageFuture.setResultMessage(future.cause());
-                        }
-                        destroyChannel(future.channel());
-                    }
-                }
-            });
+            sendSingleRequest(channel, msg, rpcMessage);
         }
         if (timeout > 0) {
             try {
                 return messageFuture.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exx) {
-                LOGGER.error("wait response error:" + exx.getMessage() + ",ip:" + address + ",request:" + msg);
+                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), address, msg);
                 if (exx instanceof TimeoutException) {
                     throw (TimeoutException) exx;
                 } else {
@@ -260,6 +258,24 @@ public abstract class AbstractRpcRemoting implements Disposable {
         } else {
             return null;
         }
+    }
+
+    private void sendSingleRequest(Channel channel, Object msg, RpcMessage rpcMessage) {
+        ChannelFuture future;
+        channelWritableCheck(channel, msg);
+        future = channel.writeAndFlush(rpcMessage);
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                if (!future.isSuccess()) {
+                    MessageFuture messageFuture = futures.remove(rpcMessage.getId());
+                    if (messageFuture != null) {
+                        messageFuture.setResultMessage(future.cause());
+                    }
+                    destroyChannel(future.channel());
+                }
+            }
+        });
     }
 
     /**
@@ -280,7 +296,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
         if (msg instanceof MergeMessage) {
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) msg);
         }
-        channelWriteableCheck(channel, msg);
+        channelWritableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
@@ -304,14 +320,14 @@ public abstract class AbstractRpcRemoting implements Disposable {
         rpcMessage.setCompressor(request.getCompressor());
         rpcMessage.setBody(msg);
         rpcMessage.setId(request.getId());
-        channelWriteableCheck(channel, msg);
+        channelWritableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("send response:" + rpcMessage.getBody() + ",channel:" + channel);
         }
         channel.writeAndFlush(rpcMessage);
     }
 
-    private void channelWriteableCheck(Channel channel, Object msg) {
+    private void channelWritableCheck(Channel channel, Object msg) {
         int tryTimes = 0;
         synchronized (lock) {
             while (!channel.isWritable()) {

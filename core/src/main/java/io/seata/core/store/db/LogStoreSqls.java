@@ -23,7 +23,6 @@ import io.seata.core.constants.ServerTableColumnsName;
  * database log store SQLs
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 public class LogStoreSqls {
 
@@ -143,20 +142,20 @@ public class LogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_MYSQL = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(6), now(6))";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_ORACLE.
      */
     public static final String INSERT_BRANCH_TRANSACTION_ORACLE = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, systimestamp, systimestamp)";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL = "update " + BRANCH_TABLE_PLACEHOLD
-        + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now() where "
+        + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now(6) where "
         + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
@@ -164,7 +163,7 @@ public class LogStoreSqls {
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
         + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
-        + " = sysdate where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
+        + " = systimestamp where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
         + " = ?";
 
     /**
@@ -181,18 +180,18 @@ public class LogStoreSqls {
         + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?";
 
     /**
-     * The constant QUREY_BRANCH_TRANSACTION.
+     * The constant QUERY_BRANCH_TRANSACTION.
      */
-    public static final String QUREY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
+    public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
         + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? order by "
-        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
+        + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
     /**
-     * The constant QUREY_BRANCH_TRANSACTION_XIDS.
+     * The constant QUERY_BRANCH_TRANSACTION_XIDS.
      */
-    public static final String QUREY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS + " from "
+    public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS + " from "
         + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ") order by "
-        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
+        + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
     /**
      * The constant CHECK_MAX_TRANS_ID.
@@ -382,49 +381,49 @@ public class LogStoreSqls {
     }
 
     /**
-     * Get qurey branch transaction string.
+     * Get query branch transaction string.
      *
      * @param branchTable the branch table
      * @param dbType      the db type
      * @return the string
      */
-    public static String getQureyBranchTransaction(String branchTable, String dbType) {
-        return QUREY_BRANCH_TRANSACTION.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    public static String getQueryBranchTransaction(String branchTable, String dbType) {
+        return QUERY_BRANCH_TRANSACTION.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 
     /**
-     * Get qurey branch transaction string.
+     * Get query branch transaction string.
      *
      * @param branchTable the branch table
      * @param dbType      the db type
      * @param paramsPlaceHolder the params place holder
      * @return the string
      */
-    public static String getQureyBranchTransaction(String branchTable, String dbType,
+    public static String getQueryBranchTransaction(String branchTable, String dbType,
                                                    String paramsPlaceHolder) {
-        return QUREY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
+        return QUERY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
             .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     /**
-     * Gets qurey global max.
+     * Gets query global max.
      *
      * @param globalTable the global table
      * @param dbType      the db type
-     * @return the qurey global max
+     * @return the query global max
      */
-    public static String getQureyGlobalMax(String globalTable, String dbType) {
+    public static String getQueryGlobalMax(String globalTable, String dbType) {
         return QUERY_MAX_TRANS_ID.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     /**
-     * Gets qurey branch max.
+     * Gets query branch max.
      *
      * @param branchTable the branch table
      * @param dbType      the db type
-     * @return the qurey branch max
+     * @return the query branch max
      */
-    public static String getQureyBranchMax(String branchTable, String dbType) {
+    public static String getQueryBranchMax(String branchTable, String dbType) {
         return QUERY_MAX_BTANCH_ID.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

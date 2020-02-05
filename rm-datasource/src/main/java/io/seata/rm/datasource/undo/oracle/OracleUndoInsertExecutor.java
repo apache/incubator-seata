@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -32,7 +33,6 @@ import java.util.List;
  * The type oralce undo insert executor.
  *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
 
@@ -45,7 +45,7 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
     protected String buildUndoSQL() {
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
-        if (afterImageRows == null || afterImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(afterImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);

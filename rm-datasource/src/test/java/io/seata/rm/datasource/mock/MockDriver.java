@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Mock driver
  * @author will
- * @date 2019/8/14
  */
 public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
@@ -56,22 +55,36 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
     private Object[][] mockIndexMetasReturnValue;
 
     /**
+     * the mock value of pk meta return value
+     */
+    private Object[][] mockPkMetasReturnValue;
+
+    /**
      * the mock execute handler
      */
     private MockExecuteHandler mockExecuteHandler;
 
     public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
-        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue);
+        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue,  new Object[][]{});
+    }
+
+    public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue) {
+        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, mockPkMetasReturnValue);
+    }
+
+    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
+        this(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, new Object[][]{});
     }
 
     /**
      * Instantiate a new MockDriver
      */
-    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
+    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue) {
         this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
+        this.mockPkMetasReturnValue = mockPkMetasReturnValue;
         this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
     }
 
@@ -143,6 +156,14 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      */
     public Object[][] getMockIndexMetasReturnValue() {
         return mockIndexMetasReturnValue;
+    }
+
+    /**
+     * get the return value of pk meta
+     * @return
+     */
+    public Object[][] getMockPkMetasReturnValue() {
+        return mockPkMetasReturnValue;
     }
 
     /**

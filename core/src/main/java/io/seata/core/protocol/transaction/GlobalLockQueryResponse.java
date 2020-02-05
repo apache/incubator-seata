@@ -21,7 +21,7 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Global lock query response.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class GlobalLockQueryResponse extends AbstractTransactionResponse {
 

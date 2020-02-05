@@ -37,7 +37,6 @@ import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
  * The type Parameter parser.
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/05/30
  */
 public class ParameterParser {
 
@@ -57,6 +56,7 @@ public class ParameterParser {
     private static final String ENV_STORE_MODE_KEY = "STORE_MODE";
     private static final String C_GROUP_PATH = "/proc/1/cgroup";
     private static final String DOCKER_PATH = "/docker";
+    private static final String KUBEPODS_PATH = "/kubepods";
 
     @Parameter(names = "--help", help = true)
     private boolean help;
@@ -133,7 +133,7 @@ public class ParameterParser {
         Path path = Paths.get(C_GROUP_PATH);
         if (Files.exists(path)) {
             try (Stream<String> stream = Files.lines(path)) {
-                return stream.anyMatch(line -> line.contains(DOCKER_PATH));
+                return stream.anyMatch(line -> line.contains(DOCKER_PATH) || line.contains(KUBEPODS_PATH));
             } catch (IOException e) {
                 LOGGER.error("Judge if running in container failed:{}", e.getMessage(), e);
             }

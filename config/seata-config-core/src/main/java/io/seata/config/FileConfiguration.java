@@ -17,6 +17,8 @@ package io.seata.config;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -37,8 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/10
+ * @author slievrly
  */
 public class FileConfiguration extends AbstractConfiguration {
 
@@ -61,7 +62,7 @@ public class FileConfiguration extends AbstractConfiguration {
     private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
         8);
 
-    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
+    private final Map<String, String> listenedConfigMap = new HashMap<>(8);
 
     private final String targetFilePath;
 
@@ -176,7 +177,7 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         configListenersMap.get(dataId).add(listener);
-        listenedConfigMap.put(dataId, getConfig(dataId));
+        listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
         FileListener fileListener = new FileListener(dataId, listener);
         fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
@@ -305,7 +306,7 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    String currentConfig = getConfig(dataId);
+                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);

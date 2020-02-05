@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * The type String utils.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author Geng Zhang
  */
 public class StringUtils {
@@ -133,7 +133,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
@@ -155,7 +155,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }

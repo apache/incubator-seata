@@ -28,8 +28,7 @@ import java.util.regex.Pattern;
 /**
  * The type Net util.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author slievrly
  */
 public class NetUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);
@@ -155,7 +154,7 @@ public class NetUtil {
                 return localAddress;
             }
         } catch (Throwable e) {
-            LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+            LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
         }
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -172,17 +171,17 @@ public class NetUtil {
                                         return address;
                                     }
                                 } catch (Throwable e) {
-                                    LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+                                    LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
                                 }
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+                        LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
                     }
                 }
             }
         } catch (Throwable e) {
-            LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+            LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
         }
         LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
         return localAddress;

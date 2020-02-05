@@ -22,13 +22,16 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 @Component
 @ConfigurationProperties(prefix = REGISTRY_REDIS_PREFIX)
 public class RegistryRedisProperties {
     private String serverAddr = "localhost:6379";
-    private String db = "0";
+    private int db = 0;
+    private String password = "";
+    private String cluster = "default";
+    private int timeout = 0;
+
 
     public String getServerAddr() {
         return serverAddr;
@@ -39,12 +42,39 @@ public class RegistryRedisProperties {
         return this;
     }
 
-    public String getDb() {
+    public int getDb() {
         return db;
     }
 
-    public RegistryRedisProperties setDb(String db) {
+    public RegistryRedisProperties setDb(int db) {
         this.db = db;
+        return this;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public RegistryRedisProperties setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public String getCluster() {
+        return cluster;
+    }
+
+    public RegistryRedisProperties setCluster(String cluster) {
+        this.cluster = cluster;
+        return this;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public RegistryRedisProperties setTimeout(int timeout) {
+        this.timeout = timeout;
         return this;
     }
 }

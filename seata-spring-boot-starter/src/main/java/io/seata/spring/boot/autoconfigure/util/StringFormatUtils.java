@@ -17,12 +17,11 @@ package io.seata.spring.boot.autoconfigure.util;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 public class StringFormatUtils {
     private static final char MINUS = '-';
     private static final char UNDERLINE = '_';
-    private static final char DOT = '.';
+    public static final char DOT = '.';
 
     /**
      * camelTo underline format

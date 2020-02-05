@@ -45,7 +45,7 @@ public class RMHandlerAT extends AbstractRMHandler {
         DataSourceManager dataSourceManager = (DataSourceManager)getResourceManager();
         DataSourceProxy dataSourceProxy = dataSourceManager.get(request.getResourceId());
         if (dataSourceProxy == null) {
-            LOGGER.warn("Failed to get dataSourceProxy for delete undolog on " + request.getResourceId());
+            LOGGER.warn("Failed to get dataSourceProxy for delete undolog on {}", request.getResourceId());
             return;
         }
         Date logCreatedSave = getLogCreated(request.getSaveDays());
@@ -85,7 +85,7 @@ public class RMHandlerAT extends AbstractRMHandler {
             saveDays = UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
         }
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, 0 - saveDays);
+        calendar.add(Calendar.DATE, -saveDays);
         return calendar.getTime();
     }
 
