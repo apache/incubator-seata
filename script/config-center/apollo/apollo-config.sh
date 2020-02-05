@@ -20,68 +20,93 @@
 # add config: http://{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/items
 # publish config: http://{portal_address}/openapi/v1/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/releases
 
-
-for line in $(cat apollo-params.txt); do
-	key=${line%%=*}
-	value=${line#*=}
-	case ${key} in
-	portalAddr)
-		portalAddr=${value}
-		;;
-	env)
-		env=${value}
-		;;
-	appId)
-		appId=${value}
-		;;
-	clusterName)
-		clusterName=${value}
-		;;
-	namespaceName)
-		namespaceName=${value}
-		;;
-	dataChangeCreatedBy)
-		dataChangeCreatedBy=${value}
-		;;
-	releasedBy)
-		releasedBy=${value}
-		;;
-	token)
-		token=${value}
-		;;
-	*)
-		echo "\033[31m Invalid parameter，please refer to apollo-params.txt \033[0m"
-		exit 1
-		;;
-	esac
+while getopts ":h:p:e:a:c:n:d:r:t:" opt
+do
+  case $opt in
+  h)
+    host=$OPTARG
+    ;;
+  p)
+    port=$OPTARG
+    ;;
+  e)
+    env=$OPTARG
+    ;;
+  a)
+    appId=$OPTARG
+    ;;
+  c)
+    clusterName=$OPTARG
+    ;;
+  n)
+    namespaceName=$OPTARG
+    ;;
+  d)
+    dataChangeCreatedBy=$OPTARG
+    ;;
+  r)
+    releasedBy=$OPTARG
+    ;;
+  t)
+    token=$OPTARG
+    ;;
+  ?)
+    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] [-e env] [a appId] [-c clusterName] [-n namespaceName] [-d dataChangeCreatedBy] [-r releasedBy] [-t token] \033[0m"
+    exit 1
+    ;;
+  esac
 done
 
-if [[ -z ${portalAddr} || -z ${env} || -z ${appId} || -z ${clusterName} || -z ${namespaceName}
-      || -z ${dataChangeCreatedBy} || -z ${releasedBy} || -z ${token} ]]; then
-	echo "\033[31m Incomplete parameters, please fill in the complete parameters: portalAddr:$portalAddr,
-            env:$env, appId:$appId, clusterName:$clusterName, namespaceName:$namespaceName,
-            dataChangeCreatedBy:$dataChangeCreatedBy, releasedBy:$releasedBy, token:$token \033[0m"
-	exit 1
+if [[ -z ${host} ]]; then
+    host=localhost
+fi
+if [[ -z ${port} ]]; then
+    port=8070
+fi
+if [[ -z ${env} ]]; then
+    env=DEV
+fi
+if [[ -z ${appId} ]]; then
+    appId=seata-server
+fi
+if [[ -z ${clusterName} ]]; then
+    clusterName=default
+fi
+if [[ -z ${namespaceName} ]]; then
+    namespaceName=application
+fi
+if [[ -z ${dataChangeCreatedBy} ]]; then
+    echo "\033[31m dataChangeCreatedBy is empty, please usage option: [-d dataChangeCreatedBy] \033[0m"
+    exit 1
+fi
+if [[ -z ${releasedBy} ]]; then
+    echo "\033[31m releasedBy is empty, please usage option: [-r releasedBy] \033[0m"
+    exit 1
+fi
+if [[ -z ${token} ]]; then
+    echo "\033[31m token is empty, please usage option: [-t token] \033[0m"
+    exit 1
 fi
 
+portalAddr=$host:$port
 contentType="content-type:application/json;charset=UTF-8"
 authorization="Authorization:$token"
 publishBody="{\"releaseTitle\":\"$(date +%Y%m%d%H%M%S)\",\"releaseComment\":\"\",\"releasedBy\":\"${releasedBy}\"}"
 
-echo "Portal address is ${portalAddr}"
-echo "Env is ${env}"
-echo "AppId is ${appId}"
-echo "ClusterName is ${clusterName}"
-echo "NamespaceName is ${namespaceName}"
-echo "DataChangeCreatedBy is ${dataChangeCreatedBy}"
-echo "ReleasedBy is ${releasedBy}"
-echo "Token is ${token}"
+echo "portalAddr is ${portalAddr}"
+echo "env is ${env}"
+echo "appId is ${appId}"
+echo "clusterName is ${clusterName}"
+echo "namespaceName is ${namespaceName}"
+echo "dataChangeCreatedBy is ${dataChangeCreatedBy}"
+echo "releasedBy is ${releasedBy}"
+echo "token is ${token}"
 
 failCount=0
-tempLog=$(mktemp -t apollo-config.log)
+tempLog=$(mktemp -u)
 function addConfig() {
-	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >${tempLog} 2>/dev/null
-	log=$(cat ${tempLog})
+	curl -X POST -H "${1}" -H "${2}" -d "${3}" "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >"${tempLog}" 2>/dev/null
+	log=$(cat "${tempLog}")
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
 	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
@@ -93,8 +118,8 @@ function addConfig() {
 }
 
 function publishConfig() {
-	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >${tempLog} 2>/dev/null
-	log=$(cat ${tempLog})
+	curl -X POST -H "${1}" -H "${2}" -d "${3}" "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >"${tempLog}" 2>/dev/null
+	log=$(cat "${tempLog}")
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
 	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
@@ -111,7 +136,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 	key=${line%%=*}
 	value=${line#*=}
 	body="{\"key\":\"${key}\",\"value\":\"${value}\",\"comment\":\"\",\"dataChangeCreatedBy\":\"${dataChangeCreatedBy}\"}"
-	addConfig ${contentType} ${authorization} ${body} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName} ${key} ${value}
+	addConfig ${contentType} "${authorization}" "${body}" "${portalAddr}" "${env}" "${appId}" "${clusterName}" "${namespaceName}" "${key}" "${value}"
 done
 
 echo "========================================================================="
@@ -121,7 +146,7 @@ echo "========================================================================="
 if [[ $failCount -eq 0 ]]; then
   read -p "Publish now, y/n: " result
   if [[ ${result} == "y" ]]; then
-    publishConfig ${contentType} ${authorization} ${publishBody} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName}
+    publishConfig "${contentType}" "${authorization}" "${publishBody}" "${portalAddr}" "${env}" "${appId}" "${clusterName}" "${namespaceName}"
   else
     echo "Remember to publish later..."
   fi

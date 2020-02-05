@@ -5,24 +5,24 @@ seata:
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
   client:
-    rm-async-commit-buffer-limit: 1000
-    rm-report-retry-count: 5
-    rm-table-meta-check-enable: false
-    rm-report-success-enable: true
     rm:
+      async-commit-buffer-limit: 1000
+      report-retry-count: 5
+      table-meta-check-enable: false
+      report-success-enable: true
       lock:
-        lock-retry-interval: 10
-        lock-retry-times: 30
-        lock-retry-policy-branch-rollback-on-conflict: true
-    tm-commit-retry-count: 5
-    tm-rollback-retry-count: 5
+        retry-interval: 10
+        retry-times: 30
+        retry-policy-branch-rollback-on-conflict: true
+    tm:
+      commit-retry-count: 5
+      rollback-retry-count: 5
     undo:
-      undo-data-validation: true
-      undo-log-serialization: jackson
-      undo-log-table: undo_log
-    client:
-      log:
-        exceptionRate: 100
+      data-validation: true
+      log-serialization: jackson
+      log-table: undo_log
+    log:
+      exceptionRate: 100
   service:
     vgroup-mapping: default
     grouplist: 127.0.0.1:8091
