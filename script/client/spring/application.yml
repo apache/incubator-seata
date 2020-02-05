@@ -60,6 +60,7 @@ seata:
     nacos:
       namespace:
       serverAddr: localhost
+      group: SEATA_GROUP
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
