@@ -27,6 +27,7 @@ import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -153,7 +154,7 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         List<List<Object>> insertRows = recognizer.getInsertRows();
-        Assertions.assertTrue(insertRows.size() == 1);
+        Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
