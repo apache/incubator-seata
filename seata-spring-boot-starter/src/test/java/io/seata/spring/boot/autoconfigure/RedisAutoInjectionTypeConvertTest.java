@@ -44,7 +44,8 @@ public class RedisAutoInjectionTypeConvertTest {
     public void testRegister() throws Exception {
 
         FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration =
+                EnhancedServiceLoader.getServiceLoader(ExtConfigurationProvider.class).load().provide(configuration);
         int db = currentConfiguration.getInt("registry.redis.db");
         Assertions.assertEquals(1,db);
     }

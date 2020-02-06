@@ -16,6 +16,8 @@
 package io.seata.common.loader;
 
 import io.seata.common.Constants;
+import io.seata.common.executor.Initialize;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.Holder;
 import io.seata.common.util.IOUtil;
 import java.io.BufferedReader;
@@ -33,8 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import io.seata.common.executor.Initialize;
-import io.seata.common.util.CollectionUtils;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -170,6 +170,16 @@ public class EnhancedServiceLoader<S> {
      * @return list list
      */
     public List<S> loadAll() {
+        return loadAll(null,null);
+    }
+
+    /**
+     * get all implements
+     * @param argsType the args type
+     * @param args the args
+     * @return list list
+     */
+    public List<S> loadAll(Class[] argsType, Object[] args) {
         List<S> allInstances = new ArrayList<>();
         List<Class> allClazzs = getAllExtensionClass();
         if (CollectionUtils.isEmpty(allClazzs)) {
@@ -178,7 +188,7 @@ public class EnhancedServiceLoader<S> {
         try {
             for (Class clazz : allClazzs) {
                 ExtensionURL url = extensionClassUrlMap.get(clazz);
-                allInstances.add(getExtension(url, findClassLoader(), null, null));
+                allInstances.add(getExtension(url, findClassLoader(), argsType, args));
             }
         } catch (Throwable t) {
             throw new EnhancedServiceNotFoundException(t);

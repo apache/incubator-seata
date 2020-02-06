@@ -37,7 +37,7 @@ public class UndoLogManagerFactory {
         if (UNDO_LOG_MANAGER_MAP.get(dbType) != null) {
             return UNDO_LOG_MANAGER_MAP.get(dbType);
         }
-        UndoLogManager undoLogManager = EnhancedServiceLoader.load(UndoLogManager.class, dbType);
+        UndoLogManager undoLogManager = EnhancedServiceLoader.getServiceLoader(UndoLogManager.class).load(dbType);
         UNDO_LOG_MANAGER_MAP.putIfAbsent(dbType, undoLogManager);
         return undoLogManager;
     }

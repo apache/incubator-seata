@@ -33,7 +33,7 @@ public class SQLVisitorFactory {
 
     static {
         String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
-        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlparserType);
+        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.getServiceLoader(SQLRecognizerFactory.class).load(sqlparserType);
     }
 
     /**

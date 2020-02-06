@@ -56,7 +56,7 @@ public class DefaultCore implements Core {
      * @param messageSender the message sender
      */
     public DefaultCore(ServerMessageSender messageSender) {
-        List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
+        List<AbstractCore> allCore = EnhancedServiceLoader.getServiceLoader(AbstractCore.class).loadAll(
                 new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
         if (CollectionUtils.isNotEmpty(allCore)) {
             for (AbstractCore core : allCore) {
