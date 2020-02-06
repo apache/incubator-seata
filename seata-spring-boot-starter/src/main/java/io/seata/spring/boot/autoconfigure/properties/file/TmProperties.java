@@ -13,30 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.spring.boot.autoconfigure.properties.file;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = CONFIG_PREFIX)
-public class ConfigProperties {
-    /**
-     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
-     */
-    private String type = "file";
+@ConfigurationProperties(prefix = CLIENT_TM_PREFIX)
+public class TmProperties {
+    private int commitRetryCount = 5;
+    private int rollbackRetryCount = 5;
 
-    public String getType() {
-        return type;
+    public int getCommitRetryCount() {
+        return commitRetryCount;
     }
 
-    public ConfigProperties setType(String type) {
-        this.type = type;
+    public TmProperties setCommitRetryCount(int commitRetryCount) {
+        this.commitRetryCount = commitRetryCount;
+        return this;
+    }
+
+    public int getRollbackRetryCount() {
+        return rollbackRetryCount;
+    }
+
+    public TmProperties setRollbackRetryCount(int rollbackRetryCount) {
+        this.rollbackRetryCount = rollbackRetryCount;
         return this;
     }
 }
