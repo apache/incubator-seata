@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.postgresql;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author japsercloud
  */
+@LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlUndoLogManager.class);
@@ -41,11 +43,6 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE ID IN (" +
         "SELECT ID FROM " + UNDO_LOG_TABLE_NAME + " WHERE LOG_CREATED <= ? LIMIT ?" +
         ")";
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.POSTGRESQL;
-    }
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {

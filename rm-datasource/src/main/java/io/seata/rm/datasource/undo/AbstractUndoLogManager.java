@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.Constants;
-import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
@@ -31,7 +30,6 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,13 +95,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     public static void removeCurrentSerializer() {
         SERIALIZER_LOCAL.remove();
     }
-
-    /**
-     * get db type
-     *
-     * @return the db type
-     */
-    public abstract String getDbType();
 
     /**
      * Delete undo log.

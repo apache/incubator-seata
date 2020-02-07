@@ -15,8 +15,10 @@
  */
 package io.seata.rm.datasource.undo.postgresql.keyword;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
  *
  * @author japsercloud
  */
+@LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;
 
@@ -370,11 +373,6 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     @Override
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? replace(fieldOrTableName) : fieldOrTableName;
-    }
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.POSTGRESQL;
     }
 
     private String replace(String fieldOrTableName) {
