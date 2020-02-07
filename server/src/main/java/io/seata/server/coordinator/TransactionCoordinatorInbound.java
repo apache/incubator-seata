@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.springcloud;
+package io.seata.server.coordinator;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.seata.core.model.ResourceManagerOutbound;
+import io.seata.core.model.TransactionManager;
 
-import org.springframework.context.annotation.Import;
+/**
+ * receive inbound request from RM or TM.
+ *
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.1.0
+ */
+public interface TransactionCoordinatorInbound extends ResourceManagerOutbound, TransactionManager {
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Import({SpringApplicationContextProviderRegistrar.class})
-public @interface EnableSeataSpringConfig {
 }
