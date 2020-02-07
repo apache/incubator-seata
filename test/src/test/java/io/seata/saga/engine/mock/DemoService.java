@@ -28,6 +28,14 @@ public class DemoService {
         if(input == null){
             return null;
         }
+        Integer sleepTime = (Integer) input.get("sleepTime");
+        if(sleepTime != null){
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                throw new DemoException(e);
+            }
+        }
         if("true".equals(input.get("throwException"))){
             throw new DemoException("foo execute failed");
         }
@@ -57,6 +65,14 @@ public class DemoService {
     public Map<String, Object> bar(Map<String, Object> input) {
         if(input == null){
             return null;
+        }
+        Integer sleepTime = (Integer) input.get("sleepTime");
+        if(sleepTime != null){
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                throw new DemoException(e);
+            }
         }
         if("true".equals(input.get("throwException"))){
             throw new DemoException("bar execute failed");

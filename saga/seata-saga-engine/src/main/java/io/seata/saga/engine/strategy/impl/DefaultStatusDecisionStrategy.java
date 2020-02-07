@@ -15,9 +15,10 @@
  */
 package io.seata.saga.engine.strategy.impl;
 
-import java.util.Date;
 import java.util.List;
 
+import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.strategy.StatusDecisionStrategy;
 import io.seata.saga.engine.utils.ExceptionUtils;
@@ -97,9 +98,9 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
         boolean hasSetStatus = false;
         if (stateList != null && stateList.size() > 0) {
 
-            boolean hasSuccessedUpdateService = false;
+            boolean hasSuccessUpdateService = false;
 
-            boolean hasUnsuccessedAct = false;
+            boolean hasUnsuccessService = false;
 
             for (int i = stateList.size() - 1; i >= 0; i--) {
                 StateInstance stateInstance = stateList.get(i);
@@ -113,18 +114,18 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                 } else if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     if (DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType())) {
                         if (stateInstance.isForUpdate() && !stateInstance.isForCompensation()) {
-                            hasSuccessedUpdateService = true;
+                            hasSuccessUpdateService = true;
                         }
                     }
                 } else if (ExecutionStatus.SK.equals(stateInstance.getStatus())) {
                     // ignore
                 } else {
-                    hasUnsuccessedAct = true;
+                    hasUnsuccessService = true;
                 }
             }
 
-            if (!hasSetStatus && hasUnsuccessedAct) {
-                if (hasSuccessedUpdateService) {
+            if (!hasSetStatus && hasUnsuccessService) {
+                if (hasSuccessUpdateService) {
                     stateMachineInstance.setStatus(ExecutionStatus.UN);
                 } else {
                     stateMachineInstance.setStatus(ExecutionStatus.FA);
@@ -144,6 +145,9 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
     public static void setMachineStatusBasedOnException(StateMachineInstance stateMachineInstance, Exception exp) {
         if (exp == null) {
             stateMachineInstance.setStatus(ExecutionStatus.SU);
+        } else if (exp instanceof EngineExecutionException
+                && FrameworkErrorCode.StateMachineExecutionTimeout.equals(((EngineExecutionException)exp).getErrcode())) {
+            stateMachineInstance.setStatus(ExecutionStatus.UN);
         } else {
             NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
             if (t != null) {
@@ -194,9 +198,6 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
             stateMachineInstance.setCompensationStatus(ExecutionStatus.UN);
         }
-        stateMachineInstance.setRunning(false);
-        stateMachineInstance.setGmtEnd(new Date());
-        stateMachineInstance.setException(exp);
     }
 
     /**

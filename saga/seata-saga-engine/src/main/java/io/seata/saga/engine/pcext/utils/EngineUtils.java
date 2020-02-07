@@ -71,16 +71,16 @@ public class EngineUtils {
 
         stateMachineConfig.getStatusDecisionStrategy().decideOnEndState(context, stateMachineInstance, exp);
 
-        stateMachineInstance.setRunning(false);
         stateMachineInstance.getEndParams().putAll(
             (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
 
+        stateMachineInstance.setRunning(false);
+        stateMachineInstance.setGmtEnd(new Date());
+
         if (stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
-            stateMachineInstance.getEndParams().putAll(
-                (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);
         }
 
@@ -115,6 +115,10 @@ public class EngineUtils {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
+
+        stateMachineInstance.setRunning(false);
+        stateMachineInstance.setGmtEnd(new Date());
+        stateMachineInstance.setException(exp);
 
         if (stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);

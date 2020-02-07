@@ -208,6 +208,18 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
+        if (stateMachineInstance.isTimeout(stateMachineConfig.getTransOperationTimeout())) {
+            String message = "Saga Transaction [stateMachineInstanceId:" + stateMachineInstance.getId()
+                    + "] has timed out, stop execution now.";
+
+            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(null,
+                    FrameworkErrorCode.StateMachineExecutionTimeout, message, stateMachineInstance, instruction.getStateName());
+
+            EngineUtils.failStateMachine(context, exception);
+
+            throw exception;
+        }
+
         StateInstanceImpl stateInstance = new StateInstanceImpl();
 
         Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
@@ -314,7 +326,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-        if (stateInstance == null) {
+        if (stateInstance == null || !stateMachineInstance.isRunning()) {
             return;
         }
 

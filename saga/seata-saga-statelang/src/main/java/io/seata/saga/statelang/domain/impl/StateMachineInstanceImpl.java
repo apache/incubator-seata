@@ -274,4 +274,12 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
     public void setSerializedException(Object serializedException) {
         this.serializedException = serializedException;
     }
+
+    @Override
+    public boolean isTimeout(int timeoutMillis) {
+        if (this.gmtUpdated == null || timeoutMillis < 0) {
+            return false;
+        }
+        return System.currentTimeMillis() - this.gmtUpdated.getTime() > timeoutMillis;
+    }
 }

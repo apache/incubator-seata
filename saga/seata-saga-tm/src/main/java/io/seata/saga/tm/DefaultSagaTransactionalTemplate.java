@@ -54,9 +54,6 @@ public class DefaultSagaTransactionalTemplate
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSagaTransactionalTemplate.class);
 
-    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
-    private int timeout = DEFAULT_TRANS_OPER_TIMEOUT;
-
     private String applicationId;
     private String txServiceGroup;
     private ApplicationContext applicationContext;
@@ -256,15 +253,6 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
     }
 
     @Override

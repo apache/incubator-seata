@@ -51,11 +51,17 @@
 		<property name="applicationId" value="test_saga"></property>
 		<property name="txServiceGroup" value="my_test_tx_group"></property>
 	</bean>
+
 	<bean id="threadExecutor"
 		  class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
 		<property name="threadNamePrefix" value="SAGA_ASYNC_EXE_" />
-		<property name="corePoolSize" value="1" />
+		<property name="corePoolSize" value="20" />
 		<property name="maxPoolSize" value="20" />
+		<property name="queueCapacity" value="100" />
+		<property name="rejectedExecutionHandler" ref="callerRunsPolicy" />
+	</bean>
+
+	<bean name="callerRunsPolicy" class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy">
 	</bean>
 
 	<bean class="io.seata.saga.rm.StateMachineEngineHolder">

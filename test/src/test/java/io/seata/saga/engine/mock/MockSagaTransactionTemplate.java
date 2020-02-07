@@ -77,11 +77,6 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
     }
 
     @Override
-    public int getTimeout() {
-        return 60000;
-    }
-
-    @Override
     public void triggerAfterCompletion() {
 
     }

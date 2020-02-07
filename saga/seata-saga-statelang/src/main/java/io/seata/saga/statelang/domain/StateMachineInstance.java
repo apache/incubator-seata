@@ -327,4 +327,11 @@ public interface StateMachineInstance {
      * @param serializedException the serialized exception
      */
     void setSerializedException(Object serializedException);
+
+    /**
+     * is timeout
+     * @param timeoutMillis
+     * @return
+     */
+    boolean isTimeout(int timeoutMillis);
 }

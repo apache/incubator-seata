@@ -147,4 +147,10 @@ public interface StateMachineConfig {
      * @return
      */
     ServiceInvokerManager getServiceInvokerManager();
+
+    /**
+     * get trans operation timeout
+     * @return
+     */
+    int getTransOperationTimeout();
 }
