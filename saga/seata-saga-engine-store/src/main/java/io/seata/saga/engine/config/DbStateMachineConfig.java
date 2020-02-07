@@ -15,11 +15,10 @@
  */
 package io.seata.saga.engine.config;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
-import javax.sql.DataSource;
 
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -50,7 +49,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String dbType;
     private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private boolean                   rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
+    private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         try (Connection con = dataSource.getConnection()) {
@@ -103,7 +102,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     @Override
     public void destroy() throws Exception {
         if ((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)) {
-            ((DisposableBean)sagaTransactionalTemplate).destroy();
+            ((DisposableBean) sagaTransactionalTemplate).destroy();
         }
     }
 

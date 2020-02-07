@@ -35,6 +35,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGlobalTransaction.class);
 
+    public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 1;
+
+    public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 1;
+
     private static final int DEFAULT_GLOBAL_TX_TIMEOUT = 60000;
 
     private static final String DEFAULT_GLOBAL_TX_NAME = "default";
@@ -48,10 +52,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalTransactionRole role;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
 
     /**
      * Instantiates a new Default global transaction.

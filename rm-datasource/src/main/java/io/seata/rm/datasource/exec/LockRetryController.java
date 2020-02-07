@@ -24,11 +24,13 @@ import io.seata.core.constants.ConfigurationKeys;
  * @author sharajava
  */
 public class LockRetryController {
+    public static final int DEFAULT_CLIENT_LOCK_RETRY_INTERNAL = 10;
+    public static final int DEFAULT_CLIENT_LOCK_RETRY_TIMES = 30;
 
     private static int LOCK_RETRY_INTERNAL =
-        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERNAL, 10);
+        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERNAL, DEFAULT_CLIENT_LOCK_RETRY_INTERNAL);
     private static int LOCK_RETRY_TIMES =
-        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, 30);
+        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, DEFAULT_CLIENT_LOCK_RETRY_TIMES);
 
     private int lockRetryInternal = LOCK_RETRY_INTERNAL;
     private int lockRetryTimes = LOCK_RETRY_TIMES;

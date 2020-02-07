@@ -91,6 +91,7 @@ public class NettyBaseConfig {
 
     private static final int READIDLE_BASE_WRITEIDLE = 3;
 
+
     /**
      * The constant MAX_WRITE_IDLE_SECONDS.
      */
@@ -105,6 +106,8 @@ public class NettyBaseConfig {
      * The constant MAX_ALL_IDLE_SECONDS.
      */
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
+
+    public static final boolean TRANSPORT_HEARTBEAT = false;
 
     static {
         TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
@@ -160,7 +163,7 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
-        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, false);
+        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, TRANSPORT_HEARTBEAT);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
         } else {

@@ -47,7 +47,8 @@ import org.springframework.util.ClassUtils;
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener,MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
+    public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -65,7 +66,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-            false);
+            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
     }
 
     @Override

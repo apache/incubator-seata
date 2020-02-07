@@ -43,7 +43,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final int MAX_CHECK_ALIVE_RETRY = 300;
     private static final int CHECK_ALIVE_INTERNAL = 10;
     private static final String SOCKET_ADDRESS_START_CHAR = "/";
-    private static final int DEFAULT_SELECTOR_THREAD_SIZE = 1;
+    public static final int DEFAULT_SELECTOR_THREAD_SIZE = 1;
     private static final long MAX_ACQUIRE_CONN_MILLS = 60 * 1000L;
     private static final String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     private static final String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
@@ -53,7 +53,8 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
-    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, true);
+    public static final boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
+    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
 
     /**
      * Gets connect timeout millis.

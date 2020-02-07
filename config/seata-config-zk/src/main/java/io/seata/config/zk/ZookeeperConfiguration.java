@@ -59,8 +59,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final String SESSION_TIMEOUT_KEY = "session.timeout";
     private static final String CONNECT_TIMEOUT_KEY = "connect.timeout";
     private static final int THREAD_POOL_NUM = 1;
-    private static final int DEFAULT_SESSION_TIMEOUT = 6000;
-    private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
+    public static final int DEFAULT_SESSION_TIMEOUT = 6000;
+    public static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,

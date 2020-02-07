@@ -15,20 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.ResourceManagerInbound;
-import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -42,6 +28,20 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.ResourceManagerInbound;
+import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
@@ -57,6 +57,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int DEFAULT_RESOURCE_SIZE = 16;
 
     private static final int UNDOLOG_DELETE_LIMIT_SIZE = 1000;
+    public static final int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT=10000;
 
     private static class Phase2Context {
 
@@ -102,7 +103,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
-        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
+        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT);
 
     private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(
         ASYNC_COMMIT_BUFFER_LIMIT);

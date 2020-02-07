@@ -41,12 +41,12 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
     private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     private static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
-    private static final int DEFAULT_BOSS_THREAD_SIZE = 1;
+    public static final int DEFAULT_BOSS_THREAD_SIZE = 1;
 
     /**
      * Shutdown timeout default 1s
      */
-    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
+    public static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
 
     /**
      * The Server channel clazz.

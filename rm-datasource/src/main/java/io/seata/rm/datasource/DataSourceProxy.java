@@ -37,6 +37,7 @@ import io.seata.rm.datasource.util.JdbcUtils;
  * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
+    public static final boolean CLIENT_TABLE_META_CHECK_ENABLE=false;
 
     private String resourceGroupId;
 
@@ -50,7 +51,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, false);
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, CLIENT_TABLE_META_CHECK_ENABLE);
 
     /**
      * Table meta checker interval

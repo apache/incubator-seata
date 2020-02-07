@@ -18,9 +18,11 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.spring.annotation.GlobalTransactionalInterceptor.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
 /**
@@ -28,17 +30,15 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX
  */
 @Component
 @ConfigurationProperties(prefix = SERVICE_PREFIX)
-public class ServiceProperties {
+public class ServiceProperties implements InitializingBean {
     /**
      * vgroup->rgroup
      */
-    private Map<String, String> vgroupMapping=new HashMap(){
-
-    };
+    private Map<String, String> vgroupMapping = new HashMap<>();
     /**
      * group list
      */
-    private Map<String, String> grouplist;
+    private Map<String, String> grouplist = new HashMap<>();
     /**
      * degrade current not support
      */
@@ -46,7 +46,7 @@ public class ServiceProperties {
     /**
      * disable globalTransaction
      */
-    private boolean disableGlobalTransaction = false;
+    private boolean disableGlobalTransaction = DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
     public Map<String, String> getVgroupMapping() {
         return vgroupMapping;
@@ -80,5 +80,15 @@ public class ServiceProperties {
     public ServiceProperties setDisableGlobalTransaction(boolean disableGlobalTransaction) {
         this.disableGlobalTransaction = disableGlobalTransaction;
         return this;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (0 == vgroupMapping.size()) {
+            vgroupMapping.put("my_test_tx_group", "default");
+        }
+        if (0 == grouplist.size()) {
+            grouplist.put("default", "127.0.0.1:8091");
+        }
     }
 }

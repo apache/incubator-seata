@@ -19,6 +19,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
+import static io.seata.tm.api.DefaultGlobalTransaction.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.tm.api.DefaultGlobalTransaction.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -26,8 +28,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREF
 @Component
 @ConfigurationProperties(prefix = CLIENT_TM_PREFIX)
 public class TmProperties {
-    private int commitRetryCount = 5;
-    private int rollbackRetryCount = 5;
+    private int commitRetryCount = DEFAULT_TM_COMMIT_RETRY_COUNT;
+    private int rollbackRetryCount = DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 
     public int getCommitRetryCount() {
         return commitRetryCount;
