@@ -158,6 +158,9 @@ public class AsyncWorker implements ResourceManagerInbound {
                         throw new ShouldNeverHappenException("Failed to find resource on " + entry.getKey());
                     }
                     conn = dataSourceProxy.getPlainConnection();
+                    if (conn.getAutoCommit()) {
+                        conn.setAutoCommit(false);
+                    }
                 } catch (SQLException sqle) {
                     LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
                     continue;
@@ -192,9 +195,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 
-                if (!conn.getAutoCommit()) {
-                    conn.commit();
-                }
+                conn.commit();
             } catch (SQLException e) {
                 LOGGER.error(e.getMessage(), e);
                 try {
