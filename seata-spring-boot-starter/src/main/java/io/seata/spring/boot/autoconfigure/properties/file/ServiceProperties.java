@@ -15,6 +15,9 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.file;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -29,11 +32,13 @@ public class ServiceProperties {
     /**
      * vgroup->rgroup
      */
-    private String vgroupMapping = "default";
+    private Map<String, String> vgroupMapping=new HashMap(){
+
+    };
     /**
-     * only support single node
+     * group list
      */
-    private String grouplist = "127.0.0.1:8091";
+    private Map<String, String> grouplist;
     /**
      * degrade current not support
      */
@@ -43,22 +48,20 @@ public class ServiceProperties {
      */
     private boolean disableGlobalTransaction = false;
 
-    public String getVgroupMapping() {
+    public Map<String, String> getVgroupMapping() {
         return vgroupMapping;
     }
 
-    public ServiceProperties setVgroupMapping(String vgroupMapping) {
+    public void setVgroupMapping(Map<String, String> vgroupMapping) {
         this.vgroupMapping = vgroupMapping;
-        return this;
     }
 
-    public String getGrouplist() {
+    public Map<String, String> getGrouplist() {
         return grouplist;
     }
 
-    public ServiceProperties setGrouplist(String grouplist) {
+    public void setGrouplist(Map<String, String> grouplist) {
         this.grouplist = grouplist;
-        return this;
     }
 
     public boolean isEnableDegrade() {

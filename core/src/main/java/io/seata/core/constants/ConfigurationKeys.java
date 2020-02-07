@@ -327,7 +327,7 @@ public class ConfigurationKeys {
     /**
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
-    public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE = "undoLog";
+    public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE = "undo_log";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
