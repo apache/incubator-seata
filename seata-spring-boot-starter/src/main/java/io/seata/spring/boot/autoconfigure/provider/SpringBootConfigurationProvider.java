@@ -99,8 +99,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 Object valueObject = field.get(propertyObject);
                 if (valueObject instanceof Map) {
                     String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
-                    valueObject = ((Map<String, Object>) valueObject).get(key);
-                    System.out.println("============>" + valueObject);
+                    valueObject = ((Map) valueObject).get(key);
                 }
                 return valueObject;
             }
