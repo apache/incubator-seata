@@ -15,6 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.Map;
+
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
@@ -49,6 +51,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+import static io.seata.tm.api.DefaultGlobalTransaction.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.tm.api.DefaultGlobalTransaction.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -89,10 +93,13 @@ public class PropertiesTest {
 
     @Test
     public void testServiceProperties() {
-        assertEquals("default", context.getBean(ServiceProperties.class).getVgroupMapping());
-        assertEquals("127.0.0.1:8091", context.getBean(ServiceProperties.class).getGrouplist());
-        assertFalse(context.getBean(ServiceProperties.class).isEnableDegrade());
-        assertFalse(context.getBean(ServiceProperties.class).isDisableGlobalTransaction());
+        ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
+        Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
+        Map<String, String> grouplist = serviceProperties.getGrouplist();
+        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
+        assertEquals("127.0.0.1:8091", grouplist.get("default"));
+        assertFalse(serviceProperties.isEnableDegrade());
+        assertFalse(serviceProperties.isDisableGlobalTransaction());
     }
 
     @Test
@@ -113,8 +120,8 @@ public class PropertiesTest {
 
     @Test
     public void testTmProperties() {
-        assertEquals(5, context.getBean(TmProperties.class).getCommitRetryCount());
-        assertEquals(5, context.getBean(TmProperties.class).getRollbackRetryCount());
+        assertEquals(DEFAULT_TM_COMMIT_RETRY_COUNT, context.getBean(TmProperties.class).getCommitRetryCount());
+        assertEquals(DEFAULT_TM_ROLLBACK_RETRY_COUNT, context.getBean(TmProperties.class).getRollbackRetryCount());
     }
 
     @Test

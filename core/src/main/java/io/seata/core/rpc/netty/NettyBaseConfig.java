@@ -107,7 +107,7 @@ public class NettyBaseConfig {
      */
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
-    public static final boolean TRANSPORT_HEARTBEAT = false;
+    public static final boolean TRANSPORT_HEARTBEAT = true;
 
     static {
         TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
