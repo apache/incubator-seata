@@ -119,6 +119,6 @@ public class StarterConstants {
      * The following special keys need to be normalized.
      */
     public static final String SPECIAL_KEY_GROUPLIST = "grouplist";
-    public static final String SPECIAL_KEY_VGROUP_MAPPING="vgroupMapping";
+    public static final String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
 
 }
