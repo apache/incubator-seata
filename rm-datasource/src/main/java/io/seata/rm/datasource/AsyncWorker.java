@@ -57,7 +57,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int DEFAULT_RESOURCE_SIZE = 16;
 
     private static final int UNDOLOG_DELETE_LIMIT_SIZE = 1000;
-    public static final int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT=10000;
+    public static final int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = 10000;
 
     private static class Phase2Context {
 
