@@ -27,6 +27,7 @@ import java.util.List;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
@@ -36,6 +37,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
  */
 public class TableRecords {
 
+    @JSONField(serialize = false)
     private transient TableMeta tableMeta;
 
     private String tableName;
