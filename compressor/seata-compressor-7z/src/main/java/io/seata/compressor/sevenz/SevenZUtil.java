@@ -44,6 +44,7 @@ public class SevenZUtil {
             z7z.putArchiveEntry(entry);
             z7z.write(bytes);
             z7z.closeArchiveEntry();
+            z7z.finish();
             return channel.array();
         } catch (IOException e) {
             throw new RuntimeException("SevenZ compress error", e);
