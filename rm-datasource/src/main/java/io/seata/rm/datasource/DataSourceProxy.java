@@ -37,7 +37,7 @@ import io.seata.rm.datasource.util.JdbcUtils;
  * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
-    public static final boolean CLIENT_TABLE_META_CHECK_ENABLE=false;
+    public static final boolean CLIENT_TABLE_META_CHECK_ENABLE = false;
 
     private String resourceGroupId;
 
@@ -94,7 +94,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             tableMetaExcutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
-                            .refresh(connection, DataSourceProxy.this.getResourceId());
+                        .refresh(connection, DataSourceProxy.this.getResourceId());
                 } catch (Exception ignore) {
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);

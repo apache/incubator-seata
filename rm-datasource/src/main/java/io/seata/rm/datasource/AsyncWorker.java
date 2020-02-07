@@ -152,7 +152,7 @@ public class AsyncWorker implements ResourceManagerInbound {
             DataSourceProxy dataSourceProxy;
             try {
                 try {
-                    DataSourceManager resourceManager = (DataSourceManager)DefaultResourceManager.get()
+                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get()
                         .getResourceManager(BranchType.AT);
                     dataSourceProxy = resourceManager.get(entry.getKey());
                     if (dataSourceProxy == null) {
