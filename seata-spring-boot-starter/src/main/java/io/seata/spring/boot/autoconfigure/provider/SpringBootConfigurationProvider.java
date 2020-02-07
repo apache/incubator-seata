@@ -36,7 +36,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
@@ -50,7 +49,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.util.StringFormatUtils.DOT;
@@ -127,9 +125,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return dataId
      */
     private String convertDataId(String rawDataId) {
-        if (rawDataId.startsWith(SPECIAL_KEY_VGROUP_MAPPING)) {
-            return SERVICE_PREFIX + DOT + NORMALIZED_KEY_VGROUP_MAPPING;
-        }
         if (rawDataId.endsWith(SPECIAL_KEY_GROUPLIST)) {
             return SERVICE_PREFIX + DOT + NORMALIZED_KEY_GROUPLIST;
         }
