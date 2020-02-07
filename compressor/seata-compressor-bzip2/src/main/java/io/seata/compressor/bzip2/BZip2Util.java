@@ -38,6 +38,7 @@ public class BZip2Util {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (CBZip2OutputStream bzip2 = new CBZip2OutputStream(bos)) {
             bzip2.write(bytes);
+            bzip2.finish();
             return bos.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("BZip2 compress error", e);
