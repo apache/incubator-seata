@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.Constants;
+import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
@@ -29,6 +30,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -284,7 +287,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy).getTableMeta(
+                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
                                 conn, sqlUndoLog.getTableName(),dataSourceProxy.getResourceId());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(

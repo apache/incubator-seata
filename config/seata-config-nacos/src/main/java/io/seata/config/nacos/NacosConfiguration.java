@@ -44,7 +44,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
-    private static final String SEATA_GROUP = "SEATA_GROUP";
+    private static final String DEFAULT_GROUP = "SEATA_GROUP";
+    private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
@@ -91,7 +92,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             return value;
         }
         try {
-            value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
+            value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -102,7 +103,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.publishConfig(dataId, SEATA_GROUP, content);
+            result = configService.publishConfig(dataId, getNacosGroup(), content);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -118,7 +119,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.removeConfig(dataId, SEATA_GROUP);
+            result = configService.removeConfig(dataId, getNacosGroup());
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -134,7 +135,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             NacosListener nacosListener = new NacosListener(dataId, listener);
             configListenersMap.get(dataId).put(listener, nacosListener);
-            configService.addListener(dataId, SEATA_GROUP, nacosListener);
+            configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
             LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
         }
@@ -154,7 +155,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                     configListenersMap.get(dataId).remove(entry);
                 }
                 if (null != nacosListener) {
-                    configService.removeListener(dataId, SEATA_GROUP, nacosListener);
+                    configService.removeListener(dataId, getNacosGroup(), nacosListener);
                 }
                 break;
             }
@@ -199,6 +200,14 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static String getNacosAddrFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
+    }
+
+    private static String getNacosGroupKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
+    }
+
+    private static String getNacosGroup() {
+        return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
 
     @Override

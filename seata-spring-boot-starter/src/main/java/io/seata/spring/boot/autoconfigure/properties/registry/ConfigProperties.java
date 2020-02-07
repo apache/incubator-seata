@@ -27,7 +27,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 @ConfigurationProperties(prefix = CONFIG_PREFIX)
 public class ConfigProperties {
     /**
-     * file, nacos, apollo, zk, consul, etcd3
+     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
      */
     private String type = "file";
 

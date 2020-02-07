@@ -23,50 +23,28 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
-
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Table meta cache.
  *
  * @author sharajava
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
     private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private MysqlTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (MysqlTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new MysqlTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -202,5 +180,4 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
         return tm;
     }
-
 }
