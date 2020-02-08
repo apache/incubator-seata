@@ -210,7 +210,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
     }
 
-    private void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
+    public void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
         RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
         message.setResourceIds(resourceId);
         try {
@@ -229,7 +229,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
     }
 
-    private String getMergedResourceKeys() {
+    public String getMergedResourceKeys() {
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {

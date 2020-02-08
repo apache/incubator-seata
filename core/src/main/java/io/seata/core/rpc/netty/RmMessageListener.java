@@ -40,13 +40,27 @@ public class RmMessageListener implements ClientMessageListener {
 
     private TransactionMessageHandler handler;
 
+    private ClientMessageSender sender;
+
     /**
      * Instantiates a new Rm message listener.
      *
      * @param handler the handler
      */
-    public RmMessageListener(TransactionMessageHandler handler) {
+    public RmMessageListener(TransactionMessageHandler handler, ClientMessageSender sender) {
         this.handler = handler;
+        this.sender = sender;
+    }
+
+    public void setSender(ClientMessageSender sender) {
+        this.sender = sender;
+    }
+
+    public ClientMessageSender getSender() {
+        if (sender == null) {
+            throw new IllegalArgumentException("clientMessageSender must not be null");
+        }
+        return sender;
     }
 
     /**
@@ -59,22 +73,22 @@ public class RmMessageListener implements ClientMessageListener {
     }
 
     @Override
-    public void onMessage(RpcMessage request, String serverAddress, ClientMessageSender sender) {
+    public void onMessage(RpcMessage request, String serverAddress) {
         Object msg = request.getBody();
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("onMessage:" + msg);
         }
         if (msg instanceof BranchCommitRequest) {
-            handleBranchCommit(request, serverAddress, (BranchCommitRequest)msg, sender);
+            handleBranchCommit(request, serverAddress, (BranchCommitRequest)msg);
         } else if (msg instanceof BranchRollbackRequest) {
-            handleBranchRollback(request, serverAddress, (BranchRollbackRequest)msg, sender);
+            handleBranchRollback(request, serverAddress, (BranchRollbackRequest)msg);
         } else if (msg instanceof UndoLogDeleteRequest) {
-            handleUndoLogDelete((UndoLogDeleteRequest)msg);
+            handleUndoLogDelete((UndoLogDeleteRequest) msg);
         }
     }
 
     private void handleBranchRollback(RpcMessage request, String serverAddress,
-                                      BranchRollbackRequest branchRollbackRequest, ClientMessageSender sender) {
+                                      BranchRollbackRequest branchRollbackRequest) {
         BranchRollbackResponse resultMessage = null;
         resultMessage = (BranchRollbackResponse)handler.onRequest(branchRollbackRequest, null);
         if (LOGGER.isDebugEnabled()) {
@@ -87,13 +101,12 @@ public class RmMessageListener implements ClientMessageListener {
         }
     }
 
-    private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest,
-                                    ClientMessageSender sender) {
+    private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
 
         BranchCommitResponse resultMessage = null;
         try {
             resultMessage = (BranchCommitResponse)handler.onRequest(branchCommitRequest, null);
-            sender.sendResponse(request, serverAddress, resultMessage);
+            getSender().sendResponse(request, serverAddress, resultMessage);
         } catch (Exception e) {
             LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
             if (resultMessage == null) {
@@ -101,7 +114,7 @@ public class RmMessageListener implements ClientMessageListener {
             }
             resultMessage.setResultCode(ResultCode.Failed);
             resultMessage.setMsg(e.getMessage());
-            sender.sendResponse(request, serverAddress, resultMessage);
+            getSender().sendResponse(request, serverAddress, resultMessage);
         }
     }
 

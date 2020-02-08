@@ -34,7 +34,7 @@ public class RMClient {
     public static void init(String applicationId, String transactionServiceGroup) {
         RmRpcClient rmRpcClient = RmRpcClient.getInstance(applicationId, transactionServiceGroup);
         rmRpcClient.setResourceManager(DefaultResourceManager.get());
-        rmRpcClient.setClientMessageListener(new RmMessageListener(DefaultRMHandler.get()));
+        rmRpcClient.setClientMessageListener(new RmMessageListener(DefaultRMHandler.get(), rmRpcClient));
         rmRpcClient.init();
     }
 

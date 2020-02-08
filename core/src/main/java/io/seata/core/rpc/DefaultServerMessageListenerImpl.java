@@ -67,7 +67,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender) {
+    public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx) {
         Object message = request.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
@@ -92,21 +92,20 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            sender.sendResponse(request, ctx.channel(), resultMessage);
+            getServerMessageSender().sendResponse(request, ctx.channel(), resultMessage);
         } else if (message instanceof AbstractResultMessage) {
             transactionMessageHandler.onResponse((AbstractResultMessage) message, rpcContext);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            sender.sendResponse(request, ctx.channel(), result);
+            getServerMessageSender().sendResponse(request, ctx.channel(), result);
         }
     }
 
     @Override
-    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender,
-                               RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterRMRequest message = (RegisterRMRequest) request.getBody();
+    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterRMRequest message = (RegisterRMRequest)request.getBody();
         boolean isSuccess = false;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
@@ -118,16 +117,15 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        sender.sendResponse(request, ctx.channel(), new RegisterRMResponse(isSuccess));
+        getServerMessageSender().sendResponse(request, ctx.channel(), new RegisterRMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm register success,message:{},channel:{}", message, ctx.channel());
         }
     }
 
     @Override
-    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender,
-                               RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterTMRequest message = (RegisterTMRequest) request.getBody();
+    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterTMRequest message = (RegisterTMRequest)request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
@@ -145,13 +143,13 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        sender.sendResponse(request, ctx.channel(), new RegisterTMResponse(isSuccess));
+        getServerMessageSender().sendResponse(request, ctx.channel(), new RegisterTMResponse(isSuccess));
     }
 
     @Override
-    public void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender) {
+    public void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx) {
         try {
-            sender.sendResponse(request, ctx.channel(), HeartbeatMessage.PONG);
+            getServerMessageSender().sendResponse(request, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
@@ -176,6 +174,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
      * @return the server message sender
      */
     public ServerMessageSender getServerMessageSender() {
+        if (serverMessageSender == null) {
+            throw new IllegalArgumentException("serverMessageSender must not be null");
+        }
         return serverMessageSender;
     }
 
