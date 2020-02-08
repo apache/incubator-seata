@@ -79,6 +79,7 @@ public class Server {
         rpcServer.setHandler(coordinator);
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
+        ShutdownHook.getInstance().addDisposable(rpcServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
