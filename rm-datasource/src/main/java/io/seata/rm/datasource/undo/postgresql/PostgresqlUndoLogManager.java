@@ -39,7 +39,7 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
             "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
-            "VALUES (nextval('undo_log_seq'),?, ?,?, ?, ?, now(), now())";
+            "VALUES (nextval('undo_log_id_seq'),?, ?,?, ?, ?, now(), now())";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE ID IN (" +
             "SELECT ID FROM " + UNDO_LOG_TABLE_NAME + " WHERE LOG_CREATED <= ? LIMIT ?" +
