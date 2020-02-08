@@ -13,34 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.coordinator;
+package io.seata.server.transaction.tcc;
+
+import io.seata.core.model.BranchType;
+import io.seata.core.rpc.ServerMessageSender;
+import io.seata.server.coordinator.AbstractCore;
 
 /**
- * The type Core factory.
+ * The type tcc core.
  *
- * @author sharajava
+ * @author ph3636
  */
-public class CoreFactory {
+public class TccCore extends AbstractCore {
 
-    private static class SingletonHolder {
-        private static Core INSTANCE = new DefaultCore();
+    public TccCore(ServerMessageSender messageSender) {
+        super(messageSender);
     }
 
-    /**
-     * Get core.
-     *
-     * @return the core
-     */
-    public static final Core get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Just for test mocking
-     *
-     * @param core the core
-     */
-    public static void set(Core core) {
-        SingletonHolder.INSTANCE = core;
+    @Override
+    public BranchType getHandleBranchType() {
+        return BranchType.TCC;
     }
 }

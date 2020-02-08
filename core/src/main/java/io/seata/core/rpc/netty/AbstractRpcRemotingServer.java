@@ -15,33 +15,25 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.WriteBufferWaterMark;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
-import io.seata.common.XID;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
-import io.seata.discovery.registry.RegistryFactory;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.RpcContext;
+import io.seata.core.rpc.ServerMessageListener;
+import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.TransactionMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.rpc.netty.NettyServerConfig.SERVER_CHANNEL_CLAZZ;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * The type Rpc remoting server.
@@ -49,14 +41,80 @@ import static io.seata.core.rpc.netty.NettyServerConfig.SERVER_CHANNEL_CLAZZ;
  * @author slievrly
  * @author xingfudeshi@gmail.com
  */
-public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
+public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements ServerMessageSender {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
-    private final ServerBootstrap serverBootstrap;
-    private final EventLoopGroup eventLoopGroupWorker;
-    private final EventLoopGroup eventLoopGroupBoss;
-    private final NettyServerConfig nettyServerConfig;
-    private int listenPort;
-    private final AtomicBoolean initialized = new AtomicBoolean(false);
+
+    private final RpcServerBootstrap serverBootstrap;
+
+    /**
+     * The Server message listener.
+     */
+    private ServerMessageListener serverMessageListener;
+
+    private TransactionMessageHandler transactionMessageHandler;
+
+    private RegisterCheckAuthHandler checkAuthHandler;
+
+    /**
+     * Instantiates a new Rpc remoting server.
+     *
+     * @param messageExecutor   the message executor
+     * @param nettyServerConfig the netty server config
+     */
+    public AbstractRpcRemotingServer(final ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
+        super(messageExecutor);
+        serverBootstrap = new RpcServerBootstrap(nettyServerConfig);
+    }
+
+    /**
+     * Sets transactionMessageHandler.
+     *
+     * @param transactionMessageHandler the transactionMessageHandler
+     */
+    public void setHandler(TransactionMessageHandler transactionMessageHandler) {
+        setHandler(transactionMessageHandler, null);
+    }
+
+    private void setHandler(TransactionMessageHandler transactionMessageHandler, RegisterCheckAuthHandler checkAuthHandler) {
+        this.transactionMessageHandler = transactionMessageHandler;
+        this.checkAuthHandler = checkAuthHandler;
+    }
+
+    public TransactionMessageHandler getTransactionMessageHandler() {
+        return transactionMessageHandler;
+    }
+
+    public RegisterCheckAuthHandler getCheckAuthHandler() {
+        return checkAuthHandler;
+    }
+
+    /**
+     * Sets server message listener.
+     *
+     * @param serverMessageListener the server message listener
+     */
+    public void setServerMessageListener(ServerMessageListener serverMessageListener) {
+        this.serverMessageListener = serverMessageListener;
+    }
+
+    /**
+     * Gets server message listener.
+     *
+     * @return the server message listener
+     */
+    public ServerMessageListener getServerMessageListener() {
+        return serverMessageListener;
+    }
+
+    /**
+     * Sets channel handlers.
+     *
+     * @param handlers the handlers
+     */
+    public void setChannelHandlers(ChannelHandler... handlers) {
+        serverBootstrap.setChannelHandlers(handlers);
+    }
 
     /**
      * Sets listen port.
@@ -64,11 +122,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      * @param listenPort the listen port
      */
     public void setListenPort(int listenPort) {
-
-        if (listenPort <= 0) {
-            throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
-        }
-        this.listenPort = listenPort;
+        serverBootstrap.setListenPort(listenPort);
     }
 
     /**
@@ -77,107 +131,38 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      * @return the listen port
      */
     public int getListenPort() {
-        return listenPort;
-    }
-
-    /**
-     * Instantiates a new Rpc remoting server.
-     *
-     * @param nettyServerConfig the netty server config
-     */
-    public AbstractRpcRemotingServer(final NettyServerConfig nettyServerConfig) {
-        this(nettyServerConfig, null);
-    }
-
-    /**
-     * Instantiates a new Rpc remoting server.
-     *
-     * @param nettyServerConfig the netty server config
-     * @param messageExecutor   the message executor
-     * @param handlers          the handlers
-     */
-    public AbstractRpcRemotingServer(final NettyServerConfig nettyServerConfig,
-                                     final ThreadPoolExecutor messageExecutor, final ChannelHandler... handlers) {
-        super(messageExecutor);
-        this.serverBootstrap = new ServerBootstrap();
-        this.nettyServerConfig = nettyServerConfig;
-        if (NettyServerConfig.enableEpoll()) {
-            this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
-            this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
-                new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
-                    nettyServerConfig.getServerWorkerThreads()));
-        } else {
-            this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
-            this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
-                new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
-                    nettyServerConfig.getServerWorkerThreads()));
-        }
-        if (null != handlers) {
-            channelHandlers = handlers;
-        }
-        // init listenPort in constructor so that getListenPort() will always get the exact port
-        setListenPort(nettyServerConfig.getDefaultListenPort());
+        return serverBootstrap.getListenPort();
     }
 
     @Override
-    public void start() {
-        this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
-            .channel(SERVER_CHANNEL_CLAZZ)
-            .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
-            .option(ChannelOption.SO_REUSEADDR, true)
-            .childOption(ChannelOption.SO_KEEPALIVE, true)
-            .childOption(ChannelOption.TCP_NODELAY, true)
-            .childOption(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSendBufSize())
-            .childOption(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketResvBufSize())
-            .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
-                new WriteBufferWaterMark(nettyServerConfig.getWriteBufferLowWaterMark(),
-                    nettyServerConfig.getWriteBufferHighWaterMark()))
-            .localAddress(new InetSocketAddress(listenPort))
-            .childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) {
-                    ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                            .addLast(new ProtocolV1Decoder())
-                            .addLast(new ProtocolV1Encoder());
-                    if (null != channelHandlers) {
-                        addChannelPipelineLast(ch, channelHandlers);
-                    }
-
-                }
-            });
-
-        try {
-            ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
-            LOGGER.info("Seata-Server started ... ");
-            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
-            initialized.set(true);
-            future.channel().closeFuture().sync();
-        } catch (Exception exx) {
-            throw new RuntimeException(exx);
-        }
-
+    public void init() {
+        super.init();
+        serverBootstrap.start();
     }
 
     @Override
-    public void shutdown() {
-        try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Shutting server down. ");
-            }
-            if (initialized.get()) {
-                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
-                RegistryFactory.getInstance().close();
-                //wait a few seconds for server transport
-                TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
-            }
+    public void destroy() {
+        serverBootstrap.shutdown();
+        super.destroy();
+    }
 
-            this.eventLoopGroupBoss.shutdownGracefully();
-            this.eventLoopGroupWorker.shutdownGracefully();
-        } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
+    /**
+     * Debug log.
+     *
+     * @param info the info
+     */
+    public void debugLog(String info) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(info);
         }
+    }
+
+    private void closeChannelHandlerContext(ChannelHandlerContext ctx) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
+        }
+        ctx.disconnect();
+        ctx.close();
     }
 
     @Override
@@ -187,6 +172,141 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
         channel.disconnect();
         channel.close();
+    }
+
+    /**
+     * The type ServerHandler.
+     */
+    @ChannelHandler.Sharable
+    class ServerHandler extends AbstractHandler {
+
+        /**
+         * Dispatch.
+         *
+         * @param request the request
+         * @param ctx     the ctx
+         */
+        @Override
+        public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
+            Object msg = request.getBody();
+            if (msg instanceof RegisterRMRequest) {
+                serverMessageListener.onRegRmMessage(request, ctx, checkAuthHandler);
+            } else {
+                if (ChannelManager.isRegistered(ctx.channel())) {
+                    serverMessageListener.onTrxMessage(request, ctx);
+                } else {
+                    try {
+                        closeChannelHandlerContext(ctx);
+                    } catch (Exception exx) {
+                        LOGGER.error(exx.getMessage());
+                    }
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info(String.format("close a unhandled connection! [%s]", ctx.channel().toString()));
+                    }
+                }
+            }
+        }
+
+        /**
+         * Channel read.
+         *
+         * @param ctx the ctx
+         * @param msg the msg
+         * @throws Exception the exception
+         */
+        @Override
+        public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+            if (msg instanceof RpcMessage) {
+                RpcMessage rpcMessage = (RpcMessage) msg;
+                debugLog("read:" + rpcMessage.getBody());
+                if (rpcMessage.getBody() instanceof RegisterTMRequest) {
+                    serverMessageListener.onRegTmMessage(rpcMessage, ctx, checkAuthHandler);
+                    return;
+                }
+                if (rpcMessage.getBody() == HeartbeatMessage.PING) {
+                    serverMessageListener.onCheckMessage(rpcMessage, ctx);
+                    return;
+                }
+            }
+            super.channelRead(ctx, msg);
+        }
+
+        /**
+         * Channel inactive.
+         *
+         * @param ctx the ctx
+         * @throws Exception the exception
+         */
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            debugLog("inactive:" + ctx);
+            if (messageExecutor.isShutdown()) {
+                return;
+            }
+            handleDisconnect(ctx);
+            super.channelInactive(ctx);
+        }
+
+        private void handleDisconnect(ChannelHandlerContext ctx) {
+            final String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+            RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(ipAndPort + " to server channel inactive.");
+            }
+            if (null != rpcContext && null != rpcContext.getClientRole()) {
+                rpcContext.release();
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);
+                }
+            } else {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("remove unused channel:" + ctx.channel());
+                }
+            }
+        }
+
+        /**
+         * Exception caught.
+         *
+         * @param ctx   the ctx
+         * @param cause the cause
+         * @throws Exception the exception
+         */
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("channel exx:" + cause.getMessage() + ",channel:" + ctx.channel());
+            }
+            ChannelManager.releaseRpcContext(ctx.channel());
+            super.exceptionCaught(ctx, cause);
+        }
+
+        /**
+         * User event triggered.
+         *
+         * @param ctx the ctx
+         * @param evt the evt
+         * @throws Exception the exception
+         */
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+            if (evt instanceof IdleStateEvent) {
+                debugLog("idle:" + evt);
+                IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+                if (idleStateEvent.state() == IdleState.READER_IDLE) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("channel:" + ctx.channel() + " read idle.");
+                    }
+                    handleDisconnect(ctx);
+                    try {
+                        closeChannelHandlerContext(ctx);
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage());
+                    }
+                }
+            }
+        }
+
     }
 
 }
