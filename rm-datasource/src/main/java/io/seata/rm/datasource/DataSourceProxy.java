@@ -31,13 +31,14 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+
 /**
  * The type Data source proxy.
  *
  * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
-    public static final boolean CLIENT_TABLE_META_CHECK_ENABLE = false;
 
     private String resourceGroupId;
 
@@ -51,7 +52,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, CLIENT_TABLE_META_CHECK_ENABLE);
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
 
     /**
      * Table meta checker interval

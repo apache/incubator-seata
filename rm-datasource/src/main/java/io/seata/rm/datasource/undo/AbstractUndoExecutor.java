@@ -42,6 +42,8 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+
 /**
  * The type Abstract undo executor.
  *
@@ -49,7 +51,6 @@ import org.slf4j.LoggerFactory;
  * @author Geng Zhang
  */
 public abstract class AbstractUndoExecutor {
-    public static final boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
 
     /**
      * Logger for AbstractUndoExecutor

@@ -50,9 +50,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
-import static io.seata.tm.api.DefaultGlobalTransaction.DEFAULT_TM_COMMIT_RETRY_COUNT;
-import static io.seata.tm.api.DefaultGlobalTransaction.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;

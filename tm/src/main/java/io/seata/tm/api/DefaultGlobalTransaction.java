@@ -26,6 +26,9 @@ import io.seata.tm.TransactionManagerHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+
 /**
  * The type Default global transaction.
  *
@@ -34,10 +37,6 @@ import org.slf4j.LoggerFactory;
 public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGlobalTransaction.class);
-
-    public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 1;
-
-    public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 1;
 
     private static final int DEFAULT_GLOBAL_TX_TIMEOUT = 60000;
 

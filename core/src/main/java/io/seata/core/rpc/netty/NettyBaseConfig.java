@@ -36,6 +36,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.TRANSPORT_HEARTBEAT;
+
 /**
  * The type Netty base config.
  *
@@ -106,8 +108,6 @@ public class NettyBaseConfig {
      * The constant MAX_ALL_IDLE_SECONDS.
      */
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
-
-    public static final boolean TRANSPORT_HEARTBEAT = true;
 
     static {
         TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));

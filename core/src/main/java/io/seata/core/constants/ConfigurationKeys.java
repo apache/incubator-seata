@@ -325,11 +325,6 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_LOG_PREFIX + "exceptionRate";
 
     /**
-     * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
-     */
-    public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE = "undo_log";
-
-    /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
      */
     public static final String MAX_COMMIT_RETRY_TIMEOUT = SERVER_PREFIX + "maxCommitRetryTimeout";

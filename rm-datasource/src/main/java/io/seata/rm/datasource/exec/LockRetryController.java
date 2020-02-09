@@ -18,15 +18,15 @@ package io.seata.rm.datasource.exec;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERNAL;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
+
 /**
  * The type Lock retry controller.
  *
  * @author sharajava
  */
 public class LockRetryController {
-    public static final int DEFAULT_CLIENT_LOCK_RETRY_INTERNAL = 10;
-    public static final int DEFAULT_CLIENT_LOCK_RETRY_TIMES = 30;
-
     private static int LOCK_RETRY_INTERNAL =
         ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERNAL, DEFAULT_CLIENT_LOCK_RETRY_INTERNAL);
     private static int LOCK_RETRY_TIMES =

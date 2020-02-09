@@ -34,6 +34,10 @@ import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+
 /**
  * The type Connection proxy.
  *
@@ -45,14 +49,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    public static final int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
-    public static final boolean DEFALT_CLIENT_REPORT_SUCCESS_ENABLE = true;
-
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFALT_CLIENT_REPORT_SUCCESS_ENABLE);
+        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
@@ -274,7 +275,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public static class LockRetryPolicy {
-        public static final boolean DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = true;
         protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
             .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
 

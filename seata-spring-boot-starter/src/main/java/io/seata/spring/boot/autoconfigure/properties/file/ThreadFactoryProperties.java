@@ -18,8 +18,13 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.rpc.netty.NettyClientConfig.DEFAULT_SELECTOR_THREAD_SIZE;
-import static io.seata.core.rpc.netty.NettyServerConfig.DEFAULT_BOSS_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.NIO_WORKER_THREAD_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 
 /**
@@ -28,13 +33,13 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY
 @Component
 @ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX)
 public class ThreadFactoryProperties {
-    private String bossThreadPrefix = "NettyBoss";
-    private String workerThreadPrefix = "NettyServerNIOWorker";
-    private String serverExecutorThreadPrefix = "NettyServerBizHandler";
+    private String bossThreadPrefix = DEFAULT_BOSS_THREAD_PREFIX;
+    private String workerThreadPrefix = NIO_WORKER_THREAD_PREFIX;
+    private String serverExecutorThreadPrefix = DEFAULT_EXECUTOR_THREAD_PREFIX;
     private boolean shareBossWorker = false;
-    private String clientSelectorThreadPrefix = "NettyClientSelector";
+    private String clientSelectorThreadPrefix = DEFAULT_SELECTOR_THREAD_PREFIX;
     private int clientSelectorThreadSize = DEFAULT_SELECTOR_THREAD_SIZE;
-    private String clientWorkerThreadPrefix = "NettyClientWorkerThread";
+    private String clientWorkerThreadPrefix = DEFAULT_WORKER_THREAD_PREFIX;
     /**
      * netty boss thread size,will not be used for UDT
      */

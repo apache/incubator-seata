@@ -18,7 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.logger.StackTraceLogger.DEFAULT_LOG_EXCEPTION_RATE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 
 /**

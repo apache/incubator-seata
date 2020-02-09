@@ -18,9 +18,9 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
-import static io.seata.rm.datasource.undo.AbstractUndoExecutor.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
-import static io.seata.rm.datasource.undo.UndoLogConstants.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+import static io.seata.core.constants.DefaultValues.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**

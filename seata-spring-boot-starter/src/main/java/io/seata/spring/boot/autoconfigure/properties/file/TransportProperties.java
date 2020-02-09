@@ -18,7 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.rpc.netty.NettyBaseConfig.TRANSPORT_HEARTBEAT;
+import static io.seata.core.constants.DefaultValues.TRANSPORT_HEARTBEAT;
 import static io.seata.core.rpc.netty.NettyClientConfig.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
