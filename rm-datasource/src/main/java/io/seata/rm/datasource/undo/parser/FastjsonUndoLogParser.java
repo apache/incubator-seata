@@ -33,10 +33,10 @@ public class FastjsonUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "fastjson";
 
-    private static final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+    private static final SimplePropertyPreFilter FILTER = new SimplePropertyPreFilter();
 
     static {
-        filter.getExcludes().add("tableMeta");
+        FILTER.getExcludes().add("tableMeta");
     }
 
     @Override
