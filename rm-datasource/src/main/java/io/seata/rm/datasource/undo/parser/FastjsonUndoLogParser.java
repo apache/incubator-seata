@@ -33,7 +33,7 @@ public class FastjsonUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "fastjson";
 
-    private static final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+    private static final SimplePropertyPreFilter FILTER = new SimplePropertyPreFilter();
 
     @Override
     public String getName() {
@@ -47,8 +47,8 @@ public class FastjsonUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        filter.getExcludes().add("tableMeta");
-        String json = JSON.toJSONString(branchUndoLog, filter, SerializerFeature.WriteDateUseDateFormat);
+        FILTER.getExcludes().add("tableMeta");
+        String json = JSON.toJSONString(branchUndoLog, FILTER, SerializerFeature.WriteDateUseDateFormat);
         return json.getBytes(Constants.DEFAULT_CHARSET);
     }
 
