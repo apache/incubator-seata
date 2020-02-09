@@ -35,6 +35,10 @@ public class FastjsonUndoLogParser implements UndoLogParser {
 
     private static final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
 
+    static {
+        filter.getExcludes().add("tableMeta");
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -47,7 +51,6 @@ public class FastjsonUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        filter.getExcludes().add("tableMeta");
         String json = JSON.toJSONString(branchUndoLog, filter, SerializerFeature.WriteDateUseDateFormat);
         return json.getBytes(Constants.DEFAULT_CHARSET);
     }
