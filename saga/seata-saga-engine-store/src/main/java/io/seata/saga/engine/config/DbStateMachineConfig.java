@@ -29,6 +29,8 @@ import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
 import org.springframework.beans.factory.DisposableBean;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+
 /**
  * DbStateMachineConfig
  *
@@ -42,7 +44,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String tablePrefix = "seata_";
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
+    private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         try (Connection con = dataSource.getConnection()) {

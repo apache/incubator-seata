@@ -22,6 +22,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_GROUPLIST;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TC_CLUSTER;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.spring.annotation.GlobalTransactionalInterceptor.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
@@ -85,10 +88,10 @@ public class ServiceProperties implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         if (0 == vgroupMapping.size()) {
-            vgroupMapping.put("my_test_tx_group", "default");
+            vgroupMapping.put(DEFAULT_TX_GROUP, DEFAULT_TC_CLUSTER);
         }
         if (0 == grouplist.size()) {
-            grouplist.put("default", "127.0.0.1:8091");
+            grouplist.put(DEFAULT_TC_CLUSTER, DEFAULT_GROUPLIST);
         }
     }
 }

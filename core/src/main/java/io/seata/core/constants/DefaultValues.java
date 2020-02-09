@@ -53,5 +53,9 @@ public class DefaultValues {
     public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 1;
     public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 1;
 
+    public static final String DEFAULT_TX_GROUP = "my_test_tx_group";
+    public static final String DEFAULT_TC_CLUSTER = "default";
+    public static final String DEFAULT_GROUPLIST = "127.0.0.1:8091";
+
 
 }
