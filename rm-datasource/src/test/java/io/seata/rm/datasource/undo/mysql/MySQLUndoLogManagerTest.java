@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import java.util.List;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -69,11 +70,6 @@ public class MySQLUndoLogManagerTest {
         dataSourceProxy = new DataSourceProxy(dataSource);
         connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         undoLogManager = new MySQLUndoLogManager();
-    }
-
-    @Test
-    public void testGetDbType() {
-        Assertions.assertEquals("mysql", undoLogManager.getDbType());
     }
 
     @Test

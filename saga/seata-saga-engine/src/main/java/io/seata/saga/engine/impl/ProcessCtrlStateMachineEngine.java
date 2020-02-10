@@ -128,6 +128,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         contextBuilder.withStateMachineContextVariables(contextVariables);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext processContext = contextBuilder.build();
 
         if (instance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
@@ -177,7 +179,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         inst.setRunning(true);
 
         inst.setGmtStarted(new Date());
-        inst.setGmtStarted(inst.getGmtStarted());
+        inst.setGmtUpdated(inst.getGmtStarted());
 
         return inst;
     }
@@ -232,6 +234,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withStateMachineInstance(stateMachineInstance).withStateInstance(lastForwardState).withStateMachineConfig(
                 getStateMachineConfig()).withStateMachineEngine(this);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext context = contextBuilder.build();
 
         Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
@@ -258,6 +262,9 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         if (!ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
             lastForwardState.setIgnoreStatus(true);
         }
+
+        stateMachineInstance.setRunning(true);
+        stateMachineInstance.setGmtUpdated(new Date());
 
         if (stateMachineInstance.getStateMachine().isPersist()) {
             stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
@@ -457,6 +464,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withStateMachineInstance(stateMachineInstance).withStateMachineConfig(getStateMachineConfig())
             .withStateMachineEngine(this);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext context = contextBuilder.build();
 
         Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
@@ -476,6 +485,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         tempCompensationTriggerState.setStateMachine(stateMachineInstance.getStateMachine());
 
         stateMachineInstance.setRunning(true);
+        stateMachineInstance.setGmtUpdated(new Date());
+
         if (stateMachineInstance.getStateMachine().isPersist()) {
             stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
         }
@@ -573,7 +584,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             throw new EngineExecutionException(message, FrameworkErrorCode.OperationDenied);
         }
 
-        if (stateMachineInstance.isRunning()) {
+        if (stateMachineInstance.isRunning() && !stateMachineInstance.isTimeout(stateMachineConfig.getTransOperationTimeout())) {
             throw new EngineExecutionException(
                 "StateMachineInstance [id:" + stateMachineInstance.getId() + "]is running, operation[" + operation
                     + "] denied", FrameworkErrorCode.OperationDenied);

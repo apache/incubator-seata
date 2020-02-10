@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
+import io.seata.rm.tcc.remoting.RemotingParser;
 import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
 import org.springframework.context.ApplicationContext;
 
@@ -139,8 +140,9 @@ public class TCCBeanParserUtils {
      * @return if sofa:service, sofa:reference, dubbo:reference, dubbo:service return true, else return false
      */
     protected static boolean parserRemotingServiceInfo(Object bean, String beanName) {
-        if (DefaultRemotingParser.get().isRemoting(bean, beanName)) {
-            return null != DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
+        RemotingParser remotingParser = DefaultRemotingParser.get().isRemoting(bean, beanName);
+        if (remotingParser != null) {
+            return DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName, remotingParser) != null;
         }
         return false;
     }
