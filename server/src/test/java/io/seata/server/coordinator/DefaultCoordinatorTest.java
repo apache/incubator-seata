@@ -15,14 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
-
 import io.netty.channel.Channel;
 import io.seata.common.XID;
 import io.seata.common.util.DurationUtil;
@@ -43,6 +35,15 @@ import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -88,7 +89,7 @@ public class DefaultCoordinatorTest {
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-        DEFAULT_SESSION_STORE_FILE_DIR);
+            DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll
     public static void beforeClass() throws Exception {
@@ -176,13 +177,13 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                    ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
         }
     }
 
     @Test
     public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
-        NoSuchFieldException, IllegalAccessException {
+            NoSuchFieldException, IllegalAccessException {
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
@@ -205,7 +206,7 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                    ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
         }
     }
 
@@ -220,33 +221,34 @@ public class DefaultCoordinatorTest {
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }
-
-        SessionHolder.destroy();
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws IOException {
+        SessionHolder.destroy();
         deleteDataFile();
     }
 
-    private static void deleteDataFile() {
+    private static void deleteDataFile() throws IOException {
         File directory = new File(sessionStorePath);
         File[] files = directory.listFiles();
-        for (File file : files) {
-            file.delete();
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                Files.delete(Paths.get(file.getPath()));
+            }
         }
     }
+
     private static void deleteAndCreateDataFile() throws IOException {
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }
 
-
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
         return Stream.of(
-            Arguments.of(xid, branchId)
+                Arguments.of(xid, branchId)
         );
     }
 
@@ -264,13 +266,14 @@ public class DefaultCoordinatorTest {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
                 return branchCommitResponse;
-            } else if (message instanceof BranchRollbackRequest) {
-                final BranchRollbackResponse branchRollbackResponse = new BranchRollbackResponse();
-                branchRollbackResponse.setBranchStatus(BranchStatus.PhaseTwo_Rollbacked);
-                return branchRollbackResponse;
-            } else {
-                return null;
-            }
+            } else
+                if (message instanceof BranchRollbackRequest) {
+                    final BranchRollbackResponse branchRollbackResponse = new BranchRollbackResponse();
+                    branchRollbackResponse.setBranchStatus(BranchStatus.PhaseTwo_Rollbacked);
+                    return branchRollbackResponse;
+                } else {
+                    return null;
+                }
         }
 
         @Override
