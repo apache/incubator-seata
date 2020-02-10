@@ -66,7 +66,7 @@ public class ColumnUtilsTest {
         List<String> cols1 = new ArrayList<>();
         cols1.add("id");
         cols1 = ColumnUtils.addEscape(cols1, JdbcConstants.MYSQL);
-        Assertions.assertEquals("`id`", cols1.get(0));
+        Assertions.assertEquals("id", cols1.get(0));
 
         List<String> cols2 = new ArrayList<>();
         cols2.add("`id`");
@@ -82,6 +82,11 @@ public class ColumnUtilsTest {
         cols4.add("\"id\"");
         cols4 = ColumnUtils.addEscape(cols4, JdbcConstants.ORACLE);
         Assertions.assertEquals("\"id\"", cols4.get(0));
+
+        List<String> cols5 = new ArrayList<>();
+        cols5.add("ID");
+        cols5 = ColumnUtils.addEscape(cols5, JdbcConstants.ORACLE);
+        Assertions.assertEquals("ID", cols5.get(0));
 
     }
 
