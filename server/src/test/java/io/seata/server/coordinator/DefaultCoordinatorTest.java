@@ -241,6 +241,7 @@ public class DefaultCoordinatorTest {
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
+        SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }
