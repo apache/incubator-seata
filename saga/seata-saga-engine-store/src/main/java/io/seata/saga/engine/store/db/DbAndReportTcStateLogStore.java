@@ -109,8 +109,10 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 return;
             }
 
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             TransactionInfo transactionInfo = new TransactionInfo();
-            transactionInfo.setTimeOut(sagaTransactionalTemplate.getTimeout());
+            transactionInfo.setTimeOut(stateMachineConfig.getTransOperationTimeout());
             transactionInfo.setName(machineInstance.getStateMachine().getName());
             try {
                 GlobalTransaction globalTransaction = sagaTransactionalTemplate.beginTransaction(transactionInfo);
@@ -152,10 +154,20 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
             machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));
             machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
-            executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType),
+            int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType),
                     STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE, machineInstance);
-
-            reportTransactionFinished(machineInstance, context);
+            if (effect < 0) {
+                LOGGER.warn("StateMachineInstance[{}] is recovery by server, skip recordStateMachineFinished.", machineInstance.getId());
+            } else {
+                StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                        DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+                if (machineInstance.isTimeout(stateMachineConfig.getTransOperationTimeout())) {
+                    LOGGER.warn("StateMachineInstance[{}] is execution timeout, skip report transaction finished to server.", machineInstance.getId());
+                } else {
+                    reportTransactionFinished(machineInstance, context);
+                }
+            }
+            RootContext.unbind();
         }
     }
 
@@ -214,45 +226,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
         if (machineInstance != null) {
             //save to db
-            executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(),
+            executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(), new Timestamp(machineInstance.getGmtUpdated().getTime()),
                     machineInstance.getId());
-
-            reportTransactionRestarted(machineInstance, context);
-        }
-    }
-
-    private void reportTransactionRestarted(StateMachineInstance machineInstance, ProcessContext context) {
-
-        //if parentId is not null, machineInstance is a SubStateMachine, do not report global transaction.
-        if (sagaTransactionalTemplate != null && StringUtils.isEmpty(machineInstance.getParentId())) {
-
-            GlobalStatus globalStatus;
-            if (DomainConstants.OPERATION_NAME_COMPENSATE.equals(
-                    context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
-                globalStatus = GlobalStatus.Rollbacking;
-            } else {
-                globalStatus = GlobalStatus.Committing;
-            }
-
-            try {
-                GlobalTransaction globalTransaction = getGlobalTransaction(machineInstance, context);
-                if (globalTransaction == null) {
-                    throw new EngineExecutionException("Global transaction is not exists",
-                            FrameworkErrorCode.ObjectNotExists);
-                }
-
-                sagaTransactionalTemplate.reportTransaction(globalTransaction, globalStatus);
-            } catch (ExecutionException e) {
-                LOGGER.error(
-                        "Report transaction status to server error: " + e.getCode() + ", StateMachine:" + machineInstance
-                                .getStateMachine().getName() + ", XID: " + machineInstance.getId() + ", globalStatus:"
-                                + globalStatus + ", Reason: " + e.getMessage(), e);
-            } catch (TransactionException e) {
-                LOGGER.error(
-                        "Report transaction status to server error: " + e.getCode() + ", StateMachine:" + machineInstance
-                                .getStateMachine().getName() + ", XID: " + machineInstance.getId() + ", globalStatus:"
-                                + globalStatus + ", Reason: " + e.getMessage(), e);
-            }
         }
     }
 
@@ -729,6 +704,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setObject(7, stateMachineInstance.getSerializedStartParams());
             statement.setBoolean(8, stateMachineInstance.isRunning());
             statement.setString(9, stateMachineInstance.getStatus().name());
+            statement.setTimestamp(10, new Timestamp(stateMachineInstance.getGmtUpdated().getTime()));
         }
     }
 
@@ -746,6 +722,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                             .name() : null);
             statement.setBoolean(6, stateMachineInstance.isRunning());
             statement.setString(7, stateMachineInstance.getId());
+            statement.setTimestamp(8, new Timestamp(stateMachineInstance.getGmtUpdated().getTime()));
         }
     }
 
