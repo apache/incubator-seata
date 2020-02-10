@@ -160,22 +160,12 @@ public final class ColumnUtils {
 
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(dbType);
         if (keywordChecker != null) {
-            boolean check = keywordChecker.check(colName);
+            boolean check = keywordChecker.checkNative(colName);
             if (!check) {
-                boolean uppercase = isUppercase(colName);
-                if (uppercase && isOracle(dbType)) {
-                    // oracle
-                    // we are recommend table name and column name must uppercase.
-                    // if exists full uppercase, the table name or column name does't bundle escape symbol.
-                    return colName;
-                }
-                boolean containsUppercase = containsUppercase(colName);
-                if (!containsUppercase && isPostgresql(dbType)) {
-                    // postgresql
-                    // we are recommend table name and column name must lowercase.
-                    // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
-                    return colName;
-                }
+                // postgresql
+                // we are recommend table name and column name must lowercase.
+                // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
+                return colName;
             }
         }
 
@@ -187,27 +177,6 @@ public final class ColumnUtils {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
-    }
-
-    private static boolean isPostgresql(String dbType) {
-        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.POSTGRESQL);
-    }
-
-    private static boolean isOracle(String dbType) {
-        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.ORACLE);
-    }
-
-    private static boolean isUppercase(String colName) {
-        if (colName == null) {
-            return false;
-        }
-        char[] chars = colName.toCharArray();
-        for (char ch : chars) {
-            if (ch >= 'a' && ch <= 'z') {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static boolean containsUppercase(String colName) {

@@ -22,6 +22,7 @@ import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -59,7 +60,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         Row row = afterImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
         return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
-                             keywordChecker.checkAndReplace(pkField.getName()));
+                             ColumnUtils.addEscape(pkField.getName(), JdbcConstants.MYSQL));
     }
 
     @Override
