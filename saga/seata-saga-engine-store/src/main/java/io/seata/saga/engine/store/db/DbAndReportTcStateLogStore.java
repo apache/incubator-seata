@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.serializer.Serializer;
 import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
@@ -156,12 +158,12 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
             int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType),
                     STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE, machineInstance);
-            if (effect < 0) {
+            if (effect < 1) {
                 LOGGER.warn("StateMachineInstance[{}] is recovery by server, skip recordStateMachineFinished.", machineInstance.getId());
             } else {
                 StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
                         DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-                if (machineInstance.isTimeout(stateMachineConfig.getTransOperationTimeout())) {
+                if (EngineUtils.isTimeout(machineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
                     LOGGER.warn("StateMachineInstance[{}] is execution timeout, skip report transaction finished to server.", machineInstance.getId());
                 } else {
                     reportTransactionFinished(machineInstance, context);
@@ -226,8 +228,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
         if (machineInstance != null) {
             //save to db
-            executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(), new Timestamp(machineInstance.getGmtUpdated().getTime()),
-                    machineInstance.getId());
+            Date gmtUpdated = new Date();
+            int effect = executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(), new Timestamp(gmtUpdated.getTime()),
+                    machineInstance.getId(), new Timestamp(machineInstance.getGmtUpdated().getTime()));
+            if (effect < 1) {
+                throw new EngineExecutionException(
+                        "StateMachineInstance [id:" + machineInstance.getId() + "] is recovered by an other execution, restart denied", FrameworkErrorCode.OperationDenied);
+            }
+            machineInstance.setGmtUpdated(gmtUpdated);
         }
     }
 
@@ -721,8 +729,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     stateMachineInstance.getCompensationStatus() != null ? stateMachineInstance.getCompensationStatus()
                             .name() : null);
             statement.setBoolean(6, stateMachineInstance.isRunning());
-            statement.setString(7, stateMachineInstance.getId());
-            statement.setTimestamp(8, new Timestamp(stateMachineInstance.getGmtUpdated().getTime()));
+            statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            statement.setString(8, stateMachineInstance.getId());
+            statement.setTimestamp(9, new Timestamp(stateMachineInstance.getGmtUpdated().getTime()));
         }
     }
 
