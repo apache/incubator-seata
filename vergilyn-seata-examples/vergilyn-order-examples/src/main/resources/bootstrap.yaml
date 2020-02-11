@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: order-examples-application
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: 19f8f2a7-1969-40df-b6b3-b17e48269520
+
+      config:
+        enabled: false

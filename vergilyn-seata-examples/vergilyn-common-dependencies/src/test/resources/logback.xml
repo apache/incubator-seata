@@ -1,0 +1,13 @@
+<configuration debug="false">
+    <!-- definition of appender STDOUT -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <!-- appender referenced after it is defined -->
+        <appender-ref ref="stdout"/>
+    </root>
+</configuration>
