@@ -28,7 +28,7 @@ public class DubboConstants {
 
     public static boolean ALIBABADUBBO;
 
-    public DubboConstants() {
+    static {
         try {
             Class.forName("org.apache.dubbo.rpc.RpcContext");
         } catch (ClassNotFoundException e) {
