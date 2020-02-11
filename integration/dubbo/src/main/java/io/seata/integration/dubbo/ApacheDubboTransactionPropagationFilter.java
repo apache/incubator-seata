@@ -25,6 +25,7 @@ import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.seata.core.constants.DubboConstants;
 
 /**
  * The type Transaction propagation filter.

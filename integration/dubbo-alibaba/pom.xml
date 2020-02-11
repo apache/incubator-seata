@@ -39,10 +39,5 @@
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-dubbo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 </project>

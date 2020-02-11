@@ -23,7 +23,7 @@ import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
 import io.seata.core.context.RootContext;
-import io.seata.integration.dubbo.DubboConstants;
+import io.seata.core.constants.DubboConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
