@@ -15,10 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -29,6 +25,9 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -271,9 +270,17 @@ public class SessionHolder {
     }
 
     public static void destroy() {
-        ROOT_SESSION_MANAGER.destroy();
-        ASYNC_COMMITTING_SESSION_MANAGER.destroy();
-        RETRY_COMMITTING_SESSION_MANAGER.destroy();
-        RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
+        if (ROOT_SESSION_MANAGER != null) {
+            ROOT_SESSION_MANAGER.destroy();
+        }
+        if (ASYNC_COMMITTING_SESSION_MANAGER != null) {
+            ASYNC_COMMITTING_SESSION_MANAGER.destroy();
+        }
+        if (RETRY_COMMITTING_SESSION_MANAGER != null) {
+            RETRY_COMMITTING_SESSION_MANAGER.destroy();
+        }
+        if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
+            RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
+        }
     }
 }
