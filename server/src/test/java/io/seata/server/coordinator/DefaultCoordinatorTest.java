@@ -226,7 +226,7 @@ public class DefaultCoordinatorTest {
 
     @AfterEach
     public void tearDown() throws IOException {
-        destroySessionHolder();
+        SessionHolder.destroy();
         deleteDataFile();
     }
 
@@ -241,23 +241,10 @@ public class DefaultCoordinatorTest {
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
-        destroySessionHolder();
+        SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }
-
-    private static void destroySessionHolder() {
-        try {
-            SessionHolder.getRootSessionManager();
-            SessionHolder.getRetryCommittingSessionManager();
-            SessionHolder.getAsyncCommittingSessionManager();
-            SessionHolder.getRetryRollbackingSessionManager();
-        } catch (ShouldNeverHappenException sne) {
-            return;
-        }
-        SessionHolder.destroy();
-    }
-
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
