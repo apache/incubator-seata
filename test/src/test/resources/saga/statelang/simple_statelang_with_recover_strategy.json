@@ -24,6 +24,14 @@
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "java.lang.Throwable"
+                    ],
+                    "Next": "Fail"
+                }
+            ],
             "Next": "ChoiceState"
         },
         "ChoiceState":{
@@ -59,6 +67,14 @@
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "java.lang.Throwable"
+                    ],
+                    "Next": "Fail"
+                }
+            ],
             "Next": "Succeed"
         },
         "Succeed": {
