@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.dubbo;
+package io.seata.core.constants;
 
 /**
  * DubboConstants
