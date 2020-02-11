@@ -15,18 +15,9 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
-
 import io.netty.channel.Channel;
 import io.seata.common.XID;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
@@ -45,6 +36,15 @@ import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -226,7 +226,7 @@ public class DefaultCoordinatorTest {
 
     @AfterEach
     public void tearDown() throws IOException {
-        SessionHolder.destroy();
+        destroySessionHolder();
         deleteDataFile();
     }
 
@@ -241,9 +241,21 @@ public class DefaultCoordinatorTest {
     }
 
     private static void deleteAndCreateDataFile() throws IOException {
-        SessionHolder.destroy();
+        destroySessionHolder();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
+    }
+
+    private static void destroySessionHolder() {
+        try {
+            SessionHolder.getRootSessionManager();
+            SessionHolder.getRetryCommittingSessionManager();
+            SessionHolder.getAsyncCommittingSessionManager();
+            SessionHolder.getRetryRollbackingSessionManager();
+        } catch (ShouldNeverHappenException sne) {
+            return;
+        }
+        SessionHolder.destroy();
     }
 
 
