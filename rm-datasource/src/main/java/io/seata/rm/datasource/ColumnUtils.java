@@ -160,7 +160,7 @@ public final class ColumnUtils {
 
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(dbType);
         if (keywordChecker != null) {
-            boolean check = keywordChecker.checkNative(colName);
+            boolean check = keywordChecker.checkEscape(colName);
             if (!check) {
                 // postgresql
                 // we are recommend table name and column name must lowercase.
