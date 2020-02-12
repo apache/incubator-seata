@@ -16,8 +16,8 @@
 package io.seata.rm.datasource.undo.postgresql;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
@@ -25,39 +25,36 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author japsercloud
  */
 public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
 
+    /**
+     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk = ?
+     */
+    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
+
     @Override
     protected String buildUndoSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
-        if (beforeImageRows == null || beforeImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(beforeImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuilder mainSQL = new StringBuilder("UPDATE ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName())).append(" SET ");
-        StringBuilder where = new StringBuilder(" WHERE ");
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PRIMARY_KEY) {
-                where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
-            } else {
-                if (first) {
-                    first = false;
-                } else {
-                    mainSQL.append(", ");
-                }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
-            }
-
-        }
-        return mainSQL.append(where).toString();
+        Field pkField = row.primaryKeys().get(0);
+        List<Field> nonPkFields = row.nonPrimaryKeys();
+        String updateColumns = nonPkFields.stream()
+                .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
+                .collect(Collectors.joining(", "));
+        return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
+                updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
     }
 
     /**

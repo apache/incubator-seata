@@ -16,8 +16,8 @@
 package io.seata.rm.datasource.undo.postgresql;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
@@ -25,7 +25,10 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type postgresql undo delete executor.
@@ -43,44 +46,33 @@ public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
         super(sqlUndoLog);
     }
 
+    /**
+     * INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
+     */
+    private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
+
     @Override
     protected String buildUndoSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
-        if (beforeImageRows == null || beforeImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(beforeImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = beforeImageRows.get(0);
+        List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
+        Field pkField = row.primaryKeys().get(0);
+        // PK is at last one.
+        fields.add(pkField);
 
-        StringBuilder insertColumns = new StringBuilder();
-        StringBuilder insertValues = new StringBuilder();
-        Field pkField = null;
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PRIMARY_KEY) {
-                pkField = field;
-                continue;
-            } else {
-                if (first) {
-                    first = false;
-                } else {
-                    insertColumns.append(", ");
-                    insertValues.append(", ");
-                }
-                insertColumns.append(keywordChecker.checkAndReplace(field.getName()));
-                insertValues.append("?");
-            }
+        String insertColumns = fields.stream()
+                .map(field -> keywordChecker.checkAndReplace(field.getName()))
+                .collect(Collectors.joining(", "));
+        String insertValues = fields.stream().map(field -> "?")
+                .collect(Collectors.joining(", "));
 
-        }
-        if (!first) {
-            insertColumns.append(", ");
-            insertValues.append(", ");
-        }
-        insertColumns.append(keywordChecker.checkAndReplace(pkField.getName()));
-        insertValues.append("?");
-
-        return "INSERT INTO " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + "(" + insertColumns.toString() + ") VALUES (" + insertValues.toString() + ")";
+        return String.format(INSERT_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
+                insertColumns, insertValues);
     }
 
     @Override

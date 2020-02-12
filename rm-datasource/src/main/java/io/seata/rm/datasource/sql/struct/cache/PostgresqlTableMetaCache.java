@@ -88,16 +88,27 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : null;
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        /*
+         * use ResultSetMetaData to get the pure table name
+         * can avoid the problem below
+         *
+         * select * from account_tbl
+         * select * from account_TBL
+         * select * from account_tbl
+         * select * from account.account_tbl
+         * select * from "select"
+         * select * from "Select"
+         * select * from "Sel""ect"
+         * select * from "Sel'ect"
+         */
         if (null != schemaName) {
-            schemaName = schemaName.replace("\"", "").toLowerCase();
+            schemaName = schemaName.replaceAll("(^\")|(\"$)", "");
         }
-        tableName = tableName.replace("\"", "").toLowerCase();
+        tableName = tableName.replaceAll("(^\")|(\"$)", "");
 
-        ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-        ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName);
-
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -161,16 +172,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
-            if (rsPrimary != null) {
-                rsPrimary.close();
             }
         }
 
