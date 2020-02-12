@@ -162,7 +162,7 @@ public final class ColumnUtils {
 
         colName.getChars(0,colName.length(),buf,1);
 
-        return new String(buf);
+        return new String(buf).intern();
     }
 
     private static boolean isMysqlSeries(String dbType) {
