@@ -15,16 +15,9 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
-
 import io.netty.channel.Channel;
 import io.seata.common.XID;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
@@ -43,6 +36,15 @@ import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -220,27 +222,29 @@ public class DefaultCoordinatorTest {
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }
-
-        SessionHolder.destroy();
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws IOException {
+        SessionHolder.destroy();
         deleteDataFile();
     }
 
-    private static void deleteDataFile() {
+    private static void deleteDataFile() throws IOException {
         File directory = new File(sessionStorePath);
         File[] files = directory.listFiles();
-        for (File file : files) {
-            file.delete();
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                Files.delete(Paths.get(file.getPath()));
+            }
         }
     }
+
     private static void deleteAndCreateDataFile() throws IOException {
+        SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }
-
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
