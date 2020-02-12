@@ -18,7 +18,9 @@ package io.seata.sqlparser.druid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -104,10 +106,12 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
-                return new ArrayList[]{idParam};
+                Map result = new HashMap();
+                result.put(0,idParam);
+                return result;
             }
         }, paramAppenderList);
 
@@ -139,12 +143,15 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> id1Param = new ArrayList<>();
                 id1Param.add("id1");
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
-                return new ArrayList[]{id1Param, id2Param};
+                Map result = new HashMap();
+                result.put(0,id1Param);
+                result.put(1,id2Param);
+                return result;
             }
         }, paramAppenderList);
 
@@ -176,14 +183,18 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> id1Param = new ArrayList<>();
                 id1Param.add("id1");
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 ArrayList<Object> name1Param = new ArrayList<>();
                 name1Param.add("name");
-                return new ArrayList[]{id1Param, id2Param, name1Param};
+                Map result = new HashMap();
+                result.put(0,id1Param);
+                result.put(1,id2Param);
+                result.put(2,name1Param);
+                return result;
             }
         }, paramAppenderList);
 
@@ -215,12 +226,15 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> id1Param = new ArrayList<>();
                 id1Param.add("id1");
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
-                return new ArrayList[]{id1Param, id2Param};
+                Map result = new HashMap();
+                result.put(0,id1Param);
+                result.put(1,id2Param);
+                return result;
             }
         }, paramAppenderList);
 

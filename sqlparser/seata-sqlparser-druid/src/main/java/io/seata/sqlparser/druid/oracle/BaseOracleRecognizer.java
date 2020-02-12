@@ -50,7 +50,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
+                    ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex());
                     if (paramAppenderList.isEmpty()) {
                         oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }

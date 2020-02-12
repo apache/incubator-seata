@@ -326,7 +326,7 @@ public class InsertExecutorTest {
     }
 
     private void mockParameters() {
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(PK_VALUE);
         ArrayList arrayList1 = new ArrayList<>();
@@ -335,16 +335,16 @@ public class InsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(0,arrayList0);
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
     }
 
     private void mockParametersPkWithNull() {
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -353,19 +353,19 @@ public class InsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(0,arrayList0);
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
     }
 
     private void mockParametersOfOnePk() {
-        ArrayList<Object>[] paramters = new ArrayList[1];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
-        paramters[0] = arrayList1;
+        paramters.put(0,arrayList1);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
     }
