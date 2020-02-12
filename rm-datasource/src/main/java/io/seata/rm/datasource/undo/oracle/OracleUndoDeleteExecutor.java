@@ -63,6 +63,8 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
         // PK is at last one.
         fields.add(pkField);
 
+        // delete sql undo log before image all field come from table meta, need add escape.
+        // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
             .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE))
             .collect(Collectors.joining(", "));

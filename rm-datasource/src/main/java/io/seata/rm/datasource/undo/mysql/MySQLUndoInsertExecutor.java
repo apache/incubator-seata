@@ -51,7 +51,6 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
      */
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (CollectionUtils.isEmpty(afterImageRows)) {
@@ -59,6 +58,8 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         }
         Row row = afterImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
+        // insert sql undo log after image all field come from table meta, need add escape.
+        // see BaseTransactionalExecutor#buildTableRecords
         return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
                              ColumnUtils.addEscape(pkField.getName(), JdbcConstants.MYSQL));
     }

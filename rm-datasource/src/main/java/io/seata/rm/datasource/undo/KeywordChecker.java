@@ -35,7 +35,7 @@ public interface KeywordChecker {
      * @param fieldOrTableName
      * @return
      */
-    boolean checkNative(String fieldOrTableName);
+    boolean checkEscape(String fieldOrTableName);
 
     /**
      * check whether given field name and table name use keywords and,if so,will add "`" to the name.

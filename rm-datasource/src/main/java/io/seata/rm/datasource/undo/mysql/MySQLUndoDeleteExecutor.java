@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo.mysql;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -61,7 +62,6 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
      */
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (CollectionUtils.isEmpty(beforeImageRows)) {
@@ -73,8 +73,10 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         // PK is at last one.
         fields.add(pkField);
 
+        // delete sql undo log before image all field come from table meta, need add escape.
+        // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
-            .map(field -> keywordChecker.checkAndReplace(field.getName()))
+            .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL))
             .collect(Collectors.joining(", "));
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));

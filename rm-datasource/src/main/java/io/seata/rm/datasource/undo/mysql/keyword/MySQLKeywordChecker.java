@@ -1116,7 +1116,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean checkNative(String fieldOrTableName) {
+    public boolean checkEscape(String fieldOrTableName) {
         return check(fieldOrTableName);
     }
 

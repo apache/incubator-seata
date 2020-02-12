@@ -503,7 +503,7 @@ public class OracleKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean checkNative(String fieldOrTableName) {
+    public boolean checkEscape(String fieldOrTableName) {
         boolean check = check(fieldOrTableName);
         // oracle
         // we are recommend table name and column name must uppercase.
