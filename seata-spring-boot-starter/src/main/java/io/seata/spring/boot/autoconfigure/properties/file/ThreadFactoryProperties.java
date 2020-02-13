@@ -25,13 +25,13 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PR
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX_KEBAB_STYLE;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX)
+@ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX_KEBAB_STYLE)
 public class ThreadFactoryProperties {
     private String bossThreadPrefix = DEFAULT_BOSS_THREAD_PREFIX;
     private String workerThreadPrefix = DEFAULT_NIO_WORKER_THREAD_PREFIX;

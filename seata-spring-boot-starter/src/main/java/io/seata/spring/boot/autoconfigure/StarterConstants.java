@@ -51,7 +51,8 @@ public class StarterConstants {
     public static final String SEATA_PREFIX = "seata";
     public static final String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";
     public static final String TRANSPORT_PREFIX = SEATA_PREFIX + ".transport";
-    public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".thread-factory";
+    public static final String THREAD_FACTORY_PREFIX_KEBAB_STYLE = TRANSPORT_PREFIX + ".thread-factory";
+    public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".threadFactory";
     public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
     public static final String SERVICE_PREFIX = SEATA_PREFIX + ".service";
     public static final String CLIENT_PREFIX = SEATA_PREFIX + ".client";
