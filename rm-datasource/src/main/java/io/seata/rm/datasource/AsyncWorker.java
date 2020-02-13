@@ -194,6 +194,16 @@ public class AsyncWorker implements ResourceManagerInbound {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            } catch (Throwable e) {
+                LOGGER.error(e.getMessage(), e);
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    LOGGER.warn("Failed to rollback JDBC resource while deleting undo_log ", rollbackEx);
+                }
             } finally {
                 if (conn != null) {
                     try {

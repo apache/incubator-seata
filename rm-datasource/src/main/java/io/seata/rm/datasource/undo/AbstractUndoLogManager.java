@@ -266,8 +266,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
                     String contextString = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
                     Map<String, String> context = parseContext(contextString);
-                    Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-                    byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+                    byte[] rollbackInfo = getRollbackInfo(rs);
 
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
                     UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance()
@@ -383,4 +382,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     protected abstract void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
                                                     byte[] undoLogContent, Connection conn) throws SQLException;
+
+    /**
+     * RollbackInfo to bytes
+     *
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
+    protected abstract byte[] getRollbackInfo(ResultSet rs) throws SQLException;
 }
