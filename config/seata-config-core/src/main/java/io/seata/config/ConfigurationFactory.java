@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Configuration factory.
- *
+ * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+ *   单例类，seata-server启动时读取服务端的`register.conf`（静态代码块）
+ * </p>
  * @author slievrly
  * @author Geng Zhang
  */
@@ -41,6 +43,12 @@ public final class ConfigurationFactory {
 
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
+    /**
+     * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+     *   例如`register.conf`的配置
+     * </p>
+     * @see #instance instance - `register.conf`中对应的`config.type`对应的配置，例如`file.conf`
+     */
     public static final Configuration CURRENT_FILE_INSTANCE;
 
     static {
@@ -73,6 +81,12 @@ public final class ConfigurationFactory {
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
+    /**
+     * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+     *   例如`file.conf`的配置
+     * </p>
+     * @see #CURRENT_FILE_INSTANCE CURRENT_FILE_INSTANCE - `register.conf`的配置
+     */
     private static volatile Configuration instance = null;
 
     /**
@@ -95,6 +109,7 @@ public final class ConfigurationFactory {
         ConfigType configType = null;
         String configTypeName = null;
         try {
+            // vergilyn-comment, 2020-02-13 >>>> 从已加载的`register.conf`获取配置参数`conf.type = "file"`
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + ConfigurationKeys.FILE_ROOT_TYPE);
@@ -103,6 +118,7 @@ public final class ConfigurationFactory {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
         if (ConfigType.File == configType) {
+            // vergilyn-comment, 2020-02-13 >>>> 通过配置`conf.file.name = "file.conf"`读取conf
             String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + NAME_KEY;
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
@@ -120,6 +136,9 @@ public final class ConfigurationFactory {
 
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
+            /* vergilyn-comment, 2020-02-13 >>>>
+             *   nacos 、apollo、zk、consul、etcd3等的读取，参考`ConfigurationProvider.class`的实现类
+             */
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
                 .provide();
         }

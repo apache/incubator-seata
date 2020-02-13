@@ -87,10 +87,14 @@ public class NacosConfiguration extends AbstractConfiguration {
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
+
+        // vergilyn-comment, 2020-02-13 >>>> 如果环境变量存在该配置，则使用sys pro
+        // vergilyn-question, 2020-02-13 >>>> 不存在类似"应用缓存"的概念，每次都会去nacos获取，性能是否可以优化？
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
         }
         try {
+            // vergilyn-comment, 2020-02-13 >>>> seata v1.0.0不支持指定nacos的GROUP，下个版本扩展了这一功能。
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
@@ -170,6 +174,13 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
     }
 
+    /**
+     * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+     *   从{@linkplain ConfigurationFactory#CURRENT_FILE_INSTANCE} 读取nacos的 serverAddr 和 namespace <br/>
+     *
+     *   seata v1.0.0 不支持指定nacos的group（默认在 {@linkplain #SEATA_GROUP}）。
+     * </p>
+     */
     private static Properties getConfigProperties() {
         Properties properties = new Properties();
         if (null != System.getProperty(PRO_SERVER_ADDR_KEY)) {
@@ -190,6 +201,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
+
         return properties;
     }
 

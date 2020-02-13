@@ -99,7 +99,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         super(messageExecutor);
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
-        if (NettyServerConfig.enableEpoll()) {
+
+        /* vergilyn-comment, 2020-02-13 >>>>
+         * netty线程模型（boss、worker）： Reactor模型，参考 https://blog.csdn.net/qq924862077/article/details/81026740
+         */
+        if (NettyServerConfig.enableEpoll()) {  // vergilyn-comment, 2020-02-13 >>>> linux的epoll
             this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
                 new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
             this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
@@ -153,6 +157,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
+
+            // vergilyn-comment, 2020-02-13 >>>> 将seata-server注册到xxx（e.g. nacos）
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
             future.channel().closeFuture().sync();

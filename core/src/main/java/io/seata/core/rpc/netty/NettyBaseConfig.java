@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Netty base config.
- *
+ * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+ *   主要 初始化/加载 变量{@linkplain #CONFIG}， 注意静态代码块中的代码。
+ * </p>
  * @author slievrly
  */
 public class NettyBaseConfig {

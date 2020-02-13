@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigFuture.ConfigOperation;
@@ -93,6 +94,10 @@ public class FileConfiguration extends AbstractConfiguration {
 
     /**
      * Instantiates a new File configuration.
+     * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+     *   支持`file:register.conf`，从指定路径加载文件。 <br/>
+     *   否则，从classloader的resource加载 <br/>
+     * </p>
      *
      * @param name                the name
      * @param allowDynamicRefresh the allow dynamic refresh
@@ -114,6 +119,17 @@ public class FileConfiguration extends AbstractConfiguration {
             URL resource = this.getClass().getClassLoader().getResource(name);
             if (null != resource) {
                 targetFilePath = resource.getPath();
+
+                /* vergilyn-comment, 2020-02-13 >>>> 加载`register.conf`文件配置
+                 * 备注：
+                 *   例如启动[seata-server]的`Server#main()`，并且修改了其resource下的`register.conf`
+                 *   由于[seata-server]和[config/seata-config-core]的resource都存在 `register.conf`
+                 *   `com.typesafe.config.ConfigFactory`会读取到这2个conf，优先读取到的是[seata-server] （应该是classloader加载顺序的原因）
+                 *   然后，也会读取[config/seata-config-core]中的conf，然后“只新增，不修改”
+                 *   （大致）意味着，如果自己少配置了参数，那么默认配置就是[config/seata-config-core]
+                 *
+                 * 相关底层代码：com.typesafe.config.impl.Parseable.ParseableResources#rawParseValue(...)
+                 */
                 fileConfig = ConfigFactory.load(name);
 
             } else {

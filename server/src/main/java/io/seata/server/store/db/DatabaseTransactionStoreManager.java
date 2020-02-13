@@ -91,7 +91,7 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
 
     @Override
     public synchronized void init() {
-        if (inited.get()) {
+        if (inited.get()) {  // vergilyn-comment, 2020-02-12 >>>> prevent repeated init.
             return;
         }
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);

@@ -15,15 +15,14 @@
  */
 package io.seata.discovery.registry;
 
+import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
 
 /**
  * The type Registry factory.
@@ -51,6 +50,7 @@ public class RegistryFactory {
         if (RegistryType.File == registryType) {
             return FileRegistryServiceImpl.getInstance();
         } else {
+            // vergilyn-comment, 2020-02-13 >>>> 将seata-server注册到指定的xxx
             return EnhancedServiceLoader.load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
         }
     }

@@ -23,7 +23,9 @@ import io.seata.core.constants.ConfigurationKeys;
 
 /**
  * The type Netty server config.
- *
+ * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
+ *    NettyServerConfig只是一些配置属性，主要的一些 加载/读取配置 在父类NettyBaseConfig
+ * </p>
  * @author slievrly
  */
 public class NettyServerConfig extends NettyBaseConfig {

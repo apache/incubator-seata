@@ -490,6 +490,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     /**
      * Init.
+     * <p> vergilyn-comment, 2020-02-12 >>>> 主要是初始一些定时任务： <br/>
+     *   1. {@linkplain #handleRetryRollbacking()} <br/>
+     *   2. {@linkplain #handleRetryCommitting()} <br/>
+     *   3. {@linkplain #handleAsyncCommitting()} <br/>
+     *   4. {@linkplain #timeoutCheck()} <br/>
+     *   5. {@linkplain #undoLogDelete()} <br/>
+     *
+     *   <br/>备注： {@linkplain #destroy()}中destroy这些当时任务。
+     * </p>
+     *
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {

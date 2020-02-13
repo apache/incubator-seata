@@ -1,0 +1,50 @@
+@startuml
+
+(*top) --> "Server#main(String[] args)"
+-->[ ParameterParser parameterParser = new ParameterParser(args);] "ParameterParser.class"
+note right
+```
+public ParameterParser(String[] args) {
+    this.init(args);
+}
+
+private void init(String[] args) {
+    // 省略...
+    if (StringUtils.isBlank(storeMode)) {
+        storeMode = <font color=red>ConfigurationFactory.getInstance()</font>.getConfig(ConfigurationKeys.STORE_MODE,
+            SERVER_DEFAULT_STORE_MODE);
+    }
+}
+```
+如果storeMode存在，那么之后的`RpcServer rpcServer = new RpcServer(WORKING_THREADS)`
+也会在`io.seata.core.rpc.netty.NettyBaseConfig`调用：
+`protected <font color=purple>**static final**</font> Configuration CONFIG = ConfigurationFactory.getInstance();`
+end note
+--> "io.seata.config.ConfigurationFactory"
+note right
+  单例类，例如`register.conf`、`file.conf`
+  ```
+  // 静态代码块中加载`register.conf`
+  static{
+    Configuration configuration = new FileConfiguration("register.conf", false);
+  }
+
+  // 调用`buildConfiguration()`加载`register.conf`中`config.type`相关的配置。例如`file.conf`
+  public static Configuration getInstance() {
+      if (instance == null) {
+          synchronized (Configuration.class) {
+              if (instance == null) {
+                  instance = buildConfiguration();
+              }
+          }
+      }
+      return instance;
+  }
+  ```
+end note
+--> "io.seata.config.FileConfiguration#FileConfiguration(String, boolean)"
+note right
+依赖`com.typesafe.config`读取配置文件
+end note
+
+@enduml
