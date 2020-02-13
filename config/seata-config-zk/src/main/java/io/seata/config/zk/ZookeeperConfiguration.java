@@ -58,6 +58,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String SESSION_TIMEOUT_KEY = "session.timeout";
     private static final String CONNECT_TIMEOUT_KEY = "connect.timeout";
+    private static final String AUTH_USERNAME = "username";
+    private static final String AUTH_PASSWORD = "password";
     private static final int THREAD_POOL_NUM = 1;
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
@@ -81,6 +83,12 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                     zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT));
+                    String username = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
+                    String password = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
+                    if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
+                        StringBuffer auth = new StringBuffer(username).append(":").append(password);
+                        zkClient.addAuthInfo("digest", auth.toString().getBytes());
+                    }
                 }
             }
             if (!zkClient.exists(ROOT_PATH)) {
