@@ -224,7 +224,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
             zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
         }
-        if (null!=authInfo&&authInfo.length == 2) {
+        if (null != authInfo && authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
                 StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
                 zkClient.addAuthInfo("digest", auth.toString().getBytes());
