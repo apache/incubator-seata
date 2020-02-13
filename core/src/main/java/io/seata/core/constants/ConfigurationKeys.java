@@ -170,16 +170,6 @@ public class ConfigurationKeys {
     public static final String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
 
     /**
-     * The constant STORE_DB_GLOBAL_DEFAULT_TABLE.
-     */
-    public static final String STORE_DB_GLOBAL_DEFAULT_TABLE = "globalTable";
-
-    /**
-     * The constant STORE_DB_BRANCH_DEFAULT_TABLE.
-     */
-    public static final String STORE_DB_BRANCH_DEFAULT_TABLE = "branchTable";
-
-    /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
     public static final String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";

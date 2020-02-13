@@ -23,8 +23,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
 import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
-import static io.seata.core.constants.DefaultValues.NIO_WORKER_THREAD_PREFIX;
 
 /**
  * The type Netty server config.
@@ -240,7 +240,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getWorkerThreadPrefix() {
         return CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX,
-            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
+            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
     }
 
     /**

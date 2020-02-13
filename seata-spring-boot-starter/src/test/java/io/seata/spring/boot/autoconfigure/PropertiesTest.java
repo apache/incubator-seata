@@ -52,7 +52,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
-import static io.seata.core.constants.DefaultValues.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -138,7 +138,7 @@ public class PropertiesTest {
     public void testUndoProperties() {
         assertTrue(context.getBean(UndoProperties.class).isDataValidation());
         assertEquals("jackson", context.getBean(UndoProperties.class).getLogSerialization());
-        assertEquals(TRANSACTION_UNDO_LOG_DEFAULT_TABLE, context.getBean(UndoProperties.class).getLogTable());
+        assertEquals(DEFAULT_TRANSACTION_UNDO_LOG_DEFAULT_TABLE, context.getBean(UndoProperties.class).getLogTable());
     }
 
     @Test

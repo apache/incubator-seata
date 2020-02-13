@@ -18,6 +18,7 @@ package io.seata.core.rpc.netty;
 import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
@@ -54,7 +55,6 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
-    public static final boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
     private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
 
     /**

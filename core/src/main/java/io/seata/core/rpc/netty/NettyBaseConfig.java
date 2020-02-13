@@ -36,8 +36,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.TRANSPORT_HEARTBEAT;
-
 /**
  * The type Netty base config.
  *
@@ -163,7 +161,7 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
-        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, TRANSPORT_HEARTBEAT);
+        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, false);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
         } else {
