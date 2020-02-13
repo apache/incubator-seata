@@ -68,7 +68,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuilder prefix = new StringBuilder("SELECT ");
-        if (!tableMeta.containsPK(updateColumns)) {
+        if (!containsPK(updateColumns)) {
             prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
         }
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());

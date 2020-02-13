@@ -23,6 +23,7 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,14 +63,15 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
         // PK is at last one.
         fields.add(pkField);
 
+        // delete sql undo log before image all field come from table meta, need add escape.
+        // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
-            .map(field -> ColumnUtils.addEscape(field.getName(), ColumnUtils.Escape.STANDARD))
+            .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE))
             .collect(Collectors.joining(", "));
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
-            insertColumns, insertValues);
+        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }
 
     @Override

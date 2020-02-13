@@ -66,7 +66,7 @@ public class MySQLKeywordCheckerTest {
     @Test
     public void testUpdateKeywordCheck() {
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setTableName("lock");
+        sqlUndoLog.setTableName("`lock`");
         sqlUndoLog.setSqlType(SQLType.UPDATE);
 
         TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
@@ -75,13 +75,13 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField = new Field();
         pkField.setKeyType(KeyType.PRIMARY_KEY);
-        pkField.setName("key");
+        pkField.setName("`key`");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
         beforeRow.add(pkField);
 
         Field name = new Field();
-        name.setName("desc");
+        name.setName("`desc`");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
         beforeRow.add(name);
@@ -100,13 +100,13 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField1 = new Field();
         pkField1.setKeyType(KeyType.PRIMARY_KEY);
-        pkField1.setName("key");
+        pkField1.setName("`key`");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
         afterRow.add(pkField1);
 
         Field name1 = new Field();
-        name1.setName("desc");
+        name1.setName("`desc`");
         name1.setType(Types.VARCHAR);
         name1.setValue("GTS");
         afterRow.add(name1);
@@ -155,7 +155,7 @@ public class MySQLKeywordCheckerTest {
     @Test
     public void testInsertKeywordCheck() {
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setTableName("lock");
+        sqlUndoLog.setTableName("`lock`");
         sqlUndoLog.setSqlType(SQLType.INSERT);
 
         TableRecords beforeImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "key"));
@@ -166,13 +166,13 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField = new Field();
         pkField.setKeyType(KeyType.PRIMARY_KEY);
-        pkField.setName("key");
+        pkField.setName("`key`");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
         afterRow1.add(pkField);
 
         Field name = new Field();
-        name.setName("desc");
+        name.setName("`desc`");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
         afterRow1.add(name);
@@ -187,13 +187,13 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField1 = new Field();
         pkField1.setKeyType(KeyType.PRIMARY_KEY);
-        pkField1.setName("key");
+        pkField1.setName("`key`");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
         afterRow.add(pkField1);
 
         Field name1 = new Field();
-        name1.setName("desc");
+        name1.setName("`desc`");
         name1.setType(Types.VARCHAR);
         name1.setValue("GTS");
         afterRow.add(name1);
@@ -242,7 +242,7 @@ public class MySQLKeywordCheckerTest {
     @Test
     public void testDeleteKeywordCheck() {
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setTableName("lock");
+        sqlUndoLog.setTableName("`lock`");
         sqlUndoLog.setSqlType(SQLType.DELETE);
 
         TableRecords afterImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "id"));
@@ -253,13 +253,13 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField = new Field();
         pkField.setKeyType(KeyType.PRIMARY_KEY);
-        pkField.setName("key");
+        pkField.setName("`key`");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
         afterRow1.add(pkField);
 
         Field name = new Field();
-        name.setName("desc");
+        name.setName("`desc`");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
         afterRow1.add(name);
@@ -274,13 +274,13 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField1 = new Field();
         pkField1.setKeyType(KeyType.PRIMARY_KEY);
-        pkField1.setName("key");
+        pkField1.setName("`key`");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
         afterRow.add(pkField1);
 
         Field name1 = new Field();
-        name1.setName("desc");
+        name1.setName("`desc`");
         name1.setType(Types.VARCHAR);
         name1.setValue("GTS");
         afterRow.add(name1);
