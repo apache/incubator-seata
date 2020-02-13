@@ -162,9 +162,6 @@ public final class ColumnUtils {
         if (keywordChecker != null) {
             boolean check = keywordChecker.checkEscape(colName);
             if (!check) {
-                // postgresql
-                // we are recommend table name and column name must lowercase.
-                // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
                 return colName;
             }
         }
@@ -179,16 +176,4 @@ public final class ColumnUtils {
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
 
-    private static boolean containsUppercase(String colName) {
-        if (colName == null) {
-            return false;
-        }
-        char[] chars = colName.toCharArray();
-        for (char ch : chars) {
-            if (ch >= 'A' && ch <= 'Z') {
-                return true;
-            }
-        }
-        return false;
-    }
 }
