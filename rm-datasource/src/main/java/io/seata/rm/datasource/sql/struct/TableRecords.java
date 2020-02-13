@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.JDBCType;
@@ -23,11 +27,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-
-import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type Table records.

@@ -61,6 +61,13 @@ public class LockStoreSqls {
         "values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
+     * The constant INSERT_LOCK_SQL_POSTGRESQL.
+     */
+    public static final String INSERT_LOCK_SQL_POSTGRESQL = "insert into " + LOCK_TABLE_PLACEHOLD + "(" + ALL_COLUMNS + ")"
+        +
+        "values (?, ?, ?, ?, ?, ?, ?, now(), now())";
+
+    /**
      * The constant DELETE_LOCK_SQL.
      */
     public static final String DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
@@ -112,6 +119,8 @@ public class LockStoreSqls {
             return INSERT_LOCK_SQL_MYSQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return INSERT_LOCK_SQL_ORACLE.replace(LOCK_TABLE_PLACEHOLD, lockTable);
+        } else if (DBType.POSTGRESQL.name().equalsIgnoreCase(dbType)) {
+            return INSERT_LOCK_SQL_POSTGRESQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
         } else {
             throw new NotSupportYetException("unknown dbType:" + dbType);
         }
