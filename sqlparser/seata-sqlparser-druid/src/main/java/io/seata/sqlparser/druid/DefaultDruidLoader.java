@@ -48,18 +48,16 @@ class DefaultDruidLoader implements DruidLoader {
                 // extract druid.jar to temp file
                 // TODO use URLStreamHandler to handle nested jar loading in the future
                 File tempFile = File.createTempFile("seata", "sqlparser");
-                try (InputStream input = url.openStream()) {
+                try (InputStream input = url.openStream(); OutputStream output = new FileOutputStream(tempFile)) {
                     byte[] buf = new byte[1024];
-                    try (OutputStream output = new FileOutputStream(tempFile)) {
-                        while (true) {
-                            int readCnt = input.read(buf);
-                            if (readCnt < 0) {
-                                break;
-                            }
-                            output.write(buf, 0, readCnt);
+                    while (true) {
+                        int readCnt = input.read(buf);
+                        if (readCnt < 0) {
+                            break;
                         }
-                        output.flush();
+                        output.write(buf, 0, readCnt);
                     }
+                    output.flush();
                 }
                 tempFile.deleteOnExit();
                 druidUrl = tempFile.toURI().toURL();
