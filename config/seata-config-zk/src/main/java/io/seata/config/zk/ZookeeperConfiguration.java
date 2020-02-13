@@ -86,7 +86,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                     String username = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
                     String password = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
                     if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
-                        StringBuffer auth = new StringBuffer(username).append(":").append(password);
+                        StringBuilder auth = new StringBuilder(username).append(":").append(password);
                         zkClient.addAuthInfo("digest", auth.toString().getBytes());
                     }
                 }

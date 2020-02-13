@@ -226,7 +226,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         }
         if (authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
-                StringBuffer auth = new StringBuffer(authInfo[0]).append(":").append(authInfo[1]);
+                StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
                 zkClient.addAuthInfo("digest", auth.toString().getBytes());
             }
         }
