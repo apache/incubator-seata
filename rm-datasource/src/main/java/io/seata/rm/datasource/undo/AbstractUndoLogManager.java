@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.undo;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 
 import io.seata.common.Constants;
-import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
