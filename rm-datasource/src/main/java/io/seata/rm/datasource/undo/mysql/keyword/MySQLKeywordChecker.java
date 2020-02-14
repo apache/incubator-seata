@@ -1116,6 +1116,11 @@ public class MySQLKeywordChecker implements KeywordChecker {
     }
 
     @Override
+    public boolean checkEscape(String fieldOrTableName) {
+        return check(fieldOrTableName);
+    }
+
+    @Override
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? "`" + fieldOrTableName + "`" : fieldOrTableName;
     }
