@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -31,10 +30,11 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
-import java.sql.JDBCType;
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -273,7 +273,7 @@ public abstract class AbstractUndoExecutor {
         }
         // build check sql
         String dbType = getDbType(conn);
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
                 tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
 
         PreparedStatement statement = null;
