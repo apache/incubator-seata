@@ -29,6 +29,8 @@ public class ConfigZooKeeperProperties {
     private String serverAddr = "127.0.0.1:2181";
     private long sessionTimeout = 6000L;
     private long connectTimeout = 2000L;
+    private String username = "";
+    private String password = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -54,6 +56,24 @@ public class ConfigZooKeeperProperties {
 
     public ConfigZooKeeperProperties setConnectTimeout(long connectTimeout) {
         this.connectTimeout = connectTimeout;
+        return this;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public ConfigZooKeeperProperties setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public ConfigZooKeeperProperties setPassword(String password) {
+        this.password = password;
         return this;
     }
 }
