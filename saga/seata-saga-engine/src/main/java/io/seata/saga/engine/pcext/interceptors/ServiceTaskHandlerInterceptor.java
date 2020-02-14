@@ -307,7 +307,20 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist()
             && stateMachineConfig.getStateLogStore() != null) {
 
-            stateMachineConfig.getStateLogStore().recordStateStarted(stateInstance, context);
+            try {
+                stateMachineConfig.getStateLogStore().recordStateStarted(stateInstance, context);
+            } catch (Exception e) {
+
+                String message = "Record state[" + state.getName() + "] started failed, stateMachineInstance[" + stateMachineInstance
+                        .getId() + "], Reason: " + e.getMessage();
+
+                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
+                        FrameworkErrorCode.ExceptionCaught, message, stateMachineInstance, state.getName());
+
+                EngineUtils.failStateMachine(context, exception);
+
+                throw exception;
+            }
         }
 
         if (StringUtils.isEmpty(stateInstance.getId())) {
