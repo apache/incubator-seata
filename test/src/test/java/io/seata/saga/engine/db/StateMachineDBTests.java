@@ -599,7 +599,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
     }
 
-    @Test
+    //@Test
     public void testStateMachineTransTimeout() throws Exception {
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
@@ -652,7 +652,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
-    @Test
+    //@Test
     public void testStateMachineTransTimeoutAsync() throws Exception {
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
