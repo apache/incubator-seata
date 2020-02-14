@@ -31,14 +31,12 @@ import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
@@ -158,11 +156,6 @@ public class PropertiesTest {
     }
 
     @Test
-    public void testConfigFileProperties() {
-        assertEquals("file.conf", context.getBean(ConfigFileProperties.class).getName());
-    }
-
-    @Test
     public void testConfigNacosProperties() {
         assertEquals("localhost", context.getBean(ConfigNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(ConfigNacosProperties.class).getNamespace());
@@ -198,11 +191,6 @@ public class PropertiesTest {
         assertEquals("default", context.getBean(RegistryEurekaProperties.class).getApplication());
         assertEquals("http://localhost:8761/eureka", context.getBean(RegistryEurekaProperties.class).getServiceUrl());
         assertEquals("1", context.getBean(RegistryEurekaProperties.class).getWeight());
-    }
-
-    @Test
-    public void testRegistryFileProperties() {
-        assertEquals("file.conf", context.getBean(RegistryFileProperties.class).getName());
     }
 
     @Test
