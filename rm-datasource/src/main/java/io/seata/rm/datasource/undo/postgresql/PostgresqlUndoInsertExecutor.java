@@ -17,12 +17,11 @@ package io.seata.rm.datasource.undo.postgresql;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
@@ -45,7 +44,6 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (CollectionUtils.isEmpty(afterImageRows)) {
@@ -53,9 +51,10 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
         }
         Row row = afterImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
-        return String.format(DELETE_SQL_TEMPLATE,
-                keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                keywordChecker.checkAndReplace(pkField.getName()));
+        // insert sql undo log after image all field come from table meta, need add escape.
+        // see BaseTransactionalExecutor#buildTableRecords
+        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
+                ColumnUtils.addEscape(pkField.getName(), JdbcConstants.POSTGRESQL));
     }
 
     @Override
