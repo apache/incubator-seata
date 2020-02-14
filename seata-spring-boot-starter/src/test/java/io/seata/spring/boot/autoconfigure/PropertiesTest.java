@@ -31,6 +31,7 @@ import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigEtcd3Properties;
+import io.seata.spring.boot.autoconfigure.properties.registry.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperProperties;
@@ -153,6 +154,11 @@ public class PropertiesTest {
     @Test
     public void testConfigEtcd3Properties() {
         assertEquals("http://localhost:2379", context.getBean(ConfigEtcd3Properties.class).getServerAddr());
+    }
+
+    @Test
+    public void testConfigFileProperties() {
+        assertEquals("file.conf", context.getBean(ConfigFileProperties.class).getName());
     }
 
     @Test
