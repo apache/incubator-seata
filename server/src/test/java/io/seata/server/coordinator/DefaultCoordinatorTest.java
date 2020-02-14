@@ -15,16 +15,9 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
-
 import io.netty.channel.Channel;
 import io.seata.common.XID;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
@@ -43,6 +36,15 @@ import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -83,7 +85,7 @@ public class DefaultCoordinatorTest {
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
-    private static Core core = new DefaultCore();
+    private static DefaultCore core;
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
@@ -95,6 +97,7 @@ public class DefaultCoordinatorTest {
         XID.setIpAddress(NetUtil.getLocalIp());
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        core = new DefaultCore(serverMessageSender);
     }
 
     @BeforeEach
@@ -102,21 +105,21 @@ public class DefaultCoordinatorTest {
         deleteAndCreateDataFile();
     }
 
-
     @Test
     public void branchCommit() throws TransactionException {
         BranchStatus result = null;
         String xid = null;
+        GlobalSession globalSession = null;
         try {
             xid = core.begin(applicationId, txServiceGroup, txName, timeout);
             Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
-            result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
+            globalSession = SessionHolder.findGlobalSession(xid);
+            result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
-
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
@@ -126,8 +129,9 @@ public class DefaultCoordinatorTest {
     @MethodSource("xidAndBranchIdProviderForRollback")
     public void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         try {
-            result = defaultCoordinator.branchRollback(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = core.branchRollback(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
@@ -218,27 +222,29 @@ public class DefaultCoordinatorTest {
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }
-
-        SessionHolder.destroy();
     }
 
     @AfterEach
-    public void tearDown() {
+    public void tearDown() throws IOException {
+        SessionHolder.destroy();
         deleteDataFile();
     }
 
-    private static void deleteDataFile() {
+    private static void deleteDataFile() throws IOException {
         File directory = new File(sessionStorePath);
         File[] files = directory.listFiles();
-        for (File file : files) {
-            file.delete();
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                Files.delete(Paths.get(file.getPath()));
+            }
         }
     }
+
     private static void deleteAndCreateDataFile() throws IOException {
+        SessionHolder.destroy();
         deleteDataFile();
         SessionHolder.init(StoreMode.FILE.name());
     }
-
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
@@ -249,7 +255,7 @@ public class DefaultCoordinatorTest {
     }
 
 
-    private static class MockServerMessageSender implements ServerMessageSender {
+    public static class MockServerMessageSender implements ServerMessageSender {
 
         @Override
         public void sendResponse(RpcMessage request, Channel channel, Object msg) {

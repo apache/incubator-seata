@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.dubbo;
+package io.seata.integration.dubbo.alibaba;
 
+import com.alibaba.dubbo.common.extension.Activate;
+import com.alibaba.dubbo.rpc.Filter;
+import com.alibaba.dubbo.rpc.Invocation;
+import com.alibaba.dubbo.rpc.Invoker;
+import com.alibaba.dubbo.rpc.Result;
+import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.dubbo.rpc.RpcException;
 import io.seata.core.context.RootContext;
-import org.apache.dubbo.common.Constants;
-import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.Filter;
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
-import org.apache.dubbo.rpc.Result;
-import org.apache.dubbo.rpc.RpcContext;
-import org.apache.dubbo.rpc.RpcException;
+import io.seata.core.constants.DubboConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +32,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-@Activate(group = {Constants.PROVIDER, Constants.CONSUMER}, order = 100)
-public class TransactionPropagationFilter implements Filter {
+@Activate(group = {DubboConstants.PROVIDER, DubboConstants.CONSUMER}, order = 100)
+public class AlibabaDubboTransactionPropagationFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlibabaDubboTransactionPropagationFilter.class);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        if (!DubboConstants.ALIBABADUBBO) {
+            return invoker.invoke(invocation);
+        }
         String xid = RootContext.getXID();
         String xidInterceptorType = RootContext.getXIDInterceptorType();
 
@@ -63,6 +66,7 @@ public class TransactionPropagationFilter implements Filter {
         }
         try {
             return invoker.invoke(invocation);
+
         } finally {
             if (bind) {
                 String unbindInterceptorType = RootContext.unbindInterceptorType();
@@ -71,11 +75,13 @@ public class TransactionPropagationFilter implements Filter {
                     LOGGER.debug("unbind[{}] interceptorType[{}] from RootContext", unbindXid, unbindInterceptorType);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {}, xidInterceptorType from {} to {} ", rpcXid, unbindXid, rpcXidInterceptorType, unbindInterceptorType);
+                    LOGGER.warn("xid in change during RPC from {} to {}, xidInterceptorType from {} to {} ", rpcXid,
+                        unbindXid, rpcXidInterceptorType, unbindInterceptorType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         RootContext.bindInterceptorType(unbindInterceptorType);
-                        LOGGER.warn("bind [{}] interceptorType[{}] back to RootContext", unbindXid, unbindInterceptorType);
+                        LOGGER.warn("bind [{}] interceptorType[{}] back to RootContext", unbindXid,
+                            unbindInterceptorType);
                     }
                 }
             }

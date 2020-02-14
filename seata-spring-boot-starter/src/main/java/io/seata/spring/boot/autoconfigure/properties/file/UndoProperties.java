@@ -27,34 +27,34 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 @Component
 @ConfigurationProperties(prefix = UNDO_PREFIX)
 public class UndoProperties {
-    private boolean undoDataValidation = true;
-    private String undoLogSerialization = "jackson";
-    private String undoLogTable = TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+    private boolean dataValidation = true;
+    private String logSerialization = "jackson";
+    private String logTable = TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 
-    public boolean isUndoDataValidation() {
-        return undoDataValidation;
+    public boolean isDataValidation() {
+        return dataValidation;
     }
 
-    public UndoProperties setUndoDataValidation(boolean undoDataValidation) {
-        this.undoDataValidation = undoDataValidation;
+    public UndoProperties setDataValidation(boolean dataValidation) {
+        this.dataValidation = dataValidation;
         return this;
     }
 
-    public String getUndoLogSerialization() {
-        return undoLogSerialization;
+    public String getLogSerialization() {
+        return logSerialization;
     }
 
-    public UndoProperties setUndoLogSerialization(String undoLogSerialization) {
-        this.undoLogSerialization = undoLogSerialization;
+    public UndoProperties setLogSerialization(String logSerialization) {
+        this.logSerialization = logSerialization;
         return this;
     }
 
-    public String getUndoLogTable() {
-        return undoLogTable;
+    public String getLogTable() {
+        return logTable;
     }
 
-    public UndoProperties setUndoLogTable(String undoLogTable) {
-        this.undoLogTable = undoLogTable;
+    public UndoProperties setLogTable(String logTable) {
+        this.logTable = logTable;
         return this;
     }
 }

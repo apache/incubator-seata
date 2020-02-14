@@ -13,34 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.coordinator;
+package io.seata.core.constants;
 
 /**
- * The type Core factory.
+ * DubboConstants
  *
- * @author sharajava
+ * @author funkye
  */
-public class CoreFactory {
+public class DubboConstants {
 
-    private static class SingletonHolder {
-        private static Core INSTANCE = new DefaultCore();
-    }
+    public static final String PROVIDER = "provider";
 
-    /**
-     * Get core.
-     *
-     * @return the core
-     */
-    public static final Core get() {
-        return SingletonHolder.INSTANCE;
-    }
+    public static final String CONSUMER = "consumer";
 
-    /**
-     * Just for test mocking
-     *
-     * @param core the core
-     */
-    public static void set(Core core) {
-        SingletonHolder.INSTANCE = core;
+    public static boolean ALIBABADUBBO;
+
+    static {
+        try {
+            Class.forName("org.apache.dubbo.rpc.RpcContext");
+        } catch (ClassNotFoundException e) {
+            ALIBABADUBBO = true;
+        }
     }
 }
