@@ -29,6 +29,7 @@ import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -599,7 +600,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         }
     }
 
-    //@Test
+    @Test
     public void testStateMachineTransTimeout() throws Exception {
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
@@ -652,7 +653,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
-    //@Test
+    @Test
     public void testStateMachineTransTimeoutAsync() throws Exception {
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
@@ -769,7 +770,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
 
-    @Test
+    @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeout() throws Exception {
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
@@ -857,7 +858,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertNull(inst.getCompensationStatus());
     }
 
-    @Test
+    @Disabled
     public void testStateMachineCustomRecoverStrategyOnTimeoutAsync() throws Exception {
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(2000);
