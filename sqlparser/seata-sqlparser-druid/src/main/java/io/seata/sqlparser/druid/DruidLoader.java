@@ -15,18 +15,16 @@
  */
 package io.seata.sqlparser.druid;
 
-import com.alibaba.druid.util.JdbcUtils;
-import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.SqlParserType;
-import io.seata.sqlparser.util.DbTypeParser;
+import java.net.URL;
 
 /**
- * @author ggndnn
+ * ggndnn
  */
-@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
-public class DruidDbTypeParser implements DbTypeParser {
-    @Override
-    public String parseFromJdbcUrl(String jdbcUrl) {
-        return JdbcUtils.getDbType(jdbcUrl, null);
-    }
+interface DruidLoader {
+    /**
+     * Gets embedded druid.jar
+     *
+     * @return embedded druid.jar url
+     */
+    URL getEmbeddedDruidLocation();
 }

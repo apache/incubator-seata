@@ -17,8 +17,8 @@ package io.seata.rm.datasource.sql.druid.postgresql;
 
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.druid.postgresql.PostgresqlSelectForUpdateRecognizer;
 import java.util.ArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     public void testGetSqlType() {
         String sql = "select * from t where id = ? for update";
 
-        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
     }
 
@@ -42,7 +42,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     public void testGetWhereCondition_0() {
         String sql = "select * from t for update";
 
-        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -56,7 +56,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     public void testGetWhereCondition_1() {
         String sql = "select * from t for update";
 
-        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         String whereCondition = recognizer.getWhereCondition();
 
         Assertions.assertEquals("", whereCondition);
@@ -65,14 +65,14 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     @Test
     public void testGetTableAlias() {
         String sql = "select * from t where id = ? for update";
-        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
     @Test
     public void testGetTableName() {
         String sql = "select * from t where id = ? for update";
-        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 }

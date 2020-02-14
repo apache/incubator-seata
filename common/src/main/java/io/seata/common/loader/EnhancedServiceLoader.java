@@ -184,7 +184,7 @@ public class EnhancedServiceLoader {
      * @return all extension class
      */
     @SuppressWarnings("rawtypes")
-    public static <S> List<Class> getAllExtensionClass(Class<S> service) {
+    static <S> List<Class> getAllExtensionClass(Class<S> service) {
         return findAllExtensionClass(service, null, findClassLoader());
     }
 
@@ -197,7 +197,7 @@ public class EnhancedServiceLoader {
      * @return all extension class
      */
     @SuppressWarnings("rawtypes")
-    public static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {
+    static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {
         return findAllExtensionClass(service, null, loader);
     }
 
