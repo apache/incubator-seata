@@ -1,0 +1,41 @@
+@startuml
+(*top) --> "Server#main(String[] args)"
+-->[ io.seata.core.rpc.netty.RpcServer#init()] "RpcServer extends AbstractRpcRemotingServer"
+-->[ super.start()] "io.seata.core.rpc.netty.AbstractRpcRemotingServer#start()"
+-->[ **<font color=red>RegistryFactory.</font>getInstance().register(new InetSocketAddress(...))**] "io.seata.discovery.registry.RegistryFactory#getInstance()"
+note right
+  根据`register.conf`的配置获取`register.type`
+  (file 、nacos 、eureka、redis、zk、consul、etcd3、sofa)
+  `file`的注册实现类是"io.seata.discovery.registry.FileRegistryServiceImpl"
+  其余的注册实现参考"io.seata.discovery.registry.RegistryProvider"的实现类
+end note
+-->[ register.type = nacos] "io.seata.discovery.registry.nacos.NacosRegistryProvider"
+note right
+```
+@LoadLevel(name = "Nacos", order = 1)
+public class NacosRegistryProvider implements RegistryProvider {
+    @Override
+    public RegistryService provide() {
+        return NacosRegistryServiceImpl.getInstance();
+    }
+}
+```
+end note
+--> "io.seata.discovery.registry.nacos.NacosRegistryServiceImpl"
+note right
+```
+private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+
+@Override
+public void register(InetSocketAddress address) throws Exception {
+    validAddress(address);
+    // vergilyn-question, 2020-02-13 >>>> FIXME，注册到nacos的serviceName始终是“serverAddr”
+    getNamingInstance().registerInstance(PRO_SERVER_ADDR_KEY,
+                                    address.getAddress().getHostAddress(),  // 127.0.0.1
+                                    address.getPort(), // 8091， seata-server的端口。
+                                    getClusterName());
+}
+```
+
+end note
+@enduml
