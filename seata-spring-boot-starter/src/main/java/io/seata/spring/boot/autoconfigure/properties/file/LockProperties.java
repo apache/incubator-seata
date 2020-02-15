@@ -18,7 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERNAL;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
@@ -29,7 +29,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 @Component
 @ConfigurationProperties(prefix = LOCK_PREFIX)
 public class LockProperties {
-    private int retryInterval = DEFAULT_CLIENT_LOCK_RETRY_INTERNAL;
+    private int retryInterval = DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
     private int retryTimes = DEFAULT_CLIENT_LOCK_RETRY_TIMES;
     private boolean retryPolicyBranchRollbackOnConflict = DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
 

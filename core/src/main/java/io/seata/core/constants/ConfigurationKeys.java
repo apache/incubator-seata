@@ -99,9 +99,9 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_LOCK_RETRY_TIMES = CLIENT_RM_LOCK_PREFIX + "retryTimes";
     /**
-     * The constant CLIENT_LOCK_RETRY_INTERNAL.
+     * The constant CLIENT_LOCK_RETRY_INTERVAL.
      */
-    public static final String CLIENT_LOCK_RETRY_INTERNAL = CLIENT_RM_LOCK_PREFIX + "retryInternal";
+    public static final String CLIENT_LOCK_RETRY_INTERVAL = CLIENT_RM_LOCK_PREFIX + "retryInterval";
     /**
      * The constant CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT.
      */
@@ -221,7 +221,7 @@ public class ConfigurationKeys {
     /**
      * The constant LOCK_DB_DEFAULT_TABLE.
      */
-    public static final String LOCK_DB_DEFAULT_TABLE = "lockTable";
+    public static final String LOCK_DB_DEFAULT_TABLE = "lock_table";
 
     /**
      * The constant RECOVERY_PREFIX.

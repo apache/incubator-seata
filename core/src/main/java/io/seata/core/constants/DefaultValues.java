@@ -19,7 +19,7 @@ package io.seata.core.constants;
  * @author xingfudeshi@gmail.com
  */
 public class DefaultValues {
-    public static final int DEFAULT_CLIENT_LOCK_RETRY_INTERNAL = 10;
+    public static final int DEFAULT_CLIENT_LOCK_RETRY_INTERVAL = 10;
     public static final int DEFAULT_CLIENT_LOCK_RETRY_TIMES = 30;
     public static final boolean DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = true;
     public static final int DEFAULT_LOG_EXCEPTION_RATE = 100;

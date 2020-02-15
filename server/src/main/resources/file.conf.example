@@ -43,7 +43,7 @@ client {
   rm {
     asyncCommitBufferLimit = 10000
     lock {
-      retryInternal = 10
+      retryInterval = 10
       retryTimes = 30
       retryPolicyBranchRollbackOnConflict = true
     }
