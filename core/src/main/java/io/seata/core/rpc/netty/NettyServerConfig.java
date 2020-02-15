@@ -20,6 +20,12 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+
 /**
  * The type Netty server config.
  *
@@ -37,16 +43,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static final int DEFAULT_LISTEN_PORT = 8091;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
     private int serverChannelMaxIdleTimeSeconds = 30;
-    private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
-    private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
-    private static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
-    private static final int DEFAULT_BOSS_THREAD_SIZE = 1;
-
-    /**
-     * Shutdown timeout default 1s
-     */
-    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
 
     /**
      * The Server channel clazz.
@@ -243,7 +240,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getWorkerThreadPrefix() {
         return CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX,
-            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
+            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
     }
 
     /**
