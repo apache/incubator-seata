@@ -41,8 +41,8 @@ import io.seata.core.store.LogStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_BRANCH_DEFAULT_TABLE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_DEFAULT_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
 /**
  * The type Log store data base dao.
@@ -105,9 +105,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     @Override
     public void init() {
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
-            DEFAULT_STORE_DB_GLOBAL_DEFAULT_TABLE);
+            DEFAULT_STORE_DB_GLOBAL_TABLE);
         brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
-            DEFAULT_STORE_DB_BRANCH_DEFAULT_TABLE);
+            DEFAULT_STORE_DB_BRANCH_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
