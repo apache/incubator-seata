@@ -129,4 +129,17 @@ public class EngineUtils {
             callback.onError(context, stateMachineInstance, exp);
         }
     }
+
+    /**
+     * test if is timeout
+     * @param gmtUpdated
+     * @param timeoutMillis
+     * @return
+     */
+    public static boolean isTimeout(Date gmtUpdated, int timeoutMillis) {
+        if (gmtUpdated == null || timeoutMillis < 0) {
+            return false;
+        }
+        return System.currentTimeMillis() - gmtUpdated.getTime() > timeoutMillis;
+    }
 }

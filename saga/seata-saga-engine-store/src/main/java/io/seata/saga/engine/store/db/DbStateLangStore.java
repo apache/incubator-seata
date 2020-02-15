@@ -21,7 +21,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.store.StateLangStore;
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachine.Status;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
@@ -80,7 +82,10 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
             stateMachine.setContent(resultSet.getString("content"));
             stateMachine.setGmtCreate(resultSet.getTimestamp("gmt_create"));
             stateMachine.setType(resultSet.getString("type"));
-            stateMachine.setRecoverStrategy(resultSet.getString("recover_strategy"));
+            String recoverStrategy = resultSet.getString("recover_strategy");
+            if (StringUtils.isNotBlank(recoverStrategy)) {
+                stateMachine.setRecoverStrategy(RecoverStrategy.valueOf(recoverStrategy));
+            }
             stateMachine.setTenantId(resultSet.getString("tenant_id"));
             stateMachine.setStatus(Status.valueOf(resultSet.getString("status")));
             return stateMachine;
@@ -99,7 +104,7 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
             statement.setString(7, stateMachine.getVersion());
             statement.setString(8, stateMachine.getType());
             statement.setString(9, stateMachine.getContent());
-            statement.setString(10, stateMachine.getRecoverStrategy());
+            statement.setString(10, stateMachine.getRecoverStrategy() != null ? stateMachine.getRecoverStrategy().name() : null);
             statement.setString(11, stateMachine.getComment());
         }
     }

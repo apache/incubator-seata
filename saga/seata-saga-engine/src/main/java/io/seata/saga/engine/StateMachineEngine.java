@@ -153,4 +153,11 @@ public interface StateMachineEngine {
      * @return
      */
     StateMachineConfig getStateMachineConfig();
+
+    /**
+     * Reload StateMachine Instance
+     * @param instId
+     * @return
+     */
+    StateMachineInstance reloadStateMachineInstance(String instId);
 }

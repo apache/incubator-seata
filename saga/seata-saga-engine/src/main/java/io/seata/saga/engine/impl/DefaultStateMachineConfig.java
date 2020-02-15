@@ -69,9 +69,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
 
-    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 30;
+    private static final int DEFAULT_TRANS_OPER_TIMEOUT     = 60000 * 30;
+    private static final int DEFAULT_SERVICE_INVOKE_TIMEOUT = 60000 * 5;
 
     private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
+    private int serviceInvokeTimeout  = DEFAULT_SERVICE_INVOKE_TIMEOUT;
 
     private StateLogRepository stateLogRepository;
     private StateLogStore stateLogStore;
@@ -393,4 +395,12 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.transOperationTimeout = transOperationTimeout;
     }
 
+    @Override
+    public int getServiceInvokeTimeout() {
+        return serviceInvokeTimeout;
+    }
+
+    public void setServiceInvokeTimeout(int serviceInvokeTimeout) {
+        this.serviceInvokeTimeout = serviceInvokeTimeout;
+    }
 }

@@ -22,11 +22,13 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.statelang.domain.ExecutionStatus;
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +107,8 @@ public class SagaResourceManager extends AbstractResourceManager {
             if (FrameworkErrorCode.StateMachineInstanceNotExists.equals(e.getErrcode())) {
                 return BranchStatus.PhaseTwo_Committed;
             }
+        } catch (Exception e) {
+            LOGGER.error("StateMachine forward failed, xid: " + xid, e);
         }
         return BranchStatus.PhaseTwo_CommitFailed_Retryable;
     }
@@ -124,7 +128,18 @@ public class SagaResourceManager extends AbstractResourceManager {
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
                                        String applicationData) throws TransactionException {
         try {
-            StateMachineInstance stateMachineInstance = StateMachineEngineHolder.getStateMachineEngine().compensate(xid,
+            StateMachineInstance stateMachineInstance = StateMachineEngineHolder.getStateMachineEngine().reloadStateMachineInstance(xid);
+            if (stateMachineInstance == null) {
+                return BranchStatus.PhaseTwo_Rollbacked;
+            }
+            if (RecoverStrategy.Forward.equals(stateMachineInstance.getStateMachine().getRecoverStrategy())
+                && (GlobalStatus.TimeoutRollbacking.name().equals(applicationData)
+                        || GlobalStatus.TimeoutRollbackRetrying.name().equals(applicationData))) {
+                LOGGER.warn("Retry by custom recover strategy [Forward] on timeout, SAGA global[{}]", xid);
+                return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+            }
+
+            stateMachineInstance = StateMachineEngineHolder.getStateMachineEngine().compensate(xid,
                 null);
             if (ExecutionStatus.SU.equals(stateMachineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
@@ -136,6 +151,8 @@ public class SagaResourceManager extends AbstractResourceManager {
             if (FrameworkErrorCode.StateMachineInstanceNotExists.equals(e.getErrcode())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
+        } catch (Exception e) {
+            LOGGER.error("StateMachine compensate failed, xid: " + xid, e);
         }
         return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
     }

@@ -153,4 +153,10 @@ public interface StateMachineConfig {
      * @return
      */
     int getTransOperationTimeout();
+
+    /**
+     * get service invoke timeout
+     * @return
+     */
+    int getServiceInvokeTimeout();
 }

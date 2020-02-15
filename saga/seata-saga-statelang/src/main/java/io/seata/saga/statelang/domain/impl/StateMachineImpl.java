@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 
@@ -37,7 +38,7 @@ public class StateMachineImpl implements StateMachine {
     private String version;
     private String startState;
     private Status status = Status.AC;
-    private String recoverStrategy;
+    private RecoverStrategy recoverStrategy;
     private boolean isPersist = true;
     private String type = "STATE_LANG";
     private transient String content;
@@ -151,12 +152,12 @@ public class StateMachineImpl implements StateMachine {
     }
 
     @Override
-    public String getRecoverStrategy() {
+    public RecoverStrategy getRecoverStrategy() {
         return recoverStrategy;
     }
 
     @Override
-    public void setRecoverStrategy(String recoverStrategy) {
+    public void setRecoverStrategy(RecoverStrategy recoverStrategy) {
         this.recoverStrategy = recoverStrategy;
     }
 
