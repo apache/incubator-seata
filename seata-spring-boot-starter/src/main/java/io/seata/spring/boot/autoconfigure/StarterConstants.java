@@ -36,7 +36,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperPro
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
@@ -51,7 +50,8 @@ public class StarterConstants {
     public static final String SEATA_PREFIX = "seata";
     public static final String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";
     public static final String TRANSPORT_PREFIX = SEATA_PREFIX + ".transport";
-    public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".thread-factory";
+    public static final String THREAD_FACTORY_PREFIX_KEBAB_STYLE = TRANSPORT_PREFIX + ".thread-factory";
+    public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".threadFactory";
     public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
     public static final String SERVICE_PREFIX = SEATA_PREFIX + ".service";
     public static final String CLIENT_PREFIX = SEATA_PREFIX + ".client";
@@ -69,7 +69,6 @@ public class StarterConstants {
     public static final String REGISTRY_CONSUL_PREFIX = REGISTRY_PREFIX + ".consul";
     public static final String REGISTRY_ETCD3_PREFIX = REGISTRY_PREFIX + ".etcd3";
     public static final String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
-    public static final String REGISTRY_FILE_PREFIX = REGISTRY_PREFIX + ".file";
 
     public static final String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     public static final String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
@@ -95,7 +94,6 @@ public class StarterConstants {
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
-            put(REGISTRY_FILE_PREFIX, RegistryFileProperties.class);
 
             put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
@@ -118,18 +116,7 @@ public class StarterConstants {
     /**
      * The following special keys need to be normalized.
      */
-    public static final String SPECIAL_KEY_VGROUP_MAPPING = "service.vgroup_mapping";
-    public static final String NORMALIZED_KEY_VGROUP_MAPPING = "vgroupMapping";
     public static final String SPECIAL_KEY_GROUPLIST = "grouplist";
-    public static final String NORMALIZED_KEY_GROUPLIST = "grouplist";
-    public static final String SPECIAL_KEY_UNDO = "client.undo.";
-    public static final String SPECIAL_KEY_CLIENT_RM = "client.rm.";
-    public static final String SPECIAL_KEY_CLIENT_TM = "client.tm.";
-    public static final String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
-    public static final String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
-
-    public static final String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
-    public static final String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
-    public static final String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
+    public static final String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
 
 }

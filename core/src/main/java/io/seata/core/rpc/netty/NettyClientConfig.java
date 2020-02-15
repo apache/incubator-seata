@@ -18,6 +18,11 @@ package io.seata.core.rpc.netty;
 import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+
 /**
  * The type Netty client config.
  *
@@ -43,17 +48,14 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final int MAX_CHECK_ALIVE_RETRY = 300;
     private static final int CHECK_ALIVE_INTERNAL = 10;
     private static final String SOCKET_ADDRESS_START_CHAR = "/";
-    private static final int DEFAULT_SELECTOR_THREAD_SIZE = 1;
     private static final long MAX_ACQUIRE_CONN_MILLS = 60 * 1000L;
-    private static final String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
-    private static final String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
     private static final String RPC_DISPATCH_THREAD_PREFIX = "rpcDispatch";
     private static final int DEFAULT_MAX_POOL_ACTIVE = 1;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
-    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, true);
+    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
 
     /**
      * Gets connect timeout millis.

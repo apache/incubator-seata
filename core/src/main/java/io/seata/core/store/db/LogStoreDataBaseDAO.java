@@ -15,6 +15,7 @@
  */
 package io.seata.core.store.db;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -23,8 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
-import javax.sql.DataSource;
 
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
@@ -41,6 +40,9 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
 /**
  * The type Log store data base dao.
@@ -103,9 +105,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     @Override
     public void init() {
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
-            ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
+            DEFAULT_STORE_DB_GLOBAL_TABLE);
         brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
-            ConfigurationKeys.STORE_DB_BRANCH_DEFAULT_TABLE);
+            DEFAULT_STORE_DB_BRANCH_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");

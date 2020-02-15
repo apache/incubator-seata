@@ -44,6 +44,8 @@ import io.seata.core.store.LockStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOCK_DB_TABLE;
+
 /**
  * The type Data base lock store.
  *
@@ -85,7 +87,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
 
     @Override
     public void init() {
-        lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, ConfigurationKeys.LOCK_DB_DEFAULT_TABLE);
+        lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");

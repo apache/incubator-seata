@@ -18,6 +18,10 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
@@ -26,10 +30,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREF
 @Component
 @ConfigurationProperties(prefix = CLIENT_RM_PREFIX)
 public class RmProperties {
-    private int asyncCommitBufferLimit = 10000;
-    private int reportRetryCount = 5;
-    private boolean tableMetaCheckEnable = false;
-    private boolean reportSuccessEnable = true;
+    private int asyncCommitBufferLimit = DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+    private int reportRetryCount = DEFAULT_CLIENT_REPORT_RETRY_COUNT;
+    private boolean tableMetaCheckEnable = DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+    private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;

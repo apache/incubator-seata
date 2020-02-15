@@ -49,6 +49,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+
 /**
  * The type Global transaction scanner.
  *
@@ -80,7 +82,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String txServiceGroup;
     private final int mode;
     private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     private final FailureHandler failureHandlerHook;
 

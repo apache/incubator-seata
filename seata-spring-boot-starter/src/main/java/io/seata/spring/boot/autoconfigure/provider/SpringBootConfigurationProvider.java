@@ -24,36 +24,17 @@ import java.util.stream.Stream;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
-import io.seata.spring.boot.autoconfigure.util.StringFormatUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT_LOCK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT_RM;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT_TM;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_APOLLO;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.util.StringFormatUtils.DOT;
 
 /**
@@ -115,7 +96,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             if (fieldOptional.isPresent()) {
                 Field field = fieldOptional.get();
                 field.setAccessible(true);
-                return field.get(propertyObject);
+                Object valueObject = field.get(propertyObject);
+                if (valueObject instanceof Map) {
+                    String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
+                    valueObject = ((Map) valueObject).get(key);
+                }
+                return valueObject;
             }
         }
         return null;
@@ -128,46 +114,11 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return dataId
      */
     private String convertDataId(String rawDataId) {
-        if (rawDataId.startsWith(SPECIAL_KEY_VGROUP_MAPPING)) {
-            return SERVICE_PREFIX + DOT + NORMALIZED_KEY_VGROUP_MAPPING;
-        }
         if (rawDataId.endsWith(SPECIAL_KEY_GROUPLIST)) {
-            return SERVICE_PREFIX + DOT + NORMALIZED_KEY_GROUPLIST;
+            String suffix = StringUtils.removeEnd(rawDataId, DOT + SPECIAL_KEY_GROUPLIST);
+            //change the format of default.grouplist to grouplist.default
+            return SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT + suffix;
         }
-        if (rawDataId.startsWith(SPECIAL_KEY_UNDO)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_UNDO);
-            return UNDO_PREFIX + DOT + StringFormatUtils.dotToCamel(suffix);
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_CLIENT_LOCK)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CLIENT_LOCK);
-            return LOCK_PREFIX + DOT + StringFormatUtils.minusToCamel(
-                StringFormatUtils.dotToCamel(suffix));
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_CLIENT_RM)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CLIENT_RM);
-            return CLIENT_RM_PREFIX + DOT + StringFormatUtils.dotToCamel(suffix);
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_CLIENT_TM)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CLIENT_TM);
-            return CLIENT_TM_PREFIX + DOT + StringFormatUtils.dotToCamel(suffix);
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_TRANSPORT_THREAD_FACTORY)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_TRANSPORT_THREAD_FACTORY);
-            return THREAD_FACTORY_PREFIX + DOT + StringFormatUtils.minusToCamel(suffix);
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_REGISTRY_ZK)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_REGISTRY_ZK);
-            return REGISTRY_ZK_PREFIX + DOT + StringFormatUtils.dotToCamel(suffix);
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_CONFIG_ZK)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CONFIG_ZK);
-            return CONFIG_ZK_PREFIX + DOT + StringFormatUtils.dotToCamel(suffix);
-        }
-        if (rawDataId.startsWith(SPECIAL_KEY_CONFIG_APOLLO)) {
-            String suffix = StringUtils.removeStart(rawDataId, SPECIAL_KEY_CONFIG_APOLLO);
-            return CONFIG_APOLLO_PREFIX + DOT + StringFormatUtils.dotToCamel(suffix);
-        }
-
         return SEATA_PREFIX + DOT + rawDataId;
     }
 
@@ -178,8 +129,13 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return propertyPrefix
      */
     private String getPropertyPrefix(String dataId) {
-        return StringFormatUtils.underlineToCamel(
-            StringFormatUtils.minusToCamel(StringUtils.substringBeforeLast(dataId, String.valueOf(DOT))));
+        if (dataId.contains(SPECIAL_KEY_VGROUP_MAPPING)) {
+            return SERVICE_PREFIX;
+        }
+        if (dataId.contains(SPECIAL_KEY_GROUPLIST)) {
+            return SERVICE_PREFIX;
+        }
+        return StringUtils.substringBeforeLast(dataId, String.valueOf(DOT));
     }
 
     /**
@@ -189,6 +145,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return propertySuffix
      */
     private String getPropertySuffix(String dataId) {
+        if (dataId.contains(SPECIAL_KEY_VGROUP_MAPPING)) {
+            return SPECIAL_KEY_VGROUP_MAPPING;
+        }
+        if (dataId.contains(SPECIAL_KEY_GROUPLIST)) {
+            return SPECIAL_KEY_GROUPLIST;
+        }
         return StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
     }
 

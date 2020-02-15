@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 
 /**
@@ -27,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 @ConfigurationProperties(prefix = LOG_PREFIX)
 public class LogProperties {
 
-    private int exceptionRate = 100;
+    private int exceptionRate = DEFAULT_LOG_EXCEPTION_RATE;
 
     public int getExceptionRate() {
         return exceptionRate;
