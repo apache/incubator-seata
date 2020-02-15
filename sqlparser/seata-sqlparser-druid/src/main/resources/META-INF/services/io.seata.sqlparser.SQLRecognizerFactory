@@ -1,1 +1,1 @@
-io.seata.sqlparser.druid.DruidSQLRecognizerFactory
+io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory
