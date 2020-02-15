@@ -21,12 +21,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.EmptyTargetSource;
+import org.springframework.util.ClassUtils;
 
 /**
  * Proxy tools base on spring
@@ -52,7 +55,7 @@ public class SpringProxyUtils {
             if (AopUtils.isJdkDynamicProxy(proxy)) {
                 TargetSource targetSource = advised.getTargetSource();
                 return targetSource instanceof EmptyTargetSource ? getFirstInterfaceByAdvised(advised)
-                    : targetSource.getTargetClass();
+                        : targetSource.getTargetClass();
             }
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
@@ -62,7 +65,7 @@ public class SpringProxyUtils {
     }
 
     public static Class<?>[] findInterfaces(Object proxy) throws Exception {
-        if (AopUtils.isJdkDynamicProxy(proxy)) {
+        if (isJdkDynamicProxy(proxy)) {
             AdvisedSupport advised = getAdvisedSupport(proxy);
             return getInterfacesByAdvised(advised);
         } else {
@@ -97,7 +100,7 @@ public class SpringProxyUtils {
      */
     public static AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
         Field h;
-        if (AopUtils.isJdkDynamicProxy(proxy)) {
+        if (isJdkDynamicProxy(proxy)) {
             h = proxy.getClass().getSuperclass().getDeclaredField("h");
         } else {
             h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
@@ -106,11 +109,11 @@ public class SpringProxyUtils {
         Object dynamicAdvisedInterceptor = h.get(proxy);
         Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
         advised.setAccessible(true);
-        return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
+        return (AdvisedSupport) advised.get(dynamicAdvisedInterceptor);
     }
 
     /**
-     * Is proxy boolean.
+     * Check whether the given object is a proxy.
      *
      * @param bean the bean
      * @return the boolean
@@ -120,9 +123,46 @@ public class SpringProxyUtils {
             return false;
         }
         //check dubbo proxy ?
-        return DubboUtil.isDubboProxyName(bean.getClass().getName()) || (Proxy.class.isAssignableFrom(bean.getClass())
+        return isHSFProxy(bean) || DubboUtil.isDubboProxyName(bean.getClass().getName()) || (Proxy.class.isAssignableFrom(bean.getClass())
                 || AopUtils.isAopProxy(bean));
     }
+
+    /**
+     * Check whether the given object is a HSF proxy.
+     *
+     * @param bean the object to check
+     * @return true or false
+     */
+    public static boolean isHSFProxy(Object bean) {
+        // TODO is hsf proxy
+        return Proxy.class.isAssignableFrom(bean.getClass());
+    }
+
+
+    /**
+     * Check whether the given object is a JDK dynamic proxy.
+     * <p>This method goes beyond the implementation of
+     * {@link Proxy#isProxyClass(Class)} .
+     *
+     * @param object the object to check
+     * @see java.lang.reflect.Proxy#isProxyClass
+     */
+    public static boolean isJdkDynamicProxy(Object object) {
+        return Proxy.isProxyClass(object.getClass());
+    }
+
+    /**
+     * Check whether the given object is a CGLIB proxy.
+     * <p>This method goes beyond the implementation of
+     * {@link ClassUtils#isCglibProxy(Object)}
+     *
+     * @param object the object to check
+     * @see ClassUtils#isCglibProxy(Object)
+     */
+    public static boolean isCglibProxy(Object object) {
+        return ClassUtils.isCglibProxy(object);
+    }
+
 
     /**
      * Get the target class , get the interface of its agent if it is a Proxy
@@ -138,7 +178,7 @@ public class SpringProxyUtils {
 
         //jdk proxy
         if (Proxy.class.isAssignableFrom(proxy.getClass())) {
-            Proxy p = (Proxy)proxy;
+            Proxy p = (Proxy) proxy;
             return p.getClass().getInterfaces()[0];
         }
 
@@ -157,7 +197,7 @@ public class SpringProxyUtils {
             throw new java.lang.IllegalArgumentException("proxy can not be null");
         }
         //not proxy
-        if (!AopUtils.isAopProxy(proxy)) {
+        if (!isProxy(proxy)) {
             return proxy.getClass();
         }
         AdvisedSupport advisedSupport = getAdvisedSupport(proxy);
@@ -178,6 +218,7 @@ public class SpringProxyUtils {
 
     /**
      * get the all interfaces of bean, if the bean is null, then return empty array
+     *
      * @param bean
      * @return
      */
