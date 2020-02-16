@@ -15,18 +15,15 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.GlobalLockTemplate;
+import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.TransactionalExecutor;
@@ -42,7 +39,13 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Global transactional interceptor.
@@ -58,7 +61,27 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
+    private static int selfCheckPeriod;
+    private static boolean selfCheck;
+    private static int selfCheckAllowTimes;
+    private static volatile int autoDemotionNum = 0;
+    private static ConcurrentHashMap<String, Integer> demotionMap = new ConcurrentHashMap<>();
 
+    /**
+     * initialize selfCheck
+     */
+    static {
+        selfCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_SELF_CHECK, false);
+        if (selfCheck) {
+            selfCheckPeriod =
+                ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_SELF_CHECK_PERIOD, 2000);
+            selfCheckAllowTimes =
+                ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_SELF_CHECK_ALLOW_TIMES, 10);
+            if (selfCheckPeriod > 0 && selfCheckAllowTimes > 0) {
+                startSelfCheck();
+            }
+        }
+    }
     /**
      * Instantiates a new Global transactional interceptor.
      *
@@ -66,21 +89,31 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
-        this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        this.disable =
+            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
     }
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis())
-            : null;
+        Class<?> targetClass =
+            methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
-
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
+        String key = null;
+        if (globalTransactionalAnnotation.demotion()) {
+            StringBuilder builder = new StringBuilder(targetClass.getName()).append(".").append(method.getName());
+            key = builder.toString();
+            Integer value = demotionMap.get(key);
+            if (null != value && value >= globalTransactionalAnnotation.demotionTimes()) {
+                LOGGER.warn("This interface has been degraded");
+                return methodInvocation.proceed();
+            }
+        }
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
         if (!disable && globalTransactionalAnnotation != null) {
-            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation,
+                StringUtils.isBlank(key) ? null : key);
         } else if (!disable && globalLockAnnotation != null) {
             return handleGlobalLock(methodInvocation);
         } else {
@@ -101,9 +134,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-                                           final GlobalTransactional globalTrxAnno) throws Throwable {
+        final GlobalTransactional globalTrxAnno, String domotionKey) throws Throwable {
+        boolean error = true;
         try {
-            return transactionalTemplate.execute(new TransactionalExecutor() {
+            Object execute = transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
                 public Object execute() throws Throwable {
                     return methodInvocation.proceed();
@@ -139,10 +173,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     return transactionInfo;
                 }
             });
+            error = false;
+            return execute;
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();
             switch (code) {
                 case RollbackDone:
+                    error = false;
                     throw e.getOriginalException();
                 case BeginFailure:
                     failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
@@ -155,7 +192,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw e.getCause();
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
-
+            }
+        } finally {
+            if (selfCheck) {
+                onSelfCheck(error);
+            }
+            if (error && !StringUtils.isBlank(domotionKey)) {
+                Integer errorNum = demotionMap.get(domotionKey);
+                demotionMap.put(domotionKey, null == errorNum ? 1 : ++errorNum);
             }
         }
     }
@@ -186,4 +230,39 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         }
     }
+
+    /**
+     * auto upgrade service detection
+     */
+    private static void startSelfCheck() {
+        ScheduledThreadPoolExecutor executor =
+            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("SelfCheckWorker", 1, true));
+        executor.scheduleAtFixedRate(() -> {
+            if (demotionMap.size() > 0) {
+                try {
+                    TransactionManagerHolder.get()
+                        .commit(TransactionManagerHolder.get().begin(null, null, "test", 60000));
+                    onSelfCheck(false);
+                } catch (Exception e) {
+                    onSelfCheck(true);
+                }
+            }
+        }, 10, selfCheckPeriod, TimeUnit.MILLISECONDS);
+    }
+
+    private static synchronized void onSelfCheck(boolean isError) {
+        if (!isError) {
+            autoDemotionNum++;
+            if (autoDemotionNum > selfCheckAllowTimes && demotionMap.size() > 0) {
+                autoDemotionNum = 0;
+                demotionMap.clear();
+            }
+        }
+        if (isError) {
+            if (autoDemotionNum > 0) {
+                autoDemotionNum--;
+            }
+        }
+    }
+
 }

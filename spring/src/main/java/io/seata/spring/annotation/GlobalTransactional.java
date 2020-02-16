@@ -69,5 +69,15 @@ public @interface GlobalTransactional {
      */
     String[] noRollbackForClassName() default {};
 
+    /**
+     * Automatically demoted ultimate value
+     * @return
+     */
+    int demotionTimes() default 10;
 
+    /**
+     * Automatically demoted switch
+     * @return
+     */
+    boolean demotion() default false;
 }

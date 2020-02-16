@@ -412,5 +412,20 @@ public class ConfigurationKeys {
     /**
      * The constant SQL_PARSER_TYPE.
      */
-    public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+    public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlparser.type";
+
+    /**
+     * The constant CLIENT_SELF_CHECK_PERIOD.
+     */
+    public static final String CLIENT_SELF_CHECK_PERIOD = CLIENT_PREFIX + "tm.self.check.period";
+
+    /**
+     * The constant CLIENT_SELF_CHECK.
+     */
+    public static final String CLIENT_SELF_CHECK = CLIENT_PREFIX + "tm.self.check";
+    /**
+     * The constant CLIENT_SELF_CHECK_ALLOW_TIMES.
+     */
+    public static final String CLIENT_SELF_CHECK_ALLOW_TIMES = CLIENT_PREFIX + "tm.self.check.allow.times";
+
 }
