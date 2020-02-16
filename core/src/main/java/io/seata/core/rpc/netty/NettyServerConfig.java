@@ -296,7 +296,7 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     /**
      * Get boss thread size int.
-     *
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.thread-factory.boss-thread-siz"
      * @return the int
      */
     public int getBossThreadSize() {
@@ -305,7 +305,7 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     /**
      * Get the timeout seconds of shutdown.
-     *
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.shutdown.wait"
      * @return the int
      */
     public int getServerShutdownWaitTime() {

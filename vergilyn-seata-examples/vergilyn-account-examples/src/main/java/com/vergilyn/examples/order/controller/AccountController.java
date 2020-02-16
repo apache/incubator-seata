@@ -19,14 +19,14 @@ public class AccountController {
 
     @RequestMapping("/decrease")
     ObjectResponse<Void> decrease(@RequestParam("userId") String userId, @RequestParam("amount") Double amount){
-        log.info("请求账户微服务 >>>> userId = {}, amount = {}", userId, amount);
+        log.info("请求账户微服务 `/account/decrease` >>>> userId = {}, amount = {}", userId, amount);
 
         return accountService.decrease(userId, amount);
     }
 
     @RequestMapping("/get")
     ObjectResponse<Account> get(String userId){
-        log.info("请求账户微服务 >>>> userId = {}", userId);
+        log.info("请求账户微服务 `/account/get` >>>> userId = {}", userId);
         return accountService.get(userId);
     }
 

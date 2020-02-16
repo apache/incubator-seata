@@ -48,6 +48,9 @@ public class NettyBaseConfig {
 
     /**
      * The constant CONFIG.
+     * <p>vergilyn-comment, 2020-02-16 >>>> <br/>
+     *   {@linkplain ConfigurationFactory#instance} `file.conf`的配置
+     * </p>
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
     /**
@@ -62,6 +65,7 @@ public class NettyBaseConfig {
 
     /**
      * The constant SHARE_BOSS_WORKER.
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.thread-factory.share-boss-worker"，<strong>暂无任何意义</strong>
      */
     protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
 
@@ -72,6 +76,7 @@ public class NettyBaseConfig {
 
     /**
      * The constant TRANSPORT_SERVER_TYPE.
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport, server"，可选值：NIO、NATIVE
      */
     protected static final TransportServerType TRANSPORT_SERVER_TYPE;
 
@@ -86,6 +91,7 @@ public class NettyBaseConfig {
 
     /**
      * The constant TRANSPORT_PROTOCOL_TYPE.
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.type"，可选值：tcp、udt、unix-domain-socket
      */
     protected static final TransportProtocolType TRANSPORT_PROTOCOL_TYPE;
 
@@ -114,6 +120,10 @@ public class NettyBaseConfig {
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
         } else if (null != WorkThreadMode.getModeByName(workerThreadSize)) {
+            /* vergilyn-question, 2020-02-16 >>>>
+             *   意思能明白，但传`workerThreadSize`怪怪的。
+             *   不如提供新的配置项定义，例如"transport.thread-factory.work-thread-mode = [Auto | Pin | BusyPin | Default]"
+             */
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
@@ -162,6 +172,11 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
+
+        /* vergilyn-comment, 2020-02-16 >>>>
+         *   即`file.conf`中的"transport.heartbeat"
+         *   特别，代码中只有此处获取该配置项，所以后续的相关判断不是通过此配置项判断，而是通过`MAX_WRITE_IDLE_SECONDS`和`MAX_READ_IDLE_SECONDS`
+         */
         boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, false);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;

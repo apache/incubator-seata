@@ -177,6 +177,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
                 RegistryFactory.getInstance().close();
+
+                // vergilyn-question, 2020-02-16 >>>> 为什么要Thread.sleep一会？
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }

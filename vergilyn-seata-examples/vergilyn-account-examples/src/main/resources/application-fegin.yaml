@@ -1,0 +1,11 @@
+
+# feign
+# org.springframework.cloud.openfeign.FeignClientProperties
+feign:
+  hystrix:
+    enabled: false
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000

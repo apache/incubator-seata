@@ -15,6 +15,12 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -29,12 +35,6 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 /**
  * The type Rpc client.
@@ -87,7 +87,19 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         if (null == instance) {
             synchronized (TmRpcClient.class) {
                 if (null == instance) {
+
+                    /* vergilyn-comment, 2020-02-16 >>>>
+                     *   这里是直接new的一个NettyClientConfig，
+                     */
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
+
+                    /* vergilyn-comment, 2020-02-16 >>>>
+                     *   1. corePoolSize = maximumPoolSize
+                     *   2. keepAliveTime 为 Integer.Max 秒
+                     *   3. workQueue 最大 2000，且不可配置！
+                     *   4. threadFactory，只是定义了线程名字，不太需要关心。
+                     *   5. RejectedExecutionHandler
+                     */
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS,
@@ -95,6 +107,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         RejectedPolicies.runsOldestTaskPolicy());
+
                     instance = new TmRpcClient(nettyClientConfig, null, messageExecutor);
                 }
             }

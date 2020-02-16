@@ -19,14 +19,14 @@ public class OrderController {
 
     @RequestMapping("/create")
     public ObjectResponse<OrderDTO> createOrder(String userId, String commodityCode, Integer orderTotal, Double orderAmount){
-        log.info("请求订单微服务 >>>> userId = {}, commodityCode = {}, orderTotal = {}, orderAmount = {}"
+        log.info("请求订单微服务 `/order/creat` >>>> userId = {}, commodityCode = {}, orderTotal = {}, orderAmount = {}"
                 , userId, commodityCode, orderTotal, orderAmount);
         return orderService.create(userId, commodityCode, orderTotal, orderAmount);
     }
 
     @RequestMapping("/count")
     public ObjectResponse<Long> count(){
-        log.info("请求订单微服务 >>>> ");
+        log.info("请求订单微服务 `/order/count` >>>> ");
 
         return orderService.count();
     }

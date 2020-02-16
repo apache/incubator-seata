@@ -52,7 +52,7 @@ libprotoc 3.11.3
 1. idea安装插件`Protobuf Support`（proto语法高亮，mvn编译命令）
 - [idea使用Protobuf插件](https://www.cnblogs.com/TechSnail/p/7793813.html)
 
-2. maven-plugin 配置，例如seata源码中的相应 [pom.xml](../pom.xml)
+2. maven-plugin 配置，例如seata源码中的相应 [seata/pom.xml](../../pom.xml)
 ```XML
 <plugin>
     <groupId>org.xolstice.maven.plugins</groupId>
@@ -93,126 +93,6 @@ libprotoc 3.11.3
 
 ## 3. 配置文件的读取（register.conf、file.conf）
 ![register_conf_load](plant-uml/register_conf_load.png)
-
-```JAVA
-package io.seata.config;
-
-public final class ConfigurationFactory {
-    private static final String REGISTRY_CONF_PREFIX = "registry";
-    private static final String REGISTRY_CONF_SUFFIX = ".conf";
-    private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
-    public static final String ENV_PROPERTY_KEY = "seataEnv";
-
-    private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
-
-    private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
-
-    /**
-     * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
-     *   例如`register.conf`的配置
-     * </p>
-     * @see #instance instance - `register.conf`中对应的`config.type`对应的配置，例如`file.conf`
-     */
-    public static final Configuration CURRENT_FILE_INSTANCE;
-
-    static {
-        // 确定seata-config-name，默认叫`register.conf`
-        String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
-        if (null == seataConfigName) {
-            seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
-        }
-        if (null == seataConfigName) {
-            seataConfigName = REGISTRY_CONF_PREFIX;
-        }
-        
-        String envValue = System.getProperty(ENV_PROPERTY_KEY);  // 区分不同环境
-        if (null == envValue) {
-            envValue = System.getenv(ENV_SYSTEM_KEY);
-        }
-        
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
-            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
-        Configuration extConfiguration = null;
-        try {
-            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("load extConfiguration:{}",
-                    extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
-            }
-        } catch (Exception e) {
-            LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
-        }
-        CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
-    }
-
-    private static final String NAME_KEY = "name";
-    private static final String FILE_TYPE = "file";
-
-    /**
-     * <p>vergilyn-comment, 2020-02-13 >>>> <br/>
-     *   例如`file.conf`的配置
-     * </p>
-     * @see #CURRENT_FILE_INSTANCE CURRENT_FILE_INSTANCE - `register.conf`的配置
-     */
-    private static volatile Configuration instance = null;
-    
-    /**
-     * Gets instance.
-     *
-     * @return the instance
-     */
-    public static Configuration getInstance() {
-        if (instance == null) {
-            synchronized (Configuration.class) {
-                if (instance == null) {
-                    instance = buildConfiguration();
-                }
-            }
-        }
-        return instance;
-    }
-
-    private static Configuration buildConfiguration() {
-        ConfigType configType = null;
-        String configTypeName = null;
-        try {
-            // vergilyn-comment, 2020-02-13 >>>> 从已加载的`register.conf`获取配置参数`conf.type = "file"`
-            configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                    + ConfigurationKeys.FILE_ROOT_TYPE);
-            configType = ConfigType.getType(configTypeName);
-        } catch (Exception e) {
-            throw new NotSupportYetException("not support register type: " + configTypeName, e);
-        }
-        if (ConfigType.File == configType) {
-            // vergilyn-comment, 2020-02-13 >>>> 通过配置`conf.file.name = "file.conf"`读取conf
-            String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + NAME_KEY;
-            String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            Configuration configuration = new FileConfiguration(name);
-            Configuration extConfiguration = null;
-            try {
-                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load extConfiguration:{}",
-                        extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
-                }
-            } catch (Exception e) {
-                LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
-            }
-
-            return null == extConfiguration ? configuration : extConfiguration;
-        } else {
-            /* vergilyn-comment, 2020-02-13 >>>>
-             *   nacos 、apollo、zk、consul、etcd3等的读取，参考`ConfigurationProvider.class`的实现类
-             */
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
-                .provide();
-        }
-    }
-}
-
-```
 
 ## 4. 将seata-server注册到服务注册中心（例如eureka、nacos）
 ![seata_register_to_nacos](plant-uml/seata_register_to_nacos.png)

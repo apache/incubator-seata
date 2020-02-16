@@ -11,10 +11,14 @@ import com.vergilyn.examples.order.repository.OrderRepository;
 import com.vergilyn.examples.order.service.OrderService;
 import com.vergilyn.examples.response.ObjectResponse;
 
+import io.seata.core.context.RootContext;
+import io.seata.spring.annotation.GlobalTransactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderRepository orderRepository;
@@ -25,11 +29,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @GlobalTransactional(name = "vergilyn-first-global-transaction", rollbackFor = Exception.class)
     public ObjectResponse<OrderDTO> create(String userId, String commodityCode, Integer orderTotal, Double orderAmount) {
+        log.info("开启全局事务 >>>> xid: {}", RootContext.getXID());
 
         ObjectResponse<OrderDTO> response = new ObjectResponse<>();
         // 扣减用户账户
         ObjectResponse<Void> accountResp = accountFeignClient.decrease(userId, orderAmount);
+
+        int i = 1 / 0;
 
         // 扣减库存
         ObjectResponse<Void> storageResp = storageFeignClient.decrease(commodityCode, orderTotal);

@@ -138,7 +138,9 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     /**
      * Gets client worker threads.
-     *
+     * <p>vergilyn-comment, 2020-02-16 >>>> <br/>
+     *   一般即为`file.conf`中配置的"transport.thread-factory.worker-thread-size"，如果未配置根据
+     * </p>
      * @return the client worker threads
      */
     public int getClientWorkerThreads() {
@@ -340,7 +342,7 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     /**
      * Gets client selector thread size.
-     *
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.thread-factory.client-selector-thread-size"
      * @return the client selector thread size
      */
     public int getClientSelectorThreadSize() {
@@ -358,7 +360,7 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     /**
      * Get client selector thread prefix string.
-     *
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.thread-factory.client-selector-thread-prefix"
      * @return the string
      */
     public String getClientSelectorThreadPrefix() {

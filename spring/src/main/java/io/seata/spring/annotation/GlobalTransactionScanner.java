@@ -15,12 +15,13 @@
  */
 package io.seata.spring.annotation;
 
-import javax.sql.DataSource;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.sql.DataSource;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
@@ -87,6 +88,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
+    /**
+     * <p>vergilyn-comment, 2020-02-16 >>>> <br/>
+     *   {@linkplain #afterPropertiesSet()}会触发调用`ConfigurationFactory`，
+     *   此时seata-client会去读取配置文件`register.conf`和`file.conf`
+     * </p>
+     */
     private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
 

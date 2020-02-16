@@ -72,7 +72,7 @@ public class ProtocolConstants {
 
     /**
      * Configured codec by user, default is SEATA
-     * 
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.serialization"，可选值：seata、protobuf、kryo
      * @see CodecType#SEATA
      */
     public static final byte CONFIGURED_CODEC = CodecType.getByName(ConfigurationFactory.getInstance()
@@ -80,7 +80,7 @@ public class ProtocolConstants {
 
     /**
      * Configured compressor by user, default is NONE
-     *
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.compressor"，可选值：none、gzip、
      * @see CompressorType#NONE
      */
     public static final byte CONFIGURED_COMPRESSOR = CompressorType.getByName(ConfigurationFactory.getInstance()

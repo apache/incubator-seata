@@ -7,6 +7,7 @@ import com.vergilyn.examples.storage.entity.Storage;
 import com.vergilyn.examples.storage.repository.StorageRepository;
 import com.vergilyn.examples.storage.service.StorageService;
 
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     @Transactional
+    @GlobalTransactional(name = "vergilyn-first-global-transaction")
     public ObjectResponse<Void> decrease(String commodityCode, int total) {
 
         int storage = storageRepository.decreaseStorage(commodityCode, total);
