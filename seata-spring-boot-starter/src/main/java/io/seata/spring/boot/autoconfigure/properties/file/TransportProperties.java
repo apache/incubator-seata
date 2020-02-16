@@ -18,6 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
 /**
@@ -37,7 +39,7 @@ public class TransportProperties {
     /**
      * enable heartbeat
      */
-    private boolean heartbeat = true;
+    private boolean heartbeat = DEFAULT_TRANSPORT_HEARTBEAT;
     /**
      * serialization
      */
@@ -50,7 +52,7 @@ public class TransportProperties {
     /**
      * enable client batch send request
      */
-    private boolean enableClientBatchSendRequest = true;
+    private boolean enableClientBatchSendRequest = DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 
     public String getType() {
         return type;

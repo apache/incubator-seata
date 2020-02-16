@@ -91,6 +91,7 @@ public class NettyBaseConfig {
 
     private static final int READIDLE_BASE_WRITEIDLE = 3;
 
+
     /**
      * The constant MAX_WRITE_IDLE_SECONDS.
      */

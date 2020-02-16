@@ -13,20 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
-
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+package io.seata.saga.statelang.domain;
 
 /**
- * @author Geng Zhang
+ * Recover Strategy
+ *
+ * @author lorne.cl
  */
-public class UndoLogConstants {
+public enum RecoverStrategy {
 
-    public static final String SERIALIZER_KEY = "serializer";
+    /**
+     * Compensate
+     */
+    Compensate,
 
-    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
-        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION);
+    /**
+     * Forward
+     */
+    Forward;
 }
