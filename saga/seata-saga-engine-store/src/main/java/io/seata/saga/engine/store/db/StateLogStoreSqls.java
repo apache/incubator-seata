@@ -40,11 +40,11 @@ public class StateLogStoreSqls {
 
     private static final String RECORD_STATE_MACHINE_FINISHED_SQL
         = "UPDATE ${TABLE_PREFIX}state_machine_inst SET gmt_end = ?, excep = ?, end_params = ?,status = ?, "
-        + "compensation_status = ?, is_running = ?, gmt_updated = current_timestamp WHERE id = ? and gmt_updated = ?";
+        + "compensation_status = ?, is_running = ?, gmt_updated = ? WHERE id = ? and gmt_updated = ?";
 
     private static final String UPDATE_STATE_MACHINE_RUNNING_STATUS_SQL =
         "UPDATE ${TABLE_PREFIX}state_machine_inst SET\n"
-            + "is_running = ?, gmt_updated = ? where id = ?";
+            + "is_running = ?, gmt_updated = ? where id = ? and gmt_updated = ?";
 
     private static final String GET_STATE_MACHINE_INSTANCE_BY_ID_SQL = "SELECT " + STATE_MACHINE_INSTANCE_FIELDS
         + " FROM ${TABLE_PREFIX}state_machine_inst WHERE id = ?";
