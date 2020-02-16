@@ -412,7 +412,7 @@ public class ConfigurationKeys {
     /**
      * The constant SQL_PARSER_TYPE.
      */
-    public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlparser.type";
+    public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
      * The constant CLIENT_SELF_CHECK_PERIOD.
