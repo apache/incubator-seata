@@ -15,8 +15,10 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
+
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
@@ -24,15 +26,11 @@ import io.seata.core.rpc.DefaultServerMessageListenerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
-
 /**
  * The type Abstract rpc server.
  *
  * @author slievrly
  */
-@Sharable
 public class RpcServer extends AbstractRpcRemotingServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcServer.class);
