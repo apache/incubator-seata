@@ -67,8 +67,8 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
-    private static final int SCHEDULE_DELAY_MILLS = 60*1000;
-    private static final int SCHEDULE_INTERVAL_MILLS = 10*1000;
+    private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
+    private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
 
     private final RpcClientBootstrap clientBootstrap;
