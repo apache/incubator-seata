@@ -43,7 +43,7 @@ seata:
       client-worker-thread-prefix: NettyClientWorkerThread
     type: TCP
     server: NIO
-    heartbeat: false
+    heartbeat: true
     serialization: seata
     compressor: none
     enable-client-batch-send-request: true
