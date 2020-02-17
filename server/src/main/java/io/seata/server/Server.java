@@ -41,7 +41,7 @@ public class Server {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
-    private static final int MIN_SERVER_POOL_SIZE = 100;
+    private static final int MIN_SERVER_POOL_SIZE = 50;
     private static final int MAX_SERVER_POOL_SIZE = 500;
     private static final int MAX_TASK_QUEUE_SIZE = 20000;
     private static final int KEEP_ALIVE_TIME = 500;

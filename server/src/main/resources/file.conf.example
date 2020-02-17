@@ -28,6 +28,7 @@ transport {
   serialization = "seata"
   compressor = "none"
 }
+# service configuration, only used in client side
 service {
   #transaction service group mapping
   vgroupMapping.my_test_tx_group = "default"
@@ -38,7 +39,7 @@ service {
   #disable seata
   disableGlobalTransaction = false
 }
-
+#client transaction configuration, only used in client side
 client {
   rm {
     asyncCommitBufferLimit = 10000
@@ -49,7 +50,7 @@ client {
     }
     reportRetryCount = 5
     tableMetaCheckEnable = false
-    reportSuccessEnable = true
+    reportSuccessEnable = false
     sqlParserType = druid
   }
   tm {
@@ -66,7 +67,7 @@ client {
   }
 }
 
-## transaction log store
+## transaction log store, only used in server side
 store {
   ## store mode: file、db
   mode = "file"
@@ -104,6 +105,7 @@ store {
     queryLimit = 100
   }
 }
+## server configuration, only used in server side
 server {
   recovery {
     #schedule committing retry period in milliseconds
@@ -126,7 +128,7 @@ server {
   rollbackRetryTimeoutUnlockEnable = false
 }
 
-## metrics settings
+## metrics configuration, only used in server side
 metrics {
   enabled = false
   registryType = "compact"
