@@ -15,21 +15,19 @@
  */
 package io.seata.spring.util;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.sun.xml.internal.bind.v2.TODO;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
-import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Proxy tools base on spring
