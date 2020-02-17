@@ -13,27 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_FILE_PREFIX;
+package io.seata.core.constants;
 
 /**
- * @author xingfudeshi@gmail.com
+ * DubboConstants
+ *
+ * @author funkye
  */
-@Component
-@ConfigurationProperties(prefix = REGISTRY_FILE_PREFIX)
-public class RegistryFileProperties {
-    private String name = "file.conf";
+public class DubboConstants {
 
-    public String getName() {
-        return name;
-    }
+    public static final String PROVIDER = "provider";
 
-    public RegistryFileProperties setName(String name) {
-        this.name = name;
-        return this;
+    public static final String CONSUMER = "consumer";
+
+    public static boolean ALIBABADUBBO;
+
+    static {
+        try {
+            Class.forName("org.apache.dubbo.rpc.RpcContext");
+        } catch (ClassNotFoundException e) {
+            ALIBABADUBBO = true;
+        }
     }
 }
