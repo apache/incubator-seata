@@ -56,7 +56,7 @@ public class SagaCore extends AbstractCore {
 
     @Override
     public void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
-        // SAGA type accept forward(retry) operation, forward operation will register remaining branches
+        // SAGA type accept forward(retry) operation on timeout or commit fail, forward operation will register remaining branches
     }
 
     @Override
@@ -101,7 +101,7 @@ public class SagaCore extends AbstractCore {
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         try {
             BranchStatus branchStatus = branchCommit(globalSession, SessionHelper.newBranch(BranchType.SAGA,
-                    globalSession.getXid(), -1, getSagaResourceId(globalSession), null));
+                    globalSession.getXid(), -1, getSagaResourceId(globalSession), globalSession.getStatus().name()));
 
             switch (branchStatus) {
                 case PhaseTwo_Committed:
@@ -159,7 +159,7 @@ public class SagaCore extends AbstractCore {
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         try {
             BranchStatus branchStatus = branchRollback(globalSession, SessionHelper.newBranch(BranchType.SAGA,
-                    globalSession.getXid(), -1, getSagaResourceId(globalSession), null));
+                    globalSession.getXid(), -1, getSagaResourceId(globalSession), globalSession.getStatus().name()));
 
             switch (branchStatus) {
                 case PhaseTwo_Rollbacked:
@@ -169,6 +169,11 @@ public class SagaCore extends AbstractCore {
                 case PhaseTwo_RollbackFailed_Unretryable:
                     SessionHelper.endRollbackFailed(globalSession);
                     LOGGER.error("Failed to rollback SAGA global[{}]", globalSession.getXid());
+                    return false;
+                case PhaseTwo_CommitFailed_Retryable:
+                    SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(globalSession);
+                    globalSession.queueToRetryCommit();
+                    LOGGER.warn("Retry by custom recover strategy [Forward] on timeout, SAGA global[{}]", globalSession.getXid());
                     return false;
                 default:
                     LOGGER.error("Failed to rollback SAGA global[{}]", globalSession.getXid());
