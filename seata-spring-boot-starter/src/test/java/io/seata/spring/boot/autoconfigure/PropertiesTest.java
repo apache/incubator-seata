@@ -127,7 +127,7 @@ public class PropertiesTest {
     public void testTransportProperties() {
         assertEquals("TCP", context.getBean(TransportProperties.class).getType());
         assertEquals("NIO", context.getBean(TransportProperties.class).getServer());
-        assertFalse(context.getBean(TransportProperties.class).isHeartbeat());
+        assertTrue(context.getBean(TransportProperties.class).isHeartbeat());
         assertEquals("seata", context.getBean(TransportProperties.class).getSerialization());
         assertEquals("none", context.getBean(TransportProperties.class).getCompressor());
         assertTrue(context.getBean(TransportProperties.class).isEnableClientBatchSendRequest());
