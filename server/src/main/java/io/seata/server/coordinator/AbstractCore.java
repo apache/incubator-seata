@@ -70,11 +70,6 @@ public abstract class AbstractCore implements Core {
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
         return globalSession.lockAndExecute(() -> {
-            if (!globalSession.isActive()) {
-                throw new GlobalTransactionException(GlobalTransactionNotActive, String
-                        .format("Could not register branch into global session xid = %s status = %s",
-                                globalSession.getXid(), globalSession.getStatus()));
-            }
             globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
@@ -95,6 +90,11 @@ public abstract class AbstractCore implements Core {
     }
 
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
+        if (!globalSession.isActive()) {
+            throw new GlobalTransactionException(GlobalTransactionNotActive, String
+                    .format("Could not register branch into global session xid = %s status = %s",
+                            globalSession.getXid(), globalSession.getStatus()));
+        }
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
                     .format("Could not register branch into global session xid = %s status = %s while expecting %s",

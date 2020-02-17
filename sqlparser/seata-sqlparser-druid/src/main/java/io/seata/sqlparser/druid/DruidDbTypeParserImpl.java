@@ -13,27 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.sqlparser.druid;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_FILE_PREFIX;
+import com.alibaba.druid.util.JdbcUtils;
+import io.seata.sqlparser.util.DbTypeParser;
 
 /**
- * @author xingfudeshi@gmail.com
+ * @author ggndnn
  */
-@Component
-@ConfigurationProperties(prefix = REGISTRY_FILE_PREFIX)
-public class RegistryFileProperties {
-    private String name = "file.conf";
-
-    public String getName() {
-        return name;
-    }
-
-    public RegistryFileProperties setName(String name) {
-        this.name = name;
-        return this;
+class DruidDbTypeParserImpl implements DbTypeParser {
+    @Override
+    public String parseFromJdbcUrl(String jdbcUrl) {
+        return JdbcUtils.getDbType(jdbcUrl, null);
     }
 }
