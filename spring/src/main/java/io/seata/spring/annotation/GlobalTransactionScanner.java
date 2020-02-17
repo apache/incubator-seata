@@ -43,6 +43,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
@@ -233,7 +234,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
 
                 LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
-                if (!SpringProxyUtils.isProxy(bean)) {
+                if (!SpringProxyUtils.isProxy(bean) || !(bean instanceof SpringProxy)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
                     AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
