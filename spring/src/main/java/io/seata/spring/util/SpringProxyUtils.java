@@ -48,9 +48,9 @@ public class SpringProxyUtils {
      * @throws Exception the exception
      */
     public static Class<?> findTargetClass(Object proxy) throws Exception {
-        if (AopUtils.isAopProxy(proxy)) {
+        if (isProxy(proxy)) {
             AdvisedSupport advised = getAdvisedSupport(proxy);
-            if (AopUtils.isJdkDynamicProxy(proxy)) {
+            if (isJdkDynamicProxy(proxy)) {
                 TargetSource targetSource = advised.getTargetSource();
                 return targetSource instanceof EmptyTargetSource ? getFirstInterfaceByAdvised(advised)
                         : targetSource.getTargetClass();
@@ -121,21 +121,9 @@ public class SpringProxyUtils {
             return false;
         }
         //check dubbo proxy ?
-        return isHSFProxy(bean) || DubboUtil.isDubboProxyName(bean.getClass().getName()) || (Proxy.class.isAssignableFrom(bean.getClass())
+        return DubboUtil.isDubboProxyName(bean.getClass().getName()) || (Proxy.class.isAssignableFrom(bean.getClass())
                 || AopUtils.isAopProxy(bean));
     }
-
-    /**
-     * Check whether the given object is a HSF proxy.
-     *
-     * @param bean the object to check
-     * @return true or false
-     */
-    public static boolean isHSFProxy(Object bean) {
-        // TODO is hsf proxy
-        return Proxy.class.isAssignableFrom(bean.getClass());
-    }
-
 
     /**
      * Check whether the given object is a JDK dynamic proxy.
