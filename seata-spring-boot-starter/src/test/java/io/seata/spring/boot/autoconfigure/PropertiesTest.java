@@ -87,7 +87,7 @@ public class PropertiesTest {
         assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
         assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
-        assertTrue(context.getBean(RmProperties.class).isReportSuccessEnable());
+        assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
     }
 
     @Test
@@ -127,7 +127,7 @@ public class PropertiesTest {
     public void testTransportProperties() {
         assertEquals("TCP", context.getBean(TransportProperties.class).getType());
         assertEquals("NIO", context.getBean(TransportProperties.class).getServer());
-        assertTrue(context.getBean(TransportProperties.class).isHeartbeat());
+        assertFalse(context.getBean(TransportProperties.class).isHeartbeat());
         assertEquals("seata", context.getBean(TransportProperties.class).getSerialization());
         assertEquals("none", context.getBean(TransportProperties.class).getCompressor());
         assertTrue(context.getBean(TransportProperties.class).isEnableClientBatchSendRequest());
