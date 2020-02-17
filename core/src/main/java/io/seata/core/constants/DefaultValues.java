@@ -25,7 +25,7 @@ public class DefaultValues {
     public static final int DEFAULT_LOG_EXCEPTION_RATE = 100;
     public static final int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = 10000;
     public static final int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
-    public static final boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = true;
+    public static final boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
     public static final boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
     /**
      * Shutdown timeout default 3s
@@ -44,7 +44,7 @@ public class DefaultValues {
     public static final String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     public static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
 
-    public static final boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
+    public static final boolean DEFAULT_TRANSPORT_HEARTBEAT = false;
     public static final boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
     public static final String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
     /**
@@ -66,8 +66,8 @@ public class DefaultValues {
      */
     public static final String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
-    public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 1;
-    public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 1;
+    public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
+    public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
 
     public static final String DEFAULT_TX_GROUP = "my_test_tx_group";
     public static final String DEFAULT_TC_CLUSTER = "default";

@@ -1,6 +1,6 @@
 transport.type=TCP
 transport.server=NIO
-transport.heartbeat=true
+transport.heartbeat=false
 transport.enableClientBatchSendRequest=false
 transport.threadFactory.bossThreadPrefix=NettyBoss
 transport.threadFactory.workerThreadPrefix=NettyServerNIOWorker
@@ -23,7 +23,7 @@ client.rm.reportRetryCount=5
 client.rm.lockRetryPolicyBranchRollbackOnConflict=true
 client.rm.tableMetaCheckEnable=false
 client.rm.sqlParserType=druid
-client.rm.reportSuccessEnable=true
+client.rm.reportSuccessEnable=false
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
 store.mode=file
