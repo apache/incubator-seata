@@ -26,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -272,6 +273,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     /**
      * The type ClientHandler.
      */
+    @Sharable
     class ClientHandler extends AbstractHandler {
 
         @Override
