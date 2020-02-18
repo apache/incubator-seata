@@ -25,9 +25,4 @@ public class GlobalTransactionHookAdapter implements GlobalTransactionHook {
 
     }
 
-    @Override
-    public void afterRollback() {
-
-    }
-
 }

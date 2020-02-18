@@ -25,9 +25,4 @@ public interface GlobalTransactionHook {
      */
     void afterCommit();
 
-    /**
-     * after tx rollback
-     */
-    void afterRollback();
-
 }

@@ -136,13 +136,6 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch Rollbacked result: " + status);
         }
-        for(GlobalTransactionHook hook : GlobalTransactionHookManager.popHooks(xid)){
-            try{
-                hook.afterRollback();
-            }catch (Exception e){
-                LOGGER.error("execute callback fail:{}",e.getMessage(),e);
-            }
-        }
     }
 
     /**
