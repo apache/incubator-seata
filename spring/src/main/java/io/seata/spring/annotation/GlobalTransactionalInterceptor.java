@@ -42,12 +42,14 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+
 /**
  * The type Global transactional interceptor.
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener,MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -65,7 +67,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-            false);
+            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
     }
 
     @Override

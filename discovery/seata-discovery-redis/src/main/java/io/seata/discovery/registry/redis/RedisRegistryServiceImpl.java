@@ -18,10 +18,10 @@ package io.seata.discovery.registry.redis;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +62,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static final ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile RedisRegistryServiceImpl instance;
     private static volatile JedisPool jedisPool;
+
     private ExecutorService threadPoolExecutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("RedisRegistryService", 1));
 

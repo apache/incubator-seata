@@ -21,21 +21,18 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
-import io.seata.sqlparser.SqlParserType;
 
 import java.util.List;
 
 /**
- * DruidSQLRecognizerFactory
+ * DruidSQLRecognizerFactoryImpl
  *
  * @author sharajava
  * @author ggndnn
  */
-@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
-public class DruidSQLRecognizerFactory implements SQLRecognizerFactory {
+class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
     public SQLRecognizer create(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);

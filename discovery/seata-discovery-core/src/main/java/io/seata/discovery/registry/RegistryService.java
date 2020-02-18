@@ -15,11 +15,11 @@
  */
 package io.seata.discovery.registry;
 
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-
 import java.net.InetSocketAddress;
 import java.util.List;
+
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 
 /**
  * The interface Registry service.
@@ -32,7 +32,7 @@ public interface RegistryService<T> {
     /**
      * The constant PREFIX_SERVICE_MAPPING.
      */
-    String PREFIX_SERVICE_MAPPING = "vgroup_mapping.";
+    String PREFIX_SERVICE_MAPPING = "vgroupMapping.";
     /**
      * The constant PREFIX_SERVICE_ROOT.
      */
