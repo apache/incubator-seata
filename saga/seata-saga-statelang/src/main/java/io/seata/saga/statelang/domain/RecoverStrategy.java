@@ -13,19 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.druid;
+package io.seata.saga.statelang.domain;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+/**
+ * Recover Strategy
+ *
+ * @author lorne.cl
+ */
+public enum RecoverStrategy {
 
-class DruidLoaderForTest implements DruidLoader {
-    @Override
-    public URL getEmbeddedDruidLocation() {
-        try {
-            return URI.create("file://druid-test.jar").toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    /**
+     * Compensate
+     */
+    Compensate,
+
+    /**
+     * Forward
+     */
+    Forward;
 }

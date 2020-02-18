@@ -15,6 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.Map;
+
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
@@ -36,7 +38,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperPro
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
@@ -48,7 +49,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -84,15 +87,18 @@ public class PropertiesTest {
         assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
         assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
-        assertTrue(context.getBean(RmProperties.class).isReportSuccessEnable());
+        assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
     }
 
     @Test
     public void testServiceProperties() {
-        assertEquals("default", context.getBean(ServiceProperties.class).getVgroupMapping());
-        assertEquals("127.0.0.1:8091", context.getBean(ServiceProperties.class).getGrouplist());
-        assertFalse(context.getBean(ServiceProperties.class).isEnableDegrade());
-        assertFalse(context.getBean(ServiceProperties.class).isDisableGlobalTransaction());
+        ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
+        Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
+        Map<String, String> grouplist = serviceProperties.getGrouplist();
+        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
+        assertEquals("127.0.0.1:8091", grouplist.get("default"));
+        assertFalse(serviceProperties.isEnableDegrade());
+        assertFalse(serviceProperties.isDisableGlobalTransaction());
     }
 
     @Test
@@ -113,8 +119,8 @@ public class PropertiesTest {
 
     @Test
     public void testTmProperties() {
-        assertEquals(5, context.getBean(TmProperties.class).getCommitRetryCount());
-        assertEquals(5, context.getBean(TmProperties.class).getRollbackRetryCount());
+        assertEquals(DEFAULT_TM_COMMIT_RETRY_COUNT, context.getBean(TmProperties.class).getCommitRetryCount());
+        assertEquals(DEFAULT_TM_ROLLBACK_RETRY_COUNT, context.getBean(TmProperties.class).getRollbackRetryCount());
     }
 
     @Test
@@ -131,7 +137,7 @@ public class PropertiesTest {
     public void testUndoProperties() {
         assertTrue(context.getBean(UndoProperties.class).isDataValidation());
         assertEquals("jackson", context.getBean(UndoProperties.class).getLogSerialization());
-        assertEquals(TRANSACTION_UNDO_LOG_DEFAULT_TABLE, context.getBean(UndoProperties.class).getLogTable());
+        assertEquals(DEFAULT_TRANSACTION_UNDO_LOG_TABLE, context.getBean(UndoProperties.class).getLogTable());
     }
 
     @Test
@@ -191,11 +197,6 @@ public class PropertiesTest {
         assertEquals("default", context.getBean(RegistryEurekaProperties.class).getApplication());
         assertEquals("http://localhost:8761/eureka", context.getBean(RegistryEurekaProperties.class).getServiceUrl());
         assertEquals("1", context.getBean(RegistryEurekaProperties.class).getWeight());
-    }
-
-    @Test
-    public void testRegistryFileProperties() {
-        assertEquals("file.conf", context.getBean(RegistryFileProperties.class).getName());
     }
 
     @Test

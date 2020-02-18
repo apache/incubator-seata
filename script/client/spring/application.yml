@@ -1,6 +1,6 @@
 seata:
   enabled: true
-  application-id: test
+  application-id: applicationName
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
@@ -9,7 +9,7 @@ seata:
       async-commit-buffer-limit: 1000
       report-retry-count: 5
       table-meta-check-enable: false
-      report-success-enable: true
+      report-success-enable: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -24,8 +24,10 @@ seata:
     log:
       exceptionRate: 100
   service:
-    vgroup-mapping: default
-    grouplist: 127.0.0.1:8091
+    vgroup-mapping:
+      my_test_tx_group: default
+    grouplist:
+      default: 127.0.0.1:8091
     enable-degrade: false
     disable-global-transaction: false
   transport:
@@ -69,8 +71,6 @@ seata:
       password: ""
   registry:
     type: file
-    file:
-      name: file.conf
     consul:
       cluster: default
       server-addr: 127.0.0.1:8500

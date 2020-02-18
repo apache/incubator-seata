@@ -26,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -67,7 +68,8 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
-    private static final int SCHEDULE_INTERVAL_MILLS = 5;
+    private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
+    private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
 
     private final RpcClientBootstrap clientBootstrap;
@@ -112,7 +114,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             public void run() {
                 clientChannelManager.reconnect(getTransactionServiceGroup());
             }
-        }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
+        }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
@@ -272,6 +274,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     /**
      * The type ClientHandler.
      */
+    @Sharable
     class ClientHandler extends AbstractHandler {
 
         @Override
