@@ -35,6 +35,7 @@
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
         <module>integration/grpc</module>
+        <module>integration/http</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -43,10 +44,11 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
-        <module>codec</module>
+        <module>serializer</module>
         <module>seata-spring-boot-starter</module>
         <module>compressor</module>
         <module>saga</module>
+        <module>sqlparser</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -89,7 +91,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.0.0</revision>
+        <revision>1.1.0</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>

@@ -128,6 +128,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         contextBuilder.withStateMachineContextVariables(contextVariables);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext processContext = contextBuilder.build();
 
         if (instance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
@@ -177,7 +179,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         inst.setRunning(true);
 
         inst.setGmtStarted(new Date());
-        inst.setGmtStarted(inst.getGmtStarted());
+        inst.setGmtUpdated(inst.getGmtStarted());
 
         return inst;
     }
@@ -209,7 +211,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             return stateMachineInstance;
         }
 
-        ExecutionStatus[] acceptStatus = new ExecutionStatus[] {ExecutionStatus.FA, ExecutionStatus.UN};
+        ExecutionStatus[] acceptStatus = new ExecutionStatus[] {ExecutionStatus.FA, ExecutionStatus.UN, ExecutionStatus.RU};
         checkStatus(stateMachineInstance, acceptStatus, null, stateMachineInstance.getStatus(), null, "forward");
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
@@ -231,6 +233,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withOperationName(DomainConstants.OPERATION_NAME_FORWARD).withAsyncCallback(callback)
             .withStateMachineInstance(stateMachineInstance).withStateInstance(lastForwardState).withStateMachineConfig(
                 getStateMachineConfig()).withStateMachineEngine(this);
+
+        contextBuilder.withIsAsyncExecution(async);
 
         ProcessContext context = contextBuilder.build();
 
@@ -259,10 +263,6 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             lastForwardState.setIgnoreStatus(true);
         }
 
-        if (stateMachineInstance.getStateMachine().isPersist()) {
-            stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
-        }
-
         try {
             StateInstruction inst = new StateInstruction();
             inst.setTenantId(stateMachineInstance.getTenantId());
@@ -283,6 +283,12 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 inst.setStateName(next);
             } else {
 
+                if (ExecutionStatus.RU.equals(lastForwardState.getStatus())
+                        && !EngineUtils.isTimeout(lastForwardState.getGmtStarted(), stateMachineConfig.getServiceInvokeTimeout())) {
+                    throw new EngineExecutionException(
+                            "State [" + lastForwardState.getName() + "] is running, operation[forward] denied", FrameworkErrorCode.OperationDenied);
+                }
+
                 inst.setStateName(lastForwardState.getName());
             }
             context.setInstruction(inst);
@@ -290,13 +296,21 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             stateMachineInstance.setStatus(ExecutionStatus.RU);
             stateMachineInstance.setRunning(true);
 
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Operation [forward] started  stateMachineInstance[id:" + stateMachineInstance.getId() + "]");
+            }
+
+            if (stateMachineInstance.getStateMachine().isPersist()) {
+                stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
+            }
+
             if (async) {
                 stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
             } else {
                 stateMachineConfig.getProcessCtrlEventPublisher().publish(context);
             }
         } catch (EngineExecutionException e) {
-            LOGGER.error("Operate [forward] failed", e);
+            LOGGER.error("Operation [forward] failed", e);
             throw e;
         }
         return stateMachineInstance;
@@ -457,6 +471,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withStateMachineInstance(stateMachineInstance).withStateMachineConfig(getStateMachineConfig())
             .withStateMachineEngine(this);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext context = contextBuilder.build();
 
         Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
@@ -476,6 +492,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         tempCompensationTriggerState.setStateMachine(stateMachineInstance.getStateMachine());
 
         stateMachineInstance.setRunning(true);
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Operation [compensate] start.  stateMachineInstance[id:" + stateMachineInstance.getId() + "]");
+        }
+
         if (stateMachineInstance.getStateMachine().isPersist()) {
             stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
         }
@@ -494,7 +515,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
 
         } catch (EngineExecutionException e) {
-            LOGGER.error("Operate [compensate] failed", e);
+            LOGGER.error("Operation [compensate] failed", e);
             throw e;
         }
 
@@ -518,7 +539,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
      * @param instId
      * @return
      */
-    protected StateMachineInstance reloadStateMachineInstance(String instId) {
+    @Override
+    public StateMachineInstance reloadStateMachineInstance(String instId) {
 
         StateMachineInstance inst = stateMachineConfig.getStateLogStore().getStateMachineInstance(instId);
         if (inst != null) {
@@ -573,9 +595,9 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             throw new EngineExecutionException(message, FrameworkErrorCode.OperationDenied);
         }
 
-        if (stateMachineInstance.isRunning()) {
+        if (stateMachineInstance.isRunning() && !EngineUtils.isTimeout(stateMachineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
             throw new EngineExecutionException(
-                "StateMachineInstance [id:" + stateMachineInstance.getId() + "]is running, operation[" + operation
+                "StateMachineInstance [id:" + stateMachineInstance.getId() + "] is running, operation[" + operation
                     + "] denied", FrameworkErrorCode.OperationDenied);
         }
 

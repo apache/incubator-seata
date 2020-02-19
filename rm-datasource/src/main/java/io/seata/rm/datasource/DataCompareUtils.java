@@ -40,6 +40,10 @@ import java.util.Objects;
  */
 public class DataCompareUtils {
 
+    private DataCompareUtils() {
+
+    }
+
     /**
      * Is field equals.
      *
@@ -96,6 +100,12 @@ public class DataCompareUtils {
         if (f1Type == Types.DECIMAL && f1.getValue().getClass().equals(Integer.class)) {
             f1.setValue(new BigDecimal(f1.getValue().toString()));
         }
+        if (f0Type == Types.BIGINT && f0.getValue().getClass().equals(Integer.class)) {
+            f0.setValue(Long.parseLong(f0.getValue().toString()));
+        }
+        if (f1Type == Types.BIGINT && f1.getValue().getClass().equals(Integer.class)) {
+            f1.setValue(Long.parseLong(f1.getValue().toString()));
+        }
     }
 
     /**
@@ -147,17 +157,19 @@ public class DataCompareUtils {
         // new row to map
         Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPkName());
         // compare data
-        for (String rowKey : oldRowsMap.keySet()) {
-            Map<String, Field> oldRow = oldRowsMap.get(rowKey);
-            Map<String, Field> newRow = newRowsMap.get(rowKey);
+        for (Map.Entry<String, Map<String, Field>> oldEntry : oldRowsMap.entrySet()) {
+            String key = oldEntry.getKey();
+            Map<String, Field> oldRow = oldEntry.getValue();
+            Map<String, Field> newRow = newRowsMap.get(key);
             if (newRow == null) {
-                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", rowKey);
+                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", key);
             }
-            for (String fieldName : oldRow.keySet()) {
-                Field oldField = oldRow.get(fieldName);
+            for (Map.Entry<String, Field> oldRowEntry : oldRow.entrySet()) {
+                String fieldName = oldRowEntry.getKey();
+                Field oldField = oldRowEntry.getValue();
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
-                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", rowKey, fieldName);
+                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
                 if (!oldEqualsNewFieldResult.getResult()) {

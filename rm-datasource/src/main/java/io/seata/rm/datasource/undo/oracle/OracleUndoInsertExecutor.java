@@ -16,12 +16,14 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -44,13 +46,15 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
     protected String buildUndoSQL() {
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
-        if (afterImageRows == null || afterImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(afterImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
-        return String.format(DELETE_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
-            ColumnUtils.addEscape(pkField.getName(), ColumnUtils.Escape.STANDARD));
+        // insert sql undo log after image all field come from table meta, need add escape.
+        // see BaseTransactionalExecutor#buildTableRecords
+        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
+                ColumnUtils.addEscape(pkField.getName(), JdbcConstants.ORACLE));
     }
 
     @Override

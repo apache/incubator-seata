@@ -23,13 +23,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
+
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -49,7 +50,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public UpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+    public UpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -67,7 +68,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuilder prefix = new StringBuilder("SELECT ");
-        if (!tableMeta.containsPK(updateColumns)) {
+        if (!containsPK(updateColumns)) {
             prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
         }
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
@@ -90,28 +91,18 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             return TableRecords.empty(getTableMeta());
         }
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
-        TableRecords afterImage = null;
-        PreparedStatement pst = null;
         ResultSet rs = null;
-        try {
-            pst = statementProxy.getConnection().prepareStatement(selectSQL);
-            int index = 0;
-            for (Field pkField : beforeImage.pkRows()) {
-                index++;
-                pst.setObject(index, pkField.getValue(), pkField.getType());
+        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
+            List<Field> pkRows = beforeImage.pkRows();
+            for (int i = 1; i <= pkRows.size(); i++) {
+                Field pkField = pkRows.get(i - 1);
+                pst.setObject(i, pkField.getValue(), pkField.getType());
             }
             rs = pst.executeQuery();
-            afterImage = TableRecords.buildRecords(tmeta, rs);
-
+            return TableRecords.buildRecords(tmeta, rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (pst != null) {
-                pst.close();
-            }
+            IOUtil.close(rs);
         }
-        return afterImage;
     }
 
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {

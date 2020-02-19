@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -102,6 +102,7 @@
         <caffeine.version>2.7.0</caffeine.version>
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.30</mysql.client.version>
+        <postgres.client.version>42.1.4</postgres.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
         <jackson.version>2.9.9</jackson.version>
@@ -377,6 +378,11 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgres.client.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
