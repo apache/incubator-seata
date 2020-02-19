@@ -81,7 +81,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>1.0.0</seata.version>
+<seata.version>1.1.0</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
@@ -95,6 +95,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 [Quick Start](https://github.com/seata/seata/wiki/Quick-Start)
 
 ## Documentation
+
 
 You can view the full documentation from the wiki: [Seata wiki page](https://github.com/seata/seata/wiki).
 
