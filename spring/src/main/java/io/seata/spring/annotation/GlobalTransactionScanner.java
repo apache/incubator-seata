@@ -15,12 +15,6 @@
  */
 package io.seata.spring.annotation;
 
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -47,7 +41,6 @@ import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
@@ -55,6 +48,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.Set;
 
 import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
 
