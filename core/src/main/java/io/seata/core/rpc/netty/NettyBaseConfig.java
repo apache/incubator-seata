@@ -182,7 +182,7 @@ public class NettyBaseConfig {
     /**
      * The enum Work thread mode.
      */
-    enum WorkThreadMode {
+    public enum WorkThreadMode {
 
         /**
          * Auto work thread mode.

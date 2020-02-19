@@ -41,6 +41,8 @@ seata:
       client-selector-thread-prefix: NettyClientSelector
       client-selector-thread-size: 1
       client-worker-thread-prefix: NettyClientWorkerThread
+      worker-thread-size: default
+      boss-thread-size: 1
     type: TCP
     server: NIO
     heartbeat: true
