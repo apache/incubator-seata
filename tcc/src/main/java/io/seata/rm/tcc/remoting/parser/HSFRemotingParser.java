@@ -30,7 +30,7 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
     /**
      * is HSF env
      */
-    public static volatile boolean IS_HSF = false;
+    private static volatile boolean isHsf;
 
     static {
         // check HSF runtime env
@@ -41,38 +41,27 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
             Class.forName("com.taobao.hsf.app.spring.util.HSFSpringConsumerBean");
             Class.forName("com.taobao.hsf.app.spring.util.HSFSpringProviderBean");
 
-            IS_HSF = true;
+            isHsf = true;
         } catch (ClassNotFoundException e) {
-            IS_HSF = false;
+            isHsf = false;
         }
     }
 
     @Override
     public boolean isRemoting(Object bean, String beanName) {
-        if (!IS_HSF) {
-            return false;
-        }
-        return isReference(bean, beanName) || isService(bean, beanName);
+        return isHsf && (isReference(bean, beanName) || isService(bean, beanName));
     }
 
     @Override
     public boolean isReference(Object bean, String beanName) {
-        if (!IS_HSF) {
-            return false;
-        }
         String beanClassName = bean.getClass().getName();
-        return "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean".equals(beanClassName)
-                || "org.springframework.beans.factory.FactoryBean".equals(beanClassName);
+        return isHsf && ("com.taobao.hsf.app.spring.util.HSFSpringConsumerBean".equals(beanClassName) || "org.springframework.beans.factory.FactoryBean".equals(beanClassName));
     }
 
     @Override
     public boolean isService(Object bean, String beanName) {
-        if (!IS_HSF) {
-            return false;
-        }
         String beanClassName = bean.getClass().getName();
-        return "com.taobao.hsf.app.spring.util.HSFSpringProviderBean".equals(beanClassName);
-
+        return isHsf && "com.taobao.hsf.app.spring.util.HSFSpringProviderBean".equals(beanClassName);
     }
 
     @Override
