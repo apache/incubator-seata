@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.file;
 
+import io.seata.core.rpc.netty.NettyBaseConfig.WorkThreadMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,7 @@ public class ThreadFactoryProperties {
     /**
      * auto default pin or 8
      */
-    private int workerThreadSize = 8;
+    private String workerThreadSize = WorkThreadMode.Default.name();
 
     public String getBossThreadPrefix() {
         return bossThreadPrefix;
@@ -121,11 +122,11 @@ public class ThreadFactoryProperties {
         return this;
     }
 
-    public int getWorkerThreadSize() {
+    public String getWorkerThreadSize() {
         return workerThreadSize;
     }
 
-    public ThreadFactoryProperties setWorkerThreadSize(int workerThreadSize) {
+    public ThreadFactoryProperties setWorkerThreadSize(String workerThreadSize) {
         this.workerThreadSize = workerThreadSize;
         return this;
     }

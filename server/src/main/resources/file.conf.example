@@ -19,7 +19,7 @@ transport {
     # netty boss thread size,will not be used for UDT
     bossThreadSize = 1
     #auto default pin or 8
-    workerThreadSize = 8
+    workerThreadSize = "default"
   }
   shutdown {
     # when destroy server, wait seconds
