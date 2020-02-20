@@ -1,4 +1,5 @@
 # SEATA-conf
+[seata参数配置 1.0.0版本](https://seata.io/zh-cn/docs/user/configurations.html)
 
 以SEATA源码中的配置作为参考：
 - [ParameterParser.java](../../server/src/main/java/io/seata/server/ParameterParser.java)
@@ -33,8 +34,25 @@
 
 seata-server 和 seata-client 都可以配置该文件。
 
-### 2.1 `registry`(seata-server)
-**只有 seata-server 需要配置该项**，表明：将seata-server注册到哪个注册中心。
+### 2.1 `registry`(seata-server, seata-client)
+**seata-server 和 seata-client 都需要配置该项。**  
+2020-02-18 >>>>  
+坑！神坑！无比坑！  
+最初在写examples时，以为seata-client不需要`registry`配置，导致逻辑问题：全局事务不会回滚（程序不会报任何错，因为其实存在默认配置）
+更坑的！其实是配置文件解析顺序问题，当引入`seata-spring-boot-starter`时要特别小心！！！
+[github issues#2265](https://github.com/seata/seata/issues/2265)
+
+2020-02-19 >>>>
+通过设置`seata.enable = false`可以禁用spring-boot的auto-configuration
+
+seata-server:  
+表明将seata-server注册到哪个注册中心。
+seata源码参考：`io.seata.discovery.registry.nacos.NacosRegistryServiceImpl#register()`
+
+seata-client:  
+表示seata-client需要从哪个注册中心，去获取需要的seata-server的信息。
+seata源码参考：`io.seata.discovery.registry.nacos.NacosRegistryServiceImpl#lookup()`
+（通过源码可知，seata-client中暂时用不到 registry.nacos.cluster）
 
 ```hocon
 registry {
@@ -176,8 +194,7 @@ interface io.seata.config.ConfigurationProvider
 
 `NettyBaseConfig`其子类分为：`NettyClientConfig`、`NettyServerConfig`。
 
-
-### 3.1 `transport`
+### 3.1 `transport`(seata-server, seata-client)
 ```HOCON
 transport {
   # tcp udt unix-domain-socket
@@ -209,7 +226,23 @@ transport {
 }
 ```
 
-seata-client:
+其中部分参数需要了解以下类才能理解其含义：
+- netty的很多相关知识！！！！
+- io.netty.channel.nio.NioEventLoopGroup.NioEventLoopGroup
+- io.netty.channel.epoll.EpollEventLoopGroup
+- io.netty.util.concurrent.DefaultEventExecutorGroup.DefaultEventExecutorGroup
+- java.util.concurrent.ThreadPoolExecutor
+
+netty在seata中的相关应用源码：
+- io.seata.core.rpc.netty.RpcClientBootstrap
+- io.seata.core.rpc.netty.AbstractRpcRemotingServer
+
+1. `transport.thread-factory.share-boss-worker`  
+暂时未发现其相关实现。
+
+
+#### 3.1.1 seata-server
+（精简过后，个人认为seata-server只需要配置的transport的配置项）
 ```HOCON
 transport {
   # tcp udt unix-domain-socket
@@ -220,25 +253,128 @@ transport {
   heartbeat = true
   #thread factory for netty
   thread-factory {
-
-    # share-boss-worker = false # 暂时未发现其相关实现，因为暂时没有任何意义
-    client-selector-thread-prefix = "NettyClientSelector"
-    client-selector-thread-size = 1
-    client-worker-thread-prefix = "NettyClientWorkerThread"
+    boss-thread-prefix = "NettyBoss"
+    worker-thread-prefix = "NettyServerNIOWorker"
+    server-executor-thread-prefix = "NettyServerBizHandler"
     # netty boss thread size,will not be used for UDT
-    # boss-thread-size = 1 # 2020-02-16只在`io.seata.core.rpc.netty.AbstractRpcRemotingServer`用到
+    boss-thread-size = 1
     #auto default pin or 8
     worker-thread-size = 8
+  }
+  shutdown {
+    # when destroy server, wait seconds
+    wait = 3
   }
   serialization = "seata"
   compressor = "none"
 }
 ```
+1. `server-executor-thread-prefix`
+暂未发现源码中有相关的用途。
 
-比较特别的配置项`worker-thread-size`，可以配置成"Auto | Pin | BusyPin | Default | 数字"（不区分大小写），程序会去判断计算出相应的worker-thread-size。  
-代码参考`io.seata.core.rpc.netty.NettyBaseConfig`的静态代码块。
+2. 代码入口
+`io.seata.server.Server#main(...)`
 
-跟踪代码 [seata-spring-boot-starter/SeataAutoConfiguration.java](../../seata-spring-boot-starter/src/main/java/io/seata/spring/boot/autoconfigure/SeataAutoConfiguration.java)。  
+3. `transport.shutdown.wait`
+```JAVA
+package io.seata.core.rpc.netty;
+
+public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
+    private final ServerBootstrap serverBootstrap;
+
+     @Override
+    public void shutdown() {
+        try {
+            if (initialized.get()) {
+                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                RegistryFactory.getInstance().close();
+
+                /* vergilyn-question, 2020-02-16 >>>> 为什么要Thread.sleep一会？
+                 *   个人猜测，是为了确保seata-server已经从registry-center中移除，registry-center不会再发送相关请求到当前（准备）关闭的seata-server。
+                 */                //wait a few seconds for server transport
+                TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
+            }
+
+            /* vergilyn-comment, 2020-02-17 >>>> 优雅的关闭netty
+             *   不管是`EpollEventLoopGroup`还是`NioEventLoopGroup`其默认参数都是(2, 15, SECONDS)
+             *   表示，Netty默认在2秒的静默时间内如果没有任务，则关闭；否则15秒截止时间到达时关闭。
+             */
+            this.eventLoopGroupBoss.shutdownGracefully();
+            this.eventLoopGroupWorker.shutdownGracefully();
+        } catch (Exception exx) {
+            LOGGER.error(exx.getMessage());
+        }
+    }
+}
+
+```
+
+4. 代码跟踪示例
+例如`boss-thread-size` (备注 netty多线程模型之Reactor)
+```JAVA
+this.eventLoopGroupBoss = new io.netty.channel.epoll.EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
+    new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
+
+this.eventLoopGroupWorker = new io.netty.channel.epoll.EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
+    new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
+        nettyServerConfig.getServerWorkerThreads()));
+```
+
+#### 3.1.2 seata-client
+（精简过后，个人认为seata-client只需要配置的transport的配置项）
+```HOCON
+transport {
+  # tcp udt unix-domain-socket
+  type = "TCP"
+  #NIO NATIVE
+  server = "NIO"
+  #enable heartbeat
+  heartbeat = true
+  #thread factory for netty
+  thread-factory {
+    client-selector-thread-prefix = "NettyClientSelector"
+    client-selector-thread-size = 1
+    client-worker-thread-prefix = "NettyClientWorkerThread"
+    #auto default pin or 8
+    worker-thread-size = 8
+  }
+  serialization = "seata"
+  compressor = "none"
+  
+  # seata-client是否支持批量发送请求到seata-server
+  enable-client-batch-send-request = true
+}
+```
+
+1. 方便查看配置项的方法，在代码`io.seata.core.constants.ConfigurationKeys`中找到对应配置项进行代码跟踪。
+
+2. `worker-thread-size`，可以配置成"Auto | Pin | BusyPin | Default | 数字"（不区分大小写），seata会去判断计算出相应的worker-thread-size。  
+代码参考`io.seata.core.rpc.netty.NettyBaseConfig`的静态代码块 和 `io.seata.core.rpc.netty.NettyBaseConfig.WorkThreadMode`。
+
+3. 一个配置项，多个用途。
+例如`worker-thread-size`  
+用途一：
+```java
+// io.seata.core.rpc.netty.TmRpcClient#getInstance()
+new java.util.concurrent.ThreadPoolExecutor(
+        nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+        KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
+        new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
+            nettyClientConfig.getClientWorkerThreads()),
+        RejectedPolicies.runsOldestTaskPolicy());
+```
+
+用途二：
+```java
+// io.seata.core.rpc.netty.RpcClientBootstrap.start
+new io.netty.util.concurrent.DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(),
+                new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
+                    nettyClientConfig.getClientWorkerThreads()));
+```
+
+4. 跟踪代码示例
+入口代码[seata-spring-boot-starter/SeataAutoConfiguration.java](../../seata-spring-boot-starter/src/main/java/io/seata/spring/boot/autoconfigure/SeataAutoConfiguration.java)。  
 可以发现其入口是`new GlobalTransactionScanner(..)`，`GlobalTransactionScanner implements InitializingBean`并且重写了`afterPropertiesSet()`方法。
 ```java
 package io.seata.spring.annotation;
@@ -275,8 +411,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 }
 ```
+TMClient、RMClient基本一样，其对应的RmRpcClient、TmRpcClient都实现了AbstractRpcRemotingClient。
 
-继续跟踪代码`TMClient.init(applicationId, txServiceGroup)`直到 [o.seata.core.rpc.netty.TmRpcClient#getInstance()](../../core/src/main/java/io/seata/core/rpc/netty/TmRpcClient.java#L81-L103)：
+跟踪代码`TMClient.init(applicationId, txServiceGroup)`直到 [o.seata.core.rpc.netty.TmRpcClient#getInstance()](../../core/src/main/java/io/seata/core/rpc/netty/TmRpcClient.java#L81-L103)：
 ```java
 public final class TmRpcClient extends AbstractRpcRemotingClient {
     
@@ -359,3 +496,130 @@ public class RpcClientBootstrap implements RemotingClient {
 seata-client中，一般都是通过`new NettyClientConfig()`来获得配置（`register.conf`和`file.conf`中的配置）。  
 并且，这个对象其实也会在程序运行期间一直被引用，那么，为什么不直接写成 单例类 ？
 （其实无关紧要，只是觉得可能这样修改后的"代码"更好）
+
+### 3.2 `service`
+```HOCON
+service {
+  #transaction service group mapping
+  vgroup_mapping.my_test_tx_group = "default"
+  #only support when registry.type=file, please don't set multiple addresses
+  default.grouplist = "127.0.0.1:8091"
+  #degrade, current not support
+  enableDegrade = false
+  #disable seata
+  disableGlobalTransaction = false
+}
+```
+
+1. SEATA现在只支持简单的 LoadBalance，所以暂时"please don't set multiple addresses"
+```
+interface io.seata.discovery.loadbalance.LoadBalance
+    implements, abstract class io.seata.discovery.loadbalance.AbstractLoadBalance
+        extends, io.seata.discovery.loadbalance.RoundRobinLoadBalance
+        extends, io.seata.discovery.loadbalance.RandomLoadBalance
+```
+
+
+#### 3.2.1 seata-server
+
+#### 3.2.2 seata-client
+```hocon
+service {
+  #transaction service group mapping
+  vgroup_mapping.my_test_tx_group = "default"
+  #only support when registry.type=file, please don't set multiple addresses
+  default.grouplist = "127.0.0.1:8091"
+  #degrade, current not support
+  enableDegrade = false
+  #disable seata
+  disableGlobalTransaction = false
+}
+```
+
+1. `vgroup_mapping.my_test_tx_group`及`default.grouplist`
+这是关联的key。例如，registry-center使用的是nacos。
+seata-client启动时，通过跟踪代码`io.seata.spring.annotation.GlobalTransactionScanner#initClient()` (例如 TMClient#init(...))
+```JAVA
+public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
+    implements RegisterMsgListener, ClientMessageSender {
+    
+     @Override
+    public void init() {
+        clientBootstrap.start();
+
+        // vergilyn-comment, 2020-02-18 >>>> 每隔5ms连接seata-server，会使用到`file.conf`的"service.vgroup_mapping.my_test_tx_group"
+        timerExecutor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                clientChannelManager.reconnect(getTransactionServiceGroup());
+            }
+        }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
+
+        super.init();
+    }
+}
+```
+
+2. `enableDegrade`
+参考： `io.seata.core.rpc.netty.TmRpcClient#init()`  
+暂时不未实现任何功能！
+
+3. `disableGlobalTransaction`
+```java
+package io.seata.spring.annotation;
+
+public class GlobalTransactionScanner extends AbstractAutoProxyCreator
+    implements InitializingBean, ApplicationContextAware,
+    DisposableBean {
+    
+    private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
+    
+    @Override
+    public void afterPropertiesSet() {
+        if (disableGlobalTransaction) {
+            return;
+        }
+        initClient();
+
+    }
+    
+    private void initClient() {
+        //init TM
+        TMClient.init(applicationId, txServiceGroup);
+        //init RM
+        RMClient.init(applicationId, txServiceGroup);
+
+        registerSpringShutdownHook();
+    }
+}
+```
+
+估计是为了让seata-client可以方便禁用全局事务，当想用的时候再快速启用。
+
+
+
+
+
+2020-02-18 >>>>
+SEATA源码中，对`register.conf`和`file.conf`的 key 引用没有统一。  
+比如，大多数用的都是`io.seata.core.constants.ConfigurationKeys`。
+但是`io.seata.discovery.registry.RegistryService`中又定义了`service.vgroup_mapping`。
+
+2020-02-19 >>>>
+service.vgroup_mapping.my_test_tx_group	事务群组（附录1）	my_test_tx_group为分组，配置项值为TC集群名
+service.default.grouplist	TC服务列表（附录2）	**仅注册中心为file时使用**
+service.enableDegrade	降级开关（待实现）	默认false。业务侧根据连续错误数自动降级不走seata事务
+
+事务分组说明。
+1.事务分组是什么？
+事务分组是seata的资源逻辑，类似于服务实例。在file.conf中的my_test_tx_group就是一个事务分组。
+
+2.通过事务分组如何找到后端集群？
+首先程序中配置了事务分组（GlobalTransactionScanner 构造方法的txServiceGroup参数），  
+程序会通过用户配置的配置中心去寻找service.vgroup_mapping.事务分组配置项，取得配置项的值就是TC集群的名称。  
+拿到集群名称程序通过一定的前后缀+集群名称去构造服务名，各配置中心的服务名实现不同。  
+拿到服务名去相应的注册中心去拉取相应服务名的服务列表，获得后端真实的TC服务列表。
+
+3.为什么这么设计，不直接取服务名？
+这里多了一层获取事务分组到映射集群的配置。这样设计后，事务分组可以作为资源的逻辑隔离单位，当发生故障时可以快速failover。

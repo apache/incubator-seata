@@ -178,11 +178,17 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
                 RegistryFactory.getInstance().close();
 
-                // vergilyn-question, 2020-02-16 >>>> 为什么要Thread.sleep一会？
+                /* vergilyn-question, 2020-02-16 >>>> 为什么要Thread.sleep一会？
+                 *   个人猜测，是为了确保seata-server已经从registry-center中移除，registry-center不会再发送相关请求到当前（准备）关闭的seata-server。
+                 */
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }
 
+            /* vergilyn-comment, 2020-02-17 >>>> 优雅的关闭netty
+             *   不管是`EpollEventLoopGroup`还是`NioEventLoopGroup`其默认参数都是(2, 15, SECONDS)
+             *   表示，Netty默认在2秒的静默时间内如果没有任务，则关闭；否则15秒截止时间到达时关闭。
+             */
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {

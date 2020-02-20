@@ -99,6 +99,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (RootContext.getXID() != null) {
             throw new IllegalStateException();
         }
+        /* vergilyn-comment, 2020-02-20 >>>>
+         *   这里并没有传递 applicationId、txServiceGroup
+         */
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);

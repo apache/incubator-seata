@@ -162,8 +162,17 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
 
     /**
      * Init.
+     *
      */
     public void init() {
+        /* vergilyn-comment, 2020-02-18 >>>>
+
+         * vergilyn-question, 2020-02-18 >>>>
+         *   1. 个人觉得`mergeSendExecutorService`这个命名含义不对
+         *   2. 并且未实现`io.seata.core.rpc.Disposable#destroy()`，即当seata-server优雅关闭时，mergeSendExecutorService未调用相应shutdown()。
+         *     （可能不需要这么做，对这方面的规范不了解）
+         *
+         */
         ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_LOG_SEND_THREAD, MAX_LOG_SEND_THREAD,
             KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
             new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
@@ -190,11 +199,25 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
 
     /**
      * The type Batch log runnable.
+     * <p>vergilyn-comment, 2020-02-18 >>>> <br/>
+     *   只是从{@linkplain #logQueue}中取出log进行`LOGGER.info(log)`
+     * </p>
      */
     static class BatchLogRunnable implements Runnable {
 
         @Override
         public void run() {
+            /* vergilyn-comment, 2020-02-18 >>>>
+             *   前段时间刚好看了下`List`、`Map`的部分实现类的源码。
+             *   为了防止`ArrayList`扩容（每次扩容 oldCapacity + oldCapacity/2），建议构造对象时尽可能的设置 initCapacity。
+             *
+             * 针对以下代码，可知`logList`最多 1 + 1024，所以建议`logList = new new ArrayList<>(1025)`。
+             * 时间与空间的平衡
+             *   如果绝大部分时间，logList.size都在100内，那么初始长度为1025的数组对象显然浪费内存。
+             *   那么，是否权衡一下 initCapacity = 256/512等值
+             *
+             * （只是为了更好的代码，个人觉得 浪费的这点空间可以提升较高的性能，那么是值得的。参考：ArrayList优化）
+             */
             List<String> logList = new ArrayList<>();
             while (true) {
                 try {
@@ -205,6 +228,11 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                             LOGGER.info(str);
                         }
                     }
+
+                    /* vergilyn-comment, 2020-02-18 >>>> 查看clear源码，ArrayList扩容后，并不会缩容。
+                     *   所以，实际此处代码也不会频繁的扩容，并且最大只能达到1025。
+                     *   (ArrayList默认初始10，大约需要扩容12次 达到 1234 才会超过 1025)
+                     */
                     logList.clear();
                     TimeUnit.MILLISECONDS.sleep(BUSY_SLEEP_MILLS);
                 } catch (InterruptedException exx) {

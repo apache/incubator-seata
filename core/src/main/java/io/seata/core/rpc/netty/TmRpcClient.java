@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Rpc client.
- *
+ * <br/> vergilyn-comment, 2020-02-18 >>>> 单例类，但是其属性`applicationId`和`transactionServiceGroup`可以是动态的。
  * @author slievrly
  * @author zhaojun
  */
@@ -66,6 +66,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
 
     /**
      * Gets instance.
+     * <br/> vergilyn-comment, 2020-02-18 >>>> 单例类，但是其属性`applicationId`和`transactionServiceGroup`可以是动态的。
      *
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
@@ -82,6 +83,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      * Gets instance.
      *
      * @return the instance
+     * @see RmRpcClient
      */
     public static TmRpcClient getInstance() {
         if (null == instance) {
@@ -136,6 +138,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void init() {
         if (initialized.compareAndSet(false, true)) {
+            /* vergilyn-comment, 2020-02-18 >>>> 即`file.conf`中的"service.enableDegrade"
+             * vergilyn-question, 2020-02-18 >>>> 个人觉得该代码不符合SEATA源码的书写规范，不应该写成 `PREFIX + ENABLE_DEGRADE`
+             */
             enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
             super.init();
         }

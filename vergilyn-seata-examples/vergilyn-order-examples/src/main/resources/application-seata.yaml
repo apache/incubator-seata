@@ -1,0 +1,17 @@
+# seata
+seata:
+  applicationId: ${spring.application.name}
+  txServiceGroup: ${spring.application.name}_tx_group
+  service:
+    vgroup-mapping: default
+  # seata引入`seata-spring-boot-starter`的坑，可能导致部分属性被默认值覆盖（而不是期望的 register.conf 中的值）
+  registry:
+    type: nacos
+    nacos:
+      server-addr: 127.0.0.1:8848
+      namespace: be0813eb-8d8f-46a4-8afd-e5183af5333f
+      cluster: default # seata-client暂时用不到该值
+  config:
+    type: file
+    file:
+      name: file.conf

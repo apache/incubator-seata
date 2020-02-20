@@ -10,7 +10,9 @@ public enum RspStatusEnum {
 
     GATEWAY_DEFAULT_HYSTRIX(100400, "网关默认服务降级"),
 
-    HYSTRIX(100401, "服务降级");
+    HYSTRIX(100401, "服务降级"),
+
+    GLOBAL_TRANSACTIONAL_ROLLBACK(-500, "异常，全局事务回滚");
 
     private int code;
 

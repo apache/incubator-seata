@@ -167,6 +167,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 }
 ```
 
+如果需要修改，不止是需改这一个地方，很多地方都需要修改！
+例如`io.seata.discovery.registry.nacos.NacosRegistryServiceImpl#lookup(...)`中也需要修改。
+
 ## 5. 总结
 1. seata配置的加载
 seata配置加载类（factory模式）：`io.seata.config.ConfigurationFactory`  

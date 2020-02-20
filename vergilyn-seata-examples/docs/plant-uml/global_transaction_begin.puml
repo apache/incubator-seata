@@ -1,0 +1,64 @@
+@startuml
+partition seata-client {
+(*)  --> "@GlobalTransactional"
+
+--> "GlobalTransactionalInterceptor#invoke(...)"
+note right
+实现了 org.aopalliance.intercept.MethodInterceptor#invoke(...) 方法
+end note
+
+--> "TransactionalTemplate#execute(...)"
+note right
+1. get or create a transaction
+  `DefaultGlobalTransaction implements GlobalTransaction`
+
+1.1 get transactionInfo
+  即获取（解析）`@GlobalTransactional`注解设置的信息
+
+2. begin transaction
+  a) 支持通过TransactionHook扩展处理
+end note
+
+-->[io.seata.tm.api.DefaultGlobalTransaction#begin(...)] "DefaultGlobalTransaction#begin(...)"
+note right
+  备注：此方法中调用`transactionManager.begin(null, null, name, timeout)`时并未传递 applicationId、txServiceGroup
+end note
+
+-->[transactionManager -> DefaultTransactionManager.class] "DefaultTransactionManager#begin()"
+
+--> "TmRpcClient#sendMsgWithResponse(...)"
+note right
+此时msg(GlobalBeginRequest)中只包含:{"timeout":60000,"transactionName":"vergilyn-first-global-transaction","typeCode":1}
+
+typeCode: `1`表示 MessageType.TYPE_GLOBAL_BEGIN
+name: @GlobalTransaction 中配置的name（或者 默认规则生成）
+timeout: @GlobalTransaction 中配置的timeoutMills（默认60_000ms），这个timeout指的是"全局事务"的timeout时间。
+  并不是seata-client/seata-server之间netty通信中用到的timeout。
+
+备注：NettyClientConfig.getRpcRequestTimeout() = 30s，指的是seata-client等待这个sendMsgWithResponse响应结果的timeout。
+end note
+
+--> "AbstractRpcRemoting#sendAsyncRequest(...)"
+note right
+AbstractRpcRemoting 在seata-client相关的继承实现类：
+  1. io.seata.core.rpc.netty.AbstractRpcRemotingClient
+  2. TmRpcClient
+  3. RmRpcClient
+end note
+}
+
+partition seata-server {
+"AbstractRpcRemoting#sendAsyncRequest(...)" --> "AbstractRpcRemotingServer"
+note right
+AbstractRpcRemotingServer本身并未从写`channelRead(...)`方法，而是继承其父类`AbstractRpcRemoting`中的方法
+end note
+
+--> "RpcServer#dispatch(...)"
+
+--> "DefaultServerMessageListenerImpl#onTrxMessage(...)"
+
+--> "DefaultCoordinator#doGlobalBegin(...)"
+
+--> "DefaultCore#begin(...)"
+}
+@enduml

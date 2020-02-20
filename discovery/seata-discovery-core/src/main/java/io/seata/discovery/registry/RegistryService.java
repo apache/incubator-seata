@@ -15,11 +15,11 @@
  */
 package io.seata.discovery.registry;
 
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-
 import java.net.InetSocketAddress;
 import java.util.List;
+
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 
 /**
  * The interface Registry service.
@@ -93,7 +93,7 @@ public interface RegistryService<T> {
 
     /**
      * Get current service group name
-     *
+     * <br/> vergilyn-comment, 2020-02-18 >>>> 即`file.conf`中的"service.vgroup_mapping.{key}"
      * @param key service group
      * @return the service group name
      */

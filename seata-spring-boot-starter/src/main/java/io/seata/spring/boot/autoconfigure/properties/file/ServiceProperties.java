@@ -36,6 +36,7 @@ public class ServiceProperties {
     private String grouplist = "127.0.0.1:8091";
     /**
      * degrade current not support
+     * <br/> vergilyn-comment, 2020-02-20 >>>> 服务降级。业务侧根据连续错误数自动降级不走seata事务
      */
     private boolean enableDegrade = false;
     /**

@@ -10,6 +10,15 @@ import lombok.ToString;
 public class ObjectResponse<T> extends BaseResponse implements Serializable {
     private T data;
 
+    public ObjectResponse(){
+
+    }
+
+    public ObjectResponse(RspStatusEnum status){
+        this.setStatus(status.getCode());
+        this.setMessage(status.getMessage());
+    }
+
     public T getData() {
         return data;
     }

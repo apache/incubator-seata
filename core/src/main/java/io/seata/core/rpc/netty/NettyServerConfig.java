@@ -141,8 +141,12 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     /**
      * Gets server worker threads.
-     *
+     * <p>vergilyn-comment, 2020-02-16 >>>> <br/>
+     *   一般即为`file.conf`中配置的"transport.thread-factory.worker-thread-size"。
+     *   可选值：Auto、Pin、BusyPin、Default、数字
+     * </p>
      * @return the server worker threads
+     * @see #WORKER_THREAD_SIZE
      */
     public int getServerWorkerThreads() {
         return serverWorkerThreads;
@@ -267,7 +271,7 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     /**
      * Get boss thread prefix string.
-     *
+     * <br/> vergilyn-comment, 2020-02-17 >>>> 即`file.conf`中的"transport.thread-factory.boss-thread-prefix"
      * @return the string
      */
     public String getBossThreadPrefix() {
@@ -286,7 +290,7 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     /**
      * Get executor thread prefix string.
-     *
+     * <br/> vergilyn-comment, 2020-02-17 >>>> 即`file.conf`中的"transport.thread-factory.server-executor-thread-prefix"
      * @return the string
      */
     public String getExecutorThreadPrefix() {
@@ -296,7 +300,7 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     /**
      * Get boss thread size int.
-     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.thread-factory.boss-thread-siz"
+     * <br/> vergilyn-comment, 2020-02-16 >>>> 即`file.conf`中的"transport.thread-factory.boss-thread-size"
      * @return the int
      */
     public int getBossThreadSize() {

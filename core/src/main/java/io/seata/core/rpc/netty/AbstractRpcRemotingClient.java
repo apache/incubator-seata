@@ -106,18 +106,26 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     @Override
     public void init() {
         clientBootstrap.start();
+
+        // vergilyn-comment, 2020-02-18 >>>> 每隔5ms连接seata-server，会使用到`file.conf`的"service.vgroup_mapping.my_test_tx_group"
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 clientChannelManager.reconnect(getTransactionServiceGroup());
             }
         }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
+
+        /* vergilyn-comment, 2020-02-17 >>>> seata-client如果支持批量发送请求
+         *   创建一个只有1个线程的线程池（corePoolSize = maximumPoolSize = 1 ），在后台一直运行
+         *   #destroy() 中维护这个线程池的shutdown
+         */
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
                 KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
@@ -154,6 +162,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                         LOGGER.info("msg: {} is not found in futures.", msgId);
                     }
                 } else {
+                    /* vergilyn-comment, 2020-02-20 >>>> 等价于 java.util.concurrent.CompletableFuture#complete()
+                     *   利用Future通知并返回结果
+                     */
                     future.setResultMessage(results.getMsgs()[i]);
                 }
             }
@@ -225,6 +236,10 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     @Override
     public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
+        /* vergilyn-comment, 2020-02-20 >>>>
+         *   此处并未从 参数msg 中去获取applicationId/txServiceGroup。
+         *   而是从RmRpcClient、TmRpcClient去获取
+         */
         String validAddress = loadBalance(getTransactionServiceGroup());
         Channel channel = clientChannelManager.acquireChannel(validAddress);
         Object result = super.sendAsyncRequestWithResponse(validAddress, channel, msg, timeout);
@@ -295,14 +310,20 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
         @Override
         public void run() {
-            while (true) {
+            while (true) {  // vergilyn-comment, 2020-02-17 >>>> 一直在后台运行
                 synchronized (mergeLock) {
                     try {
-                        mergeLock.wait(MAX_MERGE_SEND_MILLS);
+                        mergeLock.wait(MAX_MERGE_SEND_MILLS);  // vergilyn-comment, 2020-02-17 >>>> 获取到mergeLock后，再等待1ms
                     } catch (InterruptedException e) {
                     }
                 }
                 isSending = true;
+                /* vergilyn-comment, 2020-02-17 >>>> 根据seata-server的address批量组装请求
+                 *
+                 * vergilyn-question, 2020-02-17 >>>>
+                 *   貌似批量组装请求只跟间隔时间有关，加入间隔时间内（同一address）请求条数过多，这个请求是否会过大？
+                 *   也没有关系，因为这些请求必须发送到seata-server，不管怎么样都会影响到seata-client。
+                 */
                 for (String address : basketMap.keySet()) {
                     BlockingQueue<RpcMessage> basket = basketMap.get(address);
                     if (basket.isEmpty()) {

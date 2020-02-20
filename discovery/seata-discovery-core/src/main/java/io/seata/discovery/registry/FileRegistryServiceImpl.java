@@ -16,14 +16,14 @@
 package io.seata.discovery.registry;
 
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type File registry service.
@@ -76,6 +76,16 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     }
 
+    /* vergilyn-comment, 2020-02-20 >>>> 例如`file.conf`的配置
+     * ```
+     * service {
+     *   vgroup_mapping.my_test_tx_group = "default"
+     *   default.grouplist = "127.0.0.1:8091"   # 仅注册中心为file时使用
+     * }
+     * ```
+     * 那么 key = "my_test_tx_group", clusterName = "default"
+     *
+     */
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);

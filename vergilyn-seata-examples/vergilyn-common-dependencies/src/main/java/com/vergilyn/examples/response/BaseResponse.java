@@ -12,4 +12,6 @@ public class BaseResponse implements Serializable {
     private int status = 200;
 
     private String message;
+
+    private String exceptionMsg;
 }

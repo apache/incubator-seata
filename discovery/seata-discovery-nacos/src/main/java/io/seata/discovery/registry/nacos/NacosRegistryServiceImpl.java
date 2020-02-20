@@ -111,6 +111,16 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         getNamingInstance().unsubscribe(PRO_SERVER_ADDR_KEY, clusters, listener);
     }
 
+    /* vergilyn-comment, 2020-02-20 >>>> 例如`file.conf`的配置
+     * ```
+     * service {
+     *   vgroup_mapping.my_test_tx_group = "default"
+     *   default.grouplist = "127.0.0.1:8091"   # 仅注册中心为file时使用
+     * }
+     * ```
+     * 那么 key = "my_test_tx_group", clusterName = "default"
+     *
+     */
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
@@ -122,7 +132,17 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
                     List<String> clusters = new ArrayList<>();
                     clusters.add(clusterName);
+
+                    /* vergilyn-comment, 2020-02-18 >>>>
+                     *   Get all instances within specified clusters of a service.
+                     *
+                     *   PRO_SERVER_ADDR_KEY 指的就是seata-server服务名，然后指定获取其中的"clusterName = default"
+                     *
+                     * vergilyn-question, 2020-02-19 >>>>
+                     *   默认从`DEFAULT_GROUP`获取，可以扩展让其支持自定义GROUP！
+                     */
                     List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
+
                     if (null != firstAllInstances) {
                         List<InetSocketAddress> newAddressList = new ArrayList<>();
                         for (Instance instance : firstAllInstances) {
@@ -132,6 +152,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                         }
                         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
+
+                    // vergilyn-comment, 2020-02-18 >>>> 事件监听，如果nacos中服务实例发生变化，监听其变化。
                     subscribe(clusterName, event -> {
                         List<Instance> instances = ((NamingEvent)event).getInstances();
                         if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {

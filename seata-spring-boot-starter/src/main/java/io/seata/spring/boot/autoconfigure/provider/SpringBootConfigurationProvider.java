@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import io.seata.spring.boot.autoconfigure.util.SpringUtils;
 import io.seata.spring.boot.autoconfigure.util.StringFormatUtils;
 import org.apache.commons.lang.StringUtils;
@@ -38,8 +39,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT;
@@ -49,11 +50,18 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CO
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
+ * <p>vergilyn-comment, 2020-02-18 >>>> <br/>
+ *   被这坑过...结合{@linkplain io.seata.config.ConfigurationFactory}的静态代码块分析。
+ *   <pre>
+ *       例如，seata-client期望读取的是`register.conf`中的"register.type = nacos"。
+ *       最后本类先去获取{@linkplain RegistryProperties#getType()}，然而其存在默认值"file"，所以返回的是"file"！
+ *   </pre>
+ * </p>
  * @author xingfudeshi@gmail.com
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {

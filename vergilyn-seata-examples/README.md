@@ -11,12 +11,17 @@
 
 |                      |                             version                              |
 |:---------------------|:----------------------------------------------------------------:|
-| nacos                |       [1.0.0](https://github.com/alibaba/nacos/releases/)        |
+| nacos                |       [1.1.4](https://github.com/alibaba/nacos/releases/)        |
 | mysql                |                       mysql-5.7.25-winx64                        |
 | spring-boot          |                          2.1.1.RELEASE                           |
 | spring-cloud         |                        Greenwich.RELEASE                         |
 | spring-cloud-alibaba | [2.1.1.RELEASE](https://github.com/alibaba/spring-cloud-alibaba) |
 | seata                |        [1.0.0](https://github.com/seata/seata/tree/1.0.0)        |
+
+备注：
+1. 因为 seata-v1.0.0 中依赖的是 nacos-v1.1.4。所以统一用的nacos-v1.1.4。
+如果版本不一致，会出现一些乱七八糟的问题。例如`NacosNamingService.getAllInstances(...)`无法获取到nacos-v1.0.0中的实例。
+（用v1.1.4的API可以注册到nacos-v1.0.0.）
 
 | project | server.port |
 |:--------|:-----------:|

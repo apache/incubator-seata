@@ -141,12 +141,25 @@ public class DefaultCore implements Core {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
+        /* vergilyn-comment, 2020-02-20 >>>>
+         *   applicationId、txServiceGroup 即seata-client application.yaml中的配置
+         *   name 即`@GlobalTransaction`中的 `name`（不存在时默认生成）
+         */
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name,
             timeout);
+
+        /* vergilyn-comment, 2020-02-20 >>>>
+         *   例如 seata-server配置的是`store.mode = db`，那么RootSessionManager -> DataBaseSessionManager
+         */
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
 
+        /* vergilyn-comment, 2020-02-20 >>>> 底层依赖google-guava中EventBus的相关知识
+         *   EventBus是Guava的事件处理机制，是设计模式中的观察者模式（生产/消费者编程模型）的优雅实现。
+         *
+         * register: MetricsManager#init(...)
+         */
         //transaction start event
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));

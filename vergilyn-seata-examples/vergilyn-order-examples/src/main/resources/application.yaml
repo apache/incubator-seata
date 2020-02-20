@@ -3,8 +3,4 @@ spring:
     active:
       - datasource
       - fegin
-
-# seata
-seata:
-  applicationId: ${spring.application.name}
-  txServiceGroup: vergilyn_test_tx_group
+      - seata

@@ -73,6 +73,11 @@ public class SessionHolder {
      */
     public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
 
+    /**
+     * vergilyn-comment, 2020-02-20 >>>> 根据seata-server的配置`store.mode = file | db`决定
+     * @see io.seata.server.session.file.FileBasedSessionManager
+     * @see io.seata.server.session.db.DataBaseSessionManager
+     */
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
@@ -203,8 +208,10 @@ public class SessionHolder {
 
     /**
      * Gets root session manager.
-     *
+     * vergilyn-comment, 2020-02-20 >>>> seata-server中根据`store.mode = file | db` 决定是
      * @return the root session manager
+     * @see io.seata.server.session.file.FileBasedSessionManager
+     * @see io.seata.server.session.db.DataBaseSessionManager
      */
     public static final SessionManager getRootSessionManager() {
         if (ROOT_SESSION_MANAGER == null) {

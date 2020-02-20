@@ -71,6 +71,11 @@ public class NettyBaseConfig {
 
     /**
      * The constant WORKER_THREAD_SIZE.
+     * <p>vergilyn-comment, 2020-02-17 >>>> <br/>
+     *   一般即为`file.conf`中配置的"transport.thread-factory.worker-thread-size"。
+     *   可选值：Auto、Pin、BusyPin、Default、数字
+     * </p>
+     * @see WorkThreadMode
      */
     protected static int WORKER_THREAD_SIZE;
 

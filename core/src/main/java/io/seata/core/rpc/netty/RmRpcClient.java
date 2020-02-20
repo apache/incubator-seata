@@ -43,7 +43,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
 /**
  * The type Rm rpc client.
- *
+ * <br/> vergilyn-comment, 2020-02-18 >>>> 单例类，但是其属性`applicationId`和`transactionServiceGroup`可以是动态的。
  * @author slievrly
  * @author zhaojun
  */
@@ -66,7 +66,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
 
     /**
      * Gets instance.
-     *
+     * <br/> vergilyn-comment, 2020-02-18 >>>> 单例类，但是其属性`applicationId`和`transactionServiceGroup`可以是动态的。
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
      * @return the instance
@@ -82,6 +82,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * Gets instance.
      *
      * @return the instance
+     * @see TmRpcClient
      */
     public static RmRpcClient getInstance() {
         if (null == instance) {

@@ -6,6 +6,10 @@ public class DefaultException extends RuntimeException{
 
     private RspStatusEnum rspStatusEnum;
 
+    public DefaultException(String message) {
+        super(message);
+    }
+
     public DefaultException(String message, Throwable cause) {
         super(message, cause);
     }

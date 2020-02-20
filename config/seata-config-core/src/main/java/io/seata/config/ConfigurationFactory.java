@@ -65,6 +65,12 @@ public final class ConfigurationFactory {
         }
         Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
             false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
+
+        /* vergilyn-comment, 2020-02-18 >>>>
+         *   如果seata-client中引入了`seata-spring-boot-starter`需要特别小心，因为其存在`class SpringBootConfigurationProvider implements ExtConfigurationProvider`
+         *   导致的结果是，如果seata-client中期望读取`register.conf`中的配置，其解析结果是不一定对的！
+         *   例如`register.conf`中"register.type = nacos"，最后其实并没读取该值，而是获取的{@linkplain io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties#type}
+         */
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);

@@ -47,9 +47,18 @@ public class DefaultTransactionManager implements TransactionManager {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
+        /* vergilyn-comment, 2020-02-20 >>>>
+         *   本方法并未使用参数 applicationId、txServiceGroup
+         *
+         *   备注：如果是DefaultGlobalTransaction#begin(...)调用本方法， applicationId = txServiceGroup = null。
+         *
+         */
+
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
+
+        // vergilyn-comment, 2020-02-20 >>>> 在syncCall(...)中会去获取seata-client项目中配置的 applicationId、txServiceGroup
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());

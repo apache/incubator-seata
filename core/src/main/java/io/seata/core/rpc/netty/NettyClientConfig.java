@@ -34,6 +34,9 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
+    /**
+     * vergilyn-question, 2020-02-17 >>>> 如何配置该值？
+     */
     private final boolean useConnPool = false;
     private static String vgroup;
     private static String clientAppName;
@@ -53,6 +56,10 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
+
+    /**
+     * vergilyn-comment, 2020-02-17 >>>> 即`file.conf`中的"transport.enable-client-batch-send-request"，不支持动态修改
+     */
     private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, true);
 
     /**
@@ -139,7 +146,8 @@ public class NettyClientConfig extends NettyBaseConfig {
     /**
      * Gets client worker threads.
      * <p>vergilyn-comment, 2020-02-16 >>>> <br/>
-     *   一般即为`file.conf`中配置的"transport.thread-factory.worker-thread-size"，如果未配置根据
+     *   一般即为`file.conf`中配置的"transport.thread-factory.worker-thread-size"。
+     *   可选值：Auto、Pin、BusyPin、Default、数字
      * </p>
      * @return the client worker threads
      */
@@ -225,7 +233,9 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     /**
      * Is use conn pool boolean.
-     *
+     * <p>vergilyn-comment, 2020-02-17 >>>> <br/>
+     *   现在这个值貌似不支持配置，恒等于 false。
+     * </p>
      * @return the boolean
      */
     public boolean isUseConnPool() {
@@ -369,7 +379,7 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     /**
      * Get client worker thread prefix string.
-     *
+     * <br/> vergilyn-comment, 2020-02-17 >>>> 即`file.conf`中的"transport.thread-factory.client-worker-thread-prefix"
      * @return the string
      */
     public String getClientWorkerThreadPrefix() {

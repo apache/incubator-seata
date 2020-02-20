@@ -55,6 +55,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
+
+    /**
+     * vergilyn-comment, 2020-02-18 >>>> 即`file.conf`中的"service.disableGlobalTransaction"
+     */
     private volatile boolean disable;
 
     /**
@@ -68,6 +72,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             false);
     }
 
+    /* vergilyn-comment, 2020-02-20 >>>>
+     *   org.aopalliance.intercept.MethodInterceptor#invoke(...)
+     */
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
         Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis())

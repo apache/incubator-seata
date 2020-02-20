@@ -15,6 +15,21 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.SocketAddress;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
@@ -34,21 +49,6 @@ import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.net.SocketAddress;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * The type Abstract rpc remoting.
@@ -210,6 +210,15 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         return sendAsyncRequest(null, channel, msg, 0);
     }
 
+    /**
+     *
+     * @param address `address != null && enableClientBatchSendRequest`时，seata-client会批量发送。否则，单条发送。
+     * @param channel
+     * @param msg
+     * @param timeout `timeout > 0`,等待响应timeout。否则`return null`
+     * @return
+     * @throws TimeoutException
+     */
     private Object sendAsyncRequest(String address, Channel channel, Object msg, long timeout)
         throws TimeoutException {
         if (channel == null) {
@@ -236,7 +245,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             */
             if (NettyClientConfig.isEnableClientBatchSendRequest()) {
                 ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-                BlockingQueue<RpcMessage> basket = map.get(address);
+                BlockingQueue<RpcMessage> basket = map.get(address);  // vergilyn-question, 2020-02-17 >>>> BlockingQueue的相关知识
                 if (basket == null) {
                     map.putIfAbsent(address, new LinkedBlockingQueue<>());
                     basket = map.get(address);
@@ -262,6 +271,10 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         }
         if (timeout > 0) {
             try {
+                /* vergilyn-comment, 2020-02-20 >>>> 需要了解`java.util.concurrent.CompletableFuture`相关知识
+                 *   seata-client在`AbstractRpcRemotingClient#channelRead(...)`接收seata-server响应的结果。
+                 *   也可能是本类的 #channelRead(...)，取决于消息类型是什么
+                 */
                 return messageFuture.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exx) {
                 LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), address, msg);
@@ -317,6 +330,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
         }
+        /* vergilyn-comment, 2020-02-17 >>>> 即请求seata-server
+         *   seata-server端相关代码 {@linkplain #channelRead(ChannelHandlerContext, Object)}
+         */
         channel.writeAndFlush(rpcMessage);
     }
 
@@ -410,6 +426,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                             rpcMessage.getBody()));
                 }
                 if (messageFuture != null) {
+                    // vergilyn-comment, 2020-02-20 >>>> java.util.concurrent.CompletableFuture#complete()
                     messageFuture.setResultMessage(rpcMessage.getBody());
                 } else {
                     try {

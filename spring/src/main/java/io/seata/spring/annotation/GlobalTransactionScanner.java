@@ -85,7 +85,15 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private MethodInterceptor interceptor;
 
+    /**
+     * vergilyn-comment, 2020-02-18 >>>>
+     *   例如spring-boot application.yaml中的`seata.applicationId`，一般都是等价于`spring.application.name`
+     */
     private final String applicationId;
+    /**
+     * vergilyn-comment, 2020-02-18 >>>>
+     *   例如spring-boot application.yaml中的`seata.txServiceGroup`
+     */
     private final String txServiceGroup;
     private final int mode;
     /**
@@ -214,6 +222,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().addDisposable(RmRpcClient.getInstance(applicationId, txServiceGroup));
     }
 
+    /* vergilyn-comment, 2020-02-20 >>>>
+     *   org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary(...)
+     */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         if (disableGlobalTransaction) {

@@ -15,6 +15,14 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.netty.channel.Channel;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
@@ -26,14 +34,6 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 /**
  * Netty client pool manager.
  *
@@ -43,11 +43,21 @@ import java.util.stream.Collectors;
 class NettyClientChannelManager {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientChannelManager.class);
-    
+
+    /**
+     * 同步锁 <br/>
+     * KEY: seata-server(TC)服务地址，例如 127.0.0.1:8091
+     */
     private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<>();
-    
+
+    /**
+     * KEY: seata-server(TC)服务地址，例如 127.0.0.1:8091
+     */
     private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<>();
-    
+
+    /**
+     * KEY: seata-server(TC)服务地址，例如 127.0.0.1:8091
+     */
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
     
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
@@ -84,7 +94,7 @@ class NettyClientChannelManager {
     /**
      * Acquire netty client channel connected to remote server.
      *
-     * @param serverAddress server address
+     * @param serverAddress server address (seata-server服务地址，例如 127.0.0.1:8091)
      * @return netty channel
      */
     Channel acquireChannel(String serverAddress) {
@@ -157,7 +167,7 @@ class NettyClientChannelManager {
      * @param transactionServiceGroup transaction service group
      */
     void reconnect(String transactionServiceGroup) {
-        List<String> availList = null;
+        List<String> availList = null;  // vergilyn-comment, 2020-02-20 >>>> TC服务列表
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception e) {
@@ -211,7 +221,12 @@ class NettyClientChannelManager {
         }
         return channelFromPool;
     }
-    
+
+    /**
+     * vergilyn-comment, 2020-02-20 >>>>
+     *   根据配置的 事务分组名(e.g. my_test_tx_group) 和 TC集群名(e.g. server.vgroup_mapping.my_test_tx_group="default")
+     *   获取TC服务（即seata-server， e.g. 127.0.0.1:8091）
+     */
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                                                                             .lookup(transactionServiceGroup);
