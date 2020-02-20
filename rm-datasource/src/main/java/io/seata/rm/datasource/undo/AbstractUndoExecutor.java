@@ -15,13 +15,22 @@
  */
 package io.seata.rm.datasource.undo;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import java.sql.Connection;
+import java.sql.JDBCType;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -31,15 +40,8 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import java.sql.JDBCType;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
 /**
  * The type Abstract undo executor.
@@ -56,7 +58,6 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * template of check sql
-     *
      * TODO support multiple primary key
      */
     private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";
@@ -65,7 +66,7 @@ public abstract class AbstractUndoExecutor {
      * Switch of undo data validation
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
-            .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, true);
+        .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
 
     /**
      * The Sql undo log.
@@ -273,8 +274,8 @@ public abstract class AbstractUndoExecutor {
         }
         // build check sql
         String dbType = getDbType(conn);
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
-                tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
+            tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
@@ -317,6 +318,7 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * Get db type
+     *
      * @param conn the connection
      * @return the db type
      * @throws SQLException

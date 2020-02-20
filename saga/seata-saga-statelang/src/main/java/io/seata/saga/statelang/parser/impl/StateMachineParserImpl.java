@@ -22,6 +22,7 @@ import com.alibaba.fastjson.parser.Feature;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.seata.common.util.StringUtils;
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
@@ -58,6 +59,10 @@ public class StateMachineParserImpl implements StateMachineParser {
         stateMachine.setComment((String) node.get("Comment"));
         stateMachine.setVersion((String) node.get("Version"));
         stateMachine.setStartState((String) node.get("StartState"));
+        String recoverStrategy = (String) node.get("RecoverStrategy");
+        if (StringUtils.isNotBlank(recoverStrategy)) {
+            stateMachine.setRecoverStrategy(RecoverStrategy.valueOf(recoverStrategy));
+        }
         Object isPersist = node.get("IsPersist");
         if (Boolean.FALSE.equals(isPersist)) {
             stateMachine.setPersist(false);
