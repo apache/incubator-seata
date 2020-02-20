@@ -263,8 +263,10 @@ public class FileConfiguration extends AbstractConfiguration {
                     }
                 } catch (Exception e) {
                     setFailResult(configFuture);
-                    LOGGER.warn("Could not found property {}, try to use default value instead.",
-                        configFuture.getDataId());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Could not found property {}, try to use default value instead.",
+                            configFuture.getDataId());
+                    }
                 }
             }
         }
