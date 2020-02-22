@@ -1,3 +1,4 @@
+
 /*
  *  Copyright 1999-2019 Seata.io Group.
  *
@@ -202,7 +203,7 @@ public class EnhancedServiceLoader<S> {
      * @return all extension class
      */
     @SuppressWarnings("rawtypes")
-    public List<Class> getAllExtensionClass() {
+    List<Class> getAllExtensionClass() {
         Map<ExtensionURL, Class<?>> map = loadAllExtensionClass(findClassLoader());
         List<Class> result = new ArrayList<>(map.values());
         return result;
@@ -215,7 +216,7 @@ public class EnhancedServiceLoader<S> {
      * @return all extension class
      */
     @SuppressWarnings("rawtypes")
-    public <S> List<Class> getAllExtensionClass(ClassLoader loader) {
+    List<Class> getAllExtensionClass(ClassLoader loader) {
         Map<ExtensionURL, Class<?>> map = loadAllExtensionClass(loader);
         List<Class> result = new ArrayList<>(map.values());
         return result;

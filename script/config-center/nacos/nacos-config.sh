@@ -42,7 +42,7 @@ if [[ -z ${port} ]]; then
     port=8848
 fi
 if [[ -z ${group} ]]; then
-    port="SEATA_GROUP"
+    group="SEATA_GROUP"
 fi
 if [[ -z ${tenant} ]]; then
     tenant=""
