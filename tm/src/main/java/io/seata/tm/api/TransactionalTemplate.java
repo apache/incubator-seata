@@ -16,6 +16,8 @@
 package io.seata.tm.api;
 
 
+import java.util.List;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -23,8 +25,6 @@ import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Template of executing business logic with a global transaction.
@@ -55,11 +55,20 @@ public class TransactionalTemplate {
         try {
 
             // 2. begin transaction
+            // vergilyn-comment, 2020-02-21 >>>> 发起 GlobalBeginRequest,seata-server新增一条global_table数据
             beginTransaction(txInfo, tx);
 
             Object rs = null;
             try {
 
+                /* vergilyn-comment, 2020-02-23 >>>>
+                 *   seata的核心proxy: PreparedStatementProxy.class、DataSourceProxy.class、ConnectionProxy.class
+                 *   例如 orderServer.create(...)会执行`orderRepository.save(order)`此时调用`PreparedStatementProxy#execute()`
+                 *
+                 *   1. 构建UndoLog
+                 *   2. commit-transaction, 如果成功，此时UndoLog和业务数据的改变都会在db中反映
+                 *      （即PhaseOne_Done，本地事务正常完成）
+                 */
                 // Do Your Business
                 rs = business.execute();
 

@@ -15,9 +15,10 @@
  */
 package io.seata.server.lock;
 
-import javax.sql.DataSource;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.sql.DataSource;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
@@ -66,8 +67,10 @@ public class LockerFactory {
 
     /**
      * Get lock manager.
-     *
+     * vergilyn-comment, 2020-02-21 >>>> 根据`store.mode`决定LockManager实现类
      * @return the lock manager
+     * @see DataBaseLockManager
+     * @see DefaultLockManager
      */
     public static final LockManager getLockManager() {
         if (lockManager == null) {

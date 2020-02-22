@@ -4,7 +4,6 @@ import javax.transaction.Transactional;
 
 import com.vergilyn.examples.dto.OrderDTO;
 import com.vergilyn.examples.enums.RspStatusEnum;
-import com.vergilyn.examples.exception.DefaultException;
 import com.vergilyn.examples.order.entity.Order;
 import com.vergilyn.examples.order.feign.AccountFeignClient;
 import com.vergilyn.examples.order.feign.StorageFeignClient;
@@ -35,7 +34,7 @@ public class OrderServiceImpl implements OrderService {
         log.info("开启全局事务 >>>> xid: {}", RootContext.getXID());
 
         ObjectResponse<OrderDTO> response = new ObjectResponse<>();
-        // 扣减用户账户
+       /* // 扣减用户账户
         ObjectResponse<Void> accountResp = accountFeignClient.decrease(userId, orderAmount);
         if (accountResp.getStatus() != 200){
             throw new DefaultException("请求account错误");
@@ -45,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
         ObjectResponse<Void> storageResp = storageFeignClient.decrease(commodityCode, orderTotal);
         if (storageResp.getStatus() != 200){
             throw new DefaultException("请求storage错误");
-        }
+        }*/
 
         //生成订单
         Order order = new Order(userId, commodityCode, orderTotal, orderAmount);

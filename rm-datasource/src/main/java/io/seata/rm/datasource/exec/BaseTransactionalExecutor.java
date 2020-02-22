@@ -82,6 +82,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public Object execute(Object... args) throws Throwable {
+        /* vergilyn-comment, 2020-02-22 >>>>
+         *   执行sql时，会判断当前线程（ThreadLocal）是否发起过begin-global-transaction
+         *   如果 inGlobalTransaction，再获取当前线程下的 xid （例如 xid = 127.0.0.1:8091:2035983424）
+         */
         if (RootContext.inGlobalTransaction()) {
             String xid = RootContext.getXID();
             statementProxy.getConnectionProxy().bind(xid);
@@ -92,6 +96,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } else {
             statementProxy.getConnectionProxy().setGlobalLockRequire(false);
         }
+        /* vergilyn-comment, 2020-02-23 >>>>
+         *   seata 实现了特殊 select-for-update, {@link io.seata.rm.datasource.exec.SelectForUpdateExecutor}
+         * > https://seata.io/zh-cn/docs/dev/mode/at-mode.html
+         * > 在数据库本地事务隔离级别 读已提交（Read Committed） 或以上的基础上，Seata（AT 模式）的默认全局隔离级别是 读未提交（Read Uncommitted） 。
+         * > 如果应用在特定场景下，必需要求全局的 读已提交 ，目前 Seata 的方式是通过 SELECT FOR UPDATE 语句的代理。
+         *
+         */
         return doExecute(args);
     }
 
@@ -230,10 +241,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
+        // vergilyn-comment, 2020-02-23 >>>> lockKey
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
         String lockKeys = buildLockKey(lockKeyRecords);
         connectionProxy.appendLockKey(lockKeys);
 
+        // vergilyn-comment, 2020-02-23 >>>> appen UndoLog
         SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
         connectionProxy.appendUndoLog(sqlUndoLog);
     }

@@ -39,7 +39,7 @@ public class ContextCoreLoader {
 
     /**
      * Load context core.
-     *
+     * vergilyn-comment, 2020-02-21 >>>> 底层基于java.lang.ThreadLocal<Map<String, String>>
      * @return the context core
      */
     public static ContextCore load() {

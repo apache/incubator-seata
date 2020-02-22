@@ -47,9 +47,15 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
+    /**
+     * vergilyn-comment, 2020-02-21 >>>> 即`file.conf`中的"client.tm.commit.retry.count"
+     */
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
 
+    /**
+     * vergilyn-comment, 2020-02-21 >>>> 即`file.conf`中的"client.tm.rollback.retry.count"
+     */
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
 
@@ -127,6 +133,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             while (retry > 0) {
                 try {
+                    // vergilyn-question, 2020-02-23 >>>> server不一定返回的是 Committed/Finish 啊！参考server端代码
                     status = transactionManager.commit(xid);
                     break;
                 } catch (Throwable ex) {

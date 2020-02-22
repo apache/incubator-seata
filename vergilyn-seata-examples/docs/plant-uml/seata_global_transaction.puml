@@ -1,0 +1,227 @@
+@startuml
+skinparam activity {
+  BackgroundColor<< FINISH >> #EEE
+  FontName Microsoft-YaHei
+}
+
+partition 10.client #LightSkyBlue{
+(*)  --> "10. @GlobalTransactional"
+
+-->[ name = "first-global-transaction"] "10. GlobalTransactionalInterceptor.class"
+
+--> "10. TransactionalTemplate#execute(...)"
+
+-->[begin transaction] "10. DefaultGlobalTransaction#begin(...)"
+
+--> "10. DefaultTransactionManager#begin(...)"
+
+-->[ **`TmRpcClient.class`** instance] "10. AbstractRpcRemotingClient#sendMsgWithResponse(...)"
+note right
+1. client 此时才会去获取`seata.txServiceGroup`，而不是通过参数传递到此。
+2. 并且获取可与server通信的netty-channel
+end note
+
+--> "10. AbstractRpcRemoting#sendAsyncRequest(
+    String address,
+    Channel channel,
+    Object msg,
+    long timeout)" as global_begin_request
+note right
+address: seata-server地址，与配置`EnableClientBatchSendRequest`判断是否支持客户端批量发送请求
+channel: 与seata-server通信可用的netty-channel
+msg: `GlobalBeginRequest.class`，
+  当前值{timeout: 60000, transactionName: first-global-transaction, typeCode: MessageType.TYPE_GLOBAL_BEGIN}
+  这个timeout/transactionName即`@GlobalTransaction`中设置的值
+  timeout指的是global-transaction的timeout，而非client与server通信中的timeout
+timeout: 表示本次通信等待server返回结果的timeout。其值是`NettyClientConfig.getRpcRequestTimeout()`
+end note
+}
+
+partition 20.server,`GlobalBeginRequest.class` #CCCCEE{
+global_begin_request -->[<font color=blue>**global-begin-request**</font>] "20. RpcServer#channelRead(...)"
+note right
+`RpcMessage.class`:
+  messageType = MSGTYPE_RESQUEST_ONEWAY,
+  body = `GlobalBeginRequest.class`
+end note
+
+--> "20. AbstractRpcRemoting#channelRead(...)"
+
+-->[RpcServer#dispatch(...)] "20. DefaultServerMessageListenerImpl#onTrxMessage(...)"
+note right
+client 批量请求和单条请求的核心是一样的
+end note
+
+--> "20. DefaultCoordinator#onRequest(...)"
+
+-->[↓ \n GlobalBeginRequest#handle(...) \n ↓ \n AbstractTCInboundHandler#handle(...)] "20. DefaultCoordinator#doGlobalBegin(...)"
+
+--> "20. DefaultCore#begin(
+    String applicationId,
+    String transactionServiceGroup,
+    String name,
+    int timeout)" as add_global_session
+note right
+1. 核心代码的逻辑处理代码都在`DefaultCoordinator.class` 和 `DefaultCore.class`。
+2. 参数即client的请求参数
+  applicationId: 可以在netty-channel中获取。（client在启动时会向server发起RegisterTMRequest，其中包含applicationId）
+  txServiceGroup、name、timeout: 即请求中包含的信息
+
+构建GlobalSession，例如server配置是`store.mode=db`，那么会将GlobalSession信息保存到db。
+<font color=red>**生成transactionId(e.g. 20200223-g-01)，并新增一条 global_table 数据。`globalStatus = Begin`**</font>
+end note
+}
+
+partition 11.client,成功创建GlobalSession #LightSkyBlue{
+add_global_session -->[server返回xid] "11. DefaultGlobalTransaction#begin(...)"
+note right
+xid格式 {seata-server-ip}:{port}:{transactionId}
+e.g. 127.0.0.1:8091:20200223-g-01
+
+基于ThreadLocal<Map<String,String>>绑定全局事务：put("TX_XID", "127.0.0.1:8091:20200223-g-01")。
+end note
+
+--> "11. TransactionalTemplate#execute(...)"
+note right
+至此seata的 begin-global-transaction已成功完成。
+开始执行业务代码（Interceptor#proceed()）
+
+e.g. execute -> INSERT INTO table_name(id, name) VALUES(1, 'vergilyn');
+end note
+
+-->[seata的核心proxy: \nPreparedStatementProxy.class \nDataSourceProxy.class \nConnectionProxy.class] "
+11. <font color=purple>**io.seata.rm.datasource.PreparedStatementProxy**</font>"
+
+-->[execute()] "
+11. <font color=purple>**io.seata.rm.datasource.exec.ExecuteTemplate#execute(...)**</font>"
+note right
+executor = new InsertExecutor<T, S>(...);
+end note
+
+--> "
+11. <font color=purple>**io.seata.rm.datasource.exec.BaseTransactionalExecutor#execute(...)**</font>"
+note right
+从当前线程的ThreadLocal中获取xid，即之前begin-global-transaction时server返回后绑定的xid。
+（xid = 127.0.0.1:8091:20200223-g-01）
+
+备注：
+Seata（AT模式）的默认全局隔离级别是Read-Uncommitted，为满足某些场景必须Read-Committed，
+Seata可以通过 SELECT FOR UPDATE 语句的代理。
+即<font color=purple>**io.seata.rm.datasource.exec.SelectForUpdateExecutor#doExecute(...)**</font>
+end note
+
+--> "
+11. <font color=purple>**io.seata.rm.datasource.exec.AbstractDMLBaseExecutor#doExecute(...)**</font>"
+note right
+seata会`setAutoCommit(false)`，之后seata手动`commit()`
+end note
+
+-->[ **executeAutoCommitFalse(...)**] "
+11. <font color=purple>**io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.executeAutoCommitFalse**</font"
+note right
+protected T executeAutoCommitFalse(Object[] args) throws Exception {
+    TableRecords beforeImage = beforeImage();
+    T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+    TableRecords afterImage = afterImage(beforeImage);
+    prepareUndoLog(beforeImage, afterImage);
+    return result;
+}
+
+protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
+    if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+        return;
+    }
+
+    ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+
+    TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
+    String lockKeys = buildLockKey(lockKeyRecords);
+    connectionProxy.appendLockKey(lockKeys);
+
+    SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
+    connectionProxy.appendUndoLog(sqlUndoLog);
+}
+end note
+
+-->[ **commit**] "
+11. <font color=purple>**io.seata.rm.datasource.ConnectionProxy#commit()**</font>"
+--> "11. ConnectionProxy#processGlobalTransactionCommit()"
+-->[<font color=blue>**registry branch**</font>] "11. ConnectionProxy#register()"
+note right
+1. RM(ResourceManager)默认AT（其它saga、TCC），即`io.seata.rm.datasource.DataSourceManager.class`
+2. <font color=red>**ConnectionContext.xid:**</font>
+  `BaseTransactionalExecutor#execute(...)`时设置，即 127.0.0.1:8091:20200223-g-01
+end note
+
+--> "11. io.seata.rm.AbstractResourceManager#branchRegister(...)"
+-->[ **`RmRpcClient.class`** instance] "11. AbstractRpcRemotingClient#sendMsgWithResponse(...)" as branch_register_request
+note right
+`BranchRegisterRequest.class`:
+  xid: 之前begin-global-transaction返回的xid
+  lockKey: `{table_name}:{primary_key}` （AbstractDMLBaseExecutor#prepareUndoLog(...)时设置后组装）
+  resourceId: 此处等于client的jdbcUrl，例如 127.0.0.1:3306/test_microservices
+  brancheType: AT
+  applicationData： null
+
+（实际发送请求与之前的begin-global-transaction一样）
+end note
+}
+
+partition 21.server,`BranchRegisterRequest.class` #CCCCEE{
+branch_register_request --> "21. DefaultCoordinator#doBranchRegister(...)"
+
+--> "21. DefaultCore#branchRegister(...)" as add_branch_session
+note right
+1. 根据xid查找并构建 GlobalSession。
+  例如，db从global_table获取主体GlobalSession，并从branch_table获取BranchSession。
+
+2. 根据本次请求的参数及xid对应的GlobalSession构建 BranchSession。
+<font color=red>**生成branchId，并新增一条 branch_table 数据。`branchStatus = Registered`**</font>
+
+3. 获取branchSession的lock：`branchSession.lock()`
+<font color=red>**如果获取lock成功，那么会新增lock的信息(0+条，0表示no-lock)到表 lock_table**</font>
+
+
+end note
+}
+
+partition 12.client,成功创建BranchSession #LightSkyBlue{
+add_branch_session-->[返回branchId = 20200223-b-01] "12. ConnectionProxy#register()"
+--> "12. ConnectionProxy#processGlobalTransactionCommit()"
+note right
+1. flush UndoLog
+2. `java.sql.Connection#commit(...)`： 此时UndoLog和业务操作的数据都真实的写入数据库
+3. 上报commit结果给seata-server（提交成功可以通过配置不上报，但失败一定上报）： `BranchReportRequest.class`
+<font color=red>**seata-server根据xid、branchId获取到BranchSession，更改branchStatus=PhaseOne_Done/PhaseOne_Failed**</font>
+end note
+--> "12. TransactionalTemplate#execute(...)"
+
+if "commit?" then
+-->[success] "success" as success
+note right
+1. 如果commit成功，此时UndoLog和业务数据的改变都会在db中反映
+2. 根据配置参数`client.report.success.enable`是否上报seata-server
+end note
+else
+-->[rollback] "rollback" as rollback
+note right
+exception 需要rollback。
+一定会上报seata-server。
+end note
+
+if "role?" then
+success -->[Participant] "**Participant commit finish**" <<FINISH>>
+else
+success -->[Launcher] "12. DefaultTransactionManager#commit(...)" as global_commit_request
+note right
+`GlobalCommitRequest.class`:
+  xid: 127.0.0.1:8091:20200223-g-01
+  typeCode: TYPE_GLOBAL_COMMIT
+end note
+}
+
+partition 22.server,`GlobalCommitRequest.class`{
+global_commit_request --> "22. DefaultCore#commit(...)"
+}
+
+@enduml

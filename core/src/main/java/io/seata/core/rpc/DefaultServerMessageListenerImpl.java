@@ -50,6 +50,10 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerMessageListenerImpl.class);
     private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
     private ServerMessageSender serverMessageSender;
+    /**
+     * vergilyn-comment, 2020-02-22 >>>>
+     *   例如`Server#main(...)`时的{@linkplain DefaultCoordinator}
+     */
     private final TransactionMessageHandler transactionMessageHandler;
     private static final int MAX_LOG_SEND_THREAD = 1;
     private static final int MAX_LOG_TAKE_SIZE = 1024;

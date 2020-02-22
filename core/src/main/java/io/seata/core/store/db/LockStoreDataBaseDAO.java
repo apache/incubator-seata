@@ -15,7 +15,6 @@
  */
 package io.seata.core.store.db;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
@@ -100,6 +101,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         return acquireLock(Collections.singletonList(lockDO));
     }
 
+    /* vergilyn-comment, 2020-02-23 >>>>
+     *   如果lock不存在（即可以正常获取lock），那么会新增lock的信息到表 lock_table
+     */
     @Override
     public boolean acquireLock(List<LockDO> lockDOs) {
         Connection conn = null;

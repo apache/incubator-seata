@@ -166,6 +166,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void close() throws TransactionException {
         if (active) {
+            // vergilyn-comment, 2020-02-21 >>>> 默认实现`AbstractSessionManager#onClose(...)`会将active设置成false
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onClose(this);
             }
@@ -194,8 +195,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @throws TransactionException the transaction exception
      */
     public void closeAndClean() throws TransactionException {
-        close();
-        clean();
+        close();  // 如果active=true，调用listener.onClose()，并且将active设置成false。
+        clean();  // 调用LockManager.releaseGlobalSessionLock()，底层删除lock_table的数据。
 
     }
 
@@ -599,6 +600,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
     }
 
+    /**
+     * vergilyn-comment, 2020-02-21 >>>>
+     *   底层基于 java.util.concurrent.locks.ReentrantLock 实现锁
+     */
     public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException {
         this.lock();
         try {

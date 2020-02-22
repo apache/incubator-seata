@@ -66,6 +66,11 @@ public class DefaultTransactionManager implements TransactionManager {
         return response.getXid();
     }
 
+    /* vergilyn-question, 2020-02-23 >>>>
+     *   通过server源码可知 {@link io.seata.server.coordinator.DefaultCore#commit(...)}可知，其返回值不一定是 GlobalStatus.Committed。
+     *   那么如果 `!shouldCommit = true`，client这里的上层 {@link io.seata.tm.api.DefaultGlobalTransaction#commit(...)}并未根据结果判断啊？
+     *
+     */
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();

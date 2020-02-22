@@ -180,7 +180,10 @@ public class ConnectionContext {
 
     /**
      * Build lock keys string.
+     * <p>vergilyn-comment, 2020-02-23 >>>> <br/>
+     *   例如"insert into t_order(id, name) VALUES(1, 'vergilyn')" 即`t_order:1`
      *
+     * </p>
      * @return the string
      */
     public String buildLockKeys() {

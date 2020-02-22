@@ -63,3 +63,29 @@ springboot可配置在yml、properties中，服务启动时加载配置，对应
 (TC服务列表即 seata-server的 IP:PORT)
 
 注：serverAddr和namespace与Server端一致，clusterName与Server端cluster一致
+
+
+## FAQ
+
+### Data truncation: Data too long for column 'transaction_service_group' at row 1
+表`global_table`中，默认"`transaction_service_group` VARCHAR(32)"。  
+而txServiceGroup如果采用 {spring.application.name}_{custom} 的形式，那么很容易超过设置。
+
+
+global_table:
+  add: client发起 begin-global-transaction时，server会去创建 DefaultCore#begin(...) -> GlobalSession#begin(...)
+  update:
+    1、async commit-global-transaction时
+  remove: client发起 commit-global-transaction时，DefaultCore#commit(...) -> GlobalSession#closeAndClean(...) -> GlobalSession#clean(...)
+
+branch_table:
+  add/update: ？？？
+  remove: client发起 commit-global-transaction时（branchTable != null），DefaultCore#commit(...) -> GlobalSession#closeAndClean(...) -> GlobalSession#clean(...)
+
+lock_table:
+
+undo_log:
+  add: AbstractDataSourceProxy.class、DataSourceProxy.class
+  `@Transaction` 提交事务时 `org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor#commit(...)`  
+  seata 通过代理 `io.seata.rm.datasource.ConnectionProxy`
+

@@ -56,6 +56,10 @@ public class DefaultCore implements Core {
 
     private ResourceManagerInbound resourceManagerInbound;
 
+    /**
+     * vergilyn-comment, 2020-02-21 >>>> 感觉当前主要用于Metrics
+     * @see io.seata.server.metrics.MetricsManager
+     */
     private EventBus eventBus = EventBusManager.get();
 
     @Override
@@ -80,17 +84,27 @@ public class DefaultCore implements Core {
                         globalSession.getXid(), globalSession.getStatus(), GlobalStatus.Begin));
             }
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+
+            /* vergilyn-comment, 2020-02-23 >>>>
+             *   根据GlobalSession(global_table) 构建 BranchSession
+             */
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                 applicationData, lockKeys, clientId);
+
+            /* vergilyn-comment, 2020-02-23 >>>>
+             *   lock会去组装被获取lock，如果可以获取lock，那么会新增lock的信息到表 lock_table
+             *   如果获取lock失败，则表示lock已被占用
+             */
             if (!branchSession.lock()) {
                 throw new BranchTransactionException(LockKeyConflict, String
                     .format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()));
             }
             try {
+                // vergilyn-comment, 2020-02-23 >>>> 内部会调用listener#onAddBranch，即新增branch_table
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
-                branchSession.unlock();
+                branchSession.unlock(); // vergilyn-comment, 2020-02-23 >>>> delete lock_table
                 throw new BranchTransactionException(FailedToAddBranch, String
                     .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()), ex);
@@ -121,6 +135,11 @@ public class DefaultCore implements Core {
                 String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+
+        /* vergilyn-comment, 2020-02-23 >>>> 更改 branchStatus = PhaseOne_Done / PhaseOne_Failed
+         *   client代码 {@link io.seata.rm.datasource.ConnectionProxy#processGlobalTransactionCommit()}
+         *   client可以通过配置"client.report.success.enable"，当branch-commit成功时不上报。但是，若失败一定会上报。
+         */
         globalSession.changeBranchStatus(branchSession, status);
 
         LOGGER.info("Successfully branch report xid = {}, branchId = {}", globalSession.getXid(),
@@ -153,7 +172,7 @@ public class DefaultCore implements Core {
          */
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
-        session.begin();
+        session.begin();  // vergilyn-comment, 2020-02-21 >>>> 创建global_table信息
 
         /* vergilyn-comment, 2020-02-20 >>>> 底层依赖google-guava中EventBus的相关知识
          *   EventBus是Guava的事件处理机制，是设计模式中的观察者模式（生产/消费者编程模型）的优雅实现。
@@ -170,11 +189,20 @@ public class DefaultCore implements Core {
 
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
+        /* vergilyn-comment, 2020-02-21 >>>>
+         *   通过xid获取之前 begin-global-transaction 时创建的 global_table、branch_table 信息，并构建成GlobalSession
+         */
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
+        /* vergilyn-comment, 2020-02-21 >>>>
+         *   `globalSession.closeAndClean()`时，如果`globalSession.active = true`会调用所有listener#onClose()
+         *   （AbstractSessionManager#onClose() 中会将active设置成false）
+         */
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+
+        // vergilyn-comment, 2020-02-21 >>>> lock是基于 java.util.concurrent.locks.ReentrantLock
         // just lock changeStatus
         boolean shouldCommit = globalSession.lockAndExcute(() -> {
             //the lock should release after branch commit
@@ -186,10 +214,19 @@ public class DefaultCore implements Core {
             }
             return false;
         });
+
+        /* vergilyn-question, 2020-02-23 >>>>
+         *   如果`!shouldCommit = true`，且`status != Committed/Finish`时 client怎么处理？
+         */
         if (!shouldCommit) {
             return globalSession.getStatus();
         }
+
+        /* vergilyn-comment, 2020-02-21 >>>>
+         *   如果branchSession存在 branchType = TCC，则不允许async-commit
+         */
         if (globalSession.canBeCommittedAsync()) {
+            // vergilyn-comment, 2020-02-21 >>>> update global_table, status = Begin(1) -> AsyncCommitting(8)
             asyncCommit(globalSession);
             return GlobalStatus.Committed;
         } else {
@@ -263,6 +300,11 @@ public class DefaultCore implements Core {
         } else {
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
                 BranchStatus currentStatus = branchSession.getStatus();
+
+                /* vergilyn-question, 2020-02-23 >>>>
+                 *   为什么可以直接remove后 continue?
+                 *   怎么感觉是PhaseOne_Done可以直接remove？
+                 */
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
                     continue;

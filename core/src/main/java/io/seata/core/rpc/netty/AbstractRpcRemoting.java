@@ -46,6 +46,7 @@ import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         new NamedThreadFactory("timeoutChecker", 1, true));
     /**
      * The Message executor.
+     * vergilyn-comment, 2020-02-22 >>>> {@linkplain RpcServer}会设置该属性 <br/>
+     *   例如处理client的{@linkplain GlobalBeginRequest}
      */
     protected final ThreadPoolExecutor messageExecutor;
 
@@ -254,6 +257,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("offer message: {}", rpcMessage.getBody());
                 }
+
+                // vergilyn-comment, 2020-02-22 >>>> client批量发送参考{@link AbstractRpcRemotingClient.MergedSendRunnable}
                 if (!isSending) {
                     synchronized (mergeLock) {
                         mergeLock.notifyAll();

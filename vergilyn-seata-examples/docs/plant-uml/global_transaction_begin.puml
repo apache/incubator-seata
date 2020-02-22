@@ -1,5 +1,5 @@
 @startuml
-partition seata-client {
+partition seata-client(请求开启global-transaction前) #LightSkyBlue{
 (*)  --> "@GlobalTransactional"
 
 --> "GlobalTransactionalInterceptor#invoke(...)"
@@ -45,12 +45,18 @@ AbstractRpcRemoting 在seata-client相关的继承实现类：
   2. TmRpcClient
   3. RmRpcClient
 end note
+
+--> ===A1===
+note right
+seata-client 开始通过 netty-channel与seata-server通信。
+seata-server 接受并开始处理 begin-global-transaction 请求。
+end note
 }
 
-partition seata-server {
-"AbstractRpcRemoting#sendAsyncRequest(...)" --> "AbstractRpcRemotingServer"
+partition seata-server(处理client的GlobalBeginRequest) #CCCCEE {
+===A1=== --> "AbstractRpcRemotingServer"
 note right
-AbstractRpcRemotingServer本身并未从写`channelRead(...)`方法，而是继承其父类`AbstractRpcRemoting`中的方法
+AbstractRpcRemotingServer本身并未重写`channelRead(...)`方法，而是继承其父类`AbstractRpcRemoting`中的方法
 end note
 
 --> "RpcServer#dispatch(...)"
@@ -60,5 +66,53 @@ end note
 --> "DefaultCoordinator#doGlobalBegin(...)"
 
 --> "DefaultCore#begin(...)"
+note right
+调用listener的onBegin(...)
+-> DataBaseSessionManager#addGlobalSession(...) 新增一条 global_table 数据。
+
+疑问：branch_table什么时候新增？
+end note
+
+--> ===A2===
+note right
+  seata-server端begin-global-transaction完成，返回 xid 给seata-client
+  xid 格式: {ip}:{port}:{transaction-id}，例如 127.0.0.1:8091:2035983424
+  ip/port是seata-server。transaction-id是由seata-server端生成、
+end note
+}
+
+partition seata-client(seata-server成功返回xid) #LightSkyBlue {
+===A2=== ---> " DefaultGlobalTransaction#begin(...)"
+--> " TransactionalTemplate#execute(...)"
+note right
+`business.execute()`即 methodInvocation.proceed()，调用业务代码
+end note
+
+if "rollback or commit?" then
+-->[commit] "DefaultGlobalTransaction#commit(...)"
+-->[commit global-transaction] "DefaultTransactionManager#commit(XID)" as transaction_commit
+note left
+参数 XID 即之前seata-server返回
+（e.g. 127.0.0.1:8091:2035983424）
+构造请求`GlobalCommitRequest`，
+typeCode = MessageType.TYPE_GLOBAL_COMMIT
+end note
+
+
+else
+-->[rollback] "rollback"
+
+endif
+}
+
+partition seata-server(处理client的GlobalCommitRequest) #CCCCEE {
+transaction_commit --> "DefaultCoordinator#doGlobalCommit(...)"
+
+--> "DefaultCore#commit(...)"
+note left
+1. 即获取global_table、branch_table中相关xid的信息，转换成GlobalSession
+2. 改变globalSession：active = true->false, status = begin->committing
+  并且，如果存在branchSession
+end note
 }
 @enduml

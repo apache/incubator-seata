@@ -15,13 +15,13 @@
  */
 package io.seata.core.context;
 
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.model.BranchType;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * The type Root context.
@@ -41,6 +41,9 @@ public class RootContext {
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
+    /**
+     * vergilyn-comment, 2020-02-21 >>>> 底层基于`java.lang.ThreadLocal<Map<String, String>>`
+     */
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     /**

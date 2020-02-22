@@ -206,8 +206,12 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         context.reset();
     }
 
+    /* vergilyn-comment, 2020-02-23 >>>>
+     *  之后回到代码 `TransactionalTemplate#execute()` 继续执行
+     */
     private void processGlobalTransactionCommit() throws SQLException {
         try {
+            // vergilyn-comment, 2020-02-21 >>>> registry branch, 根据返回值设置branchId
             register();
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, context.buildLockKeys());
@@ -217,12 +221,17 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             if (context.hasUndoLog()) {
                 UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
             }
+            // vergilyn-comment, 2020-02-23 >>>> 如果commit成功，此时UndoLog和业务数据的改变都会在db中反映
             targetConnection.commit();
         } catch (Throwable ex) {
             LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
             report(false);
             throw new SQLException(ex);
         }
+
+        /* vergilyn-comment, 2020-02-23 >>>>
+         *   seata-server根据xid、branchId获取到BranchSession，更改branchStatus=PhaseOne_Done/PhaseOne_Failed
+         */
         if (IS_REPORT_SUCCESS_ENABLE) {
             report(true);
         }
@@ -275,6 +284,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public static class LockRetryPolicy {
+        /**
+         * vergilyn-comment, 2020-02-22 >>>> 即`file.conf`中的"client.rm.lock.retry.policy.branch-rollback-on-conflict"，默认true
+         */
         protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
             .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
 
