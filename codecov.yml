@@ -17,6 +17,7 @@ ignore:
  - ".mvn/.*"
  - ".style/.*"
  - "*.md"
+ - "rm-datasource/src/test/java/io/seata/rm/datasource/mock"
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default
