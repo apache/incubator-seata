@@ -11,7 +11,7 @@ coverage:
   precision: 2
   range: "50...100"
 ignore:
- - "codec/seata-serializer-protobuf/src/main/java/io/seata/serializer/protobuf/generated"
+ - "serializer/seata-serializer-protobuf/src/main/java/io/seata/serializer/protobuf/generated"
  - "test/.*"
  - ".github/.*"
  - ".mvn/.*"
