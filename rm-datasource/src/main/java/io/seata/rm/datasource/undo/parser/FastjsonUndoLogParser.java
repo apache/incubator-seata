@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 
@@ -60,6 +59,6 @@ public class FastjsonUndoLogParser implements UndoLogParser {
     @Override
     public BranchUndoLog decode(byte[] bytes) {
         String text = new String(bytes, Constants.DEFAULT_CHARSET);
-        return JSON.parseObject(text, BranchUndoLog.class, Feature.AllowISO8601DateFormat);
+        return JSON.parseObject(text, BranchUndoLog.class);
     }
 }
