@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.core.model.BranchType;
 import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.lang.annotation.ElementType;
@@ -68,6 +69,12 @@ public @interface GlobalTransactional {
      * @return
      */
     String[] noRollbackForClassName() default {};
+
+    /**
+     * default branch type
+     * @return
+     */
+    BranchType defaultBranchType() default BranchType.AT;
 
 
 }

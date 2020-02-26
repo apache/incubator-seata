@@ -17,6 +17,7 @@ package io.seata.tm.api.transaction;
 
 import io.seata.common.util.CollectionUtils;
 
+import io.seata.core.model.BranchType;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public final class TransactionInfo implements Serializable {
     private String name;
 
     private Set<RollbackRule> rollbackRules;
+
+    private BranchType defaultBranchType;
 
     public int getTimeOut() {
         return timeOut;
@@ -74,5 +77,13 @@ public final class TransactionInfo implements Serializable {
         }
 
         return !(winner instanceof NoRollbackRule);
+    }
+
+    public BranchType getDefaultBranchType() {
+        return this.defaultBranchType;
+    }
+
+    public void setDefaultBranchType(BranchType branchType) {
+        this.defaultBranchType = branchType;
     }
 }

@@ -17,6 +17,7 @@ package io.seata.tm.api;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -224,6 +225,7 @@ public class APITest {
             TransactionInfo txInfo = new TransactionInfo();
             txInfo.setTimeOut(TIME_OUT);
             txInfo.setName(TX_NAME);
+            txInfo.setDefaultBranchType(BranchType.AT);
             return txInfo;
         }
     }
