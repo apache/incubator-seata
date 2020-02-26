@@ -45,6 +45,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
     private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+    private boolean rmReportEnable = true;
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         try (Connection con = dataSource.getConnection()) {
@@ -146,6 +147,14 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public boolean isRmReportSuccessEnable() {
         return rmReportSuccessEnable;
+    }
+
+    public boolean isRmReportEnable() {
+        return rmReportEnable;
+    }
+
+    public void setRmReportEnable(boolean rmReportEnable) {
+        this.rmReportEnable = rmReportEnable;
     }
 
     public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
