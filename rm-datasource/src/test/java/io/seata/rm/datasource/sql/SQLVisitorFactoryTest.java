@@ -99,7 +99,7 @@ public class SQLVisitorFactoryTest {
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
             SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
         });
-        
+
 
         //TEST FOR Multi-SQL
 

@@ -208,9 +208,11 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-        if (stateMachineInstance.isTimeout(stateMachineConfig.getTransOperationTimeout())) {
+        if (EngineUtils.isTimeout(stateMachineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
             String message = "Saga Transaction [stateMachineInstanceId:" + stateMachineInstance.getId()
                     + "] has timed out, stop execution now.";
+
+            LOGGER.error(message);
 
             EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(null,
                     FrameworkErrorCode.StateMachineExecutionTimeout, message, stateMachineInstance, instruction.getStateName());
@@ -307,7 +309,20 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist()
             && stateMachineConfig.getStateLogStore() != null) {
 
-            stateMachineConfig.getStateLogStore().recordStateStarted(stateInstance, context);
+            try {
+                stateMachineConfig.getStateLogStore().recordStateStarted(stateInstance, context);
+            } catch (Exception e) {
+
+                String message = "Record state[" + state.getName() + "] started failed, stateMachineInstance[" + stateMachineInstance
+                        .getId() + "], Reason: " + e.getMessage();
+
+                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
+                        FrameworkErrorCode.ExceptionCaught, message, stateMachineInstance, state.getName());
+
+                EngineUtils.failStateMachine(context, exception);
+
+                throw exception;
+            }
         }
 
         if (StringUtils.isEmpty(stateInstance.getId())) {
@@ -327,6 +342,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
         if (stateInstance == null || !stateMachineInstance.isRunning()) {
+            LOGGER.warn("StateMachineInstance[id:" + stateMachineInstance.getId() + "] is end. stop running");
             return;
         }
 

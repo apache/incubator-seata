@@ -16,8 +16,8 @@
 package io.seata.rm.datasource.sql.druid.postgresql;
 
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.druid.postgresql.PostgresqlDeleteRecognizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetSqlType() {
         String sql = "delete from t where id = ?";
 
-        PostgresqlDeleteRecognizer recognizer = (PostgresqlDeleteRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.DELETE);
     }
 
@@ -47,7 +47,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetTableAlias() {
         String sql = "delete from t where id = ?";
 
-        PostgresqlDeleteRecognizer recognizer = (PostgresqlDeleteRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
@@ -56,7 +56,7 @@ public class PostgresqlDeleteRecognizerTest {
         String sql = "delete from t where id = ?";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        PostgresqlDeleteRecognizer recognizer = (PostgresqlDeleteRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 
@@ -64,7 +64,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetWhereCondition_0() {
         String sql = "delete from t";
 
-        PostgresqlDeleteRecognizer recognizer = (PostgresqlDeleteRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -80,7 +80,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetWhereCondition_1() {
         String sql = "delete from t";
 
-        PostgresqlDeleteRecognizer recognizer = (PostgresqlDeleteRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         String whereCondition = recognizer.getWhereCondition();
 
         //test for no condition

@@ -20,6 +20,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
+
 /**
  * @author jsbxyyx
  */
@@ -29,7 +31,7 @@ public final class StackTraceLogger {
 
     public static void info(Logger logger, Throwable cause, String format1, Object[] args1, String format2, Object[] args2) {
         if (logger.isInfoEnabled()) {
-            int rate = CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, 100);
+            int rate = CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, DEFAULT_LOG_EXCEPTION_RATE);
             if (System.currentTimeMillis() % rate == 0) {
                 logger.info(format1, args1, cause);
             } else {

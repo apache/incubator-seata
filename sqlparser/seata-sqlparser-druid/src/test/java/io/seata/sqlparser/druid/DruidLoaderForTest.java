@@ -13,20 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.sqlparser.druid;
 
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
-
-/**
- * @author Geng Zhang
- */
-public class UndoLogConstants {
-
-    public static final String SERIALIZER_KEY = "serializer";
-
-    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
-        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION);
+class DruidLoaderForTest implements DruidLoader {
+    @Override
+    public URL getEmbeddedDruidLocation() {
+        try {
+            return URI.create("file://druid-test.jar").toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

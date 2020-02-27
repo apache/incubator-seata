@@ -15,32 +15,40 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.file;
 
+import io.seata.core.rpc.netty.NettyBaseConfig.WorkThreadMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX_KEBAB_STYLE;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX)
+@ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX_KEBAB_STYLE)
 public class ThreadFactoryProperties {
-    private String bossThreadPrefix = "NettyBoss";
-    private String workerThreadPrefix = "NettyServerNIOWorker";
-    private String serverExecutorThreadPrefix = "NettyServerBizHandler";
+    private String bossThreadPrefix = DEFAULT_BOSS_THREAD_PREFIX;
+    private String workerThreadPrefix = DEFAULT_NIO_WORKER_THREAD_PREFIX;
+    private String serverExecutorThreadPrefix = DEFAULT_EXECUTOR_THREAD_PREFIX;
     private boolean shareBossWorker = false;
-    private String clientSelectorThreadPrefix = "NettyClientSelector";
-    private int clientSelectorThreadSize = 1;
-    private String clientWorkerThreadPrefix = "NettyClientWorkerThread";
+    private String clientSelectorThreadPrefix = DEFAULT_SELECTOR_THREAD_PREFIX;
+    private int clientSelectorThreadSize = DEFAULT_SELECTOR_THREAD_SIZE;
+    private String clientWorkerThreadPrefix = DEFAULT_WORKER_THREAD_PREFIX;
     /**
      * netty boss thread size,will not be used for UDT
      */
-    private int bossThreadSize = 1;
+    private int bossThreadSize = DEFAULT_BOSS_THREAD_SIZE;
     /**
      * auto default pin or 8
      */
-    private int workerThreadSize = 8;
+    private String workerThreadSize = WorkThreadMode.Default.name();
 
     public String getBossThreadPrefix() {
         return bossThreadPrefix;
@@ -114,11 +122,11 @@ public class ThreadFactoryProperties {
         return this;
     }
 
-    public int getWorkerThreadSize() {
+    public String getWorkerThreadSize() {
         return workerThreadSize;
     }
 
-    public ThreadFactoryProperties setWorkerThreadSize(int workerThreadSize) {
+    public ThreadFactoryProperties setWorkerThreadSize(String workerThreadSize) {
         this.workerThreadSize = workerThreadSize;
         return this;
     }
