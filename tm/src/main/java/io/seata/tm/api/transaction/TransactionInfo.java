@@ -33,6 +33,8 @@ public final class TransactionInfo implements Serializable {
 
     private Set<RollbackRule> rollbackRules;
 
+    private Propagation propagation;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -74,5 +76,17 @@ public final class TransactionInfo implements Serializable {
         }
 
         return !(winner instanceof NoRollbackRule);
+    }
+
+    public Propagation getPropagation() {
+        if (this.propagation != null) {
+            return this.propagation;
+        }
+        //default propagation
+        return Propagation.REQUIRED;
+    }
+
+    public void setPropagation(Propagation propagation) {
+        this.propagation = propagation;
     }
 }
