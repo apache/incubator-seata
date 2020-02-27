@@ -36,6 +36,7 @@
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
         <module>integration/grpc</module>
+        <module>integration/http</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -91,7 +92,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.1.0-SNAPSHOT</revision>
+        <revision>1.2.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>

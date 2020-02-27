@@ -20,6 +20,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.SqlParserType;
 
 /**
  * @author ggndnn
@@ -31,7 +32,7 @@ public class SQLVisitorFactory {
     private final static SQLRecognizerFactory SQL_RECOGNIZER_FACTORY;
 
     static {
-        String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, "druid");
+        String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
         SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlparserType);
     }
 

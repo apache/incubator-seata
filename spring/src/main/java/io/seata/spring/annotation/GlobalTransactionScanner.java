@@ -15,13 +15,10 @@
  */
 package io.seata.spring.annotation;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
@@ -31,8 +28,6 @@ import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.RMClient;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.spring.annotation.datasource.DataSourceProxyHolder;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
@@ -47,7 +42,6 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -55,7 +49,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
+import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
 /**
  * The type Global transaction scanner.
@@ -88,7 +82,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String txServiceGroup;
     private final int mode;
     private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     private final FailureHandler failureHandlerHook;
 
@@ -228,7 +222,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
                     if (interceptor == null) {
                         interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,(ConfigurationChangeListener)interceptor);
+                        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) interceptor);
                     }
                 }
 
@@ -299,41 +293,5 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.setBeanFactory(applicationContext);
-    }
-
-    @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        if (bean instanceof DataSourceProxy && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
-            throw new ShouldNeverHappenException("Auto proxy of DataSource can't be enabled as you've created a DataSourceProxy bean. Please consider removing DataSourceProxy bean or disabling auto proxy of DataSource.");
-        }
-        return super.postProcessBeforeInitialization(bean, beanName);
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Auto proxy of [{}]", beanName);
-            }
-            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-            Class<?>[] interfaces = SpringProxyUtils.getAllInterfaces(bean);
-            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, (proxy, method, args) -> {
-                Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
-                if (null != m) {
-                    return m.invoke(dataSourceProxy, args);
-                } else {
-                    boolean oldAccessible = method.isAccessible();
-                    try {
-                        method.setAccessible(true);
-                        return method.invoke(bean, args);
-                    } finally {
-                        //recover the original accessible for security reason
-                        method.setAccessible(oldAccessible);
-                    }
-                }
-            });
-
-        }
-        return super.postProcessAfterInitialization(bean, beanName);
     }
 }
