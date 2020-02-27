@@ -30,6 +30,8 @@ import io.seata.metrics.Measurement;
 import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.registry.Registry;
 
+import static io.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT;
+
 /**
  * Exporter for Prometheus
  *
@@ -37,7 +39,6 @@ import io.seata.metrics.registry.Registry;
  */
 @LoadLevel(name = "Prometheus", order = 1)
 public class PrometheusExporter extends Collector implements Collector.Describable, Exporter {
-    private static final String METRICS_EXPORTER_PROMETHEUS_PORT = "exporter-prometheus-port";
 
     private final HTTPServer server;
 
@@ -63,7 +64,7 @@ public class PrometheusExporter extends Collector implements Collector.Describab
             List<Sample> samples = new ArrayList<>();
             measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
 
-            if (samples.size() != 0) {
+            if (!samples.isEmpty()) {
                 familySamples.add(new MetricFamilySamples("seata", Type.UNTYPED, "seata", samples));
             }
         }

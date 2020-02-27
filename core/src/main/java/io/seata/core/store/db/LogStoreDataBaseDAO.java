@@ -15,6 +15,7 @@
  */
 package io.seata.core.store.db;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -23,8 +24,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
-import javax.sql.DataSource;
 
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
@@ -41,6 +40,9 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
 /**
  * The type Log store data base dao.
@@ -103,9 +105,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     @Override
     public void init() {
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
-            ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
+            DEFAULT_STORE_DB_GLOBAL_TABLE);
         brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
-            ConfigurationKeys.STORE_DB_BRANCH_DEFAULT_TABLE);
+            DEFAULT_STORE_DB_BRANCH_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
@@ -260,18 +262,19 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, globalTransactionDO.getXid());
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps, conn);
         }
+        return true;
     }
 
     @Override
     public List<BranchTransactionDO> queryBranchTransactionDO(String xid) {
         List<BranchTransactionDO> rets = new ArrayList<>();
-        String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType);
+        String sql = LogStoreSqls.getQueryBranchTransaction(brachTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -301,7 +304,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
         StringJoiner sj = new StringJoiner(",");
         xids.stream().forEach(xid -> sj.add("?"));
-        String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType, sj.toString());
+        String sql = LogStoreSqls.getQueryBranchTransaction(brachTable, dbType, sj.toString());
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -392,8 +395,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public long getCurrentMaxSessionId(long high, long low) {
-        String transMaxSql = LogStoreSqls.getQureyGlobalMax(globalTable, dbType);
-        String branchMaxSql = LogStoreSqls.getQureyBranchMax(brachTable, dbType);
+        String transMaxSql = LogStoreSqls.getQueryGlobalMax(globalTable, dbType);
+        String branchMaxSql = LogStoreSqls.getQueryBranchMax(brachTable, dbType);
         long maxTransId = getCurrentMaxSessionId(transMaxSql, high, low);
         long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
         return maxBranchId > maxTransId ? maxBranchId : maxTransId;
@@ -479,7 +482,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         try (Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] {"TABLE"});
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[]{"TABLE"});
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {

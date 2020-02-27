@@ -33,6 +33,10 @@ import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+
 /**
  * The type Connection proxy.
  *
@@ -44,13 +48,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
-
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
+        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
+        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
@@ -143,7 +145,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (te.getCode() == TransactionExceptionCode.LockKeyConflict) {
             StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:" + context.getXid());
             if (StringUtils.isNotBlank(lockKeys)) {
-                reasonBuilder.append(", lockKeys:" + lockKeys);
+                reasonBuilder.append(", lockKeys:").append(lockKeys);
             }
             throw new LockConflictException(reasonBuilder.toString());
         } else {
@@ -237,10 +239,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void rollback() throws SQLException {
         targetConnection.rollback();
-        if (context.inGlobalTransaction()) {
-            if (context.isBranchRegistered()) {
-                report(false);
-            }
+        if (context.inGlobalTransaction() && context.isBranchRegistered()) {
+            report(false);
         }
         context.reset();
     }
@@ -274,8 +274,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public static class LockRetryPolicy {
-        protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
-            .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
+        protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
+            .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
 
         public <T> T execute(Callable<T> callable) throws Exception {
             if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {

@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource;
+import io.seata.sqlparser.struct.Null;
 
 import io.seata.rm.datasource.sql.struct.Null;
 import java.io.InputStream;

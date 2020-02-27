@@ -256,7 +256,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public int compareTo(BranchSession o) {
-        return this.branchId < o.branchId ? -1 : (this.branchId > o.branchId ? 1 : 0);
+        return Long.compare(this.branchId, o.branchId);
     }
 
     /**
@@ -270,12 +270,18 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean lock() throws TransactionException {
-        return LockerFactory.getLockManager().acquireLock(this);
+        if (this.getBranchType().equals(BranchType.AT)) {
+            return LockerFactory.getLockManager().acquireLock(this);
+        }
+        return true;
     }
 
     @Override
     public boolean unlock() throws TransactionException {
-        return LockerFactory.getLockManager().releaseLock(this);
+        if (this.getBranchType() == BranchType.AT) {
+            return LockerFactory.getLockManager().releaseLock(this);
+        }
+        return true;
     }
 
     @Override

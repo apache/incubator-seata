@@ -35,6 +35,7 @@
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
         <module>integration/grpc</module>
+        <module>integration/http</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -43,10 +44,11 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
-        <module>codec</module>
+        <module>serializer</module>
         <module>seata-spring-boot-starter</module>
         <module>compressor</module>
         <module>saga</module>
+        <module>sqlparser</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -90,7 +92,7 @@
     <properties>
         <!-- seata version -->
         <revision>1.1.0-SNAPSHOT</revision>
-        <co.faao.speed.version>6.1.6-SNAPSHOT</co.faao.speed.version>
+        <co.faao.speed.version>6.1.7-SNAPSHOT</co.faao.speed.version>
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -286,17 +288,7 @@
             </properties>
         </profile>
     </profiles>
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>Nexus Release Repository</name>
-            <url>http://192.168.150.59:8081/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+
     <build>
         <extensions>
             <extension>
@@ -465,29 +457,29 @@
                     </mapping>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
-                <!--<version>${maven-checkstyle-plugin.version}</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>validate</id>-->
-                        <!--<phase>validate</phase>-->
-                        <!--<configuration>-->
-                            <!--<configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>-->
-                            <!--<encoding>UTF-8</encoding>-->
-                            <!--<consoleOutput>true</consoleOutput>-->
-                            <!--<failsOnError>true</failsOnError>-->
-                            <!--<failOnViolation>false</failOnViolation>-->
-                            <!--<excludes>**/generated/**/*</excludes>-->
-                            <!--<excludes>io/seata/integration/grpc/interceptor/</excludes>-->
-                        <!--</configuration>-->
-                        <!--<goals>-->
-                            <!--<goal>check</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
+                            <encoding>UTF-8</encoding>
+                            <consoleOutput>true</consoleOutput>
+                            <failsOnError>true</failsOnError>
+                            <failOnViolation>false</failOnViolation>
+                            <excludes>**/generated/**/*</excludes>
+                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
+                        </configuration>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

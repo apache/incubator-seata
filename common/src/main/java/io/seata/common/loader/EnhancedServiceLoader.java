@@ -22,8 +22,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +47,7 @@ public class EnhancedServiceLoader {
     private static final String SERVICES_DIRECTORY = "META-INF/services/";
     private static final String SEATA_DIRECTORY = "META-INF/seata/";
     @SuppressWarnings("rawtypes")
-    private static Map<Class, List<Class>> providers = new ConcurrentHashMap<Class, List<Class>>();
+    private static Map<Class, List<Class>> providers = new ConcurrentHashMap<>();
 
     /**
      * Specify classLoader to load the service provider
@@ -150,6 +148,19 @@ public class EnhancedServiceLoader {
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service) {
+        return loadAll(service, null, null);
+    }
+
+    /**
+     * get all implements
+     *
+     * @param <S>     the type parameter
+     * @param service the service
+     * @param argsType     the args type
+     * @param args         the args
+     * @return list list
+     */
+    public static <S> List<S> loadAll(Class<S> service, Class[] argsType, Object[] args) {
         List<S> allInstances = new ArrayList<>();
         List<Class> allClazzs = getAllExtensionClass(service);
         if (CollectionUtils.isEmpty(allClazzs)) {
@@ -157,7 +168,7 @@ public class EnhancedServiceLoader {
         }
         try {
             for (Class clazz : allClazzs) {
-                allInstances.add(initInstance(service, clazz, null, null));
+                allInstances.add(initInstance(service, clazz, argsType, args));
             }
         } catch (Throwable t) {
             throw new EnhancedServiceNotFoundException(t);
@@ -173,7 +184,7 @@ public class EnhancedServiceLoader {
      * @return all extension class
      */
     @SuppressWarnings("rawtypes")
-    public static <S> List<Class> getAllExtensionClass(Class<S> service) {
+    static <S> List<Class> getAllExtensionClass(Class<S> service) {
         return findAllExtensionClass(service, null, findClassLoader());
     }
 
@@ -186,7 +197,7 @@ public class EnhancedServiceLoader {
      * @return all extension class
      */
     @SuppressWarnings("rawtypes")
-    public static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {
+    static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {
         return findAllExtensionClass(service, null, loader);
     }
 
@@ -213,7 +224,7 @@ public class EnhancedServiceLoader {
             if (StringUtils.isNotEmpty(activateName)) {
                 loadFile(service, SEATA_DIRECTORY + activateName.toLowerCase() + "/", loader, extensions);
 
-                List<Class> activateExtensions = new ArrayList<Class>();
+                List<Class> activateExtensions = new ArrayList<>();
                 for (Class clz : extensions) {
                     @SuppressWarnings("unchecked")
                     LoadLevel activate = (LoadLevel) clz.getAnnotation(LoadLevel.class);
@@ -250,7 +261,7 @@ public class EnhancedServiceLoader {
 
     @SuppressWarnings("rawtypes")
     private static <S> List<Class> findAllExtensionClass(Class<S> service, String activateName, ClassLoader loader) {
-        List<Class> extensions = new ArrayList<Class>();
+        List<Class> extensions = new ArrayList<>();
         try {
             loadFile(service, SERVICES_DIRECTORY, loader, extensions);
             loadFile(service, SEATA_DIRECTORY, loader, extensions);
@@ -261,27 +272,24 @@ public class EnhancedServiceLoader {
         if (extensions.isEmpty()) {
             return extensions;
         }
-        Collections.sort(extensions, new Comparator<Class>() {
-            @Override
-            public int compare(Class c1, Class c2) {
-                int o1 = 0;
-                int o2 = 0;
-                @SuppressWarnings("unchecked")
-                LoadLevel a1 = (LoadLevel)c1.getAnnotation(LoadLevel.class);
-                @SuppressWarnings("unchecked")
-                LoadLevel a2 = (LoadLevel)c2.getAnnotation(LoadLevel.class);
+        extensions.sort((c1, c2) -> {
+            int o1 = 0;
+            int o2 = 0;
+            @SuppressWarnings("unchecked")
+            LoadLevel a1 = (LoadLevel) c1.getAnnotation(LoadLevel.class);
+            @SuppressWarnings("unchecked")
+            LoadLevel a2 = (LoadLevel) c2.getAnnotation(LoadLevel.class);
 
-                if (a1 != null) {
-                    o1 = a1.order();
-                }
-
-                if (a2 != null) {
-                    o2 = a2.order();
-                }
-
-                return Integer.compare(o1, o2);
-
+            if (a1 != null) {
+                o1 = a1.order();
             }
+
+            if (a2 != null) {
+                o2 = a2.order();
+            }
+
+            return Integer.compare(o1, o2);
+
         });
 
         return extensions;

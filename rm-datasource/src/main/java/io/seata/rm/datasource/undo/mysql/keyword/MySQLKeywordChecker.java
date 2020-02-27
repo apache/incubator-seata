@@ -15,17 +15,20 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.undo.KeywordChecker;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type MySQL keyword checker.
  *
  * @author xingfudeshi@gmail.com
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;
 
@@ -1099,6 +1102,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
         }
     }
 
+
     @Override
     public boolean check(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
@@ -1112,13 +1116,13 @@ public class MySQLKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? "`" + fieldOrTableName + "`" : fieldOrTableName;
+    public boolean checkEscape(String fieldOrTableName) {
+        return check(fieldOrTableName);
     }
 
     @Override
-    public String getDbType() {
-        return JdbcConstants.MYSQL;
+    public String checkAndReplace(String fieldOrTableName) {
+        return check(fieldOrTableName) ? "`" + fieldOrTableName + "`" : fieldOrTableName;
     }
 
 }

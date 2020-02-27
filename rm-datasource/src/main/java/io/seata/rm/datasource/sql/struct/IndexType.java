@@ -28,15 +28,15 @@ public enum IndexType {
     /**
      * Normal index type.
      */
-    Normal(1),
+    NORMAL(1),
     /**
      * Unique index type.
      */
-    Unique(2),
+    UNIQUE(2),
     /**
      * Full text index type.
      */
-    FullText(3);
+    FULL_TEXT(3);
 
     private int i;
 

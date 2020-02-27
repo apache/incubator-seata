@@ -15,20 +15,8 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.druid.util.JdbcUtils;
-import com.alibaba.fastjson.JSON;
-import io.seata.common.util.IOUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.model.Result;
-import io.seata.rm.datasource.ColumnUtils;
-import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 import java.sql.Connection;
 import java.sql.JDBCType;
 import java.sql.PreparedStatement;
@@ -36,10 +24,24 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
+
+import com.alibaba.fastjson.JSON;
+import io.seata.common.util.IOUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.model.Result;
+import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
 /**
  * The type Abstract undo executor.
@@ -65,7 +67,7 @@ public abstract class AbstractUndoExecutor {
      * Switch of undo data validation
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
-        .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, true);
+        .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
 
     /**
      * The Sql undo log.
@@ -120,7 +122,7 @@ public abstract class AbstractUndoExecutor {
                 ArrayList<Field> undoValues = new ArrayList<>();
                 Field pkValue = null;
                 for (Field field : undoRow.getFields()) {
-                    if (field.getKeyType() == KeyType.PrimaryKey) {
+                    if (field.getKeyType() == KeyType.PRIMARY_KEY) {
                         pkValue = field;
                     } else {
                         undoValues.add(field);
@@ -146,9 +148,9 @@ public abstract class AbstractUndoExecutor {
     /**
      * Undo prepare.
      *
-     * @param undoPST the undo pst
+     * @param undoPST    the undo pst
      * @param undoValues the undo values
-     * @param pkValue the pk value
+     * @param pkValue    the pk value
      * @throws SQLException the sql exception
      */
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
@@ -175,7 +177,6 @@ public abstract class AbstractUndoExecutor {
             } else {
                 undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
             }
-
         }
         // PK is at last one.
         // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
@@ -274,7 +275,7 @@ public abstract class AbstractUndoExecutor {
         }
         // build check sql
         String dbType = getDbType(conn);
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
             tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
 
         PreparedStatement statement = null;
@@ -324,7 +325,7 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException
      */
     protected String getDbType(Connection conn) throws SQLException {
-        return JdbcUtils.getDbType(conn.getMetaData().getURL(), null);
+        return JdbcUtils.getDbType(conn.getMetaData().getURL());
     }
 
 }

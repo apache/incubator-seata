@@ -15,15 +15,17 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * column utils
- *
  * @author jsbxyyx
  */
 public final class ColumnUtils {
@@ -35,9 +37,9 @@ public final class ColumnUtils {
         /** standard escape */
         STANDARD('"'),
         /** mysql series escape */
-        MYSQL('`');
+        MYSQL('`')
+        ;
         public final char value;
-
         Escape(char value) {
             this.value = value;
         }
@@ -45,7 +47,6 @@ public final class ColumnUtils {
 
     /**
      * del escape by db type
-     *
      * @param cols the cols
      * @param dbType the db type
      * @return
@@ -64,7 +65,6 @@ public final class ColumnUtils {
 
     /**
      * del escape
-     *
      * @param cols the cols
      * @param escape the escape
      * @return delete the column list element left and right escape.
@@ -84,7 +84,6 @@ public final class ColumnUtils {
 
     /**
      * del escape by db type
-     *
      * @param colName the column name
      * @param dbType the db type
      * @return
@@ -99,7 +98,6 @@ public final class ColumnUtils {
 
     /**
      * del escape by escape
-     *
      * @param colName the column name
      * @param escape the escape
      * @return
@@ -116,7 +114,6 @@ public final class ColumnUtils {
 
     /**
      * add escape by db type
-     *
      * @param cols the column name list
      * @param dbType the db type
      * @return
@@ -136,33 +133,41 @@ public final class ColumnUtils {
 
     /**
      * add escape by db type
-     *
      * @param colName the column name
      * @param dbType the db type
      * @return the colName left and right add escape
      */
     public static String addEscape(String colName, String dbType) {
         if (isMysqlSeries(dbType)) {
-            return addEscape(colName, ColumnUtils.Escape.MYSQL);
+            return addEscape(colName, dbType, ColumnUtils.Escape.MYSQL);
         }
-        return addEscape(colName, ColumnUtils.Escape.STANDARD);
+        return addEscape(colName, dbType, ColumnUtils.Escape.STANDARD);
     }
 
     /**
      * add escape
-     *
      * @param colName the column name
      * @param escape the escape
      * @return
      */
-    public static String addEscape(String colName, Escape escape) {
+    private static String addEscape(String colName, String dbType, Escape escape) {
         if (colName == null || colName.isEmpty()) {
             return colName;
         }
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
             return colName;
         }
-        return String.format("%s%s%s", escape.value, colName, escape.value);
+
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(dbType);
+        if (keywordChecker != null) {
+            boolean check = keywordChecker.checkEscape(colName);
+            if (!check) {
+                return colName;
+            }
+        }
+
+        StringBuilder result = new StringBuilder(2 * (String.valueOf(escape.value).length()) + colName.length());
+        return result.append(escape.value).append(colName).append(escape.value).toString();
     }
 
     private static boolean isMysqlSeries(String dbType) {
@@ -170,4 +175,5 @@ public final class ColumnUtils {
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
     }
+
 }

@@ -15,13 +15,14 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.DataSourceProxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
+
+import io.seata.core.exception.TransactionException;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
 
 /**
  * The type Undo log manager.
@@ -33,7 +34,6 @@ public interface UndoLogManager {
 
     /**
      * Flush undo logs.
-     *
      * @param cp the cp
      * @throws SQLException the sql exception
      */
@@ -43,8 +43,8 @@ public interface UndoLogManager {
      * Undo.
      *
      * @param dataSourceProxy the data source proxy
-     * @param xid the xid
-     * @param branchId the branch id
+     * @param xid             the xid
+     * @param branchId        the branch id
      * @throws TransactionException the transaction exception
      */
     void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException;
@@ -52,9 +52,9 @@ public interface UndoLogManager {
     /**
      * Delete undo log.
      *
-     * @param xid the xid
+     * @param xid      the xid
      * @param branchId the branch id
-     * @param conn the conn
+     * @param conn     the conn
      * @throws SQLException the sql exception
      */
     void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException;
@@ -71,7 +71,6 @@ public interface UndoLogManager {
 
     /**
      * delete undolog by created
-     *
      * @param logCreated the created time
      * @param limitRows the limit rows
      * @param conn the connection
@@ -79,4 +78,5 @@ public interface UndoLogManager {
      * @throws SQLException the sql exception
      */
     int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException;
+
 }

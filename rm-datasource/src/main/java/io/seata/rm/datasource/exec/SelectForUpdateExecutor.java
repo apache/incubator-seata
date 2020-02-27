@@ -18,8 +18,8 @@ package io.seata.rm.datasource.exec;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLSelectRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -57,7 +57,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     public T doExecute(Object... args) throws Throwable {
         Connection conn = statementProxy.getConnection();
         DatabaseMetaData dbmd = conn.getMetaData();
-        T rs = null;
+        T rs;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();

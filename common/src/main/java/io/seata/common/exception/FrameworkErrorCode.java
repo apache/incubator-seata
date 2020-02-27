@@ -202,6 +202,11 @@ public enum FrameworkErrorCode {
     StateMachineInstanceNotExists("0420", "State machine instance not exists", "State machine instance not exists"),
 
     /**
+     * State machine execution timeout
+     */
+    StateMachineExecutionTimeout("0421", "State machine execution timeout", "State machine execution timeout"),
+
+    /**
      * Undefined error
      */
     UnknownAppError("10000", "Unknown error", "Internal error"),

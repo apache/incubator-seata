@@ -31,8 +31,8 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -99,6 +99,6 @@ public class DeleteExecutorTest {
     @Test
     public void testAfterImage() throws SQLException {
         TableRecords tableRecords = deleteExecutor.beforeImage();
-        Assertions.assertTrue(deleteExecutor.afterImage(tableRecords).size() == 0);
+        Assertions.assertEquals(0, deleteExecutor.afterImage(tableRecords).size());
     }
 }

@@ -177,7 +177,7 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         configListenersMap.get(dataId).add(listener);
-        listenedConfigMap.put(dataId, getConfig(dataId));
+        listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
         FileListener fileListener = new FileListener(dataId, listener);
         fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
@@ -263,8 +263,10 @@ public class FileConfiguration extends AbstractConfiguration {
                     }
                 } catch (Exception e) {
                     setFailResult(configFuture);
-                    LOGGER.warn("Could not found property {}, try to use default value instead.",
-                        configFuture.getDataId());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Could not found property {}, try to use default value instead.",
+                            configFuture.getDataId());
+                    }
                 }
             }
         }
@@ -306,7 +308,7 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    String currentConfig = getConfig(dataId);
+                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);

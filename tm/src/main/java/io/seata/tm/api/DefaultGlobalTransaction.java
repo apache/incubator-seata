@@ -26,6 +26,9 @@ import io.seata.tm.TransactionManagerHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+
 /**
  * The type Default global transaction.
  *
@@ -48,10 +51,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalTransactionRole role;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
 
     /**
      * Instantiates a new Default global transaction.
@@ -135,10 +138,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -175,10 +176,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -214,10 +213,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
-            }
+        if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            RootContext.unbind();
         }
     }
 

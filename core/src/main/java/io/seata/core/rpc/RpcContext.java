@@ -15,19 +15,16 @@
  */
 package io.seata.core.rpc;
 
-import java.net.SocketAddress;
+import io.netty.channel.Channel;
+import io.seata.core.rpc.netty.NettyPoolKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import io.seata.common.Constants;
-
-import io.netty.channel.Channel;
-import io.seata.core.rpc.netty.NettyPoolKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type rpc context.
@@ -71,7 +68,7 @@ public class RpcContext {
      * Release.
      */
     public void release() {
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         if (clientIDHolderMap != null) {
             clientIDHolderMap = null;
         }
@@ -100,7 +97,7 @@ public class RpcContext {
             throw new IllegalStateException();
         }
         this.clientTMHolderMap = clientTMHolderMap;
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         this.clientTMHolderMap.put(clientPort, this);
     }
 
@@ -127,7 +124,7 @@ public class RpcContext {
         if (null == this.clientRMHolderMap) {
             this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
         }
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         portMap.put(clientPort, this);
         this.clientRMHolderMap.put(resourceId, portMap);
     }
@@ -263,28 +260,6 @@ public class RpcContext {
      */
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    private static String getAddressFromChannel(Channel channel) {
-        SocketAddress socketAddress = channel.remoteAddress();
-        String address = socketAddress.toString();
-        if (socketAddress.toString().indexOf(Constants.ENDPOINT_BEGIN_CHAR) == 0) {
-            address = socketAddress.toString().substring(Constants.ENDPOINT_BEGIN_CHAR.length());
-        }
-        return address;
-    }
-
-    private static Integer getClientPortFromChannel(Channel channel) {
-        String address = getAddressFromChannel(channel);
-        Integer port = 0;
-        try {
-            if (address.contains(Constants.IP_PORT_SPLIT_CHAR)) {
-                port = Integer.parseInt(address.substring(address.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR) + 1));
-            }
-        } catch (NumberFormatException exx) {
-            LOGGER.error(exx.getMessage());
-        }
-        return port;
     }
 
     /**

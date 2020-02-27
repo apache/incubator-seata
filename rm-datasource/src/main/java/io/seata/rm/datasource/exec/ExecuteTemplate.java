@@ -28,6 +28,7 @@ import io.seata.rm.datasource.exec.noseata.UpdateExecutorNoSeata;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
+import io.seata.sqlparser.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -47,29 +48,29 @@ public class ExecuteTemplate {
     /**
      * Execute t.
      *
-     * @param <T> the type parameter
-     * @param <S> the type parameter
-     * @param statementProxy the statement proxy
+     * @param <T>               the type parameter
+     * @param <S>               the type parameter
+     * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param args the args
+     * @param args              the args
      * @return the t
      * @throws SQLException the sql exception
      */
     public static <T, S extends Statement> T execute(StatementProxy<S> statementProxy,
-        StatementCallback<T, S> statementCallback,
-        Object... args) throws SQLException {
+                                                     StatementCallback<T, S> statementCallback,
+                                                     Object... args) throws SQLException {
         return execute(null, statementProxy, statementCallback, args);
     }
 
     /**
      * Execute t.
      *
-     * @param <T> the type parameter
-     * @param <S> the type parameter
-     * @param sqlRecognizer the sql recognizer
-     * @param statementProxy the statement proxy
+     * @param <T>               the type parameter
+     * @param <S>               the type parameter
+     * @param sqlRecognizer     the sql recognizer
+     * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param args the args
+     * @param args              the args
      * @return the t
      * @throws SQLException the sql exception
      */
@@ -148,32 +149,32 @@ public class ExecuteTemplate {
 
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
-                statementProxy.getTargetSQL(),
-                statementProxy.getConnectionProxy().getDbType());
+                    statementProxy.getTargetSQL(),
+                    statementProxy.getConnectionProxy().getDbType());
         }
-        Executor<T> executor = null;
+        Executor<T> executor;
         if (sqlRecognizer == null) {
-            executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+            executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
             switch (sqlRecognizer.getSQLType()) {
                 case INSERT:
-                    executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case UPDATE:
-                    executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case DELETE:
-                    executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 default:
-                    executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+                    executor = new PlainExecutor<>(statementProxy, statementCallback);
                     break;
             }
         }
-        T rs = null;
+        T rs;
         try {
             rs = executor.execute(args);
         } catch (Throwable ex) {

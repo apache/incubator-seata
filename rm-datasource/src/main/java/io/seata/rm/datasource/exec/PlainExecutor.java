@@ -25,7 +25,7 @@ import java.sql.Statement;
  * @param <S> the type parameter
  * @author sharajava
  */
-public class PlainExecutor<T, S extends Statement> implements Executor {
+public class PlainExecutor<T, S extends Statement> implements Executor<T> {
 
     private StatementProxy<S> statementProxy;
 

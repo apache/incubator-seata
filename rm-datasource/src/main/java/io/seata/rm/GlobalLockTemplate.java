@@ -35,7 +35,7 @@ public class GlobalLockTemplate<T> {
      */
     public Object execute(Callable<T> business) throws Exception {
 
-        Object rs = null;
+        Object rs;
         try {
             // add global lock declare
             RootContext.bindGlobalLockFlag();

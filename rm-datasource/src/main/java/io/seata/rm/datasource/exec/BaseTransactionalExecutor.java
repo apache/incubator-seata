@@ -16,20 +16,22 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.WhereRecognizer;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,11 +43,12 @@ import java.util.StringJoiner;
 /**
  * The type Base transactional executor.
  *
+ * @author sharajava
+ *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author sharajava
  */
-public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
+public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
     /**
      * The Statement proxy.
@@ -67,29 +70,25 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * Instantiates a new Base transactional executor.
      *
-     * @param statementProxy the statement proxy
+     * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer the sql recognizer
+     * @param sqlRecognizer     the sql recognizer
      */
     public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-        SQLRecognizer sqlRecognizer) {
+                                     SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
     }
 
     @Override
-    public Object execute(Object... args) throws Throwable {
+    public T execute(Object... args) throws Throwable {
         if (RootContext.inGlobalTransaction()) {
             String xid = RootContext.getXID();
             statementProxy.getConnectionProxy().bind(xid);
         }
 
-        if (RootContext.requireGlobalLock()) {
-            statementProxy.getConnectionProxy().setGlobalLockRequire(true);
-        } else {
-            statementProxy.getConnectionProxy().setGlobalLockRequire(false);
-        }
+        statementProxy.getConnectionProxy().setGlobalLockRequire(RootContext.requireGlobalLock());
         return doExecute(args);
     }
 
@@ -100,7 +99,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the object
      * @throws Throwable the throwable
      */
-    protected abstract Object doExecute(Object... args) throws Throwable;
+    protected abstract T doExecute(Object... args) throws Throwable;
 
     /**
      * Build where condition by p ks string.
@@ -121,7 +120,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build buildWhereCondition
      *
-     * @param recognizer the recognizer
+     * @param recognizer        the recognizer
      * @param paramAppenderList the param paramAppender list
      * @return the string
      */
@@ -187,13 +186,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-            .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
+                .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }
 
     /**
      * the columns contains table meta pk
-     *
      * @param columns the column name list
      * @return true: contains pk false: not contains pk
      */
@@ -207,7 +205,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * compare column name and primary key name
-     *
      * @param columnName the primary key column name
      * @return true: equal false: not equal
      */
@@ -220,11 +217,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * prepare undo log.
      *
      * @param beforeImage the before image
-     * @param afterImage the after image
+     * @param afterImage  the after image
      * @throws SQLException the sql exception
      */
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+        if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
 
@@ -268,7 +265,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build a SQLUndoLog
      *
      * @param beforeImage the before image
-     * @param afterImage the after image
+     * @param afterImage  the after image
      * @return sql undo log
      */
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
@@ -283,57 +280,32 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return sqlUndoLog;
     }
 
+
     /**
      * build a BeforeImage
      *
-     * @param tableMeta the tableMeta
-     * @param selectSQL the selectSQL
+     * @param tableMeta         the tableMeta
+     * @param selectSQL         the selectSQL
      * @param paramAppenderList the paramAppender list
      * @return a tableRecords
      * @throws SQLException the sql exception
      */
-    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL,
-        ArrayList<List<Object>> paramAppenderList) throws SQLException {
-        TableRecords tableRecords = null;
-        PreparedStatement ps = null;
-        Statement st = null;
+    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
-        try {
-            if (paramAppenderList.isEmpty()) {
-                st = statementProxy.getConnection().createStatement();
-                rs = st.executeQuery(selectSQL);
-            } else {
-                if (paramAppenderList.size() == 1) {
-                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = paramAppenderList.get(0);
-                    for (int i = 0; i < paramAppender.size(); i++) {
-                        ps.setObject(i + 1, paramAppender.get(i));
-                    }
-                } else {
-                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = null;
-                    for (int i = 0; i < paramAppenderList.size(); i++) {
-                        paramAppender = paramAppenderList.get(i);
-                        for (int j = 0; j < paramAppender.size(); j++) {
-                            ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
-                        }
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
+            if (CollectionUtils.isNotEmpty(paramAppenderList)) {
+                for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
+                    List<Object> paramAppender = paramAppenderList.get(i);
+                    for (int j = 0, ds = paramAppender.size(); j < ds; j++) {
+                        ps.setObject(i * ds + j + 1, paramAppender.get(j));
                     }
                 }
-                rs = ps.executeQuery();
             }
-            tableRecords = TableRecords.buildRecords(tableMeta, rs);
+            rs = ps.executeQuery();
+            return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
+            IOUtil.close(rs);
         }
-        return tableRecords;
     }
 
     /**
@@ -344,39 +316,27 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException
      */
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
-        TableRecords afterImage;
-        String pk = getTableMeta().getPkName();
+        String pk = getTableMeta().getEscapePkName(getDbType());
         StringJoiner pkValuesJoiner = new StringJoiner(" , ",
-            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
+                "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add("?");
         }
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString());
 
-            for (int i = 1; i <= pkValues.size(); i++) {
+        ResultSet rs = null;
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString())) {
+            for (int i = 1, s = pkValues.size(); i <= s; i++) {
                 ps.setObject(i, pkValues.get(i - 1));
             }
-
             rs = ps.executeQuery();
-            afterImage = TableRecords.buildRecords(getTableMeta(), rs);
-
+            return TableRecords.buildRecords(getTableMeta(), rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
+            IOUtil.close(rs);
         }
-        return afterImage;
     }
 
     /**
      * get db type
-     *
      * @return
      */
     protected String getDbType() {
