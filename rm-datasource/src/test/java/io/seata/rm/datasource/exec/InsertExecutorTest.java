@@ -104,11 +104,13 @@ public class InsertExecutorTest {
     @Test
     public void testAfterImage_ByColumn() throws SQLException {
         doReturn(true).when(insertExecutor).containsPK();
-        List<Object> pkValues = new ArrayList<>();
-        pkValues.add(PK_VALUE);
-        doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
+        Map<String,List<Object>> pkValuesMap =new HashMap<>();
+        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        doReturn(pkValuesMap).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValuesMap);
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -117,11 +119,13 @@ public class InsertExecutorTest {
     public void testAfterImage_ByAuto() throws SQLException {
         doReturn(false).when(insertExecutor).containsPK();
         doReturn(true).when(insertExecutor).containsColumns();
-        List<Object> pkValues = new ArrayList<>();
-        pkValues.add(PK_VALUE);
-        doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
+        Map<String,List<Object>> pkValuesMap =new HashMap<>();
+        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValuesMap);
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -131,10 +135,12 @@ public class InsertExecutorTest {
         Assertions.assertThrows(SQLException.class, () -> {
             doReturn(false).when(insertExecutor).containsPK();
             doReturn(true).when(insertExecutor).containsColumns();
-            List<Object> pkValues = new ArrayList<>();
-            pkValues.add(PK_VALUE);
-            doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
-            doReturn(null).when(insertExecutor).buildTableRecords(pkValues);
+            Map<String,List<Object>> pkValuesMap =new HashMap<>();
+            pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+            doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
+            doReturn(null).when(insertExecutor).buildTableRecords(pkValuesMap);
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
             insertExecutor.afterImage(new TableRecords());
         });
     }
@@ -157,12 +163,12 @@ public class InsertExecutorTest {
         mockInsertRows();
         mockParametersOfOnePk();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        doReturn(0).when(insertExecutor).getPkIndex();
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertEquals(pkValuesByColumn, pkValues);
+        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();
+        Map<String,List<Object>> pkValuesList  = insertExecutor.getPkValuesByColumn();
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -171,7 +177,7 @@ public class InsertExecutorTest {
             mockInsertColumns();
             mockParameters();
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+            when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
             insertExecutor.getPkValuesByColumn();
         });
     }
@@ -182,29 +188,22 @@ public class InsertExecutorTest {
         mockInsertRows();
         mockParametersPkWithNull();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        ColumnMeta cm = new ColumnMeta();
+        cm.setColumnName(ID_COLUMN);
+        cm.setIsAutoincrement("YES");
+        when(tableMeta.getPrimaryKeyMap()).thenReturn(new HashMap<String, ColumnMeta>(){{put(ID_COLUMN,cm);}});
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        doReturn(0).when(insertExecutor).getPkIndex();
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        doReturn(new HashMap<String,List<Object>>(){{put(ID_COLUMN,pkValuesAuto);}}).when(insertExecutor).getPkValuesByAuto();
+        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();
+        Map<String,List<Object>> pkValuesList  = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValuesAuto);
     }
 
-    @Test
-    public void testGetPkValuesByAuto_NotSupportYetException() {
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-            columnMetaMap.put(ID_COLUMN, new ColumnMeta());
-            columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
-            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            insertExecutor.getPkValuesByAuto();
-        });
-    }
 
     @Test
     public void testGetPkValuesByAuto_ShouldNeverHappenException() {
@@ -249,7 +248,8 @@ public class InsertExecutorTest {
         when(preparedStatement.getGeneratedKeys()).thenThrow(e);
         ResultSet genKeys = mock(ResultSet.class);
         when(statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()")).thenReturn(genKeys);
-        Assertions.assertTrue(insertExecutor.getPkValuesByAuto().isEmpty());
+        Map<String,List<Object>> pkValueMap=insertExecutor.getPkValuesByAuto();
+        Assertions.assertTrue(pkValueMap.get(ID_COLUMN).isEmpty());
     }
 
     @Test
@@ -266,8 +266,8 @@ public class InsertExecutorTest {
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto.size(),0);
+        Map<String,List<Object>> pkValues = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValues.get(ID_COLUMN).size(),0);
     }
 
     @Test
@@ -286,8 +286,8 @@ public class InsertExecutorTest {
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto, pkValues);
+        Map<String,List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -307,16 +307,16 @@ public class InsertExecutorTest {
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto, pkValues);
+        Map<String,List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
     @Test
     public void test_getPkIndex() {
         mockInsertColumns();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        Assertions.assertEquals(0, insertExecutor.getPkIndex());
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        Assertions.assertEquals(0, insertExecutor.getPkIndex().get(ID_COLUMN));
     }
 
     private List<String> mockInsertColumns() {

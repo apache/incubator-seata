@@ -19,9 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
@@ -68,7 +67,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
-            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
+            prefix.append(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType()))).append(", ");
         }
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
@@ -95,10 +94,21 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         ResultSet rs = null;
         try {
             pst = statementProxy.getConnection().prepareStatement(selectSQL);
-            int index = 0;
-            for (Field pkField : beforeImage.pkRows()) {
-                index++;
-                pst.setObject(index, pkField.getValue(), pkField.getType());
+            List<Map<String,Field>> pkRowsList=beforeImage.pkRows();
+            List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+            int paramIndex = 1;
+            for(int i=0;i<pkColumnNameList.size();i++)
+            {
+                String pkKey=pkColumnNameList.get(i);
+                List<Field> fieldList=pkRowsList.stream()
+                        .map(e->e.get(pkKey))
+                        .filter(e->Objects.nonNull(e))
+                        .collect(Collectors.toList());
+                for(Field pkField:fieldList)
+                {
+                    pst.setObject(paramIndex, pkField.getValue(), pkField.getType());
+                    paramIndex++;
+                }
             }
             rs = pst.executeQuery();
             afterImage = TableRecords.buildRecords(tmeta, rs);
@@ -120,7 +130,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!containsPK(updateColumns)) {
             // PK should be included.
-            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
+            prefix.append(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType()))).append(", ");
         }
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);

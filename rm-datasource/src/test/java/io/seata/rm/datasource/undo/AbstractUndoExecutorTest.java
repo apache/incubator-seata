@@ -26,7 +26,9 @@ import org.mockito.Mockito;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Geng Zhang
@@ -160,7 +162,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
     @Test
     public void testParsePK() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("id");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"id"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -186,8 +188,8 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         sqlUndoLog.setAfterImage(null);
 
         TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, true);
-        Object[] pkValues = executor.parsePkValues(beforeImage);
-        Assertions.assertEquals(2, pkValues.length);
+        Map<String,List<Field>> pkValues = executor.parsePkValues(beforeImage);
+        Assertions.assertEquals(2, pkValues.get("id").size());
     }
 }
 

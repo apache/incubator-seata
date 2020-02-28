@@ -85,16 +85,16 @@ public class OracleInsertExecutorTest {
         mockInsertColumns();
         SqlSequenceExpr expr = mockParametersPkWithSeq();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValuesSeq = new ArrayList<>();
         pkValuesSeq.add(PK_VALUE);
 
         doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr);
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();
 
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        Map<String,List<Object>> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         verify(insertExecutor).getPkValuesBySequence(expr);
-        Assertions.assertEquals(pkValuesByColumn, pkValuesSeq);
+        Assertions.assertEquals(pkValuesByColumn.get(ID_COLUMN), pkValuesSeq);
     }
 
     @Test
@@ -102,15 +102,15 @@ public class OracleInsertExecutorTest {
         mockInsertColumns();
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValuesAuto = new ArrayList<>();
-        pkValuesAuto.add(PK_VALUE);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));;
+        Map<String,List<Object>> pkValuesMap =new HashMap<>();
+        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
 
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
+        doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
+        Map<String,List<Object>> pkValuesByAuto = insertExecutor.getPkValuesByAuto();
 
         verify(insertExecutor).getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto, pkValuesAuto);
+        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE}));
     }
 
     @Test
@@ -140,9 +140,7 @@ public class OracleInsertExecutorTest {
             insertExecutor.getPkValuesByAuto();
         });
 
-        int pkIndex = 0;
-        doReturn(pkIndex).when(insertExecutor).getPkIndex();
-
+        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             insertExecutor.getPkValuesByColumn();
         });

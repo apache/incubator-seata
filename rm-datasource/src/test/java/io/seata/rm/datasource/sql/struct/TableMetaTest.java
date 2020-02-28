@@ -76,16 +76,6 @@ public class TableMetaTest {
         primary.setValues(Lists.newArrayList(new ColumnMeta()));
         tableMeta.getAllIndexes().put("id", primary);
         Assertions.assertNotNull(tableMeta.getPrimaryKeyMap());
-
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            IndexMeta primary2 = new IndexMeta();
-            primary2.setIndextype(IndexType.PRIMARY);
-            ColumnMeta columnMeta = new ColumnMeta();
-            columnMeta.setColumnName("id2");
-            primary2.setValues(Lists.newArrayList(columnMeta));
-            tableMeta.getAllIndexes().put("id2", primary2);
-            tableMeta.getPrimaryKeyMap();
-        });
     }
 
     @Test
@@ -107,7 +97,7 @@ public class TableMetaTest {
         columnMeta.setColumnName("id");
         primary.setValues(Lists.newArrayList(columnMeta));
         tableMeta.getAllIndexes().put("id", primary);
-        Assertions.assertEquals("id", tableMeta.getPkName());
+        Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
     }
 
     @Test

@@ -81,7 +81,7 @@ public class TableMetaCacheTest {
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "t1", proxy.getResourceId());
 
         Assertions.assertEquals("t1", tableMeta.getTableName());
-        Assertions.assertEquals("id", tableMeta.getPkName());
+        Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());
         Assertions.assertEquals("id", tableMeta.getAutoIncreaseColumn().getColumnName());

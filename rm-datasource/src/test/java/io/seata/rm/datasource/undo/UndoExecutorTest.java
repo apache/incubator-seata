@@ -43,9 +43,7 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 import com.alibaba.druid.util.JdbcConstants;
@@ -318,8 +316,8 @@ public class UndoExecutorTest {
         }
 
         @Override
-        public String getPkName() {
-            return mockPK;
+        public List<String> getPrimaryKeyOnlyName(){
+            return Arrays.asList(new String[]{mockPK});
         }
     }
 

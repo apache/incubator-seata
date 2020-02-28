@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import java.sql.JDBCType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,7 +61,7 @@ public class DataCompareUtilsTest {
     @Test
     public void isRecordsEquals() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("pk");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"pk"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -127,7 +128,7 @@ public class DataCompareUtilsTest {
     @Test
     public void isRowsEquals() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("pk");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"pk"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         List<Row> rows = new ArrayList<>();

@@ -21,8 +21,7 @@ import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -128,19 +127,20 @@ public class TableRecords {
     /**
      * Pk rows list.
      *
-     * @return the list
+     * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
      */
-    public List<Field> pkRows() {
-        final String pkName = getTableMeta().getPkName();
-        List<Field> pkRows = new ArrayList<>();
+    public List<Map<String,Field>> pkRows() {
+        final List<String> pkNameList = getTableMeta().getPrimaryKeyOnlyName();
+        List<Map<String,Field>> pkRows = new ArrayList<>();
         for (Row row : rows) {
             List<Field> fields = row.getFields();
+            Map<String,Field> rowMap = new HashMap<>(3);
             for (Field field : fields) {
-                if (field.getName().equalsIgnoreCase(pkName)) {
-                    pkRows.add(field);
-                    break;
+                if (pkNameList.stream().anyMatch(e->field.getName().equalsIgnoreCase(e))) {
+                    rowMap.put(field.getName(),field);
                 }
             }
+            pkRows.add(rowMap);
         }
         return pkRows;
     }
@@ -184,7 +184,7 @@ public class TableRecords {
                 ColumnMeta col = tmeta.getColumnMeta(colName);
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
+                if (tmeta.getPrimaryKeyOnlyName().stream().anyMatch(e->field.getName().equalsIgnoreCase(e))) {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
@@ -230,7 +230,7 @@ public class TableRecords {
         }
 
         @Override
-        public List<Field> pkRows() {
+        public List<Map<String,Field>> pkRows() {
             return new ArrayList<>();
         }
 

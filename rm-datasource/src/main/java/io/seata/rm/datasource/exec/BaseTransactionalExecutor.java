@@ -19,9 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -105,18 +104,34 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected abstract Object doExecute(Object... args) throws Throwable;
 
     /**
-     * Build where condition by p ks string.
+     * Build where condition by pks string.
      *
      * @param pkRows the pk rows
      * @return the string
      * @throws SQLException the sql exception
      */
-    protected String buildWhereConditionByPKs(List<Field> pkRows) throws SQLException {
-        StringJoiner whereConditionAppender = new StringJoiner(",", getColumnNameInSQL(pkRows.get(0).getName()) + " in (", ")");
-        for (Field field : pkRows) {
-            whereConditionAppender.add("?");
+    protected String buildWhereConditionByPKs(List<Map<String,Field>> pkRows) throws SQLException {
+        StringBuilder sql = new StringBuilder();
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        for(int i=0;i<pkColumnNameList.size();i++)
+        {
+            if(i>0)
+            {
+                sql.append(" AND ");
+            }
+            String pkKey = pkColumnNameList.get(i);
+            StringJoiner pkValuesJoiner = new StringJoiner(" , ",
+                    " " + pkKey + " in (", ")");
+            List<Field> pkFieldList=pkRows.stream()
+                    .map(e->e.get(pkKey))
+                    .filter(e->Objects.nonNull(e))
+                    .collect(Collectors.toList());
+            for (Field pkValue : pkFieldList) {
+                pkValuesJoiner.add("?");
+            }
+            sql.append(pkValuesJoiner.toString());
         }
-        return whereConditionAppender.toString();
+        return sql.toString();
 
     }
 
@@ -155,6 +170,29 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getColumnNameInSQL(String columnName) {
         String tableAlias = sqlRecognizer.getTableAlias();
         return tableAlias == null ? columnName : tableAlias + "." + columnName;
+    }
+
+    /**
+     * Gets several column name in sql.
+     *
+     * @param columnNameList the column name
+     * @return the column name in sql
+     */
+    protected String getColumnNamesInSQL(List<String> columnNameList) {
+        if(Objects.isNull(columnNameList)||columnNameList.isEmpty())
+        {
+            return null;
+        }
+        StringBuffer columnNamesStr = new StringBuffer();
+        for(int i =0;i<columnNameList.size();i++)
+        {
+            if(i>0)
+            {
+                columnNamesStr.append(" , ");
+            }
+            columnNamesStr.append(getColumnNameInSQL(columnNameList.get(i)));
+        }
+        return columnNamesStr.toString();
     }
 
     /**
@@ -209,11 +247,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * compare column name and primary key name
      * @param columnName the primary key column name
-     * @return true: equal false: not equal
+     * @return true: contain false: not contain
      */
-    protected boolean equalsPK(String columnName) {
+    protected boolean containPK(String columnName) {
         String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
-        return StringUtils.equalsIgnoreCase(getTableMeta().getPkName(), newColumnName);
+        return CollectionUtils.toUpperList(getTableMeta().getPrimaryKeyOnlyName()).contains(newColumnName.toUpperCase());
     }
 
     /**
@@ -242,7 +280,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build lockKey
      *
      * @param rowsIncludingPK the records
-     * @return the string
+     * @return the string as local key. the local key example(multi pk): "t_user:1_a,2_b"
      */
     protected String buildLockKey(TableRecords rowsIncludingPK) {
         if (rowsIncludingPK.size() == 0) {
@@ -253,11 +291,20 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
         int filedSequence = 0;
-        List<Field> pkRows = rowsIncludingPK.pkRows();
-        for (Field field : pkRows) {
-            sb.append(field.getValue());
+        List<Map<String,Field>> pksRows = rowsIncludingPK.pkRows();
+        for (Map<String,Field> rowMap : pksRows) {
+            int pkSplitIndex=0;
+            for(String pkName:getTableMeta().getPrimaryKeyOnlyName())
+            {
+                if(pkSplitIndex>0)
+                {
+                    sb.append("_");
+                }
+                sb.append(rowMap.get(pkName).getValue());
+                pkSplitIndex++;
+            }
             filedSequence++;
-            if (filedSequence < pkRows.size()) {
+            if (filedSequence < pksRows.size()) {
                 sb.append(",");
             }
         }
@@ -339,25 +386,45 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build TableRecords
      *
-     * @param pkValues the pkValues
+     * @param pkValuesMap the pkValuesMap
      * @return return TableRecords;
      * @throws SQLException
      */
-    protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
+    protected TableRecords buildTableRecords(Map<String,List<Object>> pkValuesMap) throws SQLException {
         TableRecords afterImage;
-        String pk = getTableMeta().getPkName();
-        StringJoiner pkValuesJoiner = new StringJoiner(" , ",
-            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
-        for (Object pkValue : pkValues) {
-            pkValuesJoiner.add("?");
+        StringBuilder sql =  new StringBuilder()
+                .append("SELECT * FROM ")
+                .append(getFromTableInSQL())
+                .append(" WHERE ");
+
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        for(int i=0;i<pkColumnNameList.size();i++)
+        {
+            if(i>0)
+            {
+                sql.append(" AND ");
+            }
+            String pkKey = pkColumnNameList.get(i);
+            StringJoiner pkValuesJoiner = new StringJoiner(" , ",
+                    " " + pkKey + " in (", ")");
+            for (Object pkValue : pkValuesMap.get(pkKey)) {
+                pkValuesJoiner.add("?");
+            }
+            sql.append(pkValuesJoiner.toString());
         }
+
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString());
+            ps = statementProxy.getConnection().prepareStatement(sql.toString());
 
-            for (int i = 1; i <= pkValues.size(); i++) {
-                ps.setObject(i, pkValues.get(i - 1));
+            int paramIndex=1;
+            for(String columnName:pkColumnNameList)
+            {
+                for (Object pkValue : pkValuesMap.get(columnName)) {
+                    ps.setObject(paramIndex, pkValue);
+                    paramIndex++;
+                }
             }
 
             rs = ps.executeQuery();

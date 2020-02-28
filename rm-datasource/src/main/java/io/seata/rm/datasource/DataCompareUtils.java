@@ -143,9 +143,9 @@ public class DataCompareUtils {
 
     private static Result<Boolean> compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         // old row to map
-        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPrimaryKeyOnlyName());
         // new row to map
-        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPrimaryKeyOnlyName());
         // compare data
         for (String rowKey : oldRowsMap.keySet()) {
             Map<String, Field> oldRow = oldRowsMap.get(rowKey);
@@ -168,21 +168,24 @@ public class DataCompareUtils {
         return Result.ok();
     }
 
-    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, String primaryKey) {
+    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeyList) {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
             // {uppercase fieldName : field}
             Map<String, Field> colsMap = new HashMap<>();
-            String rowKey = null;
+            StringBuilder rowKey = new StringBuilder();
             for (int j = 0; j < row.getFields().size(); j++) {
                 Field field = row.getFields().get(j);
-                if (field.getName().equalsIgnoreCase(primaryKey)) {
-                    rowKey = String.valueOf(field.getValue());
+                if (primaryKeyList.stream().anyMatch(e->field.getName().equals(e))) {
+                    rowKey.append(String.valueOf(field.getValue()));
+                    if(j<row.getFields().size()) {
+                        rowKey.append("_");
+                    }
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
             }
-            rowMap.put(rowKey, colsMap);
+            rowMap.put(rowKey.toString(), colsMap);
         }
         return rowMap;
     }

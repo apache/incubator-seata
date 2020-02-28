@@ -18,9 +18,7 @@ package io.seata.rm.datasource.exec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.druid.util.JdbcConstants;
@@ -73,11 +71,33 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        //one pk   auto or not auto
+        //two pk   pa p   or p p
         //Pk column exists or PK is just auto generated
-        List<Object> pkValues = containsPK() ? getPkValuesByColumn() :
-                (containsColumns() ? getPkValuesByAuto() : getPkValuesByColumn());
+        Map<String,List<Object>> pkValuesMap = null;
+        //when there is only one pk in the table
+        if(getTableMeta().getPrimaryKeyOnlyName().size()==1) {
+            if(containsPK()) {
+                pkValuesMap=getPkValuesByColumn();
+            }
+            else if(containsColumns()){
+                pkValuesMap=getPkValuesByAuto();
+            }
+            else{
+                pkValuesMap=getPkValuesByColumn();
+            }
+        }
+        else{
+            //when there is multiple pk in the table
+            //1、all pk columns are filled value.
+            //2、the auto increment pk column value is null, and other pk value are not null.
+            //3、the auto increment pk column is not exits in sql, and other pk are exits also the value is not null.
+            //4、we don't accept pk null value on non-increment-pk-column
+            getPkValuesByColumn();
+        }
 
-        TableRecords afterImage = buildTableRecords(pkValues);
+
+        TableRecords afterImage = buildTableRecords(pkValuesMap);
 
         if (afterImage == null) {
             throw new SQLException("Failed to build after-image for insert");
@@ -101,14 +121,20 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return insertColumns != null && !insertColumns.isEmpty();
     }
 
-    protected List<Object> getPkValuesByColumn() throws SQLException {
+    /**
+     * get pks value
+     * @return the key of map is pk column name, the value of map is insert value associate with pk column.
+     * @throws SQLException
+     */
+    protected Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        final int pkIndex = getPkIndex();
-        if (pkIndex == -1) {
-            throw new ShouldNeverHappenException("pkIndex is " + pkIndex);
+        final Map<String, Integer> pkIndexMap = getPkIndex();
+        if (pkIndexMap.isEmpty()) {
+            throw new ShouldNeverHappenException("pkIndex is not found");
         }
-        List<Object> pkValues = null;
+        Map<String,List<Object>> pkValuesMap = new HashMap<>(3);
+
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
@@ -118,16 +144,22 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 final int rowSize = insertRows.size();
 
                 if (rowSize == 1) {
-                    Object pkValue = insertRows.get(0).get(pkIndex);
-                    if (PLACEHOLDER.equals(pkValue)) {
-                        pkValues = parameters[pkIndex];
-                    } else {
-                        int finalPkIndex = pkIndex;
-                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                    for(String pkKey:pkIndexMap.keySet())
+                    {
+                        int pkIndex=pkIndexMap.get(pkKey);
+                        List<Object> pkValues=null;
+                        Object pkValue = insertRows.get(0).get(pkIndex);
+                        if (PLACEHOLDER.equals(pkValue)) {
+                            pkValues = parameters[pkIndex];
+                        } else {
+                            int finalPkIndex = pkIndex;
+                            pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                        }
+                        pkValuesMap.put(pkKey, pkValues);
                     }
                 } else {
+//                    throw new NotSupportYetException("NEED MORE INFO,FIX THIS LATER");
                     int totalPlaceholderNum = -1;
-                    pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
                         // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
@@ -135,7 +167,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         if (row.isEmpty()) {
                             continue;
                         }
-                        Object pkValue = row.get(pkIndex);
                         int currentRowPlaceholderNum = -1;
                         for (Object r : row) {
                             if (PLACEHOLDER.equals(r)) {
@@ -143,47 +174,71 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                                 currentRowPlaceholderNum += 1;
                             }
                         }
-                        if (PLACEHOLDER.equals(pkValue)) {
-                            int idx = pkIndex;
-                            if (i != 0) {
-                                idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
+                        for(String pkKey:pkIndexMap.keySet())
+                        {
+                            Object pkValue = row.get(pkIndexMap.get(pkKey));
+                            List<Object> pkValues=pkValuesMap.get(pkKey);
+                            if(Objects.isNull(pkValues))
+                            {
+                                pkValues=new ArrayList<>();
                             }
-                            ArrayList<Object> parameter = parameters[idx];
-                            for (Object obj : parameter) {
-                                pkValues.add(obj);
+                            if (PLACEHOLDER.equals(pkValue)) {
+                                int idx = pkIndexMap.get(pkKey);
+                                if (i != 0) {
+                                    idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndexMap.get(pkKey);
+                                }
+                                ArrayList<Object> parameter = parameters[idx];
+                                pkValues.addAll(parameter);
+                            } else {
+                                pkValues.add(pkValue);
                             }
-                        } else {
-                            pkValues.add(pkValue);
+                            pkValuesMap.put(pkKey, pkValues);
                         }
                     }
                 }
             }
         } else {
             List<List<Object>> insertRows = recognizer.getInsertRows();
-            pkValues = new ArrayList<>(insertRows.size());
             for (List<Object> row : insertRows) {
-                pkValues.add(row.get(pkIndex));
+                for(String pkKey:pkIndexMap.keySet())
+                {
+                    int pkIndex=pkIndexMap.get(pkKey);
+                    List<Object> pkValues=pkValuesMap.get(pkKey);
+                    if(Objects.isNull(pkValues)) {
+                        pkValuesMap.put(pkKey, Arrays.asList(new Object[]{row.get(pkIndex)}));
+                    }
+                    else {
+                        pkValues.addAll(Arrays.asList(new Object[]{row.get(pkIndex)}));
+                    }
+
+                }
             }
         }
-        if (pkValues == null) {
+        if (pkValuesMap.isEmpty()) {
             throw new ShouldNeverHappenException();
         }
-        boolean b = this.checkPkValues(pkValues);
-        if (!b) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+        for(String pkKey:pkValuesMap.keySet())
+        {
+            List<Object> pkValues=pkValuesMap.get(pkKey);
+            boolean b = this.checkPkValues(pkValues);
+            if (!b) {
+                throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            }
+            if (!pkValuesMap.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
+                pkValues = getPkValuesBySequence(pkValues.get(0));
+                pkValuesMap.put(pkKey,pkValues);
+            }
+            // pk auto generated while single insert primary key is expression
+            else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
+                pkValuesMap.putAll(getPkValuesByAuto());
+            }
+            // pk auto generated while column exists and value is null
+            else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
+                pkValuesMap.putAll(getPkValuesByAuto());
+            }
         }
-        if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValues = getPkValuesBySequence(pkValues.get(0));
-        }
-        // pk auto generated while single insert primary key is expression
-        else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValues = getPkValuesByAuto();
-        }
-        // pk auto generated while column exists and value is null
-        else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
-            pkValues = getPkValuesByAuto();
-        }
-        return pkValues;
+
+        return pkValuesMap;
     }
 
     protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
@@ -211,41 +266,58 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return pkValues;
     }
 
-    protected List<Object> getPkValuesByAuto() throws SQLException {
+    protected Map<String,List<Object>> getPkValuesByAuto() throws SQLException {
+        Map<String,List<Object>> pkValuesMap =new HashMap<>();
         boolean oracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, getDbType());
-        if (oracle) {
-            return oracleByAuto();
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        for(String pkColumnName: pkMetaMap.keySet())
+        {
+            List<Object> valueList=null;
+            if (oracle) {
+                valueList=oracleByAuto();
+            }
+            else {
+                if(!pkMetaMap.get(pkColumnName).isAutoincrement())
+                {
+                    continue;
+                }
+                valueList=defaultByAuto();
+            }
+            pkValuesMap.put(pkColumnName,valueList);
         }
-        return defaultByAuto();
+        if(pkValuesMap.isEmpty())
+        {
+            throw new ShouldNeverHappenException();
+        }
+        return pkValuesMap;
     }
 
     /**
      * get pk index
-     * @return -1 not found pk index
+     * @return the key is pk column name and the value is index of the pk column
      */
-    protected int getPkIndex() {
+    protected Map<String,Integer> getPkIndex() {
+        Map<String,Integer> pkIndexMap = new HashMap<>();
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
         if (CollectionUtils.isNotEmpty(insertColumns)) {
             final int insertColumnsSize = insertColumns.size();
-            int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (equalsPK(insertColumns.get(paramIdx))) {
-                    pkIndex = paramIdx;
-                    break;
+                if (containPK(insertColumns.get(paramIdx))) {
+                    pkIndexMap.put(insertColumns.get(paramIdx),paramIdx);
                 }
             }
-            return pkIndex;
+            return pkIndexMap;
         }
         int pkIndex = -1;
         Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
-            if (equalsPK(entry.getValue().getColumnName())) {
-                break;
+            if (containPK(entry.getValue().getColumnName())) {
+                pkIndexMap.put(entry.getValue().getColumnName(),pkIndex);
             }
         }
-        return pkIndex;
+        return pkIndexMap;
     }
 
     /**
@@ -286,15 +358,26 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      */
     private List<Object> defaultByAuto() throws SQLException {
         // PK is just auto generated
+        List<Object> pkValues = new ArrayList<>();
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        if (pkMetaMap.size() != 1) {
+        if (pkMetaMap.size() == 0) {
             throw new NotSupportYetException();
         }
-        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
-        if (!pkMeta.isAutoincrement()) {
+        String autoColumnName =null;
+        for(String pkKey:pkMetaMap.keySet()){
+            if(pkMetaMap.get(pkKey).isAutoincrement())
+            {
+                autoColumnName=pkKey;
+                break;
+            }
+        }
+        if (Objects.isNull(autoColumnName)) {
             throw new ShouldNeverHappenException();
         }
-
+        ColumnMeta pkMeta = pkMetaMap.get(autoColumnName);
+        if(Objects.isNull(pkMeta)) {
+            throw new ShouldNeverHappenException();
+        }
         ResultSet genKeys = null;
         try {
             genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
@@ -309,7 +392,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 throw e;
             }
         }
-        List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
