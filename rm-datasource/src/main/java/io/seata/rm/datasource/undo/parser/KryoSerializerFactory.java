@@ -197,13 +197,13 @@ public class KryoSerializerFactory implements KryoFactory {
     private class TimestampSerializer extends Serializer<Timestamp> {
         @Override
         public void write(Kryo kryo, Output output, Timestamp object) {
-            output.writeLong(object.getTime());
+            output.writeLong(object.getTime(), true);
             output.writeInt(object.getNanos(), true);
         }
 
         @Override
         public Timestamp read(Kryo kryo, Input input, Class<Timestamp> type) {
-            Timestamp timestamp = new Timestamp(input.readLong());
+            Timestamp timestamp = new Timestamp(input.readLong(true));
             timestamp.setNanos(input.readInt(true));
             return timestamp;
         }
