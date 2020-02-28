@@ -474,6 +474,8 @@
                             <failOnViolation>false</failOnViolation>
                             <excludes>**/generated/**/*</excludes>
                             <excludes>io/seata/integration/grpc/interceptor/</excludes>
+                            <excludes>**/console-fe/**/*</excludes>
+                            <includeResources>false</includeResources>
                         </configuration>
                         <goals>
                             <goal>check</goal>
