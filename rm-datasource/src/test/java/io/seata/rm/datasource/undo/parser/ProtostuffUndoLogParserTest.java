@@ -29,4 +29,5 @@ class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
     public UndoLogParser getParser() {
         return parser;
     }
+
 }
