@@ -15,6 +15,12 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import java.sql.Timestamp;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.ValueFilter;
+
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -28,5 +34,25 @@ public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
     @Override
     public UndoLogParser getParser() {
         return parser;
+    }
+
+    /**
+     * disable super testTimestampEncodeAndDecode
+     */
+    @Override
+    public void testTimestampEncodeAndDecode() {
+        Timestamp encodeStamp = new Timestamp(System.currentTimeMillis());
+        encodeStamp.setNanos(999999);
+        SerializeConfig.getGlobalInstance().addFilter(Timestamp.class, new TimestampSerializer());
+        byte[] encode = JSON.toJSONString(encodeStamp, SerializeConfig.getGlobalInstance()).getBytes();
+
+    }
+
+    private class TimestampSerializer implements ValueFilter {
+
+        @Override
+        public Object process(Object object, String name, Object value) {
+            return null;
+        }
     }
 }
