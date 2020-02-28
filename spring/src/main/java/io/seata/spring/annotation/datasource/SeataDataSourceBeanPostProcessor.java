@@ -16,9 +16,11 @@
 package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.stream.Stream;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -27,9 +29,11 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -45,11 +49,15 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy)) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Auto proxy of [{}]", beanName);
+        try {
+            if (bean instanceof DataSource && !isAutoProxiedBySeata(bean)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Auto proxy of [{}]", beanName);
+                }
+                return proxyDataSource(bean);
             }
-            return proxyDataSource(bean);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
         return bean;
     }
@@ -105,4 +113,62 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
             }
         }
     }
+
+    /**
+     * is auto proxied by seata
+     *
+     * @param bean
+     * @return true, if this bean has been auto-proxied by seata
+     */
+    private boolean isAutoProxiedBySeata(Object bean) throws NoSuchFieldException, IllegalAccessException {
+        if (bean instanceof DataSourceProxy) {
+            return true;
+        }
+        //handle Spring AOP
+        Object proxyTargetObject = bean;
+        if (AopUtils.isAopProxy(proxyTargetObject)) {
+            try {
+                proxyTargetObject = SpringProxyUtils.getAdvisedSupport(bean).getTargetSource().getTarget();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Field field = null;
+        //handle Normal proxy object
+        if (ClassUtils.isCglibProxy(proxyTargetObject)) {
+            //CGLIB Proxy
+            field = proxyTargetObject.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+        } else if (Proxy.isProxyClass(proxyTargetObject.getClass())) {
+            //JDK Proxy
+            field = proxyTargetObject.getClass().getDeclaredField("h");
+        }
+        return doCheckAutoProxy(field, proxyTargetObject);
+    }
+
+    /**
+     * do check auto proxy
+     *
+     * @param field
+     * @param proxiedObject
+     * @return
+     * @throws IllegalAccessException
+     */
+    private boolean doCheckAutoProxy(Field field, Object proxiedObject) throws IllegalAccessException {
+        if (null == field) {
+            return false;
+        }
+        field.setAccessible(true);
+        Object filedObject = field.get(proxiedObject);
+        return Stream.of(filedObject.getClass().getDeclaredFields()).anyMatch(f -> {
+            f.setAccessible(true);
+            Object targetObject;
+            try {
+                targetObject = f.get(filedObject);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            return targetObject instanceof DataSourceProxy;
+        });
+    }
+
 }
