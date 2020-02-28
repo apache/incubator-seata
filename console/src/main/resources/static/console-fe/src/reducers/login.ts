@@ -15,39 +15,41 @@
  */
 
 import { Dispatch } from 'redux';
-import { fetchData } from '@/service/overview';
-import { SET_OVERVIEW } from '@/contants';
+import { loginService } from '@/service/login';
+import { SET_LOGIN, AUTHORIZATION_HEADER } from '@/contants';
 
-export type OverviewData = {
-  id: number;
-  name: string;
+export type UserType = {
+  username: string;
+  password: string;
 };
 
-export interface OverviewStateModel {
-  data: Array<OverviewData>;
+export interface LoginStateModel {
+  authHeader: string;
 }
 
-const initialState: OverviewStateModel = {
-  data: [],
+const initialState: LoginStateModel = {
+  authHeader: ''
 };
 
-const getData = () => async (dispatch: Dispatch) => {
-  let data: Array<OverviewData> = await fetchData();
+const login = (userInfo: UserType) => async (dispatch: Dispatch): Promise<string> => {
+  let authHeader: string = await loginService(userInfo);
+  localStorage.setItem(AUTHORIZATION_HEADER, authHeader);
   dispatch({
-    type: SET_OVERVIEW,
+    type: SET_LOGIN,
     data: {
-      data,
-    },
-  });
+      authHeader
+    }
+  })
+  return authHeader;
 };
 
 export default (state = initialState, action: any) => {
   switch (action.type) {
-    case SET_OVERVIEW:
+    case SET_LOGIN:
       return { ...state, ...action.data };
     default:
       return state;
   }
 };
 
-export { getData };
+export { login };

@@ -18,11 +18,11 @@ import { Dispatch } from 'redux';
 import { GET_STATE } from '@/contants';
 import { fetchData } from '@/service/base';
 
-export interface IBaseStateType {
+export interface BaseStateModel {
   version: string | null;
 }
 
-const initialState: IBaseStateType = {
+const initialState: BaseStateModel = {
   version: null,
 };
 

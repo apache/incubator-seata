@@ -36,6 +36,7 @@ const enUs: ILocale = {
     pleaseInputUsername: 'Please input username',
     pleaseInputPassword: 'Please input password',
     invalidUsernameOrPassword: 'invalid username or password',
+    desc: 'Seata is an open source distributed transaction solution that delivers high performance and easy to use distributed transaction services under a microservices architecture.'
   },
   Overview: {
     title: 'Overview',

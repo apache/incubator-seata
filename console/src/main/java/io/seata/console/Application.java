@@ -18,6 +18,10 @@ package io.seata.console;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ *
+ * @author jameslcj
+ */
 @SpringBootApplication(scanBasePackages = {"io.seata.console"})
 public class Application {
 

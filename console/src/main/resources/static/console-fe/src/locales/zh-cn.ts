@@ -36,6 +36,7 @@ const zhCn: ILocale = {
     invalidUsernameOrPassword: '用户名或密码错误',
     passwordRequired: '密码不能为空',
     usernameRequired: '用户名不能为空',
+    desc: 'Seata 是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。',
   },
   Overview: {
     title: '概览',

@@ -50,7 +50,6 @@
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
-    "src/utils/common.ts",
-    "src/index.tsx"
+    "src/utils/common.ts"
   ]
 }

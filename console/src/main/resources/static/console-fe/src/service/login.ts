@@ -13,8 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import request from '@/utils/request';
+import { UserType } from '@/reducers/login';
 
-export * from './Login';
-import Login from './Login';
+export async function loginService(data: UserType):Promise<any> {
+  let result = await request('/auth/login', {
+    method: 'post',
+    data
+  });
 
-export default Login;
+  return result;
+}

@@ -43,8 +43,8 @@ module.exports = function() {
       .click(0);
   });
 
-  it('sendKeys: nacos', async function() {
-    await driver.sendKeys('nacos');
+  it('sendKeys: seata', async function() {
+    await driver.sendKeys('seata');
   });
 
   it('click: #password, 53, 34, 0', async function() {
@@ -56,8 +56,8 @@ module.exports = function() {
       .click(0);
   });
 
-  it('sendKeys: nacos', async function() {
-    await driver.sendKeys('nacos');
+  it('sendKeys: seata', async function() {
+    await driver.sendKeys('seata');
   });
 
   it('click: 提交 ( //button[text()="提交"], 321, 30, 0 )', async function() {

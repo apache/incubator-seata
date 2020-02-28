@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 import request from '@/utils/request';
+import { OverviewData } from '@/reducers/overview';
 
-export async function fetchData() {
-  return await request('/api/fetchData', {
+export async function fetchData():Promise<any> {
+  let result = await request('/overview/getData', {
     method: 'get',
   });
+
+  return result;
 }

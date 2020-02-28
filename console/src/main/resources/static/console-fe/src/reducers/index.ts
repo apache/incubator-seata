@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import locale, { ILocaleState } from './locale';
-import base, { IBaseStateType } from './base';
-import overview, { IOverviewStateType } from './overview';
+import locale, { LocaleStateModel } from './locale';
+import base, { BaseStateModel } from './base';
+import overview, { OverviewStateModel } from './overview';
+import login, { LoginStateModel } from './login';
 
-export interface IGlobalStateType {
-    locale: ILocaleState;
-    base: IBaseStateType;
-    overview: IOverviewStateType;
+export interface GlobalStateModel {
+    locale: LocaleStateModel;
+    base: BaseStateModel;
+    overview: OverviewStateModel;
+    login: LoginStateModel;
 }
 
-export default { locale, base, overview };
+export default { locale, base, overview, login };

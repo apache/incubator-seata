@@ -21,12 +21,12 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ConfigProvider, Dropdown, Menu } from '@alicloud/console-components';
 import siteConfig from '../../config';
-import { changeLanguage, IChangeLanguage, ILocaleState, getCurrentLanguage, zhCnKey, enUsKey } from '@/reducers/locale';
-import { IGlobalStateType } from '@/reducers';
+import { changeLanguage, IChangeLanguage, LocaleStateModel, getCurrentLanguage, zhCnKey, enUsKey } from '@/reducers/locale';
+import { GlobalStateModel } from '@/reducers';
 
 import './index.scss';
 
-type StateToPropsType = ILocaleState;
+type StateToPropsType = LocaleStateModel;
 
 type DispathToPropsType = {
     changeLanguage: (lang: string) => void;
@@ -132,7 +132,7 @@ class Header extends React.Component<PropsType, StateType> {
 }
 
 
-const mapStateToProps = (state: IGlobalStateType): StateToPropsType => ({
+const mapStateToProps = (state: GlobalStateModel): StateToPropsType => ({
   ...state.locale
 });
 

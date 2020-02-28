@@ -27,4 +27,9 @@ export const GET_STATE = 'GET_STATE';
 export const GET_SUBSCRIBERS = 'GET_SUBSCRIBERS';
 export const REMOVE_SUBSCRIBERS = 'REMOVE_SUBSCRIBERS';
 
+// set overview state
 export const SET_OVERVIEW = 'SET_OVERVIEW';
+
+// set login state
+export const SET_LOGIN = 'SET_LOGIN';
+export const AUTHORIZATION_HEADER = 'Authorization';

@@ -16,18 +16,22 @@
 import React from 'react';
 import { Card, Form, Input, ConfigProvider, Field } from '@alicloud/console-components';
 import { withRouter } from 'react-router-dom';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { GlobalStateModel } from '@/reducers';
+import { LoginStateModel, UserType, login } from '@/reducers/login';
+import { GlobalProps } from '@/module';
 
 import './index.scss';
-// import Header from '@/components/Header/Header';
 import PropTypes from 'prop-types';
 
-const FormItem = Form.Item;
-
-type PropsType = {
-  locale: any
+type DispathToPropsType = {
+  login: (userInfo: UserType) => Promise<string>
 }
 
-class Login extends React.Component<PropsType> {
+type LoginPropsType = {
+} & DispathToPropsType & LoginStateModel & GlobalProps;
+class Login extends React.Component<LoginPropsType> {
   static displayName = 'Login';
 
   static propTypes = {
@@ -37,15 +41,24 @@ class Login extends React.Component<PropsType> {
 
   field = new Field(this);
 
-  constructor(props: PropsType) {
+  constructor(props: LoginPropsType) {
     super(props);
   }
 
   handleSubmit = () => {
-    const { locale = {} } = this.props;
-    this.field.validate((errors, values) => {
+    const { history, login } = this.props;
+    this.field.validate(async (errors, values) => {
       if (errors) {
         return;
+      }
+      const { username, password }: any = values;
+      const userInfo: UserType = {
+        username,
+        password
+      }
+      let authHeader = await login(userInfo);
+      if (!!authHeader) {
+        history.push('/');
       }
     });
   };
@@ -72,10 +85,9 @@ class Login extends React.Component<PropsType> {
           }}
         >
           <div className="vertical-middle product-area">
-            <img className="product-logo" src="img/seata_logo.png" />
+            <img className="product-logo" src="img/seata_logo_white.png" />
             <p className="product-desc">
-              an easy-to-use dynamic service discovery, configuration and service management
-              platform for building cloud native applications
+              {locale.desc}
             </p>
           </div>
           <div className="animation animation1" />
@@ -86,7 +98,7 @@ class Login extends React.Component<PropsType> {
           <Card className="login-panel" contentHeight="auto">
             <div className="login-header">{locale.login}</div>
             <Form className="login-form" field={this.field}>
-              <FormItem>
+              <Form.Item>
                 <Input
                   {...this.field.init('username', {
                     rules: [
@@ -99,8 +111,8 @@ class Login extends React.Component<PropsType> {
                   placeholder={locale.pleaseInputUsername}
                   onKeyDown={this.onKeyDown}
                 />
-              </FormItem>
-              <FormItem>
+              </Form.Item>
+              <Form.Item>
                 <Input
                   htmlType="password"
                   placeholder={locale.pleaseInputPassword}
@@ -114,10 +126,10 @@ class Login extends React.Component<PropsType> {
                   })}
                   onKeyDown={this.onKeyDown}
                 />
-              </FormItem>
-              <FormItem label=" ">
+              </Form.Item>
+              <Form.Item label=" ">
                 <Form.Submit onClick={this.handleSubmit}>{locale.submit}</Form.Submit>
-              </FormItem>
+              </Form.Item>
             </Form>
           </Card>
         </section>
@@ -126,4 +138,12 @@ class Login extends React.Component<PropsType> {
   }
 }
 
-export default withRouter(ConfigProvider.config(Login, {}));
+const mapStateToProps = (state: GlobalStateModel): LoginStateModel => ({
+  ...state.login
+});
+
+const mapDispatchToProps = (dispatch: Dispatch): DispathToPropsType => ({
+  login: (userInfo: UserType):Promise<string> => (login(userInfo)(dispatch))
+});
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ConfigProvider.config(Login, {})));

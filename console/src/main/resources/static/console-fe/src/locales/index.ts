@@ -16,10 +16,6 @@
 
 import enUS from './en-us';
 import zhCN from './zh-cn';
-import { ILocale } from './index.d';
-
-export {
-    ILocale
-};
+export * from './index.d';
 
 export default { enUS, zhCN };

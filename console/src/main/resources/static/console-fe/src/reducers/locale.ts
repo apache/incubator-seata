@@ -22,7 +22,7 @@ import { LANGUAGE_KEY, LANGUAGE_SWITCH } from '@/contants';
 const enUS = Object.assign({}, fusionEnUS, I18N.enUS);
 const zhCN = Object.assign({}, fusionZhCN, I18N.zhCN);
 
-interface ILocaleState {
+interface LocaleStateModel {
   language: string;
   locale: ILocale;
 }
@@ -30,7 +30,7 @@ interface ILocaleState {
 export const enUsKey = 'en-US';
 export const zhCnKey = 'zh-CN';
 
-const initialState: ILocaleState = {
+const initialState: LocaleStateModel = {
   language: enUsKey,
   locale: enUS,
 };
@@ -66,4 +66,4 @@ export default (state = initialState, action: any) => {
   }
 };
 
-export { changeLanguage, IChangeLanguage, ILocaleState, getCurrentLanguage, getCurrentLocaleObj };
+export { changeLanguage, IChangeLanguage, LocaleStateModel, getCurrentLanguage, getCurrentLocaleObj };

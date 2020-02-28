@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+import React from 'react';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Message } from '@alicloud/console-components';
 import { get } from 'lodash';
-// import { SUCCESS_RESULT_CODE } from '../constants';
+import { GlobalStateModel } from '@/reducers';
+import { AUTHORIZATION_HEADER } from '@/contants';
 
-const API_GENERAL_ERROR_MESSAGE = 'Request error, please try again later!';
+const API_GENERAL_ERROR_MESSAGE: string = 'Request error, please try again later!';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -40,13 +42,21 @@ const codeMessage = {
 };
 
 const request = () => {
-  const instance = axios.create({
+  const instance: AxiosInstance = axios.create({
     baseURL: '/api/v1',
     method: 'get',
   });
 
+  instance.interceptors.request.use((config: AxiosRequestConfig) => {
+    let authHeader: string | null = localStorage.getItem(AUTHORIZATION_HEADER);
+    // add jwt header
+    config.headers[AUTHORIZATION_HEADER] = authHeader;
+
+    return config;
+  })
+
   instance.interceptors.response.use(
-    response => {
+    (response: AxiosResponse): Promise<any> => {
       const code = get(response, 'data.code');
       if (response.status === 200 && code === 200) {
         return Promise.resolve(get(response, 'data.data'));
@@ -56,25 +66,17 @@ const request = () => {
           get(response, 'data.message') ||
           get(response, 'data.errorMsg') ||
           response.statusText;
-        Message.error({
-          title: `请求错误 ${code}: ${get(response, 'config.url', '')}`,
-          content: errorText,
-          duration: 6,
-        });
+        Message.error(errorText || `请求错误 ${code}: ${get(response, 'config.url', '')}`);
         return Promise.reject(response);
       }
     },
     error => {
-      if (error && (error.status === 403 || error.status === 401)) {
-        // 跳转至login页
-        // TODO: 用 react-router 重写，改造成本比较高，这里先hack
-        const url = window.location.href;
-        const [base_url] = url.split('#');
-        (window as any).location = `${base_url}#/login`;
-        return;
-      }
       if (error.response) {
         const { status } = error.response;
+        if (status === 403 || status === 401) {
+          (window as any).globalHistory.replace('login');
+          return;
+        }
         Message.error(`HTTP ERROR: ${status}`);
       } else {
         Message.error(API_GENERAL_ERROR_MESSAGE);

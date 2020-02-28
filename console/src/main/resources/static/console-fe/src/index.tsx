@@ -15,7 +15,7 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux';
+import { createStore, combineReducers, compose, applyMiddleware, Reducer, Store } from 'redux';
 import { routerReducer } from 'react-router-redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
@@ -25,18 +25,20 @@ import App from './app';
 import '@alicloud/console-components/dist/wind.css';
 import './index.scss';
 
-const reducer = combineReducers({
+const reducer: Reducer = combineReducers({
     ...reducers,
     routing: routerReducer,
 });
 
-const store: any = createStore(
+const store: Store = createStore(
     reducer,
     compose(
         applyMiddleware(thunk),
         (window as any)[REDUX_DEVTOOLS] ? (window as any)[REDUX_DEVTOOLS]() : (f: any) => f
     )
 );
+
+(window as any).g_store = store;
 
 ReactDOM.render(
     <Provider store={store}>

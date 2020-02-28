@@ -18,27 +18,25 @@ import { ConfigProvider, Table, Input, Select, Button } from '@alicloud/console-
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { withRouter } from 'react-router-dom';
-import request from 'utils/request';
-import PropTypes from 'prop-types';
-import { IGlobalStateType } from '@/reducers';
-import { IOverviewStateType, getData } from '@/reducers/overview'
+import { GlobalStateModel } from '@/reducers';
+import { OverviewStateModel, getData } from '@/reducers/overview'
 import './index.scss';
 import Page from '@/components/Page';
+import { GlobalProps } from '@/module';
 
-type StateToPropsType = IOverviewStateType;
+type StateToPropsType = OverviewStateModel;
 
 type DispathToPropsType = {
   getData: () => void
 };
 
-type PropsType = {
-  locale: any
-} & StateToPropsType & DispathToPropsType;
+type OverviewPropsType = {
+} & StateToPropsType & DispathToPropsType & GlobalProps;
 
-class Overview extends React.Component<PropsType> {
+class Overview extends React.Component<OverviewPropsType> {
   static displayName = 'Overview';
 
-  constructor(props: PropsType) {
+  constructor(props: OverviewPropsType) {
     super(props);
   }
   componentDidMount() {
@@ -46,7 +44,7 @@ class Overview extends React.Component<PropsType> {
     getData();
   }
   render() {
-    const { locale = {}, getData } = this.props;
+    const { locale = {}, getData, data } = this.props;
     const { title, subTitle, search } = locale;
     return (
       <Page title={title} breadcrumbs={[
@@ -62,7 +60,7 @@ class Overview extends React.Component<PropsType> {
           <Input />
           <Button type="primary" className="ml-8" onClick={getData}>{search}</Button>
         </div>
-        <Table className="mt-16" dataSource={[{id: 1, name: 'seata'}, {id: 2, name: 'gts'}]}>
+        <Table className="mt-16" dataSource={data}>
           <Table.Column title="id" dataIndex="id"/>
           <Table.Column title="name" dataIndex="name"/>
         </Table>
@@ -71,7 +69,7 @@ class Overview extends React.Component<PropsType> {
   }
 }
 
-const mapStateToProps = (state: IGlobalStateType): StateToPropsType => ({
+const mapStateToProps = (state: GlobalStateModel): StateToPropsType => ({
   ...state.overview
 });
 

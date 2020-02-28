@@ -21,26 +21,26 @@ import { Router, Route, Switch, Redirect, RouteComponentProps } from 'react-rout
 import { ConfigProvider, Loading } from '@alicloud/console-components';
 import { createHashHistory, History } from "history";
 import CCConsoleMenu from '@alicloud/console-components-console-menu';
-import { IGlobalStateType } from '@/reducers';
-import { changeLanguage, ILocaleState, getCurrentLanguage } from '@/reducers/locale';
+import { GlobalStateModel } from '@/reducers';
+import { changeLanguage, LocaleStateModel, getCurrentLanguage } from '@/reducers/locale';
 import Layout from '@/layout';
 import Login from '@/pages/Login';
 import router from '@/router';
-import { ILocale } from '@/locales';
 
 export const history: History = createHashHistory();
+(window as any).globalHistory = history;
 
-type OwnProps = RouteComponentProps;
+export type OwnProps = any;
 
-type StateToPropsType = ILocaleState;
+export type StateToPropsType = LocaleStateModel;
 
-type DispathToPropsType = {
+export type DispathToPropsType = {
     changeLanguage: (lang: string) => void
 };
 
-type AppPropsType = StateToPropsType & DispathToPropsType & OwnProps;
+export type AppPropsType = StateToPropsType & DispathToPropsType & RouteComponentProps & OwnProps;
 
-type AppStateType = {
+export type AppStateType = {
     loading: object;
 }
 
@@ -65,7 +65,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
     }
 
     get menu() {
-        const { locale }: { locale: ILocale } = this.props;
+        const { locale }: AppPropsType = this.props;
         const { MenuRouter = {} } = locale;
         const { overview } = MenuRouter;
         return {
@@ -115,7 +115,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
 }
 
 
-const mapStateToProps = (state: IGlobalStateType, ownProps: OwnProps): StateToPropsType => ({
+const mapStateToProps = (state: GlobalStateModel, ownProps: OwnProps): StateToPropsType => ({
     ...state.locale
 });
 
