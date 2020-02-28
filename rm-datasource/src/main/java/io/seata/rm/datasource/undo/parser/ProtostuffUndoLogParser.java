@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.parser;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
@@ -51,7 +52,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         ID_STRATEGY.registerDelegate(new TimeDelegate());
     }
 
-    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class);
+    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class, ID_STRATEGY);
 
     @Override
     public String getName() {
@@ -104,17 +105,20 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public java.sql.Timestamp readFrom(Input input) throws IOException {
-            return new java.sql.Timestamp(input.readFixed64());
+            String[] strs = input.readString().split("_");
+            java.sql.Timestamp timestamp = new Timestamp(Long.parseLong(strs[0]));
+            timestamp.setNanos(Integer.parseInt(strs[1]));
+            return timestamp;
         }
 
         @Override
         public void writeTo(Output output, int number, java.sql.Timestamp value, boolean repeated) throws IOException {
-            output.writeFixed64(number, value.getTime(), repeated);
+            output.writeString(number, value.getTime() + "_" + value.getNanos(), repeated);
         }
 
         @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
-            output.writeFixed64(number, input.readFixed64(), repeated);
+            output.writeString(number, input.readString(), repeated);
         }
     }
 

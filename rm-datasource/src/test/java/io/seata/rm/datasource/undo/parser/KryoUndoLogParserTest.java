@@ -30,4 +30,5 @@ public class KryoUndoLogParserTest extends BaseUndoLogParserTest {
         return parser;
     }
 
+
 }

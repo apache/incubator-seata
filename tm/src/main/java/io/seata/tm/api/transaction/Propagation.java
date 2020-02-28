@@ -13,21 +13,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.parser;
-
-import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
-import io.seata.rm.datasource.undo.UndoLogParser;
+package io.seata.tm.api.transaction;
 
 /**
- * @author Geng Zhang
+ * Propagation level of global transactions.
+ *
+ * @author haozhibei
  */
-class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
+public enum Propagation {
+    /**
+     * The REQUIRED.
+     */
+    REQUIRED,
 
-    ProtostuffUndoLogParser parser = new ProtostuffUndoLogParser();
+    /**
+     * The REQUIRES_NEW.
+     */
+    REQUIRES_NEW,
 
-    @Override
-    public UndoLogParser getParser() {
-        return parser;
-    }
+    /**
+     * The NOT_SUPPORTED
+     */
+    NOT_SUPPORTED,
 
+    /**
+     * The SUPPORTS
+     */
+    SUPPORTS
 }
+
