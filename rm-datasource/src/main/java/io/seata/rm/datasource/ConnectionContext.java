@@ -207,6 +207,15 @@ public class ConnectionContext {
         return sqlUndoItemsBuffer;
     }
 
+    /**
+     * Gets lock keys buffer.
+     *
+     * @return the lock keys buffer
+     */
+    public Set<String> getLockKeysBuffer() {
+        return lockKeysBuffer;
+    }
+
     @Override
     public String toString() {
         return "ConnectionContext [xid=" + xid + ", branchId=" + branchId + ", lockKeysBuffer=" + lockKeysBuffer
