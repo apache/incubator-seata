@@ -50,8 +50,8 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 public class ApolloConfiguration extends AbstractConfiguration {
 
     private static final String REGISTRY_TYPE = "apollo";
-    private static final String APP_ID = "app.id";
-    private static final String APOLLO_META = "apollo.meta";
+    private static final String APP_ID = "appId";
+    private static final String APOLLO_META = "apolloMeta";
     private static final String NAMESPACE = "namespace";
     private static final String DEFAULT_NAMESPACE = "application";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;

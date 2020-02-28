@@ -56,8 +56,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + SEATA_FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String SESSION_TIMEOUT_KEY = "session.timeout";
-    private static final String CONNECT_TIMEOUT_KEY = "connect.timeout";
+    private static final String SESSION_TIMEOUT_KEY = "sessionTimeout";
+    private static final String CONNECT_TIMEOUT_KEY = "connectTimeout";
     private static final String AUTH_USERNAME = "username";
     private static final String AUTH_PASSWORD = "password";
     private static final int THREAD_POOL_NUM = 1;

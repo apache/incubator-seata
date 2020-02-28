@@ -15,19 +15,6 @@
  */
 package io.seata.discovery.registry.zk;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.RegistryService;
-import org.I0Itec.zkclient.IZkChildListener;
-import org.I0Itec.zkclient.IZkStateListener;
-import org.I0Itec.zkclient.ZkClient;
-import org.apache.zookeeper.Watcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +27,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
+import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkStateListener;
+import org.I0Itec.zkclient.ZkClient;
+import org.apache.zookeeper.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
 
@@ -62,8 +62,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String AUTH_USERNAME = "username";
     private static final String AUTH_PASSWORD = "password";
-    private static final String SESSION_TIME_OUT_KEY = "session.timeout";
-    private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
+    private static final String SESSION_TIME_OUT_KEY = "sessionTimeout";
+    private static final String CONNECT_TIME_OUT_KEY = "connectTimeout";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
