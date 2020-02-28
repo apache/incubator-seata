@@ -158,12 +158,12 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
             return false;
         }
         field.setAccessible(true);
-        Object filedObject = field.get(proxiedObject);
-        return Stream.of(filedObject.getClass().getDeclaredFields()).anyMatch(f -> {
+        Object fieldObject = field.get(proxiedObject);
+        return Stream.of(fieldObject.getClass().getDeclaredFields()).anyMatch(f -> {
             f.setAccessible(true);
             Object targetObject;
             try {
-                targetObject = f.get(filedObject);
+                targetObject = f.get(fieldObject);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
