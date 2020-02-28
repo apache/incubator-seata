@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -90,15 +89,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public void begin(int timeout, String name) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
-            check();
+            assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
-        if (xid != null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNull();
         if (RootContext.getXID() != null) {
             throw new IllegalStateException();
         }
@@ -120,9 +117,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
         int retry = COMMIT_RETRY_COUNT;
         try {
             while (retry > 0) {
@@ -150,9 +145,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void rollback() throws TransactionException {
-        if (xid == null) {
-            throw new IllegalStateException();
+        if (role == GlobalTransactionRole.Participant) {
+            // Participant has no responsibility of rollback
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore Rollback(): just involved in global transaction [{}]", xid);
+            }
+            return;
         }
+        assertXIDNotNull();
 
         int retry = ROLLBACK_RETRY_COUNT;
         try {
@@ -199,9 +199,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
+
         if (globalStatus == null) {
             throw new IllegalStateException();
         }
@@ -216,10 +215,16 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
-    private void check() {
+    private void assertXIDNotNull() {
         if (xid == null) {
-            throw new ShouldNeverHappenException();
+            throw new IllegalStateException();
         }
-
     }
+
+    private void assertXIDNull() {
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
+    }
+
 }
