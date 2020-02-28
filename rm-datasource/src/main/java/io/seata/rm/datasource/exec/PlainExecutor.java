@@ -15,15 +15,17 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.rm.datasource.StatementProxy;
 import java.sql.Statement;
+
+import io.seata.rm.datasource.StatementProxy;
 
 /**
  * The type Plain executor.
  *
+ * @author sharajava
+ *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author sharajava
  */
 public class PlainExecutor<T, S extends Statement> implements Executor<T> {
 
@@ -34,7 +36,7 @@ public class PlainExecutor<T, S extends Statement> implements Executor<T> {
     /**
      * Instantiates a new Plain executor.
      *
-     * @param statementProxy the statement proxy
+     * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      */
     public PlainExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback) {

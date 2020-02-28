@@ -110,6 +110,10 @@ public final class ConfigurationFactory {
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
+            if(StringUtils.isEmpty(name)) {
+                name = "file.conf";
+                LOGGER.error("The config.file.name property configuration was not found, which defaults to file.conf  add by ccg  ewell");
+            }
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
             try {

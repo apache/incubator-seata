@@ -35,7 +35,7 @@ public class LockWaitTimeoutException extends SQLException {
      * Instantiates a new Lock wait timeout exception.
      *
      * @param reason the reason
-     * @param cause the cause
+     * @param cause  the cause
      */
     public LockWaitTimeoutException(String reason, Throwable cause) {
         super(reason, cause);

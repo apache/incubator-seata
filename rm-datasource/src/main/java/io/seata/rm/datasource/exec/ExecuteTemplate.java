@@ -25,10 +25,9 @@ import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
 import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
 import io.seata.rm.datasource.exec.noseata.NoSeata;
 import io.seata.rm.datasource.exec.noseata.UpdateExecutorNoSeata;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
+import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -75,9 +74,10 @@ public class ExecuteTemplate {
      * @throws SQLException the sql exception
      */
     public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
-        StatementProxy<S> statementProxy,
-        StatementCallback<T, S> statementCallback,
-        Object... args) throws SQLException {
+                                                     StatementProxy<S> statementProxy,
+                                                     StatementCallback<T, S> statementCallback,
+                                                     Object... args) throws SQLException {
+
         if (!ElasticsearchUtil.isStarted) {//在启动过程中执行的sql,直接执行。类似flyway执行
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);

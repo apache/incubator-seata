@@ -15,8 +15,9 @@
  */
 package io.seata.rm;
 
-import io.seata.core.context.RootContext;
 import java.util.concurrent.Callable;
+
+import io.seata.core.context.RootContext;
 
 /**
  * Template of executing business logic in a local transaction with Global lock.

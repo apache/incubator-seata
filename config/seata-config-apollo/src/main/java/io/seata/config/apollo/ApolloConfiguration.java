@@ -53,7 +53,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String APP_ID = "app.id";
     private static final String APOLLO_META = "apollo.meta";
     private static final String NAMESPACE = "namespace";
-    private static final String DEFAULT_NAMESPACE = "application";
+    private static final String DEFAULT_NAMESPACE = "application-seata";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile Config config;
     private ExecutorService configOperateExecutor;

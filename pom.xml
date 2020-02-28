@@ -92,7 +92,7 @@
     <properties>
         <!-- seata version -->
         <revision>1.1.0-SNAPSHOT</revision>
-        <co.faao.speed.version>6.1.7-SNAPSHOT</co.faao.speed.version>
+        <co.faao.speed.version>6.1.6-SNAPSHOT</co.faao.speed.version>
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -457,30 +457,40 @@
                     </mapping>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven-checkstyle-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <failOnViolation>false</failOnViolation>
-                            <excludes>**/generated/**/*</excludes>
-                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+                <!--<version>${maven-checkstyle-plugin.version}</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>validate</id>-->
+                        <!--<phase>validate</phase>-->
+                        <!--<configuration>-->
+                            <!--<configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>-->
+                            <!--<encoding>UTF-8</encoding>-->
+                            <!--<consoleOutput>true</consoleOutput>-->
+                            <!--<failsOnError>true</failsOnError>-->
+                            <!--<failOnViolation>false</failOnViolation>-->
+                            <!--<excludes>**/generated/**/*</excludes>-->
+                            <!--<excludes>io/seata/integration/grpc/interceptor/</excludes>-->
+                        <!--</configuration>-->
+                        <!--<goals>-->
+                            <!--<goal>check</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
-
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.150.59:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

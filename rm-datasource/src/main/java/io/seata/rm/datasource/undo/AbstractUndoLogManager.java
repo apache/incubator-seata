@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo;
 
 import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
+import io.seata.common.util.BlobUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,20 +42,7 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.lang.time.DateFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

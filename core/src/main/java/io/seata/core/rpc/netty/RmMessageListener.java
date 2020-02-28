@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.core.constants.Seata;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
@@ -74,16 +75,18 @@ public class RmMessageListener implements ClientMessageListener {
 
     @Override
     public void onMessage(RpcMessage request, String serverAddress) {
-        Object msg = request.getBody();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("onMessage:" + msg);
-        }
-        if (msg instanceof BranchCommitRequest) {
-            handleBranchCommit(request, serverAddress, (BranchCommitRequest)msg);
-        } else if (msg instanceof BranchRollbackRequest) {
-            handleBranchRollback(request, serverAddress, (BranchRollbackRequest)msg);
-        } else if (msg instanceof UndoLogDeleteRequest) {
-            handleUndoLogDelete((UndoLogDeleteRequest) msg);
+        if (Seata.EWELL_SEATA_STATE_IS_ON) {
+            Object msg = request.getBody();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("onMessage:" + msg);
+            }
+            if (msg instanceof BranchCommitRequest) {
+                handleBranchCommit(request, serverAddress, (BranchCommitRequest) msg);
+            } else if (msg instanceof BranchRollbackRequest) {
+                handleBranchRollback(request, serverAddress, (BranchRollbackRequest) msg);
+            } else if (msg instanceof UndoLogDeleteRequest) {
+                handleUndoLogDelete((UndoLogDeleteRequest) msg);
+            }
         }
     }
 

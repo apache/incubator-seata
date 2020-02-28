@@ -58,7 +58,6 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * template of check sql
-     *
      * TODO support multiple primary key
      */
     private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";

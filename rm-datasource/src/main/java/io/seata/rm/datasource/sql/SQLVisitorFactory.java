@@ -39,7 +39,7 @@ public class SQLVisitorFactory {
     /**
      * Get sql recognizer.
      *
-     * @param sql the sql
+     * @param sql    the sql
      * @param dbType the db type
      * @return the sql recognizer
      */

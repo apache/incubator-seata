@@ -54,7 +54,7 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
     protected String buildUndoSQL() {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
-        if (beforeImageRows == null || beforeImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(beforeImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = beforeImageRows.get(0);

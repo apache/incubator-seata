@@ -30,6 +30,11 @@ import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
 import de.javakaffee.kryoserializers.UUIDSerializer;
 import io.seata.rm.datasource.undo.BranchUndoLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -53,10 +58,6 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jsbxyyx
@@ -69,8 +70,7 @@ public class KryoSerializerFactory implements KryoFactory {
 
     private KryoPool pool = new KryoPool.Builder(this).softReferences().build();
 
-    private KryoSerializerFactory() {
-    }
+    private KryoSerializerFactory() {}
 
     public static KryoSerializerFactory getInstance() {
         return FACTORY;

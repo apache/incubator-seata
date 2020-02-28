@@ -101,7 +101,8 @@ public class FileConfiguration extends AbstractConfiguration {
         LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
-        } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+        } else
+            if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
             File targetFile = new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length()));
             if (targetFile.exists()) {
                 targetFilePath = targetFile.getPath();

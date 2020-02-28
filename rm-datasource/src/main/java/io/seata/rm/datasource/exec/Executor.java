@@ -18,8 +18,9 @@ package io.seata.rm.datasource.exec;
 /**
  * The interface Executor.
  *
- * @param <T> the type parameter
  * @author sharajava
+ *
+ * @param <T> the type parameter
  */
 public interface Executor<T> {
 

@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.Callable;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -27,9 +31,6 @@ import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

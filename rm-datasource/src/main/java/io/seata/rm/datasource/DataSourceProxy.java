@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.core.constants.Seata;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -52,7 +53,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, false);
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
 
     /**
      * Table meta checker interval
@@ -90,7 +91,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
-        DefaultResourceManager.get().registerResource(this);
+        if(Seata.EWELL_SEATA_STATE_IS_ON) {
+            DefaultResourceManager.get().registerResource(this);
+        }
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {

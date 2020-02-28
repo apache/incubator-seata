@@ -48,8 +48,8 @@ public class Field {
     /**
      * Instantiates a new Field.
      *
-     * @param name the name
-     * @param type the type
+     * @param name  the name
+     * @param type  the type
      * @param value the value
      */
     public Field(String name, int type, Object value) {

@@ -34,19 +34,24 @@
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
-        <groupId>co.faao</groupId>
-        <artifactId>speed-seata-starter</artifactId>
-        <version>${co.faao.speed.version}</version>
-            <scope>provided</scope>
-        <exclusions>
-            <exclusion>
-                <groupId>*</groupId>
-                <artifactId>*</artifactId>
-            </exclusion>
-        </exclusions>
-    </dependency>
+            <groupId>co.faao</groupId>
+            <artifactId>speed-seata-starter</artifactId>
+            <version>${co.faao.speed.version}</version>
+                <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <dependency>
             <groupId>co.faao</groupId>

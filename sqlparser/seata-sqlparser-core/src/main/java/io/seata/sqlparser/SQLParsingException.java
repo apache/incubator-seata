@@ -34,7 +34,7 @@ public class SQLParsingException extends RuntimeException {
      * Instantiates a new Sql parsing exception.
      *
      * @param message the message
-     * @param cause the cause
+     * @param cause   the cause
      */
     public SQLParsingException(String message, Throwable cause) {
         super(message, cause);

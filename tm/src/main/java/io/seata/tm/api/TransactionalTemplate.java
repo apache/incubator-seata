@@ -138,7 +138,7 @@ public class TransactionalTemplate {
         tx.rollback();
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, RollbackDone, ex);
+        throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {

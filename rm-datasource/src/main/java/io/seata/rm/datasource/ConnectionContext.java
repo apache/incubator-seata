@@ -15,13 +15,14 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.undo.SQLUndoLog;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type Connection context.
@@ -203,6 +204,15 @@ public class ConnectionContext {
      */
     public List<SQLUndoLog> getUndoItems() {
         return sqlUndoItemsBuffer;
+    }
+
+    /**
+     * Gets lock keys buffer.
+     *
+     * @return the lock keys buffer
+     */
+    public Set<String> getLockKeysBuffer() {
+        return lockKeysBuffer;
     }
 
     @Override

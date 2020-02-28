@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.alibaba.druid.util.JdbcConstants;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -33,13 +32,6 @@ import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
@@ -72,7 +64,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+    public InsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }

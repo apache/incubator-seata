@@ -18,7 +18,7 @@ package io.seata.rm.datasource.exec.noseata;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.InsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import java.sql.SQLException;
 import java.sql.Statement;
