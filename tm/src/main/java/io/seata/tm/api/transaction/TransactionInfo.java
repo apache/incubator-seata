@@ -34,6 +34,8 @@ public final class TransactionInfo implements Serializable {
 
     private Set<RollbackRule> rollbackRules;
 
+    private Propagation propagation;
+
     private BranchType defaultBranchType;
 
     public int getTimeOut() {
@@ -79,11 +81,23 @@ public final class TransactionInfo implements Serializable {
         return !(winner instanceof NoRollbackRule);
     }
 
-    public BranchType getDefaultBranchType() {
-        return this.defaultBranchType;
+    public Propagation getPropagation() {
+        if (this.propagation != null) {
+            return this.propagation;
+        }
+        //default propagation
+        return Propagation.REQUIRED;
     }
 
-    public void setDefaultBranchType(BranchType branchType) {
-        this.defaultBranchType = branchType;
+    public void setPropagation(Propagation propagation) {
+        this.propagation = propagation;
+    }
+
+    public BranchType getDefaultBranchType() {
+       return this.defaultBranchType;
+   }
+
+   public void setDefaultBranchType(BranchType branchType) {
+       this.defaultBranchType = branchType;
     }
 }

@@ -122,6 +122,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
                     transactionInfo.setName(name());
+                    transactionInfo.setPropagation(globalTrxAnno.propagation());
                     transactionInfo.setDefaultBranchType(globalTrxAnno.defaultBranchType());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
