@@ -17,7 +17,7 @@ package io.seata.core.store.db;
 
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.LockDO;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;

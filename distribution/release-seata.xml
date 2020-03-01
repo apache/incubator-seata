@@ -45,8 +45,11 @@
 
         <fileSet>
             <includes>
-                <include>lib/*</include>
+                <include>lib/**</include>
             </includes>
+            <excludes>
+                <exclude>lib/mysql-connector-java-*.jar</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <files>

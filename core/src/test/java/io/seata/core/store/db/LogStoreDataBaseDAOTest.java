@@ -19,7 +19,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
