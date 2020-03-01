@@ -17,7 +17,9 @@ package io.seata.discovery.loadbalance;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
+
+import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
 
 /**
  * The type Load balance factory.
@@ -25,6 +27,11 @@ import io.seata.config.ConfigurationKeys;
  * @author slievrly
  */
 public class LoadBalanceFactory {
+
+    /**
+     * The constant LOAD_BALANCE.
+     */
+    private static final String LOAD_BALANCE = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalance";
 
     /**
      * The load balance.
@@ -41,7 +48,7 @@ public class LoadBalanceFactory {
             synchronized (LoadBalanceFactory.class) {
                 if (loadBalance == null) {
                     loadBalance = EnhancedServiceLoader.load(LoadBalance.class,
-                            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.LOAD_BALANCE));
+                            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE));
                 }
             }
         }

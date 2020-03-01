@@ -41,12 +41,4 @@ public final class ConfigurationKeys {
      * The constant FILE_ROOT_TYPE.
      */
     public static final String FILE_ROOT_TYPE = "type";
-    /**
-     * The constant LOAD_BALANCE.
-     */
-    public static final String LOAD_BALANCE = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "load-balance";
-    /**
-     * The constant VIRTUAL_NODES.
-     */
-    public static final String VIRTUAL_NODES = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "load-balance-virtual-nodes";
 }

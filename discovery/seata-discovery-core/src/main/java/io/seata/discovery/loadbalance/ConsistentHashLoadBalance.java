@@ -15,10 +15,6 @@
  */
 package io.seata.discovery.loadbalance;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -28,6 +24,12 @@ import java.util.SortedMap;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.config.ConfigurationFactory;
+
+import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+
 /**
  * The type consistent hash load balance.
  *
@@ -36,12 +38,17 @@ import java.util.TreeMap;
 @LoadLevel(name = "ConsistentHashLoadBalance", order = 3)
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
+    /**
+     * The constant VIRTUAL_NODES.
+     */
+    private static final String VIRTUAL_NODES = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalanceVirtualNodes";
+
     @Override
     protected <T> T doSelect(List<T> invokers) {
         List<T> temp = new ArrayList<>(invokers);
         Collections.shuffle(temp);
         return new ConsistentHashSelector<>(invokers, ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(
-                ConfigurationKeys.VIRTUAL_NODES, 10)).select(getObjectKey(temp));
+                VIRTUAL_NODES, 10)).select(getObjectKey(temp));
     }
 
     private <T> String getObjectKey(List<T> invokers) {
