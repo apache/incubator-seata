@@ -67,6 +67,12 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
+    @Override
+    public void onRollbackRetrying(GlobalTransaction tx, Throwable cause) {
+        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", cause);
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackFailed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
     protected class CheckTimerTask implements TimerTask {
 
         private final GlobalTransaction tx;
