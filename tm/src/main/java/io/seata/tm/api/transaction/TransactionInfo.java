@@ -94,10 +94,10 @@ public final class TransactionInfo implements Serializable {
     }
 
     public BranchType getDefaultBranchType() {
-       return this.defaultBranchType;
-   }
+        return this.defaultBranchType;
+    }
 
-   public void setDefaultBranchType(BranchType branchType) {
-       this.defaultBranchType = branchType;
+    public void setDefaultBranchType(BranchType branchType) {
+        this.defaultBranchType = branchType;
     }
 }
