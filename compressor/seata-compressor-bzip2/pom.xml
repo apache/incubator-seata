@@ -23,15 +23,19 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-compressor-gzip</artifactId>
+    <artifactId>seata-compressor-bzip2</artifactId>
     <packaging>jar</packaging>
-    <name>seata-compressor-gzip ${project.version}</name>
+    <name>seata-compressor-bzip2 ${project.version}</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
         </dependency>
     </dependencies>
 
