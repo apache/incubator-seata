@@ -61,7 +61,7 @@ public class SQLVisitorFactoryTest {
         //test for mysql select
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertNull(recognizer);
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT);
 
         //test for mysql select for update
         sql = "select * from t for update";
@@ -86,7 +86,7 @@ public class SQLVisitorFactoryTest {
         //test for oracle select
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertNull(recognizer);
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT);
 
         //test for oracle select for update
         sql = "select * from t for update";

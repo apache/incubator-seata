@@ -15,13 +15,15 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
-
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * The type Execute template.
@@ -29,6 +31,11 @@ import java.sql.Statement;
  * @author sharajava
  */
 public class ExecuteTemplate {
+
+    private static boolean CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE, false);
+    private static boolean CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE, false);
 
     /**
      * Execute t.
@@ -71,8 +78,8 @@ public class ExecuteTemplate {
 
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+                statementProxy.getTargetSQL(),
+                statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor;
         if (sqlRecognizer == null) {
@@ -90,6 +97,14 @@ public class ExecuteTemplate {
                     break;
                 case SELECT_FOR_UPDATE:
                     executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case SELECT:
+                    if ((RootContext.requireGlobalLock() && CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE)
+                        || (RootContext.inGlobalTransaction() && CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE)) {
+                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                    } else {
+                        executor = new PlainExecutor<>(statementProxy, statementCallback);
+                    }
                     break;
                 default:
                     executor = new PlainExecutor<>(statementProxy, statementCallback);
