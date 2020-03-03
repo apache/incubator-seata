@@ -145,13 +145,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void rollback() throws TransactionException {
-        if (role == GlobalTransactionRole.Participant) {
-            // Participant has no responsibility of rollback
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Ignore Rollback(): just involved in global transaction [{}]", xid);
-            }
-            return;
-        }
         assertXIDNotNull();
 
         int retry = ROLLBACK_RETRY_COUNT;

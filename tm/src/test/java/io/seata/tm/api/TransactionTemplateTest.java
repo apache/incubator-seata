@@ -195,7 +195,9 @@ public class TransactionTemplateTest {
         //When Participant RuntimeException occurred, rollbackFailure and throw cause
         try {
             doThrow(rollbackFailException).when(participantTransaction).rollback();
-            completeTransactionAfterThrowing.invoke(template, new TransactionInfo(), participantTransaction, runtimeException);
+            TransactionInfo participantReportTxInfo = new TransactionInfo();
+            participantReportTxInfo.setParticipantReportRollback(true);
+            completeTransactionAfterThrowing.invoke(template, participantReportTxInfo, participantTransaction, runtimeException);
         }catch (InvocationTargetException e) {
             TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
             Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.ParticipantRollbackFailure);

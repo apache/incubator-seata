@@ -75,4 +75,9 @@ public @interface GlobalTransactional {
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;
+
+    /**
+     * participant report rollback
+     */
+    boolean participantReportRollback() default false;
 }

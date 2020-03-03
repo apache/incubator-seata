@@ -35,6 +35,8 @@ public final class TransactionInfo implements Serializable {
 
     private Propagation propagation;
 
+    private boolean participantReportRollback;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -88,5 +90,13 @@ public final class TransactionInfo implements Serializable {
 
     public void setPropagation(Propagation propagation) {
         this.propagation = propagation;
+    }
+
+    public boolean getParticipantReportRollback() {
+        return participantReportRollback;
+    }
+
+    public void setParticipantReportRollback(boolean participantReportRollback) {
+        this.participantReportRollback = participantReportRollback;
     }
 }

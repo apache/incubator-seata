@@ -115,7 +115,9 @@ public class TransactionalTemplate {
         //roll back
         if (txInfo != null && txInfo.rollbackOn(ex)) {
             try {
-                rollbackTransaction(tx, ex);
+                if (tx.getRole() == GlobalTransactionRole.Launcher || txInfo.getParticipantReportRollback()) {
+                    rollbackTransaction(tx, ex);
+                }
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,

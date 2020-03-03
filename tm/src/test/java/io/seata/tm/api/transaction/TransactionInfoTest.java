@@ -42,6 +42,7 @@ public class TransactionInfoTest {
     public void testFieldGetSetFromJson() {
         String fromJson = "{\n" +
                 "\t\"name\":\""+ NAME +"\",\n" +
+                "\t\"participantReportRollback\":"+ false +",\n"+
                 "\t\"propagation\":\""+ PROPAGATION +"\",\n"+
                 "\t\"rollbackRules\":[{\n" +
                 "\t\t\"exceptionName\":\""+ IllegalStateException.class.getName() +"\"\n" +
