@@ -23,6 +23,7 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.SQLType;
 
 import java.util.List;
 
@@ -51,6 +52,29 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
         } else if (ast instanceof SQLSelectStatement) {
             recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+            if (recognizer == null) {
+                recognizer = new SQLRecognizer() {
+                    @Override
+                    public SQLType getSQLType() {
+                        return SQLType.SELECT;
+                    }
+
+                    @Override
+                    public String getTableAlias() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getTableName() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getOriginalSQL() {
+                        return null;
+                    }
+                };
+            }
         }
         return recognizer;
     }
