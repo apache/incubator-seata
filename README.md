@@ -116,6 +116,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
   
+
 <img src="https://img.alicdn.com/tfs/TB1CR2orKT2gK0jSZFvXXXnFXXa-1798-588.jpg"  height="200" width="630">
 
 
@@ -195,6 +196,15 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='九机网' height='40'  src='https://img.alicdn.com/tfs/TB1ERHlrUY1gK0jSZFMXXaWcVXa-120-60.png'  /img>
     <img alt='有好东西' height='40'  src='https://img.alicdn.com/tfs/TB1LT2lrNn1gK0jSZKPXXXvUXXa-300-300.jpg'  /img>
     <img alt='南京智慧盾' height='40'  src='https://img.alicdn.com/tfs/TB1s2LprUY1gK0jSZFCXXcwqXXa-618-148.jpg'  /img>
+    <img alt='数跑科技' height='40'  src='https://supaur-prod-oss.supaur.com/images/pc/logo.png?x-oss-process=image/format,webp'  /img>
+    <img alt='拉粉粉' height='40'  src='https://www.lafenfen.cn/img/icon03.png'  /img>
+    <img alt='汇通达' height='40'  src='http://www.htd.cn/images/footerlogo.png'  /img>
+    <img alt='财新传媒' height='40'  src='http://file.caixin.com/file/content/images/new/logo_bottom.png'  /img>
+    <img alt='学两手' height='40'  src='http://img.xue2shou.com/g-xue2shou/website/2.1.7/static/logo.png?v=1575877886843'  /img>
+    <img alt='维恩贝特' height='40'  src='http://www.vivebest.com/templates/crs/images/vnb_logo.png'  /img>
+    <img alt='大诚若谷' height='40'  src='http://www.rocoinfo.com/images/logo.png'  /img>
+    <img alt='韵达快递' height='40'  src='http://www.yunda56.com/cn/images/ky_images/logo.png'  /img>
+    <img alt='上海海智在线' height='40'  src='https://user-images.githubusercontent.com/2938725/75735507-cbad3f00-5d35-11ea-9ce8-cad175948b7f.png'  /img>
 </div>
 
 
