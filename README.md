@@ -205,7 +205,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='维恩贝特' height='40'  src='http://www.vivebest.com/templates/crs/images/vnb_logo.png'  /img>
     <img alt='大诚若谷' height='40'  src='http://www.rocoinfo.com/images/logo.png'  /img>
     <img alt='韵达快递' height='40'  src='http://www.yunda56.com/cn/images/ky_images/logo.png'  /img>
-    <img alt='联通(浙江)' height='40'  src='https://img.alicdn.com/tfs/TB1vWafw7T2gK0jSZFkXXcIQFXa-301-100.png'  /img>
+    <img alt='联通(浙江)' height='40'  src='https://img.alicdn.com/tfs/TB1hvabw9f2gK0jSZFPXXXsopXa-174-100.png'  /img>
     <img alt='上海海智在线' height='40'  src='https://user-images.githubusercontent.com/2938725/75735507-cbad3f00-5d35-11ea-9ce8-cad175948b7f.png'  /img>
 </div>
 
