@@ -211,6 +211,17 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='成都数智索' height='40'  src='https://img.alicdn.com/tfs/TB1oJKiw4D1gK0jSZFyXXciOVXa-2053-377.png'  /img>
     <img alt='上海海智在线' height='40'  src='https://user-images.githubusercontent.com/2938725/75735507-cbad3f00-5d35-11ea-9ce8-cad175948b7f.png'  /img>
     <img alt='丞家（上海）公寓管理' height='40'  src='https://image.cjia.com/website/apartment/webresource/image/logo_8f2f47fe.png'  /img>
+    <img alt='北京超图' height='40'  src='https://user-images.githubusercontent.com/20411887/75741329-3a45c900-5d45-11ea-84db-aafed13bb8bc.png'  /img>
+    <img alt='深圳易佰' height='40'  src='https://user-images.githubusercontent.com/19617516/75748727-1beac800-5d5b-11ea-8ee1-71467e93c24f.png'  /img>
+    <img alt='安徽国科新材科' height='40'  src='https://user-images.githubusercontent.com/61726674/75748449-70da0e80-5d5a-11ea-8e4d-d22fe0442caf.png'  /img>
+    <img alt='易点生活' height='40'  src='https://user-images.githubusercontent.com/44664389/75748761-31f88880-5d5b-11ea-8223-d819b3430916.jpg'  /img>
+    <img alt='商银信支付' height='40' src='https://file.01caijing.com/platform/201911/E289B07A3897494.png@50h_150w_1e.png'   /img>
+    <img alt='钛师傅云' height='40'  src='https://www.tsfyun.com/images/logo.png'  /img>
+    <img alt='TCL' height='40'  src='https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=379850660,252860921&fm=26&gp=0.jpg'  /img>
+    <img alt='58集团' height='40'  src='http://img.58cdn.com.cn/logo/58/252_84/logo-o.png?v=2'  /img>
+    <img alt='广州力生信息' height='40'  src='https://user-images.githubusercontent.com/21170967/75753185-30cc5900-5d65-11ea-8eba-cd24ee669c64.jpg'  /img>
 </div>
+
+
 
 
