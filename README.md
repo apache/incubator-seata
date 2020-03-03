@@ -172,8 +172,8 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='衣二三' height='40'  src='https://img.alicdn.com/tfs/TB1OCGioCf2gK0jSZFPXXXsopXa-500-179.jpg'  /img>
     <img alt='悦途出行' height='40'  src='http://yuetu365.com/uploads/allimg/20191016/d456dbbee0c54274a70d588af4ce6116.png'  /img>
     <img alt='睿颐软件' height='40'  src='https://img.alicdn.com/tfs/TB143R4op67gK0jSZPfXXahhFXa-148-42.png'  /img>
-    <img alt='赛维' height='40'  src='http://www.savor.com.cn/common/img/logo.png'  /img>
     <img alt='有利网' height='40'  src='https://www.yooli.com/v2/local/img/common/logo.png?version=20191126190304'  /img>
+    <img alt='赛维' height='40'  src='http://www.savor.com.cn/common/img/logo.png'  /img>
     <img alt='安心保险' height='40'  src='https://query.95303.com/webins/images/logo.png'  /img>
     <img alt='科达科技' height='40'  src='https://img.alicdn.com/tfs/TB1JvOjouT2gK0jSZFvXXXnFXXa-386-146.jpg'  /img>
     <img alt='会分期' height='40'  src='https://img.alicdn.com/tfs/TB1ChKFoBr0gK0jSZFnXXbRRXXa-402-166.jpg'  /img>
@@ -209,9 +209,9 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='维恩贝特' height='40'  src='http://www.vivebest.com/templates/crs/images/vnb_logo.png'  /img>
     <img alt='八库' height='40' src='https://img.alicdn.com/tfs/TB1hC5cwVY7gK0jSZKzXXaikpXa-318-134.png'  /img>
     <img alt='大诚若谷' height='40'  src='https://img.alicdn.com/tfs/TB1VuPhw4D1gK0jSZFyXXciOVXa-294-124.png'  /img>
+    <img alt='成都数智索' height='40'  src='https://img.alicdn.com/tfs/TB1oJKiw4D1gK0jSZFyXXciOVXa-2053-377.png'  /img>    
     <img alt='宿迁民丰农商银行' height='40'  src='https://img.alicdn.com/tfs/TB1bH5fw7L0gK0jSZFAXXcA9pXa-442-39.png'  /img>
     <img alt='杭州喜团科技' height='40'  src='https://img.alicdn.com/tfs/TB1IXqgwYj1gK0jSZFuXXcrHpXa-197-58.png'  /img>
-    <img alt='成都数智索' height='40'  src='https://img.alicdn.com/tfs/TB1oJKiw4D1gK0jSZFyXXciOVXa-2053-377.png'  /img>
     <img alt='上海海智在线' height='40' src='https://user-images.githubusercontent.com/2938725/75735507-cbad3f00-5d35-11ea-9ce8-cad175948b7f.png'  /img>
     <img alt='丞家（上海）公寓管理' height='40'  src='https://image.cjia.com/website/apartment/webresource/image/logo_8f2f47fe.png'  /img>
     <img alt='北京超图' height='40'  src='https://user-images.githubusercontent.com/20411887/75741329-3a45c900-5d45-11ea-84db-aafed13bb8bc.png'  /img>
