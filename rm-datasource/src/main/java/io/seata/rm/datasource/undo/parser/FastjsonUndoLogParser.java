@@ -16,6 +16,8 @@
 package io.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 
@@ -37,7 +39,11 @@ public class FastjsonUndoLogParser implements UndoLogParser {
     private static final SimplePropertyPreFilter FILTER = new SimplePropertyPreFilter();
 
     static {
-        FILTER.getExcludes().add("tableMeta");
+        FastjsonConfigurerAdapter adapter = (FastjsonConfigurerAdapter) CustomSerializerConfigurerAdapter.getConfig(NAME);
+        if (null == adapter) {
+            adapter = new FastjsonConfigurerAdapter();
+        }
+        adapter.config(SerializeConfig.globalInstance, ParserConfig.global, FILTER);
     }
 
     @Override

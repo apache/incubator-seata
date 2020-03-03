@@ -17,6 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
+import io.seata.spring.boot.autoconfigure.loader.CustomSerializerConfigurerAdapterLoader;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 @Configuration
 @EnableConfigurationProperties({SeataProperties.class})
 public class SeataAutoConfiguration {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
@@ -63,5 +65,10 @@ public class SeataAutoConfiguration {
     @ConditionalOnMissingBean(SeataDataSourceBeanPostProcessor.class)
     public SeataDataSourceBeanPostProcessor seataDataSourceBeanPostProcessor(SeataProperties seataProperties) {
         return new SeataDataSourceBeanPostProcessor(seataProperties.isUseJdkProxy());
+    }
+
+    @Bean
+    public CustomSerializerConfigurerAdapterLoader customSerializerConfigurerAdapterLoader() {
+        return new CustomSerializerConfigurerAdapterLoader();
     }
 }
