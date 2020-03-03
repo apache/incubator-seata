@@ -200,7 +200,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
    <img alt='拉粉粉' height='40'  src='https://img.alicdn.com/tfs/TB1SV49wWL7gK0jSZFBXXXZZpXa-970-219.png'  /img> 
     <img alt='汇通达' height='40'  src='https://img.alicdn.com/tfs/TB1KVJ9wWL7gK0jSZFBXXXZZpXa-145-59.png'  /img>
     <img alt='财新传媒' height='40'  src='http://file.caixin.com/file/content/images/new/logo_bottom.png'  /img>
-    <img alt='学两手' height='40'  src='https://www.lafenfen.cn/img/icon03.png'  /img>
+    <img alt='学两手' height='40'  src='http://img.xue2shou.com/g-xue2shou/website/2.1.7/static/logo.png?v=1575877886843'  /img>
     <img alt='易宝支付' height='40'  src='https://img.alicdn.com/tfs/TB1vWafw7T2gK0jSZFkXXcIQFXa-301-100.png'  /img>
     <img alt='维恩贝特' height='40'  src='http://www.vivebest.com/templates/crs/images/vnb_logo.png'  /img>
     <img alt='大诚若谷' height='40'  src='http://www.rocoinfo.com/images/logo.png'  /img>
