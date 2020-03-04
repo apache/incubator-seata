@@ -16,13 +16,14 @@
 package io.seata.discovery.registry.redis;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Redis", order = 1)
+@LoadLevel(name = "Redis", order = 1, scope = Scope.PROTOTYPE)
 public class RedisRegistryProvider implements RegistryProvider {
     @Override
     public RegistryService provide() {

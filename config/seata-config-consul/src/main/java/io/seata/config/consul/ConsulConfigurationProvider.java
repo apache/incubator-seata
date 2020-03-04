@@ -16,13 +16,14 @@
 package io.seata.config.consul;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Consul", order = 1)
+@LoadLevel(name = "Consul", order = 1, scope = Scope.PROTOTYPE)
 public class ConsulConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {

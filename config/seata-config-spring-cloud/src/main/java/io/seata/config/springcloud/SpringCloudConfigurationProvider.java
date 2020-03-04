@@ -16,10 +16,11 @@
 package io.seata.config.springcloud;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
 
-@LoadLevel(name = "SpringCloudConfig", order = 1)
+@LoadLevel(name = "SpringCloudConfig", order = 1, scope = Scope.PROTOTYPE)
 public class SpringCloudConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {

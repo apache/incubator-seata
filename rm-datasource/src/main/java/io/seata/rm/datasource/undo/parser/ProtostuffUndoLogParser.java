@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import io.seata.common.loader.Scope;
 import java.io.IOException;
 import java.sql.Timestamp;
 
@@ -38,7 +39,7 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  *
  * @author Geng Zhang
  */
-@LoadLevel(name = ProtostuffUndoLogParser.NAME)
+@LoadLevel(name = ProtostuffUndoLogParser.NAME, scope = Scope.PROTOTYPE)
 public class ProtostuffUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "protostuff";

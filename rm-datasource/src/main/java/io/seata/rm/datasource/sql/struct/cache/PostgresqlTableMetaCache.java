@@ -17,6 +17,7 @@ package io.seata.rm.datasource.sql.struct.cache;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
@@ -37,7 +38,7 @@ import java.sql.Statement;
  *
  * @author jaspercloud
  */
-@LoadLevel(name = JdbcConstants.POSTGRESQL)
+@LoadLevel(name = JdbcConstants.POSTGRESQL, scope = Scope.PROTOTYPE)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);

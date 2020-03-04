@@ -20,7 +20,7 @@ package io.seata.common.loader;
  *
  * @author Otis.z
  */
-@LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE)
+@LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE, scope = Scope.PROTOTYPE)
 public class ChineseHello implements Hello {
 
     @Override

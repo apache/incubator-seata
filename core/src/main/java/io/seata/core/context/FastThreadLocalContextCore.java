@@ -18,6 +18,7 @@ package io.seata.core.context;
 import io.netty.util.concurrent.FastThreadLocal;
 import io.seata.common.loader.LoadLevel;
 
+import io.seata.common.loader.Scope;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ import java.util.Map;
  *
  * @author ph3636
  */
-@LoadLevel(name = "FastThreadLocalContextCore", order = Integer.MIN_VALUE + 1)
+@LoadLevel(name = "FastThreadLocalContextCore", order = Integer.MIN_VALUE + 1, scope = Scope.PROTOTYPE)
 public class FastThreadLocalContextCore implements ContextCore {
 
     private FastThreadLocal<Map<String, String>> fastThreadLocal = new FastThreadLocal<Map<String, String>>() {

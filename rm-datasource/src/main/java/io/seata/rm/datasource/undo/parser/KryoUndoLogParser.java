@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.parser;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -23,7 +24,7 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  * kryo serializer
  * @author jsbxyyx
  */
-@LoadLevel(name = KryoUndoLogParser.NAME)
+@LoadLevel(name = KryoUndoLogParser.NAME, scope = Scope.PROTOTYPE)
 public class KryoUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "kryo";

@@ -17,13 +17,14 @@ package io.seata.discovery.registry.sofa;
 
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 
 /**
  * @author leizhiyuan
  */
-@LoadLevel(name = "Sofa", order = 1)
+@LoadLevel(name = "Sofa", order = 1, scope = Scope.PROTOTYPE)
 public class SofaRegistryProvider implements RegistryProvider {
     @Override
     public RegistryService provide() {

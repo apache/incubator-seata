@@ -16,11 +16,12 @@
 package io.seata.config;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 
 /**
  * @author ggndnn
  */
-@LoadLevel(name = "forTest")
+@LoadLevel(name = "forTest", scope = Scope.PROTOTYPE)
 public class CustomConfigurationProviderForTest implements ConfigurationProvider {
     @Override
     public Configuration provide() {

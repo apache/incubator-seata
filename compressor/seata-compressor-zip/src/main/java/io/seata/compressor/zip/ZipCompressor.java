@@ -16,6 +16,7 @@
 package io.seata.compressor.zip;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.compressor.Compressor;
 
 /**
@@ -23,7 +24,7 @@ import io.seata.core.compressor.Compressor;
  *
  * @author ph3636
  */
-@LoadLevel(name = "ZIP")
+@LoadLevel(name = "ZIP", scope = Scope.PROTOTYPE)
 public class ZipCompressor implements Compressor {
 
     @Override

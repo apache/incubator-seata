@@ -16,6 +16,7 @@
 package io.seata.server.store.db;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.store.db.AbstractDataSourceGenerator;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -26,7 +27,7 @@ import javax.sql.DataSource;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "dbcp")
+@LoadLevel(name = "dbcp", scope = Scope.PROTOTYPE)
 public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
 
     @Override

@@ -15,6 +15,7 @@
  */
 package io.seata.core.store.db;
 
+import io.seata.common.loader.Scope;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -51,7 +52,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_LOCK_DB_TABLE;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
+@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class LockStoreDataBaseDAO implements LockStore, Initialize {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);

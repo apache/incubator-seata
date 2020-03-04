@@ -16,12 +16,13 @@
 package io.seata.compressor.gzip;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.compressor.Compressor;
 
 /**
  * @author jsbxyyx
  */
-@LoadLevel(name = "GZIP")
+@LoadLevel(name = "GZIP", scope = Scope.PROTOTYPE)
 public class GzipCompressor implements Compressor {
 
     @Override

@@ -18,6 +18,7 @@ package io.seata.sqlparser.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -27,7 +28,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  *
  * @author: Zhibei Hao
  */
-@LoadLevel(name = JdbcConstants.ORACLE)
+@LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
 public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder {
 
     @Override

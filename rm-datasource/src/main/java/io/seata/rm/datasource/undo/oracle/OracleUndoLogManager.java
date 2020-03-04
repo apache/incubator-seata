@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.common.util.BlobUtils;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -35,7 +36,7 @@ import java.util.Date;
 /**
  * @author jsbxyyx
  */
-@LoadLevel(name = JdbcConstants.ORACLE)
+@LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
 public class OracleUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleUndoLogManager.class);

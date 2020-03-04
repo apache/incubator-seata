@@ -15,6 +15,7 @@
  */
 package io.seata.core.store.db;
 
+import io.seata.common.loader.Scope;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -49,7 +50,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABL
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
+@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);

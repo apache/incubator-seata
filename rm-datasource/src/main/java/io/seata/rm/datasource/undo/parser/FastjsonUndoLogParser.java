@@ -21,6 +21,7 @@ import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -29,7 +30,7 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  *
  * @author sharajava
  */
-@LoadLevel(name = FastjsonUndoLogParser.NAME)
+@LoadLevel(name = FastjsonUndoLogParser.NAME, scope = Scope.PROTOTYPE)
 public class FastjsonUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "fastjson";

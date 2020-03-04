@@ -16,13 +16,14 @@
 package io.seata.serializer.kryo;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.protocol.AbstractMessage;
 
 /**
  * @author jsbxyyx
  */
-@LoadLevel(name = "KRYO")
+@LoadLevel(name = "KRYO", scope = Scope.PROTOTYPE)
 public class KryoSerializer implements Serializer {
 
     @Override

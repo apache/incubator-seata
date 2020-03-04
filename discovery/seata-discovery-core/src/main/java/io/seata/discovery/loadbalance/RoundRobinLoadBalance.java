@@ -15,6 +15,7 @@
  */
 package io.seata.discovery.loadbalance;
 
+import io.seata.common.loader.Scope;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,7 +26,7 @@ import io.seata.common.loader.LoadLevel;
  *
  * @author slievrly
  */
-@LoadLevel(name = "RoundRobinLoadBalance", order = 1)
+@LoadLevel(name = "RoundRobinLoadBalance", order = 1, scope = Scope.PROTOTYPE)
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
 
     private final AtomicInteger sequence = new AtomicInteger();

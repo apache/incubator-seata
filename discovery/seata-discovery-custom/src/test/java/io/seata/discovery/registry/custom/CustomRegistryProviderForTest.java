@@ -16,10 +16,11 @@
 package io.seata.discovery.registry.custom;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 
-@LoadLevel(name = "forTest")
+@LoadLevel(name = "forTest", scope = Scope.PROTOTYPE)
 public class CustomRegistryProviderForTest implements RegistryProvider {
     @Override
     public RegistryService provide() {

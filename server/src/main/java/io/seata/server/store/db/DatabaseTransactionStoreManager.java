@@ -15,6 +15,7 @@
  */
 package io.seata.server.store.db;
 
+import io.seata.common.loader.Scope;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ import io.seata.server.store.TransactionStoreManager;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
+@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DatabaseTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager, Initialize {
 

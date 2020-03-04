@@ -18,6 +18,7 @@ package io.seata.serializer.seata;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
 
@@ -28,7 +29,7 @@ import java.nio.ByteBuffer;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "SEATA")
+@LoadLevel(name = "SEATA", scope = Scope.PROTOTYPE)
 public class SeataSerializer implements Serializer {
 
     @Override

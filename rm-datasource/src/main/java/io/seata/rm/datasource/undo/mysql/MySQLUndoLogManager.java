@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
+import io.seata.common.loader.Scope;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jsbxyyx
  */
-@LoadLevel(name = JdbcConstants.MYSQL)
+@LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUndoLogManager.class);

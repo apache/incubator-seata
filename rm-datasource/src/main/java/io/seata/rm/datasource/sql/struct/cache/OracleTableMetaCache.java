@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import io.seata.common.loader.Scope;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -34,7 +35,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  *
  * @author ygy
  */
-@LoadLevel(name = JdbcConstants.ORACLE)
+@LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
 public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     @Override

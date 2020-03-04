@@ -15,6 +15,7 @@
  */
 package io.seata.discovery.loadbalance;
 
+import io.seata.common.loader.Scope;
 import java.util.List;
 import java.util.Random;
 
@@ -25,7 +26,7 @@ import io.seata.common.loader.LoadLevel;
  *
  * @author yuoyao
  */
-@LoadLevel(name = "RandomLoadBalance", order = 2)
+@LoadLevel(name = "RandomLoadBalance", order = 2, scope = Scope.PROTOTYPE)
 public class RandomLoadBalance extends AbstractLoadBalance {
 
     private final Random random = new Random();

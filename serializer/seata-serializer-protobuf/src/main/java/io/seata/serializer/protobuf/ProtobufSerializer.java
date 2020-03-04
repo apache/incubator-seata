@@ -17,6 +17,7 @@ package io.seata.serializer.protobuf;
 
 import com.google.protobuf.GeneratedMessageV3;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.protobuf.convertor.PbConvertor;
 import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
@@ -30,7 +31,7 @@ import java.nio.charset.StandardCharsets;
  *
  * @author leizhiyuan
  */
-@LoadLevel(name = "PROTOBUF", order = 0)
+@LoadLevel(name = "PROTOBUF", order = 0, scope = Scope.PROTOTYPE)
 public class ProtobufSerializer implements Serializer {
 
     protected static final Charset UTF8 = StandardCharsets.UTF_8;
