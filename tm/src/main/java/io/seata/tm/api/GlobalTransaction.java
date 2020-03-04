@@ -101,5 +101,5 @@ public interface GlobalTransaction {
      * @return Status of the corresponding global transaction.
      * @see GlobalStatus
      */
-    GlobalStatus getStatusNow();
+    GlobalStatus getLocalStatus();
 }

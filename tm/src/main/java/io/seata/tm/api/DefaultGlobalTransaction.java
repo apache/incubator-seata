@@ -211,7 +211,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public GlobalStatus getStatusNow() {
+    public GlobalStatus getLocalStatus() {
         return status;
     }
 
