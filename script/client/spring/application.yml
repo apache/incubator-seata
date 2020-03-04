@@ -76,7 +76,6 @@ seata:
     etcd3:
       serverAddr: http://localhost:2379
     eureka:
-      application: default
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
@@ -89,7 +88,6 @@ seata:
       timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
-      application: default
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
