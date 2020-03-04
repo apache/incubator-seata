@@ -15,34 +15,30 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The type Insert executor.
@@ -266,37 +262,33 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         sequence   X        X         X         X
         -----------------------------------------------
         */
-        Map<String, Integer> map = new HashMap<>();
-        map.put("n", 0);
-        map.put("v", 0);
-        map.put("m", 0);
-        map.put("s", 0);
+        int n = 0, v = 0, m = 0, s = 0;
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
-                map.put("n", map.get("n") + 1);
+                n++;
                 continue;
             }
             if (pkValue instanceof SqlMethodExpr) {
-                map.put("m", map.get("m") + 1);
+                m++;
                 break;
             }
             if (pkValue instanceof SqlSequenceExpr) {
-                map.put("s", map.get("s") + 1);
+                s++;
                 continue;
             }
-            map.put("v", map.get("v") + 1);
+            v++;
         }
         // not support sql primary key is function.
-        if (map.get("m") > 0) {
+        if (m > 0) {
             return false;
         }
-        if (map.get("n") > 0 && map.get("v") == 0 && map.get("s") == 0) {
+        if (n > 0 && v == 0 && s == 0) {
             return true;
         }
-        if (map.get("n") == 0 && map.get("v") > 0 && map.get("s") == 0) {
+        if (n == 0 && v > 0 && s == 0) {
             return true;
         }
-        if (map.get("n") == 0 && map.get("v") == 0 && map.get("s") == 1) {
+        if (n == 0 && v == 0 && s == 1) {
             return true;
         }
         return false;
