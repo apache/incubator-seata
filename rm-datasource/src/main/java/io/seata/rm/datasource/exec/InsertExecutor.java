@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -175,10 +176,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
-        // pk auto generated while single insert primary key is expression
-        else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValues = getPkValuesByAuto();
-        }
         // pk auto generated while column exists and value is null
         else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
@@ -251,29 +248,58 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * check pk values
      * @param pkValues
-     * @return true support false not support
+     * @return true: support. false: not support.
      */
-    private boolean checkPkValues(List<Object> pkValues) {
-        boolean pkParameterHasNull = false;
-        boolean pkParameterHasNotNull = false;
-        boolean pkParameterHasExpr = false;
-        if (pkValues.size() == 1) {
-            return true;
-        }
+    protected boolean checkPkValues(List<Object> pkValues) {
+        /*
+        -----------------------------------------------
+                  one    more
+        null       O      O
+        value      O      O
+        method     X      X
+        sequence   O      X
+        -----------------------------------------------
+                  null    value    method    sequence
+        null       O        X         X         X
+        value      X        O         X         X
+        method     X        X         X         X
+        sequence   X        X         X         X
+        -----------------------------------------------
+        */
+        Map<String, Integer> map = new HashMap<>();
+        map.put("n", 0);
+        map.put("v", 0);
+        map.put("m", 0);
+        map.put("s", 0);
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
-                pkParameterHasNull = true;
+                map.put("n", map.get("n") + 1);
                 continue;
             }
-            pkParameterHasNotNull = true;
             if (pkValue instanceof SqlMethodExpr) {
-                pkParameterHasExpr = true;
+                map.put("m", map.get("m") + 1);
+                break;
             }
+            if (pkValue instanceof SqlSequenceExpr) {
+                map.put("s", map.get("s") + 1);
+                continue;
+            }
+            map.put("v", map.get("v") + 1);
         }
-        if (pkParameterHasExpr) {
+        // not support sql primary key is function.
+        if (map.get("m") > 0) {
             return false;
         }
-        return !pkParameterHasNull || !pkParameterHasNotNull;
+        if (map.get("n") > 0 && map.get("v") == 0 && map.get("s") == 0) {
+            return true;
+        }
+        if (map.get("n") == 0 && map.get("v") > 0 && map.get("s") == 0) {
+            return true;
+        }
+        if (map.get("n") == 0 && map.get("v") == 0 && map.get("s") == 1) {
+            return true;
+        }
+        return false;
     }
 
     /**
