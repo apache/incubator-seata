@@ -32,6 +32,7 @@ import com.typesafe.config.ConfigFactory;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigFuture.ConfigOperation;
+import io.seata.config.file.FileConfig;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
-    private Config fileConfig;
+    private FileConfig fileConfig;
 
     private ExecutorService configOperateExecutor;
 
@@ -105,8 +106,7 @@ public class FileConfiguration extends AbstractConfiguration {
             File targetFile = new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length()));
             if (targetFile.exists()) {
                 targetFilePath = targetFile.getPath();
-                Config appConfig = ConfigFactory.parseFileAnySyntax(targetFile);
-                fileConfig = ConfigFactory.load(appConfig);
+                fileConfig = FileConfigFactory.load(targetFile);
             } else {
                 targetFilePath = null;
             }
@@ -114,7 +114,7 @@ public class FileConfiguration extends AbstractConfiguration {
             URL resource = this.getClass().getClassLoader().getResource(name);
             if (null != resource) {
                 targetFilePath = resource.getPath();
-                fileConfig = ConfigFactory.load(name);
+                fileConfig = FileConfigFactory.load(name);
 
             } else {
                 targetFilePath = null;
@@ -125,7 +125,7 @@ public class FileConfiguration extends AbstractConfiguration {
          * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
          */
         if (null == targetFilePath) {
-            fileConfig = ConfigFactory.load();
+            fileConfig = FileConfigFactory.load();
             this.allowDynamicRefresh = false;
         } else {
             targetFileLastModified = new File(targetFilePath).lastModified();
@@ -235,12 +235,11 @@ public class FileConfiguration extends AbstractConfiguration {
                     if (allowDynamicRefresh) {
                         long tempLastModified = new File(targetFilePath).lastModified();
                         if (tempLastModified > targetFileLastModified) {
-                            Config tempConfig;
+                            FileConfig tempConfig;
                             if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-                                Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
-                                tempConfig = ConfigFactory.load(appConfig);
+                                tempConfig = FileConfigFactory.load(new File(targetFilePath));
                             } else {
-                                tempConfig = ConfigFactory.load(name);
+                                tempConfig = FileConfigFactory.load(name);
                             }
                             if (null != tempConfig) {
                                 fileConfig = tempConfig;

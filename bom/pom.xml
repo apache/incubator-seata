@@ -108,7 +108,7 @@
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.19</commons-compress.version>
         <ant.version>1.10.6</ant.version>
-
+        <snakeyaml.version>1.26</snakeyaml.version>
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -167,6 +167,11 @@
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
                 <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -243,8 +248,8 @@
                 <version>${apache-zookeeper.version}</version>
                 <exclusions>
                     <exclusion>
-                            <artifactId>io.netty</artifactId>
-                            <groupId>netty</groupId>
+                        <artifactId>io.netty</artifactId>
+                        <groupId>netty</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>

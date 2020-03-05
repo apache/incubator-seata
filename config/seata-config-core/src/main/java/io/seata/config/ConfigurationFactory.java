@@ -33,7 +33,6 @@ public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
 
     private static final String REGISTRY_CONF_PREFIX = "registry";
-    private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     public static final String ENV_PROPERTY_KEY = "seataEnv";
 
@@ -55,14 +54,14 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
-            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
+        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName,
+                false) : new FileConfiguration(seataConfigName + "-" + envValue, false);
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load extConfiguration:{}",
-                    extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+                        extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
             }
         } catch (Exception e) {
             LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
@@ -96,8 +95,8 @@ public final class ConfigurationFactory {
         String configTypeName = null;
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                    + ConfigurationKeys.FILE_ROOT_TYPE);
+                    ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                            + ConfigurationKeys.FILE_ROOT_TYPE);
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
@@ -111,7 +110,7 @@ public final class ConfigurationFactory {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load extConfiguration:{}",
-                        extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+                            extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
                 }
             } catch (Exception e) {
                 LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
@@ -120,7 +119,7 @@ public final class ConfigurationFactory {
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
-                .provide();
+                    .provide();
         }
     }
 }
