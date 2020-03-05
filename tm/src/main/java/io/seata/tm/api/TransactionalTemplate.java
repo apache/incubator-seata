@@ -52,24 +52,36 @@ public class TransactionalTemplate {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
         Propagation propagation = txInfo.getPropagation();
-        String previousXid = null;
+        String suspendedXid = null;
+        String currentXid = RootContext.getXID();
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
-                    previousXid = RootContext.unbind();
+                    suspendedXid = suspend();
                     return business.execute();
                 case REQUIRES_NEW:
-                    previousXid = RootContext.unbind();
+                    suspendedXid = suspend();
                     break;
                 case SUPPORTS:
-                    if (StringUtils.isEmpty(RootContext.getXID())) {
+                    if (!existingTransaction()) {
                         return business.execute();
                     }
                     break;
                 case REQUIRED:
                     break;
+                case NEVER:
+                    if (existingTransaction()){
+                        throw new IllegalArgumentException("Existing transaction found for transaction marked with propagation 'never'");
+                    }else {
+                        return business.execute();
+                    }
+                case MANDATORY:
+                    if(!existingTransaction()){
+                        throw new IllegalArgumentException("No existing transaction found for transaction marked with propagation 'mandatory'");
+                    }
+                    break;
                 default:
-                    throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
+                    throw new IllegalArgumentException("Not Supported Propagation:" + propagation);
             }
 
             // 1.1 get or create a transaction
@@ -103,11 +115,41 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            if (previousXid != null) {
-                RootContext.bind(previousXid);
-            }
+            resume(suspendedXid);
         }
 
+    }
+
+    private boolean existingTransaction(){
+        return StringUtils.isEmpty(RootContext.getXID()) ? false : true;
+
+    }
+    /**
+     * Suspend the current transaction
+     * @return the transaction xid has suspended
+     */
+    private String suspend(){
+        String xid = RootContext.getXID();
+        if(!StringUtils.isEmpty(xid)){
+            xid = RootContext.unbind();
+        }
+        if(LOGGER.isDebugEnabled()){
+            LOGGER.debug("Suspending current transaction,xid = {}",xid);
+        }
+        return xid;
+    }
+
+    /**
+     * Resume the given transaction
+     * @param suspendedXid the transaction xid to resume
+     */
+    private void resume(String suspendedXid){
+        if (!StringUtils.isEmpty(suspendedXid)){
+            RootContext.bind(suspendedXid);
+            if(LOGGER.isDebugEnabled()){
+                LOGGER.debug("Resumimg the transaction,xid = {}",suspendedXid);
+            }
+        }
     }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
