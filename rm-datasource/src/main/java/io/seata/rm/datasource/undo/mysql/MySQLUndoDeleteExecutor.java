@@ -68,9 +68,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        Field pkField = row.primaryKeys().get(0);
-        // PK is at last one.
-        fields.add(pkField);
+        fields.addAll(getOrderedPkList(beforeImage,row));
 
         String insertColumns = fields.stream()
             .map(field -> keywordChecker.checkAndReplace(field.getName()))

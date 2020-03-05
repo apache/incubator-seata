@@ -26,6 +26,7 @@ import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -36,9 +37,9 @@ import java.util.stream.Collectors;
 public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
 
     /**
-     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk = ?
+     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 in (?) pk2 in (?)
      */
-    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
+    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s ";
 
     /**
      * Undo Update.
@@ -51,16 +52,21 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
-            throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
+            throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = beforeImageRows.get(0);
-        Field pkField = row.primaryKeys().get(0);
+
         List<Field> nonPkFields = row.nonPrimaryKeys();
         String updateColumns = nonPkFields.stream()
             .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
             .collect(Collectors.joining(", "));
+
+        List<String> pkNameList=getOrderedPkList(beforeImage,row).stream().map(e->e.getName()).collect(Collectors.toList());
+        Map<String,List<Field>> pkRowValues=parsePkValues(beforeImageRows,pkNameList);
+        String whereSql=buildWhereConditionByPKs(pkNameList,pkRowValues);
+
         return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
+                             updateColumns, whereSql);
     }
 
     /**

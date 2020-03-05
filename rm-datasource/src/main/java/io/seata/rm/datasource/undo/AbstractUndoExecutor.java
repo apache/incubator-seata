@@ -114,20 +114,18 @@ public abstract class AbstractUndoExecutor {
 
             PreparedStatement undoPST = conn.prepareStatement(undoSQL);
 
-            TableRecords undoRows = getUndoRows();
+            TableRecords undoRecords = getUndoRows();
 
-            for (Row undoRow : undoRows.getRows()) {
+            for (Row undoRow : undoRecords.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                Field pkValue = null;
+                List<Field> pkValueList =  getOrderedPkList(undoRecords,undoRow);
                 for (Field field : undoRow.getFields()) {
-                    if (field.getKeyType() == KeyType.PrimaryKey) {
-                        pkValue = field;
-                    } else {
+                    if (field.getKeyType() != KeyType.PrimaryKey) {
                         undoValues.add(field);
                     }
                 }
 
-                undoPrepare(undoPST, undoValues, pkValue);
+                undoPrepare(undoPST, undoValues, pkValueList);
 
                 undoPST.executeUpdate();
             }
@@ -148,10 +146,10 @@ public abstract class AbstractUndoExecutor {
      *
      * @param undoPST    the undo pst
      * @param undoValues the undo values
-     * @param pkValue    the pk value
+     * @param pkValueList    the pk value
      * @throws SQLException the sql exception
      */
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
         throws SQLException {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
@@ -176,12 +174,16 @@ public abstract class AbstractUndoExecutor {
                 undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
             }
         }
-        // PK is at last one.
-        // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-        // UPDATE a SET x=?, y=?, z=? WHERE pk = ?
-        // DELETE FROM a WHERE pk = ?
-        undoIndex++;
-        undoPST.setObject(undoIndex, pkValue.getValue(), pkValue.getType());
+        // PK is always at last.
+        // INSERT INTO a (x, y, z, pk1,pk2) VALUES (?, ?, ?, ? ,?)
+        // UPDATE a SET x=?, y=?, z=? WHERE pk1 in (?) and pk2 in (?)
+        // DELETE FROM a WHERE pk1 in (?) and pk2 in (?)
+        for(Field pkField:pkValueList)
+        {
+            undoIndex++;
+            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+        }
+
     }
 
     /**
@@ -296,8 +298,23 @@ public abstract class AbstractUndoExecutor {
         return currentRecords;
     }
 
+    protected List<Field> getOrderedPkList(TableRecords image,Row row){
+        List<Field> pkFields = new ArrayList<>();
+        // To ensure the order of the pk, we the order should based on getPrimaryKeyOnlyName.
+        List<String> pkColumnNameListByOrder = image.getTableMeta().getPrimaryKeyOnlyName();
+        List<String> pkColumnNameListNoOrder = row.primaryKeys().stream().map(e->e.getName()).collect(Collectors.toList());
+        pkColumnNameListByOrder.forEach(pkName->{
+            int pkIndex=pkColumnNameListNoOrder.indexOf(pkName);
+            if(pkIndex!=-1)
+            {
+                // add PK to the last of the list.
+                pkFields.add(row.primaryKeys().get(pkIndex));
+            }
+        });
+        return pkFields;
+    }
     /**
-     * each pk is a condition.the result will like :" where id in (?,?,?) and userCode in (?,?,?)"
+     * each pk is a condition.the result will like :" id in (?,?,?) and userCode in (?,?,?)"
      * @param pkNameList
      * @param pkRowValues  the kye of map is pk name ,and value of map is pk's value
      * @return
@@ -336,11 +353,20 @@ public abstract class AbstractUndoExecutor {
      * @return List<List<Field>>   each element represents a row. And inside a row list contains pk columns(Field).
      */
     protected Map<String,List<Field>> parsePkValues(TableRecords records) {
-        List<String> pkNameList = records.getTableMeta().getPrimaryKeyOnlyName();
-        List<Row> undoRows = records.getRows();
+        return parsePkValues(records.getRows(),records.getTableMeta().getPrimaryKeyOnlyName());
+    }
+
+    /**
+     * Parse pk values Field List.
+     *
+     * @param rows  pk rows
+     * @param pkNameList  pk column name
+     * @return List<List<Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     */
+    protected Map<String,List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
         List<Field> pkFieldList = new ArrayList<>();
-        for (int i = 0; i < undoRows.size(); i++) {
-            List<Field> fields = undoRows.get(i).getFields();
+        for (int i = 0; i < rows.size(); i++) {
+            List<Field> fields = rows.get(i).getFields();
             if (fields != null) {
                 for (Field field : fields) {
                     if (pkNameList.stream().anyMatch(e->field.getName().equals(e))) {

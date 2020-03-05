@@ -74,9 +74,6 @@ public class Row {
                 pkFields.add(field);
             }
         }
-        if (pkFields.size() > 1) {
-            throw new NotSupportYetException("Multi-PK");
-        }
         return pkFields;
     }
 

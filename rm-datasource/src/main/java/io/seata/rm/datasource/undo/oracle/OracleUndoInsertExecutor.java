@@ -54,9 +54,14 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
-        throws SQLException {
-        undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
+            throws SQLException {
+        int undoIndex=0;
+        for(Field pkField:pkValueList)
+        {
+            undoIndex++;
+            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+        }
     }
 
     /**
