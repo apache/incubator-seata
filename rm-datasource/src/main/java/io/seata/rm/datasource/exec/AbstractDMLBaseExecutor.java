@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.Connection;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
