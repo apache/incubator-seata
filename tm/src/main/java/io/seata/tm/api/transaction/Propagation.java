@@ -49,7 +49,7 @@ public enum Propagation {
     /**
      * The MANDATORY
      */
-    MANDATORY,
+    MANDATORY
 
     /**
      * The NESTED
