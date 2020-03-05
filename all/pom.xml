@@ -264,6 +264,21 @@
             <artifactId>seata-compressor-gzip</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-7z</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-bzip2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-zip</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- saga -->
         <dependency>
@@ -646,6 +661,9 @@
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
                                     <include>io.seata:seata-compressor-gzip</include>
+                                    <include>io.seata:seata-compressor-7z</include>
+                                    <include>io.seata:seata-compressor-bzip2</include>
+                                    <include>io.seata:seata-compressor-zip</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
