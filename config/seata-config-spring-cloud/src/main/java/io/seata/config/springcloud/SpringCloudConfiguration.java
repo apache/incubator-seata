@@ -78,7 +78,7 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        LOGGER.error("dynamic listening is not supported spring cloud config");
+        LOGGER.warn("dynamic listening is not supported spring cloud config");
     }
 
     @Override
