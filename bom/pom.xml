@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -29,9 +29,6 @@
     <description>Seata bom</description>
 
     <url>http://seata.io</url>
-    <prerequisites>
-        <maven>3.6.0</maven>
-    </prerequisites>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -108,6 +105,9 @@
         <jackson.version>2.9.9</jackson.version>
         <jcommander.version>1.72</jcommander.version>
         <annotation.api.version>1.2</annotation.api.version>
+        <xz.version>1.8</xz.version>
+        <commons-compress.version>1.19</commons-compress.version>
+        <ant.version>1.10.6</ant.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -470,6 +470,21 @@
                 <version>${annotation.api.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>org.tukaani</groupId>
+                <artifactId>xz</artifactId>
+                <version>${xz.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>${ant.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -520,6 +535,26 @@
                                 </goals>
                                 <configuration>
                                     <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.0.0-M3</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-maven</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireMavenVersion>
+                                            <version>[3.6.0,)</version>
+                                        </requireMavenVersion>
+                                    </rules>
                                 </configuration>
                             </execution>
                         </executions>
