@@ -51,9 +51,5 @@ public enum Propagation {
      */
     MANDATORY
 
-    /**
-     * The NESTED
-     */
-//    NESTED
 }
 

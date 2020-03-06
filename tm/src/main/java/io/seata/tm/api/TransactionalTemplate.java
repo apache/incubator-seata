@@ -53,7 +53,6 @@ public class TransactionalTemplate {
         }
         Propagation propagation = txInfo.getPropagation();
         String suspendedXid = null;
-        String currentXid = RootContext.getXID();
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
@@ -70,13 +69,13 @@ public class TransactionalTemplate {
                 case REQUIRED:
                     break;
                 case NEVER:
-                    if (existingTransaction()){
+                    if (existingTransaction()) {
                         throw new IllegalArgumentException("Existing transaction found for transaction marked with propagation 'never'");
-                    }else {
+                    } else {
                         return business.execute();
                     }
                 case MANDATORY:
-                    if(!existingTransaction()){
+                    if (!existingTransaction()) {
                         throw new IllegalArgumentException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
                     break;
@@ -120,7 +119,7 @@ public class TransactionalTemplate {
 
     }
 
-    private boolean existingTransaction(){
+    private boolean existingTransaction() {
         return StringUtils.isEmpty(RootContext.getXID()) ? false : true;
 
     }
@@ -128,12 +127,12 @@ public class TransactionalTemplate {
      * Suspend the current transaction
      * @return the transaction xid has suspended
      */
-    private String suspend(){
+    private String suspend() {
         String xid = RootContext.getXID();
-        if(!StringUtils.isEmpty(xid)){
+        if (!StringUtils.isEmpty(xid)) {
             xid = RootContext.unbind();
         }
-        if(LOGGER.isDebugEnabled()){
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Suspending current transaction,xid = {}",xid);
         }
         return xid;
@@ -143,10 +142,10 @@ public class TransactionalTemplate {
      * Resume the given transaction
      * @param suspendedXid the transaction xid to resume
      */
-    private void resume(String suspendedXid){
-        if (!StringUtils.isEmpty(suspendedXid)){
+    private void resume(String suspendedXid) {
+        if (!StringUtils.isEmpty(suspendedXid)) {
             RootContext.bind(suspendedXid);
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Resumimg the transaction,xid = {}",suspendedXid);
             }
         }
