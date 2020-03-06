@@ -46,7 +46,7 @@ public final class ConfigurationFactory {
         load();
     }
 
-    protected static void load() {
+    private static void load() {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         if (null == seataConfigName) {
             seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
@@ -125,5 +125,11 @@ public final class ConfigurationFactory {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
                     .provide();
         }
+    }
+
+    protected static void reload(){
+        load();
+        instance = null;
+        getInstance();
     }
 }
