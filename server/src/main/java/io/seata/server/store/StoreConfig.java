@@ -45,18 +45,18 @@ public class StoreConfig {
     private static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
     public static int getMaxBranchSessionSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "fileWriteBufferCacheSize", DEFAULT_MAX_BRANCH_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
     }
 
     public static int getMaxGlobalSessionSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "maxGlobalSessionSize", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-global-session-size", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
     }
 
     public static int getFileWriteBufferCacheSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "fileWriteBufferCacheSize", DEFAULT_WRITE_BUFFER_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
     }
 
     public static FlushDiskMode getFlushDiskMode() {
-        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
+        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flush-disk-mode"));
     }
 }
