@@ -82,7 +82,9 @@ public @interface GlobalTransactional {
      */
     boolean demotion() default false;
 
+    /**
      * the propagation of the global transaction
+     * 
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;
