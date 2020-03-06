@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
  */
 class FileConfigurationTest {
 
-    private Configuration fileConfig = ConfigurationFactory.getInstance();
+
 
     @BeforeEach
     void setUp() {
@@ -40,6 +40,7 @@ class FileConfigurationTest {
 
     @Test
     void addConfigListener() throws InterruptedException {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
         fileConfig.addConfigListener("service.disableGlobalTransaction", (event) -> {

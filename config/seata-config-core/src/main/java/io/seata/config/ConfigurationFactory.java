@@ -32,7 +32,7 @@ public final class ConfigurationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
 
-    private static final String REGISTRY_CONF_PREFIX = "registry";
+    private static final String REGISTRY_CONF_DEFAULT = "registry";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     public static final String ENV_PROPERTY_KEY = "seataEnv";
 
@@ -40,15 +40,19 @@ public final class ConfigurationFactory {
 
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
-    public static final Configuration CURRENT_FILE_INSTANCE;
+    public static Configuration CURRENT_FILE_INSTANCE;
 
     static {
+        load();
+    }
+
+    protected static void load() {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         if (null == seataConfigName) {
             seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
         }
         if (null == seataConfigName) {
-            seataConfigName = REGISTRY_CONF_PREFIX;
+            seataConfigName = REGISTRY_CONF_DEFAULT;
         }
         String envValue = System.getProperty(ENV_PROPERTY_KEY);
         if (null == envValue) {
