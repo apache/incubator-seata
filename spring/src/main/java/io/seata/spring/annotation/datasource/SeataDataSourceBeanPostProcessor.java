@@ -140,7 +140,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
             field = proxyTargetObject.getClass().getDeclaredField("CGLIB$CALLBACK_0");
         } else if (Proxy.isProxyClass(proxyTargetObject.getClass())) {
             //JDK Proxy
-            field = proxyTargetObject.getClass().getDeclaredField("h");
+            field = proxyTargetObject.getClass().getSuperclass().getDeclaredField("h");
         }
         return doCheckAutoProxy(field, proxyTargetObject);
     }
@@ -157,15 +157,24 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
         if (null == field) {
             return false;
         }
-        field.setAccessible(true);
-        Object fieldObject = field.get(proxiedObject);
+        Object fieldObject;
+        boolean fieldAccessible = field.isAccessible();
+        try {
+            field.setAccessible(true);
+            fieldObject = field.get(proxiedObject);
+        } finally {
+            field.setAccessible(fieldAccessible);
+        }
         return Stream.of(fieldObject.getClass().getDeclaredFields()).anyMatch(f -> {
+            boolean accessible = f.isAccessible();
             f.setAccessible(true);
             Object targetObject;
             try {
                 targetObject = f.get(fieldObject);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
+            } finally {
+                f.setAccessible(accessible);
             }
             return targetObject instanceof DataSourceProxy;
         });
