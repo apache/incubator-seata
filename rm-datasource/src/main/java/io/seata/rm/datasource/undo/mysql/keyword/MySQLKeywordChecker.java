@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -30,14 +29,9 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
-public class MySQLKeywordChecker implements KeywordChecker, Initialize {
+public class MySQLKeywordChecker implements KeywordChecker {
 
-    private Set<String> keywordSet;
-
-    @Override
-    public void init() {
-        keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
-    }
+    private Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
 
     /**
      * MySQL keyword
