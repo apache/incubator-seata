@@ -70,8 +70,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
     @Override
     public void onRollbackRetrying(GlobalTransaction tx, Throwable cause) {
-        StackTraceLogger.info(LOGGER, cause, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()}, null,
-            null);
+        StackTraceLogger.warn(LOGGER, cause, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()});
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
             TimeUnit.SECONDS);
     }
