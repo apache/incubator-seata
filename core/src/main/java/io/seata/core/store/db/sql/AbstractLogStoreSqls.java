@@ -16,6 +16,9 @@
 package io.seata.core.store.db.sql;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 
 
@@ -24,6 +27,12 @@ import io.seata.core.constants.ServerTableColumnsName;
  * @author will
  */
 public abstract class AbstractLogStoreSqls implements LogStoreSqls {
+
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * The constant GLOBAL_TABLE_PLACEHOLD.
      */
@@ -123,78 +132,77 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     @Override
-    public String getInsertGlobalTransactionSQL(String globalTable, String dbType) {
-        throw new NotSupportYetException("unknown dbType:" + dbType);
+    public String getInsertGlobalTransactionSQL(String globalTable) {
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override
-    public String getUpdateGlobalTransactionStatusSQL(String globalTable, String dbType) {
-        throw new NotSupportYetException("unknown dbType:" + dbType);
+    public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override
-    public String getDeleteGlobalTransactionSQL(String globalTable, String dbType) {
+    public String getDeleteGlobalTransactionSQL(String globalTable) {
         return DELETE_GLOBAL_TRANSACTION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
-    public String getQueryGlobalTransactionSQL(String globalTable, String dbType) {
+    public String getQueryGlobalTransactionSQL(String globalTable) {
         return QUERY_GLOBAL_TRANSACTION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByTransactionId(String globalTable, String dbType) {
+    public String getQueryGlobalTransactionSQLByTransactionId(String globalTable) {
         return QUERY_GLOBAL_TRANSACTION_BY_ID.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String dbType, String paramsPlaceHolder) {
-        throw new NotSupportYetException("unknown dbType:" + dbType);
+    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override
-    public String getQueryGlobalTransactionForRecoverySQL(String globalTable, String dbType) {
-        throw new NotSupportYetException("unknown dbType:" + dbType);
+    public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override
-    public String getInsertBranchTransactionSQL(String branchTable, String dbType) {
-        throw new NotSupportYetException("unknown dbType:" + dbType);
+    public String getInsertBranchTransactionSQL(String branchTable) {
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override
-    public String getUpdateBranchTransactionStatusSQL(String branchTable, String dbType) {
-        throw new NotSupportYetException("unknown dbType:" + dbType);
+    public String getUpdateBranchTransactionStatusSQL(String branchTable) {
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
 
     @Override
-    public String getDeleteBranchTransactionByBranchIdSQL(String branchTable, String dbType) {
+    public String getDeleteBranchTransactionByBranchIdSQL(String branchTable) {
         return DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 
     @Override
-    public String getDeleteBranchTransactionByXId(String branchTable, String dbType) {
+    public String getDeleteBranchTransactionByXId(String branchTable) {
         return DELETE_BRANCH_TRANSACTION_BY_XID.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 
     @Override
-    public String getQueryBranchTransaction(String branchTable, String dbType) {
+    public String getQueryBranchTransaction(String branchTable) {
         return QUERY_BRANCH_TRANSACTION.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 
     @Override
-    public String getQueryBranchTransaction(String branchTable, String dbType,
-                                                   String paramsPlaceHolder) {
+    public String getQueryBranchTransaction(String branchTable, String paramsPlaceHolder) {
         return QUERY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
-    public String getQueryGlobalMax(String globalTable, String dbType) {
+    public String getQueryGlobalMax(String globalTable) {
         return QUERY_MAX_TRANS_ID.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
-    public String getQueryBranchMax(String branchTable, String dbType) {
+    public String getQueryBranchMax(String branchTable) {
         return QUERY_MAX_BTANCH_ID.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

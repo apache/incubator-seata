@@ -25,138 +25,121 @@ public interface LogStoreSqls {
      * Get insert global transaction sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the string
      */
-    String getInsertGlobalTransactionSQL(String globalTable, String dbType);
+    String getInsertGlobalTransactionSQL(String globalTable);
 
     /**
      * Get update global transaction status sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the string
      */
-    String getUpdateGlobalTransactionStatusSQL(String globalTable, String dbType);
+    String getUpdateGlobalTransactionStatusSQL(String globalTable);
 
     /**
      * Get delete global transaction sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the string
      */
-    String getDeleteGlobalTransactionSQL(String globalTable, String dbType);
+    String getDeleteGlobalTransactionSQL(String globalTable);
 
     /**
      * Get query global transaction sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the string
      */
-    String getQueryGlobalTransactionSQL(String globalTable, String dbType);
+    String getQueryGlobalTransactionSQL(String globalTable);
 
     /**
      * Get query global transaction sql by transaction id string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the string
      */
-    String getQueryGlobalTransactionSQLByTransactionId(String globalTable, String dbType);
+    String getQueryGlobalTransactionSQLByTransactionId(String globalTable);
 
     /**
      * Get query global transaction sql by status string.
      *
      * @param globalTable       the global table
-     * @param dbType            the db type
      * @param paramsPlaceHolder the params place holder
      * @return the string
      */
-    String getQueryGlobalTransactionSQLByStatus(String globalTable, String dbType,
-                                                              String paramsPlaceHolder);
+    String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
 
     /**
      * Get query global transaction for recovery sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the string
      */
-    String getQueryGlobalTransactionForRecoverySQL(String globalTable, String dbType);
+    String getQueryGlobalTransactionForRecoverySQL(String globalTable);
 
     /**
      * Get insert branch transaction sql string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @return the string
      */
-    String getInsertBranchTransactionSQL(String branchTable, String dbType);
+    String getInsertBranchTransactionSQL(String branchTable);
 
     /**
      * Get update branch transaction status sql string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @return the string
      */
-    String getUpdateBranchTransactionStatusSQL(String branchTable, String dbType);
+    String getUpdateBranchTransactionStatusSQL(String branchTable);
 
     /**
      * Get delete branch transaction by branch id sql string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @return the string
      */
-    String getDeleteBranchTransactionByBranchIdSQL(String branchTable, String dbType);
+    String getDeleteBranchTransactionByBranchIdSQL(String branchTable);
 
     /**
      * Get delete branch transaction by x id string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @return the string
      */
-    String getDeleteBranchTransactionByXId(String branchTable, String dbType);
+    String getDeleteBranchTransactionByXId(String branchTable);
 
     /**
      * Get query branch transaction string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @return the string
      */
-    String getQueryBranchTransaction(String branchTable, String dbType);
+    String getQueryBranchTransaction(String branchTable);
 
     /**
      * Get query branch transaction string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @param paramsPlaceHolder the params place holder
      * @return the string
      */
-    String getQueryBranchTransaction(String branchTable, String dbType,
-                                                   String paramsPlaceHolder);
+    String getQueryBranchTransaction(String branchTable, String paramsPlaceHolder);
 
     /**
      * Gets query global max.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
      * @return the query global max
      */
-    String getQueryGlobalMax(String globalTable, String dbType);
+    String getQueryGlobalMax(String globalTable);
 
     /**
      * Gets query branch max.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
      * @return the query branch max
      */
-    String getQueryBranchMax(String branchTable, String dbType);
+    String getQueryBranchMax(String branchTable);
 }

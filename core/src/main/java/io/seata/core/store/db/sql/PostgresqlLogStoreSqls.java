@@ -67,33 +67,33 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
             + " = now() where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     @Override
-    public String getInsertGlobalTransactionSQL(String globalTable, String dbType) {
+    public String getInsertGlobalTransactionSQL(String globalTable) {
         return INSERT_GLOBAL_TRANSACTION_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
-    public String getUpdateGlobalTransactionStatusSQL(String globalTable, String dbType) {
+    public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
         return UPDATE_GLOBAL_TRANSACTION_STATUS_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String dbType, String paramsPlaceHolder) {
+    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
                 PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     @Override
-    public String getQueryGlobalTransactionForRecoverySQL(String globalTable, String dbType) {
+    public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
         return QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
-    public String getInsertBranchTransactionSQL(String branchTable, String dbType) {
+    public String getInsertBranchTransactionSQL(String branchTable) {
         return INSERT_BRANCH_TRANSACTION_POSTGRESQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 
     @Override
-    public String getUpdateBranchTransactionStatusSQL(String branchTable, String dbType) {
+    public String getUpdateBranchTransactionStatusSQL(String branchTable) {
         return UPDATE_BRANCH_TRANSACTION_STATUS_POSTGRESQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

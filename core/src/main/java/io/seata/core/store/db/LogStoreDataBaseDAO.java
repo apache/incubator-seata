@@ -122,7 +122,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public GlobalTransactionDO queryGlobalTransactionDO(String xid) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQL(globalTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -146,7 +146,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public GlobalTransactionDO queryGlobalTransactionDO(long transactionId) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByTransactionId(globalTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -186,7 +186,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 }
             }
 
-            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, dbType, sb.toString());
+            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, sb.toString());
             ps = conn.prepareStatement(sql);
             for (int i = 0; i < statuses.length; i++) {
                 int status = statuses[i];
@@ -207,7 +207,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertGlobalTransactionSQL(globalTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertGlobalTransactionSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -236,7 +236,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusSQL(globalTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -255,7 +255,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteGlobalTransactionSQL(globalTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteGlobalTransactionSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -275,7 +275,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     @Override
     public List<BranchTransactionDO> queryBranchTransactionDO(String xid) {
         List<BranchTransactionDO> rets = new ArrayList<>();
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -305,7 +305,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
         StringJoiner sj = new StringJoiner(",");
         xids.stream().forEach(xid -> sj.add("?"));
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable, dbType, sj.toString());
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable, sj.toString());
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -330,7 +330,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertBranchTransactionSQL(brachTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertBranchTransactionSQL(brachTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -356,7 +356,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(brachTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(brachTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -376,7 +376,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteBranchTransactionByBranchIdSQL(brachTable, dbType);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteBranchTransactionByBranchIdSQL(brachTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -396,8 +396,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public long getCurrentMaxSessionId(long high, long low) {
-        String transMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalMax(globalTable, dbType);
-        String branchMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchMax(brachTable, dbType);
+        String transMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalMax(globalTable);
+        String branchMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchMax(brachTable);
         long maxTransId = getCurrentMaxSessionId(transMaxSql, high, low);
         long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
         return maxBranchId > maxTransId ? maxBranchId : maxTransId;
