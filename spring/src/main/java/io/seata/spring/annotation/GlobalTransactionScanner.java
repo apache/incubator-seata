@@ -32,7 +32,6 @@ import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
@@ -45,6 +44,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -60,9 +60,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,
     DisposableBean {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
@@ -74,7 +71,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
-    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private MethodInterceptor interceptor;
 
@@ -84,7 +80,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
-    private final FailureHandler failureHandlerHook;
+    private FailureHandler failureHandlerHook;
 
     private ApplicationContext applicationContext;
 
@@ -125,7 +121,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param mode           the mode
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
-        this(applicationId, txServiceGroup, mode, DEFAULT_FAIL_HANDLER);
+        this(applicationId, txServiceGroup, mode, null);
     }
 
     /**
@@ -287,6 +283,17 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         initClient();
 
+        setCustomFailureHandler();
+    }
+
+    private void setCustomFailureHandler() {
+        if (failureHandlerHook == null) {
+            try {
+                failureHandlerHook = applicationContext.getBean(FailureHandler.class);
+            } catch (NoSuchBeanDefinitionException ex) {
+                // ignore
+            }
+        }
     }
 
     @Override
