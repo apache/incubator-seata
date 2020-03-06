@@ -21,11 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -50,6 +52,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
+    private static final String USER_NAME = "username";
+    private static final String PASSWORD = "password";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -191,6 +195,17 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
+        if (StringUtils.isNotBlank(System.getProperty(USER_NAME))
+            && StringUtils.isNotBlank(System.getProperty(PASSWORD))) {
+            properties.put(USER_NAME, System.getProperty(USER_NAME));
+            properties.put(PASSWORD, System.getProperty(PASSWORD));
+        } else {
+            String userName = FILE_CONFIG.getConfig(getNacosUserName());
+            if (StringUtils.isNotBlank(userName)) {
+                properties.put(USER_NAME, userName);
+                properties.put(PASSWORD, FILE_CONFIG.getConfig(getNacosPassword()));
+            }
+        }
         return properties;
     }
 
@@ -204,6 +219,16 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static String getNacosGroupKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
+    }
+
+    private static String getNacosUserName() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
+            USER_NAME);
+    }
+
+    private static String getNacosPassword() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
+            PASSWORD);
     }
 
     private static String getNacosGroup() {
