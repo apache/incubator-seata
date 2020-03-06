@@ -45,7 +45,7 @@ public class StoreConfig {
     private static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
     public static int getMaxBranchSessionSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "fileWriteBufferCacheSize", DEFAULT_MAX_BRANCH_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "maxBranchSessionSize", DEFAULT_MAX_BRANCH_SESSION_SIZE);
     }
 
     public static int getMaxGlobalSessionSize() {
