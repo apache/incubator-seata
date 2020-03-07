@@ -68,6 +68,7 @@ public class TransactionalTemplate {
                     if (StringUtils.isEmpty(RootContext.getXID())) {
                         return business.execute();
                     }
+                    previousBranchType = RootContext.unbindBranchType();
                     break;
                 case REQUIRED:
                     //AT can be nested inside the MT,need to switch branchType
