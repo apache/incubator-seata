@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.lock;
+package io.seata.core.store.db.sql.lock;
 
 import com.google.common.collect.Maps;
 import io.seata.common.loader.EnhancedServiceLoader;

@@ -29,7 +29,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
-import io.seata.core.store.db.lock.LockStoreSqlFactory;
+import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

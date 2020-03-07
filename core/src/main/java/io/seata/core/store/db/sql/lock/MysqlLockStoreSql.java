@@ -13,28 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.lock;
+package io.seata.core.store.db.sql.lock;
 
 import io.seata.common.loader.LoadLevel;
 
 /**
- * the database lock store H2 sql
+ * the database lock store mysql sql
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-@LoadLevel(name = "h2")
-public class H2LockStoreSql extends AbstractLockStoreSql {
+@LoadLevel(name = "mysql")
+public class MysqlLockStoreSql extends AbstractLockStoreSql {
 
     /**
-     * The constant INSERT_LOCK_SQL_H2.
+     * The constant INSERT_LOCK_SQL_MYSQL.
      */
-    private static final String INSERT_LOCK_SQL_H2 = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")" +
+    private static final String INSERT_LOCK_SQL_MYSQL = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")" +
         "values (?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     @Override
     public String getInsertLockSQL(String lockTable) {
-        return INSERT_LOCK_SQL_H2.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
+        return INSERT_LOCK_SQL_MYSQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
 
 }
