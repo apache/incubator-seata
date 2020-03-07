@@ -44,9 +44,9 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "protostuff";
 
-    private DefaultIdStrategy idStrategy = (DefaultIdStrategy) RuntimeEnv.ID_STRATEGY;
+    private final DefaultIdStrategy idStrategy = (DefaultIdStrategy) RuntimeEnv.ID_STRATEGY;
 
-    private Schema<BranchUndoLog> schema = RuntimeSchema.getSchema(BranchUndoLog.class, idStrategy);
+    private final Schema<BranchUndoLog> schema = RuntimeSchema.getSchema(BranchUndoLog.class, idStrategy);
 
     @Override
     public void init() {

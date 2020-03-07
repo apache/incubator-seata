@@ -61,39 +61,39 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonUndoLogParser.class);
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    private SimpleModule module = new SimpleModule();
+    private final SimpleModule module = new SimpleModule();
 
     /**
      * customize serializer for java.sql.Timestamp
      */
-    private JsonSerializer timestampSerializer = new TimestampSerializer();
+    private final JsonSerializer timestampSerializer = new TimestampSerializer();
 
     /**
      * customize deserializer for java.sql.Timestamp
      */
-    private JsonDeserializer timestampDeserializer = new TimestampDeserializer();
+    private final JsonDeserializer timestampDeserializer = new TimestampDeserializer();
 
     /**
      * customize serializer of java.sql.Blob
      */
-    private JsonSerializer blobSerializer = new BlobSerializer();
+    private final JsonSerializer blobSerializer = new BlobSerializer();
 
     /**
      * customize deserializer of java.sql.Blob
      */
-    private JsonDeserializer blobDeserializer = new BlobDeserializer();
+    private final JsonDeserializer blobDeserializer = new BlobDeserializer();
 
     /**
      * customize serializer of java.sql.Clob
      */
-    private JsonSerializer clobSerializer = new ClobSerializer();
+    private final JsonSerializer clobSerializer = new ClobSerializer();
 
     /**
      * customize deserializer of java.sql.Clob
      */
-    private JsonDeserializer clobDeserializer = new ClobDeserializer();
+    private final JsonDeserializer clobDeserializer = new ClobDeserializer();
 
     @Override
     public void init() {
