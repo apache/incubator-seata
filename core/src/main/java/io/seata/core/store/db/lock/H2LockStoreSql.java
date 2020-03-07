@@ -23,7 +23,7 @@ import io.seata.common.loader.LoadLevel;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-@LoadLevel(name = "H2")
+@LoadLevel(name = "h2")
 public class H2LockStoreSql extends AbstractLockStoreSql {
 
     /**
