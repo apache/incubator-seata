@@ -70,7 +70,7 @@ public class TransactionalTemplate {
                     }
                     break;
                 case REQUIRED:
-                    //AT can be nested inside the MT,need to change branchType
+                    //AT can be nested inside the MT,need to switch branchType
                     previousBranchType = RootContext.unbindBranchType();
                     break;
                 default:
@@ -157,7 +157,7 @@ public class TransactionalTemplate {
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getDefaultBranchType());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getBranchType());
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,

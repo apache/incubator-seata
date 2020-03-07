@@ -117,7 +117,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             TransactionInfo transactionInfo = new TransactionInfo();
             transactionInfo.setTimeOut(stateMachineConfig.getTransOperationTimeout());
             transactionInfo.setName(machineInstance.getStateMachine().getName());
-            transactionInfo.setDefaultBranchType(BranchType.AT);
+            transactionInfo.setBranchType(BranchType.SAGA);
             try {
                 GlobalTransaction globalTransaction = sagaTransactionalTemplate.beginTransaction(transactionInfo);
                 machineInstance.setId(globalTransaction.getXid());

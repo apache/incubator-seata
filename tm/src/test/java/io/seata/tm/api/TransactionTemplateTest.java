@@ -63,7 +63,7 @@ public class TransactionTemplateTest {
         TransactionInfo txInfo = new TransactionInfo();
         txInfo.setTimeOut(DEFAULT_TIME_OUT);
         txInfo.setName(DEFAULT_NAME);
-        txInfo.setDefaultBranchType(BranchType.AT);
+        txInfo.setBranchType(BranchType.AT);
         when(transactionalExecutor.getTransactionInfo()).thenReturn(txInfo);
     }
 
@@ -128,7 +128,7 @@ public class TransactionTemplateTest {
         txInfo.setTimeOut(DEFAULT_TIME_OUT);
         txInfo.setName(DEFAULT_NAME);
         txInfo.setRollbackRules(rollbackRules);
-        txInfo.setDefaultBranchType(BranchType.AT);
+        txInfo.setBranchType(BranchType.AT);
         when(transactionalExecutor.getTransactionInfo()).thenReturn(txInfo);
 
         when(transactionalExecutor.execute()).thenThrow(throwable);

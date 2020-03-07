@@ -36,7 +36,7 @@ public final class TransactionInfo implements Serializable {
 
     private Propagation propagation;
 
-    private BranchType defaultBranchType;
+    private BranchType branchType;
 
     public int getTimeOut() {
         return timeOut;
@@ -93,11 +93,11 @@ public final class TransactionInfo implements Serializable {
         this.propagation = propagation;
     }
 
-    public BranchType getDefaultBranchType() {
-        return this.defaultBranchType;
+    public BranchType getBranchType() {
+        return this.branchType;
     }
 
-    public void setDefaultBranchType(BranchType branchType) {
-        this.defaultBranchType = branchType;
+    public void setBranchType(BranchType branchType) {
+        this.branchType = branchType;
     }
 }
