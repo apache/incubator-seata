@@ -15,18 +15,6 @@
  */
 package io.seata.core.store.db;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
@@ -41,8 +29,21 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
+import io.seata.core.store.db.lock.LockStoreSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 
@@ -124,7 +125,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             boolean canLock = true;
             //query
-            String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sj.toString(), dbType);
+            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, sj.toString());
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());
@@ -218,7 +219,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 sj.add("?");
             }
             //batch release lock
-            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSql(lockTable, sj.toString(), dbType);
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSql(lockTable, sj.toString());
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, lockDOs.get(0).getXid());
             for (int i = 0; i < lockDOs.size(); i++) {
@@ -241,7 +242,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             //batch release lock by branch
-            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranch(lockTable, dbType);
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranch(lockTable);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
@@ -264,7 +265,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             StringJoiner sj = new StringJoiner(",");
             branchIds.stream().forEach(branchId -> sj.add("?"));
             //batch release lock by branch list
-            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranchs(lockTable, sj.toString(), dbType);
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranchs(lockTable, sj.toString());
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
             for (int i = 0; i < branchIds.size(); i++) {
@@ -307,7 +308,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         PreparedStatement ps = null;
         try {
             //insert
-            String insertLockSQL = LockStoreSqls.getInsertLockSQL(lockTable, dbType);
+            String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getInsertLockSQL(lockTable);
             ps = conn.prepareStatement(insertLockSQL);
             ps.setString(1, lockDO.getXid());
             ps.setLong(2, lockDO.getTransactionId());
@@ -335,7 +336,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         PreparedStatement ps = null;
         try {
             //insert
-            String insertLockSQL = LockStoreSqls.getInsertLockSQL(lockTable, dbType);
+            String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getInsertLockSQL(lockTable);
             ps = conn.prepareStatement(insertLockSQL);
             for (LockDO lockDO : lockDOs) {
                 ps.setString(1, lockDO.getXid());
@@ -374,7 +375,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
 
             //query
-            String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sj.toString(), dbType);
+            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, sj.toString());
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());
