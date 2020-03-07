@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.sql.Timestamp;
+
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Output;
@@ -29,10 +33,6 @@ import io.protostuff.runtime.RuntimeSchema;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.sql.Timestamp;
 
 /**
  * The type protostuff based undo log parser.
