@@ -83,6 +83,10 @@ public interface TransactionalExecutor {
          * Participant rollback failure
          */
         ParticipantRollbackFailure
+         * Rollback retrying code.
+         */
+        //
+        RollbackRetrying
     }
 
     /**
