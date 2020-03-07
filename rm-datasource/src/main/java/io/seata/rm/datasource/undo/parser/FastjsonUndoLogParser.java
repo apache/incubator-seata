@@ -34,7 +34,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "fastjson";
 
-    private SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+    private final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
 
     @Override
     public void init() {
