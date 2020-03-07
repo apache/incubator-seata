@@ -75,18 +75,22 @@ public interface TransactionalExecutor {
         ReportFailure,
 
         /**
+         * Rollback retrying code.
+         */
+        //
+        RollbackRetrying,
+
+        /**
          * Participant rollback done
          */
+        //
         ParticipantRollbackDone,
 
         /**
          * Participant rollback failure
          */
-        ParticipantRollbackFailure
-         * Rollback retrying code.
-         */
         //
-        RollbackRetrying
+        ParticipantRollbackFailure
     }
 
     /**

@@ -144,17 +144,14 @@ public class TransactionalTemplate {
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
-        //branch has reported rollback done
+        //check branch rollback
         if (!(ex instanceof TransactionException
                 && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantReportedRollback)) {
             tx.rollback();
         }
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, getRollbackDoneCode(tx.getRole()), getOriginalException(ex));
-        throw new TransactionalExecutor.ExecutionException(tx,
-            tx.getStatus().equals(GlobalStatus.RollbackRetrying) ? TransactionalExecutor.Code.RollbackRetrying :
-                TransactionalExecutor.Code.RollbackDone, ex);
+        throw new TransactionalExecutor.ExecutionException(tx, getRollbackCode(tx), getOriginalException(ex));
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
@@ -255,11 +252,19 @@ public class TransactionalTemplate {
         }
     }
 
-    private TransactionalExecutor.Code getRollbackDoneCode(GlobalTransactionRole role) {
-        if (role == GlobalTransactionRole.Launcher) {
-            return TransactionalExecutor.Code.RollbackDone;
+    private TransactionalExecutor.Code getRollbackCode(GlobalTransaction tx) throws TransactionException {
+        if (tx.getStatus() == GlobalStatus.RollbackRetrying) {
+            if (tx.getRole() == GlobalTransactionRole.Launcher) {
+                return TransactionalExecutor.Code.RollbackRetrying;
+            } else {
+                return TransactionalExecutor.Code.ParticipantRollbackDone;
+            }
         } else {
-            return TransactionalExecutor.Code.ParticipantRollbackDone;
+            if (tx.getRole() == GlobalTransactionRole.Launcher) {
+                return TransactionalExecutor.Code.RollbackDone;
+            } else {
+                return TransactionalExecutor.Code.ParticipantRollbackDone;
+            }
         }
     }
 
