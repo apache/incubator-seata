@@ -194,15 +194,14 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        if (StringUtils.isNotBlank(System.getProperty(USER_NAME))
-            && StringUtils.isNotBlank(System.getProperty(PASSWORD))) {
-            properties.setProperty(USER_NAME, System.getProperty(USER_NAME));
-            properties.setProperty(PASSWORD, System.getProperty(PASSWORD));
-        } else {
-            String userName = FILE_CONFIG.getConfig(getNacosUserName());
-            if (StringUtils.isNotBlank(userName)) {
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
+            : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
+                : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
-                properties.setProperty(PASSWORD, FILE_CONFIG.getConfig(getNacosPassword()));
+                properties.setProperty(PASSWORD, password);
             }
         }
         return properties;
