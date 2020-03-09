@@ -130,21 +130,30 @@ public class FileConfiguration extends AbstractConfiguration {
         String filePath = null;
         if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
             filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-        } else {
-            URL resource = this.getClass().getClassLoader().getResource("");
-            filePath = resource.getPath() + name;
-        }
-        File targetFile = new File(filePath);
-        if (!targetFile.exists()) {
-            LOGGER.info("suffixSet {}", FileConfigFactory.getSuffixSet().toString());
-            for (String s : FileConfigFactory.getSuffixSet()) {
-                targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                LOGGER.info("suffixSet -s {}", s);
-                if (targetFile.exists()) {
-                    return targetFile;
+            File targetFile = new File(filePath);
+            if (!targetFile.exists()) {
+                for (String s : FileConfigFactory.getSuffixSet()) {
+                    targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                    if (targetFile.exists()) {
+                        return targetFile;
+                    }
                 }
             }
+        } else {
+            URL resource = this.getClass().getClassLoader().getResource(name);
+            if (resource == null) {
+                for (String s : FileConfigFactory.getSuffixSet()) {
+                    resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                    if (resource != null) {
+                        return new File(resource.getPath());
+                    }
+
+                }
+            } else {
+                return new File(resource.getPath());
+            }
         }
+
         return null;
     }
 
