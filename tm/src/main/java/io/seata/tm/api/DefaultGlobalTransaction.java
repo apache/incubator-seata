@@ -138,7 +138,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void commit() throws TransactionException {
-        if(Propagation.NOT_SUPPORTED.equals(this.propagation)){
+        if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
             return;
         }
         if (role == GlobalTransactionRole.Participant) {
@@ -176,7 +176,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void rollback() throws TransactionException {
-        if(Propagation.NOT_SUPPORTED.equals(this.propagation)){
+        if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
             return;
         }
         if (role == GlobalTransactionRole.Participant) {
