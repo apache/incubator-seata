@@ -13,27 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.compressor.bzip2;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_FILE_PREFIX;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * @author xingfudeshi@gmail.com
+ * the BZip2 Util test
+ *
+ * @author ph3636
  */
-@Component
-@ConfigurationProperties(prefix = REGISTRY_FILE_PREFIX)
-public class RegistryFileProperties {
-    private String name = "file.conf";
+public class BZip2UtilTest {
 
-    public String getName() {
-        return name;
+    @Test
+    public void test_compress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            BZip2Util.compress(null);
+        });
     }
 
-    public RegistryFileProperties setName(String name) {
-        this.name = name;
-        return this;
+    @Test
+    public void test_decompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            BZip2Util.decompress(null);
+        });
     }
 }

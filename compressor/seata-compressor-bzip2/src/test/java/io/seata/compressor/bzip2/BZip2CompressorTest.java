@@ -13,20 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.druid;
+package io.seata.compressor.bzip2;
 
-import com.alibaba.druid.util.JdbcUtils;
-import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.SqlParserType;
-import io.seata.sqlparser.util.DbTypeParser;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * @author ggndnn
+ * the BZip2 Compressor test
+ *
+ * @author ph3636
  */
-@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
-public class DruidDbTypeParser implements DbTypeParser {
-    @Override
-    public String parseFromJdbcUrl(String jdbcUrl) {
-        return JdbcUtils.getDbType(jdbcUrl, null);
+public class BZip2CompressorTest {
+
+    @Test
+    public void testCompressAndDecompress() {
+        BZip2Compressor compressor = new BZip2Compressor();
+        byte[] bytes = "aa".getBytes();
+        bytes = compressor.compress(bytes);
+        bytes = compressor.decompress(bytes);
+        Assertions.assertEquals(new String(bytes), "aa");
     }
 }

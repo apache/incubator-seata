@@ -1,6 +1,6 @@
 seata:
   enabled: true
-  application-id: test
+  application-id: applicationName
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
@@ -9,7 +9,7 @@ seata:
       async-commit-buffer-limit: 1000
       report-retry-count: 5
       table-meta-check-enable: false
-      report-success-enable: true
+      report-success-enable: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -24,8 +24,10 @@ seata:
     log:
       exceptionRate: 100
   service:
-    vgroup-mapping: default
-    grouplist: 127.0.0.1:8091
+    vgroup-mapping:
+      my_test_tx_group: default
+    grouplist:
+      default: 127.0.0.1:8091
     enable-degrade: false
     disable-global-transaction: false
   transport:
@@ -39,6 +41,8 @@ seata:
       client-selector-thread-prefix: NettyClientSelector
       client-selector-thread-size: 1
       client-worker-thread-prefix: NettyClientWorkerThread
+      worker-thread-size: default
+      boss-thread-size: 1
     type: TCP
     server: NIO
     heartbeat: true
@@ -47,8 +51,6 @@ seata:
     enable-client-batch-send-request: true
   config:
     type: file
-    file:
-      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
     apollo:
@@ -65,40 +67,34 @@ seata:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
+      username: ""
+      password: ""
   registry:
     type: file
-    file:
-      name: file.conf
     consul:
-      cluster: default
       server-addr: 127.0.0.1:8500
     etcd3:
-      cluster: default
       serverAddr: http://localhost:2379
     eureka:
-      application: default
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
-      cluster: default
       server-addr: localhost
       namespace:
     redis:
       server-addr: localhost:6379
       db: 0
       password:
-      cluster: default
       timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
-      application: default
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
-      cluster: default
       group: SEATA_GROUP
       addressWaitTime: 3000
     zk:
-      cluster: default
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
+      username: ""
+      password: ""

@@ -15,18 +15,6 @@
  */
 package io.seata.discovery.registry.zk;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.RegistryService;
-import org.I0Itec.zkclient.IZkChildListener;
-import org.I0Itec.zkclient.IZkStateListener;
-import org.I0Itec.zkclient.ZkClient;
-import org.apache.zookeeper.Watcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +27,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
+import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkStateListener;
+import org.I0Itec.zkclient.ZkClient;
+import org.apache.zookeeper.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
 
@@ -59,8 +60,10 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final String REGISTRY_CLUSTER = "cluster";
     private static final String REGISTRY_TYPE = "zk";
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String SESSION_TIME_OUT_KEY = "session.timeout";
-    private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
+    private static final String AUTH_USERNAME = "username";
+    private static final String AUTH_PASSWORD = "password";
+    private static final String SESSION_TIME_OUT_KEY = "sessionTimeout";
+    private static final String CONNECT_TIME_OUT_KEY = "connectTimeout";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
@@ -206,7 +209,9 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
                 if (null == zkClient) {
                     zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY),
+                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
+                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
                 }
             }
         }
@@ -214,10 +219,16 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     // visible for test.
-    ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout) {
+    ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
         ZkClient zkClient = new ZkClient(address, sessionTimeout, connectTimeout);
         if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
             zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
+        }
+        if (null != authInfo && authInfo.length == 2) {
+            if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
+                StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
+                zkClient.addAuthInfo("digest", auth.toString().getBytes());
+            }
         }
         zkClient.subscribeStateChanges(new IZkStateListener() {
 
