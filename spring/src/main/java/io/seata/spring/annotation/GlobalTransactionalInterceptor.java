@@ -103,7 +103,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         String key = null;
-        if (globalTransactionalAnnotation.demotion()) {
+        if (null != globalTransactionalAnnotation && globalTransactionalAnnotation.demotion()) {
             StringBuilder builder = new StringBuilder(targetClass.getName()).append(".").append(method.getName());
             key = builder.toString();
             Integer value = demotionMap.get(key);
