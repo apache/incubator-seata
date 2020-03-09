@@ -29,7 +29,7 @@ public class LockerManagerFactory {
     /**
      * the lock manager
      */
-    private static LockManager lockManager = EnhancedServiceLoader.load(LockManager.class,
+    private static final LockManager LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class,
             ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE));
 
     /**
@@ -38,6 +38,6 @@ public class LockerManagerFactory {
      * @return the lock manager
      */
     public static LockManager getLockManager() {
-        return lockManager;
+        return LOCK_MANAGER;
     }
 }
