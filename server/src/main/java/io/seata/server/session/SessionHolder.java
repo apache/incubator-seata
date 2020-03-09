@@ -107,8 +107,8 @@ public class SessionHolder {
             if (sessionStorePath == null) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.name(),
-                new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
+                new Object[] {ROOT_SESSION_MANAGER_NAME});
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
