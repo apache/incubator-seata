@@ -56,7 +56,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final String REGISTRY_TYPE = "file";
 
-    private static final String SYS_FILE_RESOURCE_PREFIX = "file:";
+    public static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
     private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
             8);
@@ -103,7 +103,7 @@ public class FileConfiguration extends AbstractConfiguration {
             targetFilePath = null;
         } else {
             targetFilePath = file.getPath();
-            fileConfig = FileConfigFactory.load(file);
+            fileConfig = FileConfigFactory.load(file, name);
         }
         /**
          * For seata-server side the conf file should always exists.
@@ -128,18 +128,25 @@ public class FileConfiguration extends AbstractConfiguration {
             throw new IllegalArgumentException("name can't be null");
         }
         String filePath = null;
-        if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+        boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
+        if (filePathCustom) {
             filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-            File targetFile = new File(filePath);
-            if (!targetFile.exists()) {
-                for (String s : FileConfigFactory.getSuffixSet()) {
-                    targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                    if (targetFile.exists()) {
-                        return targetFile;
-                    }
+        } else {
+            // projectDir first
+            filePath = this.getClass().getClassLoader().getResource("").getPath() + name;
+        }
+
+        File targetFile = new File(filePath);
+        if (!targetFile.exists()) {
+            for (String s : FileConfigFactory.getSuffixSet()) {
+                targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                if (targetFile.exists()) {
+                    return targetFile;
                 }
             }
-        } else {
+        }
+
+        if (!filePathCustom) {
             URL resource = this.getClass().getClassLoader().getResource(name);
             if (resource == null) {
                 for (String s : FileConfigFactory.getSuffixSet()) {
@@ -147,7 +154,6 @@ public class FileConfiguration extends AbstractConfiguration {
                     if (resource != null) {
                         return new File(resource.getPath());
                     }
-
                 }
             } else {
                 return new File(resource.getPath());
@@ -254,12 +260,7 @@ public class FileConfiguration extends AbstractConfiguration {
                     if (allowDynamicRefresh) {
                         long tempLastModified = new File(targetFilePath).lastModified();
                         if (tempLastModified > targetFileLastModified) {
-                            FileConfig tempConfig;
-                            if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-                                tempConfig = FileConfigFactory.load(new File(targetFilePath));
-                            } else {
-                                tempConfig = FileConfigFactory.load(name);
-                            }
+                            FileConfig tempConfig = FileConfigFactory.load(new File(targetFilePath), name);
                             if (null != tempConfig) {
                                 fileConfig = tempConfig;
                                 targetFileLastModified = tempLastModified;

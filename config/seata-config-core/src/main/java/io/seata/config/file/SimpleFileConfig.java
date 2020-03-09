@@ -20,6 +20,7 @@ import com.typesafe.config.ConfigFactory;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.FileConfigFactory;
+import io.seata.config.FileConfiguration;
 
 import java.io.File;
 
@@ -35,9 +36,13 @@ public class SimpleFileConfig implements FileConfig {
         fileConfig = ConfigFactory.load();
     }
 
-    public SimpleFileConfig(File file) {
-        Config appConfig = ConfigFactory.parseFileAnySyntax(file);
-        fileConfig = ConfigFactory.load(appConfig);
+    public SimpleFileConfig(File file, String name) {
+        if (name.startsWith(FileConfiguration.SYS_FILE_RESOURCE_PREFIX)) {
+            Config appConfig = ConfigFactory.parseFileAnySyntax(file);
+            fileConfig = ConfigFactory.load(appConfig);
+        } else {
+            fileConfig = ConfigFactory.load(file.getName());
+        }
     }
 
     @Override

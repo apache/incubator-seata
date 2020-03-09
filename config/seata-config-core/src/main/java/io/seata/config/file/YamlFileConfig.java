@@ -35,12 +35,7 @@ public class YamlFileConfig implements FileConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(YamlFileConfig.class);
     private Map configMap;
 
-    public YamlFileConfig(String filePath) {
-        Yaml yaml = new Yaml();
-        configMap = (Map) yaml.load(filePath);
-    }
-
-    public YamlFileConfig(File file) {
+    public YamlFileConfig(File file, String name) {
         Yaml yaml = new Yaml();
         try {
             configMap = (Map) yaml.load(new FileInputStream(file));

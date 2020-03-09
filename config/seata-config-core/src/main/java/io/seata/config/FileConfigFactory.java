@@ -44,20 +44,17 @@ public class FileConfigFactory {
         }
     };
 
-    public static FileConfig load(String filePath) {
-        String configType = getConfigType(filePath);
-        return loadService(configType, new Class[]{String.class}, new Object[]{filePath});
-    }
+
 
     public static FileConfig load() {
 
         return loadService(DEFAULT_TYPE, null, null);
     }
 
-    public static FileConfig load(File targetFile) {
+    public static FileConfig load(File targetFile,String name) {
         String fileName = targetFile.getName();
         String configType = getConfigType(fileName);
-        return loadService(configType, new Class[]{File.class}, new Object[]{targetFile});
+        return loadService(configType, new Class[]{File.class,String.class}, new Object[]{targetFile,name});
     }
 
     private static String getConfigType(String fileName) {
