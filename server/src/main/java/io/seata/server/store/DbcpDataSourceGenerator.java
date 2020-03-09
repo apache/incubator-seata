@@ -19,28 +19,31 @@ import javax.sql.DataSource;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceGenerator;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
  * The type Dbcp data source generator.
  *
  * @author zhangsen
+ * @author ggndnn
  */
 @LoadLevel(name = "dbcp")
 public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
-
     @Override
     public DataSource generateDataSource() {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(getDriverClassName());
+        // DriverClassLoader works if upgrade commons-dbcp to at least 1.3.1.
+        // https://issues.apache.org/jira/browse/DBCP-333
+        ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
         ds.setInitialSize(getMinConn());
-        ds.setMaxActive(getMaxConn());
+        ds.setMaxTotal(getMaxConn());
         ds.setMinIdle(getMinConn());
         ds.setMaxIdle(getMinConn());
-        ds.setMaxWait(5000);
+        ds.setMaxWaitMillis(5000);
         ds.setTimeBetweenEvictionRunsMillis(120000);
         ds.setNumTestsPerEvictionRun(1);
         ds.setTestWhileIdle(true);
@@ -48,6 +51,4 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
         return ds;
     }
-
-
 }

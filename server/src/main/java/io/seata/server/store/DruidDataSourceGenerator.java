@@ -25,14 +25,15 @@ import io.seata.core.store.db.AbstractDataSourceGenerator;
  * The type Druid data source generator.
  *
  * @author zhangsen
+ * @author ggndnn
  */
 @LoadLevel(name = "druid")
 public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
-
     @Override
     public DataSource generateDataSource() {
         DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
+        ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
