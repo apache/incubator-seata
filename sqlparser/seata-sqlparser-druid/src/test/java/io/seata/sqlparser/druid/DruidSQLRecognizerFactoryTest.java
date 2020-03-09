@@ -27,7 +27,8 @@ import org.junit.jupiter.api.Test;
 public class DruidSQLRecognizerFactoryTest {
     @Test
     public void testSqlRecognizerCreation() {
-        SQLRecognizerFactory recognizerFactory = EnhancedServiceLoader.getServiceLoader(SQLRecognizerFactory.class).load(SqlParserType.SQL_PARSER_TYPE_DRUID);
+        SQLRecognizerFactory recognizerFactory = EnhancedServiceLoader.load(SQLRecognizerFactory.class,
+                SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
         SQLRecognizer recognizer = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL);
         Assertions.assertNotNull(recognizer);

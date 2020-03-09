@@ -48,7 +48,7 @@ public class CompressorFactory {
         if (COMPRESSOR_MAP.get(type) != null) {
             return COMPRESSOR_MAP.get(type);
         }
-        Compressor impl = EnhancedServiceLoader.getServiceLoader(Compressor.class).load(type.name());
+        Compressor impl = EnhancedServiceLoader.load(Compressor.class, type.name());
         COMPRESSOR_MAP.putIfAbsent(type, impl);
         return impl;
     }

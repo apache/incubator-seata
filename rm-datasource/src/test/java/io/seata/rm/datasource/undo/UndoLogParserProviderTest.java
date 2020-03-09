@@ -30,20 +30,20 @@ class UndoLogParserProviderTest {
 
     @Test
     void testLoad(){
-        UndoLogParser parser = EnhancedServiceLoader.getServiceLoader(UndoLogParser.class).load("fastjson");
+        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fastjson");
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof FastjsonUndoLogParser);
         
-        parser = EnhancedServiceLoader.getServiceLoader(UndoLogParser.class).load("jackson");
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "jackson");
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof JacksonUndoLogParser);
 
-        parser = EnhancedServiceLoader.getServiceLoader(UndoLogParser.class).load("protostuff");
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "protostuff");
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof ProtostuffUndoLogParser);
         
         try {
-            EnhancedServiceLoader.getServiceLoader(UndoLogParser.class).load("adadad");
+            EnhancedServiceLoader.load(UndoLogParser.class, "adadad");
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof EnhancedServiceNotFoundException);

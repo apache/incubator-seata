@@ -40,7 +40,7 @@ public class UndoExecutorHolderFactory {
             return UNDO_EXECUTOR_HOLDER_MAP.get(dbType);
         }
         UndoExecutorHolder undoExecutorHolder =
-                EnhancedServiceLoader.getServiceLoader(UndoExecutorHolder.class).load(dbType);
+                EnhancedServiceLoader.load(UndoExecutorHolder.class, dbType);
         UNDO_EXECUTOR_HOLDER_MAP.putIfAbsent(dbType, undoExecutorHolder);
         return undoExecutorHolder;
     }

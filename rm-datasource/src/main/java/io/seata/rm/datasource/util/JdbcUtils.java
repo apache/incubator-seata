@@ -39,7 +39,7 @@ public final class JdbcUtils {
             synchronized (JdbcUtils.class) {
                 if (dbTypeParser == null) {
                     String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
-                    dbTypeParser = EnhancedServiceLoader.getServiceLoader(DbTypeParser.class).load(sqlparserType);
+                    dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, sqlparserType);
                 }
             }
         }

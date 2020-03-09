@@ -39,7 +39,7 @@ public class RegistryFactory {
             } catch (Exception exx) {
                 throw new NotSupportYetException("not support metrics registry type: " + registryTypeName);
             }
-            return EnhancedServiceLoader.getServiceLoader(Registry.class).load(Objects.requireNonNull(registryType).getName());
+            return EnhancedServiceLoader.load(Registry.class, Objects.requireNonNull(registryType).getName());
         }
         return null;
     }

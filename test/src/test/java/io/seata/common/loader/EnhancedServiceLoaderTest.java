@@ -28,7 +28,7 @@ public class EnhancedServiceLoaderTest {
 
     @Test
     public void testLoadBeanByOrder(){
-        LoaderTestSPI loader  = EnhancedServiceLoader.getServiceLoader(LoaderTestSPI.class).load(
+        LoaderTestSPI loader  = EnhancedServiceLoader.load(LoaderTestSPI.class,
                 EnhancedServiceLoaderTest.class.getClassLoader());
         System.out.println(loader.echo());
         Assertions.assertEquals("impl_2", loader.echo());
@@ -36,7 +36,7 @@ public class EnhancedServiceLoaderTest {
 
     @Test
     public void testLoadAll(){
-        List<LoaderTestSPI> list = EnhancedServiceLoader.getServiceLoader(LoaderTestSPI.class).loadAll();
+        List<LoaderTestSPI> list = EnhancedServiceLoader.loadAll(LoaderTestSPI.class);
         Assertions.assertEquals(2, list.size());
     }
 

@@ -30,6 +30,6 @@ public class LoadBalanceFactory {
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        return EnhancedServiceLoader.getServiceLoader(LoadBalance.class).load();
+        return EnhancedServiceLoader.load(LoadBalance.class);
     }
 }

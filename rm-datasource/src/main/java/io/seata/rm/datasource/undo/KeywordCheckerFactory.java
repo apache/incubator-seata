@@ -40,7 +40,7 @@ public class KeywordCheckerFactory {
             return KEYWORD_CHECKER_MAP.get(dbType);
         }
         KeywordChecker tableMetaCache =
-                EnhancedServiceLoader.getServiceLoader(KeywordChecker.class).load(dbType);
+                EnhancedServiceLoader.load(KeywordChecker.class, dbType);
         KEYWORD_CHECKER_MAP.putIfAbsent(dbType, tableMetaCache);
         return tableMetaCache;
     }

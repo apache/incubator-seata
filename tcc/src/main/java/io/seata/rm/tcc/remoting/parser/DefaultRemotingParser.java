@@ -74,7 +74,7 @@ public class DefaultRemotingParser {
      */
     protected void initRemotingParser() {
         //init all resource managers
-        List<RemotingParser> remotingParsers = EnhancedServiceLoader.getServiceLoader(RemotingParser.class).loadAll();
+        List<RemotingParser> remotingParsers = EnhancedServiceLoader.loadAll(RemotingParser.class);
         if (CollectionUtils.isNotEmpty(remotingParsers)) {
             allRemotingParsers.addAll(remotingParsers);
         }

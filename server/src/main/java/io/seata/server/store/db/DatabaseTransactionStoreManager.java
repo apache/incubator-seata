@@ -98,9 +98,9 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
-        DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.getServiceLoader(DataSourceGenerator.class).load(datasourceType);
+        DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
         DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-        logStore = EnhancedServiceLoader.getServiceLoader(LogStore.class).load(StoreMode.DB.getName(),
+        logStore = EnhancedServiceLoader.load(LogStore.class, StoreMode.DB.getName(),
                 new Class[] {DataSource.class},
             new Object[] {logStoreDataSource});
         inited.set(true);

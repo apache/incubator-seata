@@ -45,7 +45,7 @@ public class DefaultRMHandler extends AbstractRMHandler {
     }
 
     protected void initRMHandlers() {
-        List<AbstractRMHandler> allRMHandlers = EnhancedServiceLoader.getServiceLoader(AbstractRMHandler.class).loadAll();
+        List<AbstractRMHandler> allRMHandlers = EnhancedServiceLoader.loadAll(AbstractRMHandler.class);
         if (CollectionUtils.isNotEmpty(allRMHandlers)) {
             for (AbstractRMHandler rmHandler : allRMHandlers) {
                 allRMHandlersMap.put(rmHandler.getBranchType(), rmHandler);

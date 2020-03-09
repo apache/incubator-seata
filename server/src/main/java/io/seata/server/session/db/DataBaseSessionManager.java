@@ -81,7 +81,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     @Override
     public void init() {
         transactionStoreManager =
-                EnhancedServiceLoader.getServiceLoader(TransactionStoreManager.class).load(StoreMode.DB.getName());
+                EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.DB.getName());
     }
 
     @Override

@@ -62,7 +62,7 @@ public class UndoLogParserFactory {
             synchronized (UndoLogParserFactory.class) {
                 parser = INSTANCES.get(name);
                 if (parser == null) {
-                    parser = EnhancedServiceLoader.getServiceLoader(UndoLogParser.class).load(name);
+                    parser = EnhancedServiceLoader.load(UndoLogParser.class, name);
                     INSTANCES.putIfAbsent(name, parser);
                 }
             }

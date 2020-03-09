@@ -94,17 +94,18 @@ public class LockerFactory {
             }
             //init dataSource
             String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-            DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.getServiceLoader(DataSourceGenerator.class).load(datasourceType);
+            DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class,
+                    datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            locker = EnhancedServiceLoader.getServiceLoader(Locker.class).load(storeMode, new Class[] {DataSource.class},
+            locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[] {DataSource.class},
                 new Object[] {logStoreDataSource});
             lockerMap.putIfAbsent(storeMode, locker);
         } else if (StringUtils.equalsIgnoreCase(StoreMode.FILE.getName(), storeMode)) {
-            locker = EnhancedServiceLoader.getServiceLoader(Locker.class).load(storeMode,
+            locker = EnhancedServiceLoader.load(Locker.class, storeMode,
                 new Class[] {BranchSession.class}, new Object[] {branchSession});
         } else {
             //other locker
-            locker = EnhancedServiceLoader.getServiceLoader(Locker.class).load(storeMode);
+            locker = EnhancedServiceLoader.load(Locker.class, storeMode);
         }
         return locker;
     }
