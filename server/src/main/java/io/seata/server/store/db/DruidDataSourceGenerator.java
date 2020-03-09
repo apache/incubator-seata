@@ -26,14 +26,15 @@ import javax.sql.DataSource;
  * The type Druid data source generator.
  *
  * @author zhangsen
+ * @author ggndnn
  */
 @LoadLevel(name = "druid", scope = Scope.PROTOTYPE)
 public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
-
     @Override
     public DataSource generateDataSource() {
         DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
+        ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
