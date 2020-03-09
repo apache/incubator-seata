@@ -52,6 +52,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
+    private Propagation propagation;
+
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
@@ -113,7 +115,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name, Propagation propagation) throws TransactionException {
-        switch (propagation) {
+        this.propagation = propagation;
+        switch (this.propagation) {
             case NOT_SUPPORTED:
                 RootContext.unbind();
                 return;
@@ -135,6 +138,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void commit() throws TransactionException {
+        if(Propagation.NOT_SUPPORTED.equals(this.propagation)){
+            return;
+        }
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of committing
             if (LOGGER.isDebugEnabled()) {
@@ -170,6 +176,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void rollback() throws TransactionException {
+        if(Propagation.NOT_SUPPORTED.equals(this.propagation)){
+            return;
+        }
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of rollback
             if (LOGGER.isDebugEnabled()) {
