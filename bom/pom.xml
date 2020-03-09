@@ -100,6 +100,7 @@
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.30</mysql.client.version>
         <postgres.client.version>42.1.4</postgres.client.version>
+        <ojdbc6.client.version>11.2.0.1.0</ojdbc6.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
         <jackson.version>2.9.9</jackson.version>
@@ -383,6 +384,11 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgres.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>${ojdbc6.client.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
