@@ -15,6 +15,8 @@
  */
 package io.seata.tm.api;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -22,6 +24,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.Propagation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +109,28 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
 
+    }
+
+    @Override
+    public void begin(int timeout, String name, Propagation propagation) throws TransactionException {
+        switch (propagation) {
+            case NOT_SUPPORTED:
+                RootContext.unbind();
+                return;
+            case REQUIRES_NEW:
+                RootContext.unbind();
+                break;
+            case SUPPORTS:
+                if (StringUtils.isEmpty(RootContext.getXID())) {
+                    return;
+                }
+                break;
+            case REQUIRED:
+                break;
+            default:
+                throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
+        }
+        begin(timeout, name);
     }
 
     @Override
