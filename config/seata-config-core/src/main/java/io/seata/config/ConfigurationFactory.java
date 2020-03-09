@@ -127,7 +127,7 @@ public final class ConfigurationFactory {
         }
     }
 
-    protected static void reload(){
+    protected static void reload() {
         load();
         instance = null;
         getInstance();

@@ -136,14 +136,16 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         File targetFile = new File(filePath);
         if (!targetFile.exists()) {
+            LOGGER.info("suffixSet {}", FileConfigFactory.getSuffixSet().toString());
             for (String s : FileConfigFactory.getSuffixSet()) {
                 targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                LOGGER.info("suffixSet -s {}", s);
                 if (targetFile.exists()) {
                     return targetFile;
                 }
             }
         }
-        return targetFile;
+        return null;
     }
 
     @Override

@@ -15,9 +15,10 @@
  */
 package io.seata.config;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.extension.ExtendWith;
 
 class YamlConfigurationFactoryTest {
     private static final String ENV_PROPERTY_KEY = "seataEnv";
@@ -39,4 +40,10 @@ class YamlConfigurationFactoryTest {
         Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8093");
     }
 
+    @AfterAll
+    public static void afterAll(){
+        System.clearProperty(ENV_PROPERTY_KEY);
+        System.clearProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
+        ConfigurationFactory.reload();
+    }
 }
