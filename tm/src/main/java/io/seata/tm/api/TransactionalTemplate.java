@@ -20,6 +20,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
@@ -143,7 +144,9 @@ public class TransactionalTemplate {
         tx.rollback();
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+        throw new TransactionalExecutor.ExecutionException(tx,
+            tx.getStatus().equals(GlobalStatus.RollbackRetrying) ? TransactionalExecutor.Code.RollbackRetrying :
+                TransactionalExecutor.Code.RollbackDone, ex);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
