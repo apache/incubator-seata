@@ -123,8 +123,8 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc6</artifactId>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
