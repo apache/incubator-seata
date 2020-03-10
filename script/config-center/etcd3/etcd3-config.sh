@@ -61,7 +61,7 @@ function addConfig() {
 }
 
 count=0
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
   (( count++ ))
   key=${line%%=*}
 	value=${line#*=}

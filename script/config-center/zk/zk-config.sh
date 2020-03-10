@@ -94,7 +94,7 @@ else
 	fi
 fi
 
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
 	key=${line%%=*}
 	value=${line#*=}
 	echo "Set" "${key}" "=" "${value}"
