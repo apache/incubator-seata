@@ -15,10 +15,10 @@
  */
 package io.seata.core.store.db.sql.lock;
 
-import com.google.common.collect.Maps;
+import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-
-import java.util.Map;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
  * the database lock store factory
@@ -28,20 +28,19 @@ import java.util.Map;
  */
 public class LockStoreSqlFactory {
 
-    private static Map<String/*dbType*/, LockStoreSql> LOCK_STORE_SQL_MAP = Maps.newConcurrentMap();
+    private static final LockStoreSql LOCK_STORE_SQL = EnhancedServiceLoader.load(LockStoreSql.class,
+        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_TYPE));
 
     /**
      * get the lock store sql
      *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase
-     * @return lock store sql
+     * @return lock store sql, support mysql/oracle/h2/postgre/oceanbase
      */
-    public static LockStoreSql getLogStoreSql(String dbType) {
-        if (!LOCK_STORE_SQL_MAP.containsKey(dbType)) {
-            LockStoreSql lockStoreSql = EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase());
-            LOCK_STORE_SQL_MAP.put(dbType, lockStoreSql);
+    public static LockStoreSql getLogStoreSql() {
+        if (LOCK_STORE_SQL == null) {
+            throw new StoreException("there must be db type, support mysql/oracle/h2/postgre/oceanbase database.");
         }
-        return LOCK_STORE_SQL_MAP.get(dbType);
+        return LOCK_STORE_SQL;
     }
 
 }

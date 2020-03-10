@@ -54,8 +54,7 @@ public class DataBaseLockManagerImplTest {
         dataSource.setPassword("");
 
         dataBaseLockStoreDAO = new LockStoreDataBaseDAO(dataSource);
-        dataBaseLockStoreDAO.setDbType("h2");
-        dataBaseLockStoreDAO.setLockTable("lock_table");
+        dataBaseLockStoreDAO.init();
 
         lockManager = new DBLockManagerForTest(dataBaseLockStoreDAO);
 

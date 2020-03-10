@@ -18,12 +18,11 @@ package io.seata.core.store.db;
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.LockDO;
 import org.apache.commons.dbcp2.BasicDataSource;
-
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -50,8 +49,7 @@ public class DataBaseLockStoreDAOTest {
         dataSource.setPassword("");
 
         dataBaseLockStoreDAO = new LockStoreDataBaseDAO(dataSource);
-        dataBaseLockStoreDAO.setDbType("h2");
-        dataBaseLockStoreDAO.setLockTable("lock_table");
+        dataBaseLockStoreDAO.init();
 
         prepareTable(dataSource);
     }
