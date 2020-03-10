@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
+import java.sql.SQLException;
 import java.sql.Types;
 
 import com.alibaba.druid.util.JdbcConstants;

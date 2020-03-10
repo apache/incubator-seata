@@ -406,7 +406,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
             String pkKey = pkColumnNameList.get(i);
             StringJoiner pkValuesJoiner = new StringJoiner(" , ",
-                    " " + pkKey + " in (", ")");
+                    " " + ColumnUtils.addEscape(pkKey,getDbType()) + " in (", ")");
             for (Object pkValue : pkValuesMap.get(pkKey)) {
                 pkValuesJoiner.add("?");
             }

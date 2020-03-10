@@ -272,7 +272,7 @@ public abstract class AbstractUndoExecutor {
         // build check sql
         String dbType = getDbType(conn);
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
-                buildWhereConditionByPKs(pkNameList,pkRowValues));
+                buildWhereConditionByPKs(pkNameList,pkRowValues,conn));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
@@ -319,7 +319,7 @@ public abstract class AbstractUndoExecutor {
      * @param pkNameList
      * @return return where condition sql string.the sql can just search one related record.
      */
-    protected String buildWhereConditionByPKs(List<String> pkNameList) {
+    protected String buildWhereConditionByPKs(List<String> pkNameList,KeywordChecker keywordChecker) {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
         for (int i =0;i<pkNameList.size();i++)
@@ -328,7 +328,7 @@ public abstract class AbstractUndoExecutor {
                 whereStr.append(" and ");
             }
             String pkName =pkNameList.get(i);
-            whereStr.append(pkName);
+            whereStr.append(keywordChecker.checkAndReplace(pkName));
             whereStr.append(" = ? ");
         }
         return whereStr.toString();
@@ -340,7 +340,7 @@ public abstract class AbstractUndoExecutor {
      * @param pkRowValues  the kye of map is pk name ,and value of map is pk's value
      * @return return where condition sql string.the sql can search all related records not just one.
      */
-    protected String buildWhereConditionByPKs(List<String> pkNameList,Map<String,List<Field>> pkRowValues) {
+    protected String buildWhereConditionByPKs(List<String> pkNameList,Map<String,List<Field>> pkRowValues,Connection conn) throws SQLException {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
         for (int i =0;i<pkNameList.size();i++)
@@ -349,7 +349,7 @@ public abstract class AbstractUndoExecutor {
                 whereStr.append(" and ");
             }
             String pkName =pkNameList.get(i);
-            whereStr.append(pkName);
+            whereStr.append(ColumnUtils.addEscape(pkName,getDbType(conn)));
             whereStr.append(" in ( ");
             List<Field> valueList=pkRowValues.get(pkName);
             StringBuffer pkValueStr = new StringBuffer();

@@ -82,7 +82,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         boolean moreThanOneRow = Objects.nonNull(insertRows)&&!insertRows.isEmpty()&&insertRows.size()>1;
         boolean isStatement=!(statementProxy instanceof PreparedStatementProxy);
         Boolean isContainsPk=containsPK();
-        if (isStatement&&moreThanOneRow&&!isContainsPk)
+        if (isStatement&&moreThanOneRow)
         {
             throw new NotSupportYetException("Not support statement batch insert sql");
         }
