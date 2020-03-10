@@ -108,11 +108,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
             <exclusions>

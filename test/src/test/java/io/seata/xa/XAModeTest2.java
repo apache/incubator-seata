@@ -34,7 +34,6 @@ import io.seata.rm.datasource.xa.XAXidBuilder;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
-import oracle.jdbc.xa.client.OracleXADataSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -46,6 +45,7 @@ import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -123,16 +123,37 @@ public class XAModeTest2 {
             return mysqlXADataSource;
 
         } else if (dbType.equalsIgnoreCase(JdbcUtils.ORACLE)) {
-            OracleXADataSource oracleXADataSource = new OracleXADataSource();
-            oracleXADataSource.setURL(oracle_jdbcUrl);
-            oracleXADataSource.setUser(oracle_username);
-            oracleXADataSource.setPassword(oracle_password);
-            oracleXADataSource.setDriverType(oracle_driverClassName);
-            return oracleXADataSource;
+            return createOracleXADataSource();
 
         } else {
             throw new IllegalAccessError("Unknown dbType: " + dbType);
         }
+    }
+
+    private XADataSource createOracleXADataSource() {
+        try {
+            Class oracleXADataSourceClass = Class.forName("oracle.jdbc.xa.client.OracleXADataSource");
+            XADataSource xaDataSource = (XADataSource)oracleXADataSourceClass.newInstance();
+
+            Method setURLMethod = oracleXADataSourceClass.getMethod("setURL", String.class);
+            setURLMethod.invoke(xaDataSource, oracle_jdbcUrl);
+
+            Method setUserMethod = oracleXADataSourceClass.getMethod("setUser", String.class);
+            setUserMethod.invoke(xaDataSource, oracle_username);
+
+            Method setPasswordMethod = oracleXADataSourceClass.getMethod("setPassword", String.class);
+            setPasswordMethod.invoke(xaDataSource, oracle_password);
+
+            Method setDriverTypeMethod = oracleXADataSourceClass.getMethod("setDriverType", String.class);
+            setDriverTypeMethod.invoke(xaDataSource, oracle_driverClassName);
+
+            return xaDataSource;
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
     }
 
     private void initDruidDataSource(DruidDataSource druidDataSource) throws Throwable {
@@ -459,11 +480,7 @@ public class XAModeTest2 {
     @Test
     @Disabled
     public void testXADataSourceNative() throws Throwable {
-        OracleXADataSource nativeXADataSource = new OracleXADataSource();
-        nativeXADataSource.setURL(oracle_jdbcUrl);
-        nativeXADataSource.setUser(oracle_username);
-        nativeXADataSource.setPassword(oracle_password);
-        nativeXADataSource.setDriverType(oracle_driverClassName);
+        XADataSource nativeXADataSource = createOracleXADataSource();
 
         XAConnection xaConnection = nativeXADataSource.getXAConnection();
         XAResource xaResource = xaConnection.getXAResource();
