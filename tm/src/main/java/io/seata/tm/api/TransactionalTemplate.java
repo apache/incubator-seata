@@ -117,9 +117,8 @@ public class TransactionalTemplate {
         tx.rollback();
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx,
-            tx.getStatus().equals(GlobalStatus.RollbackRetrying) ? TransactionalExecutor.Code.RollbackRetrying :
-                TransactionalExecutor.Code.RollbackDone, ex);
+        throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
+            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, ex);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx,Propagation propagation) throws TransactionalExecutor.ExecutionException {

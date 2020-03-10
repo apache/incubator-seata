@@ -88,4 +88,9 @@ public class MockGlobalTransaction implements GlobalTransaction {
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
 
     }
+
+    @Override
+    public GlobalStatus getLocalStatus() {
+        return status;
+    }
 }
