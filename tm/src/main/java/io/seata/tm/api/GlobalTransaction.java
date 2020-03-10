@@ -95,4 +95,11 @@ public interface GlobalTransaction {
      */
     void globalReport(GlobalStatus globalStatus) throws TransactionException;
 
+    /**
+     * local status of the global transaction.
+     *
+     * @return Status of the corresponding global transaction.
+     * @see GlobalStatus
+     */
+    GlobalStatus getLocalStatus();
 }
