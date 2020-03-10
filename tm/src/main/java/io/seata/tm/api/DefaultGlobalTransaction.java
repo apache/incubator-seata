@@ -54,6 +54,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private Propagation propagation;
 
+    private String previousXid;
+
+    private boolean used;
+
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
@@ -93,6 +97,30 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
+        begin(timeout, name, Propagation.REQUIRED);
+    }
+
+    @Override
+    public void begin(int timeout, String name, Propagation propagation) throws TransactionException {
+        isUsed();
+        this.propagation = propagation;
+        switch (this.propagation) {
+            case NOT_SUPPORTED:
+                previousXid = RootContext.unbind();
+                return;
+            case REQUIRES_NEW:
+                previousXid = RootContext.unbind();
+                break;
+            case SUPPORTS:
+                if (StringUtils.isEmpty(RootContext.getXID())) {
+                    return;
+                }
+                break;
+            case REQUIRED:
+                break;
+            default:
+                throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
+        }
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -110,30 +138,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
-
-    }
-
-    @Override
-    public void begin(int timeout, String name, Propagation propagation) throws TransactionException {
-        this.propagation = propagation;
-        switch (this.propagation) {
-            case NOT_SUPPORTED:
-                RootContext.unbind();
-                return;
-            case REQUIRES_NEW:
-                RootContext.unbind();
-                break;
-            case SUPPORTS:
-                if (StringUtils.isEmpty(RootContext.getXID())) {
-                    return;
-                }
-                break;
-            case REQUIRED:
-                break;
-            default:
-                throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
-        }
-        begin(timeout, name);
     }
 
     @Override
@@ -167,6 +171,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 RootContext.unbind();
             }
+            bindPreviousXid();
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] commit status: {}", xid, status);
@@ -206,6 +211,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 RootContext.unbind();
             }
+            bindPreviousXid();
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] rollback status: {}", xid, status);
@@ -253,6 +259,20 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private void assertXIDNull() {
         if (xid != null) {
             throw new IllegalStateException();
+        }
+    }
+
+    private void bindPreviousXid() {
+        if (StringUtils.isNotBlank(previousXid)) {
+            RootContext.bind(previousXid);
+        }
+    }
+
+    private void isUsed() {
+        if (used) {
+            throw new IllegalStateException("the same instance is allowed to be used only once");
+        } else {
+            used = true;
         }
     }
 

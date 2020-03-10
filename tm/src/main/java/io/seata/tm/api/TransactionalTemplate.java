@@ -17,8 +17,6 @@ package io.seata.tm.api;
 
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
@@ -53,60 +51,35 @@ public class TransactionalTemplate {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
         Propagation propagation = txInfo.getPropagation();
-        String previousXid = null;
+        // 1.1 get or create a transaction
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+
         try {
-            switch (propagation) {
-                case NOT_SUPPORTED:
-                    previousXid = RootContext.unbind();
-                    return business.execute();
-                case REQUIRES_NEW:
-                    previousXid = RootContext.unbind();
-                    break;
-                case SUPPORTS:
-                    if (StringUtils.isEmpty(RootContext.getXID())) {
-                        return business.execute();
-                    }
-                    break;
-                case REQUIRED:
-                    break;
-                default:
-                    throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
-            }
 
-            // 1.1 get or create a transaction
-            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+            // 2. begin transaction
+            beginTransaction(txInfo, tx, propagation);
 
+            Object rs = null;
             try {
 
-                // 2. begin transaction
-                beginTransaction(txInfo, tx);
+                // Do Your Business
+                rs = business.execute();
 
-                Object rs = null;
-                try {
+            } catch (Throwable ex) {
 
-                    // Do Your Business
-                    rs = business.execute();
-
-                } catch (Throwable ex) {
-
-                    // 3.the needed business exception to rollback.
-                    completeTransactionAfterThrowing(txInfo, tx, ex);
-                    throw ex;
-                }
-
-                // 4. everything is fine, commit.
-                commitTransaction(tx);
-
-                return rs;
-            } finally {
-                //5. clear
-                triggerAfterCompletion();
-                cleanUp();
+                // 3.the needed business exception to rollback.
+                completeTransactionAfterThrowing(txInfo, tx, ex);
+                throw ex;
             }
+
+            // 4. everything is fine, commit.
+            commitTransaction(tx);
+
+            return rs;
         } finally {
-            if (previousXid != null) {
-                RootContext.bind(previousXid);
-            }
+            // 5. clear
+            triggerAfterCompletion();
+            cleanUp();
         }
 
     }
@@ -149,10 +122,10 @@ public class TransactionalTemplate {
                 TransactionalExecutor.Code.RollbackDone, ex);
     }
 
-    private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+    private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx,Propagation propagation) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName(),propagation);
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
