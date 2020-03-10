@@ -100,14 +100,17 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.oracle.jdbc</groupId>
             <artifactId>ojdbc8</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.zookeeper</groupId>

@@ -19,13 +19,12 @@ import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
 import io.seata.rm.BaseDataSourceResource;
-import oracle.jdbc.driver.T4CXAConnection;
-import oracle.jdbc.xa.client.OracleXAConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
+import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -50,9 +49,9 @@ public class XAUtils {
                 // return OracleUtils.OracleXAConnection(physicalConn);
                 String physicalConnClassName = physicalConn.getClass().getName();
                 if ("oracle.jdbc.driver.T4CConnection".equals(physicalConnClassName)) {
-                    return new T4CXAConnection(physicalConn);
+                    return createOracleXAConnection(physicalConn, "oracle.jdbc.driver.T4CXAConnection");
                 } else {
-                    return new OracleXAConnection(physicalConn);
+                    return createOracleXAConnection(physicalConn, "oracle.jdbc.xa.client.OracleXAConnection");
                 }
             } catch (XAException xae) {
                 LOGGER.error("create xaConnection error", xae);
@@ -69,5 +68,21 @@ public class XAUtils {
         }
 
         throw new SQLException("xa not support dbType: " + dbType);
+    }
+
+    private static XAConnection createOracleXAConnection(Connection physicalConnection, String xaConnectionClassName) throws XAException, SQLException {
+        try {
+            Class xaConnectionClass = Class.forName(xaConnectionClassName);
+            Constructor<XAConnection> constructor = xaConnectionClass.getConstructor(Connection.class);
+            return constructor.newInstance(physicalConnection);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to create Oracle XA Connection " + xaConnectionClassName + " on " + physicalConnection);
+            if (e instanceof XAException) {
+                throw (XAException) e;
+            } else {
+                throw new SQLException(e);
+            }
+        }
+
     }
 }
