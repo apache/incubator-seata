@@ -62,11 +62,9 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
             .collect(Collectors.joining(", "));
 
         List<String> pkNameList=getOrderedPkList(beforeImage,row).stream().map(e->e.getName()).collect(Collectors.toList());
-        Map<String,List<Field>> pkRowValues=parsePkValues(beforeImageRows,pkNameList);
-        String whereSql=buildWhereConditionByPKs(pkNameList,pkRowValues);
+        String whereSql=buildWhereConditionByPKs(pkNameList);
 
-        return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             updateColumns, whereSql);
+        return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),updateColumns, whereSql);
     }
 
     /**

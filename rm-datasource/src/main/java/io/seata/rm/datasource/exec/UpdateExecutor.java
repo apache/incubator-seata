@@ -22,10 +22,12 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 
@@ -55,7 +57,6 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
-
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
         String selectSQL = buildBeforeImageSQL(tmeta, paramAppenderList);
@@ -65,6 +66,13 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
+        updateColumns.forEach(e->{
+            boolean isFind=tableMeta.getPrimaryKeyOnlyName().stream().anyMatch(a->e.equals(a));
+            if(isFind)
+            {
+                throw new NotSupportYetException("not support update pk column.");
+            }
+        });
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
             prefix.append(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType()))).append(", ");

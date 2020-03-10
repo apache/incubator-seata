@@ -313,11 +313,32 @@ public abstract class AbstractUndoExecutor {
         });
         return pkFields;
     }
+
+    /**
+     * each pk is a condition.the result will like :" id =? and userCode =?"
+     * @param pkNameList
+     * @return return where condition sql string.the sql can just search one related record.
+     */
+    protected String buildWhereConditionByPKs(List<String> pkNameList) {
+        StringBuilder whereStr = new StringBuilder();
+        //we must consider the situation of composite primary key
+        for (int i =0;i<pkNameList.size();i++)
+        {
+            if(i>0){
+                whereStr.append(" and ");
+            }
+            String pkName =pkNameList.get(i);
+            whereStr.append(pkName);
+            whereStr.append(" = ? ");
+        }
+        return whereStr.toString();
+
+    }
     /**
      * each pk is a condition.the result will like :" id in (?,?,?) and userCode in (?,?,?)"
      * @param pkNameList
      * @param pkRowValues  the kye of map is pk name ,and value of map is pk's value
-     * @return
+     * @return return where condition sql string.the sql can search all related records not just one.
      */
     protected String buildWhereConditionByPKs(List<String> pkNameList,Map<String,List<Field>> pkRowValues) {
         StringBuilder whereStr = new StringBuilder();

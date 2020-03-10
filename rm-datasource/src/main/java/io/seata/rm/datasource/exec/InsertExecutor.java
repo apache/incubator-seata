@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.druid.util.JdbcConstants;
+import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -72,12 +73,22 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         //Pk column exists or PK is just auto generated
         Map<String,List<Object>> pkValuesMap = null;
         List<String> pkColumnNameList=getTableMeta().getPrimaryKeyOnlyName();
+        // Not support statement batch insert sql
+        List<List<Object>> insertRows=recognizer.getInsertRows();
+        boolean moreThanOneRow = Objects.nonNull(insertRows)&&!insertRows.isEmpty()&&insertRows.size()>1;
+        boolean isStatement=!(statementProxy instanceof PreparedStatementProxy);
+        Boolean isContainsPk=containsPK();
+        if (isStatement&&moreThanOneRow&&!isContainsPk)
+        {
+            throw new NotSupportYetException("Not support statement batch insert sql");
+        }
         //when there is only one pk in the table
         if(getTableMeta().getPrimaryKeyOnlyName().size()==1) {
-            if(containsPK()) {
+            if(isContainsPk) {
                 pkValuesMap=getPkValuesByColumn();
             }
             else if(containsColumns()){
@@ -215,10 +226,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     int pkIndex=pkIndexMap.get(pkKey);
                     List<Object> pkValues=pkValuesMap.get(pkKey);
                     if(Objects.isNull(pkValues)) {
-                        pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), Arrays.asList(new Object[]{row.get(pkIndex)}));
+                        pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), Lists.newArrayList(row.get(pkIndex)));
                     }
                     else {
-                        pkValues.addAll(Arrays.asList(new Object[]{row.get(pkIndex)}));
+                        pkValues.add(row.get(pkIndex));
                     }
 
                 }
