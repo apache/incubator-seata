@@ -43,7 +43,7 @@ import io.seata.discovery.registry.RegistryService;
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
     private static final String DEFAULT_NAMESPACE = "";
     private static final String DEFAULT_CLUSTER = "default";
-    private static final String DEFAULT_APPLICATION = "seata";
+    private static final String DEFAULT_APPLICATION = "seata-server";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final String REGISTRY_TYPE = "nacos";
@@ -198,19 +198,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     private static String getClusterName() {
-        String cluster = FILE_CONFIG.getConfig(getNacosClusterFileKey());
-        if (null == cluster) {
-            cluster = DEFAULT_CLUSTER;
-        }
-        return cluster;
+        return FILE_CONFIG.getConfig(getNacosClusterFileKey(), DEFAULT_CLUSTER);
     }
 
     private static String getServiceName() {
-        String serviceName = FILE_CONFIG.getConfig(getNacosApplicationFileKey());
-        if (null == serviceName) {
-            serviceName = DEFAULT_APPLICATION;
-        }
-        return serviceName;
+        return FILE_CONFIG.getConfig(getNacosApplicationFileKey(), DEFAULT_APPLICATION);
     }
 
     private static String getNacosAddrFileKey() {
