@@ -253,7 +253,7 @@ public class TransactionalTemplate {
     }
 
     private TransactionalExecutor.Code getRollbackCode(GlobalTransaction tx) throws TransactionException {
-        if (tx.getStatus() == GlobalStatus.RollbackRetrying) {
+        if (tx.getLocalStatus() == GlobalStatus.RollbackRetrying) {
             if (tx.getRole() == GlobalTransactionRole.Launcher) {
                 return TransactionalExecutor.Code.RollbackRetrying;
             } else {
