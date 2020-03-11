@@ -79,7 +79,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
-    private FailureHandler failureHandlerHook;
+    private final FailureHandler failureHandlerHook;
 
     private ApplicationContext applicationContext;
 
