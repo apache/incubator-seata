@@ -19,15 +19,12 @@ import io.seata.spring.tcc.LocalTccAction;
 import io.seata.spring.tcc.LocalTccActionImpl;
 import io.seata.spring.tcc.TccAction;
 import io.seata.spring.tcc.TccActionImpl;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.context.support.StaticApplicationContext;
 
-import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
 /**
@@ -85,14 +82,8 @@ public class GlobalTransactionScannerTest {
      * Test after properties set.
      */
     @Test
-    public void testAfterPropertiesSet() throws Exception {
-        StaticApplicationContext staticApplicationContext = new StaticApplicationContext();
-        staticApplicationContext.registerSingleton("customFailureHandler", DefaultFailureHandlerImpl.class);
-        globalTransactionScanner.setApplicationContext(staticApplicationContext);
+    public void testAfterPropertiesSet() {
         globalTransactionScanner.afterPropertiesSet();
-        Field field = globalTransactionScanner.getClass().getDeclaredField("failureHandlerHook");
-        field.setAccessible(true);
-        Assertions.assertEquals(field.get(globalTransactionScanner).getClass(), DefaultFailureHandlerImpl.class);
     }
 
     /**

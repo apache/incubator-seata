@@ -44,7 +44,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -282,18 +281,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             return;
         }
         initClient();
-
-        setCustomFailureHandler();
-    }
-
-    private void setCustomFailureHandler() {
-        if (failureHandlerHook == null) {
-            try {
-                failureHandlerHook = applicationContext.getBean(FailureHandler.class);
-            } catch (NoSuchBeanDefinitionException ex) {
-                // ignore
-            }
-        }
     }
 
     @Override
