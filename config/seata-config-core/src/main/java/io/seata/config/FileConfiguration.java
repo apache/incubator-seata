@@ -74,6 +74,9 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private final boolean allowDynamicRefresh;
 
+    private ScheduledExecutorService onChangeEventExecutor =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("fileOnChangeEventExecutor", 1, true));
+
     /**
      * Note that:this constructor is only used to create proxy with CGLIB
      * see io.seata.spring.boot.autoconfigure.provider.SpringBootConfigurationProvider#provide
@@ -308,8 +311,6 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            ScheduledExecutorService onChangeEventExecutor =
-                new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(dataId + "onChangeEventExecutor", 1, true));
             onChangeEventExecutor.scheduleAtFixedRate(() -> {
                 try {
                     String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
