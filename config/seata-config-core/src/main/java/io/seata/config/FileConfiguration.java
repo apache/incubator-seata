@@ -24,8 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -73,9 +71,6 @@ public class FileConfiguration extends AbstractConfiguration {
     private final String name;
 
     private final boolean allowDynamicRefresh;
-
-    private ScheduledExecutorService onChangeEventExecutor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("fileOnChangeEventExecutor", 1, true));
 
     /**
      * Note that:this constructor is only used to create proxy with CGLIB
@@ -311,7 +306,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            onChangeEventExecutor.scheduleAtFixedRate(() -> {
+            while (true) {
                 try {
                     String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
                     String oldConfig = listenedConfigMap.get(dataId);
@@ -323,7 +318,12 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (Exception exx) {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage(), exx);
                 }
-            }, 10, LISTENER_CONFIG_INTERNAL, TimeUnit.MILLISECONDS);
+                try {
+                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         
         @Override
