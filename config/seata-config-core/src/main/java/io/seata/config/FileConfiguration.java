@@ -24,6 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -306,7 +308,9 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            while (true) {
+            ScheduledExecutorService onChangeEventExecutor =
+                new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(dataId + "onChangeEventExecutor", 1, true));
+            onChangeEventExecutor.scheduleAtFixedRate(() -> {
                 try {
                     String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
                     String oldConfig = listenedConfigMap.get(dataId);
@@ -315,13 +319,12 @@ public class FileConfiguration extends AbstractConfiguration {
                         event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
                         listener.onChangeEvent(event);
                     }
-                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
                 } catch (Exception exx) {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage(), exx);
                 }
-            }
+            }, 10, LISTENER_CONFIG_INTERNAL, TimeUnit.MILLISECONDS);
         }
-
+        
         @Override
         public ExecutorService getExecutorService() {
             return executor;
