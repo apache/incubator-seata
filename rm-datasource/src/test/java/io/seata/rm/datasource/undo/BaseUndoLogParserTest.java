@@ -184,7 +184,7 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test {
         field.setName("gmt_create");
         field.setKeyType(KeyType.PRIMARY_KEY);
         field.setType(JDBCType.TIMESTAMP.getVendorTypeNumber());
-        Timestamp timestampEncode = new Timestamp(System.currentTimeMillis());
+        Timestamp timestampEncode = new Timestamp(Integer.MAX_VALUE + 1L);
         timestampEncode.setNanos(999999);
         field.setValue(timestampEncode);
         row.add(field);
