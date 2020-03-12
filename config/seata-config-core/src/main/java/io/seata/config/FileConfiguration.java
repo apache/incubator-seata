@@ -321,11 +321,11 @@ public class FileConfiguration extends AbstractConfiguration {
                 try {
                     Thread.sleep(LISTENER_CONFIG_INTERNAL);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
             }
         }
-        
+
         @Override
         public ExecutorService getExecutorService() {
             return executor;
