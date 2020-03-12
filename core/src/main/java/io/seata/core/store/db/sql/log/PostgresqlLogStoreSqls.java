@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.sql;
+package io.seata.core.store.db.sql.log;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.constants.ServerTableColumnsName;

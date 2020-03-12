@@ -38,7 +38,7 @@ import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
-import io.seata.core.store.db.sql.LogStoreSqlsFactory;
+import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

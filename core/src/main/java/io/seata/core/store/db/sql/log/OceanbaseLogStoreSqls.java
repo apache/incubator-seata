@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.sql;
+package io.seata.core.store.db.sql.log;
 
 import io.seata.common.loader.LoadLevel;
 
 /**
- * Database log store h2 sql
+ * Database log store oceanbase sql
  * @author will
  */
-@LoadLevel(name = "h2")
-public class H2LogStoreSqls extends MysqlLogStoreSqls {
+@LoadLevel(name = "oceanbase")
+public class OceanbaseLogStoreSqls extends MysqlLogStoreSqls {
 }
