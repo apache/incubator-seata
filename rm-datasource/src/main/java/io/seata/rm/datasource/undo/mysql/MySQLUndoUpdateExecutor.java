@@ -22,6 +22,8 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
@@ -48,6 +50,7 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
      */
     @Override
     protected String buildUndoSQL() {
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (CollectionUtils.isEmpty(beforeImageRows)) {

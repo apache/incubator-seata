@@ -21,7 +21,6 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.alibaba.druid.util.JdbcConstants;
 import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
