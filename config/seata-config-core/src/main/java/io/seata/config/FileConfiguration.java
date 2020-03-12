@@ -316,7 +316,7 @@ public class FileConfiguration extends AbstractConfiguration {
                         listener.onChangeEvent(event);
                     }
                 } catch (Exception exx) {
-                    LOGGER.error("fileListener execute error:{}", exx.getMessage(), exx);
+                    LOGGER.error("fileListener execute error:{}", exx.getMessage());
                 }
                 try {
                     Thread.sleep(LISTENER_CONFIG_INTERNAL);
