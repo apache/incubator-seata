@@ -15,18 +15,20 @@
  */
 package io.seata.rm.datasource.undo.oracle.keyword;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type oracle sql keyword checker.
  *
  * @author ccg
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;
 
@@ -501,14 +503,33 @@ public class OracleKeywordChecker implements KeywordChecker {
     }
 
     @Override
+    public boolean checkEscape(String fieldOrTableName) {
+        boolean check = check(fieldOrTableName);
+        // oracle
+        // we are recommend table name and column name must uppercase.
+        // if exists full uppercase, the table name or column name does't bundle escape symbol.
+        if (!check && isUppercase(fieldOrTableName)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
         //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
     }
 
-    @Override
-    public String getDbType()
-    {
-        return JdbcConstants.ORACLE;
+    private static boolean isUppercase(String fieldOrTableName) {
+        if (fieldOrTableName == null) {
+            return false;
+        }
+        char[] chars = fieldOrTableName.toCharArray();
+        for (char ch : chars) {
+            if (ch >= 'a' && ch <= 'z') {
+                return false;
+            }
+        }
+        return true;
     }
 }

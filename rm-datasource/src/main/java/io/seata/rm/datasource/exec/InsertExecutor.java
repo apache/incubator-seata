@@ -28,15 +28,19 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
+
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLInsertRecognizer;
-import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Null;
-import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
-import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+
+import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +65,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+    public InsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -272,11 +276,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
             final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
-            LOGGER.warn("Fail to get auto-generated keys, use \'{}\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+            LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
             genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         } else {
             throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
@@ -368,10 +372,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkParameterHasExpr) {
             return false;
         }
-        if (pkParameterHasNull && pkParameterHasNotNull) {
-            return false;
-        }
-        return true;
+        return !pkParameterHasNull || !pkParameterHasNotNull;
     }
 
     /**
@@ -409,7 +410,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                LOGGER.warn("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
             } else {
                 throw e;
@@ -437,19 +438,14 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkMetaMap.size() != 1) {
             throw new NotSupportYetException();
         }
-        ResultSet genKeys = null;
-        try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
-        } catch (SQLException e) {
-            throw e;
-        }
+        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValues;
     }

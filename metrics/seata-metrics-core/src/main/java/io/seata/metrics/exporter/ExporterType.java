@@ -26,11 +26,11 @@ public enum ExporterType {
     /**
      * Export metrics data to Prometheus
      */
-    Prometheus;
+    PROMETHEUS;
 
     public static ExporterType getType(String name) {
-        if (Prometheus.name().equalsIgnoreCase(name)) {
-            return Prometheus;
+        if (PROMETHEUS.name().equalsIgnoreCase(name)) {
+            return PROMETHEUS;
         } else {
             throw new NotSupportYetException("unsupported type:" + name);
         }

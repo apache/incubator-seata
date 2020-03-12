@@ -53,29 +53,22 @@ public class BaseTransactionalExecutorTest {
         GlobalLockTemplate<Object> globalLockLocalTransactionalTemplate = new GlobalLockTemplate<>();
 
         // not in global lock context
-        ((Callable<Object>) () -> {
+        try {
+            baseTransactionalExecutor.execute(new Object());
+            Assertions.assertFalse(connectionProxy.isGlobalLockRequire(), "conectionContext set!");
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+
+        //in global lock context
+        globalLockLocalTransactionalTemplate.execute(() -> {
             try {
                 baseTransactionalExecutor.execute(new Object());
-                Assertions.assertTrue(!connectionProxy.isGlobalLockRequire(), "conectionContext set!");
+                Assertions.assertTrue(connectionProxy.isGlobalLockRequire(), "conectionContext not set!");
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
             return null;
-        }).call();
-
-        //in global lock context
-        globalLockLocalTransactionalTemplate.execute(new Callable<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                try {
-                    baseTransactionalExecutor.execute(new Object());
-                    Assertions.assertTrue(connectionProxy.isGlobalLockRequire(), "conectionContext not set!");
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-                return null;
-            }
         });
 
     }
