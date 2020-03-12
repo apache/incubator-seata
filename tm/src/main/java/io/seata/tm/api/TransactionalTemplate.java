@@ -120,10 +120,11 @@ public class TransactionalTemplate {
 
     }
 
-    private boolean existingTransaction() {
-        return StringUtils.isEmpty(RootContext.getXID()) ? false : true;
+    public boolean existingTransaction() {
+        return !StringUtils.isEmpty(RootContext.getXID());
 
     }
+
     /**
      * Suspend the current transaction
      * @return the transaction xid has suspended
