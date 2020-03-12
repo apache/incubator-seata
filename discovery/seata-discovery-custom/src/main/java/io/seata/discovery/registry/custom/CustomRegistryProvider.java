@@ -17,7 +17,6 @@ package io.seata.discovery.registry.custom;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryProvider;
@@ -29,7 +28,7 @@ import java.util.stream.Stream;
 /**
  * @author ggndnn
  */
-@LoadLevel(name = "Custom", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "Custom")
 public class CustomRegistryProvider implements RegistryProvider {
     private static final String FILE_CONFIG_KEY_PREFIX = "registry.custom.name";
 

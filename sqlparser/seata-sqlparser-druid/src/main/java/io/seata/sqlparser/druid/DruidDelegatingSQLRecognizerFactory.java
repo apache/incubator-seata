@@ -16,7 +16,6 @@
 package io.seata.sqlparser.druid;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
@@ -27,7 +26,7 @@ import java.lang.reflect.Constructor;
 /**
  * @author ggndnn
  */
-@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID, scope = Scope.PROTOTYPE)
+@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
 public class DruidDelegatingSQLRecognizerFactory implements SQLRecognizerFactory {
     private volatile SQLRecognizerFactory recognizerFactoryImpl;
 

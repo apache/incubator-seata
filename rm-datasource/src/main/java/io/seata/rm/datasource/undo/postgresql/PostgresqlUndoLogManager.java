@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.postgresql;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author japsercloud
  */
-@LoadLevel(name = JdbcConstants.POSTGRESQL, scope = Scope.PROTOTYPE)
+@LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlUndoLogManager.class);

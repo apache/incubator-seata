@@ -16,14 +16,13 @@
 package io.seata.config.etcd3;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Etcd3", order = 1, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "Etcd3", order = 1)
 public class EtcdConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {

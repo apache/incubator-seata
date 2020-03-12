@@ -16,14 +16,13 @@
 package io.seata.config.apollo;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Apollo", order = 1, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "Apollo", order = 1)
 public class ApolloConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {

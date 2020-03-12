@@ -16,7 +16,6 @@
 package io.seata.sqlparser.druid;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.DbTypeParser;
 
@@ -25,7 +24,7 @@ import java.lang.reflect.Constructor;
 /**
  * @author ggndnn
  */
-@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID, scope = Scope.PROTOTYPE)
+@LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
 public class DruidDelegatingDbTypeParser implements DbTypeParser {
     private DbTypeParser dbTypeParserImpl;
 

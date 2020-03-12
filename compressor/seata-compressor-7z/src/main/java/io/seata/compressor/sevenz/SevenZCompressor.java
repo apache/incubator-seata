@@ -16,7 +16,6 @@
 package io.seata.compressor.sevenz;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.core.compressor.Compressor;
 
 /**
@@ -24,7 +23,7 @@ import io.seata.core.compressor.Compressor;
  *
  * @author ph3636
  */
-@LoadLevel(name = "SEVENZ", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "SEVENZ")
 public class SevenZCompressor implements Compressor {
 
     @Override

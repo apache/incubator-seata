@@ -16,14 +16,13 @@
 package io.seata.config.nacos;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Nacos", order = 1, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "Nacos", order = 1)
 public class NacosConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {

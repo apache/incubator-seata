@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
-import io.seata.common.loader.Scope;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  *
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;
 

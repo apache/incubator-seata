@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import io.seata.common.loader.Scope;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -40,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-@LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);

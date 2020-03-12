@@ -17,7 +17,6 @@ package io.seata.server.store.db;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.core.store.db.AbstractDataSourceGenerator;
 
 import javax.sql.DataSource;
@@ -28,7 +27,7 @@ import javax.sql.DataSource;
  * @author zhangsen
  * @author ggndnn
  */
-@LoadLevel(name = "druid", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "druid")
 public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
     @Override
     public DataSource generateDataSource() {

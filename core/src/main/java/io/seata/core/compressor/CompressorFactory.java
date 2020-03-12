@@ -18,7 +18,6 @@ package io.seata.core.compressor;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 
-import io.seata.common.loader.Scope;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -56,7 +55,7 @@ public class CompressorFactory {
     /**
      * None compressor
      */
-    @LoadLevel(name = "NONE", scope = Scope.PROTOTYPE)
+    @LoadLevel(name = "NONE")
     public static class NoneCompressor implements Compressor {
         @Override
         public byte[] compress(byte[] bytes) {

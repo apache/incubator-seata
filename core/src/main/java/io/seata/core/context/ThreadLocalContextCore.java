@@ -15,7 +15,6 @@
  */
 package io.seata.core.context;
 
-import io.seata.common.loader.Scope;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ import io.seata.common.loader.LoadLevel;
  *
  * @author slievrly
  */
-@LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE)
 public class ThreadLocalContextCore implements ContextCore {
 
     private ThreadLocal<Map<String, String>> threadLocal = new ThreadLocal<Map<String, String>>() {

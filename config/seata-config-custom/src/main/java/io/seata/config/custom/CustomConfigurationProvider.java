@@ -17,7 +17,6 @@ package io.seata.config.custom;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigType;
 import io.seata.config.Configuration;
@@ -30,7 +29,7 @@ import java.util.stream.Stream;
 /**
  * @author ggndnn
  */
-@LoadLevel(name = "Custom", scope = Scope.PROTOTYPE)
+@LoadLevel(name = "Custom")
 public class CustomConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {

@@ -35,7 +35,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -57,7 +56,7 @@ import javax.sql.rowset.serial.SerialException;
  *
  * @author jsbxyyx
  */
-@LoadLevel(name = JacksonUndoLogParser.NAME, scope = Scope.PROTOTYPE)
+@LoadLevel(name = JacksonUndoLogParser.NAME)
 public class JacksonUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "jackson";

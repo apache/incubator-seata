@@ -16,14 +16,13 @@
 package io.seata.discovery.registry.nacos;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.discovery.registry.RegistryService;
 import io.seata.discovery.registry.RegistryProvider;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Nacos", order = 1, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "Nacos", order = 1)
 public class NacosRegistryProvider implements RegistryProvider {
     @Override
     public RegistryService provide() {
