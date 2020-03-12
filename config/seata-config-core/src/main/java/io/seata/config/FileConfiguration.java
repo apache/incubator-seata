@@ -53,7 +53,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
-    private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
+    private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
 
@@ -319,7 +319,7 @@ public class FileConfiguration extends AbstractConfiguration {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage());
                 }
                 try {
-                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
+                    Thread.sleep(LISTENER_CONFIG_INTERVAL);
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
