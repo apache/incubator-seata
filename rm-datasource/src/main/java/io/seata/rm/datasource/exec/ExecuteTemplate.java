@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
@@ -116,7 +117,7 @@ public class ExecuteTemplate {
             return false;
         }
 
-        if (RootContext.inGlobalTransaction() && !RootContext.getBranchType().equals(String.valueOf(BranchType.AT.ordinal()))) {
+        if (RootContext.inGlobalTransaction() && !StringUtils.equals(RootContext.getBranchType(),String.valueOf(BranchType.AT.ordinal()))) {
             return false;
         }
 
