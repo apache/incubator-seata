@@ -158,7 +158,9 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                     return stateMachine;
                 }
             }
-            stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE));
+            if (StringUtils.isBlank(stateMachine.getId())) {
+                stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE));
+            }
             stateMachine.setGmtCreate(new Date());
             stateLangStore.storeStateMachine(stateMachine);
         }
