@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.store.db;
 
+import io.seata.core.model.BranchType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -116,6 +117,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             TransactionInfo transactionInfo = new TransactionInfo();
             transactionInfo.setTimeOut(stateMachineConfig.getTransOperationTimeout());
             transactionInfo.setName(machineInstance.getStateMachine().getName());
+            transactionInfo.setBranchType(BranchType.SAGA);
             try {
                 GlobalTransaction globalTransaction = sagaTransactionalTemplate.beginTransaction(transactionInfo);
                 machineInstance.setId(globalTransaction.getXid());

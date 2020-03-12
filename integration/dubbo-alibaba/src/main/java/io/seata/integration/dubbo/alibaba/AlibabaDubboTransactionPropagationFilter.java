@@ -43,24 +43,20 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
             return invoker.invoke(invocation);
         }
         String xid = RootContext.getXID();
-        String xidInterceptorType = RootContext.getXIDInterceptorType();
 
         String rpcXid = getRpcXid();
-        String rpcXidInterceptorType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE, xidInterceptorType);
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
-                RootContext.bindInterceptorType(rpcXidInterceptorType);
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[{}] interceptorType[{}] to RootContext", rpcXid, rpcXidInterceptorType);
+                    LOGGER.debug("bind[{}] to RootContext", rpcXid);
                 }
             }
         }
@@ -69,19 +65,15 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
 
         } finally {
             if (bind) {
-                String unbindInterceptorType = RootContext.unbindInterceptorType();
                 String unbindXid = RootContext.unbind();
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind[{}] interceptorType[{}] from RootContext", unbindXid, unbindInterceptorType);
+                    LOGGER.debug("unbind[{}] from RootContext", unbindXid);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {}, xidInterceptorType from {} to {} ", rpcXid,
-                        unbindXid, rpcXidInterceptorType, unbindInterceptorType);
+                    LOGGER.warn("xid in change during RPC from {} to {} ", rpcXid, unbindXid);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        RootContext.bindInterceptorType(unbindInterceptorType);
-                        LOGGER.warn("bind [{}] interceptorType[{}] back to RootContext", unbindXid,
-                            unbindInterceptorType);
+                        LOGGER.warn("bind [{}] back to RootContext", unbindXid);
                     }
                 }
             }

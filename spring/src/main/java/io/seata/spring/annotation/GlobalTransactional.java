@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.core.model.BranchType;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionInfo;
 
@@ -75,4 +76,10 @@ public @interface GlobalTransactional {
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;
+
+    /**
+     * the branch type
+     * @return
+     */
+    BranchType branchType() default BranchType.AT;
 }
