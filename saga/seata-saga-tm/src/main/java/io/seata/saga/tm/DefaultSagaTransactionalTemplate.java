@@ -84,7 +84,7 @@ public class DefaultSagaTransactionalTemplate
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getBranchType());
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
