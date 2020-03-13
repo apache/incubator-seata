@@ -197,10 +197,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         BranchType branchType = null;
-        String branchTypeStr = RootContext.getBranchType();
-        if (StringUtils.isNotEmpty(branchTypeStr) && unbindBranchType) {
-            RootContext.unbindBranchType();
-            branchType = BranchType.valueOf(branchTypeStr);
+        String previousBranchType = RootContext.getBranchType();
+        if (StringUtils.isNotEmpty(previousBranchType) && unbindBranchType) {
+            previousBranchType = RootContext.unbindBranchType();
+            branchType = BranchType.get(Integer.parseInt(previousBranchType));
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Unbinding current transaction branchType,branchType = {}",branchType);
             }
