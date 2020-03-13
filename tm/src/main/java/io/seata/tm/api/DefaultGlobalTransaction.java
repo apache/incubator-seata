@@ -15,11 +15,11 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -41,6 +41,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private static final int DEFAULT_GLOBAL_TX_TIMEOUT = 60000;
 
     private static final String DEFAULT_GLOBAL_TX_NAME = "default";
+
+    private static final BranchType DEFAULT_GLOBAL_TX_BRANCH_TYPE = BranchType.AT;
 
     private TransactionManager transactionManager;
 
@@ -84,27 +86,26 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout) throws TransactionException {
-        begin(timeout, DEFAULT_GLOBAL_TX_NAME);
+        begin(timeout, DEFAULT_GLOBAL_TX_NAME, DEFAULT_GLOBAL_TX_BRANCH_TYPE);
     }
 
     @Override
-    public void begin(int timeout, String name) throws TransactionException {
+    public void begin(int timeout, String name, BranchType branchType) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
-            check();
+            assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
-        if (xid != null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNull();
         if (RootContext.getXID() != null) {
             throw new IllegalStateException();
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
+        RootContext.bindBranchType(branchType);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
@@ -120,9 +121,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
         int retry = COMMIT_RETRY_COUNT;
         try {
             while (retry > 0) {
@@ -140,6 +139,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 RootContext.unbind();
+                RootContext.unbindBranchType();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -157,9 +157,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
 
         int retry = ROLLBACK_RETRY_COUNT;
         try {
@@ -178,6 +176,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 RootContext.unbind();
+                RootContext.unbindBranchType();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -201,9 +200,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
+
         if (globalStatus == null) {
             throw new IllegalStateException();
         }
@@ -215,13 +213,25 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
         if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
             RootContext.unbind();
+            RootContext.unbindBranchType();
         }
     }
 
-    private void check() {
+    @Override
+    public GlobalStatus getLocalStatus() {
+        return status;
+    }
+
+    private void assertXIDNotNull() {
         if (xid == null) {
-            throw new ShouldNeverHappenException();
+            throw new IllegalStateException();
         }
-
     }
+
+    private void assertXIDNull() {
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
+    }
+
 }

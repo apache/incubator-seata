@@ -16,6 +16,8 @@
 package io.seata.rm.datasource.undo.parser;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.sql.Timestamp;
 
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
@@ -51,7 +53,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         ID_STRATEGY.registerDelegate(new TimeDelegate());
     }
 
-    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class);
+    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class, ID_STRATEGY);
 
     @Override
     public String getName() {
@@ -94,7 +96,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public FieldType getFieldType() {
-            return FieldType.FIXED64;
+            return FieldType.BYTES;
         }
 
         @Override
@@ -104,17 +106,27 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public java.sql.Timestamp readFrom(Input input) throws IOException {
-            return new java.sql.Timestamp(input.readFixed64());
+            ByteBuffer buffer = input.readByteBuffer();
+            long time = buffer.getLong();
+            int nanos = buffer.getInt();
+            buffer.flip();
+            java.sql.Timestamp timestamp = new Timestamp(time);
+            timestamp.setNanos(nanos);
+            return timestamp;
         }
 
         @Override
         public void writeTo(Output output, int number, java.sql.Timestamp value, boolean repeated) throws IOException {
-            output.writeFixed64(number, value.getTime(), repeated);
+            ByteBuffer buffer = ByteBuffer.allocate(12);
+            buffer.putLong(value.getTime());
+            buffer.putInt(value.getNanos());
+            buffer.flip();
+            output.writeBytes(number, buffer, repeated);
         }
 
         @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
-            output.writeFixed64(number, input.readFixed64(), repeated);
+            output.writeBytes(number, input.readByteBuffer(), repeated);
         }
     }
 
