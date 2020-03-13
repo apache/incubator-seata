@@ -305,7 +305,7 @@ public abstract class AbstractUndoExecutor {
 
     protected List<Field> getOrderedPkList(TableRecords image,Row row){
         List<Field> pkFields = new ArrayList<>();
-        // To ensure the order of the pk, we the order should based on getPrimaryKeyOnlyName.
+        // To ensure the order of the pk, the order should based on getPrimaryKeyOnlyName.
         List<String> pkColumnNameListByOrder = image.getTableMeta().getPrimaryKeyOnlyName();
         List<String> pkColumnNameListNoOrder = row.primaryKeys().stream().map(e->e.getName()).collect(Collectors.toList());
         pkColumnNameListByOrder.forEach(pkName->{

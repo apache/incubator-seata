@@ -87,6 +87,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Boolean isContainsPk=containsPK();
         if (isStatement&&moreThanOneRow)
         {
+            //Because we can't obtain the auto increment value if the program run batch insert sql in the form of statement.
+            //We can't rollback without the auto increment value.
             throw new NotSupportYetException("Not support statement batch insert sql");
         }
         //when there is only one pk in the table

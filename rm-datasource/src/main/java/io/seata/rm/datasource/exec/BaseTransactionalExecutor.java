@@ -163,6 +163,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
             whereCondition = whereConditionSb.toString();
         }
+        // fix druid bug parse where contain \n
+        if(StringUtils.isNotBlank(whereCondition)&&whereCondition.contains("\n"))
+        {
+            whereCondition=whereCondition.replace("\n"," ");
+        }
         return whereCondition;
     }
 

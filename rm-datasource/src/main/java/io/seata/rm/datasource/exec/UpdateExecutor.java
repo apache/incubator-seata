@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 
 import io.seata.sqlparser.SQLRecognizer;
@@ -68,7 +69,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         updateColumns.forEach(e->{
-            boolean isFind=tableMeta.getPrimaryKeyOnlyName().stream().anyMatch(a->e.equals(a));
+            boolean isFind=tableMeta.getPrimaryKeyOnlyName()
+                    .stream()
+                    .anyMatch(a->ColumnUtils.delEscape(e,getDbType()).equals(a));
             if(isFind)
             {
                 throw new NotSupportYetException("not support update pk column.");
