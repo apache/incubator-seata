@@ -79,18 +79,18 @@ public class TransactionalTemplate {
                     break;
                 case NEVER:
                     if (existingTransaction()) {
-                        throw new IllegalArgumentException("Existing transaction found for transaction marked with propagation 'never'");
+                        throw new TransactionException("Existing transaction found for transaction marked with propagation 'never'");
                     } else {
                         return business.execute();
                     }
                 case MANDATORY:
                     if (!existingTransaction()) {
-                        throw new IllegalArgumentException("No existing transaction found for transaction marked with propagation 'mandatory'");
+                        throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
                     suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 default:
-                    throw new IllegalArgumentException("Not Supported Propagation:" + propagation);
+                    throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
 
