@@ -16,7 +16,9 @@
 package io.seata.tm.api;
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 
 /**
  * Global transaction.
@@ -47,10 +49,11 @@ public interface GlobalTransaction {
      *
      * @param timeout Given timeout in MILLISECONDS.
      * @param name    Given name.
+     * @param branchType Given branchType
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    void begin(int timeout, String name) throws TransactionException;
+    void begin(int timeout, String name, BranchType branchType) throws TransactionException;
 
     /**
      * Commit the global transaction.
@@ -67,6 +70,27 @@ public interface GlobalTransaction {
      * out.
      */
     void rollback() throws TransactionException;
+
+    /**
+     * Suspend the global transaction.
+     *
+     * @param unbindXid if true,suspend the global transaction.
+     * @param unbindBranchType if true,unbind the branchType
+     * @return the SuspendedResourcesHolder which holds the suspend resources
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * @see SuspendedResourcesHolder
+     */
+    SuspendedResourcesHolder suspend(boolean unbindXid,boolean unbindBranchType) throws TransactionException;
+
+    /**
+     * Resume the global transaction.
+     *
+     * @param suspendedResourcesHolder the suspended resources to resume
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * out.
+     * @see SuspendedResourcesHolder
+     */
+    void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException;
 
     /**
      * Ask TC for current status of the corresponding global transaction.

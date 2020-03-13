@@ -22,6 +22,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -52,22 +53,29 @@ public class TransactionalTemplate {
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
+        // 1.1 get or create a transaction
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+
+        // 1.2 Handle the Transaction propatation and the branchType
         Propagation propagation = txInfo.getPropagation();
-        String suspendedXid = null;
+        SuspendedResourcesHolder suspendedResourcesHolder = null;
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
-                    suspendedXid = suspend();
+                    suspendedResourcesHolder = tx.suspend(true,false);
                     return business.execute();
                 case REQUIRES_NEW:
-                    suspendedXid = suspend();
+                    suspendedResourcesHolder = tx.suspend(true,true);
                     break;
                 case SUPPORTS:
                     if (!existingTransaction()) {
                         return business.execute();
                     }
+                    suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 case REQUIRED:
+                    //AT can be nested inside the MT,need to switch branchType
+                    suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 case NEVER:
                     if (existingTransaction()) {
@@ -79,13 +87,12 @@ public class TransactionalTemplate {
                     if (!existingTransaction()) {
                         throw new IllegalArgumentException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
+                    suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 default:
                     throw new IllegalArgumentException("Not Supported Propagation:" + propagation);
             }
 
-            // 1.1 get or create a transaction
-            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
             try {
 
@@ -115,7 +122,7 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            resume(suspendedXid);
+            tx.resume(suspendedResourcesHolder);
         }
 
     }
@@ -125,33 +132,7 @@ public class TransactionalTemplate {
 
     }
 
-    /**
-     * Suspend the current transaction
-     * @return the transaction xid has suspended
-     */
-    private String suspend() {
-        String xid = RootContext.getXID();
-        if (!StringUtils.isEmpty(xid)) {
-            xid = RootContext.unbind();
-        }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Suspending current transaction,xid = {}",xid);
-        }
-        return xid;
-    }
 
-    /**
-     * Resume the given transaction
-     * @param suspendedXid the transaction xid to resume
-     */
-    private void resume(String suspendedXid) {
-        if (!StringUtils.isEmpty(suspendedXid)) {
-            RootContext.bind(suspendedXid);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Resumimg the transaction,xid = {}",suspendedXid);
-            }
-        }
-    }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
         //roll back
@@ -193,7 +174,7 @@ public class TransactionalTemplate {
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getBranchType());
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
