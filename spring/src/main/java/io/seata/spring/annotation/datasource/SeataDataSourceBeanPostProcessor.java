@@ -34,14 +34,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
-import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
 /**
  * @author xingfudeshi@gmail.com
  * The type seata data source bean post processor
  */
-public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor, PriorityOrdered {
+public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor, Ordered {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataDataSourceBeanPostProcessor.class);
     private final boolean useJdkProxy;
 
