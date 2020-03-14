@@ -19,7 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import io.seata.common.util.CollectionUtils;
@@ -39,10 +40,6 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -118,18 +115,18 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String buildWhereConditionByPKs(List<Map<String,Field>> pkRows) throws SQLException {
         StringBuilder sql = new StringBuilder();
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        for(int i=0;i<pkColumnNameList.size();i++)
+        for (int i = 0;i < pkColumnNameList.size();i++)
         {
-            if(i>0)
+            if (i > 0)
             {
                 sql.append(" AND ");
             }
             String pkKey = pkColumnNameList.get(i);
             StringJoiner pkValuesJoiner = new StringJoiner(" , ",
                     " " + pkKey + " in (", ")");
-            List<Field> pkFieldList=pkRows.stream()
-                    .map(e->e.get(pkKey))
-                    .filter(e->Objects.nonNull(e))
+            List<Field> pkFieldList = pkRows.stream()
+                    .map(e -> e.get(pkKey))
+                    .filter(e -> Objects.nonNull(e))
                     .collect(Collectors.toList());
             for (Field pkValue : pkFieldList) {
                 pkValuesJoiner.add("?");
@@ -164,9 +161,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             whereCondition = whereConditionSb.toString();
         }
         // fix druid bug parse where contain \n
-        if(StringUtils.isNotBlank(whereCondition)&&whereCondition.contains("\n"))
+        if (StringUtils.isNotBlank(whereCondition) && whereCondition.contains("\n"))
         {
-            whereCondition=whereCondition.replace("\n"," ");
+            whereCondition = whereCondition.replace("\n"," ");
         }
         return whereCondition;
     }
@@ -189,14 +186,14 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the column name in sql
      */
     protected String getColumnNamesInSQL(List<String> columnNameList) {
-        if(Objects.isNull(columnNameList)||columnNameList.isEmpty())
+        if (Objects.isNull(columnNameList) || columnNameList.isEmpty())
         {
             return null;
         }
         StringBuffer columnNamesStr = new StringBuffer();
-        for(int i =0;i<columnNameList.size();i++)
+        for (int i = 0;i < columnNameList.size(); i++)
         {
-            if(i>0)
+            if (i > 0)
             {
                 columnNamesStr.append(" , ");
             }
@@ -303,10 +300,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         int filedSequence = 0;
         List<Map<String,Field>> pksRows = rowsIncludingPK.pkRows();
         for (Map<String,Field> rowMap : pksRows) {
-            int pkSplitIndex=0;
-            for(String pkName:getTableMeta().getPrimaryKeyOnlyName())
+            int pkSplitIndex = 0;
+            for (String pkName:getTableMeta().getPrimaryKeyOnlyName())
             {
-                if(pkSplitIndex>0)
+                if (pkSplitIndex > 0)
                 {
                     sb.append("_");
                 }
@@ -383,9 +380,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 .append(" WHERE ");
 
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        for(int i=0;i<pkColumnNameList.size();i++)
+        for (int i = 0;i < pkColumnNameList.size();i++)
         {
-            if(i>0)
+            if (i > 0)
             {
                 sql.append(" AND ");
             }
@@ -403,8 +400,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         try {
             ps = statementProxy.getConnection().prepareStatement(sql.toString());
 
-            int paramIndex=1;
-            for(String columnName:pkColumnNameList)
+            int paramIndex = 1;
+            for (String columnName:pkColumnNameList)
             {
                 for (Object pkValue : pkValuesMap.get(columnName)) {
                     ps.setObject(paramIndex, pkValue);

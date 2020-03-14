@@ -17,7 +17,6 @@ package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -58,18 +57,17 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
     @Override
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
             throws SQLException {
-        int undoIndex=0;
-        for(Field pkField:pkValueList)
-        {
+        int undoIndex = 0;
+        for (Field pkField:pkValueList) {
             undoIndex++;
             undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
         }
     }
 
 
-    private String generateDeleteSql(List<Row> rows,TableRecords afterImage ) {
+    private String generateDeleteSql(List<Row> rows,TableRecords afterImage) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        List<String> pkNameList=getOrderedPkList(afterImage,rows.get(0)).stream().map(e->e.getName()).collect(Collectors.toList());
+        List<String> pkNameList = getOrderedPkList(afterImage,rows.get(0)).stream().map(e -> e.getName()).collect(Collectors.toList());
         String whereSql = buildWhereConditionByPKs(pkNameList,keywordChecker);
         return String.format(DELETE_SQL_TEMPLATE,keywordChecker.checkAndReplace(sqlUndoLog.getTableName()), whereSql);
     }

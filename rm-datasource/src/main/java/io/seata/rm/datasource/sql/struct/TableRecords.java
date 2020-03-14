@@ -25,7 +25,10 @@ import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Table records.
@@ -135,7 +138,7 @@ public class TableRecords {
             List<Field> fields = row.getFields();
             Map<String,Field> rowMap = new HashMap<>(3);
             for (Field field : fields) {
-                if (pkNameList.stream().anyMatch(e->field.getName().equalsIgnoreCase(e))) {
+                if (pkNameList.stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {
                     rowMap.put(field.getName(),field);
                 }
             }
@@ -183,7 +186,7 @@ public class TableRecords {
                 ColumnMeta col = tmeta.getColumnMeta(colName);
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPrimaryKeyOnlyName().stream().anyMatch(e->field.getName().equalsIgnoreCase(e))) {
+                if (tmeta.getPrimaryKeyOnlyName().stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(col.getDataType());

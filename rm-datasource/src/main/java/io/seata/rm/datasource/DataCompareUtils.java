@@ -28,7 +28,11 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.HashMap;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -183,7 +187,7 @@ public class DataCompareUtils {
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
             //ensure the order of column
-            List<Field> rowFieldList=row.getFields().stream()
+            List<Field> rowFieldList = row.getFields().stream()
                     .sorted(Comparator.comparing(Field::getName))
                     .collect(Collectors.toList());
             // {uppercase fieldName : field}
@@ -191,14 +195,14 @@ public class DataCompareUtils {
             String rowKey = new String();
             for (int j = 0; j < rowFieldList.size(); j++) {
                 Field field = rowFieldList.get(j);
-                if (primaryKeyList.stream().anyMatch(e->field.getName().equals(e))) {
-                    rowKey=rowKey+String.valueOf(field.getValue())+"_";
+                if (primaryKeyList.stream().anyMatch(e -> field.getName().equals(e))) {
+                    rowKey = rowKey + String.valueOf(field.getValue()) + "_";
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
             }
-            if(rowKey.lastIndexOf("_")!=-1)
+            if (rowKey.lastIndexOf("_") != -1)
             {
-                rowKey=rowKey.substring(0,rowKey.lastIndexOf("_"));
+                rowKey = rowKey.substring(0,rowKey.lastIndexOf("_"));
             }
             rowMap.put(rowKey, colsMap);
         }

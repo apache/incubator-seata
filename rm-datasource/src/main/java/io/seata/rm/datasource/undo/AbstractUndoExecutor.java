@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -183,8 +183,7 @@ public abstract class AbstractUndoExecutor {
         // INSERT INTO a (x, y, z, pk1,pk2) VALUES (?, ?, ?, ? ,?)
         // UPDATE a SET x=?, y=?, z=? WHERE pk1 in (?) and pk2 in (?)
         // DELETE FROM a WHERE pk1 in (?) and pk2 in (?)
-        for(Field pkField:pkValueList)
-        {
+        for (Field pkField:pkValueList) {
             undoIndex++;
             undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
         }
@@ -284,13 +283,12 @@ public abstract class AbstractUndoExecutor {
         TableRecords currentRecords;
         try {
             statement = conn.prepareStatement(checkSQL);
-            int paramIndex=1;
-            for(String key:pkNameList)
-            {
-                List<Field> fieldList= pkRowValues.get(key);
-                for (int i = 0; i<fieldList.size(); i++) {
-                    Field field=fieldList.get(i);
-                    int dataType=tableMeta.getColumnMeta(field.getName()).getDataType();
+            int paramIndex = 1;
+            for (String key:pkNameList) {
+                List<Field> fieldList = pkRowValues.get(key);
+                for (int i = 0; i < fieldList.size(); i++) {
+                    Field field = fieldList.get(i);
+                    int dataType = tableMeta.getColumnMeta(field.getName()).getDataType();
                     statement.setObject(paramIndex,field.getValue(),dataType);
                     paramIndex++;
                 }
@@ -303,15 +301,14 @@ public abstract class AbstractUndoExecutor {
         return currentRecords;
     }
 
-    protected List<Field> getOrderedPkList(TableRecords image,Row row){
+    protected List<Field> getOrderedPkList(TableRecords image,Row row) {
         List<Field> pkFields = new ArrayList<>();
         // To ensure the order of the pk, the order should based on getPrimaryKeyOnlyName.
         List<String> pkColumnNameListByOrder = image.getTableMeta().getPrimaryKeyOnlyName();
-        List<String> pkColumnNameListNoOrder = row.primaryKeys().stream().map(e->e.getName()).collect(Collectors.toList());
-        pkColumnNameListByOrder.forEach(pkName->{
-            int pkIndex=pkColumnNameListNoOrder.indexOf(pkName);
-            if(pkIndex!=-1)
-            {
+        List<String> pkColumnNameListNoOrder = row.primaryKeys().stream().map(e -> e.getName()).collect(Collectors.toList());
+        pkColumnNameListByOrder.forEach(pkName -> {
+            int pkIndex = pkColumnNameListNoOrder.indexOf(pkName);
+            if (pkIndex != -1) {
                 // add PK to the last of the list.
                 pkFields.add(row.primaryKeys().get(pkIndex));
             }
@@ -327,12 +324,11 @@ public abstract class AbstractUndoExecutor {
     protected String buildWhereConditionByPKs(List<String> pkNameList,KeywordChecker keywordChecker) {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
-        for (int i =0;i<pkNameList.size();i++)
-        {
-            if(i>0){
+        for (int i = 0;i < pkNameList.size(); i++) {
+            if (i > 0) {
                 whereStr.append(" and ");
             }
-            String pkName =pkNameList.get(i);
+            String pkName = pkNameList.get(i);
             whereStr.append(keywordChecker.checkAndReplace(pkName));
             whereStr.append(" = ? ");
         }
@@ -348,18 +344,17 @@ public abstract class AbstractUndoExecutor {
     protected String buildWhereConditionByPKs(List<String> pkNameList,Map<String,List<Field>> pkRowValues,Connection conn) throws SQLException {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
-        for (int i =0;i<pkNameList.size();i++)
-        {
-            if(i>0){
+        for (int i = 0;i < pkNameList.size(); i++) {
+            if (i > 0) {
                 whereStr.append(" and ");
             }
-            String pkName =pkNameList.get(i);
+            String pkName = pkNameList.get(i);
             whereStr.append(ColumnUtils.addEscape(pkName,getDbType(conn)));
             whereStr.append(" in ( ");
-            List<Field> valueList=pkRowValues.get(pkName);
+            List<Field> valueList = pkRowValues.get(pkName);
             StringBuffer pkValueStr = new StringBuffer();
-            for(int r=0;r<valueList.size();r++){
-                if(r>0){
+            for (int r = 0;r < valueList.size(); r++) {
+                if (r > 0) {
                     pkValueStr.append(",");
                 }
                 pkValueStr.append("?");
@@ -395,7 +390,7 @@ public abstract class AbstractUndoExecutor {
             List<Field> fields = rows.get(i).getFields();
             if (fields != null) {
                 for (Field field : fields) {
-                    if (pkNameList.stream().anyMatch(e->field.getName().equals(e))) {
+                    if (pkNameList.stream().anyMatch(e -> field.getName().equals(e))) {
                         pkFieldList.add(field);
                     }
                 }

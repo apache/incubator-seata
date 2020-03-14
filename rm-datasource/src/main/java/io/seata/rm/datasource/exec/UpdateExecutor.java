@@ -19,8 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
@@ -30,7 +34,6 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.commons.lang.StringUtils;
@@ -68,12 +71,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        updateColumns.forEach(e->{
-            boolean isFind=tableMeta.getPrimaryKeyOnlyName()
+        updateColumns.forEach(e -> {
+            boolean isFind = tableMeta.getPrimaryKeyOnlyName()
                     .stream()
-                    .anyMatch(a->ColumnUtils.delEscape(e,getDbType()).equals(a));
-            if(isFind)
-            {
+                    .anyMatch(a -> ColumnUtils.delEscape(e,getDbType()).equals(a));
+            if (isFind) {
                 throw new NotSupportYetException("not support update pk column.");
             }
         });
@@ -103,18 +105,16 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
-            List<Map<String,Field>> pkRowsList=beforeImage.pkRows();
+            List<Map<String,Field>> pkRowsList = beforeImage.pkRows();
             List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
             int paramIndex = 1;
-            for(int i=0;i<pkColumnNameList.size();i++)
-            {
-                String pkKey=pkColumnNameList.get(i);
-                List<Field> fieldList=pkRowsList.stream()
-                        .map(e->e.get(pkKey))
-                        .filter(e->Objects.nonNull(e))
+            for (int i = 0;i < pkColumnNameList.size(); i++) {
+                String pkKey = pkColumnNameList.get(i);
+                List<Field> fieldList = pkRowsList.stream()
+                        .map(e -> e.get(pkKey))
+                        .filter(e -> Objects.nonNull(e))
                         .collect(Collectors.toList());
-                for(Field pkField:fieldList)
-                {
+                for (Field pkField:fieldList) {
                     pst.setObject(paramIndex, pkField.getValue(), pkField.getType());
                     paramIndex++;
                 }

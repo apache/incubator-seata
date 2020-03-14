@@ -19,7 +19,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import io.seata.core.context.RootContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,15 +29,15 @@ import java.util.concurrent.TimeUnit;
  */
 public final class GlobalTransactionHookManager {
 
-    private static final Cache<String ,List<GlobalTransactionHook> > LOCAL_HOOKS = CacheBuilder.newBuilder()
+    private static final Cache<String ,List<GlobalTransactionHook>> LOCAL_HOOKS = CacheBuilder.newBuilder()
             .maximumSize(2000)
-            .expireAfterWrite(60*10, TimeUnit.SECONDS)
+            .expireAfterWrite(60 * 10, TimeUnit.SECONDS)
             .build();
 
     /**
      * get the current hooks
      *
-     * @param xId 由xid组成
+     * @param xId
      * @return
      * @throws IllegalStateException
      */
@@ -59,7 +61,7 @@ public final class GlobalTransactionHookManager {
         if (globalTransactionHook == null) {
             throw new NullPointerException("globalTransactionHook must not be null");
         }
-        String xId=RootContext.getXID();
+        String xId = RootContext.getXID();
         List<GlobalTransactionHook> hookList = LOCAL_HOOKS.getIfPresent(xId);
         if (hookList == null) {
             hookList = new ArrayList<>();
