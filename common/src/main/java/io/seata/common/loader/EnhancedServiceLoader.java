@@ -27,14 +27,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -475,14 +473,7 @@ public class EnhancedServiceLoader {
 
         @SuppressWarnings("rawtypes")
         private Map<ExtensionURL, Class<?>> findAllExtensionClass(ClassLoader loader) {
-            Map<ExtensionURL, Class<?>> extensions = new TreeMap<>(new Comparator<ExtensionURL>() {
-                @Override
-                public int compare(ExtensionURL url1, ExtensionURL url2) {
-                    int o1 = url1.getOrder();
-                    int o2 = url2.getOrder();
-                    return Integer.compare(o1, o2);
-                }
-            });
+            Map<ExtensionURL, Class<?>> extensions = new HashMap<>();
             try {
                 loadFile(SERVICES_DIRECTORY, loader, extensions);
                 loadFile(SEATA_DIRECTORY, loader, extensions);
@@ -490,19 +481,35 @@ public class EnhancedServiceLoader {
                 throw new EnhancedServiceNotFoundException(e);
             }
 
+            if (!extensions.isEmpty()) {
+                extensions = sortAllExtensionClass(extensions);
+            }
+
             if (!extensionNameUrlsMap.isEmpty()) {
                 for (List<ExtensionURL> urlList : extensionNameUrlsMap.values()) {
-                    Collections.sort(urlList, new Comparator<ExtensionURL>() {
-                        @Override
-                        public int compare(ExtensionURL url1, ExtensionURL url2) {
-                            int o1 = url1.getOrder();
-                            int o2 = url2.getOrder();
-                            return Integer.compare(o1, o2);
-                        }
+                    Collections.sort(urlList, (url1, url2) -> {
+                        int o1 = url1.getOrder();
+                        int o2 = url2.getOrder();
+                        return Integer.compare(o1, o2);
                     });
                 }
             }
             return extensions;
+        }
+
+        private Map<ExtensionURL, Class<?>> sortAllExtensionClass(Map<ExtensionURL, Class<?>> extensions) {
+            Set<ExtensionURL> entrySet = extensions.keySet();
+            List<ExtensionURL> list = new ArrayList<>(entrySet);
+            Collections.sort(list, (url1, url2) -> {
+                int o1 = url1.getOrder();
+                int o2 = url2.getOrder();
+                return Integer.compare(o1, o2);
+            });
+            LinkedHashMap<ExtensionURL, Class<?>> linkedHashMap = new LinkedHashMap<ExtensionURL, Class<?>>();
+            for (ExtensionURL url : list) {
+                linkedHashMap.put(url, extensions.get(url));
+            }
+            return linkedHashMap;
         }
 
         @SuppressWarnings("rawtypes")
@@ -553,9 +560,8 @@ public class EnhancedServiceLoader {
             Integer priority = 0;
             Scope scope = Scope.SINGLETON;
             LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
-            if (loadLevel == null) {
-                typeName = clazz.getTypeName();
-            } else {
+            typeName = clazz.getTypeName();
+            if (loadLevel != null) {
                 serviceName = loadLevel.name();
                 priority = loadLevel.order();
                 scope = loadLevel.scope();
