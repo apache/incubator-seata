@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.parser;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 
 import io.protostuff.Input;
@@ -95,7 +96,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public FieldType getFieldType() {
-            return FieldType.FIXED64;
+            return FieldType.BYTES;
         }
 
         @Override
@@ -105,20 +106,27 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public java.sql.Timestamp readFrom(Input input) throws IOException {
-            String[] strs = input.readString().split("_");
-            java.sql.Timestamp timestamp = new Timestamp(Long.parseLong(strs[0]));
-            timestamp.setNanos(Integer.parseInt(strs[1]));
+            ByteBuffer buffer = input.readByteBuffer();
+            long time = buffer.getLong();
+            int nanos = buffer.getInt();
+            buffer.flip();
+            java.sql.Timestamp timestamp = new Timestamp(time);
+            timestamp.setNanos(nanos);
             return timestamp;
         }
 
         @Override
         public void writeTo(Output output, int number, java.sql.Timestamp value, boolean repeated) throws IOException {
-            output.writeString(number, value.getTime() + "_" + value.getNanos(), repeated);
+            ByteBuffer buffer = ByteBuffer.allocate(12);
+            buffer.putLong(value.getTime());
+            buffer.putInt(value.getNanos());
+            buffer.flip();
+            output.writeBytes(number, buffer, repeated);
         }
 
         @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
-            output.writeString(number, input.readString(), repeated);
+            output.writeBytes(number, input.readByteBuffer(), repeated);
         }
     }
 
