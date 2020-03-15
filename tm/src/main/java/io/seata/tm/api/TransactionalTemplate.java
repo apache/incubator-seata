@@ -20,7 +20,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -55,7 +54,6 @@ public class TransactionalTemplate {
         }
         Propagation propagation = txInfo.getPropagation();
         String previousXid = null;
-        String previousBranchType = null;
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
@@ -63,17 +61,13 @@ public class TransactionalTemplate {
                     return business.execute();
                 case REQUIRES_NEW:
                     previousXid = RootContext.unbind();
-                    previousBranchType = RootContext.unbindBranchType();
                     break;
                 case SUPPORTS:
                     if (StringUtils.isEmpty(RootContext.getXID())) {
                         return business.execute();
                     }
-                    previousBranchType = RootContext.unbindBranchType();
                     break;
                 case REQUIRED:
-                    //AT can be nested inside the MT,need to switch branchType
-                    previousBranchType = RootContext.unbindBranchType();
                     break;
                 default:
                     throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
@@ -112,9 +106,6 @@ public class TransactionalTemplate {
         } finally {
             if (previousXid != null) {
                 RootContext.bind(previousXid);
-            }
-            if (previousBranchType != null) {
-                RootContext.bindBranchType(BranchType.get(Integer.parseInt(previousBranchType)));
             }
         }
 
@@ -160,7 +151,7 @@ public class TransactionalTemplate {
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getBranchType());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
