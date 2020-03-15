@@ -44,43 +44,45 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        if (bean instanceof DataSource && !isAutoProxiedBySeata(bean)) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Auto proxy of [{}]", beanName);
-            }
-            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-            advice = new SeataAutoDataSourceProxyAdvice(dataSourceProxy);
+        if (bean instanceof DataSource) {
             boolean isProxied = AopUtils.isAopProxy(bean);
-            if (isProxied) {
-                try {
-                    AdvisedSupport advisedSupport = SpringProxyUtils.getAdvisedSupport(bean);
-                    advisedSupport.addAdvice(advice);
-                    Advisor[] advisors = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                    for (Advisor advisor : advisors) {
-                        advisedSupport.addAdvisor(0, advisor);
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+            if (!isProxied || !isAutoProxiedBySeata(bean)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Auto proxy of [{}]", beanName);
                 }
-
-            } else {
-                bean = super.wrapIfNecessary(bean, beanName, cacheKey);
+                DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
+                advice = new SeataAutoDataSourceProxyAdvice(dataSourceProxy);
+                if (isProxied) {
+                    try {
+                        AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
+                        Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
+                        for (Advisor avr : advisor) {
+                            advised.addAdvisor(0, avr);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
+                }
             }
         }
         return bean;
     }
 
+    /**
+     * Whether this bean has been proxied by Seata
+     *
+     * @param bean
+     * @return true if this bean has been proxied by Seata
+     */
     private boolean isAutoProxiedBySeata(Object bean) {
-        boolean isProxied = AopUtils.isAopProxy(bean);
-        if (isProxied) {
-            try {
-                AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-                return advised.countAdvicesOfType(SeataAutoDataSourceProxyAdvice.class) > 0;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
+            return advised.countAdvicesOfType(SeataAutoDataSourceProxyAdvice.class) > 0;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return false;
     }
 
     @Override
