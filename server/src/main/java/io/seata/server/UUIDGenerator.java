@@ -17,6 +17,8 @@ package io.seata.server;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
@@ -103,7 +105,9 @@ public class UUIDGenerator {
             UUID.set(UUID_INTERNAL * serverNodeId);
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             Calendar cal = Calendar.getInstance();
-            Date date = format.parse("2019-01-01");
+            String firstDayOfYear = LocalDate.now()
+                    .with(TemporalAdjusters.firstDayOfYear()).toString();
+            Date date = format.parse(firstDayOfYear);
             cal.setTime(date);
             long base = cal.getTimeInMillis();
             long current = System.currentTimeMillis();
