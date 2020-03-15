@@ -16,6 +16,7 @@
 package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
+import java.util.stream.Stream;
 
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.spring.util.SpringProxyUtils;
@@ -35,16 +36,17 @@ import org.springframework.beans.BeansException;
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoDataSourceProxyCreator.class);
     private MethodInterceptor advice;
-    private final boolean useJdkProxy;
+    private final String[] exclude;
 
-    public SeataAutoDataSourceProxyCreator(boolean useJdkProxy) {
-        this.useJdkProxy = useJdkProxy;
-        setProxyTargetClass(!this.useJdkProxy);
+    public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] exclude) {
+        this.exclude = exclude;
+        setProxyTargetClass(!useJdkProxy);
     }
 
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        if (bean instanceof DataSource) {
+        String className = bean.getClass().getName();
+        if (bean instanceof DataSource && Stream.of(exclude).noneMatch(s -> s.equals(className))) {
             boolean isProxied = AopUtils.isAopProxy(bean);
             if (!isProxied || !isAutoProxiedBySeata(bean)) {
                 if (LOGGER.isInfoEnabled()) {
