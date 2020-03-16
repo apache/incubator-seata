@@ -16,7 +16,6 @@
 package io.seata.tm.api;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 
 /**
@@ -48,11 +47,10 @@ public interface GlobalTransaction {
      *
      * @param timeout Given timeout in MILLISECONDS.
      * @param name    Given name.
-     * @param branchType Given branchType
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    void begin(int timeout, String name, BranchType branchType) throws TransactionException;
+    void begin(int timeout, String name) throws TransactionException;
 
     /**
      * Commit the global transaction.
