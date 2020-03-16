@@ -62,20 +62,17 @@ public class TransactionalTemplate {
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
-                    suspendedResourcesHolder = tx.suspend(true,false);
+                    suspendedResourcesHolder = tx.suspend(true);
                     return business.execute();
                 case REQUIRES_NEW:
-                    suspendedResourcesHolder = tx.suspend(true,true);
+                    suspendedResourcesHolder = tx.suspend(true);
                     break;
                 case SUPPORTS:
                     if (!existingTransaction()) {
                         return business.execute();
                     }
-                    suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 case REQUIRED:
-                    //AT can be nested inside the MT,need to switch branchType
-                    suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 case NEVER:
                     if (existingTransaction()) {
@@ -87,7 +84,6 @@ public class TransactionalTemplate {
                     if (!existingTransaction()) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
-                    suspendedResourcesHolder = tx.suspend(false,true);
                     break;
                 default:
                     throw new TransactionException("Not Supported Propagation:" + propagation);
@@ -128,7 +124,7 @@ public class TransactionalTemplate {
     }
 
     public boolean existingTransaction() {
-        return !StringUtils.isEmpty(RootContext.getXID());
+        return StringUtils.isNotEmpty(RootContext.getXID());
 
     }
 
@@ -174,7 +170,7 @@ public class TransactionalTemplate {
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getBranchType());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,

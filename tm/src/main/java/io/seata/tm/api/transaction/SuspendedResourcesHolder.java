@@ -15,11 +15,9 @@
  */
 package io.seata.tm.api.transaction;
 
-import io.seata.core.model.BranchType;
-
 /**
- * Holder for suspended resources.
- * Used by {@code suspend} and {@code resume}.
+ * Holder for suspended resources to support propagation or nested logic.
+ * Used by {@code suspend} and {@code resume}
  *
  * @author wangzhongxiang
  */
@@ -28,15 +26,12 @@ public class SuspendedResourcesHolder {
     /**The xid*/
     private String xid;
 
-    /**The branchType*/
-    private BranchType branchType;
 
     public SuspendedResourcesHolder() {
     }
 
-    public SuspendedResourcesHolder(String xid, BranchType branchType) {
+    public SuspendedResourcesHolder(String xid) {
         this.xid = xid;
-        this.branchType = branchType;
     }
 
     public String getXid() {
@@ -45,13 +40,5 @@ public class SuspendedResourcesHolder {
 
     public void setXid(String xid) {
         this.xid = xid;
-    }
-
-    public BranchType getBranchType() {
-        return branchType;
-    }
-
-    public void setBranchType(BranchType branchType) {
-        this.branchType = branchType;
     }
 }

@@ -41,7 +41,7 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_BRANCH_TYPE = "BRANCH_TYPE";
+    public static final String KEY_XID_INTERCEPTOR_TYPE = "tx-xid-interceptor-type";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
@@ -57,16 +57,22 @@ public class RootContext {
         if (StringUtils.isNotBlank(xid)) {
             return xid;
         }
+
+        String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
+        if (StringUtils.isNotBlank(xidType) && xidType.contains("_")) {
+            return xidType.split("_")[0];
+        }
+
         return null;
     }
 
     /**
-     * Gets the current branchType
+     * Gets xid.
      *
-     * @return the branchType
+     * @return the xid
      */
-    public static String getBranchType() {
-        return CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+    public static String getXIDInterceptorType() {
+        return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
     }
 
     /**
@@ -82,12 +88,33 @@ public class RootContext {
     }
 
     /**
-     * Bind the current branchType
+     * Bind interceptor type
      *
+     * @param xidType
+     */
+    public static void bindInterceptorType(String xidType) {
+        if (StringUtils.isNotBlank(xidType)) {
+
+            String[] xidTypes = xidType.split("_");
+
+            if (xidTypes.length == 2) {
+                bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+            }
+        }
+    }
+
+    /**
+     * Bind interceptor type
+     *
+     * @param xid
      * @param branchType
      */
-    public static void bindBranchType(BranchType branchType) {
-        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, String.valueOf(branchType.ordinal()));
+    public static void bindInterceptorType(String xid, BranchType branchType) {
+        String xidType = String.format("%s_%s", xid, branchType.name());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("bind interceptor type xid={} branchType={}", xid, branchType);
+        }
+        CONTEXT_HOLDER.put(KEY_XID_INTERCEPTOR_TYPE, xidType);
     }
 
     /**
@@ -106,27 +133,27 @@ public class RootContext {
     /**
      * Unbind string.
      *
-     * @return the xid
+     * @return the string
      */
     public static String unbind() {
         String xid = CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind xid {} ", xid);
+            LOGGER.debug("unbind {} ", xid);
         }
         return xid;
     }
 
     /**
-     * Unbind branchType
+     * Unbind temporary string
      *
-     * @return the branchType
+     * @return the string
      */
-    public static String unbindBranchType() {
-        String branchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
+    public static String unbindInterceptorType() {
+        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind branchType {} ", branchType);
+            LOGGER.debug("unbind inteceptor type {}", xidType);
         }
-        return branchType;
+        return xidType;
     }
 
     public static void unbindGlobalLockFlag() {
