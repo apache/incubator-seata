@@ -37,7 +37,7 @@ public class XidResource {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("unbind[{}] from RootContext", unbindXid);
             }
-            if(!StringUtils.equalsIgnoreCase(rpcXid, unbindXid)){
+            if (!StringUtils.equalsIgnoreCase(rpcXid, unbindXid)) {
                 LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
                 if (unbindXid != null) {
                     RootContext.bind(unbindXid);
