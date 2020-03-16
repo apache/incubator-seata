@@ -51,7 +51,7 @@ do
     token=$OPTARG
     ;;
   ?)
-    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] [-e env] [a appId] [-c clusterName] [-n namespaceName] [-d dataChangeCreatedBy] [-r releasedBy] [-t token] \033[0m"
+    echo " USAGE OPTION: $0 [-h host] [-p port] [-e env] [a appId] [-c clusterName] [-n namespaceName] [-d dataChangeCreatedBy] [-r releasedBy] [-t token] "
     exit 1
     ;;
   esac
@@ -76,15 +76,15 @@ if [[ -z ${namespaceName} ]]; then
     namespaceName=application
 fi
 if [[ -z ${dataChangeCreatedBy} ]]; then
-    echo "\033[31m dataChangeCreatedBy is empty, please usage option: [-d dataChangeCreatedBy] \033[0m"
+    echo " dataChangeCreatedBy is empty, please usage option: [-d dataChangeCreatedBy] "
     exit 1
 fi
 if [[ -z ${releasedBy} ]]; then
-    echo "\033[31m releasedBy is empty, please usage option: [-r releasedBy] \033[0m"
+    echo " releasedBy is empty, please usage option: [-r releasedBy] "
     exit 1
 fi
 if [[ -z ${token} ]]; then
-    echo "\033[31m token is empty, please usage option: [-t token] \033[0m"
+    echo " token is empty, please usage option: [-t token] "
     exit 1
 fi
 
@@ -110,10 +110,10 @@ function addConfig() {
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
 	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
-	  echo "set $9=${10}\033[31m failure \033[0m"
+	  echo "set $9=${10} failure "
 		(( failCount++ ))
 	else
-	  echo "set $9=${10}\033[32m successfully \033[0m"
+	  echo "set $9=${10} successfully "
 	fi
 }
 
@@ -123,15 +123,15 @@ function publishConfig() {
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
 	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
-	  echo "\033[31m Publish fail \033[0m"
+	  echo " Publish fail "
 	  exit 1
 	else
-	  echo "\033[32m Publish successfully, please start seata-server. \033[0m"
+	  echo " Publish successfully, please start seata-server. "
 	fi
 }
 
 count=0
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
 	(( count++ ))
 	key=${line%%=*}
 	value=${line#*=}
@@ -140,7 +140,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
+echo " Complete initialization parameters,  total-count:$count ,  failure-count:$failCount "
 echo "========================================================================="
 
 if [[ $failCount -eq 0 ]]; then
@@ -151,5 +151,5 @@ if [[ $failCount -eq 0 ]]; then
     echo "Remember to publish later..."
   fi
 else
-  echo "\033[31m init apollo config fail. \033[0m"
+  echo " init apollo config fail. "
 fi

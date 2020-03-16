@@ -23,7 +23,7 @@ do
     port=$OPTARG
     ;;
   ?)
-    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] \033[0m"
+    echo " USAGE OPTION: $0 [-h host] [-p port] "
     exit 1
     ;;
   esac
@@ -45,19 +45,19 @@ tempLog=$(mktemp -u)
 function addConfig() {
   curl -X PUT -H "${1}" -d "${2}" "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat "${tempLog}") ]]; then
-    echo "\033[31m Please check the cluster status. \033[0m"
+    echo " Please check the cluster status. "
     exit 1
   fi
   if [[ $(cat "${tempLog}") =~ "true" ]]; then
-    echo "Set $4=$2\033[32m successfully \033[0m"
+    echo "Set $4=$2 successfully "
   else
-    echo "Set $4=$2\033[31m failure \033[0m"
+    echo "Set $4=$2 failure "
     (( failCount++ ))
  fi
 }
 
 count=0
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
   (( count++ ))
   key=${line%%=*}
   value=${line#*=}
@@ -65,11 +65,11 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
+echo " Complete initialization parameters,  total-count:$count ,  failure-count:$failCount "
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-  echo "\033[32m Init consul config finished, please start seata-server. \033[0m"
+  echo " Init consul config finished, please start seata-server. "
 else
-  echo "\033[31m Init consul config fail. \033[0m"
+  echo " Init consul config fail. "
 fi
