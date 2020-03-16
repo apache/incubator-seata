@@ -209,23 +209,26 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processGlobalTransactionCommit() throws SQLException {
-        try {
-            register();
-        } catch (TransactionException e) {
-            recognizeLockKeyConflictException(e, context.buildLockKeys());
-        }
-
-        try {
-            if (context.hasUndoLog()) {
+        boolean hasUndoLog = context.hasUndoLog();
+        if (hasUndoLog) {
+            try {
+                register();
                 UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
+            } catch (TransactionException e) {
+                recognizeLockKeyConflictException(e, context.buildLockKeys());
+            } catch (SQLException sqlEx) {
+                LOGGER.error("add undoLog error:{}",sqlEx.getMessage(),sqlEx);
+                throw new SQLException(sqlEx);
             }
+        }
+        try {
             targetConnection.commit();
         } catch (Throwable ex) {
             LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
             report(false);
             throw new SQLException(ex);
         }
-        if (IS_REPORT_SUCCESS_ENABLE) {
+        if (IS_REPORT_SUCCESS_ENABLE && hasUndoLog) {
             report(true);
         }
         context.reset();
