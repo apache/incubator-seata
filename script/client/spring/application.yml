@@ -5,7 +5,7 @@ seata:
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
   worker-id: 1
-  datacenter-id: 1
+  data-center-id: 1
   client:
     rm:
       async-commit-buffer-limit: 1000
