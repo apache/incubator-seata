@@ -154,7 +154,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext)
         throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
-            request.getTransactionName(), request.getTimeout()));
+            request));
     }
 
     @Override

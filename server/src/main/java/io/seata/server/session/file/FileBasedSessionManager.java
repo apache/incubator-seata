@@ -29,7 +29,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.DefaultSessionManager;
 import io.seata.server.session.GlobalSession;
@@ -138,11 +137,9 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
     }
 
     private void restore(List<TransactionWriteStore> stores, Map<Long, BranchSession> unhandledBranchSessions) {
-        long maxRecoverId = UUIDGenerator.getCurrentUUID();
         for (TransactionWriteStore store : stores) {
             TransactionStoreManager.LogOperation logOperation = store.getOperate();
             SessionStorable sessionStorable = store.getSessionRequest();
-            maxRecoverId = getMaxId(maxRecoverId, sessionStorable);
             switch (logOperation) {
                 case GLOBAL_ADD:
                 case GLOBAL_UPDATE: {
@@ -233,32 +230,6 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
 
             }
         }
-        setMaxId(maxRecoverId);
-
-    }
-
-    private long getMaxId(long maxRecoverId, SessionStorable sessionStorable) {
-        long currentId = 0;
-        if (sessionStorable instanceof GlobalSession) {
-            currentId = ((GlobalSession)sessionStorable).getTransactionId();
-        } else if (sessionStorable instanceof BranchSession) {
-            currentId = ((BranchSession)sessionStorable).getBranchId();
-        }
-
-        return maxRecoverId > currentId ? maxRecoverId : currentId;
-    }
-
-    private void setMaxId(long maxRecoverId) {
-        long currentId;
-        // will be recover multi-thread later
-        while ((currentId = UUIDGenerator.getCurrentUUID()) < maxRecoverId) {
-            if (UUIDGenerator.setUUID(currentId, maxRecoverId)) {
-                break;
-            }
-        }
-    }
-
-    private void restore(TransactionWriteStore store) {
     }
 
     @Override

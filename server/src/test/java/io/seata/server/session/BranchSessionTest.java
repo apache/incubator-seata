@@ -16,7 +16,7 @@
 package io.seata.server.session;
 
 import io.seata.core.model.BranchType;
-import io.seata.server.UUIDGenerator;
+import io.seata.core.util.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

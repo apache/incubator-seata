@@ -18,7 +18,7 @@ package io.seata.server.session;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.UUIDGenerator;
+import io.seata.core.util.UUIDGenerator;
 
 /**
  * The type Session helper.

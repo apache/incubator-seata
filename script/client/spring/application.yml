@@ -4,6 +4,8 @@ seata:
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
+  worker-id: 1
+  datacenter-id: 1
   client:
     rm:
       async-commit-buffer-limit: 1000

@@ -410,6 +410,11 @@ public class ConfigurationKeys {
     public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
 
     /**
+     * The constant CREATE_LOCAL_XID.
+     */
+    public static final String CREATE_LOCAL_XID = SERVICE_PREFIX + "createLocalXid";
+
+    /**
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";

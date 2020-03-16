@@ -27,7 +27,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -194,10 +193,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void reload() {
-        long maxSessionId = transactionStoreManager.getCurrentMaxSessionId();
-        if (maxSessionId > UUIDGenerator.getCurrentUUID()) {
-            UUIDGenerator.setUUID(UUIDGenerator.getCurrentUUID(), maxSessionId);
-        }
-    }
+    public void reload() {}
+
 }

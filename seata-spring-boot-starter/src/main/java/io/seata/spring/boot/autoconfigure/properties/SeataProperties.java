@@ -47,6 +47,14 @@ public class SeataProperties {
      * Whether use JDK proxy instead of CGLIB proxy
      */
     private boolean useJdkProxy = false;
+    /**
+     * Job ID (0 ~ 31)
+     */
+    private Long workerId = 1L;
+    /**
+     * Data Center ID (0 ~ 31)
+     */
+    private Long dataCenterId = 1L;
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
@@ -99,6 +107,24 @@ public class SeataProperties {
 
     public SeataProperties setUseJdkProxy(boolean useJdkProxy) {
         this.useJdkProxy = useJdkProxy;
+        return this;
+    }
+
+    public Long getWorkerId() {
+        return workerId;
+    }
+
+    public SeataProperties setWorkerId(Long workerId) {
+        this.workerId = workerId;
+        return this;
+    }
+
+    public Long getDataCenterId() {
+        return dataCenterId;
+    }
+
+    public SeataProperties setDataCenterId(Long dataCenterId) {
+        this.dataCenterId = dataCenterId;
         return this;
     }
 }

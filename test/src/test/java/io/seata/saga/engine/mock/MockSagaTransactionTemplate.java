@@ -18,8 +18,8 @@ package io.seata.saga.engine.mock;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.util.UUIDGenerator;
 import io.seata.saga.tm.SagaTransactionalTemplate;
-import io.seata.server.UUIDGenerator;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -29,10 +29,6 @@ import io.seata.tm.api.transaction.TransactionInfo;
  * @author lorne.cl
  */
 public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
-
-    static {
-        UUIDGenerator.init(0);
-    }
 
     @Override
     public void commitTransaction(GlobalTransaction tx) throws ExecutionException {

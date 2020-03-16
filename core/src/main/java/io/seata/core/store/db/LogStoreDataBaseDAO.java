@@ -393,15 +393,6 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         return true;
     }
 
-    @Override
-    public long getCurrentMaxSessionId(long high, long low) {
-        String transMaxSql = LogStoreSqls.getQueryGlobalMax(globalTable, dbType);
-        String branchMaxSql = LogStoreSqls.getQueryBranchMax(brachTable, dbType);
-        long maxTransId = getCurrentMaxSessionId(transMaxSql, high, low);
-        long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
-        return maxBranchId > maxTransId ? maxBranchId : maxTransId;
-    }
-
     private long getCurrentMaxSessionId(String sql, long high, long low) {
         long max = 0;
         Connection conn = null;

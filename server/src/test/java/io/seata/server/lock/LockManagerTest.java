@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
-import io.seata.server.UUIDGenerator;
+import io.seata.core.util.UUIDGenerator;
 import io.seata.server.lock.memory.MemoryLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;

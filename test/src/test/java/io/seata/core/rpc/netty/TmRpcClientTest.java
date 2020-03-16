@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.seata.server.UUIDGenerator;
+import io.seata.core.util.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
 import io.netty.channel.Channel;
@@ -55,7 +55,6 @@ public class TmRpcClientTest {
             public void run() {
                 RpcServer rpcServer = new RpcServer(workingThreads);
                 rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-                UUIDGenerator.init(1);
                 rpcServer.init();
             }
         });
@@ -90,7 +89,6 @@ public class TmRpcClientTest {
             public void run() {
                 RpcServer rpcServer = new RpcServer(workingThreads);
                 rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-                UUIDGenerator.init(1);
                 rpcServer.init();
             }
         });
@@ -116,7 +114,6 @@ public class TmRpcClientTest {
             public void run() {
                 RpcServer rpcServer = new RpcServer(workingThreads);
                 rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-                UUIDGenerator.init(1);
                 rpcServer.init();
             }
         });

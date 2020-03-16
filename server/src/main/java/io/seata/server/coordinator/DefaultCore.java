@@ -22,12 +22,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.BranchSession;
@@ -135,6 +137,25 @@ public class DefaultCore implements Core {
         return session.getXid();
     }
 
+    public String begin(String applicationId, String transactionServiceGroup, GlobalBeginRequest request)
+        throws TransactionException {
+        if (StringUtils.isNotBlank(request.getXid())) {
+            GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, request);
+
+            session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+
+            session.begin();
+
+            // transaction start event
+            eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
+
+            LOGGER.info("Successfully begin global transaction xid = {}", session.getXid());
+            return session.getXid();
+        } else {
+            return begin(applicationId, transactionServiceGroup, request.getTransactionName(), request.getTimeout());
+        }
+    }
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
@@ -363,4 +384,5 @@ public class DefaultCore implements Core {
             getCore(BranchType.SAGA).doGlobalReport(globalSession, xid, globalStatus);
         }
     }
+
 }

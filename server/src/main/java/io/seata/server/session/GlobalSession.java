@@ -25,13 +25,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.XID;
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.UUIDGenerator;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.util.UUIDGenerator;
 import io.seata.server.lock.LockerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
@@ -75,7 +77,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
-
 
     /**
      * Add boolean.
@@ -311,6 +312,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param request                 the request
+     */
+    public GlobalSession(String applicationId, String transactionServiceGroup, GlobalBeginRequest request) {
+        this.transactionId = UUIDGenerator.generateUUID();
+        this.status = GlobalStatus.Begin;
+
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.transactionName = request.getTransactionName();
+        this.timeout = request.getTimeout();
+        this.xid = StringUtils.isBlank(request.getXid()) ? XID.generateXID(transactionId) : request.getXid();
+    }
+
+    /**
      * Gets transaction id.
      *
      * @return the transaction id
@@ -448,6 +467,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
         GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
+        return session;
+    }
+
+    public static GlobalSession createGlobalSession(String applicationId, String transactionServiceGroup, GlobalBeginRequest request) {
+        GlobalSession session = new GlobalSession(applicationId,transactionServiceGroup, request);
         return session;
     }
 

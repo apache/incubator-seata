@@ -51,22 +51,6 @@ public class DefaultSessionManager extends AbstractSessionManager {
             public boolean writeSession(LogOperation logOperation, SessionStorable session) {
                 return true;
             }
-
-            @Override
-            public long getCurrentMaxSessionId() {
-                long maxSessionId = 0L;
-                for (Map.Entry<String, GlobalSession> entry : sessionMap.entrySet()) {
-                    GlobalSession globalSession = entry.getValue();
-                    if (globalSession.hasBranch()) {
-                        long maxBranchId = globalSession.getSortedBranches().get(globalSession.getSortedBranches().size() - 1)
-                            .getBranchId();
-                        if (maxBranchId > maxSessionId) {
-                            maxSessionId = maxBranchId;
-                        }
-                    }
-                }
-                return maxSessionId;
-            }
         };
     }
 

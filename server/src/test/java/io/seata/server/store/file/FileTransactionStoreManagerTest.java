@@ -15,7 +15,7 @@
  */
 package io.seata.server.store.file;
 
-import io.seata.server.UUIDGenerator;
+import io.seata.core.util.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionManager;

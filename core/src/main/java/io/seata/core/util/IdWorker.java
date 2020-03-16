@@ -1,0 +1,184 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package io.seata.core.util;
+
+/**
+ * @author funkye
+ */
+public class IdWorker {
+
+    private volatile static IdWorker idWorker = null;
+
+    /**
+     * Start time cut (2015-01-01)
+     */
+    private final long twepoch = 1546272000000L;
+
+    /**
+     * The number of bits occupied by the machine id
+     */
+    private final long workerIdBits = 5L;
+
+    /**
+     * The number of bits occupied by the data identification id
+     */
+    private final long datacenterIdBits = 5L;
+
+    /**
+     * Maximum supported machine id, the result is 31 (this shift algorithm can quickly calculate the largest decimal
+     * number that can be represented by a few binary numbers)
+     */
+    private final long maxWorkerId = -1L ^ (-1L << workerIdBits);
+
+    /**
+     * The maximum data identifier id supported, the result is 31
+     */
+    private final long maxDatacenterId = -1L ^ (-1L << datacenterIdBits);
+
+    /**
+     * The number of bits the sequence occupies in id
+     */
+    private final long sequenceBits = 12L;
+
+    /**
+     * Machine ID left 12 digits
+     */
+    private final long workerIdShift = sequenceBits;
+
+    /**
+     * Data ID id shifted 17 bits to the left (12 + 5)
+     */
+    private final long datacenterIdShift = sequenceBits + workerIdBits;
+
+    /**
+     * Time truncated to the left by 22 bits (5 + 5 + 12)
+     */
+    private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
+
+    /**
+     * Generate sequence mask
+     */
+    private final long sequenceMask = -1L ^ (-1L << sequenceBits);
+
+    /**
+     * Machine ID (0 ~ 31)
+     */
+    private long workerId;
+
+    /**
+     * Data center ID (0 ~ 31)
+     */
+    private long datacenterId;
+
+    /**
+     * Sequence in milliseconds (0 ~ 4095)
+     */
+    private long sequence = 0L;
+
+    /**
+     * Time of last ID generation
+     */
+    private long lastTimestamp = -1L;
+
+    /**
+     * Constructor
+     *
+     * @param workerId
+     *            Job ID (0 ~ 31)
+     * @param datacenterId
+     *            Data Center ID (0 ~ 31)
+     */
+    public IdWorker(long workerId, long datacenterId) {
+        if (workerId > maxWorkerId || workerId < 0) {
+            throw new IllegalArgumentException(
+                String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+        }
+        if (datacenterId > maxDatacenterId || datacenterId < 0) {
+            throw new IllegalArgumentException(
+                String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
+        }
+        this.workerId = workerId;
+        this.datacenterId = datacenterId;
+    }
+
+    /**
+     * Get the next ID (the method is thread-safe)
+     *
+     * @return SnowflakeId
+     */
+    public synchronized long nextId() {
+        long timestamp = timeGen();
+
+        if (timestamp < lastTimestamp) {
+            throw new RuntimeException(String.format(
+                "Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+        }
+
+        if (lastTimestamp == timestamp) {
+            sequence = (sequence + 1) & sequenceMask;
+            if (sequence == 0) {
+                timestamp = tilNextMillis(lastTimestamp);
+            }
+        } else {
+            sequence = 0L;
+        }
+
+        lastTimestamp = timestamp;
+
+        return ((timestamp - twepoch) << timestampLeftShift) | (datacenterId << datacenterIdShift)
+            | (workerId << workerIdShift) | sequence;
+    }
+
+    /**
+     * Block until the next millisecond until a new timestamp is obtained
+     *
+     * @param lastTimestamp
+     *            Time of last ID generation
+     * @return Current timestamp
+     */
+    protected long tilNextMillis(long lastTimestamp) {
+        long timestamp = timeGen();
+        while (timestamp <= lastTimestamp) {
+            timestamp = timeGen();
+        }
+        return timestamp;
+    }
+
+    /**
+     * Returns the current time in milliseconds
+     *
+     * @return Current time (ms)
+     */
+    protected long timeGen() {
+        return System.currentTimeMillis();
+    }
+
+    public static IdWorker getInstance(Long... ids) {
+        if (idWorker == null) {
+            synchronized (IdWorker.class) {
+                if (idWorker == null) {
+                    if (ids.length == 2) {
+                        idWorker = new IdWorker(ids[0], ids[1]);
+                    } else {
+                        idWorker = new IdWorker(1L, 1L);
+                    }
+                }
+            }
+        }
+        return idWorker;
+    }
+
+}

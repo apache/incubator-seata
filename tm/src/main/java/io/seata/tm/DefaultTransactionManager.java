@@ -17,6 +17,8 @@ package io.seata.tm;
 
 import java.util.concurrent.TimeoutException;
 
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -36,6 +38,9 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.util.UUIDGenerator;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_CREATE_LOCAL_XID;
 
 /**
  * The type Default transaction manager.
@@ -43,13 +48,22 @@ import io.seata.core.rpc.netty.TmRpcClient;
  * @author sharajava
  */
 public class DefaultTransactionManager implements TransactionManager {
+    private static boolean createLocalXid;
 
+    static {
+        createLocalXid =
+            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CREATE_LOCAL_XID, DEFAULT_CREATE_LOCAL_XID);
+    }
+    
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
+        if (createLocalXid) {
+            request.setXid(String.valueOf(UUIDGenerator.generateUUID()));
+        }
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());

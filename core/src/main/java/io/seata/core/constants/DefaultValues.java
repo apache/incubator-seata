@@ -75,5 +75,7 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
+    public static final boolean DEFAULT_CREATE_LOCAL_XID = false;
+
 
 }
