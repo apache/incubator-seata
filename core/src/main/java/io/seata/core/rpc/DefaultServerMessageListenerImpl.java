@@ -114,7 +114,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.info("checkAuth for client:{},vgroup:{},applicationId:{}",
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
                             ipAndPort,message.getTransactionServiceGroup(),message.getApplicationId());
                 }
             }
@@ -140,7 +140,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.info("checkAuth for client:{},vgroup:{},applicationId:{}",
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
                             ipAndPort,message.getTransactionServiceGroup(),message.getApplicationId());
                 }
             }
