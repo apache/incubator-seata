@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.seata.common.XID;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMResponse;
@@ -55,6 +56,8 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
         }
+        XID.setPort(address.getPort());
+        XID.setIpAddress(address.getAddress().getHostAddress());
         Channel tmpChannel = clientBootstrap.getNewChannel(address);
         long start = System.currentTimeMillis();
         Object response;

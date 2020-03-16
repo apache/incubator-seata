@@ -17,6 +17,7 @@ package io.seata.tm;
 
 import java.util.concurrent.TimeoutException;
 
+import io.seata.common.XID;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TmTransactionException;
@@ -62,7 +63,7 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         if (createLocalXid) {
-            request.setXid(String.valueOf(UUIDGenerator.generateUUID()));
+            request.setXid(XID.generateXID(UUIDGenerator.generateUUID()));
         }
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
