@@ -57,7 +57,9 @@ public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
                 .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.POSTGRESQL) + " = ?")
                 .collect(Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage,row).stream().map(e -> e.getName()).collect(Collectors.toList());
+        List<String> pkNameList = getOrderedPkList(beforeImage,row,JdbcConstants.POSTGRESQL)
+                .stream().map(e -> e.getName())
+                .collect(Collectors.toList());
         String whereSql = buildWhereConditionByPKs(pkNameList,keywordChecker);
 
         return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),updateColumns, whereSql);

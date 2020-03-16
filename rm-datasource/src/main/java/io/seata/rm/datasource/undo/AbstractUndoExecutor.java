@@ -123,7 +123,7 @@ public abstract class AbstractUndoExecutor {
 
             for (Row undoRow : undoRecords.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                List<Field> pkValueList =  getOrderedPkList(undoRecords,undoRow);
+                List<Field> pkValueList =  getOrderedPkList(undoRecords,undoRow,getDbType(conn));
                 for (Field field : undoRow.getFields()) {
                     if (field.getKeyType() != KeyType.PRIMARY_KEY) {
                         undoValues.add(field);
@@ -301,11 +301,14 @@ public abstract class AbstractUndoExecutor {
         return currentRecords;
     }
 
-    protected List<Field> getOrderedPkList(TableRecords image,Row row) {
+    protected List<Field> getOrderedPkList(TableRecords image,Row row,String dbType) {
         List<Field> pkFields = new ArrayList<>();
         // To ensure the order of the pk, the order should based on getPrimaryKeyOnlyName.
         List<String> pkColumnNameListByOrder = image.getTableMeta().getPrimaryKeyOnlyName();
-        List<String> pkColumnNameListNoOrder = row.primaryKeys().stream().map(e -> e.getName()).collect(Collectors.toList());
+        List<String> pkColumnNameListNoOrder = row.primaryKeys()
+                .stream()
+                .map(e -> ColumnUtils.delEscape(e.getName(),dbType))
+                .collect(Collectors.toList());
         pkColumnNameListByOrder.forEach(pkName -> {
             int pkIndex = pkColumnNameListNoOrder.indexOf(pkName);
             if (pkIndex != -1) {

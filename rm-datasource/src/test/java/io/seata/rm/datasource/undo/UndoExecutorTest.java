@@ -150,6 +150,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
         Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
+        Mockito.doReturn(JdbcConstants.MYSQL).when(spy).getDbType(connection);
         spy.executeOn(connection);
     }
 
@@ -219,6 +220,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
         Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
+        Mockito.doReturn(JdbcConstants.MYSQL).when(spy).getDbType(connection);
         spy.executeOn(connection);
     }
 
@@ -288,6 +290,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
         Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
+        Mockito.doReturn(JdbcConstants.MYSQL).when(spy).getDbType(connection);
         spy.executeOn(connection);
     }
 
