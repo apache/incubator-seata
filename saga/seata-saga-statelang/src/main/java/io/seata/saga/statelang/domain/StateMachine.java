@@ -126,14 +126,14 @@ public interface StateMachine {
      *
      * @return
      */
-    String getRecoverStrategy();
+    RecoverStrategy getRecoverStrategy();
 
     /**
      * set RecoverStrategy
      *
      * @param recoverStrategy
      */
-    void setRecoverStrategy(String recoverStrategy);
+    void setRecoverStrategy(RecoverStrategy recoverStrategy);
 
     /**
      * Is it persist execution log to storage?, default true

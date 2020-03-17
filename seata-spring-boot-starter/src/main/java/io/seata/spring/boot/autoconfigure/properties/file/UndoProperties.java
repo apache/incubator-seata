@@ -18,7 +18,9 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
@@ -27,34 +29,34 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 @Component
 @ConfigurationProperties(prefix = UNDO_PREFIX)
 public class UndoProperties {
-    private boolean undoDataValidation = true;
-    private String undoLogSerialization = "jackson";
-    private String undoLogTable = TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+    private boolean dataValidation = DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+    private String logSerialization = DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+    private String logTable = DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 
-    public boolean isUndoDataValidation() {
-        return undoDataValidation;
+    public boolean isDataValidation() {
+        return dataValidation;
     }
 
-    public UndoProperties setUndoDataValidation(boolean undoDataValidation) {
-        this.undoDataValidation = undoDataValidation;
+    public UndoProperties setDataValidation(boolean dataValidation) {
+        this.dataValidation = dataValidation;
         return this;
     }
 
-    public String getUndoLogSerialization() {
-        return undoLogSerialization;
+    public String getLogSerialization() {
+        return logSerialization;
     }
 
-    public UndoProperties setUndoLogSerialization(String undoLogSerialization) {
-        this.undoLogSerialization = undoLogSerialization;
+    public UndoProperties setLogSerialization(String logSerialization) {
+        this.logSerialization = logSerialization;
         return this;
     }
 
-    public String getUndoLogTable() {
-        return undoLogTable;
+    public String getLogTable() {
+        return logTable;
     }
 
-    public UndoProperties setUndoLogTable(String undoLogTable) {
-        this.undoLogTable = undoLogTable;
+    public UndoProperties setLogTable(String logTable) {
+        this.logTable = logTable;
         return this;
     }
 }

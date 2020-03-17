@@ -68,11 +68,7 @@ public class OracleTableMetaCacheTest {
 
         TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE);
 
-        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t1", proxy.getResourceId());
-
-        Assertions.assertNotNull(tableMeta);
-
-        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.t1", proxy.getResourceId());
+        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.t1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
 

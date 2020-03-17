@@ -21,40 +21,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Table meta cache.
  *
  * @author ygy
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleTableMetaCache extends AbstractTableMetaCache {
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private OracleTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (OracleTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new OracleTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -95,9 +76,15 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if (schemaName.contains("\"")) {
+            schemaName = schemaName.replace("\"", "");
+        } else {
+            schemaName = schemaName.toUpperCase();
+        }
+
         if (tableName.contains("\"")) {
             tableName = tableName.replace("\"", "");
-            schemaName = schemaName.replace("\"", "");
+
         } else {
             tableName = tableName.toUpperCase();
         }
@@ -173,5 +160,4 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
         return tm;
     }
-
 }
