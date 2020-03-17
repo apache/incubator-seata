@@ -20,7 +20,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.seata.core.util.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
 import io.netty.channel.Channel;

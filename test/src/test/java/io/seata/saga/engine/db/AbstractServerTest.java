@@ -20,7 +20,6 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
-import io.seata.core.util.UUIDGenerator;
 import io.seata.server.ParameterParser;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;

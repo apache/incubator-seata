@@ -16,7 +16,6 @@
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
-import io.seata.core.util.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
 import java.util.concurrent.LinkedBlockingQueue;
