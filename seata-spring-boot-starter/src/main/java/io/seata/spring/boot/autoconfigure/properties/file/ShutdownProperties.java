@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 
 /**
@@ -29,7 +30,7 @@ public class ShutdownProperties {
     /**
      * when destroy server, wait seconds
      */
-    private long wait = 3L;
+    private long wait = DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 
     public long getWait() {
         return wait;

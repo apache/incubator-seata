@@ -100,6 +100,12 @@ public class DataCompareUtils {
         if (f1Type == Types.DECIMAL && f1.getValue().getClass().equals(Integer.class)) {
             f1.setValue(new BigDecimal(f1.getValue().toString()));
         }
+        if (f0Type == Types.BIGINT && f0.getValue().getClass().equals(Integer.class)) {
+            f0.setValue(Long.parseLong(f0.getValue().toString()));
+        }
+        if (f1Type == Types.BIGINT && f1.getValue().getClass().equals(Integer.class)) {
+            f1.setValue(Long.parseLong(f1.getValue().toString()));
+        }
     }
 
     /**

@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.HashMap;
 import java.util.Map;
 
 import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
@@ -184,7 +185,6 @@ class HttpTest {
         }
 
     }
-
     public static String readStreamAsStr(InputStream is) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         WritableByteChannel dest = Channels.newChannel(bos);

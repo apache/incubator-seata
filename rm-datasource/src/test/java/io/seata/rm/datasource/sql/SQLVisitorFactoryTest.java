@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql;
 
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
@@ -45,17 +46,17 @@ public class SQLVisitorFactoryTest {
         //test for mysql insert
         String sql = "insert into t(id) values (1)";
         SQLRecognizer recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLInsertRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), MySQLInsertRecognizer.class.getName());
 
         //test for mysql delete
         sql = "delete from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLDeleteRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), MySQLDeleteRecognizer.class.getName());
 
         //test for mysql update
         sql = "update t set a = a";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLUpdateRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), MySQLUpdateRecognizer.class.getName());
 
         //test for mysql select
         sql = "select * from t";
@@ -65,22 +66,22 @@ public class SQLVisitorFactoryTest {
         //test for mysql select for update
         sql = "select * from t for update";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLSelectForUpdateRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
 
         //test for oracle insert
         sql = "insert into t(id) values (1)";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleInsertRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), OracleInsertRecognizer.class.getName());
 
         //test for oracle delete
         sql = "delete from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleDeleteRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), OracleDeleteRecognizer.class.getName());
 
         //test for oracle update
         sql = "update t set a = a";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleUpdateRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), OracleUpdateRecognizer.class.getName());
 
         //test for oracle select
         sql = "select * from t";
@@ -90,10 +91,10 @@ public class SQLVisitorFactoryTest {
         //test for oracle select for update
         sql = "select * from t for update";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleSelectForUpdateRecognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
 
         //test for do not support db
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
     }
 
     @Test

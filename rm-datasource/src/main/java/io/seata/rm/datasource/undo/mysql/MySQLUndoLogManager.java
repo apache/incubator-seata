@@ -15,11 +15,14 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.BlobUtils;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -31,6 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jsbxyyx
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUndoLogManager.class);
@@ -47,12 +51,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE log_created <= ? LIMIT ?";
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.MYSQL;
-    }
-
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
@@ -74,8 +72,15 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
-                                                byte[] undoLogContent, Connection conn) throws SQLException {
+                                           byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
+    }
+
+    @Override
+    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
+        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+        return rollbackInfo;
     }
 
     @Override
@@ -85,7 +90,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     }
 
     private void insertUndoLog(String xid, long branchId, String rollbackCtx,
-                                      byte[] undoLogContent, State state, Connection conn) throws SQLException {
+                               byte[] undoLogContent, State state, Connection conn) throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchId);
             pst.setString(2, xid);
