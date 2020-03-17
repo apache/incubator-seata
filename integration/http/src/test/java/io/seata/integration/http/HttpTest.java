@@ -144,7 +144,7 @@ class HttpTest {
 
     private String consumerGetStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
-        Map<String, String> params = Maps.newHashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("name", "zhangsan");
         params.put("age", "15");
 
@@ -172,7 +172,7 @@ class HttpTest {
 
     private String consumerGetExceptionStart() {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
-        Map<String, String> params = Maps.newHashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("name", "zhangsan");
         params.put("age", "15");
         HttpResponse response = null;
