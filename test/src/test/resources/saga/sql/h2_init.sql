@@ -16,7 +16,7 @@ create table if not exists seata_state_machine_def
 
 create table if not exists seata_state_machine_inst
 (
-    id varchar(46) not null comment 'id',
+    id varchar(52) not null comment 'id',
     machine_id varchar(32) not null comment 'state machine definition id',
     tenant_id varchar(32) not null comment 'tenant id',
     parent_id varchar(46) comment 'parent id',

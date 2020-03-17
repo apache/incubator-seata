@@ -70,7 +70,6 @@ public class Server {
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
         //server port
         rpcServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db
         SessionHolder.init(parameterParser.getStoreMode());
 

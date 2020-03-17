@@ -15,15 +15,6 @@
  */
 package io.seata.server.store.db;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
-
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -41,13 +32,20 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.StoreMode;
 import io.seata.core.store.db.DataSourceGenerator;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * The type Database transaction store manager.
@@ -220,12 +218,6 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
             return readSession(sessionCondition.getStatuses());
         }
         return null;
-    }
-
-    @Override
-    public long getCurrentMaxSessionId() {
-        //check max transId or branchId
-        return logStore.getCurrentMaxSessionId(UUIDGenerator.getMaxUUID(), UUIDGenerator.getInitUUID());
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,

@@ -15,24 +15,6 @@
  */
 package io.seata.server.store.file;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
-
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.thread.NamedThreadFactory;
@@ -50,6 +32,23 @@ import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The type File transaction store manager.
@@ -335,11 +334,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             LOGGER.error("fileChannel force error{}", e.getMessage(), e);
         }
         closeFile(currRaf);
-    }
-
-    @Override
-    public long getCurrentMaxSessionId() {
-        throw new NotSupportYetException("not support getCurrentMaxSessionId");
     }
 
     @Override
