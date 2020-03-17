@@ -16,10 +16,10 @@ create table seata_state_machine_def
 
 create table seata_state_machine_inst
 (
-    id varchar(46) not null,
+    id varchar(53) not null,
     machine_id varchar(32) not null,
     tenant_id varchar(32) not null,
-    parent_id varchar(46),
+    parent_id varchar(53),
     gmt_started timestamp not null,
     business_key varchar(48),
     uni_business_key varchar(48) not null generated always as( --Unique index does not allow empty columns on DB2
@@ -43,7 +43,7 @@ create unique index state_machine_inst_unibuzkey on seata_state_machine_inst(uni
 create table seata_state_inst
 (
     id varchar(32) not null,
-    machine_inst_id varchar(46) not null,
+    machine_inst_id varchar(53) not null,
     name varchar(255) not null,
     type varchar(20),
     service_name varchar(255),
