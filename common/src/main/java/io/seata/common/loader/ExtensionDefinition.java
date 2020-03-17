@@ -20,13 +20,14 @@ import io.seata.common.util.StringUtils;
 /**
  * The type URL
  *
- * @author: haozhibei
+ * @author haozhibei
  */
-public class ExtensionURL {
+class ExtensionDefinition {
     private String name;
     private String typeName;
     private Integer order;
     private Scope scope;
+    private Class serviceClass;
 
     public String getName() {
         return this.name;
@@ -52,11 +53,20 @@ public class ExtensionURL {
         this.scope = scope;
     }
 
-    public ExtensionURL(String name, String typeName, Integer order, Scope scope) {
+    public Class getServiceClass(){
+        return this.serviceClass;
+    }
+
+    public void setServiceClass(Class clazz){
+        this.serviceClass = clazz;
+    }
+
+    public ExtensionDefinition(String name, String typeName, Integer order, Scope scope, Class clazz) {
         this.name = name;
         this.typeName = typeName;
         this.order = order;
         this.scope = scope;
+        this.serviceClass = clazz;
     }
 
     @Override
@@ -81,7 +91,7 @@ public class ExtensionURL {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ExtensionURL other = (ExtensionURL)obj;
+        ExtensionDefinition other = (ExtensionDefinition)obj;
         if (!StringUtils.equals(name, other.name)) {
             return false;
         }

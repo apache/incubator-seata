@@ -18,7 +18,7 @@ package io.seata.common.loader;
 /**
  * The type LatinHello
  *
- * @author: haozhibei
+ * @author haozhibei
  */
 @LoadLevel(name = "LatinHello",order = 3)
 public class LatinHello implements Hello {

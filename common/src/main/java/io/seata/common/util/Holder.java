@@ -18,7 +18,7 @@ package io.seata.common.util;
 /**
  * Helper Class for hold a value.
  *
- * @author: haozhibei
+ * @author haozhibei
  */
 public class Holder<T> {
 

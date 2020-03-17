@@ -28,13 +28,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,7 +178,7 @@ public class EnhancedServiceLoader {
     }
 
 
-    static class InnerEnhancedServiceLoader<S> {
+    private static class InnerEnhancedServiceLoader<S> {
         private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
         private static final String SERVICES_DIRECTORY = "META-INF/services/";
         private static final String SEATA_DIRECTORY = "META-INF/seata/";
@@ -191,11 +188,12 @@ public class EnhancedServiceLoader {
         private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>();
 
         private final Class<S> type;
-        private final Holder<Map<ExtensionURL, Class<?>>> extensionClasses = new Holder<>();
-        private final ConcurrentMap<ExtensionURL, Holder<Object>> extensionInstances = new ConcurrentHashMap<>();
-        private final ConcurrentMap<String, List<ExtensionURL>> extensionNameUrlsMap = new ConcurrentHashMap<>();
-        private final ConcurrentMap<Class<?>, ExtensionURL> extensionClassUrlMap = new ConcurrentHashMap<>();
-        private ExtensionURL defaultExtensionURL = null;
+        private final Holder<List<ExtensionDefinition>> definitionsHolder = new Holder<>();
+        private final ConcurrentMap<ExtensionDefinition, Holder<Object>> definitionToInstanceMap =
+                new ConcurrentHashMap<>();
+        private final ConcurrentMap<String, List<ExtensionDefinition>> nameToDefinitionsMap = new ConcurrentHashMap<>();
+        private final ConcurrentMap<Class<?>, ExtensionDefinition> classToDefinitionMap = new ConcurrentHashMap<>();
+        private ExtensionDefinition defaultExtensionDefinition = null;
         private Integer highestLoadPriority = Integer.MIN_VALUE;
 
         private InnerEnhancedServiceLoader(Class<S> type) {
@@ -209,7 +207,7 @@ public class EnhancedServiceLoader {
          * @param <S>  the type
          * @return the service loader
          */
-        static <S> InnerEnhancedServiceLoader<S> getServiceLoader(Class<S> type) {
+        private static <S> InnerEnhancedServiceLoader<S> getServiceLoader(Class<S> type) {
             if (type == null) {
                 throw new IllegalArgumentException("Enhanced Service type == null");
             }
@@ -228,7 +226,7 @@ public class EnhancedServiceLoader {
          * @return s s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        public S load(ClassLoader loader) throws EnhancedServiceNotFoundException {
+        private S load(ClassLoader loader) throws EnhancedServiceNotFoundException {
             return loadExtension(loader, null, null);
         }
 
@@ -238,7 +236,7 @@ public class EnhancedServiceLoader {
          * @return s s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        public S load() throws EnhancedServiceNotFoundException {
+        private S load() throws EnhancedServiceNotFoundException {
             return loadExtension(findClassLoader(), null, null);
         }
 
@@ -249,7 +247,7 @@ public class EnhancedServiceLoader {
          * @return s s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        public S load(String activateName) throws EnhancedServiceNotFoundException {
+        private S load(String activateName) throws EnhancedServiceNotFoundException {
             return loadExtension(activateName, findClassLoader(), null, null);
         }
 
@@ -261,7 +259,7 @@ public class EnhancedServiceLoader {
          * @return s s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        public S load(String activateName, ClassLoader loader)
+        private S load(String activateName, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
             return loadExtension(activateName, loader, null, null);
         }
@@ -274,7 +272,7 @@ public class EnhancedServiceLoader {
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        public S load(String activateName, Object[] args)
+        private S load(String activateName, Object[] args)
                 throws EnhancedServiceNotFoundException {
             Class[] argsType = null;
             if (args != null && args.length > 0) {
@@ -295,7 +293,7 @@ public class EnhancedServiceLoader {
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        public S load(String activateName, Class[] argsType, Object[] args)
+        private S load(String activateName, Class[] argsType, Object[] args)
                 throws EnhancedServiceNotFoundException {
             return loadExtension(activateName, findClassLoader(), argsType, args);
         }
@@ -305,7 +303,7 @@ public class EnhancedServiceLoader {
          *
          * @return list list
          */
-        public List<S> loadAll() {
+        private List<S> loadAll() {
             return loadAll(null, null);
         }
 
@@ -316,7 +314,7 @@ public class EnhancedServiceLoader {
          * @param args     the args
          * @return list list
          */
-        public List<S> loadAll(Class[] argsType, Object[] args) {
+        private List<S> loadAll(Class[] argsType, Object[] args) {
             List<S> allInstances = new ArrayList<>();
             List<Class> allClazzs = getAllExtensionClass();
             if (CollectionUtils.isEmpty(allClazzs)) {
@@ -324,8 +322,8 @@ public class EnhancedServiceLoader {
             }
             try {
                 for (Class clazz : allClazzs) {
-                    ExtensionURL url = extensionClassUrlMap.get(clazz);
-                    allInstances.add(getExtension(url, findClassLoader(), argsType, args));
+                    ExtensionDefinition definition = classToDefinitionMap.get(clazz);
+                    allInstances.add(getExtensionInstance(definition, findClassLoader(), argsType, args));
                 }
             } catch (Throwable t) {
                 throw new EnhancedServiceNotFoundException(t);
@@ -339,10 +337,8 @@ public class EnhancedServiceLoader {
          * @return all extension class
          */
         @SuppressWarnings("rawtypes")
-        List<Class> getAllExtensionClass() {
-            Map<ExtensionURL, Class<?>> map = loadAllExtensionClass(findClassLoader());
-            List<Class> result = new ArrayList<>(map.values());
-            return result;
+        private List<Class> getAllExtensionClass() {
+           return loadAllExtensionClass(findClassLoader());
         }
 
         /**
@@ -352,10 +348,8 @@ public class EnhancedServiceLoader {
          * @return all extension class
          */
         @SuppressWarnings("rawtypes")
-        List<Class> getAllExtensionClass(ClassLoader loader) {
-            Map<ExtensionURL, Class<?>> map = loadAllExtensionClass(loader);
-            List<Class> result = new ArrayList<>(map.values());
-            return result;
+        private List<Class> getAllExtensionClass(ClassLoader loader) {
+            return loadAllExtensionClass(loader);
         }
 
         @SuppressWarnings("rawtypes")
@@ -363,7 +357,7 @@ public class EnhancedServiceLoader {
                                 Object[] args) {
             try {
                 loadAllExtensionClass(loader);
-                return getExtension(defaultExtensionURL, loader, argTypes, args);
+                return getExtensionInstance(defaultExtensionDefinition, loader, argTypes, args);
             } catch (Throwable e) {
                 if (e instanceof EnhancedServiceNotFoundException) {
                     throw (EnhancedServiceNotFoundException)e;
@@ -383,8 +377,8 @@ public class EnhancedServiceLoader {
             }
             try {
                 loadAllExtensionClass(loader);
-                ExtensionURL cachedExtensionURL = getCachedServiceURL(activateName);
-                return getExtension(cachedExtensionURL, loader, argTypes, args);
+                ExtensionDefinition cachedExtensionDefinition = getCachedExtensionDefinition(activateName);
+                return getExtensionInstance(cachedExtensionDefinition, loader, argTypes, args);
             } catch (Throwable e) {
                 if (e instanceof EnhancedServiceNotFoundException) {
                     throw (EnhancedServiceNotFoundException)e;
@@ -396,39 +390,35 @@ public class EnhancedServiceLoader {
             }
         }
 
-        private S getExtension(ExtensionURL url, ClassLoader loader, Class[] argTypes,
-                               Object[] args) {
-            if (url == null) {
-                throw new EnhancedServiceNotFoundException("service provider not found");
+        private S getExtensionInstance(ExtensionDefinition definition, ClassLoader loader, Class[] argTypes,
+                                       Object[] args) {
+            if (definition == null) {
+                throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
-            if (Scope.SINGLETON.equals(url.getScope())) {
-                Holder<Object> holder = extensionInstances.get(url);
+            if (Scope.SINGLETON.equals(definition.getScope())) {
+                Holder<Object> holder = definitionToInstanceMap.get(definition);
                 if (holder == null) {
-                    extensionInstances.putIfAbsent(url, new Holder<>());
-                    holder = extensionInstances.get(url);
+                    definitionToInstanceMap.putIfAbsent(definition, new Holder<>());
+                    holder = definitionToInstanceMap.get(definition);
                 }
                 Object instance = holder.get();
                 if (instance == null) {
                     synchronized (holder) {
                         instance = holder.get();
                         if (instance == null) {
-                            instance = createExtension(url, loader, argTypes, args);
+                            instance = createExtension(definition, argTypes, args);
                             holder.set(instance);
                         }
                     }
                 }
                 return (S)instance;
             } else {
-                return createNewExtension(url, loader, argTypes, args);
+                return createNewExtension(definition, loader, argTypes, args);
             }
         }
 
-        private S createExtension(ExtensionURL url, ClassLoader loader, Class[] argTypes,
-                                  Object[] args) {
-            Class<?> clazz = loadAllExtensionClass(loader).get(url);
-            if (clazz == null) {
-                throw new EnhancedServiceNotFoundException("Not Found");
-            }
+        private S createExtension(ExtensionDefinition definition, Class[] argTypes, Object[] args) {
+            Class<?> clazz = definition.getServiceClass();
             try {
                 S instance = (S)EXTENSION_INSTANCES.get(clazz);
                 if (instance == null) {
@@ -438,82 +428,74 @@ public class EnhancedServiceLoader {
                 }
                 return instance;
             } catch (Throwable t) {
-                throw new IllegalStateException("Extension instance(url: " + url + ", class: " +
+                throw new IllegalStateException("Extension instance(definition: " + definition + ", class: " +
                         type + ")  could not be instantiated: " + t.getMessage(), t);
             }
         }
 
-        private S createNewExtension(ExtensionURL url, ClassLoader loader, Class[] argTypes, Object[] args) {
-            Class<?> clazz = loadAllExtensionClass(loader).get(url);
-            if (clazz == null) {
-                throw new EnhancedServiceNotFoundException("Not Found");
-            }
+        private S createNewExtension(ExtensionDefinition definition, ClassLoader loader, Class[] argTypes, Object[] args) {
+            loadAllExtensionClass(loader);
+            Class<?> clazz = definition.getServiceClass();
             try {
                 S newInstance = initInstance(clazz, argTypes, args);
                 return newInstance;
             } catch (Throwable t) {
-                throw new IllegalStateException("Extension instance(url: " + url + ", class: " +
+                throw new IllegalStateException("Extension instance(definition: " + definition + ", class: " +
                         type + ")  could not be instantiated: " + t.getMessage(), t);
             }
         }
 
-        private Map<ExtensionURL, Class<?>> loadAllExtensionClass(ClassLoader loader) {
-            Map<ExtensionURL, Class<?>> classes = extensionClasses.get();
-            if (classes == null) {
-                synchronized (extensionClasses) {
-                    classes = extensionClasses.get();
-                    if (classes == null) {
-                        classes = findAllExtensionClass(loader);
-                        extensionClasses.set(classes);
+        private List<Class> loadAllExtensionClass(ClassLoader loader) {
+            List<Class> result;
+            List<ExtensionDefinition> definitions = definitionsHolder.get();
+            if (definitions == null) {
+                synchronized (definitionsHolder) {
+                    definitions = definitionsHolder.get();
+                    if (definitions == null) {
+                        definitions = findAllExtensionDefinition(loader);
+                        definitionsHolder.set(definitions);
                     }
                 }
             }
-            return classes;
+            result = definitions.stream().map(def -> def.getServiceClass()).collect(Collectors.toList());
+            return result;
         }
 
         @SuppressWarnings("rawtypes")
-        private Map<ExtensionURL, Class<?>> findAllExtensionClass(ClassLoader loader) {
-            Map<ExtensionURL, Class<?>> extensions = new HashMap<>();
+        private List<ExtensionDefinition> findAllExtensionDefinition(ClassLoader loader) {
+            List<ExtensionDefinition> extensionDefinitions = new ArrayList<>();
             try {
-                loadFile(SERVICES_DIRECTORY, loader, extensions);
-                loadFile(SEATA_DIRECTORY, loader, extensions);
+                loadFile(SERVICES_DIRECTORY, loader, extensionDefinitions);
+                loadFile(SEATA_DIRECTORY, loader, extensionDefinitions);
             } catch (IOException e) {
                 throw new EnhancedServiceNotFoundException(e);
             }
 
-            if (!extensions.isEmpty()) {
-                extensions = sortAllExtensionClass(extensions);
-            }
-
-            if (!extensionNameUrlsMap.isEmpty()) {
-                for (List<ExtensionURL> urlList : extensionNameUrlsMap.values()) {
-                    Collections.sort(urlList, (url1, url2) -> {
-                        int o1 = url1.getOrder();
-                        int o2 = url2.getOrder();
+            //After loaded all the extensions,sort the caches by order
+            if (!nameToDefinitionsMap.isEmpty()) {
+                for (List<ExtensionDefinition> definitions : nameToDefinitionsMap.values()) {
+                    Collections.sort(definitions, (def1, def2) -> {
+                        int o1 = def1.getOrder();
+                        int o2 = def2.getOrder();
                         return Integer.compare(o1, o2);
                     });
                 }
             }
-            return extensions;
+
+            if (!extensionDefinitions.isEmpty()) {
+                Collections.sort(extensionDefinitions, (definition1, definition2) -> {
+                    int o1 = definition1.getOrder();
+                    int o2 = definition2.getOrder();
+                    return Integer.compare(o1, o2);
+                });
+            }
+
+            return extensionDefinitions;
         }
 
-        private Map<ExtensionURL, Class<?>> sortAllExtensionClass(Map<ExtensionURL, Class<?>> extensions) {
-            Set<ExtensionURL> entrySet = extensions.keySet();
-            List<ExtensionURL> list = new ArrayList<>(entrySet);
-            Collections.sort(list, (url1, url2) -> {
-                int o1 = url1.getOrder();
-                int o2 = url2.getOrder();
-                return Integer.compare(o1, o2);
-            });
-            LinkedHashMap<ExtensionURL, Class<?>> linkedHashMap = new LinkedHashMap<ExtensionURL, Class<?>>();
-            for (ExtensionURL url : list) {
-                linkedHashMap.put(url, extensions.get(url));
-            }
-            return linkedHashMap;
-        }
 
         @SuppressWarnings("rawtypes")
-        private void loadFile(String dir, ClassLoader classLoader, Map<ExtensionURL, Class<?>> extensions)
+        private void loadFile(String dir, ClassLoader classLoader, List<ExtensionDefinition> extensions)
                 throws IOException {
             String fileName = dir + type.getName();
             Enumeration<java.net.URL> urls;
@@ -538,8 +520,8 @@ public class EnhancedServiceLoader {
                             if (line.length() > 0) {
                                 try {
                                     Class<?> clazz = Class.forName(line, true, classLoader);
-                                    ExtensionURL extensionUrl = getExtensionURL(clazz);
-                                    extensions.put(extensionUrl, clazz);
+                                    ExtensionDefinition extensionDefinition = getExtensionDefinition(clazz);
+                                    extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
                                     LOGGER.warn("load [{}] class fail. {}", line, e.getMessage());
                                 }
@@ -554,7 +536,7 @@ public class EnhancedServiceLoader {
             }
         }
 
-        private ExtensionURL getExtensionURL(Class<?> clazz) {
+        private ExtensionDefinition getExtensionDefinition(Class<?> clazz) {
             String serviceName = null;
             String typeName = null;
             Integer priority = 0;
@@ -566,33 +548,31 @@ public class EnhancedServiceLoader {
                 priority = loadLevel.order();
                 scope = loadLevel.scope();
             }
-            ExtensionURL result = new ExtensionURL(serviceName, typeName, priority, scope);
+            ExtensionDefinition result = new ExtensionDefinition(serviceName, typeName, priority, scope, clazz);
             //do cache
-            extensionClassUrlMap.put(clazz, result);
-            if (loadLevel != null) {
-                if (extensionNameUrlsMap.containsKey(serviceName)) {
-                    List<ExtensionURL> urls = extensionNameUrlsMap.get(serviceName);
-                    urls.add(result);
+            classToDefinitionMap.put(clazz, result);
+            if (serviceName != null) {
+                if (nameToDefinitionsMap.containsKey(serviceName)) {
+                    List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(serviceName);
+                    definitions.add(result);
                 } else {
-                    List<ExtensionURL> urls = new ArrayList<>();
-                    urls.add(result);
-                    extensionNameUrlsMap.put(serviceName, urls);
+                    List<ExtensionDefinition> definitions = new ArrayList<>();
+                    definitions.add(result);
+                    nameToDefinitionsMap.put(serviceName, definitions);
                 }
             }
-            if (priority >= highestLoadPriority) {
-                //the highest priority based on the order param in LoadLevel,matches the current class's
-                //defaultExtensionURL,so cached them together
+            if (defaultExtensionDefinition == null || priority >= highestLoadPriority) {
+                //the highestLoadPriority matches the current class's defaultExtensionDefinition,cached them together
                 highestLoadPriority = priority;
-                defaultExtensionURL = result;
-                return defaultExtensionURL;
+                defaultExtensionDefinition = result;
             }
             return result;
         }
 
-        private ExtensionURL getCachedServiceURL(String activateName) {
-            if (extensionNameUrlsMap.containsKey(activateName)) {
-                List<ExtensionURL> urls = extensionNameUrlsMap.get(activateName);
-                return urls.get(urls.size() - 1);
+        private ExtensionDefinition getCachedExtensionDefinition(String activateName) {
+            if (nameToDefinitionsMap.containsKey(activateName)) {
+                List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
+                return definitions.get(definitions.size() - 1);
             }
             return null;
         }
@@ -609,7 +589,7 @@ public class EnhancedServiceLoader {
          * @throws NoSuchMethodException     the no such method exception
          * @throws InvocationTargetException the invocation target exception
          */
-        protected S initInstance(Class implClazz, Class[] argTypes, Object[] args)
+        private S initInstance(Class implClazz, Class[] argTypes, Object[] args)
                 throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
             S s = null;
             if (argTypes != null && args != null) {
@@ -631,7 +611,7 @@ public class EnhancedServiceLoader {
          *
          * @return
          */
-        static ClassLoader findClassLoader() {
+       private static ClassLoader findClassLoader() {
             return EnhancedServiceLoader.class.getClassLoader();
         }
 
