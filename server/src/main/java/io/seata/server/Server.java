@@ -21,6 +21,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
+import io.seata.core.util.IdWorker;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -67,6 +68,7 @@ public class Server {
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
+
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
         //server port
         rpcServer.setListenPort(parameterParser.getPort());
@@ -79,7 +81,9 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(rpcServer);
-
+        //IdWorker Instantiate by service node
+        IdWorker.getInstance(Long.valueOf(parameterParser.getServerNode()),
+            Long.valueOf(parameterParser.getServerNode()));
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
