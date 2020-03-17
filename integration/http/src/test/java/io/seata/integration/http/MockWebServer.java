@@ -123,9 +123,6 @@ public class MockWebServer {
         return map;
     }
 
-    public static void main(String[] args) {
-        new MockWebServer().start(8081);
-    }
 
     public static Map<String, Object> getUrlParams(String param) {
         Map<String, Object> map = new HashMap<String, Object>(0);
