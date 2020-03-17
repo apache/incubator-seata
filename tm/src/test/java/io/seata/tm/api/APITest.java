@@ -224,7 +224,6 @@ public class APITest {
             TransactionInfo txInfo = new TransactionInfo();
             txInfo.setTimeOut(TIME_OUT);
             txInfo.setName(TX_NAME);
-            txInfo.setBranchType(BranchType.AT);
             return txInfo;
         }
     }

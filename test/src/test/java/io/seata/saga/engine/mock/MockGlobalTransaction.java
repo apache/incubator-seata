@@ -55,7 +55,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public void begin(int timeout, String name, BranchType branchType) throws TransactionException {
+    public void begin(int timeout, String name) throws TransactionException {
 
     }
 
