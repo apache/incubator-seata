@@ -15,11 +15,11 @@
  */
 package io.seata.integration.http;
 
-import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class MockRequest {
     private String url;
-    private Map<String, String> header = Maps.newHashMap();
+    private Map<String, String> header = new HashMap<>();
     private String body;
     private String path;
     private String method = "get";
