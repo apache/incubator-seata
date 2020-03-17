@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;

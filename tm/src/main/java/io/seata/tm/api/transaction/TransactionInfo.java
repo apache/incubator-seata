@@ -89,5 +89,4 @@ public final class TransactionInfo implements Serializable {
     public void setPropagation(Propagation propagation) {
         this.propagation = propagation;
     }
-
 }
