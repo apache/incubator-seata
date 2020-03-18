@@ -32,14 +32,16 @@ public class MockResponse {
 
     public String write(String content) throws IOException {
         StringBuffer httpResponse = new StringBuffer();
-        httpResponse.append("HTTP/1.1 200 OK\n")      //按照HTTP响应报文的格式写入
+        httpResponse.append("HTTP/1.1 200 OK\n")
                 .append("Content-Type:application/json\n")
                 .append("\r\n")
-                .append(content);       //将页面内容写入
-        if (outputStream == null)
+                .append(content);
+        if (outputStream == null) {
+            //local call
             return content;
+        }
         else {
-            outputStream.write(httpResponse.toString().getBytes());      //将文本转为字节流
+            outputStream.write(httpResponse.toString().getBytes());
             outputStream.close();
             return "success";
         }
