@@ -49,7 +49,8 @@ public class DataBaseLockStoreDAOTest {
         dataSource.setPassword("");
 
         dataBaseLockStoreDAO = new LockStoreDataBaseDAO(dataSource);
-        dataBaseLockStoreDAO.init();
+        dataBaseLockStoreDAO.setDbType("h2");
+        dataBaseLockStoreDAO.setLockTable("lock_table");
 
         prepareTable(dataSource);
     }

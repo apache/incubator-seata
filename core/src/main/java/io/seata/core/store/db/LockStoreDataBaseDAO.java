@@ -63,7 +63,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
-     * The Log store data source.
+     * The Lock store data source.
      */
     protected DataSource lockStoreDataSource;
 
@@ -73,9 +73,14 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
     protected String lockTable;
 
     /**
+     * The Db type.
+     */
+    protected String dbType;
+
+    /**
      * Instantiates a new Data base lock store dao.
      *
-     * @param lockStoreDataSource the lock store data source
+     * @param lockStoreDataSource the log store data source
      */
     public LockStoreDataBaseDAO(DataSource lockStoreDataSource) {
         this.lockStoreDataSource = lockStoreDataSource;
@@ -84,8 +89,12 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
     @Override
     public void init() {
         lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
+        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        if (StringUtils.isBlank(dbType)) {
+            throw new StoreException("there must be db type.");
+        }
         if (lockStoreDataSource == null) {
-            throw new StoreException("there must be logStoreDataSource.");
+            throw new StoreException("there must be lockStoreDataSource.");
         }
     }
 
@@ -116,7 +125,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             boolean canLock = true;
             //query
-            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql().getCheckLockableSql(lockTable, sj.toString());
+            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, sj.toString());
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());
@@ -210,7 +219,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 sj.add("?");
             }
             //batch release lock
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql().getBatchDeleteLockSql(lockTable, sj.toString());
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSql(lockTable, sj.toString());
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, lockDOs.get(0).getXid());
             for (int i = 0; i < lockDOs.size(); i++) {
@@ -233,7 +242,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             //batch release lock by branch
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql().getBatchDeleteLockSqlByBranch(lockTable);
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranch(lockTable);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
@@ -256,7 +265,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             StringJoiner sj = new StringJoiner(",");
             branchIds.stream().forEach(branchId -> sj.add("?"));
             //batch release lock by branch list
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql().getBatchDeleteLockSqlByBranchs(lockTable, sj.toString());
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranchs(lockTable, sj.toString());
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
             for (int i = 0; i < branchIds.size(); i++) {
@@ -299,7 +308,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         PreparedStatement ps = null;
         try {
             //insert
-            String insertLockSQL = LockStoreSqlFactory.getLogStoreSql().getInsertLockSQL(lockTable);
+            String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getInsertLockSQL(lockTable);
             ps = conn.prepareStatement(insertLockSQL);
             ps.setString(1, lockDO.getXid());
             ps.setLong(2, lockDO.getTransactionId());
@@ -327,7 +336,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         PreparedStatement ps = null;
         try {
             //insert
-            String insertLockSQL = LockStoreSqlFactory.getLogStoreSql().getInsertLockSQL(lockTable);
+            String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getInsertLockSQL(lockTable);
             ps = conn.prepareStatement(insertLockSQL);
             for (LockDO lockDO : lockDOs) {
                 ps.setString(1, lockDO.getXid());
@@ -366,7 +375,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
 
             //query
-            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql().getCheckLockableSql(lockTable, sj.toString());
+            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, sj.toString());
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());
@@ -384,5 +393,32 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } finally {
             IOUtil.close(rs, ps);
         }
+    }
+
+    /**
+     * Sets lock table.
+     *
+     * @param lockTable the lock table
+     */
+    public void setLockTable(String lockTable) {
+        this.lockTable = lockTable;
+    }
+
+    /**
+     * Sets db type.
+     *
+     * @param dbType the db type
+     */
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
+    }
+
+    /**
+     * Sets log store data source.
+     *
+     * @param lockStoreDataSource the log store data source
+     */
+    public void setLogStoreDataSource(DataSource lockStoreDataSource) {
+        this.lockStoreDataSource = lockStoreDataSource;
     }
 }
