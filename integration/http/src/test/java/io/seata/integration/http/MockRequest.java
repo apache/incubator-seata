@@ -35,14 +35,26 @@ public class MockRequest {
     public String getBody() {
         return body;
     }
+
     public Map<String, String> getHeader() {
         return header;
     }
+
     public String getMethod() {
         return method;
     }
+
     public String getPath() {
         return path;
+    }
+
+    public MockRequest(String url, Map<String, String> header, String body, String path,String method) {
+
+        this.url = url;
+        this.header = header;
+        this.body = body;
+        this.path = path;
+        this.method = method;
     }
 
     public MockRequest(InputStream inputStream) throws IOException {
