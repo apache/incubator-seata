@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-serializer-fst</artifactId>
     <packaging>jar</packaging>
-    <name>seata-serializer-kryo ${project.version}</name>
+    <name>seata-serializer-fst ${project.version}</name>
     <dependencies>
         <dependency>
             <groupId>de.ruedigermoeller</groupId>
@@ -37,5 +37,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
 </project>
