@@ -53,11 +53,11 @@ class ExtensionDefinition {
         this.scope = scope;
     }
 
-    public Class getServiceClass(){
+    public Class getServiceClass() {
         return this.serviceClass;
     }
 
-    public void setServiceClass(Class clazz){
+    public void setServiceClass(Class clazz) {
         this.serviceClass = clazz;
     }
 
