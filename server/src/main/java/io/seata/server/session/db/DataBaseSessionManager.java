@@ -15,6 +15,9 @@
  */
 package io.seata.server.session.db;
 
+import java.util.Collection;
+import java.util.List;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -36,9 +39,6 @@ import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * The Data base session manager.
