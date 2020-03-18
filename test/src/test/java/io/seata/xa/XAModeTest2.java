@@ -216,6 +216,7 @@ public class XAModeTest2 {
     }
 
     @Test
+    @Disabled
     public void testAllInOne() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
@@ -223,6 +224,7 @@ public class XAModeTest2 {
     }
 
     @Test
+    @Disabled
     public void testGlobalCommitOnDifferentDataSource() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
@@ -232,6 +234,7 @@ public class XAModeTest2 {
     }
 
     @Test
+    @Disabled
     public void testGlobalRollbackOnDifferentDataSource() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
@@ -445,6 +448,7 @@ public class XAModeTest2 {
     }
 
     @Test
+    @Disabled
     public void testXid() throws Throwable {
         XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
 
