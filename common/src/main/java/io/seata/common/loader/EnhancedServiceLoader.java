@@ -18,7 +18,6 @@ package io.seata.common.loader;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.Holder;
 import io.seata.common.util.IOUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -93,8 +92,8 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName, ClassLoader loader)
-        throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName,loader);
+            throws EnhancedServiceNotFoundException {
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, loader);
     }
 
     /**
@@ -108,8 +107,8 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName, Object[] args)
-        throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName,args);
+            throws EnhancedServiceNotFoundException {
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args);
     }
 
     /**
@@ -124,8 +123,8 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName, Class[] argsType, Object[] args)
-        throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName,argsType,args);
+            throws EnhancedServiceNotFoundException {
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args);
     }
 
     /**
@@ -142,14 +141,14 @@ public class EnhancedServiceLoader {
     /**
      * get all implements
      *
-     * @param <S>     the type parameter
-     * @param service the service
-     * @param argsType     the args type
-     * @param args         the args
+     * @param <S>      the type parameter
+     * @param service  the service
+     * @param argsType the args type
+     * @param args     the args
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service, Class[] argsType, Object[] args) {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType,args);
+        return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args);
     }
 
     /**
@@ -185,7 +184,6 @@ public class EnhancedServiceLoader {
 
         private static final ConcurrentMap<Class<?>, InnerEnhancedServiceLoader<?>> SERVICE_LOADERS =
                 new ConcurrentHashMap<>();
-        private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>();
 
         private final Class<S> type;
         private final Holder<List<ExtensionDefinition>> definitionsHolder = new Holder<>();
@@ -338,7 +336,7 @@ public class EnhancedServiceLoader {
          */
         @SuppressWarnings("rawtypes")
         private List<Class> getAllExtensionClass() {
-           return loadAllExtensionClass(findClassLoader());
+            return loadAllExtensionClass(findClassLoader());
         }
 
         /**
@@ -406,7 +404,7 @@ public class EnhancedServiceLoader {
                     synchronized (holder) {
                         instance = holder.get();
                         if (instance == null) {
-                            instance = createExtension(definition, argTypes, args);
+                            instance = createNewExtension(definition, loader, argTypes, args);
                             holder.set(instance);
                         }
                     }
@@ -414,22 +412,6 @@ public class EnhancedServiceLoader {
                 return (S)instance;
             } else {
                 return createNewExtension(definition, loader, argTypes, args);
-            }
-        }
-
-        private S createExtension(ExtensionDefinition definition, Class[] argTypes, Object[] args) {
-            Class<?> clazz = definition.getServiceClass();
-            try {
-                S instance = (S)EXTENSION_INSTANCES.get(clazz);
-                if (instance == null) {
-                    S newInstance = initInstance(clazz, argTypes, args);
-                    EXTENSION_INSTANCES.putIfAbsent(clazz, newInstance);
-                    instance = newInstance;
-                }
-                return instance;
-            } catch (Throwable t) {
-                throw new IllegalStateException("Extension instance(definition: " + definition + ", class: " +
-                        type + ")  could not be instantiated: " + t.getMessage(), t);
             }
         }
 
@@ -611,9 +593,28 @@ public class EnhancedServiceLoader {
          *
          * @return
          */
-       private static ClassLoader findClassLoader() {
+        private static ClassLoader findClassLoader() {
             return EnhancedServiceLoader.class.getClassLoader();
         }
 
+
+        /**
+         * Helper Class for hold a value.
+         * @param <T>
+         */
+        private static class Holder<T> {
+
+            private volatile T value;
+
+            private void set(T value) {
+                this.value = value;
+            }
+
+            private T get() {
+                return value;
+            }
+        }
     }
+
+
 }
