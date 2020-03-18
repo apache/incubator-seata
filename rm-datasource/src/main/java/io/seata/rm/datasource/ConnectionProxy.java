@@ -263,7 +263,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                    commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
+                    handleBranchStatus(commitDone), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
@@ -275,6 +275,20 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 }
             }
         }
+    }
+
+    private BranchStatus handleBranchStatus(boolean commitDone) {
+        BranchStatus branchStatus = null;
+        if (!commitDone) {
+            if (context.getBranchId() == null) {
+                branchStatus = BranchStatus.Local_CommitFailed_NotRegistered;
+            } else {
+                branchStatus = BranchStatus.PhaseOne_Failed;
+            }
+        } else {
+            branchStatus = BranchStatus.PhaseOne_Done;
+        }
+        return branchStatus;
     }
 
     public static class LockRetryPolicy {

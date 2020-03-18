@@ -91,7 +91,13 @@ public enum BranchStatus {
      * The Phase two rollback failed unretryable.
      * description:Rollback logic is failed but NOT retryable.
      */
-    PhaseTwo_RollbackFailed_Unretryable(10);
+    PhaseTwo_RollbackFailed_Unretryable(10),
+
+    /**
+     * The local commit failed and has not registered.
+     * description:Branch local commit failed, and has not registered.
+     */
+    Local_CommitFailed_NotRegistered(11);
 
     private int code;
 
