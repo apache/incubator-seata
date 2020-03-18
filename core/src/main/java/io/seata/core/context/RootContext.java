@@ -66,11 +66,7 @@ public class RootContext {
      * @return the xid
      */
     public static String getBranchType() {
-        String result = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
-        if(StringUtils.isEmpty(result)){
-            return String.valueOf(BranchType.AT.ordinal());
-        }
-        return result;
+        return CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
     }
 
     /**
