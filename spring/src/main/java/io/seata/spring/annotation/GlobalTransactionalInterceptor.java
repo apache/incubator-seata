@@ -15,14 +15,6 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
@@ -46,6 +38,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
@@ -114,8 +114,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
         if (!disable && globalTransactionalAnnotation != null) {
-            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation,
-                StringUtils.isBlank(key) ? null : key);
+            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation, key);
         } else if (!disable && globalLockAnnotation != null) {
             return handleGlobalLock(methodInvocation);
         } else {
@@ -194,6 +193,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 case RollbackRetrying:
+                    error = false;
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 default:
@@ -270,5 +270,4 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             }
         }
     }
-
 }
