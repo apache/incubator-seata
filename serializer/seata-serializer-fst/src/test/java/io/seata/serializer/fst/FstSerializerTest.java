@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author funkye
  */
-public class KryoSerializerTest {
+public class FstSerializerTest {
 
     private static FstSerializer fstSerializer;
 
