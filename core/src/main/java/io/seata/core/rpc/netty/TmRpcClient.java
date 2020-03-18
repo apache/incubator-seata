@@ -153,7 +153,6 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                                      AbstractMessage requestMessage) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. server version:{},channel:{}", ((RegisterTMResponse)response).getVersion(), channel);
-            getClientChannelManager().registerChannel(serverAddress, channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
     }
