@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
+import javax.xml.ws.Holder;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -520,17 +521,15 @@ public class EnhancedServiceLoader {
 
         private ExtensionDefinition getExtensionDefinition(Class<?> clazz) {
             String serviceName = null;
-            String typeName = null;
             Integer priority = 0;
             Scope scope = Scope.SINGLETON;
             LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
-            typeName = clazz.getTypeName();
             if (loadLevel != null) {
                 serviceName = loadLevel.name();
                 priority = loadLevel.order();
                 scope = loadLevel.scope();
             }
-            ExtensionDefinition result = new ExtensionDefinition(serviceName, typeName, priority, scope, clazz);
+            ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
             //do cache
             classToDefinitionMap.put(clazz, result);
             if (serviceName != null) {
@@ -603,7 +602,6 @@ public class EnhancedServiceLoader {
          * @param <T>
          */
         private static class Holder<T> {
-
             private volatile T value;
 
             private void set(T value) {

@@ -51,8 +51,7 @@ public class DataBaseLocker extends AbstractLocker {
      * @param logStoreDataSource the log store data source
      */
     public DataBaseLocker(DataSource logStoreDataSource) {
-        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.getName(),
-                new Class[] {DataSource.class},
+        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.getName(), new Class[] {DataSource.class},
             new Object[] {logStoreDataSource});
     }
 

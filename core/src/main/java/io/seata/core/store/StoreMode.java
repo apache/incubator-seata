@@ -44,7 +44,7 @@ public enum StoreMode {
 
     /**
      * get value of store mode
-      * @param name the mode name
+     * @param name the mode name
      *  @return the store mode
      */
     public static StoreMode get(String name) {

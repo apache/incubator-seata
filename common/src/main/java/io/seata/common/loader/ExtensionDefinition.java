@@ -24,18 +24,9 @@ import io.seata.common.util.StringUtils;
  */
 class ExtensionDefinition {
     private String name;
-    private String typeName;
+    private Class serviceClass;
     private Integer order;
     private Scope scope;
-    private Class serviceClass;
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public Integer getOrder() {
         return this.order;
@@ -43,14 +34,6 @@ class ExtensionDefinition {
 
     public void setOrder(Integer order) {
         this.order = order;
-    }
-
-    public Scope getScope() {
-        return this.scope;
-    }
-
-    public void setScope(Scope scope) {
-        this.scope = scope;
     }
 
     public Class getServiceClass() {
@@ -61,9 +44,16 @@ class ExtensionDefinition {
         this.serviceClass = clazz;
     }
 
-    public ExtensionDefinition(String name, String typeName, Integer order, Scope scope, Class clazz) {
+    public Scope getScope() {
+        return this.scope;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
+    public ExtensionDefinition(String name, Integer order, Scope scope, Class clazz) {
         this.name = name;
-        this.typeName = typeName;
         this.order = order;
         this.scope = scope;
         this.serviceClass = clazz;
@@ -74,7 +64,7 @@ class ExtensionDefinition {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((typeName == null) ? 0 : typeName.hashCode());
+        result = prime * result + ((serviceClass == null) ? 0 : serviceClass.hashCode());
         result = prime * result + ((order == null) ? 0 : order.hashCode());
         result = prime * result + ((scope == null) ? 0 : scope.hashCode());
         return result;
@@ -95,7 +85,7 @@ class ExtensionDefinition {
         if (!StringUtils.equals(name, other.name)) {
             return false;
         }
-        if (!StringUtils.equals(typeName, other.typeName)) {
+        if (!serviceClass.equals(other.serviceClass)) {
             return false;
         }
         if (!order.equals(other.order)) {

@@ -92,16 +92,12 @@ public class SessionHolder {
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
             //database store
-            ROOT_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
             //file store

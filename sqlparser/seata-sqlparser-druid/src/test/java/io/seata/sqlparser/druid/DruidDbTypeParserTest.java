@@ -28,8 +28,7 @@ public class DruidDbTypeParserTest {
     @Test
     public void testDruidDbTypeParserLoading() {
         String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/seata";
-        DruidDelegatingDbTypeParser dbTypeParser =
-                (DruidDelegatingDbTypeParser) EnhancedServiceLoader.load(DbTypeParser.class,
+        DruidDelegatingDbTypeParser dbTypeParser = (DruidDelegatingDbTypeParser) EnhancedServiceLoader.load(DbTypeParser.class,
                         SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(dbTypeParser);
         Assertions.assertEquals(DruidDelegatingDbTypeParser.class, dbTypeParser.getClass());

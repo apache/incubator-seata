@@ -61,8 +61,7 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
      */
     public FileBasedSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
-        transactionStoreManager =
-                EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.FILE.getName(),
+        transactionStoreManager = EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.FILE.getName(),
             new Class[] {String.class, SessionManager.class},
             new Object[] {sessionStoreFilePath + File.separator + name, this});
     }

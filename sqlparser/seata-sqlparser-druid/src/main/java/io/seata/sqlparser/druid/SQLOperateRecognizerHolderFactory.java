@@ -39,8 +39,8 @@ public class SQLOperateRecognizerHolderFactory {
         if (RECOGNIZER_HOLDER_MAP.get(dbType) != null) {
             return RECOGNIZER_HOLDER_MAP.get(dbType);
         }
-        SQLOperateRecognizerHolder recognizerHolder = EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class,
-                dbType, SQLOperateRecognizerHolderFactory.class.getClassLoader());
+        SQLOperateRecognizerHolder recognizerHolder = EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, dbType,
+                SQLOperateRecognizerHolderFactory.class.getClassLoader());
         RECOGNIZER_HOLDER_MAP.putIfAbsent(dbType, recognizerHolder);
         return recognizerHolder;
     }

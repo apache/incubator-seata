@@ -32,8 +32,7 @@ public class DruidIsolationTest {
 
     @Test
     public void testDruidIsolation() throws Exception {
-        DruidDelegatingSQLRecognizerFactory recognizerFactory =
-                (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class,
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class,
                         SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
         SQLRecognizer sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL);
@@ -46,8 +45,7 @@ public class DruidIsolationTest {
 
     @AfterAll
     public static void afterClass(){
-        DruidDelegatingSQLRecognizerFactory recognizerFactory =
-                       (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class,
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class,
                                SqlParserType.SQL_PARSER_TYPE_DRUID);
         recognizerFactory.setClassLoader(DruidIsolationTest.class.getClassLoader());
     }

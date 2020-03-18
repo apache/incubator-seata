@@ -28,8 +28,7 @@ public class EnhancedServiceLoaderTest {
 
     @Test
     public void testLoadBeanByOrder(){
-        LoaderTestSPI loader  = EnhancedServiceLoader.load(LoaderTestSPI.class,
-                EnhancedServiceLoaderTest.class.getClassLoader());
+        LoaderTestSPI loader  = EnhancedServiceLoader.load(LoaderTestSPI.class, EnhancedServiceLoaderTest.class.getClassLoader());
         System.out.println(loader.echo());
         Assertions.assertEquals("impl_2", loader.echo());
     }
