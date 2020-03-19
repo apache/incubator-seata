@@ -41,7 +41,8 @@ public @interface EnableAutoDataSourceProxy {
 
     /**
      * Specifies which datasource bean are not eligible for auto-proxying
+     *
      * @return
      */
-    String[] exclude() default {};
+    String[] excludes() default {};
 }

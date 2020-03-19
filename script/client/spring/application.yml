@@ -4,7 +4,7 @@ seata:
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
-  exclude-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
+  excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
       async-commit-buffer-limit: 1000

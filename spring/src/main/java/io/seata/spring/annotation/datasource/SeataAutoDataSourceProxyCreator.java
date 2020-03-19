@@ -16,7 +16,7 @@
 package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.spring.util.SpringProxyUtils;
@@ -28,6 +28,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.BeansException;
 
 /**
@@ -36,59 +37,48 @@ import org.springframework.beans.BeansException;
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoDataSourceProxyCreator.class);
     private MethodInterceptor advice;
-    private final String[] exclude;
+    private final String[] excludes;
 
-    public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] exclude) {
-        this.exclude = exclude;
+    public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] excludes) {
+        this.excludes = excludes;
         setProxyTargetClass(!useJdkProxy);
     }
 
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        String className = bean.getClass().getName();
-        if (bean instanceof DataSource && Stream.of(exclude).noneMatch(s -> s.equals(className))) {
-            boolean isProxied = AopUtils.isAopProxy(bean);
-            if (!isProxied || !isAutoProxiedBySeata(bean)) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Auto proxy of [{}]", beanName);
-                }
-                DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-                advice = new SeataAutoDataSourceProxyAdvice(dataSourceProxy);
-                if (isProxied) {
-                    try {
-                        AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-                        Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                        for (Advisor avr : advisor) {
-                            advised.addAdvisor(0, avr);
-                        }
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+        if (!shouldSkip(bean.getClass(), beanName)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Auto proxy of [{}]", beanName);
+            }
+            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
+            advice = new SeataAutoDataSourceProxyAdvice(dataSourceProxy);
+            if (AopUtils.isAopProxy(bean)) {
+                try {
+                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
+                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
+                    for (Advisor avr : advisor) {
+                        advised.addAdvisor(0, avr);
                     }
-                } else {
-                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
+            } else {
+                bean = super.wrapIfNecessary(bean, beanName, cacheKey);
             }
         }
-        return bean;
-    }
 
-    /**
-     * Whether this bean has been proxied by Seata
-     *
-     * @param bean
-     * @return true if this bean has been proxied by Seata
-     */
-    private boolean isAutoProxiedBySeata(Object bean) {
-        try {
-            AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-            return advised.countAdvicesOfType(SeataAutoDataSourceProxyAdvice.class) > 0;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return bean;
     }
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) throws BeansException {
-        return new Object[]{advice};
+        return new Object[]{new DefaultIntroductionAdvisor(advice)};
+    }
+
+    @Override
+    protected boolean shouldSkip(Class<?> beanClass, String beanName) {
+        return SeataProxy.class.isAssignableFrom(beanClass) ||
+            !DataSource.class.isAssignableFrom(beanClass) ||
+            Arrays.asList(excludes).contains(beanClass.getName());
     }
 }

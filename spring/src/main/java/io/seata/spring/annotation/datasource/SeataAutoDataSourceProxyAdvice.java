@@ -20,12 +20,13 @@ import java.lang.reflect.Method;
 import io.seata.rm.datasource.DataSourceProxy;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.IntroductionInfo;
 import org.springframework.beans.BeanUtils;
 
 /**
  * @author xingfudeshi@gmail.com
  */
-public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor {
+public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
     private final DataSourceProxy dataSourceProxy;
 
     public SeataAutoDataSourceProxyAdvice(DataSourceProxy dataSourceProxy) {
@@ -43,4 +44,10 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor {
             return invocation.proceed();
         }
     }
+
+    @Override
+    public Class<?>[] getInterfaces() {
+        return new Class[]{SeataProxy.class};
+    }
+
 }
