@@ -17,6 +17,7 @@ package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +42,9 @@ public class RootContext {
     public static final String KEY_XID = "TX_XID";
 
     /**
-     * The constant KEY_TCC_SCOPE
+     * The constant KEY_BRANCH_TYPE
      */
-    public static final String KEY_TCC_SCOPE = "TCC_SCOPE";
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
@@ -116,38 +117,39 @@ public class RootContext {
         return CONTEXT_HOLDER.get(KEY_XID) != null;
     }
 
-
     /**
-     * In tcc scope boolean
+     * In TCC scope boolean
      *
      * @return the boolean
      */
     public static boolean inTCCScope() {
-        return CONTEXT_HOLDER.get(KEY_TCC_SCOPE) != null;
+        return StringUtils.equals(String.valueOf(BranchType.TCC.ordinal()), CONTEXT_HOLDER.get(KEY_BRANCH_TYPE));
     }
 
     /**
-     * Enter the TCC scope
-     */
-    public static void enterTCCScope() {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("enter TCC scope");
-        }
-
-        CONTEXT_HOLDER.put(KEY_TCC_SCOPE, String.valueOf(true));
-    }
-
-    /**
-     * Exit the TCC Scope
+     * bind branch type
      *
-     * @return the previous TCC scope String
+     * @param branchType the branch type
      */
-    public static String exitTCCScope() {
-        String previousTCCScope = CONTEXT_HOLDER.remove(KEY_TCC_SCOPE);
+    public static void bindBranchType(BranchType branchType) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("exit TCC scope {} ", previousTCCScope);
+            LOGGER.debug("bind branch type {}", branchType);
         }
-        return previousTCCScope;
+
+        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, String.valueOf(branchType.ordinal()));
+    }
+
+    /**
+     * unbind branch type
+     *
+     * @return the previous branch type string
+     */
+    public static String unbindBranchType() {
+        String unbindBranchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind branch type {}", unbindBranchType);
+        }
+        return unbindBranchType;
     }
 
     /**

@@ -25,6 +25,7 @@ import com.alibaba.dubbo.rpc.RpcException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.constants.DubboConstants;
+import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,19 +48,19 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         boolean inTccScope = RootContext.inTCCScope();
 
         String rpcXid = getRpcXid();
-        String rpcInTCCScope = RpcContext.getContext().getAttachment(RootContext.KEY_TCC_SCOPE);
+        String rpcInTCCScope = RpcContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_TCC_SCOPE, String.valueOf(inTccScope));
+            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, String.valueOf(inTccScope));
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
                 if (StringUtils.equals(rpcInTCCScope, String.valueOf(true))) {
-                    RootContext.enterTCCScope();
+                    RootContext.bindBranchType(BranchType.TCC);
                 }
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
@@ -72,7 +73,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         } finally {
             if (bind) {
                 String unbindXid = RootContext.unbind();
-                String exitTCCScope = RootContext.inTCCScope() ? RootContext.exitTCCScope() : String.valueOf(false);
+                String exitTCCScope = RootContext.inTCCScope() ? RootContext.unbindBranchType() : String.valueOf(false);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("unbind[{}] from RootContext", unbindXid);
                 }
@@ -81,7 +82,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         if (StringUtils.equals(exitTCCScope,String.valueOf(true))) {
-                            RootContext.enterTCCScope();
+                            RootContext.bindBranchType(BranchType.TCC);
                         }
                         LOGGER.warn("bind [{}] back to RootContext", unbindXid);
                     }
