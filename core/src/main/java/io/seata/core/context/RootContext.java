@@ -17,7 +17,6 @@ package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
-import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,10 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_BRANCH_TYPE = "BRANCH_TYPE";
+    /**
+     * The constant KEY_TCC_SCOPE
+     */
+    public static final String KEY_TCC_SCOPE = "TCC_SCOPE";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
@@ -61,15 +63,6 @@ public class RootContext {
     }
 
     /**
-     * Gets the current branchType
-     *
-     * @return the xid
-     */
-    public static String getBranchType() {
-        return CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
-    }
-
-    /**
      * Bind.
      *
      * @param xid the xid
@@ -79,15 +72,6 @@ public class RootContext {
             LOGGER.debug("bind {}", xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
-    }
-
-    /**
-     * Bind the current branchType
-     *
-     * @param branchType
-     */
-    public static void bindBranchType(BranchType branchType) {
-        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, String.valueOf(branchType.ordinal()));
     }
 
     /**
@@ -116,19 +100,6 @@ public class RootContext {
         return xid;
     }
 
-    /**
-     * Unbind branchType
-     *
-     * @return the string
-     */
-    public static String unbindBranchType() {
-        String branchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind {} ", branchType);
-        }
-        return branchType;
-    }
-
     public static void unbindGlobalLockFlag() {
         String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
         if (LOGGER.isDebugEnabled() && lockFlag != null) {
@@ -143,6 +114,40 @@ public class RootContext {
      */
     public static boolean inGlobalTransaction() {
         return CONTEXT_HOLDER.get(KEY_XID) != null;
+    }
+
+
+    /**
+     * In tcc scope boolean
+     *
+     * @return the boolean
+     */
+    public static boolean inTCCScope() {
+        return CONTEXT_HOLDER.get(KEY_TCC_SCOPE) != null;
+    }
+
+    /**
+     * Enter the TCC scope
+     */
+    public static void enterTCCScope() {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("enter TCC scope");
+        }
+
+        CONTEXT_HOLDER.put(KEY_TCC_SCOPE, String.valueOf(true));
+    }
+
+    /**
+     * Exit the TCC Scope
+     *
+     * @return the previous TCC scope String
+     */
+    public static String exitTCCScope() {
+        String previousTCCScope = CONTEXT_HOLDER.remove(KEY_TCC_SCOPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("exit TCC scope {} ", previousTCCScope);
+        }
+        return previousTCCScope;
     }
 
     /**

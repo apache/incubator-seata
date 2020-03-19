@@ -22,6 +22,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.constants.DubboConstants;
 import org.slf4j.Logger;
@@ -43,17 +44,23 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
             return invoker.invoke(invocation);
         }
         String xid = RootContext.getXID();
+        boolean inTccScope = RootContext.inTCCScope();
 
         String rpcXid = getRpcXid();
+        String rpcInTCCScope = RpcContext.getContext().getAttachment(RootContext.KEY_TCC_SCOPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
+            RpcContext.getContext().setAttachment(RootContext.KEY_TCC_SCOPE, String.valueOf(inTccScope));
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
+                if (StringUtils.equals(rpcInTCCScope, String.valueOf(true))) {
+                    RootContext.enterTCCScope();
+                }
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("bind[{}] to RootContext", rpcXid);
@@ -62,17 +69,20 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         }
         try {
             return invoker.invoke(invocation);
-
         } finally {
             if (bind) {
                 String unbindXid = RootContext.unbind();
+                String exitTCCScope = RootContext.inTCCScope() ? RootContext.exitTCCScope() : String.valueOf(false);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("unbind[{}] from RootContext", unbindXid);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {} ", rpcXid, unbindXid);
+                    LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
+                        if (StringUtils.equals(exitTCCScope,String.valueOf(true))) {
+                            RootContext.enterTCCScope();
+                        }
                         LOGGER.warn("bind [{}] back to RootContext", unbindXid);
                     }
                 }

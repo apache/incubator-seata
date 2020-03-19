@@ -17,7 +17,6 @@ package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
 import io.seata.core.context.RootContext;
-import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
 import io.seata.rm.tcc.remoting.RemotingDesc;
@@ -74,9 +73,9 @@ public class TccActionInterceptor implements MethodInterceptor {
         if (businessAction != null) {
             //save the xid
             String xid = RootContext.getXID();
-            //save the branchType
-            String previousBranchType = RootContext.unbindBranchType();
-            RootContext.bindBranchType(BranchType.TCC);
+            //save the previous TCC scope
+            boolean previousInTCCScope = RootContext.inTCCScope();
+            RootContext.enterTCCScope();
             try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
@@ -86,11 +85,12 @@ public class TccActionInterceptor implements MethodInterceptor {
                 return ret.get(Constants.TCC_METHOD_RESULT);
             }
             finally {
-                //recover the previous branchType
-                RootContext.bindBranchType(BranchType.get(Integer.parseInt(previousBranchType)));
+                RootContext.exitTCCScope();
+                //restore the previous TCC Scope if exists
+                if (previousInTCCScope) {
+                    RootContext.enterTCCScope();
+                }
             }
-
-
         }
         return invocation.proceed();
     }
