@@ -15,7 +15,6 @@
  */
 package io.seata.spring.annotation;
 
-import io.seata.core.model.BranchType;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionInfo;
 
