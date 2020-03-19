@@ -48,7 +48,7 @@ public enum SerializerType {
      * <p>
      * Math.pow(2, 3)
      */
-    FST((byte)0x6),
+    FST((byte)0x8),
     ;
 
     private final byte code;
