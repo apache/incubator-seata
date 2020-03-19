@@ -97,7 +97,7 @@ public class ActionContextUtil {
     public static void addContext(BusinessActionContextParameter annotation, Object targetObject, Object paramObject, Map<String, Object> context) {
         if (annotation.isParamInProperty() && targetObject != null) {
             @SuppressWarnings("unchecked")
-                    context.putAll(fetchContextFromObject(targetObject));
+            context.putAll(fetchContextFromObject(targetObject));
         } else if (annotation.isParamInProperty()) {
             context.putAll(fetchContextFromObject(paramObject));
         } else {
