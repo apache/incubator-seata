@@ -57,27 +57,10 @@ public class ActionContextUtil {
                     Object paramObject = f.get(targetParam);
                     int index = annotation.index();
                     if (index >= 0) {
-                        @SuppressWarnings("unchecked")
-                        Object targetObject = ((List<Object>)paramObject).get(index);
-                        if (annotation.isParamInProperty()) {
-                            context.putAll(fetchContextFromObject(targetObject));
-                        } else {
-                            if (StringUtils.isBlank(annotation.paramName())) {
-                                context.put(fieldName, paramObject);
-                            } else {
-                                context.put(annotation.paramName(), paramObject);
-                            }
-                        }
+                        Object targetObject = ((List<Object>) paramObject).get(index);
+                        addContext(annotation, targetObject, paramObject, context);
                     } else {
-                        if (annotation.isParamInProperty()) {
-                            context.putAll(fetchContextFromObject(paramObject));
-                        } else {
-                            if (StringUtils.isBlank(annotation.paramName())) {
-                                context.put(fieldName, paramObject);
-                            } else {
-                                context.put(annotation.paramName(), paramObject);
-                            }
-                        }
+                        addContext(annotation, null, paramObject, context);
                     }
                 }
             }
@@ -102,4 +85,28 @@ public class ActionContextUtil {
         getAllField(interFace.getSuperclass(), fields);
     }
 
+
+    /**
+     * Adds context
+     *
+     * @param annotation   the annotation
+     * @param targetObject the targetObject
+     * @param paramObject  the paramObject
+     * @param context      the context
+     */
+    public static void addContext(BusinessActionContextParameter annotation, Object targetObject, Object paramObject, Map<String, Object> context) {
+        if (annotation.isParamInProperty() && targetObject != null) {
+            @SuppressWarnings("unchecked")
+                    context.putAll(fetchContextFromObject(targetObject));
+        } else if (annotation.isParamInProperty()) {
+            context.putAll(fetchContextFromObject(paramObject));
+        } else {
+            if (StringUtils.isBlank(annotation.paramName())) {
+                context.put(fieldName, paramObject);
+            } else {
+                context.put(annotation.paramName(), paramObject);
+            }
+
+        }
+    }
 }
