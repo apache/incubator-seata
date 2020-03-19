@@ -106,12 +106,17 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
         RegisterRMRequest message = (RegisterRMRequest)request.getBody();
+        String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
+                            ipAndPort,message.getTransactionServiceGroup(),message.getApplicationId());
+                }
             }
         } catch (Exception exx) {
             isSuccess = false;
@@ -119,7 +124,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         }
         getServerMessageSender().sendResponse(request, ctx.channel(), new RegisterRMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("rm register success,message:{},channel:{}", message, ctx.channel());
+            LOGGER.info("RM register success,message:{},channel:{}", message, ctx.channel());
         }
     }
 
@@ -134,8 +139,8 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("checkAuth for client:{},vgroup:{},applicationId:{}",
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
                             ipAndPort,message.getTransactionServiceGroup(),message.getApplicationId());
                 }
             }
@@ -144,6 +149,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             LOGGER.error(exx.getMessage());
         }
         getServerMessageSender().sendResponse(request, ctx.channel(), new RegisterTMResponse(isSuccess));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("TM register success,message:{},channel:{}", message, ctx.channel());
+        }
     }
 
     @Override
