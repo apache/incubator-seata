@@ -77,9 +77,4 @@ public @interface GlobalTransactional {
      */
     Propagation propagation() default Propagation.REQUIRED;
 
-    /**
-     * the branch type
-     * @return
-     */
-    BranchType branchType() default BranchType.AT;
 }

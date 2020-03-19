@@ -70,7 +70,10 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
         } finally {
             if (bind) {
                 String unbindXid = RootContext.unbind();
-                String exitTCCScope = RootContext.inTCCScope() ? RootContext.unbindBranchType() : String.valueOf(false);
+                boolean previouslyInTCCScope = RootContext.inTCCScope();
+                if(previouslyInTCCScope) {
+                    RootContext.unbindBranchType();
+                }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("unbind[{}] from RootContext", unbindXid);
                 }
@@ -78,7 +81,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        if (StringUtils.equals(exitTCCScope,String.valueOf(true))) {
+                        if (previouslyInTCCScope) {
                             RootContext.bindBranchType(BranchType.TCC);
                         }
                         LOGGER.warn("bind [{}] back to RootContext", unbindXid);
