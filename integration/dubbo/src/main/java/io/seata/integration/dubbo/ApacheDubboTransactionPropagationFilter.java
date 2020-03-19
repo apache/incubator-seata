@@ -71,7 +71,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
             if (bind) {
                 String unbindXid = RootContext.unbind();
                 boolean previouslyInTCCScope = RootContext.inTCCScope();
-                if(previouslyInTCCScope) {
+                if (previouslyInTCCScope) {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
