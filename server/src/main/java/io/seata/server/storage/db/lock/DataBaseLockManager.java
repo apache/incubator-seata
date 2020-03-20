@@ -15,18 +15,18 @@
  */
 package io.seata.server.storage.db.lock;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.Locker;
 import io.seata.core.store.db.DataSourceGenerator;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
@@ -39,6 +39,11 @@ import io.seata.server.session.GlobalSession;
  */
 @LoadLevel(name = "db")
 public class DataBaseLockManager extends AbstractLockManager implements Initialize {
+
+    /**
+     * The locker.
+     */
+    private Locker locker;
 
     @Override
     public void init() {
@@ -60,20 +65,17 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
     }
 
     @Override
+    public Locker getLocker(BranchSession branchSession) {
+        return locker;
+    }
+
+    @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         List<BranchSession> branchSessions = globalSession.getBranchSessions();
         if (CollectionUtils.isEmpty(branchSessions)) {
             return true;
         }
-        List<Long> branchIds = new ArrayList<>(branchSessions.size());
-        boolean notNeedReleaseLock = true;
-        for (BranchSession branchSession : branchSessions) {
-            branchIds.add(branchSession.getBranchId());
-            notNeedReleaseLock &= StringUtils.isBlank(branchSession.getLockKey());
-        }
-        if (notNeedReleaseLock) {
-            return true;
-        }
+        List<Long> branchIds = branchSessions.stream().map(BranchSession::getBranchId).collect(Collectors.toList());
         try {
             return getLocker().releaseLock(globalSession.getXid(), branchIds);
         } catch (Exception t) {

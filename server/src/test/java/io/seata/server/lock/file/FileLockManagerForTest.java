@@ -26,7 +26,7 @@ import io.seata.server.session.BranchSession;
 public class FileLockManagerForTest extends FileLockManager {
 
     @Override
-    protected Locker getLocker(BranchSession branchSession) {
+    public Locker getLocker(BranchSession branchSession) {
         return new FileLocker(branchSession);
     }
 }

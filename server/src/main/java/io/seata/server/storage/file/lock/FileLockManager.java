@@ -33,9 +33,8 @@ import io.seata.server.session.GlobalSession;
 public class FileLockManager extends AbstractLockManager {
 
     @Override
-    protected Locker getLocker(BranchSession branchSession) {
-        locker = new FileLocker(branchSession);
-        return locker;
+    public Locker getLocker(BranchSession branchSession) {
+        return new FileLocker(branchSession);
     }
 
     @Override

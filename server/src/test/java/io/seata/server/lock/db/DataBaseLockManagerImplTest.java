@@ -267,7 +267,7 @@ public class DataBaseLockManagerImplTest {
         }
 
         @Override
-        protected Locker getLocker(BranchSession branchSession) {
+        public Locker getLocker(BranchSession branchSession) {
             DataBaseLocker locker =  new DataBaseLocker();
             locker.setLockStore(lockStore);
             return locker;

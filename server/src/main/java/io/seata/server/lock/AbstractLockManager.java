@@ -40,11 +40,6 @@ public abstract class AbstractLockManager implements LockManager {
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
 
-    /**
-     * The locker.
-     */
-    protected Locker locker = null;
-
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
         if (branchSession == null) {
@@ -110,9 +105,7 @@ public abstract class AbstractLockManager implements LockManager {
      * @param branchSession the branch session
      * @return the locker
      */
-    protected Locker getLocker(BranchSession branchSession) {
-        return locker;
-    }
+    protected abstract Locker getLocker(BranchSession branchSession);
 
     /**
      * Collect row locks list.`
