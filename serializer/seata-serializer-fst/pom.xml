@@ -18,22 +18,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>seata-serializer</artifactId>
         <groupId>io.seata</groupId>
-        <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-serializer</artifactId>
-    <packaging>pom</packaging>
-    <name>seata-serializer ${project.version}</name>
-
-    <modules>
-        <module>seata-serializer-all</module>
-        <module>seata-serializer-protobuf</module>
-        <module>seata-serializer-seata</module>
-        <module>seata-serializer-kryo</module>
-        <module>seata-serializer-hessian</module>
-        <module>seata-serializer-fst</module>
-    </modules>
-
+    <artifactId>seata-serializer-fst</artifactId>
+    <packaging>jar</packaging>
+    <name>seata-serializer-fst ${project.version}</name>
+    <dependencies>
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

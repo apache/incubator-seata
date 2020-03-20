@@ -13,23 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.parser;
+package io.seata.serializer.fst;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
-import io.seata.rm.datasource.undo.UndoLogParser;
+import org.nustaq.serialization.FSTConfiguration;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.serializer.Serializer;
 
 /**
- * @author jsbxyyx
+ * @author funkye
  */
-public class KryoUndoLogParserTest extends BaseUndoLogParserTest {
+@LoadLevel(name = "FST")
+public class FstSerializer implements Serializer {
 
-    KryoUndoLogParser parser = (KryoUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, KryoUndoLogParser.NAME);
+    private final FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
     @Override
-    public UndoLogParser getParser() {
-        return parser;
+    public <T> byte[] serialize(T t) {
+        return conf.asByteArray(t);
     }
 
+    @Override
+    public <T> T deserialize(byte[] bytes) {
+        return (T)conf.asObject(bytes);
+    }
 
 }
