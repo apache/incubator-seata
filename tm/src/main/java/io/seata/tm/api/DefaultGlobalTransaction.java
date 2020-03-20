@@ -156,9 +156,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void commit() throws TransactionException {
-        if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
-            return;
-        }
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of committing
             if (LOGGER.isDebugEnabled()) {
@@ -166,9 +163,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        assertXIDNotNull();
-        int retry = COMMIT_RETRY_COUNT;
         try {
+            if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
+                return;
+            }
+            assertXIDNotNull();
+            int retry = COMMIT_RETRY_COUNT;
             while (retry > 0) {
                 try {
                     status = transactionManager.commit(xid);
@@ -195,9 +195,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void rollback() throws TransactionException {
-        if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
-            return;
-        }
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of rollback
             if (LOGGER.isDebugEnabled()) {
@@ -205,10 +202,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        assertXIDNotNull();
-
-        int retry = ROLLBACK_RETRY_COUNT;
         try {
+            if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
+                return;
+            }
+            assertXIDNotNull();
+
+            int retry = ROLLBACK_RETRY_COUNT;
             while (retry > 0) {
                 try {
                     status = transactionManager.rollback(xid);
