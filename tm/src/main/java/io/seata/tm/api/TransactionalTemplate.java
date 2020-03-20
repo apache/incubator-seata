@@ -76,7 +76,9 @@ public class TransactionalTemplate {
                     break;
                 case NEVER:
                     if (existingTransaction()) {
-                        throw new TransactionException("Existing transaction found for transaction marked with propagation 'never'");
+                        throw new TransactionException(
+                                String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
+                                        ,RootContext.getXID()));
                     } else {
                         return business.execute();
                     }
