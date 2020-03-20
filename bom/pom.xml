@@ -119,6 +119,7 @@
         <kryo.version>4.0.2</kryo.version>
         <kryo-serializers.version>0.42</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
+        <fst.version>2.57</fst.version>
     </properties>
 
     <dependencyManagement>
@@ -453,6 +454,11 @@
                 <groupId>com.caucho</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.ruedigermoeller</groupId>
+                <artifactId>fst</artifactId>
+                <version>${fst.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
