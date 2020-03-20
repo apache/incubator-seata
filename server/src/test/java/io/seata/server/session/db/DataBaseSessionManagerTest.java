@@ -57,7 +57,7 @@ public class DataBaseSessionManagerTest {
     @BeforeAll
     public static void start() throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
-        DataBaseTransactionStoreManager transactionStoreManager = new DataBaseTransactionStoreManager();
+        DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
