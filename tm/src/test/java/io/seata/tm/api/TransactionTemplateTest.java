@@ -17,6 +17,7 @@ package io.seata.tm.api;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -239,5 +240,15 @@ public class TransactionTemplateTest {
         verify(transactionHook).beforeRollback();
         verify(transactionHook).afterRollback();
         verify(transactionHook).afterCompletion();
+    }
+
+    @Test
+    public void testExistingTransaction(){
+        RootContext.bind(DEFAULT_XID);
+        TransactionalTemplate template = new TransactionalTemplate();
+        Assertions.assertTrue(template.existingTransaction(),"Existing transaction");
+
+        RootContext.unbind();
+        Assertions.assertFalse(template.existingTransaction(),"No existing transaction");
     }
 }

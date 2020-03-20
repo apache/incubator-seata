@@ -42,6 +42,13 @@ public enum SerializerType {
      * Math.pow(2, 2)
      */
     KRYO((byte)0x4),
+
+    /**
+     * The fst.
+     * <p>
+     * Math.pow(2, 3)
+     */
+    FST((byte)0x8),
     ;
 
     private final byte code;
