@@ -13,43 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.server.lock;
+
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
- * Propagation level of global transactions.
+ * The type Lock manager factory.
  *
- * @author haozhibei
+ * @author sharajava
  */
-public enum Propagation {
-    /**
-     * The REQUIRED.
-     */
-    REQUIRED,
+public class LockerManagerFactory {
 
     /**
-     * The REQUIRES_NEW.
+     * the lock manager
      */
-    REQUIRES_NEW,
+    private static final LockManager LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class,
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE));
 
     /**
-     * The NOT_SUPPORTED
+     * Get lock manager.
+     *
+     * @return the lock manager
      */
-    NOT_SUPPORTED,
-
-    /**
-     * The SUPPORTS
-     */
-    SUPPORTS,
-
-    /**
-     * The NEVER
-     */
-    NEVER,
-
-    /**
-     * The MANDATORY
-     */
-    MANDATORY
-
+    public static LockManager getLockManager() {
+        return LOCK_MANAGER;
+    }
 }
-

@@ -13,43 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.server.lock.file;
+
+import io.seata.core.lock.Locker;
+import io.seata.server.storage.file.lock.FileLockManager;
+import io.seata.server.storage.file.lock.FileLocker;
+import io.seata.server.session.BranchSession;
 
 /**
- * Propagation level of global transactions.
- *
- * @author haozhibei
+ * @author zhangsen
  */
-public enum Propagation {
-    /**
-     * The REQUIRED.
-     */
-    REQUIRED,
+public class FileLockManagerForTest extends FileLockManager {
 
-    /**
-     * The REQUIRES_NEW.
-     */
-    REQUIRES_NEW,
-
-    /**
-     * The NOT_SUPPORTED
-     */
-    NOT_SUPPORTED,
-
-    /**
-     * The SUPPORTS
-     */
-    SUPPORTS,
-
-    /**
-     * The NEVER
-     */
-    NEVER,
-
-    /**
-     * The MANDATORY
-     */
-    MANDATORY
-
+    @Override
+    public Locker getLocker(BranchSession branchSession) {
+        return new FileLocker(branchSession);
+    }
 }
-

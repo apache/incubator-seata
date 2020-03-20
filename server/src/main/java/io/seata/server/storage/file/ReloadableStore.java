@@ -13,43 +13,33 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.server.storage.file;
+
+import java.util.List;
 
 /**
- * Propagation level of global transactions.
+ * The interface Reloadable store.
  *
- * @author haozhibei
+ * @author zhangsen
  */
-public enum Propagation {
-    /**
-     * The REQUIRED.
-     */
-    REQUIRED,
+public interface ReloadableStore {
 
     /**
-     * The REQUIRES_NEW.
+     * Read write store.
+     *
+     * @param readSize  the read size
+     * @param isHistory the is history
+     * @return the list
      */
-    REQUIRES_NEW,
+    List<TransactionWriteStore> readWriteStore(int readSize, boolean isHistory);
 
     /**
-     * The NOT_SUPPORTED
+     * Has remaining boolean.
+     *
+     * @param isHistory the is history
+     * @return the boolean
      */
-    NOT_SUPPORTED,
+    boolean hasRemaining(boolean isHistory);
 
-    /**
-     * The SUPPORTS
-     */
-    SUPPORTS,
-
-    /**
-     * The NEVER
-     */
-    NEVER,
-
-    /**
-     * The MANDATORY
-     */
-    MANDATORY
 
 }
-

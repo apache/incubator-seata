@@ -13,43 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.server.storage.file;
 
 /**
- * Propagation level of global transactions.
- *
- * @author haozhibei
+ * @author lizhao
  */
-public enum Propagation {
+public enum FlushDiskMode {
     /**
-     * The REQUIRED.
+     * sync flush disk
      */
-    REQUIRED,
-
+    SYNC_MODEL("sync"),
     /**
-     * The REQUIRES_NEW.
+     * async flush disk
      */
-    REQUIRES_NEW,
+    ASYNC_MODEL("async");
 
-    /**
-     * The NOT_SUPPORTED
-     */
-    NOT_SUPPORTED,
+    private String modeStr;
 
-    /**
-     * The SUPPORTS
-     */
-    SUPPORTS,
+    FlushDiskMode(String modeStr) {
+        this.modeStr = modeStr;
+    }
 
-    /**
-     * The NEVER
-     */
-    NEVER,
-
-    /**
-     * The MANDATORY
-     */
-    MANDATORY
-
+    public static FlushDiskMode findDiskMode(String modeStr) {
+        if (SYNC_MODEL.modeStr.equals(modeStr)) {
+            return SYNC_MODEL;
+        }
+        return ASYNC_MODEL;
+    }
 }
-
