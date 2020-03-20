@@ -15,13 +15,13 @@
  */
 package io.seata.rm.datasource.undo.postgresql.keyword;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.sqlparser.util.JdbcConstants;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type postgresql keyword checker.
@@ -30,11 +30,9 @@ import java.util.stream.Collectors;
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlKeywordChecker implements KeywordChecker {
-    private static Set<String> keywordSet;
 
-    static {
-        keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values()).map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
-    }
+    private Set<String> keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values())
+            .map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
 
     /**
      * postgresql keyword

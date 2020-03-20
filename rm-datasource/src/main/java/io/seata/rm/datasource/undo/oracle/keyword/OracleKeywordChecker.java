@@ -30,11 +30,8 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleKeywordChecker implements KeywordChecker {
-    private static Set<String> keywordSet;
 
-    static {
-        keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
-    }
+    private Set<String> keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
 
     /**
      * oracle keyword
