@@ -27,18 +27,18 @@ import org.springframework.core.type.AnnotationMetadata;
  */
 public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistrar {
     private static final String ATTRIBUTE_KEY_USE_JDK_PROXY = "useJdkProxy";
-    private static final String ATTRIBUTE_KEY_EXCLUDE = "exclude";
+    private static final String ATTRIBUTE_KEY_EXCLUDES = "excludes";
     public static final String BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR = "seataAutoDataSourceProxyCreator";
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)) {
             boolean useJdkProxy = Boolean.parseBoolean(importingClassMetadata.getAnnotationAttributes(EnableAutoDataSourceProxy.class.getName()).get(ATTRIBUTE_KEY_USE_JDK_PROXY).toString());
-            String[] exclude = (String[]) importingClassMetadata.getAnnotationAttributes(EnableAutoDataSourceProxy.class.getName()).get(ATTRIBUTE_KEY_EXCLUDE);
+            String[] excludes = (String[]) importingClassMetadata.getAnnotationAttributes(EnableAutoDataSourceProxy.class.getName()).get(ATTRIBUTE_KEY_EXCLUDES);
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
                 .genericBeanDefinition(SeataAutoDataSourceProxyCreator.class)
                 .addConstructorArgValue(useJdkProxy)
-                .addConstructorArgValue(exclude)
+                .addConstructorArgValue(excludes)
                 .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR, beanDefinition);
         }

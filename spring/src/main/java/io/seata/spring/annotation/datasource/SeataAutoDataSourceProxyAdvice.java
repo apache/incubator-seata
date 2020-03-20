@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation.datasource;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Method;
 
 import io.seata.rm.datasource.DataSourceProxy;
@@ -27,14 +28,10 @@ import org.springframework.beans.BeanUtils;
  * @author xingfudeshi@gmail.com
  */
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
-    private final DataSourceProxy dataSourceProxy;
-
-    public SeataAutoDataSourceProxyAdvice(DataSourceProxy dataSourceProxy) {
-        this.dataSourceProxy = dataSourceProxy;
-    }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
+        DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis());
         Method method = invocation.getMethod();
         Object[] args = invocation.getArguments();
         Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());

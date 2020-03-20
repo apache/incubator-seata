@@ -18,16 +18,11 @@ package io.seata.spring.annotation.datasource;
 import javax.sql.DataSource;
 import java.util.Arrays;
 
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.spring.util.SpringProxyUtils;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.beans.BeansException;
 
@@ -36,8 +31,8 @@ import org.springframework.beans.BeansException;
  */
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoDataSourceProxyCreator.class);
-    private MethodInterceptor advice;
     private final String[] excludes;
+    private final Advisor advisor = new DefaultIntroductionAdvisor(new SeataAutoDataSourceProxyAdvice());
 
     public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] excludes) {
         this.excludes = excludes;
@@ -45,34 +40,11 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     }
 
     @Override
-    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        if (!shouldSkip(bean.getClass(), beanName)) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Auto proxy of [{}]", beanName);
-            }
-            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-            advice = new SeataAutoDataSourceProxyAdvice(dataSourceProxy);
-            if (AopUtils.isAopProxy(bean)) {
-                try {
-                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                    for (Advisor avr : advisor) {
-                        advised.addAdvisor(0, avr);
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                bean = super.wrapIfNecessary(bean, beanName, cacheKey);
-            }
-        }
-
-        return bean;
-    }
-
-    @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) throws BeansException {
-        return new Object[]{new DefaultIntroductionAdvisor(advice)};
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Auto proxy of [{}]", beanName);
+        }
+        return new Object[]{advisor};
     }
 
     @Override
