@@ -122,6 +122,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
                     transactionInfo.setName(name());
+                    transactionInfo.setPropagation(globalTrxAnno.propagation());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
@@ -152,6 +153,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw e.getCause();
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case RollbackRetrying:
+                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
