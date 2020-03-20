@@ -207,7 +207,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 return;
             }
             assertXIDNotNull();
-
             int retry = ROLLBACK_RETRY_COUNT;
             while (retry > 0) {
                 try {
