@@ -16,40 +16,29 @@
 package io.seata.tm.api.transaction;
 
 /**
- * Propagation level of global transactions.
+ * Holder for suspended resources to support propagation or nested logic.
+ * Used by {@code suspend} and {@code resume}
  *
- * @author haozhibei
+ * @author wangzhongxiang
  */
-public enum Propagation {
-    /**
-     * The REQUIRED.
-     */
-    REQUIRED,
+public class SuspendedResourcesHolder {
 
-    /**
-     * The REQUIRES_NEW.
-     */
-    REQUIRES_NEW,
+    /**The xid*/
+    private String xid;
 
-    /**
-     * The NOT_SUPPORTED
-     */
-    NOT_SUPPORTED,
 
-    /**
-     * The SUPPORTS
-     */
-    SUPPORTS,
+    public SuspendedResourcesHolder() {
+    }
 
-    /**
-     * The NEVER
-     */
-    NEVER,
+    public SuspendedResourcesHolder(String xid) {
+        this.xid = xid;
+    }
 
-    /**
-     * The MANDATORY
-     */
-    MANDATORY
+    public String getXid() {
+        return xid;
+    }
 
+    public void setXid(String xid) {
+        this.xid = xid;
+    }
 }
-
