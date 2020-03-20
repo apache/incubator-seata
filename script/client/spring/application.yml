@@ -64,6 +64,8 @@ seata:
       namespace:
       serverAddr: localhost
       group: SEATA_GROUP
+      userName: ""
+      password: ""
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
@@ -82,6 +84,8 @@ seata:
     nacos:
       server-addr: localhost
       namespace:
+      userName: ""
+      password: ""
     redis:
       server-addr: localhost:6379
       db: 0
