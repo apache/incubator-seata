@@ -34,7 +34,7 @@ public class EnhancedServiceLoaderTest {
      */
     @Test
     public void testLoadByClassAndClassLoader() {
-        Hello load = EnhancedServiceLoader.load(Hello.class,Hello.class.getClassLoader());
+        Hello load = EnhancedServiceLoader.load(Hello.class, Hello.class.getClassLoader());
         Assertions.assertEquals(load.say(), "Olá.");
     }
 
@@ -62,7 +62,7 @@ public class EnhancedServiceLoaderTest {
      */
     @Test
     public void testLoadByClassAndActivateName() {
-        Hello englishHello = EnhancedServiceLoader.load(Hello.class,"EnglishHello");
+        Hello englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
         assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
@@ -109,7 +109,7 @@ public class EnhancedServiceLoaderTest {
     public void getMultipleExtensionInstance(){
         Hello hello1 = EnhancedServiceLoader.load(Hello.class, "LatinHello");
         Hello hello2 = EnhancedServiceLoader.load(Hello.class, "LatinHello");
-        assertThat(hello1 != hello2);
+        assertThat(hello1 == hello2).isFalse();
     }
 
     @Test
@@ -121,7 +121,7 @@ public class EnhancedServiceLoaderTest {
                 assertThat(hellows2.contains(hello));
             }
             else{
-                assertThat(!hellows2.contains(hello));
+                assertThat(hellows2.contains(hello)).isFalse();
             }
         }
     }

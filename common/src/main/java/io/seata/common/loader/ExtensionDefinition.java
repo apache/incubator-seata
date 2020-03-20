@@ -18,11 +18,11 @@ package io.seata.common.loader;
 import io.seata.common.util.StringUtils;
 
 /**
- * The type URL
+ * The type ExtensionDefinition
  *
  * @author haozhibei
  */
-class ExtensionDefinition {
+final class ExtensionDefinition {
     private String name;
     private Class serviceClass;
     private Integer order;
@@ -32,24 +32,12 @@ class ExtensionDefinition {
         return this.order;
     }
 
-    public void setOrder(Integer order) {
-        this.order = order;
-    }
-
     public Class getServiceClass() {
         return this.serviceClass;
     }
 
-    public void setServiceClass(Class clazz) {
-        this.serviceClass = clazz;
-    }
-
     public Scope getScope() {
         return this.scope;
-    }
-
-    public void setScope(Scope scope) {
-        this.scope = scope;
     }
 
     public ExtensionDefinition(String name, Integer order, Scope scope, Class clazz) {
@@ -91,10 +79,7 @@ class ExtensionDefinition {
         if (!order.equals(other.order)) {
             return false;
         }
-        if (!scope.equals(other.scope)) {
-            return false;
-        }
-        return true;
+        return !scope.equals(other.scope);
     }
 
 

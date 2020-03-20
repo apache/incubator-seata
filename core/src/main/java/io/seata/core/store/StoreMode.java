@@ -45,7 +45,7 @@ public enum StoreMode {
     /**
      * get value of store mode
      * @param name the mode name
-     *  @return the store mode
+     * @return the store mode
      */
     public static StoreMode get(String name) {
         for (StoreMode sm : StoreMode.class.getEnumConstants()) {
