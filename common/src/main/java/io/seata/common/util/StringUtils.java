@@ -220,7 +220,11 @@ public class StringUtils {
             sb.append("=");
             try {
                 Object f = field.get(obj);
-                sb.append(toString(f));
+                if (f.getClass() == obj.getClass()) {
+                    sb.append(f.toString());
+                } else {
+                    sb.append(toString(f));
+                }
             } catch (Exception e) {
             }
             sb.append(";");
