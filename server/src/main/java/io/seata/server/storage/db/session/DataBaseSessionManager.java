@@ -77,7 +77,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void init() {
-        transactionStoreManager = new DataBaseTransactionStoreManager();
+        transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
     }
 
     @Override

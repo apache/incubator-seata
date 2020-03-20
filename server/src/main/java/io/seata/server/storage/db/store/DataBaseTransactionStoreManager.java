@@ -52,6 +52,8 @@ import io.seata.server.store.TransactionStoreManager;
 public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager {
 
+    private static volatile DataBaseTransactionStoreManager instance;
+
     /**
      * The constant CONFIG.
      */
@@ -73,9 +75,23 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     protected int logQueryLimit;
 
     /**
+     * Get the instance.
+     */
+    public static DataBaseTransactionStoreManager getInstance() {
+        if (null == instance) {
+            synchronized (DataBaseTransactionStoreManager.class) {
+                if (null == instance) {
+                    instance = new DataBaseTransactionStoreManager();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
      * Instantiates a new Database transaction store manager.
      */
-    public DataBaseTransactionStoreManager() {
+    private DataBaseTransactionStoreManager() {
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
