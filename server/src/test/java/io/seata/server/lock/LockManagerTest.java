@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.memory.MemoryLockManagerForTest;
+import io.seata.server.lock.file.FileLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,7 +48,7 @@ public class LockManagerTest {
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
     public void acquireLock_success(BranchSession branchSession) throws Exception {
-        LockManager lockManager = new MemoryLockManagerForTest();
+        LockManager lockManager = new FileLockManagerForTest();
         Assertions.assertTrue(lockManager.acquireLock(branchSession));
     }
 
@@ -62,7 +62,7 @@ public class LockManagerTest {
     @ParameterizedTest
     @MethodSource("branchSessionsProvider")
     public void acquireLock_failed(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
-        LockManager lockManager = new MemoryLockManagerForTest();
+        LockManager lockManager = new FileLockManagerForTest();
         Assertions.assertTrue(lockManager.acquireLock(branchSession1));
         Assertions.assertFalse(lockManager.acquireLock(branchSession2));
     }
@@ -77,7 +77,7 @@ public class LockManagerTest {
     @ParameterizedTest
     @MethodSource("deadlockBranchSessionsProvider")
     public void deadlockTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
-        LockManager lockManager = new MemoryLockManagerForTest();
+        LockManager lockManager = new FileLockManagerForTest();
         try {
             CountDownLatch countDownLatch = new CountDownLatch(2);
             new Thread(() -> {
@@ -118,7 +118,7 @@ public class LockManagerTest {
     @ParameterizedTest
     @MethodSource("deadlockBranchSessionsProvider")
     public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2)  throws Exception {
-        LockManager lockManager = new MemoryLockManagerForTest();
+        LockManager lockManager = new FileLockManagerForTest();
         try {
             final AtomicBoolean first = new AtomicBoolean();
             final AtomicBoolean second = new AtomicBoolean();
@@ -161,7 +161,7 @@ public class LockManagerTest {
     @MethodSource("branchSessionProvider")
     public void isLockableTest(BranchSession branchSession) throws Exception {
         branchSession.setLockKey("t:4");
-        LockManager lockManager = new MemoryLockManagerForTest();
+        LockManager lockManager = new FileLockManagerForTest();
         Assertions.assertTrue(lockManager
                 .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
         lockManager.acquireLock(branchSession);
@@ -173,7 +173,7 @@ public class LockManagerTest {
     @ParameterizedTest
     @MethodSource("duplicatePkBranchSessionsProvider")
     public void duplicatePkBranchSessionHolderTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
-        LockManager lockManager = new MemoryLockManagerForTest();
+        LockManager lockManager = new FileLockManagerForTest();
         Assertions.assertTrue(lockManager.acquireLock(branchSession1));
         Assertions.assertEquals(4, branchSession1.getLockHolder().values().stream().map(Set::size).count());
         Assertions.assertTrue(lockManager.releaseLock(branchSession1));
