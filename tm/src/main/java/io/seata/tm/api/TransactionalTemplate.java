@@ -15,6 +15,7 @@
  */
 package io.seata.tm.api;
 
+import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
@@ -23,7 +24,6 @@ import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +50,12 @@ public class TransactionalTemplate {
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
-        Propagation propagation = txInfo.getPropagation();
         // 1.1 get or create a transaction
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
+        // 1.2 Handle the Transaction propatation and the branchType
+        Propagation propagation = txInfo.getPropagation();
         try {
-
             // 2. begin transaction
             beginTransaction(txInfo, tx, propagation);
 
@@ -77,11 +77,11 @@ public class TransactionalTemplate {
 
             return rs;
         } finally {
+            tx.resume();
             // 5. clear
             triggerAfterCompletion();
             cleanUp();
         }
-
     }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {

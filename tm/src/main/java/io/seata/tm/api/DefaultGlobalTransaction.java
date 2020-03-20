@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -25,6 +24,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.Propagation;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +54,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private Propagation propagation;
 
-    private String previousXid;
+    private SuspendedResourcesHolder suspendedResourcesHolder;
 
-    private boolean used;
+    private volatile boolean used;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
@@ -102,24 +102,38 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name, Propagation propagation) throws TransactionException {
-        isUsed();
+        assertInUsed();
         this.propagation = propagation;
-        switch (this.propagation) {
+        switch (propagation) {
             case NOT_SUPPORTED:
-                previousXid = RootContext.unbind();
+                suspendedResourcesHolder = suspend(true);
                 return;
             case REQUIRES_NEW:
-                previousXid = RootContext.unbind();
+                suspendedResourcesHolder = suspend(true);
                 break;
             case SUPPORTS:
-                if (StringUtils.isEmpty(RootContext.getXID())) {
+                if (!existingTransaction()) {
                     return;
                 }
                 break;
             case REQUIRED:
                 break;
+            case NEVER:
+                if (existingTransaction()) {
+                    throw new TransactionException(String.format(
+                        "Existing transaction found for transaction marked with propagation 'never',xid = %s",
+                        RootContext.getXID()));
+                } else {
+                    return;
+                }
+            case MANDATORY:
+                if (!existingTransaction()) {
+                    throw new TransactionException(
+                        "No existing transaction found for transaction marked with propagation 'mandatory'");
+                }
+                break;
             default:
-                throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
+                throw new TransactionException("Not Supported Propagation:" + propagation);
         }
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
@@ -169,9 +183,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
+                suspend(true);
             }
-            bindPreviousXid();
+            resume();
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] commit status: {}", xid, status);
@@ -209,12 +223,41 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
+                suspend(true);
             }
-            bindPreviousXid();
+            resume();
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] rollback status: {}", xid, status);
+        }
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
+        String xid = RootContext.getXID();
+        if (StringUtils.isNotEmpty(xid) && unbindXid) {
+            RootContext.unbind();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Suspending current transaction,xid = {}",xid);
+            }
+        } else {
+            xid = null;
+        }
+        return new SuspendedResourcesHolder(xid);
+    }
+
+    @Override
+    public void resume() throws TransactionException {
+        if (suspendedResourcesHolder == null) {
+            return;
+        }
+        String xid = suspendedResourcesHolder.getXid();
+        if (StringUtils.isNotEmpty(xid)) {
+            RootContext.bind(xid);
+            suspendedResourcesHolder.setXid(null);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Resumimg the transaction,xid = {}", xid);
+            }
         }
     }
 
@@ -246,7 +289,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-            RootContext.unbind();
+            suspend(true);
         }
     }
 
@@ -266,14 +309,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
     }
-
-    private void bindPreviousXid() {
-        if (StringUtils.isNotBlank(previousXid)) {
-            RootContext.bind(previousXid);
-        }
+    
+    public boolean existingTransaction() {
+        return StringUtils.isNotEmpty(RootContext.getXID());
     }
 
-    private void isUsed() {
+    private void assertInUsed() {
         if (used) {
             throw new IllegalStateException("the same instance is allowed to be used only once");
         } else {
