@@ -158,6 +158,10 @@ public class ConfigurationKeys {
      * The constant STORE_DB_PREFIX.
      */
     public static final String STORE_DB_PREFIX = "store.db.";
+    /**
+     * The constant STORE_REDIS_PREFIX.
+     */
+    public static final String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
@@ -178,6 +182,7 @@ public class ConfigurationKeys {
      * The constant STORE_DB_TYPE.
      */
     public static final String STORE_DB_TYPE = STORE_DB_PREFIX + "dbType";
+
     /**
      * The constant STORE_DB_DRIVER_CLASS_NAME.
      */
@@ -413,4 +418,35 @@ public class ConfigurationKeys {
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+
+    /**
+     * The constant STORE_REDIS_HOST.
+     */
+    public static final String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+
+    /**
+     * The constant STORE_MIN_Conn.
+     */
+    public static final String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
+
+    /**
+     * The constant STORE_REDIS_PORT.
+     */
+    public static final String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+
+    /**
+     * The constant STORE_REDIS_MAX_CONN.
+     */
+    public static final String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
+
+    /**
+     * The constant STORE_REDIS_DATABASE.
+     */
+    public static final String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
+
+    /**
+     * The constant STORE_REDIS_DATABASE.
+     */
+    public static final String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
+
 }
