@@ -22,6 +22,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -52,29 +53,44 @@ public class TransactionalTemplate {
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
+        // 1.1 get or create a transaction
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+
+        // 1.2 Handle the Transaction propatation and the branchType
         Propagation propagation = txInfo.getPropagation();
-        String previousXid = null;
+        SuspendedResourcesHolder suspendedResourcesHolder = null;
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
-                    previousXid = RootContext.unbind();
+                    suspendedResourcesHolder = tx.suspend(true);
                     return business.execute();
                 case REQUIRES_NEW:
-                    previousXid = RootContext.unbind();
+                    suspendedResourcesHolder = tx.suspend(true);
                     break;
                 case SUPPORTS:
-                    if (StringUtils.isEmpty(RootContext.getXID())) {
+                    if (!existingTransaction()) {
                         return business.execute();
                     }
                     break;
                 case REQUIRED:
                     break;
+                case NEVER:
+                    if (existingTransaction()) {
+                        throw new TransactionException(
+                                String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
+                                        ,RootContext.getXID()));
+                    } else {
+                        return business.execute();
+                    }
+                case MANDATORY:
+                    if (!existingTransaction()) {
+                        throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
+                    }
+                    break;
                 default:
-                    throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
+                    throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
-            // 1.1 get or create a transaction
-            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
             try {
 
@@ -104,12 +120,17 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            if (previousXid != null) {
-                RootContext.bind(previousXid);
-            }
+            tx.resume(suspendedResourcesHolder);
         }
 
     }
+
+    public boolean existingTransaction() {
+        return StringUtils.isNotEmpty(RootContext.getXID());
+
+    }
+
+
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
         //roll back
@@ -144,9 +165,8 @@ public class TransactionalTemplate {
         tx.rollback();
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx,
-            tx.getStatus().equals(GlobalStatus.RollbackRetrying) ? TransactionalExecutor.Code.RollbackRetrying :
-                TransactionalExecutor.Code.RollbackDone, ex);
+        throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
+            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, ex);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
