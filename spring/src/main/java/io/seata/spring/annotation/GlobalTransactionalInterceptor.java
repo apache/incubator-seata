@@ -76,12 +76,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * initialize selfCheck
      */
     static {
-        selfCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_SELF_CHECK, DEFAULT_CLIENT_SELF_CHECK);
+        selfCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_SELF_CHECK,
+            DEFAULT_CLIENT_SELF_CHECK);
         if (selfCheck) {
-            selfCheckPeriod =
-                ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_SELF_CHECK_PERIOD, DEFAULT_CLIENT_SELF_CHECK_PERIOD);
-            selfCheckAllowTimes =
-                ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_SELF_CHECK_ALLOW_TIMES, DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES);
+            selfCheckPeriod = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_SELF_CHECK_PERIOD,
+                DEFAULT_CLIENT_SELF_CHECK_PERIOD);
+            selfCheckAllowTimes = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_SELF_CHECK_ALLOW_TIMES, DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES);
             if (selfCheckPeriod > 0 && selfCheckAllowTimes > 0) {
                 startSelfCheck();
             }
