@@ -18,11 +18,13 @@ package io.seata.server.session;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.server.storage.file.session.FileSessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 /**
@@ -156,10 +158,10 @@ public class GlobalSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    static Stream<Arguments> globalSessionProvider() {
+    static Stream<Arguments> globalSessionProvider() throws IOException {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         globalSession.setActive(true);
-        globalSession.addSessionLifecycleListener(new DefaultSessionManager("default"));
+        globalSession.addSessionLifecycleListener(new FileSessionManager("default", null));
         return Stream.of(
                 Arguments.of(
                         globalSession)
