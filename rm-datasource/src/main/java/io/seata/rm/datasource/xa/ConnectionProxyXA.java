@@ -59,7 +59,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Keep
         super(originalConnection, xaConnection, resource, xid);
     }
 
-    void init() {
+    public void init() {
         try {
             this.xaResource = xaConnection.getXAResource();
             this.currentAutoCommitStatus = this.originalConnection.getAutoCommit();
