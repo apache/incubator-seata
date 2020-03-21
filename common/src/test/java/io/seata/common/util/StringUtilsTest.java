@@ -87,4 +87,31 @@ public class StringUtilsTest {
         Assertions.assertFalse(StringUtils.equalsIgnoreCase("", null));
         Assertions.assertFalse(StringUtils.equalsIgnoreCase(null, ""));
     }
+
+    @Test
+    void testCycleDependency() {
+        CycleDependency A = CycleDependency.A;
+        try {
+            StringUtils.toString(A);
+        } catch (StackOverflowError e) {
+            Assertions.fail("stack overflow error");
+        }
+    }
+
+    static class CycleDependency {
+        public static final CycleDependency A = new CycleDependency("a");
+        public static final CycleDependency B = new CycleDependency("b");
+
+        private String s;
+        private CycleDependency(String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "s='" + s + '\'' +
+                    '}';
+        }
+    }
 }
