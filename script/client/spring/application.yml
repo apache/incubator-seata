@@ -15,6 +15,9 @@ seata:
         retry-times: 30
         retry-policy-branch-rollback-on-conflict: true
     tm:
+      self-check: false
+      self-check-period: 2000
+      self-check-allow-times: 10
       commit-retry-count: 5
       rollback-retry-count: 5
     undo:

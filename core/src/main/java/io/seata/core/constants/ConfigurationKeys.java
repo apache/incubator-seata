@@ -417,15 +417,15 @@ public class ConfigurationKeys {
     /**
      * The constant CLIENT_SELF_CHECK_PERIOD.
      */
-    public static final String CLIENT_SELF_CHECK_PERIOD = CLIENT_PREFIX + "tm.self.check.period";
+    public static final String CLIENT_SELF_CHECK_PERIOD = CLIENT_TM_PREFIX + "selfCheckPeriod";
 
     /**
      * The constant CLIENT_SELF_CHECK.
      */
-    public static final String CLIENT_SELF_CHECK = CLIENT_PREFIX + "tm.self.check";
+    public static final String CLIENT_SELF_CHECK = CLIENT_TM_PREFIX + "selfCheck";
     /**
      * The constant CLIENT_SELF_CHECK_ALLOW_TIMES.
      */
-    public static final String CLIENT_SELF_CHECK_ALLOW_TIMES = CLIENT_PREFIX + "tm.self.check.allow.times";
+    public static final String CLIENT_SELF_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "selfCheckAllowTimes";
 
 }
