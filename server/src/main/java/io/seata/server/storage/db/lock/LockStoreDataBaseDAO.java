@@ -79,8 +79,8 @@ public class LockStoreDataBaseDAO implements LockStore {
      *
      * @param lockStoreDataSource the log store data source
      */
-    public LockStoreDataBaseDAO(DataSource logStoreDataSource) {
-        this.logStoreDataSource = logStoreDataSource;
+    public LockStoreDataBaseDAO(DataSource lockStoreDataSource) {
+        this.lockStoreDataSource = lockStoreDataSource;
         lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
