@@ -39,6 +39,17 @@ public enum Propagation {
     /**
      * The SUPPORTS
      */
-    SUPPORTS
+    SUPPORTS,
+
+    /**
+     * The NEVER
+     */
+    NEVER,
+
+    /**
+     * The MANDATORY
+     */
+    MANDATORY
+
 }
 
