@@ -21,6 +21,7 @@ import io.seata.core.model.ResourceManager;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
+import io.seata.rm.datasource.xa.StatementProxyXA;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -33,6 +34,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import java.sql.Array;
 import java.sql.Connection;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -333,5 +335,18 @@ public class ConnectionProxyXATest {
         connectionProxyXA.xaRollback("xxx", 123L, null);
         Assertions.assertFalse(xaCommitted.value);
         Assertions.assertTrue(xaRolledback.value);
+    }
+
+    @Test
+    public void testCreateStatement() throws Throwable {
+        Connection connection = Mockito.mock(Connection.class);
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
+        XAConnection xaConnection = Mockito.mock(XAConnection.class);
+        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        String xid = "xxx";
+
+        ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
+        Statement statement = connectionProxyXA.createStatement();
+        Assertions.assertTrue(statement instanceof StatementProxyXA);
     }
 }
