@@ -102,7 +102,7 @@ public class EnhancedServiceLoaderTest {
     public void getSingletonExtensionInstance(){
         Hello hello1 = EnhancedServiceLoader.load(Hello.class, "ChineseHello");
         Hello hello2 = EnhancedServiceLoader.load(Hello.class, "ChineseHello");
-        assertThat(hello1 == hello2);
+        assertThat(hello1 == hello2).isTrue();
     }
 
     @Test
