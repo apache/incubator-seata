@@ -186,7 +186,7 @@ public class EnhancedServiceLoader {
 
 
     private static class InnerEnhancedServiceLoader<S> {
-        private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(InnerEnhancedServiceLoader.class);
         private static final String SERVICES_DIRECTORY = "META-INF/services/";
         private static final String SEATA_DIRECTORY = "META-INF/seata/";
 

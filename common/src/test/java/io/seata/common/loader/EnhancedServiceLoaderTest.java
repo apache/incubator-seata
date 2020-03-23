@@ -118,7 +118,7 @@ public class EnhancedServiceLoaderTest {
         List<Hello> hellows2 = EnhancedServiceLoader.loadAll(Hello.class);
         for (Hello hello : hellows1){
             if(hello.say()!="Olá."){
-                assertThat(hellows2.contains(hello));
+                assertThat(hellows2.contains(hello)).isTrue();
             }
             else{
                 assertThat(hellows2.contains(hello)).isFalse();
