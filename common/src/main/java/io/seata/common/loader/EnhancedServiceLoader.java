@@ -64,7 +64,7 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service) throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load();
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(findClassLoader());
     }
 
     /**
@@ -77,8 +77,7 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName,
-                InnerEnhancedServiceLoader.findClassLoader());
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
     }
 
     /**
@@ -108,7 +107,7 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName, Object[] args)
             throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args);
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args, findClassLoader());
     }
 
     /**
@@ -124,7 +123,7 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName, Class[] argsType, Object[] args)
             throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args);
+        return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args, findClassLoader());
     }
 
     /**
@@ -135,7 +134,7 @@ public class EnhancedServiceLoader {
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service) {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll();
+        return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(findClassLoader());
     }
 
     /**
@@ -148,7 +147,7 @@ public class EnhancedServiceLoader {
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service, Class[] argsType, Object[] args) {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args);
+        return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args, findClassLoader());
     }
 
     /**
@@ -160,7 +159,7 @@ public class EnhancedServiceLoader {
      */
     @SuppressWarnings("rawtypes")
     static <S> List<Class> getAllExtensionClass(Class<S> service) {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).getAllExtensionClass();
+        return InnerEnhancedServiceLoader.getServiceLoader(service).getAllExtensionClass(findClassLoader());
     }
 
     /**
@@ -174,6 +173,15 @@ public class EnhancedServiceLoader {
     @SuppressWarnings("rawtypes")
     static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {
         return InnerEnhancedServiceLoader.getServiceLoader(service).getAllExtensionClass(loader);
+    }
+
+    /**
+     * Cannot use TCCL, in the pandora container will cause the class in the plugin not to be loaded
+     *
+     * @return
+     */
+    private static ClassLoader findClassLoader() {
+        return EnhancedServiceLoader.class.getClassLoader();
     }
 
 
@@ -227,27 +235,6 @@ public class EnhancedServiceLoader {
         }
 
         /**
-         * load service provider
-         *
-         * @return s s
-         * @throws EnhancedServiceNotFoundException the enhanced service not found exception
-         */
-        private S load() throws EnhancedServiceNotFoundException {
-            return loadExtension(findClassLoader(), null, null);
-        }
-
-        /**
-         * load service provider
-         *
-         * @param activateName the activate name
-         * @return s s
-         * @throws EnhancedServiceNotFoundException the enhanced service not found exception
-         */
-        private S load(String activateName) throws EnhancedServiceNotFoundException {
-            return loadExtension(activateName, findClassLoader(), null, null);
-        }
-
-        /**
          * Specify classLoader to load the service provider
          *
          * @param activateName the activate name
@@ -265,10 +252,11 @@ public class EnhancedServiceLoader {
          *
          * @param activateName the activate name
          * @param args         the args
+         * @param loader       the loader
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        private S load(String activateName, Object[] args)
+        private S load(String activateName, Object[] args, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
             Class[] argsType = null;
             if (args != null && args.length > 0) {
@@ -277,7 +265,7 @@ public class EnhancedServiceLoader {
                     argsType[i] = args[i].getClass();
                 }
             }
-            return loadExtension(activateName, findClassLoader(), argsType, args);
+            return loadExtension(activateName, loader, argsType, args);
         }
 
         /**
@@ -286,21 +274,23 @@ public class EnhancedServiceLoader {
          * @param activateName the activate name
          * @param argsType     the args type
          * @param args         the args
+         * @param loader  the class loader
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
-        private S load(String activateName, Class[] argsType, Object[] args)
+        private S load(String activateName, Class[] argsType, Object[] args, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
-            return loadExtension(activateName, findClassLoader(), argsType, args);
+            return loadExtension(activateName, loader, argsType, args);
         }
 
         /**
          * get all implements
+         * @param loader  the class loader
          *
          * @return list list
          */
-        private List<S> loadAll() {
-            return loadAll(null, null);
+        private List<S> loadAll(ClassLoader loader) {
+            return loadAll(null, null, loader);
         }
 
         /**
@@ -310,31 +300,21 @@ public class EnhancedServiceLoader {
          * @param args     the args
          * @return list list
          */
-        private List<S> loadAll(Class[] argsType, Object[] args) {
+        private List<S> loadAll(Class[] argsType, Object[] args, ClassLoader loader) {
             List<S> allInstances = new ArrayList<>();
-            List<Class> allClazzs = getAllExtensionClass();
+            List<Class> allClazzs = getAllExtensionClass(loader);
             if (CollectionUtils.isEmpty(allClazzs)) {
                 return allInstances;
             }
             try {
                 for (Class clazz : allClazzs) {
                     ExtensionDefinition definition = classToDefinitionMap.get(clazz);
-                    allInstances.add(getExtensionInstance(definition, findClassLoader(), argsType, args));
+                    allInstances.add(getExtensionInstance(definition, loader, argsType, args));
                 }
             } catch (Throwable t) {
                 throw new EnhancedServiceNotFoundException(t);
             }
             return allInstances;
-        }
-
-        /**
-         * Get all the extension classes, follow {@linkplain LoadLevel} defined and sort order
-         *
-         * @return all extension class
-         */
-        @SuppressWarnings("rawtypes")
-        private List<Class> getAllExtensionClass() {
-            return loadAllExtensionClass(findClassLoader());
         }
 
         /**
@@ -415,7 +395,6 @@ public class EnhancedServiceLoader {
         }
 
         private S createNewExtension(ExtensionDefinition definition, ClassLoader loader, Class[] argTypes, Object[] args) {
-            loadAllExtensionClass(loader);
             Class<?> clazz = definition.getServiceClass();
             try {
                 S newInstance = initInstance(clazz, argTypes, args);
@@ -475,12 +454,12 @@ public class EnhancedServiceLoader {
 
 
         @SuppressWarnings("rawtypes")
-        private void loadFile(String dir, ClassLoader classLoader, List<ExtensionDefinition> extensions)
+        private void loadFile(String dir, ClassLoader loader, List<ExtensionDefinition> extensions)
                 throws IOException {
             String fileName = dir + type.getName();
             Enumeration<java.net.URL> urls;
-            if (classLoader != null) {
-                urls = classLoader.getResources(fileName);
+            if (loader != null) {
+                urls = loader.getResources(fileName);
             } else {
                 urls = ClassLoader.getSystemResources(fileName);
             }
@@ -499,11 +478,15 @@ public class EnhancedServiceLoader {
                             line = line.trim();
                             if (line.length() > 0) {
                                 try {
-                                    Class<?> clazz = Class.forName(line, true, classLoader);
-                                    ExtensionDefinition extensionDefinition = getExtensionDefinition(clazz);
+                                    Class<?> clazz = Class.forName(line, true, loader);
+                                    ExtensionDefinition extensionDefinition = getUnloadedExtensionDefinition(clazz);
+                                    if (extensionDefinition == null) {
+                                        LOGGER.warn("The same extension {} has already been loaded, skipped", line);
+                                        continue;
+                                    }
                                     extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
-                                    LOGGER.warn("load [{}] class fail. {}", line, e.getMessage());
+                                    LOGGER.warn("Load [{}] class fail. {}", line, e.getMessage());
                                 }
                             }
                         }
@@ -516,7 +499,7 @@ public class EnhancedServiceLoader {
             }
         }
 
-        private ExtensionDefinition getExtensionDefinition(Class<?> clazz) {
+        private ExtensionDefinition getUnloadedExtensionDefinition(Class<?> clazz) {
             String serviceName = null;
             Integer priority = 0;
             Scope scope = Scope.SINGLETON;
@@ -526,20 +509,23 @@ public class EnhancedServiceLoader {
                 priority = loadLevel.order();
                 scope = loadLevel.scope();
             }
-            ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
-            //do cache
-            classToDefinitionMap.put(clazz, result);
-            if (serviceName != null) {
-                if (nameToDefinitionsMap.containsKey(serviceName)) {
-                    List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(serviceName);
-                    definitions.add(result);
-                } else {
-                    List<ExtensionDefinition> definitions = new ArrayList<>();
-                    definitions.add(result);
-                    nameToDefinitionsMap.put(serviceName, definitions);
+            //Check whether the definition has been loaded
+            if (!classToDefinitionMap.containsKey(clazz)) {
+                ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
+                classToDefinitionMap.put(clazz, result);
+                if (serviceName != null) {
+                    if (nameToDefinitionsMap.containsKey(serviceName)) {
+                        List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(serviceName);
+                        definitions.add(result);
+                    } else {
+                        List<ExtensionDefinition> definitions = new ArrayList<>();
+                        definitions.add(result);
+                        nameToDefinitionsMap.put(serviceName, definitions);
+                    }
                 }
+                return result;
             }
-            return result;
+            return null;
         }
 
         private ExtensionDefinition getDefaultExtensionDefinition() {
@@ -586,16 +572,6 @@ public class EnhancedServiceLoader {
             }
             return s;
         }
-
-        /**
-         * Cannot use TCCL, in the pandora container will cause the class in the plugin not to be loaded
-         *
-         * @return
-         */
-        private static ClassLoader findClassLoader() {
-            return EnhancedServiceLoader.class.getClassLoader();
-        }
-
 
         /**
          * Helper Class for hold a value.
