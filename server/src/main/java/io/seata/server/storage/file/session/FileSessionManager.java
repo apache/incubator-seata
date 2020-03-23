@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.file.session;
 
-import io.seata.common.loader.Scope;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +44,8 @@ import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import io.seata.common.loader.Scope;
+
 
 /**
  * The type File based session manager.

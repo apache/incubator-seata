@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.db.session;
 
-import io.seata.common.loader.Scope;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,6 +36,7 @@ import io.seata.server.session.SessionLifecycleListener;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
+import io.seata.common.loader.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
