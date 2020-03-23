@@ -191,8 +191,6 @@ public class EnhancedServiceLoader {
                 new ConcurrentHashMap<>();
         private final ConcurrentMap<String, List<ExtensionDefinition>> nameToDefinitionsMap = new ConcurrentHashMap<>();
         private final ConcurrentMap<Class<?>, ExtensionDefinition> classToDefinitionMap = new ConcurrentHashMap<>();
-        private ExtensionDefinition defaultExtensionDefinition = null;
-        private Integer highestLoadPriority = Integer.MIN_VALUE;
 
         private InnerEnhancedServiceLoader(Class<S> type) {
             this.type = type;
@@ -355,6 +353,7 @@ public class EnhancedServiceLoader {
                                 Object[] args) {
             try {
                 loadAllExtensionClass(loader);
+                ExtensionDefinition defaultExtensionDefinition = getDefaultExtensionDefinition();
                 return getExtensionInstance(defaultExtensionDefinition, loader, argTypes, args);
             } catch (Throwable e) {
                 if (e instanceof EnhancedServiceNotFoundException) {
@@ -439,8 +438,7 @@ public class EnhancedServiceLoader {
                     }
                 }
             }
-            result = definitions.stream().map(def -> def.getServiceClass()).collect(Collectors.toList());
-            return result;
+            return definitions.stream().map(def -> def.getServiceClass()).collect(Collectors.toList());
         }
 
         @SuppressWarnings("rawtypes")
@@ -541,12 +539,15 @@ public class EnhancedServiceLoader {
                     nameToDefinitionsMap.put(serviceName, definitions);
                 }
             }
-            if (defaultExtensionDefinition == null || priority >= highestLoadPriority) {
-                //the highestLoadPriority matches the current class's defaultExtensionDefinition,cached them together
-                highestLoadPriority = priority;
-                defaultExtensionDefinition = result;
-            }
             return result;
+        }
+
+        private ExtensionDefinition getDefaultExtensionDefinition() {
+            List<ExtensionDefinition> currentDefinitions = definitionsHolder.get();
+            if (currentDefinitions != null && currentDefinitions.size() > 0) {
+                return definitionsHolder.get().get(currentDefinitions.size() - 1);
+            }
+            return null;
         }
 
         private ExtensionDefinition getCachedExtensionDefinition(String activateName) {
