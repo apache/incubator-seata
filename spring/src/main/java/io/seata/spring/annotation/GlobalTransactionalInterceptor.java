@@ -112,7 +112,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             key = builder.toString();
             Integer value = demotionMap.get(key);
             if (null != value && value >= globalTransactionalAnnotation.demotionTimes()) {
-                LOGGER.warn("This interface has been degraded");
+                LOGGER.warn("this interface has been degraded");
                 return methodInvocation.proceed();
             }
         }
@@ -139,7 +139,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-        final GlobalTransactional globalTrxAnno, String domotionKey) throws Throwable {
+        final GlobalTransactional globalTrxAnno, String demotionKey) throws Throwable {
         boolean error = true;
         try {
             Object execute = transactionalTemplate.execute(new TransactionalExecutor() {
@@ -207,9 +207,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             if (selfCheck) {
                 onSelfCheck(error);
             }
-            if (error && !StringUtils.isBlank(domotionKey)) {
-                Integer errorNum = demotionMap.get(domotionKey);
-                demotionMap.put(domotionKey, null == errorNum ? 1 : ++errorNum);
+            if (error && !StringUtils.isBlank(demotionKey)) {
+                Integer errorNum = demotionMap.get(demotionKey);
+                demotionMap.put(demotionKey, null == errorNum ? 1 : ++errorNum);
             }
         }
     }
