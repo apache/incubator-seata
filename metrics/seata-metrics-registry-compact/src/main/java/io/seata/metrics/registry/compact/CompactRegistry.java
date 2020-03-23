@@ -15,7 +15,6 @@
  */
 package io.seata.metrics.registry.compact;
 
-import io.seata.common.loader.Scope;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ import io.seata.metrics.Timer;
  *
  * @author zhengyangyong
  */
-@LoadLevel(name = "compact", order = 1, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "compact", order = 1)
 public class CompactRegistry implements Registry {
     private static final Map<UUID, Meter> METERS = new ConcurrentHashMap<>();
 

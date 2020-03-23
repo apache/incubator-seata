@@ -15,7 +15,6 @@
  */
 package io.seata.metrics.exporter.prometheus;
 
-import io.seata.common.loader.Scope;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,7 @@ import static io.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETH
  *
  * @author zhengyangyong
  */
-@LoadLevel(name = "prometheus", order = 1, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "prometheus", order = 1)
 public class PrometheusExporter extends Collector implements Collector.Describable, Exporter {
 
     private final HTTPServer server;
