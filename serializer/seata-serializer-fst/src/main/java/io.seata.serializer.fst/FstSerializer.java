@@ -32,6 +32,7 @@ public class FstSerializer implements Serializer {
     public FstSerializer() {
         SerializerClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
     }
+
     @Override
     public <T> byte[] serialize(T t) {
         return conf.asByteArray(t);
