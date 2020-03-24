@@ -204,9 +204,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            if (selfCheck) {
-                onSelfCheck(error);
-            }
             if (error && !StringUtils.isBlank(demotionKey)) {
                 Integer errorNum = demotionMap.get(demotionKey);
                 demotionMap.put(demotionKey, null == errorNum ? 1 : ++errorNum);
@@ -267,8 +264,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 autoDemotionNum = 0;
                 demotionMap.clear();
             }
-        }
-        if (isError) {
+        }else{
             if (autoDemotionNum > 0) {
                 autoDemotionNum--;
             }
