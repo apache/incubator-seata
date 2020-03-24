@@ -123,7 +123,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 if (rowSize == 1) {
                     Object pkValue = insertRows.get(0).get(pkIndex);
                     if (PLACEHOLDER.equals(pkValue)) {
-                        pkValues = parameters.get(pkIndex);
+                        pkValues = parameters.get(pkIndex + 1);
                     } else {
                         pkValues = insertRows.stream().map(insertRow -> insertRow.get(pkIndex)).collect(Collectors.toList());
                     }
@@ -150,7 +150,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                             if (i != 0) {
                                 idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
                             }
-                            ArrayList<Object> parameter = parameters.get(idx);
+                            ArrayList<Object> parameter = parameters.get(idx + 1);
                             pkValues.addAll(parameter);
                         } else {
                             pkValues.add(pkValue);

@@ -101,10 +101,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @param x     the x
      */
     protected void setParamByIndex(int index, Object x) {
-        if (!parameters.containsKey(--index)) {
-            parameters.put(index, new ArrayList<>());
-        }
-        parameters.get(index).add(x);
+        parameters.computeIfAbsent(index,e -> new ArrayList<>()).add(x);
     }
 
     @Override

@@ -194,11 +194,11 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userId2");
         ArrayList arrayList4 = new ArrayList<>();
         arrayList4.add("userName2");
-        paramters.put(0,arrayList0);
-        paramters.put(1,arrayList1);
-        paramters.put(2,arrayList2);
-        paramters.put(3,arrayList3);
-        paramters.put(4,arrayList4);
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
+        paramters.put(3,arrayList2);
+        paramters.put(4,arrayList3);
+        paramters.put(5,arrayList4);
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
@@ -219,11 +219,11 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userId2");
         ArrayList arrayList4 = new ArrayList<>();
         arrayList4.add("userName2");
-        paramters.put(0,arrayList0);
-        paramters.put(1,arrayList1);
-        paramters.put(2,arrayList2);
-        paramters.put(3,arrayList3);
-        paramters.put(4,arrayList4);
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
+        paramters.put(3,arrayList2);
+        paramters.put(4,arrayList3);
+        paramters.put(5,arrayList4);
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
@@ -270,10 +270,10 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userStatus4");
         arrayList3.add("userStatus5");
 
-        paramters.put(0,arrayList0);
-        paramters.put(1,arrayList1);
-        paramters.put(2,arrayList2);
-        paramters.put(3,arrayList3);
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
+        paramters.put(3,arrayList2);
+        paramters.put(4,arrayList3);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
@@ -332,26 +332,26 @@ public class BatchInsertExecutorTest {
         arrayList20.add("userStatus5");
 
 
-        paramters.put(0,arrayList1);
-        paramters.put(1,arrayList2);
-        paramters.put(2,arrayList3);
-        paramters.put(3,arrayList4);
-        paramters.put(4,arrayList5);
-        paramters.put(5,arrayList6);
-        paramters.put(6,arrayList7);
-        paramters.put(7,arrayList8);
-        paramters.put(8,arrayList9);
-        paramters.put(9,arrayList10);
-        paramters.put(10,arrayList11);
-        paramters.put(11,arrayList12);
-        paramters.put(12,arrayList13);
-        paramters.put(13,arrayList14);
-        paramters.put(14,arrayList15);
-        paramters.put(15,arrayList16);
-        paramters.put(16,arrayList17);
-        paramters.put(17,arrayList18);
-        paramters.put(18,arrayList19);
-        paramters.put(19,arrayList20);
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
+        paramters.put(4,arrayList4);
+        paramters.put(5,arrayList5);
+        paramters.put(6,arrayList6);
+        paramters.put(7,arrayList7);
+        paramters.put(8,arrayList8);
+        paramters.put(9,arrayList9);
+        paramters.put(10,arrayList10);
+        paramters.put(11,arrayList11);
+        paramters.put(12,arrayList12);
+        paramters.put(13,arrayList13);
+        paramters.put(14,arrayList14);
+        paramters.put(15,arrayList15);
+        paramters.put(16,arrayList16);
+        paramters.put(17,arrayList17);
+        paramters.put(18,arrayList18);
+        paramters.put(19,arrayList19);
+        paramters.put(20,arrayList20);
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
@@ -386,16 +386,16 @@ public class BatchInsertExecutorTest {
         arrayList9.add("userId5");
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(100000005);
-        paramters.put(0,arrayList1);
-        paramters.put(1,arrayList2);
-        paramters.put(2,arrayList3);
-        paramters.put(3,arrayList4);
-        paramters.put(4,arrayList5);
-        paramters.put(5,arrayList6);
-        paramters.put(6,arrayList7);
-        paramters.put(7,arrayList8);
-        paramters.put(8,arrayList9);
-        paramters.put(9,arrayList10);
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
+        paramters.put(4,arrayList4);
+        paramters.put(5,arrayList5);
+        paramters.put(6,arrayList6);
+        paramters.put(7,arrayList7);
+        paramters.put(8,arrayList8);
+        paramters.put(9,arrayList9);
+        paramters.put(10,arrayList10);
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "1", "11"));
         insertRows.add(Arrays.asList("?", "?", "2", "22"));
@@ -430,16 +430,16 @@ public class BatchInsertExecutorTest {
         arrayList9.add("userId5");
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(100000005);
-        paramters.put(0,arrayList1);
-        paramters.put(1,arrayList2);
-        paramters.put(2,arrayList3);
-        paramters.put(3,arrayList4);
-        paramters.put(4,arrayList5);
-        paramters.put(5,arrayList6);
-        paramters.put(6,arrayList7);
-        paramters.put(7,arrayList8);
-        paramters.put(8,arrayList9);
-        paramters.put(9,arrayList10);
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
+        paramters.put(4,arrayList4);
+        paramters.put(5,arrayList5);
+        paramters.put(6,arrayList6);
+        paramters.put(7,arrayList7);
+        paramters.put(8,arrayList8);
+        paramters.put(9,arrayList9);
+        paramters.put(10,arrayList10);
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", 100000001, "?", "1"));
         insertRows.add(Arrays.asList("?", 100000002, "?", "2"));
@@ -478,10 +478,10 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userStatus3");
         arrayList3.add("userStatus4");
         arrayList3.add("userStatus5");
-        paramters.put(0,arrayList0);
-        paramters.put(1,arrayList1);
-        paramters.put(2,arrayList2);
-        paramters.put(3,arrayList3);
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
+        paramters.put(3,arrayList2);
+        paramters.put(4,arrayList3);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
@@ -505,8 +505,8 @@ public class BatchInsertExecutorTest {
         arrayList1.add(PK_VALUES.get(2));
         arrayList1.add(PK_VALUES.get(3));
         arrayList1.add(PK_VALUES.get(4));
-        paramters.put(0,arrayList0);
-        paramters.put(1,arrayList1);
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "userName1", "userStatus1"));
@@ -522,8 +522,8 @@ public class BatchInsertExecutorTest {
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userName1");
-        paramters.put(0,arrayList0);
-        paramters.put(1,arrayList1);
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", pkId, "?", "userStatus"));
