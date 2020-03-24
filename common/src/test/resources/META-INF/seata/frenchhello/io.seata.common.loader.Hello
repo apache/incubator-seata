@@ -16,3 +16,4 @@
 
 
 io.seata.common.loader.EnglishHello
+io.seata.common.loader.LatinHello
