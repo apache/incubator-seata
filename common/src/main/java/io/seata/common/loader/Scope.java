@@ -13,36 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.metrics.exporter;
-
-import io.seata.common.exception.NotSupportYetException;
+package io.seata.common.loader;
 
 /**
- * Supported metrics exporter type
+ * the scope of the extension
  *
- * @author zhengyangyong
+ * @author haozhibei
  */
-public enum ExporterType {
+public enum Scope {
     /**
-     * Export metrics data to Prometheus
+     * The extension will be loaded in singleton mode
      */
-    PROMETHEUS("prometheus");
+    SINGLETON,
 
-    private String name;
+    /**
+     * The extension will be loaded in multi instance mode
+     */
+    PROTOTYPE
 
-    ExporterType(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public static ExporterType getType(String name) {
-        if (PROMETHEUS.name().equalsIgnoreCase(name)) {
-            return PROMETHEUS;
-        } else {
-            throw new NotSupportYetException("unsupported type:" + name);
-        }
-    }
 }
