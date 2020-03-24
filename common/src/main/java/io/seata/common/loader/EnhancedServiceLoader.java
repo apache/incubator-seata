@@ -510,12 +510,7 @@ public class EnhancedServiceLoader {
                 ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
-                    if (nameToDefinitionsMap.containsKey(serviceName)) {
-                        List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(serviceName);
-                        definitions.add(result);
-                    } else {
-                        nameToDefinitionsMap.computeIfAbsent(serviceName, e -> new ArrayList<>()).add(result);
-                    }
+                    nameToDefinitionsMap.computeIfAbsent(serviceName, e -> new ArrayList<>()).add(result);
                 }
                 return result;
             }
@@ -525,7 +520,7 @@ public class EnhancedServiceLoader {
         private ExtensionDefinition getDefaultExtensionDefinition() {
             List<ExtensionDefinition> currentDefinitions = definitionsHolder.get();
             if (currentDefinitions != null && currentDefinitions.size() > 0) {
-                return definitionsHolder.get().get(currentDefinitions.size() - 1);
+                return currentDefinitions.get(currentDefinitions.size() - 1);
             }
             return null;
         }
