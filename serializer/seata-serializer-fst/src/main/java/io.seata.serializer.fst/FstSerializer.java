@@ -29,7 +29,7 @@ public class FstSerializer implements Serializer {
 
     private final FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
-    public FstSerializer(){
+    public FstSerializer() {
         SerializerClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
     }
     @Override
