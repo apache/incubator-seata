@@ -69,6 +69,7 @@ public class SerializerClassRegistry {
     private static final Map<Class<?>, Object> REGISTRATIONS = new LinkedHashMap<>();
 
     static {
+
         // register commonly class
         registerClass(HashMap.class);
         registerClass(ArrayList.class);
