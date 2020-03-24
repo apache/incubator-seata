@@ -71,7 +71,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static int selfCheckAllowTimes;
     private static volatile int autoDemotionNum = 0;
     private static ConcurrentHashMap<String, Integer> demotionMap = new ConcurrentHashMap<>();
-
+    private static ScheduledThreadPoolExecutor executor =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("SelfCheckWorker", 1, true));
     /**
      * initialize selfCheck
      */
@@ -242,8 +243,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      * auto upgrade service detection
      */
     private static void startSelfCheck() {
-        ScheduledThreadPoolExecutor executor =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("SelfCheckWorker", 1, true));
         executor.scheduleAtFixedRate(() -> {
             if (demotionMap.size() > 0) {
                 try {
@@ -260,11 +259,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static synchronized void onSelfCheck(boolean isError) {
         if (!isError) {
             autoDemotionNum++;
-            if (autoDemotionNum > selfCheckAllowTimes && demotionMap.size() > 0) {
+            if (autoDemotionNum > selfCheckAllowTimes) {
                 autoDemotionNum = 0;
                 demotionMap.clear();
             }
-        }else{
+        } else {
             if (autoDemotionNum > 0) {
                 autoDemotionNum--;
             }
