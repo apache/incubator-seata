@@ -35,7 +35,7 @@ import de.javakaffee.kryoserializers.JdkProxySerializer;
 import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
 import de.javakaffee.kryoserializers.UUIDSerializer;
-import io.seata.core.serializer.SerializableClassRegistry;
+import io.seata.core.serializer.SerializerClassRegistry;
 
 /**
  * @author jsbxyyx
@@ -80,7 +80,7 @@ public class KryoSerializerFactory implements KryoFactory {
         kryo.register(UUID.class, new UUIDSerializer());
 
         // register commonly class
-        SerializableClassRegistry.getRegisteredClasses().keySet().forEach(kryo::register);
+        SerializerClassRegistry.getRegisteredClasses().keySet().forEach(kryo::register);
         return kryo;
     }
 

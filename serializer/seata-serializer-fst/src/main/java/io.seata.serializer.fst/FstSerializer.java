@@ -18,8 +18,8 @@ package io.seata.serializer.fst;
 import org.nustaq.serialization.FSTConfiguration;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.serializer.SerializableClassRegistry;
 import io.seata.core.serializer.Serializer;
+import io.seata.core.serializer.SerializerClassRegistry;
 
 /**
  * @author funkye
@@ -30,7 +30,7 @@ public class FstSerializer implements Serializer {
     private final FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
     public FstSerializer(){
-        SerializableClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
+        SerializerClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
     }
     @Override
     public <T> byte[] serialize(T t) {
