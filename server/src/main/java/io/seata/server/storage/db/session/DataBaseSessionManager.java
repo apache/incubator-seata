@@ -36,6 +36,7 @@ import io.seata.server.session.SessionLifecycleListener;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
+import io.seata.common.loader.Scope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
+@LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager
     implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
 

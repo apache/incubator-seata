@@ -26,7 +26,17 @@ public enum RegistryType {
     /**
      * Built-in compact metrics registry
      */
-    COMPACT;
+    COMPACT("compact");
+
+    private String name;
+
+    RegistryType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public static RegistryType getType(String name) {
         if (COMPACT.name().equalsIgnoreCase(name)) {

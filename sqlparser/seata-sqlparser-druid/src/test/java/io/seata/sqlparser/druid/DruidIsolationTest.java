@@ -20,6 +20,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,5 +40,12 @@ public class DruidIsolationTest {
         recognizerFactory.setClassLoader(new DruidIsolationClassLoader(druidLoaderForTest));
         // because druid-test.jar not exists, so NoClassDefFoundError should be threw
         Assertions.assertThrows(NoClassDefFoundError.class, () -> recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL));
+    }
+
+    @AfterAll
+    public static void afterClass(){
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class,
+                               SqlParserType.SQL_PARSER_TYPE_DRUID);
+        recognizerFactory.setClassLoader(DruidIsolationTest.class.getClassLoader());
     }
 }

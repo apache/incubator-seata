@@ -44,13 +44,15 @@ import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import io.seata.common.loader.Scope;
+
 
 /**
  * The type File based session manager.
  *
  * @author slievrly
  */
-@LoadLevel(name = "file")
+@LoadLevel(name = "file", scope = Scope.PROTOTYPE)
 public class FileSessionManager extends AbstractSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
