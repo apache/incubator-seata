@@ -143,7 +143,7 @@ public class SerializerClassRegistry {
      */
     public static void registerClass(Class<?> clazz, Object serializer) {
         if (clazz == null) {
-            throw new IllegalArgumentException("Class registered to kryo cannot be null!");
+            throw new IllegalArgumentException("Class registered cannot be null!");
         }
         REGISTRATIONS.put(clazz, serializer);
     }

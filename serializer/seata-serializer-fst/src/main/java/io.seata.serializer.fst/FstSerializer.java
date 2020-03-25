@@ -24,7 +24,7 @@ import io.seata.core.serializer.Serializer;
 @LoadLevel(name = "FST")
 public class FstSerializer implements Serializer {
 
-    FstSerializerFactory fstFactory = FstSerializerFactory.getDefaultFactory();
+    private FstSerializerFactory fstFactory = FstSerializerFactory.getDefaultFactory();
 
     @Override
     public <T> byte[] serialize(T t) {
