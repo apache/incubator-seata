@@ -15,7 +15,9 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
@@ -115,7 +117,7 @@ public class ExecuteTemplate {
             return false;
         }
 
-        if (RootContext.inGlobalTransaction() && RootContext.inTCCScope()) {
+        if (RootContext.inGlobalTransaction() && StringUtils.equals(BranchType.TCC.name(), RootContext.getBranchType())) {
             return false;
         }
 

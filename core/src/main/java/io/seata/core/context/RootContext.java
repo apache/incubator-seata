@@ -15,13 +15,14 @@
  */
 package io.seata.core.context;
 
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 
 /**
  * The type Root context.
@@ -118,12 +119,16 @@ public class RootContext {
     }
 
     /**
-     * In TCC scope boolean
+     * get the branch type
      *
-     * @return the boolean
+     * @return the branch type String
      */
-    public static boolean inTCCScope() {
-        return StringUtils.equals(String.valueOf(BranchType.TCC.ordinal()), CONTEXT_HOLDER.get(KEY_BRANCH_TYPE));
+    public static String getBranchType() {
+        String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+        if (StringUtils.isNotBlank(branchType)) {
+            return branchType;
+        }
+        return null;
     }
 
     /**
@@ -136,7 +141,7 @@ public class RootContext {
             LOGGER.debug("bind branch type {}", branchType);
         }
 
-        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, String.valueOf(branchType.ordinal()));
+        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, branchType.name());
     }
 
     /**

@@ -45,7 +45,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
             return invoker.invoke(invocation);
         }
         String xid = RootContext.getXID();
-        boolean inTccScope = RootContext.inTCCScope();
+        String branchType = RootContext.getBranchType();
 
         String rpcXid = getRpcXid();
         String rpcInTCCScope = RpcContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
@@ -55,7 +55,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, String.valueOf(inTccScope));
+            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType);
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
@@ -73,8 +73,8 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         } finally {
             if (bind) {
                 String unbindXid = RootContext.unbind();
-                boolean previouslyInTCCScope = RootContext.inTCCScope();
-                if (previouslyInTCCScope) {
+                String previousBranchType = RootContext.getBranchType();
+                if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
@@ -84,7 +84,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                     LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        if (previouslyInTCCScope) {
+                        if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
                             RootContext.bindBranchType(BranchType.TCC);
                         }
                         LOGGER.warn("bind [{}] back to RootContext", unbindXid);
