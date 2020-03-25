@@ -15,38 +15,15 @@
  */
 package io.seata.common.loader;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * The interface Load level.
+ * The type LatinHello
  *
- * @author slievrly
+ * @author haozhibei
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-public @interface LoadLevel {
-    /**
-     * Name string.
-     *
-     * @return the string
-     */
-    String name();
-
-    /**
-     * Order int.
-     *
-     * @return the int
-     */
-    int order() default 0;
-
-    /**
-     * Scope enum.
-     * @return
-     */
-    Scope scope() default Scope.SINGLETON;
+@LoadLevel(name = "LatinHello",order = 3, scope = Scope.PROTOTYPE)
+public class LatinHello implements Hello {
+    @Override
+    public String say() {
+        return "Olá.";
+    }
 }
