@@ -17,9 +17,9 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Collection utils.
@@ -46,7 +46,7 @@ public class CollectionUtils {
      * @return the boolean
      */
     public static boolean isNotEmpty(Collection col) {
-        return col != null && col.size() > 0;
+        return col != null && !col.isEmpty();
     }
 
     /**
@@ -143,7 +143,7 @@ public class CollectionUtils {
         if (data == null) {
             return null;
         }
-        Map<String, String> map = new ConcurrentHashMap<>();
+        Map<String, String> map = new HashMap<>(8);
         if (StringUtils.isBlank(data)) {
             return map;
         }
@@ -171,7 +171,7 @@ public class CollectionUtils {
      * @return the list
      */
     public static List<String> toUpperList(List<String> sourceList) {
-        if (null == sourceList || sourceList.size() == 0) { return sourceList; }
+        if (null == sourceList || sourceList.isEmpty()) { return sourceList; }
         List<String> destList = new ArrayList<>(sourceList.size());
         for (String element : sourceList) {
             if (null != element) {
