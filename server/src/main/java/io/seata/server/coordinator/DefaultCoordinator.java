@@ -222,7 +222,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
                         + globalSession.getTimeout());
             }
-            boolean shouldTimeout = globalSession.lockAndExecute(() -> {
+            boolean shouldTimeout = SessionHolder.lockAndExecute(globalSession, () -> {
                 if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
                     return false;
                 }
@@ -356,7 +356,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void undoLogDelete() {
         Map<String, Channel> rmChannels = ChannelManager.getRmChannels();
         if (rmChannels == null || rmChannels.isEmpty()) {
-            LOGGER.info("no active rm channels to delete undo log");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("no active rm channels to delete undo log");
+            }
             return;
         }
         short saveDays = CONFIG.getShort(ConfigurationKeys.TRANSACTION_UNDO_LOG_SAVE_DAYS,
