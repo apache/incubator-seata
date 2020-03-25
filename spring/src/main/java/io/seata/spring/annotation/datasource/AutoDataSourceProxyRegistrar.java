@@ -27,16 +27,20 @@ import org.springframework.core.type.AnnotationMetadata;
  */
 public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistrar {
     private static final String ATTRIBUTE_KEY_USE_JDK_PROXY = "useJdkProxy";
-    public static final String BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR = "seataDataSourceBeanPostProcessor";
+    private static final String ATTRIBUTE_KEY_EXCLUDES = "excludes";
+    public static final String BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR = "seataAutoDataSourceProxyCreator";
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)) {
-            boolean useJdkProxy = Boolean.valueOf(importingClassMetadata.getAnnotationAttributes(EnableAutoDataSourceProxy.class.getName()).get(ATTRIBUTE_KEY_USE_JDK_PROXY).toString());
+        if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)) {
+            boolean useJdkProxy = Boolean.parseBoolean(importingClassMetadata.getAnnotationAttributes(EnableAutoDataSourceProxy.class.getName()).get(ATTRIBUTE_KEY_USE_JDK_PROXY).toString());
+            String[] excludes = (String[]) importingClassMetadata.getAnnotationAttributes(EnableAutoDataSourceProxy.class.getName()).get(ATTRIBUTE_KEY_EXCLUDES);
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
-                .genericBeanDefinition(SeataDataSourceBeanPostProcessor.class)
-                .addConstructorArgValue(useJdkProxy).getBeanDefinition();
-            registry.registerBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR, beanDefinition);
+                .genericBeanDefinition(SeataAutoDataSourceProxyCreator.class)
+                .addConstructorArgValue(useJdkProxy)
+                .addConstructorArgValue(excludes)
+                .getBeanDefinition();
+            registry.registerBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR, beanDefinition);
         }
     }
 
