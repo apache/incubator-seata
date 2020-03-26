@@ -28,11 +28,6 @@
     <name>seata-server ${project.version}</name>
 
     <dependencies>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>3.2.0</version>
-        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -104,6 +99,11 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <!-- jedis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

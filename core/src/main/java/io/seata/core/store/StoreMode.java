@@ -30,7 +30,11 @@ public enum StoreMode {
     /**
      * database store
      */
-    DB("db");
+    DB("db"),
+    /**
+     * database store
+     */
+    REDIS("redis");
 
     private String name;
 
