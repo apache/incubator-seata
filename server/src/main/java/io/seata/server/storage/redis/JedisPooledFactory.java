@@ -1,4 +1,4 @@
-package io.seata.server.store.redis;
+package io.seata.server.storage.redis;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -29,12 +29,11 @@ public class JedisPooledFactory {
                     JedisPoolConfig poolConfig = new JedisPoolConfig();
                     poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, minConn));
                     poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, maxConn));
-                    poolConfig.setTestOnBorrow(true);
                     jedisPool =
                         new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, host),
                             CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, port), 60000,
                             CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD, password),
-                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE));
+                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE,dataBase));
                 }
             }
         }

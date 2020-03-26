@@ -48,11 +48,7 @@ public enum SerializerType {
      * <p>
      * Math.pow(2, 3)
      */
-<<<<<<< HEAD
-    FST((byte)0x6),
-=======
     FST((byte)0x8),
->>>>>>> seata-develop/develop
     ;
 
     private final byte code;
