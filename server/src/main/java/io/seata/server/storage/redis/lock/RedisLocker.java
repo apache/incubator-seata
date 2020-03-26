@@ -15,7 +15,7 @@ public class RedisLocker extends AbstractLocker {
 
     private static Integer DEFAULT_SECONDS = 30000;
 
-    private static String DEFAULT_REDIS_PREFIX = "SEATA_LOCK_";
+    private static String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
     /**
      * The Branch session.
      */
@@ -40,10 +40,10 @@ public class RedisLocker extends AbstractLocker {
         long status = 0;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (RowLock lock : rowLocks) {
-                status = jedis.setnx(DEFAULT_REDIS_PREFIX+lock.getRowKey(), JSON.toJSONString(lock));
+                status = jedis.setnx(DEFAULT_REDIS_SEATA_LOCK_PREFIX+lock.getRowKey(), JSON.toJSONString(lock));
                 if (status == 1) {
-                    successList.add(DEFAULT_REDIS_PREFIX+lock.getRowKey());
-                    jedis.expire(DEFAULT_REDIS_PREFIX+lock.getRowKey(), DEFAULT_SECONDS);
+                    successList.add(DEFAULT_REDIS_SEATA_LOCK_PREFIX+lock.getRowKey());
+                    jedis.expire(DEFAULT_REDIS_SEATA_LOCK_PREFIX+lock.getRowKey(), DEFAULT_SECONDS);
                 } else {
                     break;
                 }
@@ -65,7 +65,7 @@ public class RedisLocker extends AbstractLocker {
         }
         String[] keys=new String[rowLocks.size()];
         for (int i=0;i<rowLocks.size();i++){
-            keys[i]=DEFAULT_REDIS_PREFIX+rowLocks.get(i).getRowKey();
+            keys[i]=DEFAULT_REDIS_SEATA_LOCK_PREFIX+rowLocks.get(i).getRowKey();
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.del(keys);
@@ -81,7 +81,7 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (RowLock rowlock : rowLocks) {
-                String rowlockJson = jedis.get(DEFAULT_REDIS_PREFIX + rowlock.getRowKey());
+                String rowlockJson = jedis.get(DEFAULT_REDIS_SEATA_LOCK_PREFIX + rowlock.getRowKey());
                 if (StringUtils.isNotBlank(rowlockJson)) {
                     RowLock lock = JSON.parseObject(rowlockJson, RowLock.class);
                     if (!lock.getXid().equals(rowlock.getXid())) {

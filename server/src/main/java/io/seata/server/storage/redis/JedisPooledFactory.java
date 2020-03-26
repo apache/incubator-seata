@@ -19,8 +19,8 @@ public class JedisPooledFactory {
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
     /**
-     * 获取RedisPool实例（单例）
-     * @return RedisPool实例
+     * get the RedisPool instance (singleton)
+     * @return redisPool
      */
     public static JedisPool getJedisPoolInstance() {
         if (jedisPool == null) {
@@ -42,21 +42,12 @@ public class JedisPooledFactory {
     }
 
     /**
-     * 从连接池中获取一个 Jedis 实例（连接）
-     * @return Jedis 实例
+     * get an instance of Jedis (connection) from the connection pool
+     * @return jedis
      */
     public static Jedis getJedisInstance() {
         return getJedisPoolInstance().getResource();
     }
 
-    /**
-     * 将Jedis对象（连接）归还连接池
-     * @param jedis 连接对象
-     */
-    public static void release(Jedis jedis) {
-        if (jedis != null) {
-            jedis.close();  // 已废弃，推荐使用jedis.close()方法
-        }
-    }
 
 }
