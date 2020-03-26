@@ -35,6 +35,15 @@ class Page extends React.Component {
     }
 
     if (newData !== oldData) {
+      // Compensation类型后置连接点去掉箭头
+      newData.edges.forEach((item) => {
+        if (item.type === 'Compensation') {
+          item.style = {
+            ...item.style,
+            endArrow: false,
+          };
+        }
+      });
       this.page.read(newData);
 
       return true;
