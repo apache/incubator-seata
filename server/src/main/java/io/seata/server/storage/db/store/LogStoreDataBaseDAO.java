@@ -164,15 +164,9 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < statuses.length; i++) {
-                sb.append("?");
-                if (i != (statuses.length - 1)) {
-                    sb.append(", ");
-                }
-            }
+            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?",",",statuses.length);
 
-            String sql = LogStoreSqls.getQueryGlobalTransactionSQLByStatus(globalTable, dbType, sb.toString());
+            String sql = LogStoreSqls.getQueryGlobalTransactionSQLByStatus(globalTable, dbType, paramsPlaceHolder);
             ps = conn.prepareStatement(sql);
             for (int i = 0; i < statuses.length; i++) {
                 int status = statuses[i];
