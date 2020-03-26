@@ -213,11 +213,13 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (hasUndoLog) {
             try {
                 register();
-                UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
             } catch (TransactionException e) {
                 recognizeLockKeyConflictException(e, context.buildLockKeys());
+            }
+            try {
+                UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
             } catch (SQLException sqlEx) {
-                LOGGER.error("add undoLog error:{}",sqlEx.getMessage(),sqlEx);
+                LOGGER.error("add undoLog error:{}", sqlEx.getMessage(), sqlEx);
                 throw new SQLException(sqlEx);
             }
         }
