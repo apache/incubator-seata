@@ -61,8 +61,7 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
             for (LockDO lock : locks) {
-                String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey() + "_"
-                    + DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX + lock.getBranchId();
+                String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey();
                 status = jedis.setnx(key, JSON.toJSONString(lock));
                 if (status == 1) {
                     successList.add(key);
@@ -90,8 +89,7 @@ public class RedisLocker extends AbstractLocker {
         String[] keys = new String[rowLocks.size()];
         List<LockDO> locks = convertToLockDO(rowLocks);
         for (int i = 0; i < locks.size(); i++) {
-            String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey() + "_"
-                + DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX + locks.get(i).getBranchId();
+            String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey();
             keys[i] = key;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
