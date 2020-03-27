@@ -15,6 +15,12 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -26,12 +32,6 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 /**
  * The type Table meta cache.
  *
@@ -40,7 +40,7 @@ import java.sql.Statement;
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
-    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
+    private KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
