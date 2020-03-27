@@ -43,12 +43,12 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
  * @date 2020/3/26
  */
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
-public class RedisSeesionManager extends AbstractSessionManager
+public class RedisSessionManager extends AbstractSessionManager
     implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
     /**
      * The constant LOGGER.
      */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(RedisSeesionManager.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManager.class);
 
     /**
      * The Task name.
@@ -58,7 +58,7 @@ public class RedisSeesionManager extends AbstractSessionManager
     /**
      * Instantiates a new Data base session manager.
      */
-    public RedisSeesionManager() {
+    public RedisSessionManager() {
         super();
     }
 
@@ -68,7 +68,7 @@ public class RedisSeesionManager extends AbstractSessionManager
      * @param name
      *            the name
      */
-    public RedisSeesionManager(String name) {
+    public RedisSessionManager(String name) {
         super();
         this.taskName = name;
     }

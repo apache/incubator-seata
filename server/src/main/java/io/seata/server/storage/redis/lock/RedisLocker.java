@@ -1,24 +1,23 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Copyright 1999-2019 Seata.io Group.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package io.seata.server.storage.redis.lock;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+
 import com.alibaba.fastjson.JSON;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.lock.AbstractLocker;
@@ -34,6 +33,8 @@ public class RedisLocker extends AbstractLocker {
 
     private static String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
     private static String DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX = "SEATA_LOCK_REDIS_SEATA_LOCK_BRANCH_";
+
+    private static String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
     /**
      * The Branch session.
      */
@@ -65,6 +66,7 @@ public class RedisLocker extends AbstractLocker {
                 status = jedis.setnx(key, JSON.toJSONString(lock));
                 if (status == 1) {
                     successList.add(key);
+                    jedis.lpush(DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + lock.getXid(), key);
                     jedis.expire(key, DEFAULT_SECONDS);
                 } else {
                     break;
@@ -105,13 +107,41 @@ public class RedisLocker extends AbstractLocker {
             return true;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Set<String> keys = jedis.keys("*" + xid + "*");
-            for (int i = 0; i < branchIds.size(); i++) {
-                for (String key : keys) {
+            String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
+            List<String> keys = jedis.lrange(lockListKey, 0, 100);
+            Iterator<String> it = keys.iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                for (int i = 0; i < branchIds.size(); i++) {
                     if (key.contains(String.valueOf(branchIds.get(i)))) {
                         jedis.del(key);
+                        it.remove();
                     }
                 }
+            }
+            if (keys.size() == 0) {
+                jedis.del(lockListKey);
+            }
+            return true;
+        }
+    }
+
+    @Override
+    public boolean releaseLock(String xid, Long branchId) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
+            List<String> keys = jedis.lrange(lockListKey, 0, 100);
+            String branch = branchId.toString();
+            Iterator<String> it = keys.iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                if (key.contains(branch)) {
+                    jedis.del(key);
+                    it.remove();
+                }
+            }
+            if (keys.size() == 0) {
+                jedis.del(lockListKey);
             }
             return true;
         }
