@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.FactorySqlExecutor;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
@@ -27,6 +28,7 @@ import java.sql.Statement;
  * The type Execute template.
  *
  * @author sharajava
+ * @author pengzhengfa
  */
 public class ExecuteTemplate {
 
@@ -78,23 +80,7 @@ public class ExecuteTemplate {
         if (sqlRecognizer == null) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
-            switch (sqlRecognizer.getSQLType()) {
-                case INSERT:
-                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case UPDATE:
-                    executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case DELETE:
-                    executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                default:
-                    executor = new PlainExecutor<>(statementProxy, statementCallback);
-                    break;
-            }
+            executor= FactorySqlExecutor.SqlCreateExecutor(sqlRecognizer.getSQLType(), sqlRecognizer, statementProxy, statementCallback);
         }
         T rs;
         try {
@@ -105,6 +91,7 @@ public class ExecuteTemplate {
                 ex = new SQLException(ex);
             }
             throw (SQLException)ex;
+
         }
         return rs;
     }
