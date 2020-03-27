@@ -17,10 +17,8 @@ package io.seata.server.storage.redis.lock;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Set;
 import com.alibaba.fastjson.JSON;
-
-import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.lock.AbstractLocker;
@@ -35,6 +33,7 @@ public class RedisLocker extends AbstractLocker {
     private static Integer DEFAULT_SECONDS = 30;
 
     private static String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
+    private static String DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX = "SEATA_LOCK_REDIS_SEATA_LOCK_BRANCH_";
     /**
      * The Branch session.
      */
@@ -61,10 +60,12 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
             for (LockDO lock : locks) {
-                status = jedis.setnx(DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey(), JSON.toJSONString(lock));
+                String key=DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey() + "_"
+                    + DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX + lock.getBranchId();
+                status = jedis.setnx(key, JSON.toJSONString(lock));
                 if (status == 1) {
-                    successList.add(DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey());
-                    jedis.expire(DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey(), DEFAULT_SECONDS);
+                    successList.add(key);
+                    jedis.expire(key, DEFAULT_SECONDS);
                 } else {
                     break;
                 }
@@ -87,7 +88,9 @@ public class RedisLocker extends AbstractLocker {
         String[] keys = new String[rowLocks.size()];
         List<LockDO> locks = convertToLockDO(rowLocks);
         for (int i = 0; i < locks.size(); i++) {
-            keys[i] = DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey();
+            String key=DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey() + "_"
+                + DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX + locks.get(i).getBranchId();
+            keys[i] = key;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.del(keys);
@@ -101,15 +104,19 @@ public class RedisLocker extends AbstractLocker {
             // no lock
             return true;
         }
-        try {
-            return lockStore.unLock(xid, branchIds);
-        } catch (StoreException e) {
-            throw e;
-        } catch (Exception t) {
-            LOGGER.error("unLock by branchIds error, xid {}, branchIds:{}", xid, CollectionUtils.toString(branchIds), t);
-            return false;
+        try(Jedis jedis=JedisPooledFactory.getJedisInstance()){
+            Set<String> keys=jedis.keys("*"+xid+"*");
+            for (int i = 0; i < branchIds.size(); i++) {
+                for (String key : keys) {
+                    if(key.contains(String.valueOf(branchIds.get(i)))){
+                        jedis.del(key);
+                    }
+                }
+            }
+            return true;
         }
     }
+
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
