@@ -60,7 +60,7 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
             for (LockDO lock : locks) {
-                String key=DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey() + "_"
+                String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey() + "_"
                     + DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX + lock.getBranchId();
                 status = jedis.setnx(key, JSON.toJSONString(lock));
                 if (status == 1) {
@@ -88,7 +88,7 @@ public class RedisLocker extends AbstractLocker {
         String[] keys = new String[rowLocks.size()];
         List<LockDO> locks = convertToLockDO(rowLocks);
         for (int i = 0; i < locks.size(); i++) {
-            String key=DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey() + "_"
+            String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey() + "_"
                 + DEFAULT_REDIS_SEATA_LOCK_BRANCH_PREFIX + locks.get(i).getBranchId();
             keys[i] = key;
         }
@@ -104,11 +104,11 @@ public class RedisLocker extends AbstractLocker {
             // no lock
             return true;
         }
-        try(Jedis jedis=JedisPooledFactory.getJedisInstance()){
-            Set<String> keys=jedis.keys("*"+xid+"*");
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Set<String> keys = jedis.keys("*" + xid + "*");
             for (int i = 0; i < branchIds.size(); i++) {
                 for (String key : keys) {
-                    if(key.contains(String.valueOf(branchIds.get(i)))){
+                    if (key.contains(String.valueOf(branchIds.get(i)))) {
                         jedis.del(key);
                     }
                 }
@@ -137,10 +137,12 @@ public class RedisLocker extends AbstractLocker {
         }
         return true;
     }
+
     /**
      * Convert to lock do list.
      *
-     * @param locks the locks
+     * @param locks
+     *            the locks
      * @return the list
      */
     protected List<LockDO> convertToLockDO(List<RowLock> locks) {
