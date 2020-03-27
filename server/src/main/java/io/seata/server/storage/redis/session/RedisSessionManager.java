@@ -40,7 +40,6 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
 
 /**
  * @author funkye
- * @date 2020/3/26
  */
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager

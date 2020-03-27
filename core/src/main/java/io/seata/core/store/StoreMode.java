@@ -32,7 +32,7 @@ public enum StoreMode {
      */
     DB("db"),
     /**
-     * database store
+     * redis store
      */
     REDIS("redis");
 

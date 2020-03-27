@@ -23,6 +23,9 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+/**
+ * @author funkye
+ */
 public class JedisPooledFactory {
 
     private static volatile JedisPool jedisPool = null;

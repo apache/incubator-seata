@@ -15,18 +15,18 @@ package io.seata.server.storage.redis.lock;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import com.alibaba.fastjson.JSON;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
-import io.seata.server.session.BranchSession;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
 
+/**
+ * @author funkye
+ */
 public class RedisLocker extends AbstractLocker {
 
     private static Integer DEFAULT_SECONDS = 30;
@@ -34,20 +34,12 @@ public class RedisLocker extends AbstractLocker {
     private static String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
 
     private static String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
-    /**
-     * The Branch session.
-     */
-    protected BranchSession branchSession = null;
 
     /**
-     * Instantiates a new Memory locker.
+     * Instantiates a new Redis locker.
      *
-     * @param branchSession
-     *            the branch session
      */
-    public RedisLocker(BranchSession branchSession) {
-        this.branchSession = branchSession;
-    }
+    public RedisLocker() {}
 
     @Override
     public boolean acquireLock(List<RowLock> rowLocks) {
@@ -71,7 +63,10 @@ public class RedisLocker extends AbstractLocker {
                 }
             }
             if (status != 1) {
-                jedis.del(successList.toArray(new String[successList.size()]));
+                String[] rms = successList.toArray(new String[successList.size()]);
+                if (rms.length > 0) {
+                    jedis.del(rms);
+                }
                 return false;
             } else {
                 return true;
@@ -109,8 +104,9 @@ public class RedisLocker extends AbstractLocker {
             Iterator<String> it = keys.iterator();
             while (it.hasNext()) {
                 String key = it.next();
+                LockDO lock = JSON.parseObject(key, LockDO.class);
                 for (int i = 0; i < branchIds.size(); i++) {
-                    if (key.contains(String.valueOf(branchIds.get(i)))) {
+                    if (lock.getBranchId().equals(branchIds.get(i))) {
                         jedis.del(key);
                         it.remove();
                     }
@@ -128,11 +124,11 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
             List<String> keys = jedis.lrange(lockListKey, 0, 100);
-            String branch = branchId.toString();
             Iterator<String> it = keys.iterator();
             while (it.hasNext()) {
                 String key = it.next();
-                if (key.contains(branch)) {
+                LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
+                if (lock.getBranchId().equals(branchId)) {
                     jedis.del(key);
                     it.remove();
                 }

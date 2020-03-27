@@ -23,12 +23,15 @@ import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
+/**
+ * @author funkye
+ */
 @LoadLevel(name = "redis")
 public class RedisLockManager extends AbstractLockManager {
 
     @Override
     public Locker getLocker(BranchSession branchSession) {
-        return new RedisLocker(branchSession);
+        return new RedisLocker();
     }
 
     @Override

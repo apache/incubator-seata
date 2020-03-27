@@ -38,7 +38,6 @@ import redis.clients.jedis.Jedis;
 
 /**
  * @author funkye
- * @date 2020/3/26
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
