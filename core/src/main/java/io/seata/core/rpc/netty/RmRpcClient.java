@@ -15,15 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -36,8 +27,20 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -46,6 +49,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  *
  * @author slievrly
  * @author zhaojun
+ * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
 public final class RmRpcClient extends AbstractRpcRemotingClient {
@@ -58,7 +62,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final int MAX_QUEUE_SIZE = 20000;
     private String applicationId;
     private String transactionServiceGroup;
-    
+    private Map<Integer/*MessageType*/, Pair<NettyProcessor, Boolean/*Whether thread pool processing is required*/>> rmProcessorTable = null;
+
     private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
@@ -99,7 +104,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
         return instance;
     }
-    
+
     /**
      * Sets application id.
      *
@@ -108,7 +113,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
-    
+
     /**
      * Sets transaction service group.
      *
@@ -117,7 +122,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
     }
-    
+
     /**
      * Sets resource manager.
      *
@@ -127,20 +132,30 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         this.resourceManager = resourceManager;
     }
 
+    public void setRmProcessor(Map<Integer, Pair<NettyProcessor, Boolean>> processorMap) {
+        this.rmProcessorTable = processorMap;
+    }
+
     @Override
     public void init() {
         if (initialized.compareAndSet(false, true)) {
             super.init();
         }
+        // registry processor
+        if (rmProcessorTable != null) {
+            for (Map.Entry<Integer, Pair<NettyProcessor, Boolean>> entry : rmProcessorTable.entrySet()) {
+                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
+            }
+        }
     }
-    
+
     @Override
     public void destroy() {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
     }
-    
+
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (serverAddress) -> {
@@ -159,16 +174,16 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     protected String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
-    
+
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register RM success. server version:{},channel:{}", ((RegisterRMResponse)response).getVersion(), channel);
+            LOGGER.info("register RM success. server version:{},channel:{}", ((RegisterRMResponse) response).getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
         String dbKey = getMergedResourceKeys();
-        RegisterRMRequest message = (RegisterRMRequest)requestMessage;
+        RegisterRMRequest message = (RegisterRMRequest) requestMessage;
         if (message.getResourceIds() != null) {
             if (!message.getResourceIds().equals(dbKey)) {
                 sendRegisterMessage(serverAddress, channel, dbKey);
@@ -182,7 +197,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                                   AbstractMessage requestMessage) {
 
         if (response instanceof RegisterRMResponse && LOGGER.isInfoEnabled()) {
-            LOGGER.info("register RM failed. server version:{}", ((RegisterRMResponse)response).getVersion());
+            LOGGER.info("register RM failed. server version:{}", ((RegisterRMResponse) response).getVersion());
         }
         throw new FrameworkException("register RM failed, channel:" + channel);
     }
@@ -246,5 +261,11 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             return sb.toString();
         }
         return null;
+    }
+
+    @Override
+    public void registerProcessor(int requestCode, NettyProcessor processor, ExecutorService executor) {
+        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(requestCode, pair);
     }
 }

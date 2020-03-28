@@ -36,7 +36,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import org.slf4j.Logger;
@@ -52,8 +52,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author slievrly
  * @author zhaojun
  */
-public class RpcClientBootstrap implements RemotingClient {
-    
+public class RpcClientBootstrap implements RemotingBootstrap {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
     private final NettyClientConfig nettyClientConfig;
     private final Bootstrap bootstrap = new Bootstrap();
@@ -104,7 +104,7 @@ public class RpcClientBootstrap implements RemotingClient {
             channel.pipeline().addLast(handlers);
         }
     }
-    
+
     @Override
     public void start() {
         if (this.defaultEventExecutorGroup == null) {
@@ -118,7 +118,7 @@ public class RpcClientBootstrap implements RemotingClient {
             ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
             ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
             nettyClientConfig.getClientSocketRcvBufSize());
-    
+
         if (nettyClientConfig.enableNative()) {
             if (PlatformDependent.isOsx()) {
                 if (LOGGER.isInfoEnabled()) {
@@ -159,7 +159,7 @@ public class RpcClientBootstrap implements RemotingClient {
         } else {
             bootstrap.handler(
                 new ChannelInitializer<SocketChannel>() {
-                
+
                     @Override
                     public void initChannel(SocketChannel ch) {
                         ChannelPipeline pipeline = ch.pipeline();
@@ -167,8 +167,8 @@ public class RpcClientBootstrap implements RemotingClient {
                             new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                                 nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                                 nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                                .addLast(new ProtocolV1Decoder())
-                                .addLast(new ProtocolV1Encoder());
+                            .addLast(new ProtocolV1Decoder())
+                            .addLast(new ProtocolV1Encoder());
                         if (null != channelHandlers) {
                             addChannelPipelineLast(ch, channelHandlers);
                         }
@@ -179,7 +179,7 @@ public class RpcClientBootstrap implements RemotingClient {
             LOGGER.info("RpcClientBootstrap has started");
         }
     }
-    
+
     @Override
     public void shutdown() {
         try {
@@ -218,7 +218,7 @@ public class RpcClientBootstrap implements RemotingClient {
         }
         return channel;
     }
-    
+
     /**
      * Gets thread prefix.
      *

@@ -13,22 +13,36 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
-
-import io.seata.core.protocol.RpcMessage;
+package io.seata.core.rpc.netty.processor;
 
 /**
- * The interface Client message listener.
+ * Currently used to associate object1 and object2
  *
- * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.2.0
  */
-@Deprecated
-public interface ClientMessageListener {
-    /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
-     */
-    void onMessage(RpcMessage request, String serverAddress);
+public class Pair<T1, T2> {
+    private T1 object1;
+    private T2 object2;
+
+    public Pair(T1 object1, T2 object2) {
+        this.object1 = object1;
+        this.object2 = object2;
+    }
+
+    public T1 getObject1() {
+        return object1;
+    }
+
+    public void setObject1(T1 object1) {
+        this.object1 = object1;
+    }
+
+    public T2 getObject2() {
+        return object2;
+    }
+
+    public void setObject2(T2 object2) {
+        this.object2 = object2;
+    }
 }

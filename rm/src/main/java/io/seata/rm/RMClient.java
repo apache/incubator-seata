@@ -15,8 +15,17 @@
  */
 package io.seata.rm;
 
-import io.seata.core.rpc.netty.RmMessageListener;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.RmRpcClient;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.netty.processor.client.RmHandleBranchCommitProcessor;
+import io.seata.core.rpc.netty.processor.client.RmHandleBranchRollbackProcessor;
+import io.seata.core.rpc.netty.processor.client.RmHandleUndoLogProcessor;
+import io.seata.core.rpc.netty.processor.client.MergeResultMessageProcessor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Rm client Initiator.
@@ -34,7 +43,27 @@ public class RMClient {
     public static void init(String applicationId, String transactionServiceGroup) {
         RmRpcClient rmRpcClient = RmRpcClient.getInstance(applicationId, transactionServiceGroup);
         rmRpcClient.setResourceManager(DefaultResourceManager.get());
-        rmRpcClient.setClientMessageListener(new RmMessageListener(DefaultRMHandler.get(), rmRpcClient));
+        AbstractRMHandler handler = DefaultRMHandler.get();
+
+        Map<Integer, Pair<NettyProcessor, Boolean>> processorMap = new HashMap<>();
+        // rm client handle branch commit processor
+        Pair<NettyProcessor, Boolean> branchCommitProcessor =
+            new Pair<>(new RmHandleBranchCommitProcessor(handler, rmRpcClient), true);
+        processorMap.put((int) MessageType.TYPE_BRANCH_COMMIT, branchCommitProcessor);
+        // rm client handle branch commit processor
+        Pair<NettyProcessor, Boolean> branchRollbackProcessor =
+            new Pair<>(new RmHandleBranchRollbackProcessor(handler, rmRpcClient), true);
+        processorMap.put((int) MessageType.TYPE_BRANCH_ROLLBACK, branchRollbackProcessor);
+        // rm handler undo log processor
+        Pair<NettyProcessor, Boolean> deleteUndoLogProcessor =
+            new Pair<>(new RmHandleUndoLogProcessor(handler), true);
+        processorMap.put((int) MessageType.TYPE_RM_DELETE_UNDOLOG, deleteUndoLogProcessor);
+        // handle TC response about process merge message
+        Pair<NettyProcessor, Boolean> mergeMsgProcessor =
+            new Pair<>(new MergeResultMessageProcessor(rmRpcClient.getMergeMsgMap(), rmRpcClient.getFutures()), false);
+        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, mergeMsgProcessor);
+        rmRpcClient.setRmProcessor(processorMap);
+
         rmRpcClient.init();
     }
 
