@@ -15,6 +15,9 @@
  */
 package io.seata.server.storage.redis;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -27,12 +30,21 @@ import redis.clients.jedis.JedisPoolConfig;
  * @author funkye
  */
 public class JedisPooledFactory {
+    /**
+     * The constant LOGGER.
+     */
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JedisPooledFactory.class);
 
     private static volatile JedisPool jedisPool = null;
+
     private static String host = "127.0.0.1";
+
     private static int port = 6379;
+
     private static int minConn = 1;
-    private static int maxConn = 1;
+
+    private static int maxConn = 10;
+
     private static int dataBase = 0;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
@@ -42,14 +54,14 @@ public class JedisPooledFactory {
      * 
      * @return redisPool
      */
-    public static JedisPool getJedisPoolInstance() {
+    private static JedisPool getJedisPoolInstance() {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
-                String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
-                if (StringUtils.isBlank(password)) {
-                    password = null;
-                }
                 if (jedisPool == null) {
+                    String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
+                    if (StringUtils.isBlank(password)) {
+                        password = null;
+                    }
                     JedisPoolConfig poolConfig = new JedisPoolConfig();
                     poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, minConn));
                     poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, maxConn));
@@ -57,10 +69,12 @@ public class JedisPooledFactory {
                         new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, host),
                             CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, port), 60000, password,
                             CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, dataBase));
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("initialization of the build redis connection pool is complete");
+                    }
                 }
             }
         }
-
         return jedisPool;
     }
 
