@@ -48,16 +48,16 @@ import redis.clients.jedis.Jedis;
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     // global transaction prefix
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
+    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA-GLOBAL-";
 
     // the prefix of the branchs transaction
-    private static final String DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX = "SEATA__XID_BRANCHS";
+    private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA-XID-BRANCHS-";
 
-    // the prefix of the branchs transaction
-    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
+    // the prefix of the branch transaction
+    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA-BRANCH-";
 
     // global transaction id PREFIX
-    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA_TRANSACTION_ID_GLOBAL";
+    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA-TRANSACTION-ID-GLOBAL-";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -96,7 +96,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private boolean deleteBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String branchsKey = DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX + convertBranchTransactionDO.getXid();
+            String branchsKey = DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + convertBranchTransactionDO.getXid();
             List<String> branchs = jedis.lrange(branchsKey, 0, 100);
             if (null != branchs && branchs.size() > 0) {
                 String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + convertBranchTransactionDO.getBranchId();
@@ -121,7 +121,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + convertBranchTransactionDO.getBranchId();
             if (jedis.get(key) == null) {
-                jedis.lpush(DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX + convertBranchTransactionDO.getXid(), key);
+                jedis.lpush(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + convertBranchTransactionDO.getXid(), key);
             }
             jedis.set(key, JSON.toJSONString(convertBranchTransactionDO));
             return true;
@@ -181,7 +181,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             // reduce rpc with db when branchRegister and getGlobalStatus
             if (withBranchSessions) {
                 List<String> branchJson =
-                    jedis.lrange(DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX + globalTransactionDO.getXid(), 0, 100);
+                    jedis.lrange(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + globalTransactionDO.getXid(), 0, 100);
                 if (null != branchJson && branchJson.size() > 0) {
                     branchTransactionDOs = new ArrayList<>();
                     for (String s : branchJson) {
@@ -233,7 +233,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
                     List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
                     for (String xid : xids) {
-                        List<String> branchs = jedis.lrange(DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX + xid, 0, 100);
+                        List<String> branchs = jedis.lrange(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + xid, 0, 100);
                         if (null != branchs && branchs.size() > 0) {
                             for (String branchKey : branchs) {
                                 branchTransactionDOs
@@ -276,7 +276,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     return null;
                 }
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(global, GlobalTransactionDO.class);
-                String branchsKey = DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX + globalTransactionDO.getXid();
+                String branchsKey = DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + globalTransactionDO.getXid();
                 List<String> branchJson = jedis.lrange(branchsKey, 0, 100);
                 List<BranchTransactionDO> branchTransactionDOS = new ArrayList<>();
                 if (null != branchJson && branchJson.size() > 0) {

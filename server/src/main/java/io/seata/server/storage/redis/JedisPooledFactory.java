@@ -37,15 +37,15 @@ public class JedisPooledFactory {
 
     private static volatile JedisPool jedisPool = null;
 
-    private static final String host = "127.0.0.1";
+    private static final String HOST = "127.0.0.1";
 
-    private static final int port = 6379;
+    private static final int PORT = 6379;
 
-    private static final int minConn = 1;
+    private static final int MINCONN = 1;
 
-    private static final int maxConn = 10;
+    private static final int MAXCONN = 10;
 
-    private static final int dataBase = 0;
+    private static final int DATABASE = 0;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
@@ -63,12 +63,12 @@ public class JedisPooledFactory {
                         password = null;
                     }
                     JedisPoolConfig poolConfig = new JedisPoolConfig();
-                    poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, minConn));
-                    poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, maxConn));
+                    poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
+                    poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
                     jedisPool =
-                        new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, host),
-                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, port), 60000, password,
-                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, dataBase));
+                        new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
+                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,
+                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("initialization of the build redis connection pool is complete");
                     }
