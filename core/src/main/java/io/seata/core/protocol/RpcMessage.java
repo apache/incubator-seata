@@ -35,6 +35,11 @@ public class RpcMessage {
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
+    /**
+     * Get command type according to protocol.
+     *
+     * @return remoting command type
+     */
     public RemotingCommandType getType() {
         if (messageType == ProtocolConstants.MSGTYPE_RESQUEST
             || messageType == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY
