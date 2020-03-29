@@ -37,15 +37,15 @@ public class JedisPooledFactory {
 
     private static volatile JedisPool jedisPool = null;
 
-    private static String host = "127.0.0.1";
+    private static final String host = "127.0.0.1";
 
-    private static int port = 6379;
+    private static final int port = 6379;
 
-    private static int minConn = 1;
+    private static final int minConn = 1;
 
-    private static int maxConn = 10;
+    private static final int maxConn = 10;
 
-    private static int dataBase = 0;
+    private static final int dataBase = 0;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 

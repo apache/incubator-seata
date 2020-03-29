@@ -48,16 +48,16 @@ import redis.clients.jedis.Jedis;
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     // global transaction prefix
-    private static String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
+    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
 
     // the prefix of the branchs transaction
-    private static String DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX = "SEATA__XID_BRANCHS";
+    private static final String DEFAULT_REDIS_SEATA__XID_BRANCHS_PREFIX = "SEATA__XID_BRANCHS";
 
     // the prefix of the branchs transaction
-    private static String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
+    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
 
     // global transaction id PREFIX
-    private static String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA_TRANSACTION_ID_GLOBAL";
+    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA_TRANSACTION_ID_GLOBAL";
 
     private static volatile RedisTransactionStoreManager instance;
 

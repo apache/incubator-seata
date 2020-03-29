@@ -32,11 +32,11 @@ import redis.clients.jedis.Jedis;
  */
 public class RedisLocker extends AbstractLocker {
 
-    private static Integer DEFAULT_SECONDS = 30;
+    private static final Integer DEFAULT_SECONDS = 30;
 
-    private static String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
+    private static final String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
 
-    private static String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
+    private static final String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
 
     /**
      * Instantiates a new Redis locker.
