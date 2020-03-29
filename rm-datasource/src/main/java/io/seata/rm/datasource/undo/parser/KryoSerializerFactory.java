@@ -15,21 +15,51 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import java.lang.reflect.InvocationHandler;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.TreeSet;
+import java.util.UUID;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
+import com.esotericsoftware.kryo.serializers.DefaultSerializers;
+import de.javakaffee.kryoserializers.ArraysAsListSerializer;
+import de.javakaffee.kryoserializers.BitSetSerializer;
+import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
+import de.javakaffee.kryoserializers.JdkProxySerializer;
+import de.javakaffee.kryoserializers.RegexSerializer;
+import de.javakaffee.kryoserializers.URISerializer;
+import de.javakaffee.kryoserializers.UUIDSerializer;
+import io.seata.rm.datasource.undo.BranchUndoLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 
 /**
  * @author jsbxyyx
@@ -69,22 +99,6 @@ public class KryoSerializerFactory implements KryoFactory {
         }
         adapter.config(kryo);
         return kryo;
-    }
-
-    public static class TimestampSerializer extends Serializer<Timestamp> {
-
-        @Override
-        public void write(Kryo kryo, Output output, Timestamp timestamp) {
-            output.writeLong(timestamp.getTime());
-            output.writeInt(timestamp.getNanos());
-        }
-
-        @Override
-        public Timestamp read(Kryo kryo, Input input, Class<Timestamp> type) {
-            Timestamp timestamp = new Timestamp(input.readLong());
-            timestamp.setNanos(input.readInt());
-            return timestamp;
-        }
     }
 
     public static class BlobSerializer extends Serializer<Blob> {
@@ -139,4 +153,18 @@ public class KryoSerializerFactory implements KryoFactory {
 
     }
 
+    private class TimestampSerializer extends Serializer<Timestamp> {
+        @Override
+        public void write(Kryo kryo, Output output, Timestamp object) {
+            output.writeLong(object.getTime());
+            output.writeInt(object.getNanos());
+        }
+
+        @Override
+        public Timestamp read(Kryo kryo, Input input, Class<Timestamp> type) {
+            Timestamp timestamp = new Timestamp(input.readLong());
+            timestamp.setNanos(input.readInt());
+            return timestamp;
+        }
+    }
 }

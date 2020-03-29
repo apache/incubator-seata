@@ -26,7 +26,17 @@ public enum ExporterType {
     /**
      * Export metrics data to Prometheus
      */
-    PROMETHEUS;
+    PROMETHEUS("prometheus");
+
+    private String name;
+
+    ExporterType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public static ExporterType getType(String name) {
         if (PROMETHEUS.name().equalsIgnoreCase(name)) {
