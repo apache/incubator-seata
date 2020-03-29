@@ -124,6 +124,7 @@ public class KryoSerializerFactory implements KryoFactory {
     }
 
     public static class TimestampSerializer extends Serializer<Timestamp> {
+
         @Override
         public void write(Kryo kryo, Output output, Timestamp object) {
             output.writeLong(object.getTime());
