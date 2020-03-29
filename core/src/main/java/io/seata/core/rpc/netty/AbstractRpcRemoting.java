@@ -492,6 +492,8 @@ public abstract class AbstractRpcRemoting implements Disposable {
                     allowDumpStack = false;
                 }
             }
+        } else {
+            LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
         }
     }
 
@@ -505,25 +507,29 @@ public abstract class AbstractRpcRemoting implements Disposable {
         } else {
             MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
             final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) (messageTypeAware.getTypeCode()));
-            try {
-                if (pair.getObject2() != null) {
-                    pair.getObject2().execute(() -> {
+            if (pair != null) {
+                try {
+                    if (pair.getObject2() != null) {
+                        pair.getObject2().execute(() -> {
+                            try {
+                                pair.getObject1().process(ctx, rpcMessage);
+                            } catch (Throwable th) {
+                                LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                            }
+                        });
+                    } else {
                         try {
                             pair.getObject1().process(ctx, rpcMessage);
                         } catch (Throwable th) {
                             LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                         }
-                    });
-                } else {
-                    try {
-                        pair.getObject1().process(ctx, rpcMessage);
-                    } catch (Throwable th) {
-                        LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                     }
+                } catch (RejectedExecutionException e) {
+                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
+                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                 }
-            } catch (RejectedExecutionException e) {
-                LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                    "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+            } else {
+                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         }
     }
