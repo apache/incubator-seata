@@ -102,7 +102,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
          * select * from "Sel'ect"
          */
         if (null != schemaName) {
-            schemaName = schemaName.replaceAll("(^\")|(\"$)", "");
+            schemaName = schemaName.replaceAll("(^\")|(\"$)", "").toLowerCase();
         }
         tableName = tableName.replaceAll("(^\")|(\"$)", "");
 
