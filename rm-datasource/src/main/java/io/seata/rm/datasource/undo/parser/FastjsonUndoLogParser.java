@@ -37,19 +37,15 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "fastjson";
 
-    private static final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+    private final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
 
-    static {
+    @Override
+    public void init() {
         FastjsonConfigurerAdapter adapter = (FastjsonConfigurerAdapter) CustomSerializerConfigurerAdapter.getConfig(NAME);
         if (null == adapter) {
             adapter = new FastjsonConfigurerAdapter();
         }
         adapter.config(SerializeConfig.globalInstance, ParserConfig.global, filter);
-    }
-
-    @Override
-    public void init() {
-        filter.getExcludes().add("tableMeta");
     }
 
     @Override
