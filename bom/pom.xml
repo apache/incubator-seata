@@ -86,7 +86,7 @@
         <redis-clients.version>2.9.0</redis-clients.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.0.0</nacos-client.version>
+        <nacos-client.version>1.2.0</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>27.0.1-jre</guava.version>
@@ -119,6 +119,7 @@
         <kryo.version>4.0.2</kryo.version>
         <kryo-serializers.version>0.42</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
+        <fst.version>2.57</fst.version>
     </properties>
 
     <dependencyManagement>
@@ -458,6 +459,11 @@
                 <groupId>com.caucho</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.ruedigermoeller</groupId>
+                <artifactId>fst</artifactId>
+                <version>${fst.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
