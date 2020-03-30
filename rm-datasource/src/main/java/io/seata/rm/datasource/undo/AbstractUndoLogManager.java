@@ -270,11 +270,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     }
                 } else {
                     exists = true;
-                    int state = (int)cache[2];
-                    if (!canUndo(state)) {
+                    if (!canUndo((int)cache[2])) {
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("xid {} branch {}, ignore {} undo_log", xid, branchId, state);
+                            LOGGER.info("xid {} branch {}, ignore {} undo_log", xid, branchId, (int)cache[2]);
                         }
+                        UndoLogCache.remove(xid, branchId);
                         return;
                     }
                     undo((String)cache[0], (byte[])cache[1], dataSourceProxy, conn);
