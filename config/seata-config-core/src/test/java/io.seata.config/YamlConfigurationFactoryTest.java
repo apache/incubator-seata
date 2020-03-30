@@ -20,14 +20,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static io.seata.config.ConfigProperty.ENV_PROPERTY_KEY;
+import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
+import static io.seata.config.ConfigProperty.REGISTRY_CONF_DEFAULT;
+
 /**
  * @author wangwei-ying
  */
 class YamlConfigurationFactoryTest {
-    private static final String ENV_PROPERTY_KEY = "seataEnv";
-    private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
-    private static final String REGISTRY_CONF_DEFAULT = "registry";
-
 
     @Test
     public void getInstance() {
