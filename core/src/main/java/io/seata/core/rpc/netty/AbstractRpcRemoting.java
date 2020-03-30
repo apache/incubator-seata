@@ -99,7 +99,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     protected volatile long nowMills = 0;
     private static final int TIMEOUT_CHECK_INTERNAL = 3000;
-    private final Object lock = new Object();
+    protected final Object lock = new Object();
     /**
      * The Is sending.
      */
@@ -440,6 +440,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * @param ctx        Channel handler context.
      * @param rpcMessage rpc message.
      * @throws Exception throws exception process message error.
+     * @since 1.2.0
      */
     public void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (LOGGER.isDebugEnabled()) {
