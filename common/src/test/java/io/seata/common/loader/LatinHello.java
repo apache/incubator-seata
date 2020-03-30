@@ -13,27 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.fst;
-
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.serializer.Serializer;
+package io.seata.common.loader;
 
 /**
- * @author funkye
+ * The type LatinHello
+ *
+ * @author haozhibei
  */
-@LoadLevel(name = "FST")
-public class FstSerializer implements Serializer {
-
-    private FstSerializerFactory fstFactory = FstSerializerFactory.getDefaultFactory();
-
+@LoadLevel(name = "LatinHello",order = 3, scope = Scope.PROTOTYPE)
+public class LatinHello implements Hello {
     @Override
-    public <T> byte[] serialize(T t) {
-        return fstFactory.serialize(t);
+    public String say() {
+        return "Olá.";
     }
-
-    @Override
-    public <T> T deserialize(byte[] bytes) {
-        return (T)fstFactory.deserialize(bytes);
-    }
-
 }
