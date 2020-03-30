@@ -139,21 +139,17 @@ public class ChannelManager {
             + ChannelUtil.getClientIpFromChannel(newChannel);
         Channel expiredChannel = TM_CLIENT_ACTIVE_CHANNELS.get(clientIdentified);
         if (expiredChannel != null) {
+            releaseRpcContext(expiredChannel);
             IDENTIFIED_CHANNELS.remove(expiredChannel);
             LOGGER.info("remove expired tm client channel[{}] from identified channels.", expiredChannel);
         }
         TM_CLIENT_ACTIVE_CHANNELS.put(clientIdentified, newChannel);
 
-        RpcContext rpcContext;
-        if (!IDENTIFIED_CHANNELS.containsKey(newChannel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
-                request.getApplicationId(),
-                request.getTransactionServiceGroup(),
-                null, newChannel);
-            rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        } else {
-            rpcContext = IDENTIFIED_CHANNELS.get(newChannel);
-        }
+        RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
+            request.getApplicationId(),
+            request.getTransactionServiceGroup(),
+            null, newChannel);
+        rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
 
         TM_CHANNELS.putIfAbsent(clientIdentified, new ConcurrentHashMap<>());
         ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = TM_CHANNELS.get(clientIdentified);
@@ -177,20 +173,16 @@ public class ChannelManager {
             + ChannelUtil.getClientIpFromChannel(newChannel);
         Channel expiredChannel = RM_CLIENT_ACTIVE_CHANNELS.get(clientIdentified);
         if (expiredChannel != null) {
+            releaseRpcContext(expiredChannel);
             IDENTIFIED_CHANNELS.remove(expiredChannel);
             LOGGER.info("remove expired rm client channel[{}] from identified channels.", expiredChannel);
         }
         RM_CLIENT_ACTIVE_CHANNELS.put(clientIdentified, newChannel);
 
-        RpcContext rpcContext;
-        if (!IDENTIFIED_CHANNELS.containsKey(newChannel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
+        RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
                 request.getApplicationId(), request.getTransactionServiceGroup(), request.getResourceIds(), newChannel);
             rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        } else {
-            rpcContext = IDENTIFIED_CHANNELS.get(newChannel);
-            rpcContext.addResources(dbkeySet);
-        }
+
         if (null == dbkeySet || dbkeySet.isEmpty()) {
             return;
         }
