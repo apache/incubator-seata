@@ -104,19 +104,22 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
             List<String> keys = jedis.lrange(lockListKey, 0, 100);
-            Iterator<String> it = keys.iterator();
-            while (it.hasNext()) {
-                String key = it.next();
-                LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                for (int i = 0; i < branchIds.size(); i++) {
-                    if (lock.getBranchId().equals(branchIds.get(i))) {
-                        jedis.del(key);
-                        it.remove();
+            if (null != keys && keys.size() > 0) {
+                Iterator<String> it = keys.iterator();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
+                    for (int i = 0; i < branchIds.size(); i++) {
+                        if (lock.getBranchId().equals(branchIds.get(i))) {
+                            jedis.del(key);
+                            jedis.lrem(lockListKey, 0, key);
+                            it.remove();
+                        }
                     }
                 }
-            }
-            if (keys.size() == 0) {
-                jedis.del(lockListKey);
+                if (keys.size() == 0) {
+                    jedis.del(lockListKey);
+                }
             }
             return true;
         }
@@ -127,17 +130,20 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
             List<String> keys = jedis.lrange(lockListKey, 0, 100);
-            Iterator<String> it = keys.iterator();
-            while (it.hasNext()) {
-                String key = it.next();
-                LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                if (lock.getBranchId().equals(branchId)) {
-                    jedis.del(key);
-                    it.remove();
+            if (null != keys && keys.size() > 0) {
+                Iterator<String> it = keys.iterator();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
+                    if (lock.getBranchId().equals(branchId)) {
+                        jedis.del(key);
+                        jedis.lrem(lockListKey, 0, key);
+                        it.remove();
+                    }
                 }
-            }
-            if (keys.size() == 0) {
-                jedis.del(lockListKey);
+                if (keys.size() == 0) {
+                    jedis.del(lockListKey);
+                }
             }
             return true;
         }
