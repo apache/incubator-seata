@@ -31,8 +31,11 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -76,7 +79,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     private NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
-    private final Object lock = new Object();
 
     public AbstractRpcRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                                      ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
@@ -262,8 +264,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     public void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         // HeartbeatMessage has no message type, will be added later.
         if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
+            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) MessageType.TYPE_HEARTBEAT_MSG);
+            try {
+                pair.getObject1().process(ctx, rpcMessage);
+            } catch (Exception e) {
+                LOGGER.error("check message error", e);
+                return;
             }
             return;
         }
