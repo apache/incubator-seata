@@ -181,7 +181,7 @@ public class ChannelManager {
 
         RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
                 request.getApplicationId(), request.getTransactionServiceGroup(), request.getResourceIds(), newChannel);
-            rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
+        rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
 
         if (null == dbkeySet || dbkeySet.isEmpty()) {
             return;
