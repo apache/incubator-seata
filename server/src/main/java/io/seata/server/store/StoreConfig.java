@@ -17,6 +17,7 @@ package io.seata.server.store;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.server.storage.file.FlushDiskMode;
 
 import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
