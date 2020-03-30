@@ -19,19 +19,19 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * @author wangwei-ying
+ */
 class ProConfigurationFactoryTest {
     private static final String ENV_PROPERTY_KEY = "seataEnv";
     private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
     private static final String REGISTRY_CONF_DEFAULT = "registry";
 
-    static {
-        System.setProperty(ENV_PROPERTY_KEY, "testpro");
-        System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME,REGISTRY_CONF_DEFAULT);
-    }
-
 
     @Test
     void getInstance() {
+        System.setProperty(ENV_PROPERTY_KEY, "testpro");
+        System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME,REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"),"file-testpro.conf");
         Configuration instance = ConfigurationFactory.getInstance();

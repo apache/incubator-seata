@@ -144,6 +144,8 @@ public class FileConfiguration extends AbstractConfiguration {
                     return targetFile;
                 }
             }
+        } else {
+            return targetFile;
         }
 
         if (!filePathCustom) {

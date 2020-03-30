@@ -16,6 +16,7 @@
 package io.seata.config.file;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.config.FileConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ import java.util.Map;
 /**
  * @author wangwei-ying
  */
-@LoadLevel(name = FileConfigFactory.YAML_TYPE, order = 1)
+@LoadLevel(name = FileConfigFactory.YAML_TYPE, order = 1,scope = Scope.PROTOTYPE)
 public class YamlFileConfig implements FileConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YamlFileConfig.class);

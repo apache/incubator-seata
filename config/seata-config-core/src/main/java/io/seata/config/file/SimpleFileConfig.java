@@ -19,6 +19,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.config.FileConfigFactory;
 import io.seata.config.FileConfiguration;
 
@@ -27,7 +28,7 @@ import java.io.File;
 /**
  * @author wangwei-ying
  */
-@LoadLevel(name = FileConfigFactory.DEFAULT_TYPE)
+@LoadLevel(name = FileConfigFactory.DEFAULT_TYPE,scope = Scope.PROTOTYPE)
 public class SimpleFileConfig implements FileConfig {
 
     private Config fileConfig;
