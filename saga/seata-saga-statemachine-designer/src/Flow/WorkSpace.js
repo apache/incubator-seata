@@ -39,7 +39,10 @@ class WorkSpaceBase extends React.Component {
 
     if (param.action == 'add' && param.item.type == 'edge') {
       // 默认圆角折线
-      if (param.item.type == 'edge') {
+      if (param.item.target
+        && param.item.target.model
+        && param.item.source
+        && param.item.source.model) {
         executeCommand(() => {
           update(param.item, {
             shape: 'flow-polyline-round',
