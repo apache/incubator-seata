@@ -106,6 +106,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     if (s.equals(key)) {
                         it.remove();
                         jedis.del(key);
+                        jedis.lrem(branchsKey, 0, key);
                         break;
                     }
                 }
