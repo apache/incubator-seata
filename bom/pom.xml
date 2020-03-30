@@ -83,7 +83,7 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <apollo-client.version>1.1.0</apollo-client.version>
-        <redis-clients.version>2.9.0</redis-clients.version>
+        <redis-clients.version>3.2.0</redis-clients.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.2.0</nacos-client.version>
