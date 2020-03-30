@@ -124,9 +124,9 @@ public abstract class AbstractCore implements Core {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
                              String applicationData) throws TransactionException {
-        if (BranchStatus.Local_CommitFailed_NotRegistered.equals(status)) {
+        if (BranchStatus.PhaseOne_Failed_NotRegistered.equals(status)) {
             throw new BranchTransactionException(BranchLocalCommitFailed_NotRegistered,
-                    "Branch local commit failed ,and has not registered.");
+                    String.format("The Phase one local commit failed,and has not registered. xid = %s",xid));
         }
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, true);
         BranchSession branchSession = globalSession.getBranch(branchId);

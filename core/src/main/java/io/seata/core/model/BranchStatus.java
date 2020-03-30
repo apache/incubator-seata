@@ -94,10 +94,10 @@ public enum BranchStatus {
     PhaseTwo_RollbackFailed_Unretryable(10),
 
     /**
-     * The local commit failed and has not registered.
-     * description:Branch local commit failed, and has not registered.
+     * The Phase one commit failed,not registered.
+     * description:The Phase one local commit failed,As the result of the undolog is empty ,so it has not registered branch.
      */
-    Local_CommitFailed_NotRegistered(11);
+    PhaseOne_Failed_NotRegistered(11);
 
     private int code;
 

@@ -283,7 +283,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         BranchStatus branchStatus = null;
         if (!commitDone) {
             if (context.getBranchId() == null) {
-                branchStatus = BranchStatus.Local_CommitFailed_NotRegistered;
+                branchStatus = BranchStatus.PhaseOne_Failed_NotRegistered;
             } else {
                 branchStatus = BranchStatus.PhaseOne_Failed;
             }
