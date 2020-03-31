@@ -54,21 +54,25 @@ public class JedisPooledFactory {
      * 
      * @return redisPool
      */
-    private static JedisPool getJedisPoolInstance() {
+    public static JedisPool getJedisPoolInstance(JedisPool... jedisPools) {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
                 if (jedisPool == null) {
-                    String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
-                    if (StringUtils.isBlank(password)) {
-                        password = null;
+                    if (null != jedisPools && jedisPools.length > 0) {
+                        jedisPool = jedisPools[0];
+                    } else {
+                        String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
+                        if (StringUtils.isBlank(password)) {
+                            password = null;
+                        }
+                        JedisPoolConfig poolConfig = new JedisPoolConfig();
+                        poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
+                        poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
+                        jedisPool =
+                            new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
+                                CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,
+                                CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                     }
-                    JedisPoolConfig poolConfig = new JedisPoolConfig();
-                    poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
-                    poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
-                    jedisPool =
-                        new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
-                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,
-                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("initialization of the build redis connection pool is complete");
                     }

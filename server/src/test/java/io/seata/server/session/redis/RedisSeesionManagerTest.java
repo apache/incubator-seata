@@ -16,64 +16,44 @@
 
 package io.seata.server.session.redis;
 
-import java.sql.SQLException;
-
-import org.junit.jupiter.api.Test;
-
-import com.alibaba.fastjson.JSON;
-import com.fiftyonred.mock_jedis.MockJedis;
-
+import com.fiftyonred.mock_jedis.MockJedisPool;
 import io.seata.common.XID;
-import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.store.SessionStorable;
-import redis.clients.jedis.Jedis;
+import io.seata.server.session.SessionManager;
+import io.seata.server.storage.redis.JedisPooledFactory;
+import io.seata.server.storage.redis.session.RedisSessionManager;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author funkye
  */
 public class RedisSeesionManagerTest {
 
-    // global transaction prefix
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA-GLOBAL-";
+    static SessionManager sessionManager = null;
 
-    // the prefix of the branchs transaction
-    private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA-XID-BRANCHS-";
-
-    // the prefix of the branch transaction
-    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA-BRANCH-";
-
-    // global transaction id PREFIX
-    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA-TRANSACTION-ID-GLOBAL-";
-
-    @Test
-    public void test_addGlobalSession() {
-        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
-        String xid = XID.generateXID(session.getTransactionId());
-        session.setXid(xid);
-        session.setTransactionId(146757978);
-        session.setBeginTime(System.currentTimeMillis());
-        session.setApplicationData("abc=878s");
-        session.setStatus(GlobalStatus.Begin);
-        GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = new MockJedis("test")) {
-            String keys = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
-            jedis.set(keys, JSON.toJSONString(globalTransactionDO));
-            keys = DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + globalTransactionDO.getTransactionId();
-            jedis.set(keys, JSON.toJSONString(globalTransactionDO));
-        }
+    @BeforeAll
+    public static void start(){
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMinIdle(1);
+        poolConfig.setMaxIdle(10);
+        JedisPooledFactory.getJedisPoolInstance(new MockJedisPool(poolConfig, "test"));
+        RedisTransactionStoreManager transactionStoreManager = RedisTransactionStoreManager.getInstance();
+        RedisSessionManager redisSessionManager= new RedisSessionManager();
+        redisSessionManager.setTransactionStoreManager(transactionStoreManager);
+        sessionManager=redisSessionManager;
     }
 
     @Test
-    public void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
+    public void test_addGlobalSession() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
@@ -81,17 +61,21 @@ public class RedisSeesionManagerTest {
         session.setBeginTime(System.currentTimeMillis());
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
-        GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = new MockJedis("test")) {
-            String keys = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
-            jedis.set(keys, JSON.toJSONString(globalTransactionDO));
-            keys = DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + globalTransactionDO.getTransactionId();
-            jedis.set(keys, JSON.toJSONString(globalTransactionDO));
-            session.setStatus(GlobalStatus.Committing);
-            globalTransactionDO = convertGlobalTransactionDO(session);
-            keys = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
-            jedis.set(keys, JSON.toJSONString(globalTransactionDO));
-        }
+        sessionManager.addGlobalSession(session);
+    }
+
+    @Test
+    public void test_updateGlobalSessionStatus() throws TransactionException {
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
+        String xid = XID.generateXID(session.getTransactionId());
+        session.setXid(xid);
+        session.setTransactionId(146757978);
+        session.setBeginTime(System.currentTimeMillis());
+        session.setApplicationData("abc=878s");
+        session.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session);
+        session.setStatus(GlobalStatus.Committing);
+        sessionManager.updateGlobalSessionStatus(session,GlobalStatus.Committing);
     }
 
     @Test
@@ -103,33 +87,12 @@ public class RedisSeesionManagerTest {
         session.setBeginTime(System.currentTimeMillis());
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
-        GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = new MockJedis("test")) {
-            String key = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
-            jedis.set(key, JSON.toJSONString(globalTransactionDO));
-            jedis.del(key);
-        }
+        sessionManager.addGlobalSession(session);
+        sessionManager.removeGlobalSession(session);
     }
 
     @Test
-    public void test_findGlobalSession() throws Exception {
-        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
-        String xid = XID.generateXID(session.getTransactionId());
-        session.setXid(xid);
-        session.setTransactionId(146757978);
-        session.setBeginTime(System.currentTimeMillis());
-        session.setApplicationData("abc=878s");
-        session.setStatus(GlobalStatus.Begin);
-        GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = new MockJedis("test")) {
-            String key = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
-            jedis.set(key, JSON.toJSONString(globalTransactionDO));
-            jedis.get(key);
-        }
-    }
-
-    @Test
-    public void test_addBranchSession() throws Exception {
+    public void test_addBranchSession() throws TransactionException {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
@@ -137,6 +100,7 @@ public class RedisSeesionManagerTest {
         globalSession.setBeginTime(System.currentTimeMillis());
         globalSession.setApplicationData("abc=878s");
         globalSession.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(globalSession);
 
         BranchSession branchSession = new BranchSession();
         branchSession.setBranchId(UUIDGenerator.generateUUID());
@@ -148,14 +112,7 @@ public class RedisSeesionManagerTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        BranchTransactionDO branchTransactionDO = convertBranchTransactionDO(branchSession);
-        try (Jedis jedis = new MockJedis("test")) {
-            String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchTransactionDO.getBranchId();
-            if (jedis.get(key) == null) {
-                jedis.lpush(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + branchTransactionDO.getXid(), key);
-            }
-            jedis.set(key, JSON.toJSONString(branchTransactionDO));
-        }
+        sessionManager.addBranchSession(globalSession,branchSession);
     }
 
     @Test
@@ -179,84 +136,9 @@ public class RedisSeesionManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
-        BranchTransactionDO branchTransactionDO = convertBranchTransactionDO(branchSession);
-        try (Jedis jedis = new MockJedis("test")) {
-            String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchTransactionDO.getBranchId();
-            if (jedis.get(key) == null) {
-                jedis.lpush(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + branchTransactionDO.getXid(), key);
-            }
-            jedis.set(key, JSON.toJSONString(branchTransactionDO));
-            branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
-            branchTransactionDO = convertBranchTransactionDO(branchSession);
-            jedis.set(key, JSON.toJSONString(branchTransactionDO));
-        }
+        sessionManager.addBranchSession(globalSession, branchSession);
+        branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
+        sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
     }
 
-    @Test
-    public void test_removeBranchSession() throws Exception {
-        GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
-        String xid = XID.generateXID(globalSession.getTransactionId());
-        globalSession.setXid(xid);
-        globalSession.setTransactionId(146757978);
-        globalSession.setBeginTime(System.currentTimeMillis());
-        globalSession.setApplicationData("abc=878s");
-        globalSession.setStatus(GlobalStatus.Begin);
-
-        BranchSession branchSession = new BranchSession();
-        branchSession.setBranchId(UUIDGenerator.generateUUID());
-        branchSession.setXid(xid);
-        branchSession.setTransactionId(globalSession.getTransactionId());
-        branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
-        branchSession.setResourceId("tb_1");
-        branchSession.setLockKey("t_1");
-        branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationData("{\"data\":\"test\"}");
-        branchSession.setStatus(BranchStatus.PhaseOne_Done);
-        BranchTransactionDO branchTransactionDO = convertBranchTransactionDO(branchSession);
-        try (Jedis jedis = new MockJedis("test")) {
-            String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchTransactionDO.getBranchId();
-            jedis.del(key);
-        }
-    }
-
-    private GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
-        if (session == null || !(session instanceof GlobalSession)) {
-            throw new IllegalArgumentException(
-                "the parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
-        }
-        GlobalSession globalSession = (GlobalSession)session;
-
-        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalTransactionDO.setXid(globalSession.getXid());
-        globalTransactionDO.setStatus(globalSession.getStatus().getCode());
-        globalTransactionDO.setApplicationId(globalSession.getApplicationId());
-        globalTransactionDO.setBeginTime(globalSession.getBeginTime());
-        globalTransactionDO.setTimeout(globalSession.getTimeout());
-        globalTransactionDO.setTransactionId(globalSession.getTransactionId());
-        globalTransactionDO.setTransactionName(globalSession.getTransactionName());
-        globalTransactionDO.setTransactionServiceGroup(globalSession.getTransactionServiceGroup());
-        globalTransactionDO.setApplicationData(globalSession.getApplicationData());
-        return globalTransactionDO;
-    }
-
-    private BranchTransactionDO convertBranchTransactionDO(SessionStorable session) {
-        if (session == null || !(session instanceof BranchSession)) {
-            throw new IllegalArgumentException(
-                "the parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
-        }
-        BranchSession branchSession = (BranchSession)session;
-
-        BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-        branchTransactionDO.setXid(branchSession.getXid());
-        branchTransactionDO.setBranchId(branchSession.getBranchId());
-        branchTransactionDO.setBranchType(branchSession.getBranchType().name());
-        branchTransactionDO.setClientId(branchSession.getClientId());
-        branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
-        branchTransactionDO.setTransactionId(branchSession.getTransactionId());
-        branchTransactionDO.setApplicationData(branchSession.getApplicationData());
-        branchTransactionDO.setResourceId(branchSession.getResourceId());
-        branchTransactionDO.setStatus(branchSession.getStatus().getCode());
-        return branchTransactionDO;
-    }
 }
