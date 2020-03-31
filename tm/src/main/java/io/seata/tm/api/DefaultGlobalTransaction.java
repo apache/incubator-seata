@@ -52,8 +52,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
-    private Propagation propagation;
-
     private SuspendedResourcesHolder suspendedResourcesHolder;
 
     private volatile boolean used;
@@ -103,7 +101,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public void begin(int timeout, String name, Propagation propagation) throws TransactionException {
         assertInUsed();
-        this.propagation = propagation;
         switch (propagation) {
             case NOT_SUPPORTED:
                 suspendedResourcesHolder = suspend(true);
@@ -164,7 +161,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         try {
-            if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
+            if (StringUtils.isBlank(xid)) {
                 return;
             }
             assertXIDNotNull();
@@ -203,7 +200,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         try {
-            if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
+            if (StringUtils.isBlank(xid)) {
                 return;
             }
             assertXIDNotNull();
