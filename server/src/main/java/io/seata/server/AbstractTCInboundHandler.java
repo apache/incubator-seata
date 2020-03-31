@@ -308,6 +308,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     @Override
     public GlobalReportResponse handle(GlobalReportRequest request, final RpcContext rpcContext) {
         GlobalReportResponse response = new GlobalReportResponse();
+        response.setGlobalStatus(request.getGlobalStatus());
         exceptionHandleTemplate(new AbstractCallback<GlobalReportRequest, GlobalReportResponse>() {
             @Override
             public void execute(GlobalReportRequest request, GlobalReportResponse response)
