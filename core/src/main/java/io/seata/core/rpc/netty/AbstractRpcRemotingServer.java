@@ -16,23 +16,26 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.ServerMessageListener;
-import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -40,17 +43,13 @@ import java.util.concurrent.ThreadPoolExecutor;
  *
  * @author slievrly
  * @author xingfudeshi@gmail.com
+ * @author zhangchenghui.dev@gmail.com
  */
-public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements ServerMessageSender {
+public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
 
     private final RpcServerBootstrap serverBootstrap;
-
-    /**
-     * The Server message listener.
-     */
-    private ServerMessageListener serverMessageListener;
 
     private TransactionMessageHandler transactionMessageHandler;
 
@@ -87,24 +86,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     public RegisterCheckAuthHandler getCheckAuthHandler() {
         return checkAuthHandler;
-    }
-
-    /**
-     * Sets server message listener.
-     *
-     * @param serverMessageListener the server message listener
-     */
-    public void setServerMessageListener(ServerMessageListener serverMessageListener) {
-        this.serverMessageListener = serverMessageListener;
-    }
-
-    /**
-     * Gets server message listener.
-     *
-     * @return the server message listener
-     */
-    public ServerMessageListener getServerMessageListener() {
-        return serverMessageListener;
     }
 
     /**
@@ -174,38 +155,34 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         channel.close();
     }
 
+    @Override
+    protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        debugLog("read:" + rpcMessage.getBody());
+        // HeartbeatMessage has no message type, will be added later.
+        if (rpcMessage.getBody() == HeartbeatMessage.PING) {
+            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) MessageType.TYPE_HEARTBEAT_MSG);
+            try {
+                pair.getObject1().process(ctx, rpcMessage);
+            } catch (Exception e) {
+                LOGGER.error("check message error", e);
+                return;
+            }
+            return;
+        }
+        super.processRequestMessage(ctx, rpcMessage);
+    }
+
+    @Override
+    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        debugLog("read:" + rpcMessage.getBody());
+        super.processResponseMessage(ctx, rpcMessage);
+    }
+
     /**
      * The type ServerHandler.
      */
     @ChannelHandler.Sharable
-    class ServerHandler extends AbstractHandler {
-
-        /**
-         * Dispatch.
-         *
-         * @param request the request
-         * @param ctx     the ctx
-         */
-        @Override
-        public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
-            Object msg = request.getBody();
-            if (msg instanceof RegisterRMRequest) {
-                serverMessageListener.onRegRmMessage(request, ctx, checkAuthHandler);
-            } else {
-                if (ChannelManager.isRegistered(ctx.channel())) {
-                    serverMessageListener.onTrxMessage(request, ctx);
-                } else {
-                    try {
-                        closeChannelHandlerContext(ctx);
-                    } catch (Exception exx) {
-                        LOGGER.error(exx.getMessage());
-                    }
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info(String.format("close a unhandled connection! [%s]", ctx.channel().toString()));
-                    }
-                }
-            }
-        }
+    class ServerHandler extends ChannelDuplexHandler {
 
         /**
          * Channel read.
@@ -216,19 +193,20 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
          */
         @Override
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof RpcMessage) {
-                RpcMessage rpcMessage = (RpcMessage) msg;
-                debugLog("read:" + rpcMessage.getBody());
-                if (rpcMessage.getBody() instanceof RegisterTMRequest) {
-                    serverMessageListener.onRegTmMessage(rpcMessage, ctx, checkAuthHandler);
-                    return;
-                }
-                if (rpcMessage.getBody() == HeartbeatMessage.PING) {
-                    serverMessageListener.onCheckMessage(rpcMessage, ctx);
-                    return;
+            if (!(msg instanceof RpcMessage)) {
+                return;
+            }
+            processMessage(ctx, (RpcMessage) msg);
+        }
+
+        @Override
+        public void channelWritabilityChanged(ChannelHandlerContext ctx) {
+            synchronized (lock) {
+                if (ctx.channel().isWritable()) {
+                    lock.notifyAll();
                 }
             }
-            super.channelRead(ctx, msg);
+            ctx.fireChannelWritabilityChanged();
         }
 
         /**
@@ -305,6 +283,14 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                     }
                 }
             }
+        }
+
+        @Override
+        public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(ctx + " will closed");
+            }
+            super.close(ctx, future);
         }
 
     }

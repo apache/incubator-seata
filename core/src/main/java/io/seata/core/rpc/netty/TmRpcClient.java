@@ -27,9 +27,13 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +56,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
+    private Map<Integer/*MessageType*/, Pair<NettyProcessor, Boolean/*Whether thread pool processing is required*/>> tmProcessorTable = null;
     
     /**
      * The constant enableDegrade.
@@ -119,12 +124,22 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
     }
+
+    public void setTmProcessor(Map<Integer, Pair<NettyProcessor, Boolean>> processorMap) {
+        this.tmProcessorTable = processorMap;
+    }
     
     @Override
     public void init() {
         if (initialized.compareAndSet(false, true)) {
             enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
             super.init();
+        }
+        // registry processor
+        if (tmProcessorTable != null) {
+            for (Map.Entry<Integer, Pair<NettyProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
+                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
+            }
         }
     }
     
@@ -165,5 +180,11 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                 + ((RegisterTMResponse)response).getVersion());
         }
         throw new FrameworkException("register client app failed.");
+    }
+
+    @Override
+    public void registerProcessor(int requestCode, NettyProcessor processor, ExecutorService executor) {
+        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(requestCode, pair);
     }
 }

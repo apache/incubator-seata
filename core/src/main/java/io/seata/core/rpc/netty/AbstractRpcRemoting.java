@@ -16,31 +16,36 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
+import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.MessageType;
+import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,6 +58,7 @@ import java.util.concurrent.TimeoutException;
  * The type Abstract rpc remoting.
  *
  * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
  */
 public abstract class AbstractRpcRemoting implements Disposable {
 
@@ -91,7 +97,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     protected volatile long nowMills = 0;
     private static final int TIMEOUT_CHECK_INTERNAL = 3000;
-    private final Object lock = new Object();
+    protected final Object lock = new Object();
     /**
      * The Is sending.
      */
@@ -101,6 +107,12 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * The Merge msg map.
      */
     protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
+
+    /**
+     * This container holds all processors.
+     * processor type {@link MessageType}
+     */
+    protected final HashMap<Integer/*MessageType*/, Pair<NettyProcessor, ExecutorService>> processorTable = new HashMap<>(32);
 
     /**
      * Instantiates a new Abstract rpc remoting.
@@ -118,6 +130,14 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     public int getNextMessageId() {
         return idGenerator.incrementAndGet();
+    }
+
+    public Map<Integer, MergeMessage> getMergeMsgMap() {
+        return mergeMsgMap;
+    }
+
+    public ConcurrentHashMap<Integer, MessageFuture> getFutures() {
+        return futures;
     }
 
     /**
@@ -411,114 +431,106 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     boolean allowDumpStack = false;
 
+
     /**
-     * The type AbstractHandler.
+     * Rpc message processing.
+     *
+     * @param ctx        Channel handler context.
+     * @param rpcMessage rpc message.
+     * @throws Exception throws exception process message error.
+     * @since 1.2.0
      */
-    abstract class AbstractHandler extends ChannelDuplexHandler {
+    public void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
+        }
+        switch (rpcMessage.getType()) {
+            case REQUEST_COMMAND:
+                processRequestMessage(ctx, rpcMessage);
+                break;
+            case RESPONSE_COMMAND:
+                processResponseMessage(ctx, rpcMessage);
+                break;
+            default:
+                break;
+        }
+    }
 
-        /**
-         * Dispatch.
-         *
-         * @param request the request
-         * @param ctx     the ctx
-         */
-        public abstract void dispatch(RpcMessage request, ChannelHandlerContext ctx);
-
-        @Override
-        public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            synchronized (lock) {
-                if (ctx.channel().isWritable()) {
-                    lock.notifyAll();
+    protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
+        final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
+        if (pair != null) {
+            try {
+                if (pair.getObject2() != null) {
+                    pair.getObject2().execute(() -> {
+                        try {
+                            pair.getObject1().process(ctx, rpcMessage);
+                        } catch (Throwable th) {
+                            LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                        }
+                    });
+                } else {
+                    try {
+                        pair.getObject1().process(ctx, rpcMessage);
+                    } catch (Throwable th) {
+                        LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                    }
+                }
+            } catch (RejectedExecutionException e) {
+                LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
+                    "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                if (allowDumpStack) {
+                    String name = ManagementFactory.getRuntimeMXBean().getName();
+                    String pid = name.split("@")[0];
+                    int idx = new Random().nextInt(100);
+                    try {
+                        Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
+                    } catch (IOException exx) {
+                        LOGGER.error(exx.getMessage());
+                    }
+                    allowDumpStack = false;
                 }
             }
-
-            ctx.fireChannelWritabilityChanged();
+        } else {
+            LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
         }
+    }
 
-        @Override
-        public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof RpcMessage) {
-                final RpcMessage rpcMessage = (RpcMessage) msg;
-                if (rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST
-                    || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
-                    }
-                    try {
-                        messageExecutor.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    dispatch(rpcMessage, ctx);
-                                } catch (Throwable th) {
-                                    LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
-                                }
+    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        MessageFuture messageFuture = null;
+        if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
+            messageFuture = futures.remove(rpcMessage.getId());
+        }
+        if (messageFuture != null) {
+            messageFuture.setResultMessage(rpcMessage.getBody());
+        } else {
+            MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
+            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) (messageTypeAware.getTypeCode()));
+            if (pair != null) {
+                try {
+                    if (pair.getObject2() != null) {
+                        pair.getObject2().execute(() -> {
+                            try {
+                                pair.getObject1().process(ctx, rpcMessage);
+                            } catch (Throwable th) {
+                                LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             }
                         });
-                    } catch (RejectedExecutionException e) {
-                        LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
-                        if (allowDumpStack) {
-                            String name = ManagementFactory.getRuntimeMXBean().getName();
-                            String pid = name.split("@")[0];
-                            int idx = new Random().nextInt(100);
-                            try {
-                                Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
-                            } catch (IOException exx) {
-                                LOGGER.error(exx.getMessage());
-                            }
-                            allowDumpStack = false;
-                        }
-                    }
-                } else {
-                    MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug(String
-                            .format("%s msgId:%s, future :%s, body:%s", this, rpcMessage.getId(), messageFuture,
-                                rpcMessage.getBody()));
-                    }
-                    if (messageFuture != null) {
-                        messageFuture.setResultMessage(rpcMessage.getBody());
                     } else {
                         try {
-                            messageExecutor.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        dispatch(rpcMessage, ctx);
-                                    } catch (Throwable th) {
-                                        LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
-                                    }
-                                }
-                            });
-                        } catch (RejectedExecutionException e) {
-                            LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                                "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                            pair.getObject1().process(ctx, rpcMessage);
+                        } catch (Throwable th) {
+                            LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                         }
                     }
+                } catch (RejectedExecutionException e) {
+                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
+                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                 }
+            } else {
+                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         }
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
-                ctx.channel() + " connect exception. " + cause.getMessage(),
-                cause);
-            try {
-                destroyChannel(ctx.channel());
-            } catch (Exception e) {
-                LOGGER.error("failed to close channel {}: {}", ctx.channel(), e.getMessage(), e);
-            }
-        }
-
-        @Override
-        public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(ctx + " will closed");
-            }
-            super.close(ctx, future);
-        }
-
     }
+
 }

@@ -16,6 +16,7 @@
 package io.seata.core.protocol;
 
 import io.seata.common.util.StringUtils;
+import io.seata.core.rpc.netty.processor.RemotingCommandType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,20 @@ public class RpcMessage {
     private byte compressor;
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
+
+    /**
+     * Get command type according to protocol.
+     *
+     * @return remoting command type
+     */
+    public RemotingCommandType getType() {
+        if (messageType == ProtocolConstants.MSGTYPE_RESQUEST
+            || messageType == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY
+            || messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
+            return RemotingCommandType.REQUEST_COMMAND;
+        }
+        return RemotingCommandType.RESPONSE_COMMAND;
+    }
 
     /**
      * Gets id.

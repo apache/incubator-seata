@@ -13,22 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
-
-import io.seata.core.protocol.RpcMessage;
+package io.seata.core.rpc.netty.processor;
 
 /**
- * The interface Client message listener.
+ * The remoting command type
  *
- * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.2.0
  */
-@Deprecated
-public interface ClientMessageListener {
+public enum RemotingCommandType {
+
     /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
+     * request
      */
-    void onMessage(RpcMessage request, String serverAddress);
+    REQUEST_COMMAND,
+
+    /**
+     * response
+     */
+    RESPONSE_COMMAND
+
 }

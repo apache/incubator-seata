@@ -15,7 +15,15 @@
  */
 package io.seata.tm;
 
+import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.netty.processor.client.HeartbeatMessageProcessor;
+import io.seata.core.rpc.netty.processor.client.MergeResultMessageProcessor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The type Tm client.
@@ -32,6 +40,18 @@ public class TMClient {
      */
     public static void init(String applicationId, String transactionServiceGroup) {
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+
+        Map<Integer, Pair<NettyProcessor, Boolean>> processorMap = new HashMap<>();
+        // handle TC response about process merge message
+        Pair<NettyProcessor, Boolean> mergeMsgProcessor =
+            new Pair<>(new MergeResultMessageProcessor(tmRpcClient.getMergeMsgMap(), tmRpcClient.getFutures()), false);
+        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, mergeMsgProcessor);
+        tmRpcClient.setTmProcessor(processorMap);
+        // handle heartbeat message processor
+        Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new HeartbeatMessageProcessor(), false);
+        processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);
+        tmRpcClient.setTmProcessor(processorMap);
+
         tmRpcClient.init();
     }
 
