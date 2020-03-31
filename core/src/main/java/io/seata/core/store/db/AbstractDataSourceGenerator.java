@@ -15,13 +15,6 @@
  */
 package io.seata.core.store.db;
 
-import io.seata.common.exception.StoreException;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DBType;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,6 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import io.seata.common.exception.StoreException;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 
 /**
  * The type Abstract data source generator.
@@ -58,6 +58,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
 
     private static final int DEFAULT_DB_MIN_CONN = 1;
 
+    private static final long DEFAULT_DB_MAX_WAIT = 5000;
+
     /**
      * Get db type db type.
      *
@@ -79,6 +81,16 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
                 String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
+    }
+
+    /**
+     * get db max wait
+     *
+     * @return the db max wait
+     */
+    protected Long getMaxWait() {
+        Long maxWait = CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
+        return maxWait;
     }
 
     protected ClassLoader getDriverClassLoader() {
