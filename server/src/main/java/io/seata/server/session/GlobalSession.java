@@ -70,7 +70,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
