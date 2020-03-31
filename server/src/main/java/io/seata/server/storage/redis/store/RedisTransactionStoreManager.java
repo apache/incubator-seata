@@ -144,8 +144,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             String keys = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + convertGlobalTransactionDO.getXid();
             jedis.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
             keys = DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + convertGlobalTransactionDO.getTransactionId();
-            jedis.set(DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + convertGlobalTransactionDO.getTransactionId(),
-                JSON.toJSONString(convertGlobalTransactionDO));
+            jedis.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
             return true;
         }
     }
