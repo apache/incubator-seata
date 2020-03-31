@@ -48,6 +48,7 @@ store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
+store.db.maxWait=5000
 server.recovery.committingRetryPeriod=1000
 server.recovery.asynCommittingRetryPeriod=1000
 server.recovery.rollbackingRetryPeriod=1000

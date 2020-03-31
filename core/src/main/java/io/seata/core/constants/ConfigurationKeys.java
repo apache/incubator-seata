@@ -178,10 +178,16 @@ public class ConfigurationKeys {
      * The constant STORE_DB_TYPE.
      */
     public static final String STORE_DB_TYPE = STORE_DB_PREFIX + "dbType";
+
     /**
      * The constant STORE_DB_DRIVER_CLASS_NAME.
      */
     public static final String STORE_DB_DRIVER_CLASS_NAME = STORE_DB_PREFIX + "driverClassName";
+
+    /**
+     * The constant STORE_DB_MAX_WAIT.
+     */
+    public static final String STORE_DB_MAX_WAIT = STORE_DB_PREFIX + "maxWait";
 
     /**
      * The constant STORE_DB_URL.
