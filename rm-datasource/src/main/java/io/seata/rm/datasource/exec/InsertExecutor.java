@@ -27,19 +27,16 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,10 +172,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
-        // pk auto generated while single insert primary key is expression
-        else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValues = getPkValuesByAuto();
-        }
         // pk auto generated while column exists and value is null
         else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
@@ -251,29 +244,54 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * check pk values
      * @param pkValues
-     * @return true support false not support
+     * @return true: support. false: not support.
      */
-    private boolean checkPkValues(List<Object> pkValues) {
-        boolean pkParameterHasNull = false;
-        boolean pkParameterHasNotNull = false;
-        boolean pkParameterHasExpr = false;
-        if (pkValues.size() == 1) {
-            return true;
-        }
+    protected boolean checkPkValues(List<Object> pkValues) {
+        /*
+        -----------------------------------------------
+                  one    more
+        null       O      O
+        value      O      O
+        method     X      X
+        sequence   O      X
+        -----------------------------------------------
+                  null    value    method    sequence
+        null       O        X         X         X
+        value      X        O         X         X
+        method     X        X         X         X
+        sequence   X        X         X         X
+        -----------------------------------------------
+        */
+        int n = 0, v = 0, m = 0, s = 0;
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
-                pkParameterHasNull = true;
+                n++;
                 continue;
             }
-            pkParameterHasNotNull = true;
             if (pkValue instanceof SqlMethodExpr) {
-                pkParameterHasExpr = true;
+                m++;
+                break;
             }
+            if (pkValue instanceof SqlSequenceExpr) {
+                s++;
+                continue;
+            }
+            v++;
         }
-        if (pkParameterHasExpr) {
+        // not support sql primary key is function.
+        if (m > 0) {
             return false;
         }
-        return !pkParameterHasNull || !pkParameterHasNotNull;
+        if (n > 0 && v == 0 && s == 0) {
+            return true;
+        }
+        if (n == 0 && v > 0 && s == 0) {
+            return true;
+        }
+        if (n == 0 && v == 0 && s == 1) {
+            return true;
+        }
+        return false;
     }
 
     /**
