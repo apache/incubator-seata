@@ -105,6 +105,12 @@
             <artifactId>jedis</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.fiftyonred</groupId>
+            <artifactId>mock-jedis</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -18,16 +18,14 @@ package io.seata.server.lock.redis;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.alibaba.fastjson.JSON;
+import com.fiftyonred.mock_jedis.MockJedis;
 import io.seata.common.util.StringUtils;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import redis.clients.jedis.Jedis;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * @author funkye
@@ -45,11 +43,12 @@ public class RedisLockManagerForTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:13,14;t2:11,12");
         List<RowLock> locks = collectRowLocks(branchSession);
-        try (Jedis jedis = mock(Jedis.class)) {
+
+        try (Jedis jedis = new MockJedis("test")) {
             for (RowLock lock : locks) {
                 String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey();
                 Long status = jedis.setnx(key, JSON.toJSONString(branchSession));
-                Assertions.assertTrue(status == 0);
+                Assertions.assertTrue(status == 1);
                 break;
             }
         }
@@ -64,11 +63,10 @@ public class RedisLockManagerForTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:3,4;t2:4,5");
         List<RowLock> locks = collectRowLocks(branchSession);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             for (RowLock lock : locks) {
                 String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey();
                 Long status = jedis.del(key);
-                Assertions.assertTrue(status == 0);
                 break;
             }
         }
@@ -83,28 +81,24 @@ public class RedisLockManagerForTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:8,7;t2:1,2");
         List<RowLock> locks = collectRowLocks(branchSession);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             for (RowLock lock : locks) {
                 String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey();
-                Long status = jedis.del(key);
-                Assertions.assertTrue(status == 0);
+                long status = jedis.setnx(key, JSON.toJSONString(lock));
+                Assertions.assertTrue(status == 1);
                 break;
             }
-        }
-
-        BranchSession branchSession2 = new BranchSession();
-        branchSession2.setXid("abc-123:56877898");
-        branchSession2.setTransactionId(245686786);
-        branchSession2.setBranchId(1242354576);
-        branchSession2.setResourceId("abcss");
-        branchSession2.setLockKey("t1:8");
-        locks = collectRowLocks(branchSession);
-
-        try (Jedis jedis = mock(Jedis.class)) {
+            BranchSession branchSession2 = new BranchSession();
+            branchSession2.setXid("abc-123:56877898");
+            branchSession2.setTransactionId(245686786);
+            branchSession2.setBranchId(1242354576);
+            branchSession2.setResourceId("abcss");
+            branchSession2.setLockKey("t1:8");
+            locks = collectRowLocks(branchSession);
             for (RowLock lock : locks) {
                 String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey();
                 Long status = jedis.del(key);
-                Assertions.assertTrue(status == 0);
+                Assertions.assertTrue(status == 1);
                 break;
             }
         }
