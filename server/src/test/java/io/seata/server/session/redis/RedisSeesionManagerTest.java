@@ -17,7 +17,12 @@
 package io.seata.server.session.redis;
 
 import java.sql.SQLException;
+
+import org.junit.jupiter.api.Test;
+
 import com.alibaba.fastjson.JSON;
+import com.fiftyonred.mock_jedis.MockJedis;
+
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
@@ -30,10 +35,7 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
-import org.junit.jupiter.api.Test;
 import redis.clients.jedis.Jedis;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * @author funkye
@@ -62,7 +64,7 @@ public class RedisSeesionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String keys = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
             jedis.set(keys, JSON.toJSONString(globalTransactionDO));
             keys = DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + globalTransactionDO.getTransactionId();
@@ -80,7 +82,7 @@ public class RedisSeesionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String keys = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
             jedis.set(keys, JSON.toJSONString(globalTransactionDO));
             keys = DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + globalTransactionDO.getTransactionId();
@@ -102,7 +104,7 @@ public class RedisSeesionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String key = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
             jedis.set(key, JSON.toJSONString(globalTransactionDO));
             jedis.del(key);
@@ -119,7 +121,7 @@ public class RedisSeesionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         GlobalTransactionDO globalTransactionDO = convertGlobalTransactionDO(session);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String key = DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + globalTransactionDO.getXid();
             jedis.set(key, JSON.toJSONString(globalTransactionDO));
             jedis.get(key);
@@ -147,7 +149,7 @@ public class RedisSeesionManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         BranchTransactionDO branchTransactionDO = convertBranchTransactionDO(branchSession);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchTransactionDO.getBranchId();
             if (jedis.get(key) == null) {
                 jedis.lpush(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + branchTransactionDO.getXid(), key);
@@ -178,7 +180,7 @@ public class RedisSeesionManagerTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
         BranchTransactionDO branchTransactionDO = convertBranchTransactionDO(branchSession);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchTransactionDO.getBranchId();
             if (jedis.get(key) == null) {
                 jedis.lpush(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + branchTransactionDO.getXid(), key);
@@ -212,7 +214,7 @@ public class RedisSeesionManagerTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
         BranchTransactionDO branchTransactionDO = convertBranchTransactionDO(branchSession);
-        try (Jedis jedis = mock(Jedis.class)) {
+        try (Jedis jedis = new MockJedis("test")) {
             String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchTransactionDO.getBranchId();
             jedis.del(key);
         }
