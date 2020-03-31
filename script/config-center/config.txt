@@ -45,6 +45,7 @@ store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
+store.db.maxWait=5000
 store.redis.host=127.0.0.1
 store.redis.port=6379
 store.redis.maxConn=10
