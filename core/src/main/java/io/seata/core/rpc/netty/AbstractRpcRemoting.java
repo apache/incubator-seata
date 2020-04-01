@@ -508,7 +508,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
             } catch (RejectedExecutionException e) {
                 LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
                     "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
-                if (allowDumpStack && rpcMessage.getType().equals(RemotingCommandType.REQUEST_COMMAND)) {
+                if (allowDumpStack) {
                     String name = ManagementFactory.getRuntimeMXBean().getName();
                     String pid = name.split("@")[0];
                     int idx = new Random().nextInt(100);
