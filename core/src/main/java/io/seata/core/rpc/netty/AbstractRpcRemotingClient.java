@@ -255,27 +255,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
         }
     }
 
-    @Override
-    protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        super.processRequestMessage(ctx, rpcMessage);
-    }
-
-    @Override
-    public void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        // HeartbeatMessage has no message type, will be added later.
-        if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) MessageType.TYPE_HEARTBEAT_MSG);
-            try {
-                pair.getObject1().process(ctx, rpcMessage);
-            } catch (Exception e) {
-                LOGGER.error("check message error", e);
-                return;
-            }
-            return;
-        }
-        super.processResponseMessage(ctx, rpcMessage);
-    }
-
     /**
      * The type ClientHandler.
      */
