@@ -478,8 +478,8 @@ public abstract class AbstractRpcRemoting implements Disposable {
         MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
         final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
         if (pair != null) {
-            try {
-                if (pair.getObject2() != null) {
+            if (pair.getObject2() != null) {
+                try {
                     pair.getObject2().execute(() -> {
                         try {
                             pair.getObject1().process(ctx, rpcMessage);
@@ -487,26 +487,26 @@ public abstract class AbstractRpcRemoting implements Disposable {
                             LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                         }
                     });
-                } else {
-                    try {
-                        pair.getObject1().process(ctx, rpcMessage);
-                    } catch (Throwable th) {
-                        LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                } catch (RejectedExecutionException e) {
+                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
+                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                    if (allowDumpStack) {
+                        String name = ManagementFactory.getRuntimeMXBean().getName();
+                        String pid = name.split("@")[0];
+                        int idx = new Random().nextInt(100);
+                        try {
+                            Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
+                        } catch (IOException exx) {
+                            LOGGER.error(exx.getMessage());
+                        }
+                        allowDumpStack = false;
                     }
                 }
-            } catch (RejectedExecutionException e) {
-                LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                    "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
-                if (allowDumpStack) {
-                    String name = ManagementFactory.getRuntimeMXBean().getName();
-                    String pid = name.split("@")[0];
-                    int idx = new Random().nextInt(100);
-                    try {
-                        Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
-                    } catch (IOException exx) {
-                        LOGGER.error(exx.getMessage());
-                    }
-                    allowDumpStack = false;
+            } else {
+                try {
+                    pair.getObject1().process(ctx, rpcMessage);
+                } catch (Throwable th) {
+                    LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                 }
             }
         } else {
