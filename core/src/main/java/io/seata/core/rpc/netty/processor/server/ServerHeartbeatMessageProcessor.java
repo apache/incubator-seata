@@ -29,22 +29,18 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class CheckMessageProcessor implements NettyProcessor {
+public class ServerHeartbeatMessageProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CheckMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerHeartbeatMessageProcessor.class);
 
     private RemotingServer remotingServer;
 
-    public CheckMessageProcessor(RemotingServer remotingServer) {
+    public ServerHeartbeatMessageProcessor(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
     }
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        onCheckMessage(ctx, rpcMessage);
-    }
-
-    private void onCheckMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         try {
             remotingServer.sendResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
@@ -54,4 +50,5 @@ public class CheckMessageProcessor implements NettyProcessor {
             LOGGER.debug("received PING from {}", ctx.channel().remoteAddress());
         }
     }
+
 }

@@ -22,7 +22,7 @@ import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.server.CheckMessageProcessor;
+import io.seata.core.rpc.netty.processor.server.ServerHeartbeatMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.RegRmMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.RegTmMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.TrxMessageProcessor;
@@ -90,9 +90,9 @@ public class RpcServer extends AbstractRpcRemotingServer {
         // 3. registry tm message processor
         RegTmMessageProcessor regTmMessageProcessor = new RegTmMessageProcessor(this, null);
         registerProcessor(MessageType.TYPE_REG_CLT, regTmMessageProcessor, null);
-        // 4. registry check message processor
-        CheckMessageProcessor checkMessageProcessor = new CheckMessageProcessor(this);
-        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, checkMessageProcessor, null);
+        // 4. registry heartbeat message processor
+        ServerHeartbeatMessageProcessor heartbeatMessageProcessor = new ServerHeartbeatMessageProcessor(this);
+        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
 
         super.setChannelHandlers(new ServerHandler());
         super.init();
