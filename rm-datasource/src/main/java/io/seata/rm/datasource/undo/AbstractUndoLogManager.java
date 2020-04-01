@@ -216,7 +216,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         }
         String rollbackCtx = buildContext(parser.getName());
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
-        Object[] objects = {rollbackCtx, undoLogContent, State.Normal};
+        Object[] objects = {rollbackCtx, undoLogContent, State.Normal.getValue()};
         UndoLogCache.put(xid, branchId, objects);
     }
 
