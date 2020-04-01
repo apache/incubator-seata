@@ -19,7 +19,7 @@ import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.client.HeartbeatMessageProcessor;
+import io.seata.core.rpc.netty.processor.client.ClientHeartbeatMessageProcessor;
 import io.seata.core.rpc.netty.processor.client.RmHandleBranchCommitProcessor;
 import io.seata.core.rpc.netty.processor.client.RmHandleBranchRollbackProcessor;
 import io.seata.core.rpc.netty.processor.client.RmHandleUndoLogProcessor;
@@ -66,7 +66,7 @@ public class RMClient {
         rmRpcClient.setRmProcessor(processorMap);
 
         // handle heartbeat message processor
-        Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new HeartbeatMessageProcessor(), false);
+        Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatMessageProcessor(), false);
         processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);
         rmRpcClient.setRmProcessor(processorMap);
 

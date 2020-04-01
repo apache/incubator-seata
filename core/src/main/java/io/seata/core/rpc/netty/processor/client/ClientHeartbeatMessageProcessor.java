@@ -28,9 +28,9 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class HeartbeatMessageProcessor implements NettyProcessor {
+public class ClientHeartbeatMessageProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientHeartbeatMessageProcessor.class);
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
