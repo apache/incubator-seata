@@ -13,31 +13,42 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.client;
+package io.seata.core.rpc.netty.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * handle heartbeat message processor
+ * handle client heartbeat message request(PING) processor.
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class HeartbeatMessageProcessor implements NettyProcessor {
+public class ServerHeartbeatMessageProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerHeartbeatMessageProcessor.class);
+
+    private RemotingServer remotingServer;
+
+    public ServerHeartbeatMessageProcessor(RemotingServer remotingServer) {
+        this.remotingServer = remotingServer;
+    }
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
-            }
+        try {
+            remotingServer.sendResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
+        } catch (Throwable throwable) {
+            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("received PING from {}", ctx.channel().remoteAddress());
         }
     }
+
 }

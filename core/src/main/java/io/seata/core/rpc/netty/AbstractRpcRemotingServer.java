@@ -23,19 +23,14 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -153,29 +148,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
         channel.disconnect();
         channel.close();
-    }
-
-    @Override
-    protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        debugLog("read:" + rpcMessage.getBody());
-        // HeartbeatMessage has no message type, will be added later.
-        if (rpcMessage.getBody() == HeartbeatMessage.PING) {
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) MessageType.TYPE_HEARTBEAT_MSG);
-            try {
-                pair.getObject1().process(ctx, rpcMessage);
-            } catch (Exception e) {
-                LOGGER.error("check message error", e);
-                return;
-            }
-            return;
-        }
-        super.processRequestMessage(ctx, rpcMessage);
-    }
-
-    @Override
-    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        debugLog("read:" + rpcMessage.getBody());
-        super.processResponseMessage(ctx, rpcMessage);
     }
 
     /**
