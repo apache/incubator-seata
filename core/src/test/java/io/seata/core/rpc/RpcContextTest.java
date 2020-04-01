@@ -121,9 +121,9 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testAddResourceNull() {
-		rpcContext.addResource(null);
 		HashSet<String> resourceSet = new HashSet<String>();
-		resourceSet.add(null);
+		rpcContext.setResourceSets(resourceSet);
+		rpcContext.addResource(null);
 		Assertions.assertEquals(resourceSet, rpcContext.getResourceSets());
 	}
 
