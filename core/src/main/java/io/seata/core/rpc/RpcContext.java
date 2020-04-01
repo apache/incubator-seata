@@ -299,14 +299,14 @@ public class RpcContext {
     /**
      * Add resources.
      *
-     * @param resource the resource
+     * @param resources the resources
      */
-    public void addResources(Set<String> resource) {
-        if (null == resource) { return; }
+    public void addResources(Set<String> resources) {
+        if (null == resources) { return; }
         if (null == resourceSets) {
             this.resourceSets = new HashSet<String>();
         }
-        this.resourceSets.addAll(resource);
+        this.resourceSets.addAll(resources);
     }
 
     /**
