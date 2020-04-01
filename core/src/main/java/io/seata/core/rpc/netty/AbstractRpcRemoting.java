@@ -444,6 +444,18 @@ public abstract class AbstractRpcRemoting implements Disposable {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
         }
+        // HeartbeatMessage has no message type, will be added later.
+        if (rpcMessage.getBody() == HeartbeatMessage.PING
+            || rpcMessage.getBody() == HeartbeatMessage.PONG) {
+            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) MessageType.TYPE_HEARTBEAT_MSG);
+            try {
+                pair.getObject1().process(ctx, rpcMessage);
+            } catch (Exception e) {
+                LOGGER.error("check message error", e);
+                return;
+            }
+            return;
+        }
         switch (rpcMessage.getType()) {
             case REQUEST_COMMAND:
                 processRequestMessage(ctx, rpcMessage);
@@ -457,6 +469,22 @@ public abstract class AbstractRpcRemoting implements Disposable {
     }
 
     protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        doProcess(ctx, rpcMessage);
+    }
+
+    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        MessageFuture messageFuture = null;
+        if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
+            messageFuture = futures.remove(rpcMessage.getId());
+        }
+        if (messageFuture != null) {
+            messageFuture.setResultMessage(rpcMessage.getBody());
+        } else {
+            doProcess(ctx, rpcMessage);
+        }
+    }
+
+    private void doProcess(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
         final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
         if (pair != null) {
@@ -493,43 +521,6 @@ public abstract class AbstractRpcRemoting implements Disposable {
             }
         } else {
             LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
-        }
-    }
-
-    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        MessageFuture messageFuture = null;
-        if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
-            messageFuture = futures.remove(rpcMessage.getId());
-        }
-        if (messageFuture != null) {
-            messageFuture.setResultMessage(rpcMessage.getBody());
-        } else {
-            MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) (messageTypeAware.getTypeCode()));
-            if (pair != null) {
-                try {
-                    if (pair.getObject2() != null) {
-                        pair.getObject2().execute(() -> {
-                            try {
-                                pair.getObject1().process(ctx, rpcMessage);
-                            } catch (Throwable th) {
-                                LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
-                            }
-                        });
-                    } else {
-                        try {
-                            pair.getObject1().process(ctx, rpcMessage);
-                        } catch (Throwable th) {
-                            LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
-                        }
-                    }
-                } catch (RejectedExecutionException e) {
-                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
-                }
-            } else {
-                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
-            }
         }
     }
 
