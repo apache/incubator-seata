@@ -1,0 +1,2 @@
+io.seata.server.storage.db.lock.DataBaseLockManager
+io.seata.server.storage.file.lock.FileLockManager
