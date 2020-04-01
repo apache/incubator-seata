@@ -36,7 +36,6 @@ import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.RemotingCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -446,18 +445,6 @@ public abstract class AbstractRpcRemoting implements Disposable {
     public void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
-        }
-        // HeartbeatMessage has no message type, will be added later.
-        if (rpcMessage.getBody() == HeartbeatMessage.PING
-            || rpcMessage.getBody() == HeartbeatMessage.PONG) {
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) MessageType.TYPE_HEARTBEAT_MSG);
-            try {
-                pair.getObject1().process(ctx, rpcMessage);
-            } catch (Exception e) {
-                LOGGER.error("check message error", e);
-                return;
-            }
-            return;
         }
         switch (rpcMessage.getType()) {
             case REQUEST_COMMAND:
