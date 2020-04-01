@@ -27,6 +27,7 @@ import java.sql.Statement;
  * The type Execute template.
  *
  * @author sharajava
+ * @author pengzhengfa
  */
 public class ExecuteTemplate {
 
@@ -78,23 +79,7 @@ public class ExecuteTemplate {
         if (sqlRecognizer == null) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
-            switch (sqlRecognizer.getSQLType()) {
-                case INSERT:
-                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case UPDATE:
-                    executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case DELETE:
-                    executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                default:
-                    executor = new PlainExecutor<>(statementProxy, statementCallback);
-                    break;
-            }
+            executor = createExecutor(sqlRecognizer, statementProxy, statementCallback);
         }
         T rs;
         try {
@@ -104,8 +89,32 @@ public class ExecuteTemplate {
                 // Turn other exception into SQLException
                 ex = new SQLException(ex);
             }
-            throw (SQLException)ex;
+            throw (SQLException) ex;
         }
         return rs;
+    }
+
+    private static <T, S extends Statement> Executor<T> createExecutor(SQLRecognizer sqlRecognizer,
+                                                                       StatementProxy<S> statementProxy,
+                                                                       StatementCallback<T, S> statementCallback) {
+        Executor<T> executor;
+        switch (sqlRecognizer.getSQLType()) {
+            case INSERT:
+                executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                break;
+            case UPDATE:
+                executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                break;
+            case DELETE:
+                executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                break;
+            case SELECT_FOR_UPDATE:
+                executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                break;
+            default:
+                executor = new PlainExecutor<>(statementProxy, statementCallback);
+                break;
+        }
+        return executor;
     }
 }
