@@ -124,7 +124,7 @@ public class RpcContextTest {
 		HashSet<String> resourceSet = new HashSet<String>();
 		rpcContext.setResourceSets(resourceSet);
 		rpcContext.addResource(null);
-		Assertions.assertEquals(resourceSet, rpcContext.getResourceSets());
+		Assertions.assertEquals(0, rpcContext.getResourceSets().size());
 	}
 
 	/**
