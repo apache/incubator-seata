@@ -26,7 +26,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.BlobUtils;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogCache;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -99,8 +98,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             pst.setBlob(4, BlobUtils.bytes2Blob(undoLogContent));
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
-            Object[] objects = {rollbackCtx, undoLogContent, state.getValue()};
-            UndoLogCache.put(xid, branchId, objects);
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);

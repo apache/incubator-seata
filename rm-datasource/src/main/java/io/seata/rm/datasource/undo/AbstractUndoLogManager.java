@@ -214,9 +214,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
-
-        insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName()), undoLogContent,
-            cp.getTargetConnection());
+        String rollbackCtx = buildContext(parser.getName());
+        insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
+        Object[] objects = {rollbackCtx, undoLogContent, State.Normal};
+        UndoLogCache.put(xid, branchId, objects);
     }
 
     /**
