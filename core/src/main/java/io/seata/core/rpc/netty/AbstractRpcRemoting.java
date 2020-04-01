@@ -34,6 +34,7 @@ import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.netty.processor.RemotingCommandType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -507,7 +508,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
             } catch (RejectedExecutionException e) {
                 LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
                     "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
-                if (allowDumpStack) {
+                if (allowDumpStack && rpcMessage.getType().equals(RemotingCommandType.REQUEST_COMMAND)) {
                     String name = ManagementFactory.getRuntimeMXBean().getName();
                     String pid = name.split("@")[0];
                     int idx = new Random().nextInt(100);
