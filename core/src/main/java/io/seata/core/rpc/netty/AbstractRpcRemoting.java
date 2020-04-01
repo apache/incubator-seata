@@ -473,42 +473,47 @@ public abstract class AbstractRpcRemoting implements Disposable {
     }
 
     private void doProcess(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        MessageTypeAware messageTypeAware = (MessageTypeAware) rpcMessage.getBody();
-        final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
-        if (pair != null) {
-            if (pair.getObject2() != null) {
-                try {
-                    pair.getObject2().execute(() -> {
-                        try {
-                            pair.getObject1().process(ctx, rpcMessage);
-                        } catch (Throwable th) {
-                            LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+        Object body = rpcMessage.getBody();
+        if (body instanceof MessageTypeAware) {
+            MessageTypeAware messageTypeAware = (MessageTypeAware) body;
+            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
+            if (pair != null) {
+                if (pair.getObject2() != null) {
+                    try {
+                        pair.getObject2().execute(() -> {
+                            try {
+                                pair.getObject1().process(ctx, rpcMessage);
+                            } catch (Throwable th) {
+                                LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                            }
+                        });
+                    } catch (RejectedExecutionException e) {
+                        LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
+                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                        if (allowDumpStack) {
+                            String name = ManagementFactory.getRuntimeMXBean().getName();
+                            String pid = name.split("@")[0];
+                            int idx = new Random().nextInt(100);
+                            try {
+                                Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
+                            } catch (IOException exx) {
+                                LOGGER.error(exx.getMessage());
+                            }
+                            allowDumpStack = false;
                         }
-                    });
-                } catch (RejectedExecutionException e) {
-                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
-                    if (allowDumpStack) {
-                        String name = ManagementFactory.getRuntimeMXBean().getName();
-                        String pid = name.split("@")[0];
-                        int idx = new Random().nextInt(100);
-                        try {
-                            Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
-                        } catch (IOException exx) {
-                            LOGGER.error(exx.getMessage());
-                        }
-                        allowDumpStack = false;
+                    }
+                } else {
+                    try {
+                        pair.getObject1().process(ctx, rpcMessage);
+                    } catch (Throwable th) {
+                        LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                     }
                 }
             } else {
-                try {
-                    pair.getObject1().process(ctx, rpcMessage);
-                } catch (Throwable th) {
-                    LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
-                }
+                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         } else {
-            LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
+            LOGGER.warn("This rpcMessage body[{}] is not MessageTypeAware type.", body);
         }
     }
 
