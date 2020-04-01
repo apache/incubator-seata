@@ -15,9 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -39,16 +36,15 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
-import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
-import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import static io.seata.core.exception.TransactionExceptionCode.*;
 
 /**
  * The type abstract core.
  *
+ * @author pengzhengfa
  * @author ph3636
  */
 public abstract class AbstractCore implements Core {
@@ -145,13 +141,8 @@ public abstract class AbstractCore implements Core {
     @Override
     public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         try {
-            BranchCommitRequest request = new BranchCommitRequest();
-            request.setXid(branchSession.getXid());
-            request.setBranchId(branchSession.getBranchId());
-            request.setResourceId(branchSession.getResourceId());
-            request.setApplicationData(branchSession.getApplicationData());
-            request.setBranchType(branchSession.getBranchType());
-            return branchCommitSend(request, globalSession, branchSession);
+            BranchCommitRequest branchCommitRequest = branchCommitRequestParameter(branchSession);
+            return branchCommitSend(branchCommitRequest, globalSession, branchSession);
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchCommitRequest,
                     String.format("Send branch commit failed, xid = %s branchId = %s", branchSession.getXid(),
@@ -169,18 +160,33 @@ public abstract class AbstractCore implements Core {
     @Override
     public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         try {
-            BranchRollbackRequest request = new BranchRollbackRequest();
-            request.setXid(branchSession.getXid());
-            request.setBranchId(branchSession.getBranchId());
-            request.setResourceId(branchSession.getResourceId());
-            request.setApplicationData(branchSession.getApplicationData());
-            request.setBranchType(branchSession.getBranchType());
-            return branchRollbackSend(request, globalSession, branchSession);
+            BranchRollbackRequest branchRollbackRequest = branchRollbackRequestParameter(branchSession);
+            return branchRollbackSend(branchRollbackRequest, globalSession, branchSession);
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchRollbackRequest,
                     String.format("Send branch rollback failed, xid = %s branchId = %s",
                             branchSession.getXid(), branchSession.getBranchId()), e);
         }
+    }
+
+    private BranchCommitRequest branchCommitRequestParameter(BranchSession branchSession) {
+        BranchCommitRequest request = new BranchCommitRequest();
+        request.setXid(branchSession.getXid());
+        request.setBranchId(branchSession.getBranchId());
+        request.setResourceId(branchSession.getResourceId());
+        request.setApplicationData(branchSession.getApplicationData());
+        request.setBranchType(branchSession.getBranchType());
+        return request;
+    }
+
+    private BranchRollbackRequest branchRollbackRequestParameter(BranchSession branchSession) {
+        BranchRollbackRequest request = new BranchRollbackRequest();
+        request.setXid(branchSession.getXid());
+        request.setBranchId(branchSession.getBranchId());
+        request.setResourceId(branchSession.getResourceId());
+        request.setApplicationData(branchSession.getApplicationData());
+        request.setBranchType(branchSession.getBranchType());
+        return request;
     }
 
     protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
