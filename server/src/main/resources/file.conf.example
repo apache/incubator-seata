@@ -28,44 +28,6 @@ transport {
   serialization = "seata"
   compressor = "none"
 }
-# service configuration, only used in client side
-service {
-  #transaction service group mapping
-  vgroupMapping.my_test_tx_group = "default"
-  #only support when registry.type=file, please don't set multiple addresses
-  default.grouplist = "127.0.0.1:8091"
-  #degrade, current not support
-  enableDegrade = false
-  #disable seata
-  disableGlobalTransaction = false
-}
-#client transaction configuration, only used in client side
-client {
-  rm {
-    asyncCommitBufferLimit = 10000
-    lock {
-      retryInterval = 10
-      retryTimes = 30
-      retryPolicyBranchRollbackOnConflict = true
-    }
-    reportRetryCount = 5
-    tableMetaCheckEnable = false
-    reportSuccessEnable = false
-    sqlParserType = druid
-  }
-  tm {
-    commitRetryCount = 5
-    rollbackRetryCount = 5
-  }
-  undo {
-    dataValidation = true
-    logSerialization = "jackson"
-    logTable = "undo_log"
-  }
-  log {
-    exceptionRate = 100
-  }
-}
 
 ## transaction log store, only used in server side
 store {
@@ -90,15 +52,15 @@ store {
   ## database store property
   db {
     ## the implement of javax.sql.DataSource, such as DruidDataSource(druid)/BasicDataSource(dbcp) etc.
-    datasource = "dbcp"
-    ## mysql/oracle/h2/oceanbase etc.
+    datasource = "druid"
+    ## mysql/oracle/postgresql/h2/oceanbase etc.
     dbType = "mysql"
     driverClassName = "com.mysql.jdbc.Driver"
     url = "jdbc:mysql://127.0.0.1:3306/seata"
     user = "mysql"
     password = "mysql"
-    minConn = 1
-    maxConn = 10
+    minConn = 5
+    maxConn = 30
     globalTable = "global_table"
     branchTable = "branch_table"
     lockTable = "lock_table"
