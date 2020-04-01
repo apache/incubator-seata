@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,22 +23,32 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UndoLogCache {
 
-    private static ConcurrentHashMap<String, Object[]> undoLogCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Object[]> cache = new ConcurrentHashMap<>();
 
     private static final String DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX = "UNDO_LOG_CACHE_KEY_XID_";
 
     private static final String DEFAULT_BRANCHID_PREFIX = "BRANCHID_";
 
     public static void put(String xid, Long branchId, Object[] objects) {
-        undoLogCache.put(getCacheKey(xid, branchId), objects);
+        cache.put(getCacheKey(xid, branchId), objects);
     }
 
     public static Object[] get(String xid, Long branchId) {
-        return undoLogCache.get(getCacheKey(xid, branchId));
+        return cache.get(getCacheKey(xid, branchId));
     }
 
     public static void remove(String xid, Long branchId) {
-        undoLogCache.remove(getCacheKey(xid, branchId));
+        cache.remove(getCacheKey(xid, branchId));
+    }
+
+    public static void remove(Set<String> xids) {
+        xids.forEach(xid -> {
+            cache.forEach((k, v) -> {
+                if (k.contains(xid)) {
+                    cache.remove(k);
+                }
+            });
+        });
     }
 
     private static String getCacheKey(String xid, Long branchId) {
