@@ -19,12 +19,11 @@ import io.seata.common.util.IOUtil;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
-
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
