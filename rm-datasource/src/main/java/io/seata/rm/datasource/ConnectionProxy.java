@@ -15,8 +15,10 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.common.util.CollectionUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import io.seata.common.util.StringUtils;
@@ -198,8 +200,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
-
-        checkLock(context.buildLockKeys());
+        Set<String> lockKeys = context.getLockKeysBuffer();
+        if (CollectionUtils.isNotEmpty(lockKeys)) {
+            checkLock(context.buildLockKeys());
+        }
         try {
             targetConnection.commit();
         } catch (Throwable ex) {
