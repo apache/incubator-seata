@@ -138,14 +138,14 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public void init() {
-        if (initialized.compareAndSet(false, true)) {
-            super.init();
-        }
         // registry processor
         if (rmProcessorTable != null) {
             for (Map.Entry<Integer, Pair<NettyProcessor, Boolean>> entry : rmProcessorTable.entrySet()) {
                 registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
             }
+        }
+        if (initialized.compareAndSet(false, true)) {
+            super.init();
         }
     }
 
