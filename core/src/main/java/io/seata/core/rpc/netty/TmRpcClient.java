@@ -131,15 +131,15 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     
     @Override
     public void init() {
-        if (initialized.compareAndSet(false, true)) {
-            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
-            super.init();
-        }
         // registry processor
         if (tmProcessorTable != null) {
             for (Map.Entry<Integer, Pair<NettyProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
                 registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
             }
+        }
+        if (initialized.compareAndSet(false, true)) {
+            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
+            super.init();
         }
     }
     
