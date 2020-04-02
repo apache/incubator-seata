@@ -45,7 +45,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
-
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SELF_CHECK;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SELF_CHECK_PERIOD;
@@ -73,23 +72,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("healthCheckWorker", 1, true));
 
     /**
-     * initialize healthCheck
-     */
-    static {
-        healthCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_HEALTH_CHECK,
-            DEFAULT_CLIENT_SELF_CHECK);
-        if (healthCheck) {
-            healthCheckPeriod = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_HEALTH_CHECK_PERIOD,
-                DEFAULT_CLIENT_SELF_CHECK_PERIOD);
-            healthCheckDegradeAllowTimes = ConfigurationFactory.getInstance()
-                .getInt(ConfigurationKeys.CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES, DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES);
-            if (healthCheckPeriod > 0 && healthCheckDegradeAllowTimes > 0) {
-                startSelfCheck();
-            }
-        }
-    }
-
-    /**
      * Instantiates a new Global transactional interceptor.
      *
      * @param failureHandler
@@ -99,6 +81,17 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        this.healthCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_HEALTH_CHECK,
+            DEFAULT_CLIENT_SELF_CHECK);
+        if (healthCheck) {
+            this.healthCheckPeriod = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_HEALTH_CHECK_PERIOD, DEFAULT_CLIENT_SELF_CHECK_PERIOD);
+            this.healthCheckDegradeAllowTimes = ConfigurationFactory.getInstance().getInt(
+                ConfigurationKeys.CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES, DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES);
+            if (healthCheckPeriod > 0 && healthCheckDegradeAllowTimes > 0) {
+                startSelfCheck();
+            }
+        }
     }
 
     @Override
@@ -225,6 +218,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                 disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
+        } else if (ConfigurationKeys.CLIENT_HEALTH_CHECK.equals(event.getDataId())) {
+            healthCheck = Boolean.parseBoolean(event.getNewValue());
+            if (!healthCheck) {
+                degradeNum = 0;
+            }
         }
     }
 
@@ -233,11 +231,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      */
     private static void startSelfCheck() {
         executor.scheduleAtFixedRate(() -> {
-            try {
-                TransactionManagerHolder.get().commit(TransactionManagerHolder.get().begin(null, null, "test", 60000));
-                onSelfCheck(true);
-            } catch (Exception e) {
-                onSelfCheck(false);
+            if (healthCheck) {
+                try {
+                    TransactionManagerHolder.get()
+                        .commit(TransactionManagerHolder.get().begin(null, null, "test", 60000));
+                    onSelfCheck(true);
+                } catch (Exception e) {
+                    onSelfCheck(false);
+                }
             }
         }, 10, healthCheckPeriod, TimeUnit.MILLISECONDS);
     }
