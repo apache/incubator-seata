@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
@@ -29,6 +30,7 @@ import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
@@ -46,6 +48,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final String REGISTRY_TYPE = "nacos";
     private static final String REGISTRY_CLUSTER = "cluster";
+    private static final String USER_NAME = "username";
+    private static final String PASSWORD = "password";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
@@ -99,12 +103,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         clusters.add(cluster);
         List<EventListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
         if (null != subscribeList) {
-            List<EventListener> newSubscribeList = new ArrayList<>();
-            for (EventListener eventListener : subscribeList) {
-                if (!eventListener.equals(listener)) {
-                    newSubscribeList.add(eventListener);
-                }
-            }
+            List<EventListener> newSubscribeList = subscribeList.stream()
+                    .filter(eventListener -> !eventListener.equals(listener))
+                    .collect(Collectors.toList());
             LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
         }
         getNamingInstance().unsubscribe(PRO_SERVER_ADDR_KEY, clusters, listener);
@@ -123,12 +124,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     clusters.add(clusterName);
                     List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
                     if (null != firstAllInstances) {
-                        List<InetSocketAddress> newAddressList = new ArrayList<>();
-                        for (Instance instance : firstAllInstances) {
-                            if (instance.isEnabled() && instance.isHealthy()) {
-                                newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
-                            }
-                        }
+                        List<InetSocketAddress> newAddressList = firstAllInstances.stream()
+                                .filter(instance -> instance.isEnabled() && instance.isHealthy())
+                                .map(instance -> new InetSocketAddress(instance.getIp(), instance.getPort()))
+                                .collect(Collectors.toList());
                         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
                     subscribe(clusterName, event -> {
@@ -136,12 +135,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                         if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
                             CLUSTER_ADDRESS_MAP.remove(clusterName);
                         } else if (!CollectionUtils.isEmpty(instances)) {
-                            List<InetSocketAddress> newAddressList = new ArrayList<>();
-                            for (Instance instance : instances) {
-                                if (instance.isEnabled() && instance.isHealthy()) {
-                                    newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
-                                }
-                            }
+                            List<InetSocketAddress> newAddressList = instances.stream()
+                                    .filter(instance -> instance.isEnabled() && instance.isHealthy())
+                                    .map(instance -> new InetSocketAddress(instance.getIp(), instance.getPort()))
+                                    .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                         }
                     });
@@ -198,6 +195,16 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
+            : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
+                : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+            }
+        }
         return properties;
     }
 
@@ -210,20 +217,24 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     private static String getNacosAddrFileKey() {
-        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-            + PRO_SERVER_ADDR_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
     private static String getNacosNameSpaceFileKey() {
-        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-            + PRO_NAMESPACE_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_NAMESPACE_KEY);
     }
 
     private static String getNacosClusterFileKey() {
-        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
+    }
+
+    private static String getNacosUserName() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE,
+            USER_NAME);
+    }
+
+    private static String getNacosPassword() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE,
+            PASSWORD);
     }
 }

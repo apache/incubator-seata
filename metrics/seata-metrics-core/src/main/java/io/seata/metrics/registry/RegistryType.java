@@ -26,11 +26,21 @@ public enum RegistryType {
     /**
      * Built-in compact metrics registry
      */
-    Compact;
+    COMPACT("compact");
+
+    private String name;
+
+    RegistryType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public static RegistryType getType(String name) {
-        if (Compact.name().equalsIgnoreCase(name)) {
-            return Compact;
+        if (COMPACT.name().equalsIgnoreCase(name)) {
+            return COMPACT;
         } else {
             throw new NotSupportYetException("unsupported type:" + name);
         }

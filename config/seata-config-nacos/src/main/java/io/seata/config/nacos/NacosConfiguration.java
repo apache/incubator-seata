@@ -26,6 +26,7 @@ import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -44,11 +45,14 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
-    private static final String SEATA_GROUP = "SEATA_GROUP";
+    private static final String DEFAULT_GROUP = "SEATA_GROUP";
+    private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
+    private static final String USER_NAME = "username";
+    private static final String PASSWORD = "password";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -91,7 +95,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             return value;
         }
         try {
-            value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
+            value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -102,7 +106,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.publishConfig(dataId, SEATA_GROUP, content);
+            result = configService.publishConfig(dataId, getNacosGroup(), content);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -118,7 +122,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.removeConfig(dataId, SEATA_GROUP);
+            result = configService.removeConfig(dataId, getNacosGroup());
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -134,7 +138,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             NacosListener nacosListener = new NacosListener(dataId, listener);
             configListenersMap.get(dataId).put(listener, nacosListener);
-            configService.addListener(dataId, SEATA_GROUP, nacosListener);
+            configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
             LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
         }
@@ -154,7 +158,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                     configListenersMap.get(dataId).remove(entry);
                 }
                 if (null != nacosListener) {
-                    configService.removeListener(dataId, SEATA_GROUP, nacosListener);
+                    configService.removeListener(dataId, getNacosGroup(), nacosListener);
                 }
                 break;
             }
@@ -190,17 +194,43 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
+            : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
+                : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+            }
+        }
         return properties;
     }
 
     private static String getNacosNameSpaceFileKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + PRO_NAMESPACE_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
     }
 
     private static String getNacosAddrFileKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + PRO_SERVER_ADDR_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
+    }
+
+    private static String getNacosGroupKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
+    }
+
+    private static String getNacosUserName() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
+            USER_NAME);
+    }
+
+    private static String getNacosPassword() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
+            PASSWORD);
+    }
+
+    private static String getNacosGroup() {
+        return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
 
     @Override
@@ -211,7 +241,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     /**
      * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination
      */
-    public class NacosListener extends AbstractSharedListener {
+    public static class NacosListener extends AbstractSharedListener {
         private final String dataId;
         private final ConfigurationChangeListener listener;
 

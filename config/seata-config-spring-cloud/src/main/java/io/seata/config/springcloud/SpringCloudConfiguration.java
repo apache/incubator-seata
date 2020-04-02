@@ -17,12 +17,16 @@ package io.seata.config.springcloud;
 
 import java.util.Set;
 
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigurationChangeListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 public class SpringCloudConfiguration extends AbstractConfiguration {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudConfiguration.class);
     private static final String CONFIG_TYPE = "SpringCloudConfig";
     private static volatile SpringCloudConfiguration instance;
     private static final String PREFIX = "seata.";
@@ -49,40 +53,40 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        if (null == SpringContextProvider.getEnvironment()) {
+        ApplicationContext applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
+        if (null == applicationContext || null == applicationContext.getEnvironment()) {
             return defaultValue;
         }
-        String conf = SpringContextProvider.getEnvironment().getProperty(PREFIX + dataId);
+        String conf = applicationContext.getEnvironment().getProperty(PREFIX + dataId);
         return StringUtils.isNotBlank(conf) ? conf : defaultValue;
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        throw new UnsupportedOperationException();
+        LOGGER.warn("dynamic listening is not supported spring cloud config");
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        throw new UnsupportedOperationException();
+        return null;
     }
 }

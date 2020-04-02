@@ -13,44 +13,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ $# != 1 ]]; then
-  echo "USAGE: $0 consulAddr"
-  exit 1
+while getopts ":h:p:" opt
+do
+  case $opt in
+  h)
+    host=$OPTARG
+    ;;
+  p)
+    port=$OPTARG
+    ;;
+  ?)
+    echo " USAGE OPTION: $0 [-h host] [-p port] "
+    exit 1
+    ;;
+  esac
+done
+
+if [[ -z ${host} ]]; then
+    host=localhost
 fi
-consulAddr=$1
+if [[ -z ${port} ]]; then
+    port=8500
+fi
+
+consulAddr=$host:$port
 contentType="content-type:application/json;charset=UTF-8"
 echo "Set consulAddr=$consulAddr"
 
 failCount=0
-tempLog=$(mktemp -t consul-config.log)
+tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X PUT -H ${1} -d ${2} "http://$3/v1/kv/$4" >${tempLog} 2>/dev/null
-  if [[ -z $(cat ${tempLog}) ]]; then
-    echo "\033[31m Please check the cluster status. \033[0m"
+  curl -X PUT -H "${1}" -d "${2}" "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
+  if [[ -z $(cat "${tempLog}") ]]; then
+    echo " Please check the cluster status. "
     exit 1
   fi
-  if [[ $(cat ${tempLog}) =~ "true" ]]; then
-    echo "Set $4=$2\033[32m successfully \033[0m"
+  if [[ $(cat "${tempLog}") =~ "true" ]]; then
+    echo "Set $4=$2 successfully "
   else
-    echo "Set $4=$2\033[31m failure \033[0m"
+    echo "Set $4=$2 failure "
     (( failCount++ ))
  fi
 }
 
 count=0
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
   (( count++ ))
   key=${line%%=*}
   value=${line#*=}
-  addConfig ${contentType} ${value} ${consulAddr} ${key}
+  addConfig "${contentType}" "${value}" "${consulAddr}" "${key}"
 done
 
 echo "========================================================================="
-echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
+echo " Complete initialization parameters,  total-count:$count ,  failure-count:$failCount "
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-  echo "\033[32m Init consul config finished, please start seata-server. \033[0m"
+  echo " Init consul config finished, please start seata-server. "
 else
-  echo "\033[31m Init consul config fail. \033[0m"
+  echo " Init consul config fail. "
 fi

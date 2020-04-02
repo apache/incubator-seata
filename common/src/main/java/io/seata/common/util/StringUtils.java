@@ -133,7 +133,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
@@ -155,7 +155,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
@@ -220,7 +220,11 @@ public class StringUtils {
             sb.append("=");
             try {
                 Object f = field.get(obj);
-                sb.append(toString(f));
+                if (f.getClass() == obj.getClass()) {
+                    sb.append(f.toString());
+                } else {
+                    sb.append(toString(f));
+                }
             } catch (Exception e) {
             }
             sb.append(";");
@@ -257,5 +261,15 @@ public class StringUtils {
      */
     public static boolean isEmpty(final CharSequence cs) {
         return cs == null || cs.length() == 0;
+    }
+
+    /**
+     * Checks if a CharSequence is not empty ("") and not null.
+     *
+     * @param cs the CharSequence to check, may be null
+     * @return {@code true} if the CharSequence is not empty and not null
+     */
+    public static boolean isNotEmpty(final CharSequence cs) {
+        return !isEmpty(cs);
     }
 }

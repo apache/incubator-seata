@@ -23,20 +23,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLInsertRecognizer;
-import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Null;
-import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
-import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+    public InsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -106,7 +106,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final int pkIndex = getPkIndex();
         if (pkIndex == -1) {
-            throw new ShouldNeverHappenException("pkIndex is " + pkIndex);
+            throw new ShouldNeverHappenException(String.format("pkIndex is %d", pkIndex));
         }
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
@@ -122,8 +122,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     if (PLACEHOLDER.equals(pkValue)) {
                         pkValues = parameters[pkIndex];
                     } else {
-                        int finalPkIndex = pkIndex;
-                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(pkIndex)).collect(Collectors.toList());
                     }
                 } else {
                     int totalPlaceholderNum = -1;
@@ -149,9 +148,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                                 idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
                             }
                             ArrayList<Object> parameter = parameters[idx];
-                            for (Object obj : parameter) {
-                                pkValues.add(obj);
-                            }
+                            pkValues.addAll(parameter);
                         } else {
                             pkValues.add(pkValue);
                         }
@@ -170,17 +167,13 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         boolean b = this.checkPkValues(pkValues);
         if (!b) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
-        if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
+        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
-        // pk auto generated while single insert primary key is expression
-        else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValues = getPkValuesByAuto();
-        }
         // pk auto generated while column exists and value is null
-        else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
+        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
@@ -194,11 +187,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
             final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
-            LOGGER.warn("Fail to get auto-generated keys, use \'{}\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+            LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
             genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         } else {
             throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
@@ -251,32 +244,54 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * check pk values
      * @param pkValues
-     * @return true support false not support
+     * @return true: support. false: not support.
      */
-    private boolean checkPkValues(List<Object> pkValues) {
-        boolean pkParameterHasNull = false;
-        boolean pkParameterHasNotNull = false;
-        boolean pkParameterHasExpr = false;
-        if (pkValues.size() == 1) {
-            return true;
-        }
+    protected boolean checkPkValues(List<Object> pkValues) {
+        /*
+        -----------------------------------------------
+                  one    more
+        null       O      O
+        value      O      O
+        method     X      X
+        sequence   O      X
+        -----------------------------------------------
+                  null    value    method    sequence
+        null       O        X         X         X
+        value      X        O         X         X
+        method     X        X         X         X
+        sequence   X        X         X         X
+        -----------------------------------------------
+        */
+        int n = 0, v = 0, m = 0, s = 0;
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
-                pkParameterHasNull = true;
+                n++;
                 continue;
             }
-            pkParameterHasNotNull = true;
             if (pkValue instanceof SqlMethodExpr) {
-                pkParameterHasExpr = true;
+                m++;
+                break;
             }
+            if (pkValue instanceof SqlSequenceExpr) {
+                s++;
+                continue;
+            }
+            v++;
         }
-        if (pkParameterHasExpr) {
+        // not support sql primary key is function.
+        if (m > 0) {
             return false;
         }
-        if (pkParameterHasNull && pkParameterHasNotNull) {
-            return false;
+        if (n > 0 && v == 0 && s == 0) {
+            return true;
         }
-        return true;
+        if (n == 0 && v > 0 && s == 0) {
+            return true;
+        }
+        if (n == 0 && v == 0 && s == 1) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -295,7 +310,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             throw new ShouldNeverHappenException();
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         try {
             genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         } catch (SQLException e) {
@@ -303,7 +318,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                LOGGER.warn("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
             } else {
                 throw e;
@@ -332,19 +347,14 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkMetaMap.size() != 1) {
             throw new NotSupportYetException();
         }
-        ResultSet genKeys = null;
-        try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
-        } catch (SQLException e) {
-            throw e;
-        }
+        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValues;
     }

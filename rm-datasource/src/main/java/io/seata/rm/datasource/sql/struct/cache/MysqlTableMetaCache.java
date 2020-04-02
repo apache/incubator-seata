@@ -22,15 +22,15 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,32 +39,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
-    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private MysqlTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (MysqlTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new MysqlTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
+    private KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -78,7 +58,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
-            LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
+            LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -90,7 +70,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 cacheKey.append(defaultTableName.toLowerCase());
             }
         } catch (SQLException e) {
-            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key", e.getMessage(), e);
+            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -99,31 +79,16 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.createStatement();
-            StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(keywordChecker.checkAndReplace(tableName));
-            builder.append(" LIMIT 1");
-            rs = stmt.executeQuery(builder.toString());
-            ResultSetMetaData rsmd = rs.getMetaData();
-            DatabaseMetaData dbmd = connection.getMetaData();
-
-            return resultSetMetaToSchema(rsmd, dbmd);
-        } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
+        String sql = "SELECT * FROM " + keywordChecker.checkAndReplace(tableName) + " LIMIT 1";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+        }
+        catch (SQLException sqlEx) {
+            throw sqlEx;
+        }
+        catch (Exception e) {
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
 
@@ -152,10 +117,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          * 1. show full columns from xxx from xxx(normal)
          * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
          */
-        ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
 
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -202,9 +166,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     if ("PRIMARY".equalsIgnoreCase(indexName)) {
                         index.setIndextype(IndexType.PRIMARY);
                     } else if (!index.isNonUnique()) {
-                        index.setIndextype(IndexType.Unique);
+                        index.setIndextype(IndexType.UNIQUE);
                     } else {
-                        index.setIndextype(IndexType.Normal);
+                        index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
 
@@ -213,15 +177,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
             }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
         }
         return tm;
     }
-
 }

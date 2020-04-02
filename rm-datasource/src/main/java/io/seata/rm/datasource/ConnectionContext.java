@@ -118,7 +118,7 @@ public class ConnectionContext {
      * @return the boolean
      */
     public boolean hasUndoLog() {
-        return sqlUndoItemsBuffer.size() > 0;
+        return !sqlUndoItemsBuffer.isEmpty();
     }
 
     /**
@@ -205,6 +205,15 @@ public class ConnectionContext {
      */
     public List<SQLUndoLog> getUndoItems() {
         return sqlUndoItemsBuffer;
+    }
+
+    /**
+     * Gets lock keys buffer.
+     *
+     * @return the lock keys buffer
+     */
+    public Set<String> getLockKeysBuffer() {
+        return lockKeysBuffer;
     }
 
     @Override

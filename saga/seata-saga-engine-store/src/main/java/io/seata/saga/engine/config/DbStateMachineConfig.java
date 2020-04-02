@@ -15,20 +15,21 @@
  */
 package io.seata.saga.engine.config;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 
 /**
  * DbStateMachineConfig
@@ -37,32 +38,18 @@ import org.springframework.beans.factory.DisposableBean;
  */
 public class DbStateMachineConfig extends DefaultStateMachineConfig implements DisposableBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DbStateMachineConfig.class);
-
-    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
-
     private DataSource dataSource;
     private String applicationId;
     private String txServiceGroup;
     private String tablePrefix = "seata_";
     private String dbType;
-    private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
+    private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
+        try (Connection con = dataSource.getConnection()) {
             DatabaseMetaData metaData = con.getMetaData();
             return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: {}", e.getMessage(), e);
-                }
-            }
         }
     }
 
@@ -82,7 +69,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             if (sagaTransactionalTemplate == null) {
                 DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate
                     = new DefaultSagaTransactionalTemplate();
-                defaultSagaTransactionalTemplate.setTimeout(transOperationTimeout);
                 defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
                 defaultSagaTransactionalTemplate.setApplicationId(applicationId);
                 defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
@@ -110,7 +96,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     @Override
     public void destroy() throws Exception {
         if ((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)) {
-            ((DisposableBean)sagaTransactionalTemplate).destroy();
+            ((DisposableBean) sagaTransactionalTemplate).destroy();
         }
     }
 
@@ -158,11 +144,11 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         this.dbType = dbType;
     }
 
-    public int getTransOperationTimeout() {
-        return transOperationTimeout;
+    public boolean isRmReportSuccessEnable() {
+        return rmReportSuccessEnable;
     }
 
-    public void setTransOperationTimeout(int transOperationTimeout) {
-        this.transOperationTimeout = transOperationTimeout;
+    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
+        this.rmReportSuccessEnable = rmReportSuccessEnable;
     }
 }
