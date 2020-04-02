@@ -15,14 +15,13 @@
  */
 package io.seata.spring.annotation;
 
-import io.seata.tm.api.transaction.Propagation;
-import io.seata.tm.api.transaction.TransactionInfo;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import io.seata.tm.api.transaction.Propagation;
+import io.seata.tm.api.transaction.TransactionInfo;
 
 /**
  * The interface Global transactional.
@@ -69,18 +68,6 @@ public @interface GlobalTransactional {
      * @return
      */
     String[] noRollbackForClassName() default {};
-
-    /**
-     * Automatically demoted ultimate value
-     * @return
-     */
-    int demotionTimes() default 10;
-
-    /**
-     * Automatically demoted switch
-     * @return
-     */
-    boolean demotion() default false;
 
     /**
      * the propagation of the global transaction
