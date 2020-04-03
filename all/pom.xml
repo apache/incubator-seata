@@ -21,15 +21,12 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.2.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.
     </description>
-    <prerequisites>
-        <maven>3.6.0</maven>
-    </prerequisites>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -259,12 +256,32 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-serializer-fst</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-serializer-hessian</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-compressor-gzip</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-7z</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-bzip2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-zip</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -507,6 +524,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
@@ -514,6 +535,11 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -636,6 +662,7 @@
                                     <include>io.seata:seata-serializer-seata</include>
                                     <include>io.seata:seata-serializer-protobuf</include>
                                     <include>io.seata:seata-serializer-kryo</include>
+                                    <include>io.seata:seata-serializer-fst</include>
                                     <include>io.seata:seata-serializer-hessian</include>
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>
@@ -645,6 +672,9 @@
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
                                     <include>io.seata:seata-compressor-gzip</include>
+                                    <include>io.seata:seata-compressor-7z</include>
+                                    <include>io.seata:seata-compressor-bzip2</include>
+                                    <include>io.seata:seata-compressor-zip</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -745,6 +775,26 @@
                                 </goals>
                                 <configuration>
                                     <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.0.0-M3</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-maven</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireMavenVersion>
+                                            <version>[3.6.0,)</version>
+                                        </requireMavenVersion>
+                                    </rules>
                                 </configuration>
                             </execution>
                         </executions>

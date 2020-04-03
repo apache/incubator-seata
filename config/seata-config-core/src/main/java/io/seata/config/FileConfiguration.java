@@ -53,7 +53,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
-    private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
+    private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
 
@@ -263,8 +263,10 @@ public class FileConfiguration extends AbstractConfiguration {
                     }
                 } catch (Exception e) {
                     setFailResult(configFuture);
-                    LOGGER.warn("Could not found property {}, try to use default value instead.",
-                        configFuture.getDataId());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Could not found property {}, try to use default value instead.",
+                            configFuture.getDataId());
+                    }
                 }
             }
         }
@@ -313,9 +315,13 @@ public class FileConfiguration extends AbstractConfiguration {
                         event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
                         listener.onChangeEvent(event);
                     }
-                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
                 } catch (Exception exx) {
-                    LOGGER.error("fileListener execute error:{}", exx.getMessage(), exx);
+                    LOGGER.error("fileListener execute error:{}", exx.getMessage());
+                }
+                try {
+                    Thread.sleep(LISTENER_CONFIG_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
             }
         }

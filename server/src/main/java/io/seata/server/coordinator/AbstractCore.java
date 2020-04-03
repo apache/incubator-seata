@@ -31,7 +31,7 @@ import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockerFactory;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -55,7 +55,7 @@ public abstract class AbstractCore implements Core {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractCore.class);
 
-    protected LockManager lockManager = LockerFactory.getLockManager();
+    protected LockManager lockManager = LockerManagerFactory.getLockManager();
 
     protected ServerMessageSender messageSender;
 
@@ -69,12 +69,7 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        return globalSession.lockAndExecute(() -> {
-            if (!globalSession.isActive()) {
-                throw new GlobalTransactionException(GlobalTransactionNotActive, String
-                        .format("Could not register branch into global session xid = %s status = %s",
-                                globalSession.getXid(), globalSession.getStatus()));
-            }
+        return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
@@ -95,6 +90,11 @@ public abstract class AbstractCore implements Core {
     }
 
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
+        if (!globalSession.isActive()) {
+            throw new GlobalTransactionException(GlobalTransactionNotActive, String
+                    .format("Could not register branch into global session xid = %s status = %s",
+                            globalSession.getXid(), globalSession.getStatus()));
+        }
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
                     .format("Could not register branch into global session xid = %s status = %s while expecting %s",

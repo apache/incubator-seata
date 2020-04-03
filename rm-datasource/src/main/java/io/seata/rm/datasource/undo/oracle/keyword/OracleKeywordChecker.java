@@ -30,11 +30,8 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleKeywordChecker implements KeywordChecker {
-    private static Set<String> keywordSet;
 
-    static {
-        keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
-    }
+    private Set<String> keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
 
     /**
      * oracle keyword
@@ -503,8 +500,33 @@ public class OracleKeywordChecker implements KeywordChecker {
     }
 
     @Override
+    public boolean checkEscape(String fieldOrTableName) {
+        boolean check = check(fieldOrTableName);
+        // oracle
+        // we are recommend table name and column name must uppercase.
+        // if exists full uppercase, the table name or column name does't bundle escape symbol.
+        if (!check && isUppercase(fieldOrTableName)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
         //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
+    }
+
+    private static boolean isUppercase(String fieldOrTableName) {
+        if (fieldOrTableName == null) {
+            return false;
+        }
+        char[] chars = fieldOrTableName.toCharArray();
+        for (char ch : chars) {
+            if (ch >= 'a' && ch <= 'z') {
+                return false;
+            }
+        }
+        return true;
     }
 }
