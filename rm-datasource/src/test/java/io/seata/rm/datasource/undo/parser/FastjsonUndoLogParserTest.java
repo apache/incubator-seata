@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.ValueFilter;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -29,7 +30,7 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  */
 public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
 
-    FastjsonUndoLogParser parser = new FastjsonUndoLogParser();
+    FastjsonUndoLogParser parser = (FastjsonUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, FastjsonUndoLogParser.NAME);
 
     @Override
     public UndoLogParser getParser() {
