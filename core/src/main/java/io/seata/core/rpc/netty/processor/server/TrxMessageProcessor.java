@@ -41,6 +41,23 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * handle client trx message processor.
+ * include mergeMessage and single message.
+ * <p>
+ * Trx message includes the following messages:
+ * 1.Request message:
+ * {@link TransactionMessageHandler#onRequest}
+ * 1) BranchRegisterRequest
+ * 2) BranchReportRequest
+ * 3) GlobalBeginRequest
+ * 4) GlobalCommitRequest
+ * 5) GlobalLockQueryRequest
+ * 6) GlobalReportRequest
+ * 7) GlobalRollbackRequest
+ * 8) GlobalStatusRequest
+ * <p>
+ * 2.Response message:
+ * {@link TransactionMessageHandler#onResponse}
+ * not yet
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
