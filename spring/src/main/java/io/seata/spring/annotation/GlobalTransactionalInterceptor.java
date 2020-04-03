@@ -66,7 +66,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final FailureHandler failureHandler;
     private volatile boolean disable;
     private static int degradeCheckPeriod;
-    private static boolean degradeCheck;
+    private static volatile boolean degradeCheck;
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static ScheduledThreadPoolExecutor executor =
