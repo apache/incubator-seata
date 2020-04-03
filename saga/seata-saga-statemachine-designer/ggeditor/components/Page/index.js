@@ -35,7 +35,7 @@ class Page extends React.Component {
     }
 
     if (newData !== oldData) {
-      // Compensation类型后置连接点去掉箭头
+      // Remove the arrow after the connection point of the compensation type
       newData.edges.forEach((item) => {
         if (item.type === 'Compensation') {
           item.style = {

@@ -38,7 +38,7 @@ class WorkSpaceBase extends React.Component {
     const { executeCommand, update } = propsAPI;
 
     if (param.action == 'add' && param.item.type == 'edge') {
-      // 默认圆角折线
+      // Default polyline-round type
       if (param.item.target
         && param.item.target.model
         && param.item.source
