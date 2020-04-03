@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * The rm client handle branch commit processor
  * <p>
  * handle TC do global commit command.
+ * {@link BranchCommitRequest}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
