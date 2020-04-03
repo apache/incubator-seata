@@ -235,8 +235,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         executor.scheduleAtFixedRate(() -> {
             if (degradeCheck) {
                 try {
-                    TransactionManagerHolder.get()
-                        .commit(TransactionManagerHolder.get().begin(null, null, "test", 60000));
+                    String xid = TransactionManagerHolder.get().begin(null, null, "test", 60000);
+                    TransactionManagerHolder.get().commit(xid);
                     onSelfCheck(true);
                 } catch (Exception e) {
                     onSelfCheck(false);
