@@ -96,7 +96,7 @@ public class SQLVisitorFactoryTest {
         //test for oracle select for update
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, true);
-        Assertions.assertEquals(recognizer.getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
+        Assertions.assertNull(recognizer);
 
         //test for oracle select for update
         sql = "select * from t for update";
