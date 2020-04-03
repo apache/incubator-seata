@@ -65,7 +65,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
-    private static volatile boolean localDisable;
     private static int degradeCheckPeriod;
     private static boolean degradeCheck;
     private static int degradeCheckAllowTimes;
@@ -85,8 +84,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
         this.degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
-        this.localDisable = disable;
-        if (!localDisable && degradeCheck) {
+        if (degradeCheck) {
             this.degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
             this.degradeCheckAllowTimes = ConfigurationFactory.getInstance()
@@ -105,7 +103,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
-        if (!localDisable && !disable) {
+        boolean localDisable = (disable) || (degradeCheck && degradeNum > degradeCheckAllowTimes);
+        if (!localDisable) {
             if (globalTransactionalAnnotation != null) {
                 return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
             } else if (globalLockAnnotation != null) {
@@ -191,7 +190,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            if (!degradeCheck) {
+            if (degradeCheck) {
                 onSelfCheck(succeed);
             }
         }
@@ -221,13 +220,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                 disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
-            if (!degradeCheck && disable != localDisable) {
-                localDisable = disable;
-            }
         } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
             degradeCheck = Boolean.parseBoolean(event.getNewValue());
             if (!degradeCheck) {
-                localDisable = disable;
                 degradeNum = 0;
             }
         }
@@ -258,8 +253,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         } else {
             if (degradeNum < degradeCheckAllowTimes) {
                 degradeNum++;
-            } else {
-                localDisable = true;
             }
         }
     }
