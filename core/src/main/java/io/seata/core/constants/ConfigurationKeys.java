@@ -421,17 +421,17 @@ public class ConfigurationKeys {
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
-     * The constant CLIENT_HEALTH_CHECK_PERIOD.
+     * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
-    public static final String CLIENT_HEALTH_CHECK_PERIOD = CLIENT_TM_PREFIX + "healthCheckPeriod";
+    public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
 
     /**
-     * The constant CLIENT_HEALTH_CHECK.
+     * The constant CLIENT_DEGRADE_CHECK.
      */
-    public static final String CLIENT_HEALTH_CHECK = CLIENT_TM_PREFIX + "healthCheck";
+    public static final String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
     /**
-     * The constant CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES.
+     * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
-    public static final String CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES = CLIENT_TM_PREFIX + "healthCheckDegradeAllowTimes";
+    public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
 
 }

@@ -47,9 +47,9 @@ import org.springframework.util.ClassUtils;
 
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
-import static io.seata.core.constants.DefaultValues.DEFAULT_TM_HEALTH_CHECK;
-import static io.seata.core.constants.DefaultValues.DEFAULT_TM_HEALTH_CHECK_DEGRADE_ALLOW_TIMES;
-import static io.seata.core.constants.DefaultValues.DEFAULT_TM_HEALTH_CHECK_PERIOD;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
 
 /**
  * The type Global transactional interceptor.
@@ -65,12 +65,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
-    private static int healthCheckPeriod;
-    private static boolean healthCheck;
-    private static int healthCheckDegradeAllowTimes;
+    private static int degradeCheckPeriod;
+    private static boolean degradeCheck;
+    private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static ScheduledThreadPoolExecutor executor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("healthCheckWorker", 1, true));
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
 
     /**
      * Instantiates a new Global transactional interceptor.
@@ -82,14 +82,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-        this.healthCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_HEALTH_CHECK,
-            DEFAULT_TM_HEALTH_CHECK);
-        if (healthCheck) {
-            this.healthCheckPeriod = ConfigurationFactory.getInstance()
-                .getInt(ConfigurationKeys.CLIENT_HEALTH_CHECK_PERIOD, DEFAULT_TM_HEALTH_CHECK_PERIOD);
-            this.healthCheckDegradeAllowTimes = ConfigurationFactory.getInstance().getInt(
-                ConfigurationKeys.CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES, DEFAULT_TM_HEALTH_CHECK_DEGRADE_ALLOW_TIMES);
-            if (healthCheckPeriod > 0 && healthCheckDegradeAllowTimes > 0) {
+        this.degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+            DEFAULT_TM_DEGRADE_CHECK);
+        if (degradeCheck) {
+            this.degradeCheckPeriod = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
+            this.degradeCheckAllowTimes = ConfigurationFactory.getInstance().getInt(
+                ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
+            if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startSelfCheck();
             }
         }
@@ -103,7 +103,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
-        if (!healthCheck || degradeNum < healthCheckDegradeAllowTimes) {
+        if (!degradeCheck || degradeNum < degradeCheckAllowTimes) {
             if (!disable && globalTransactionalAnnotation != null) {
                 return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
             } else if (!disable && globalLockAnnotation != null) {
@@ -189,7 +189,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            if (!healthCheck) {
+            if (!degradeCheck) {
                 onSelfCheck(succeed);
             }
         }
@@ -219,9 +219,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                 disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
-        } else if (ConfigurationKeys.CLIENT_HEALTH_CHECK.equals(event.getDataId())) {
-            healthCheck = Boolean.parseBoolean(event.getNewValue());
-            if (!healthCheck) {
+        } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
+            degradeCheck = Boolean.parseBoolean(event.getNewValue());
+            if (!degradeCheck) {
                 degradeNum = 0;
             }
         }
@@ -232,7 +232,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      */
     private static void startSelfCheck() {
         executor.scheduleAtFixedRate(() -> {
-            if (healthCheck) {
+            if (degradeCheck) {
                 try {
                     TransactionManagerHolder.get()
                         .commit(TransactionManagerHolder.get().begin(null, null, "test", 60000));
@@ -241,7 +241,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     onSelfCheck(false);
                 }
             }
-        }, 10, healthCheckPeriod, TimeUnit.MILLISECONDS);
+        }, 10, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
 
     private static synchronized void onSelfCheck(boolean succeed) {
@@ -250,7 +250,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 degradeNum--;
             }
         } else {
-            if (degradeNum < healthCheckDegradeAllowTimes) {
+            if (degradeNum < degradeCheckAllowTimes) {
                 degradeNum++;
             }
         }

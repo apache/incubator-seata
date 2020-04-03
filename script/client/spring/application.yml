@@ -16,9 +16,9 @@ seata:
         retry-times: 30
         retry-policy-branch-rollback-on-conflict: true
     tm:
-      health-check: false
-      health-check-period: 2000
-      health-check-degrade-allow-times: 10
+      degrade-check: false
+      degrade-check-period: 2000
+      degrade-check-degrade-allow-times: 10
       commit-retry-count: 5
       rollback-retry-count: 5
     undo:
