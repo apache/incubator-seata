@@ -55,7 +55,7 @@ public class DruidDelegatingSQLRecognizerFactory implements SQLRecognizerFactory
     }
 
     @Override
-    public SQLRecognizer create(String sql, String dbType) {
-        return recognizerFactoryImpl.create(sql, dbType);
+    public SQLRecognizer create(String sql, String dbType, boolean isSelectTransformForUpdate) {
+        return recognizerFactoryImpl.create(sql, dbType, isSelectTransformForUpdate);
     }
 }

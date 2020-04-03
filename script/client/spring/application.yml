@@ -15,6 +15,8 @@ seata:
         retry-interval: 10
         retry-times: 30
         retry-policy-branch-rollback-on-conflict: true
+        globalTransactionSelectToForUpdateEnable: false
+        globalLockSelectToForUpdateEnable: false
     tm:
       commit-retry-count: 5
       rollback-retry-count: 5

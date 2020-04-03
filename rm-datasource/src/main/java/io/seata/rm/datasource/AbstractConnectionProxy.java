@@ -108,7 +108,7 @@ public abstract class AbstractConnectionProxy implements Connection {
         // support oracle 10.2+
         PreparedStatement targetPreparedStatement = null;
         if (RootContext.inGlobalTransaction()) {
-            SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
+            SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType, false);
             if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
                 String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
                 TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),

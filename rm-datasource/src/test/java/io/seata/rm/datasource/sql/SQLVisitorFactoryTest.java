@@ -41,65 +41,75 @@ public class SQLVisitorFactoryTest {
     public void testSqlRecognizing() {
 
         //test for ast was null
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("", JdbcConstants.MYSQL));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("", JdbcConstants.MYSQL, false));
 
         //test for mysql insert
         String sql = "insert into t(id) values (1)";
-        SQLRecognizer recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        SQLRecognizer recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, false);
         Assertions.assertEquals(recognizer.getClass().getName(), MySQLInsertRecognizer.class.getName());
 
         //test for mysql delete
         sql = "delete from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, false);
         Assertions.assertEquals(recognizer.getClass().getName(), MySQLDeleteRecognizer.class.getName());
 
         //test for mysql update
         sql = "update t set a = a";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, false);
         Assertions.assertEquals(recognizer.getClass().getName(), MySQLUpdateRecognizer.class.getName());
 
         //test for mysql select
         sql = "select * from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, false);
+        Assertions.assertNull(recognizer);
+
+        //test for mysql select transform selectForUpdate
+        sql = "select * from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, true);
+        Assertions.assertEquals(recognizer.getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
 
         //test for mysql select for update
         sql = "select * from t for update";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, false);
         Assertions.assertEquals(recognizer.getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
 
         //test for oracle insert
         sql = "insert into t(id) values (1)";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, false);
         Assertions.assertEquals(recognizer.getClass().getName(), OracleInsertRecognizer.class.getName());
 
         //test for oracle delete
         sql = "delete from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, false);
         Assertions.assertEquals(recognizer.getClass().getName(), OracleDeleteRecognizer.class.getName());
 
         //test for oracle update
         sql = "update t set a = a";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, false);
         Assertions.assertEquals(recognizer.getClass().getName(), OracleUpdateRecognizer.class.getName());
 
         //test for oracle select
         sql = "select * from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, false);
+        Assertions.assertEquals(recognizer.getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
+
+        //test for oracle select for update
+        sql = "select * from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, true);
+        Assertions.assertEquals(recognizer.getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
 
         //test for oracle select for update
         sql = "select * from t for update";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, false);
         Assertions.assertEquals(recognizer.getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
 
         //test for do not support db
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2, false));
     }
 
     @Test
     public void testSqlRecognizerLoading() {
-        SQLRecognizer recognizer = SQLVisitorFactory.get("update t1 set name = 'test' where id = '1'", JdbcConstants.MYSQL);
+        SQLRecognizer recognizer = SQLVisitorFactory.get("update t1 set name = 'test' where id = '1'", JdbcConstants.MYSQL, false);
         Assertions.assertNotNull(recognizer);
         Assertions.assertEquals(SQLType.UPDATE, recognizer.getSQLType());
         Assertions.assertEquals("t1", recognizer.getTableName());

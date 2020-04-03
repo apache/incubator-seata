@@ -46,8 +46,8 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
     }
 
     @Override
-    public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
+    public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast, boolean isSelectTransformForUpdate) {
+        if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate() || isSelectTransformForUpdate) {
             return new OracleSelectForUpdateRecognizer(sql, ast);
         }
         return null;

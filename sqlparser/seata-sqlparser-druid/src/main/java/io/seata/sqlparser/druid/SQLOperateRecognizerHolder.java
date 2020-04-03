@@ -57,8 +57,9 @@ public interface SQLOperateRecognizerHolder {
      *
      * @param sql the sql
      * @param ast the ast
+     * @param isSelectTransformForUpdate the isSelectTransformForUpdate
      * @return the SelectForUpdate recognizer
      */
-    SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
+    SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast, boolean isSelectTransformForUpdate);
 
 }

@@ -128,9 +128,9 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
 
-    public static final String CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE = CLIENT_RM_PREFIX + "globalTransactionSelectForUpdateEnable";
+    public static final String CLIENT_RM_GLOBAL_TRANSACTION_SELECT_TO_FOR_UPDATE_ENABLE = CLIENT_RM_PREFIX + "globalTransactionSelectToForUpdateEnable";
 
-    public static final String CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE = CLIENT_RM_PREFIX + "globalLockSelectForUpdateEnable";
+    public static final String CLIENT_RM_GLOBAL_LOCK_SELECT_TO_FOR_UPDATE_ENABLE = CLIENT_RM_PREFIX + "globalLockSelectToForUpdateEnable";
 
     /**
      * The constant CLIENT_TM_PREFIX.

@@ -29,7 +29,7 @@ public class DruidSQLRecognizerFactoryTest {
     public void testSqlRecognizerCreation() {
         SQLRecognizerFactory recognizerFactory = EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
-        SQLRecognizer recognizer = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL);
+        SQLRecognizer recognizer = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL, false);
         Assertions.assertNotNull(recognizer);
         Assertions.assertEquals(SQLType.DELETE, recognizer.getSQLType());
     }

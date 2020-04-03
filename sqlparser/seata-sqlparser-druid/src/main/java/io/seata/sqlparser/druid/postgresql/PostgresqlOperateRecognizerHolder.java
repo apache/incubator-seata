@@ -47,9 +47,10 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
     }
 
     @Override
-    public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
+    public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast, boolean isSelectTransformForUpdate) {
         PGSelectQueryBlock selectQueryBlock = (PGSelectQueryBlock) ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock();
-        if (selectQueryBlock.getForClause() != null && selectQueryBlock.getForClause().getOption().equals(PGSelectQueryBlock.ForClause.Option.UPDATE)) {
+        if ((selectQueryBlock.getForClause() != null && selectQueryBlock.getForClause().getOption().equals(PGSelectQueryBlock.ForClause.Option.UPDATE))
+            || isSelectTransformForUpdate) {
             return new PostgresqlSelectForUpdateRecognizer(sql, ast);
         }
         return null;

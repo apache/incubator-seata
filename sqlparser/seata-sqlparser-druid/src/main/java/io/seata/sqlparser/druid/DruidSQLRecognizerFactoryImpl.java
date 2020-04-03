@@ -15,6 +15,8 @@
  */
 package io.seata.sqlparser.druid;
 
+import java.util.List;
+
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
@@ -23,9 +25,6 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
-import io.seata.sqlparser.SQLType;
-
-import java.util.List;
 
 /**
  * DruidSQLRecognizerFactoryImpl
@@ -35,7 +34,7 @@ import java.util.List;
  */
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
-    public SQLRecognizer create(String sql, String dbType) {
+    public SQLRecognizer create(String sql, String dbType, boolean isSelectTransformForUpdate) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
         if (asts == null || asts.size() != 1) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
@@ -43,7 +42,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
         SQLRecognizer recognizer = null;
         SQLStatement ast = asts.get(0);
         SQLOperateRecognizerHolder recognizerHolder =
-                SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
+            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
         if (ast instanceof SQLInsertStatement) {
             recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
         } else if (ast instanceof SQLUpdateStatement) {
@@ -51,30 +50,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
         } else if (ast instanceof SQLDeleteStatement) {
             recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
         } else if (ast instanceof SQLSelectStatement) {
-            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
-            if (recognizer == null) {
-                recognizer = new SQLRecognizer() {
-                    @Override
-                    public SQLType getSQLType() {
-                        return SQLType.SELECT;
-                    }
-
-                    @Override
-                    public String getTableAlias() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getTableName() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getOriginalSQL() {
-                        return null;
-                    }
-                };
-            }
+            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast, isSelectTransformForUpdate);
         }
         return recognizer;
     }

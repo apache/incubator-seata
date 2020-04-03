@@ -39,7 +39,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetSqlType() {
         String sql = "delete from t where id = ?";
 
-        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.DELETE);
     }
 
@@ -47,7 +47,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetTableAlias() {
         String sql = "delete from t where id = ?";
 
-        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
@@ -56,7 +56,7 @@ public class PostgresqlDeleteRecognizerTest {
         String sql = "delete from t where id = ?";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 
@@ -64,7 +64,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetWhereCondition_0() {
         String sql = "delete from t";
 
-        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -80,7 +80,7 @@ public class PostgresqlDeleteRecognizerTest {
     public void testGetWhereCondition_1() {
         String sql = "delete from t";
 
-        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
         String whereCondition = recognizer.getWhereCondition();
 
         //test for no condition

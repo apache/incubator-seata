@@ -33,9 +33,9 @@ import io.seata.sqlparser.SQLRecognizer;
 public class ExecuteTemplate {
 
     private static boolean CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE, false);
+        ConfigurationKeys.CLIENT_RM_GLOBAL_TRANSACTION_SELECT_TO_FOR_UPDATE_ENABLE, false);
     private static boolean CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE, false);
+        ConfigurationKeys.CLIENT_RM_GLOBAL_LOCK_SELECT_TO_FOR_UPDATE_ENABLE, false);
 
     /**
      * Execute t.
@@ -77,9 +77,11 @@ public class ExecuteTemplate {
         }
 
         if (sqlRecognizer == null) {
+            boolean isSelectTransformForUpdate = (RootContext.requireGlobalLock() && CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE)
+                || (RootContext.inGlobalTransaction() && CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE);
             sqlRecognizer = SQLVisitorFactory.get(
                 statementProxy.getTargetSQL(),
-                statementProxy.getConnectionProxy().getDbType());
+                statementProxy.getConnectionProxy().getDbType(), isSelectTransformForUpdate);
         }
         Executor<T> executor;
         if (sqlRecognizer == null) {
@@ -98,14 +100,6 @@ public class ExecuteTemplate {
                 case SELECT_FOR_UPDATE:
                     executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
-                case SELECT:
-                    if ((RootContext.requireGlobalLock() && CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE)
-                        || (RootContext.inGlobalTransaction() && CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE)) {
-                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    } else {
-                        executor = new PlainExecutor<>(statementProxy, statementCallback);
-                    }
-                    break;
                 default:
                     executor = new PlainExecutor<>(statementProxy, statementCallback);
                     break;
@@ -119,7 +113,7 @@ public class ExecuteTemplate {
                 // Turn other exception into SQLException
                 ex = new SQLException(ex);
             }
-            throw (SQLException)ex;
+            throw (SQLException) ex;
         }
         return rs;
     }
