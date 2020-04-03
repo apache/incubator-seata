@@ -103,7 +103,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
-        boolean localDisable = (disable) || (degradeCheck && degradeNum > degradeCheckAllowTimes);
+        boolean localDisable = disable || (degradeCheck && degradeNum > degradeCheckAllowTimes);
         if (!localDisable) {
             if (globalTransactionalAnnotation != null) {
                 return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
