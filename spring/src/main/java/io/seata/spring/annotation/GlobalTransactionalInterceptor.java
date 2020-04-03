@@ -45,10 +45,11 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SELF_CHECK;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SELF_CHECK_PERIOD;
+
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_HEALTH_CHECK;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_HEALTH_CHECK_DEGRADE_ALLOW_TIMES;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_HEALTH_CHECK_PERIOD;
 
 /**
  * The type Global transactional interceptor.
@@ -82,12 +83,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
         this.healthCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_HEALTH_CHECK,
-            DEFAULT_CLIENT_SELF_CHECK);
+            DEFAULT_TM_HEALTH_CHECK);
         if (healthCheck) {
             this.healthCheckPeriod = ConfigurationFactory.getInstance()
-                .getInt(ConfigurationKeys.CLIENT_HEALTH_CHECK_PERIOD, DEFAULT_CLIENT_SELF_CHECK_PERIOD);
+                .getInt(ConfigurationKeys.CLIENT_HEALTH_CHECK_PERIOD, DEFAULT_TM_HEALTH_CHECK_PERIOD);
             this.healthCheckDegradeAllowTimes = ConfigurationFactory.getInstance().getInt(
-                ConfigurationKeys.CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES, DEFAULT_CLIENT_SELF_CHECK_ALLOW_TIMES);
+                ConfigurationKeys.CLIENT_HEALTH_CHECK_DEGRADE_ALLOW_TIMES, DEFAULT_TM_HEALTH_CHECK_DEGRADE_ALLOW_TIMES);
             if (healthCheckPeriod > 0 && healthCheckDegradeAllowTimes > 0) {
                 startSelfCheck();
             }
