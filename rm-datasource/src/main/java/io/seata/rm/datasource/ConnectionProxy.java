@@ -15,10 +15,8 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.util.CollectionUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import io.seata.common.util.StringUtils;
@@ -110,6 +108,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * @throws SQLException the sql exception
      */
     public void checkLock(String lockKeys) throws SQLException {
+        if (StringUtils.isBlank(lockKeys)) {
+            return;
+        }
         // Just check lock without requiring lock by now.
         try {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
@@ -200,10 +201,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
-        Set<String> lockKeys = context.getLockKeysBuffer();
-        if (CollectionUtils.isNotEmpty(lockKeys)) {
-            checkLock(context.buildLockKeys());
-        }
+        checkLock(context.buildLockKeys());
         try {
             targetConnection.commit();
         } catch (Throwable ex) {
