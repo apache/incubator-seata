@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
  * The rm handler undo log processor
  * <p>
  * handle TC undo log delete command.
+ * {@link UndoLogDeleteRequest}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
