@@ -284,6 +284,11 @@
             <artifactId>seata-compressor-zip</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-lz4</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- saga -->
         <dependency>
