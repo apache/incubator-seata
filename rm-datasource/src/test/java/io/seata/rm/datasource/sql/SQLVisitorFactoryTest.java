@@ -91,12 +91,12 @@ public class SQLVisitorFactoryTest {
         //test for oracle select
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, false);
-        Assertions.assertEquals(recognizer.getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
+        Assertions.assertNull(recognizer);
 
         //test for oracle select for update
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, true);
-        Assertions.assertNull(recognizer);
+        Assertions.assertEquals(recognizer.getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
 
         //test for oracle select for update
         sql = "select * from t for update";
