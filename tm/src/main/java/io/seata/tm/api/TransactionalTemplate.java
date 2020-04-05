@@ -135,9 +135,7 @@ public class TransactionalTemplate {
         //roll back
         if (txInfo != null && txInfo.rollbackOn(ex)) {
             try {
-                if (tx.getRole() == GlobalTransactionRole.Launcher || txInfo.getParticipantReportRollback()) {
-                    rollbackTransaction(tx, ex);
-                }
+                rollbackTransaction(tx, ex, txInfo);
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -161,12 +159,14 @@ public class TransactionalTemplate {
         }
     }
 
-    private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
+    private void rollbackTransaction(GlobalTransaction tx, Throwable ex, TransactionInfo txInfo) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         //check branch rollback
-        if (!(ex instanceof TransactionException
-                && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantReportedRollback)) {
-            tx.rollback();
+        if (tx.getRole() == GlobalTransactionRole.Launcher || txInfo.getParticipantReportRollback()) {
+            if (!(ex instanceof TransactionException
+                    && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantReportedRollback)) {
+                tx.rollback();
+            }
         }
         triggerAfterRollback();
         // 3.1 Successfully rolled back
@@ -276,7 +276,7 @@ public class TransactionalTemplate {
             if (tx.getRole() == GlobalTransactionRole.Launcher) {
                 return TransactionalExecutor.Code.RollbackRetrying;
             } else {
-                return TransactionalExecutor.Code.ParticipantRollbackDone;
+                return TransactionalExecutor.Code.ParticipantRollbackFailure;
             }
         } else {
             if (tx.getRole() == GlobalTransactionRole.Launcher) {
