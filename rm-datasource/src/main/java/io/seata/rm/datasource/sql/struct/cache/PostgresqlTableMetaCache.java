@@ -100,11 +100,23 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
          * select * from "Select"
          * select * from "Sel""ect"
          * select * from "Sel'ect"
+         * select * from TEST.test
+         * select * from test.TEST
+         * select * from "Test".test
+         * select * from "Test"."Select"
          */
         if (null != schemaName) {
-            schemaName = schemaName.replaceAll("(^\")|(\"$)", "");
+            if (schemaName.startsWith("\"") && schemaName.endsWith("\"")) {
+                schemaName = schemaName.replaceAll("(^\")|(\"$)", "");
+            } else {
+                schemaName = schemaName.toLowerCase();
+            }
         }
-        tableName = tableName.replaceAll("(^\")|(\"$)", "");
+        if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
+            tableName = tableName.replaceAll("(^\")|(\"$)", "");
+        } else {
+            tableName = tableName.toLowerCase();
+        }
 
         try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
