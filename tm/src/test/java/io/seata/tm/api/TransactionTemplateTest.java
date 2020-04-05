@@ -148,7 +148,7 @@ public class TransactionTemplateTest {
         Throwable rollbackFailException = new TransactionException("Failed to report global rollback", runtimeException);
 
         TransactionInfo transactionInfo = new TransactionInfo();
-        transactionInfo.setParticipantReportRollback(false);
+        transactionInfo.setParticipantReportRollback(true);
 
         //When Participant RuntimeException occurred, rollback and throw original Exception
         try {
