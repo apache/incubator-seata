@@ -1,11 +1,10 @@
 package io.seata.discovery.loadbalance;
 
-import io.seata.common.loader.LoadLevel;
-
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadLocalRandom;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.rpc.RpcStatus;
 
 /**
  * The type Random load balance.
@@ -15,31 +14,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 @LoadLevel(name = "LeastActiveLoadBalance", order = 4)
 public class LeastActiveLoadBalance extends AbstractLoadBalance {
 
-    private static final ConcurrentMap<String, AtomicInteger> ACTIVE_MAP = new ConcurrentHashMap<>();
-
     @Override
     protected <T> T doSelect(List<T> invokers) {
+        int length = invokers.size();
         int leastActive = -1;
-        int leastIndex = 0;
-        for (int i = 0; i < invokers.size(); i++) {
-            int active = ACTIVE_MAP.computeIfAbsent(String.valueOf(invokers.get(i)),
-                    e -> new AtomicInteger(0)).get();
+        int leastCount = 0;
+        int[] leastIndexes = new int[length];
+        for (int i = 0; i < length; i++) {
+            int active = RpcStatus.getStatus(String.valueOf(invokers.get(i))).getActive();
             if (leastActive == -1 || active < leastActive) {
                 leastActive = active;
-                leastIndex = i;
+                leastCount = 1;
+                leastIndexes[0] = i;
+            } else if (active == leastActive) {
+                leastIndexes[leastCount++] = i;
             }
         }
-        addActive(ACTIVE_MAP.get(String.valueOf(invokers.get(leastIndex))));
-        return invokers.get(leastIndex);
-    }
-
-    private void addActive(AtomicInteger active) {
-        for (; ; ) {
-            int current = active.get();
-            int next = current >= Integer.MAX_VALUE ? 0 : current + 1;
-            if (active.compareAndSet(current, next)) {
-                return;
-            }
+        if (leastCount == 1) {
+            return invokers.get(leastIndexes[0]);
         }
+        return invokers.get(leastIndexes[ThreadLocalRandom.current().nextInt(leastCount)]);
     }
 }
