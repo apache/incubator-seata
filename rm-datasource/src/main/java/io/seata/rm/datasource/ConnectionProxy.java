@@ -231,7 +231,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 report(false);
                 throw new SQLException(ex);
             } else {
-                LOGGER.error("process connectionProxy commit error: {},but has nothing to commit", ex.getMessage(), ex);
+                LOGGER.error("process connectionProxy commit error: {},and the undolog is null", ex.getMessage(), ex);
             }
         }
         if (IS_REPORT_SUCCESS_ENABLE && hasUndoLog) {
