@@ -61,11 +61,6 @@ public enum TransactionExceptionCode {
     BranchRegisterFailed,
 
     /**
-     * Branch transaction has not registered but local commit failed
-     */
-    BranchLocalCommitFailed_NotRegistered,
-
-    /**
      * Branch report failed transaction exception code.
      */
     BranchReportFailed,

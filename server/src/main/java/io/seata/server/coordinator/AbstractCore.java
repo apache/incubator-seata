@@ -39,7 +39,6 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.exception.TransactionExceptionCode.BranchLocalCommitFailed_NotRegistered;
 import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
 import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
@@ -124,10 +123,6 @@ public abstract class AbstractCore implements Core {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
                              String applicationData) throws TransactionException {
-        if (BranchStatus.PhaseOne_Failed_NotRegistered.equals(status)) {
-            throw new BranchTransactionException(BranchLocalCommitFailed_NotRegistered,
-                    String.format("The Phase one local commit failed,and has not registered. xid = %s",xid));
-        }
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, true);
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {

@@ -226,9 +226,13 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         try {
             targetConnection.commit();
         } catch (Throwable ex) {
-            LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
-            report(false);
-            throw new SQLException(ex);
+            if (hasUndoLog) {
+                LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
+                report(false);
+                throw new SQLException(ex);
+            } else {
+                LOGGER.error("process connectionProxy commit error: {},but has nothing to commit", ex.getMessage(), ex);
+            }
         }
         if (IS_REPORT_SUCCESS_ENABLE && hasUndoLog) {
             report(true);
@@ -265,7 +269,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                    handleBranchStatus(commitDone), null);
+                        commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
@@ -277,20 +281,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 }
             }
         }
-    }
-
-    private BranchStatus handleBranchStatus(boolean commitDone) {
-        BranchStatus branchStatus = null;
-        if (!commitDone) {
-            if (context.getBranchId() == null) {
-                branchStatus = BranchStatus.PhaseOne_Failed_NotRegistered;
-            } else {
-                branchStatus = BranchStatus.PhaseOne_Failed;
-            }
-        } else {
-            branchStatus = BranchStatus.PhaseOne_Done;
-        }
-        return branchStatus;
     }
 
     public static class LockRetryPolicy {
