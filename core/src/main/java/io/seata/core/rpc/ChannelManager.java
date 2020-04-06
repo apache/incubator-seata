@@ -135,8 +135,7 @@ public class ChannelManager {
         Version.checkVersion(request.getVersion());
 
         // remove channel from identified channels if expired.
-        String clientIdentified = request.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-            + ChannelUtil.getClientIpFromChannel(newChannel);
+        String clientIdentified = getClientIdentified(request.getApplicationId(), newChannel);
         Channel expiredChannel = TM_CLIENT_ACTIVE_CHANNELS.get(clientIdentified);
         if (expiredChannel != null) {
             releaseRpcContext(expiredChannel);
@@ -156,6 +155,10 @@ public class ChannelManager {
         rpcContext.holdInClientChannels(clientIdentifiedMap);
     }
 
+    private static String getClientIdentified(String applicationId, Channel channel) {
+        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + ChannelUtil.getClientIpFromChannel(channel);
+    }
+
     /**
      * Register rm channel.
      *
@@ -169,8 +172,7 @@ public class ChannelManager {
         Set<String> dbkeySet = dbKeytoSet(request.getResourceIds());
 
         // remove channel from identified channels if expired.
-        String clientIdentified = request.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-            + ChannelUtil.getClientIpFromChannel(newChannel);
+        String clientIdentified = getClientIdentified(request.getApplicationId(), newChannel);
         Channel expiredChannel = RM_CLIENT_ACTIVE_CHANNELS.get(clientIdentified);
         if (expiredChannel != null) {
             releaseRpcContext(expiredChannel);
