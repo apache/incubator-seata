@@ -19,6 +19,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
 import io.seata.tm.api.GlobalTransaction;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 
 /**
  *
@@ -69,6 +70,18 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
+    public SuspendedResourcesHolder suspend(boolean unbindXid)
+            throws TransactionException {
+        return null;
+    }
+
+    @Override
+    public void resume(SuspendedResourcesHolder suspendedResourcesHolder)
+            throws TransactionException {
+
+    }
+
+    @Override
     public GlobalStatus getStatus() throws TransactionException {
         return status;
     }
@@ -81,5 +94,10 @@ public class MockGlobalTransaction implements GlobalTransaction {
     @Override
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
 
+    }
+
+    @Override
+    public GlobalStatus getLocalStatus() {
+        return status;
     }
 }

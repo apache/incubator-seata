@@ -25,10 +25,11 @@ import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.sql.struct.Field;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -37,14 +38,14 @@ import org.junit.jupiter.api.Test;
  */
 public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
 
-    JacksonUndoLogParser parser = new JacksonUndoLogParser();
+    JacksonUndoLogParser parser = (JacksonUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, JacksonUndoLogParser.NAME);
 
     @Test
     public void encode() throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
         //get the jackson mapper
-        java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("MAPPER");
+        java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
         reflectField.setAccessible(true);
-        ObjectMapper mapper = (ObjectMapper)reflectField.get(null);
+        ObjectMapper mapper = (ObjectMapper)reflectField.get(parser);
 
         //bigint type
         Field field = new Field("bigint_type", JDBCType.BIGINT.getVendorTypeNumber(), 9223372036854775807L);

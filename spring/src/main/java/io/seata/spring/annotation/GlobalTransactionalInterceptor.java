@@ -42,12 +42,14 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+
 /**
  * The type Global transactional interceptor.
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener,MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -65,7 +67,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-            false);
+            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
     }
 
     @Override
@@ -90,12 +92,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return globalLockTemplate.execute(() -> {
             try {
                 return methodInvocation.proceed();
+            } catch (Exception e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof Exception) {
-                    throw (Exception)e;
-                } else {
-                    throw new RuntimeException(e);
-                }
+                throw new RuntimeException(e);
             }
         });
     }
@@ -122,6 +122,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
                     transactionInfo.setName(name());
+                    transactionInfo.setPropagation(globalTrxAnno.propagation());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
@@ -153,8 +154,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
+                case RollbackRetrying:
+                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
+                    throw e.getCause();
                 default:
-                    throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
 
             }
         }

@@ -35,6 +35,7 @@
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
         <module>integration/grpc</module>
+        <module>integration/http</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -43,19 +44,17 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
-        <module>codec</module>
+        <module>serializer</module>
         <module>seata-spring-boot-starter</module>
         <module>compressor</module>
         <module>saga</module>
+        <module>sqlparser</module>
     </modules>
     <packaging>pom</packaging>
 
     <name>Seata Parent POM ${project.version}</name>
     <url>http://seata.io</url>
     <description>top seata project pom.xml file</description>
-    <prerequisites>
-        <maven>3.6.0</maven>
-    </prerequisites>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -89,7 +88,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.1.0-SNAPSHOT</revision>
+        <revision>1.2.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -475,6 +474,26 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

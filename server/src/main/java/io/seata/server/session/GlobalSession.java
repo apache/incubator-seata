@@ -32,7 +32,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.LockerFactory;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
@@ -111,6 +111,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             }
         }
         return true;
+    }
+
+    /**
+     * Is saga type transaction
+     *
+     * @return is saga
+     */
+    public boolean isSaga() {
+        if (branchSessions.size() > 0) {
+            return BranchType.SAGA == branchSessions.get(0).getBranchType();
+        }
+        return false;
     }
 
     /**
@@ -184,7 +196,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void clean() throws TransactionException {
-        LockerFactory.getLockManager().releaseGlobalSessionLock(this);
+        LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
 
     }
 
@@ -260,8 +272,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the sorted branches
      */
     public ArrayList<BranchSession> getSortedBranches() {
-        ArrayList<BranchSession> sorted = new ArrayList<>(branchSessions);
-        return sorted;
+        return new ArrayList<>(branchSessions);
     }
 
     /**
@@ -590,24 +601,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         globalSessionLock.unlock();
     }
 
-    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException {
-        this.lock();
-        try {
-            excuteRunnable.run();
-        } finally {
-            this.unlock();
-        }
-    }
-
-    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException {
-        this.lock();
-        try {
-            return lockCallable.call();
-        } finally {
-            this.unlock();
-        }
-    }
-
     private static class GlobalSessionLock {
 
         private Lock globalSessionLock = new ReentrantLock();
@@ -645,5 +638,28 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public ArrayList<BranchSession> getBranchSessions() {
         return branchSessions;
+    }
+
+    public void asyncCommit() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
+        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+        this.changeStatus(GlobalStatus.AsyncCommitting);
+    }
+
+    public void queueToRetryCommit() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
+        SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
+        this.changeStatus(GlobalStatus.CommitRetrying);
+    }
+
+    public void queueToRetryRollback() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+        GlobalStatus currentStatus = this.getStatus();
+        if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
+            this.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
+        } else {
+            this.changeStatus(GlobalStatus.RollbackRetrying);
+        }
     }
 }

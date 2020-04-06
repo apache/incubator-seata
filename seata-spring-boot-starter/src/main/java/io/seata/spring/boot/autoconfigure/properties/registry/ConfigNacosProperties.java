@@ -28,6 +28,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_P
 public class ConfigNacosProperties {
     private String serverAddr = "localhost";
     private String namespace = "";
+    private String group = "SEATA_GROUP";
+    private String username = "";
+    private String password = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -44,6 +47,33 @@ public class ConfigNacosProperties {
 
     public ConfigNacosProperties setNamespace(String namespace) {
         this.namespace = namespace;
+        return this;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public ConfigNacosProperties setGroup(String group) {
+        this.group = group;
+        return this;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public ConfigNacosProperties setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public ConfigNacosProperties setPassword(String password) {
+        this.password = password;
         return this;
     }
 }

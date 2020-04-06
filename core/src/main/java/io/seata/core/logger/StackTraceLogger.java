@@ -19,6 +19,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 
 /**
  * @author jsbxyyx
@@ -27,15 +28,32 @@ public final class StackTraceLogger {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    public static void info(Logger logger, Throwable cause, String format1, Object[] args1, String format2, Object[] args2) {
+    private static final String STACK_TRACE_LOGGER_PREFIX = "[stacktrace]";
+
+    public static void info(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isInfoEnabled()) {
-            int rate = CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, 100);
+            int rate = getRate();
             if (System.currentTimeMillis() % rate == 0) {
-                logger.info(format1, args1, cause);
+                logger.info(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
-                logger.info(format2, args2);
+                logger.info(format, args);
             }
         }
+    }
+
+    public static void warn(Logger logger, Throwable cause, String format, Object[] args) {
+        if (logger.isWarnEnabled()) {
+            int rate = getRate();
+            if (System.currentTimeMillis() % rate == 0) {
+                logger.warn(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
+            } else {
+                logger.warn(format, args);
+            }
+        }
+    }
+
+    private static int getRate() {
+        return CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, DEFAULT_LOG_EXCEPTION_RATE);
     }
 
 }

@@ -15,17 +15,19 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The Type OracleUndoExecutorHolder
  *
  * @author: Zhibei Hao
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleUndoExecutorHolder implements UndoExecutorHolder {
-    private static final String ORACLE = "oracle";
 
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
@@ -40,10 +42,5 @@ public class OracleUndoExecutorHolder implements UndoExecutorHolder {
     @Override
     public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
         return new OracleUndoDeleteExecutor(sqlUndoLog);
-    }
-
-    @Override
-    public String getDbType() {
-        return ORACLE;
     }
 }

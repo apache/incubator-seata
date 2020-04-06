@@ -15,6 +15,15 @@
  */
 package io.seata.core.store.db;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -28,6 +37,17 @@ import io.seata.core.constants.DBType;
  * @author zhangsen
  */
 public abstract class AbstractDataSourceGenerator implements DataSourceGenerator {
+    private final static String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+
+    private final static String MYSQL8_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
+
+    private final static String MYSQL_DRIVER_FILE_PREFIX = "mysql-connector-java-";
+
+    private final static Map<String, ClassLoader> MYSQL_DRIVER_LOADERS;
+
+    static {
+        MYSQL_DRIVER_LOADERS = createMysqlDriverClassLoaders();
+    }
 
     /**
      * The constant CONFIG.
@@ -37,6 +57,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     private static final int DEFAULT_DB_MAX_CONN = 10;
 
     private static final int DEFAULT_DB_MIN_CONN = 1;
+
+    private static final long DEFAULT_DB_MAX_WAIT = 5000;
 
     /**
      * Get db type db type.
@@ -59,6 +81,63 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
                 String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
+    }
+
+    /**
+     * get db max wait
+     *
+     * @return the db max wait
+     */
+    protected Long getMaxWait() {
+        Long maxWait = CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
+        return maxWait;
+    }
+
+    protected ClassLoader getDriverClassLoader() {
+        return MYSQL_DRIVER_LOADERS.getOrDefault(getDriverClassName(), ClassLoader.getSystemClassLoader());
+    }
+
+    private static Map<String, ClassLoader> createMysqlDriverClassLoaders() {
+        Map<String, ClassLoader> loaders = new HashMap<>();
+        String cp = System.getProperty("java.class.path");
+        if (cp == null || cp.isEmpty()) {
+            return loaders;
+        }
+        Stream.of(cp.split(File.pathSeparator))
+                .map(File::new)
+                .filter(File::exists)
+                .map(file -> file.isFile() ? file.getParentFile() : file)
+                .filter(Objects::nonNull)
+                .filter(File::isDirectory)
+                .map(file -> new File(file, "jdbc"))
+                .filter(File::exists)
+                .filter(File::isDirectory)
+                .distinct()
+                .flatMap(file -> {
+                    File[] files = file.listFiles((f, name) -> name.startsWith(MYSQL_DRIVER_FILE_PREFIX));
+                    if (files != null) {
+                        return Stream.of(files);
+                    } else {
+                        return Stream.of();
+                    }
+                })
+                .forEach(file -> {
+                    if (loaders.containsKey(MYSQL8_DRIVER_CLASS_NAME) && loaders.containsKey(MYSQL_DRIVER_CLASS_NAME)) {
+                        return;
+                    }
+                    try {
+                        URL url = file.toURI().toURL();
+                        ClassLoader loader = new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
+                        try {
+                            loader.loadClass(MYSQL8_DRIVER_CLASS_NAME);
+                            loaders.putIfAbsent(MYSQL8_DRIVER_CLASS_NAME, loader);
+                        } catch (ClassNotFoundException e) {
+                            loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
+                        }
+                    } catch (MalformedURLException ignore) {
+                    }
+                });
+        return loaders;
     }
 
     /**
@@ -118,36 +197,6 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     }
 
     /**
-     * Get driver name string.
-     *
-     * @param dbType the db type
-     * @return the string
-     */
-    protected static String getDriverName(DBType dbType) {
-        if (DBType.H2.equals(dbType)) {
-            return "org.h2.Driver";
-        } else if (DBType.MYSQL.equals(dbType)) {
-            return "com.mysql.jdbc.Driver";
-        } else if (DBType.ORACLE.equals(dbType)) {
-            return "oracle.jdbc.OracleDriver";
-        } else if (DBType.SYBAEE.equals(dbType)) {
-            return "com.sybase.jdbc2.jdbc.SybDriver";
-        } else if (DBType.SQLSERVER.equals(dbType)) {
-            return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-        } else if (DBType.SQLITE.equals(dbType)) {
-            return "org.sqlite.JDBC";
-        } else if (DBType.POSTGRESQL.equals(dbType)) {
-            return "org.postgresql.Driver";
-        } else if (DBType.ACCESS.equals(dbType)) {
-            return "com.hxtt.sql.access.AccessDriver";
-        } else if (DBType.DB2.equals(dbType)) {
-            return "com.ibm.db2.jcc.DB2Driver";
-        } else {
-            throw new StoreException("Unsupported database type, dbType:" + dbType);
-        }
-    }
-
-    /**
      * Get validation query string.
      *
      * @param dbType the db type
@@ -160,5 +209,4 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
             return "select 1";
         }
     }
-
 }

@@ -22,7 +22,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -30,6 +29,9 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.util.JdbcUtils;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 
 /**
  * The type Data source proxy.
@@ -50,7 +52,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, false);
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
 
     /**
      * Table meta checker interval
@@ -84,7 +86,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         this.resourceGroupId = resourceGroupId;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
-            dbType = JdbcUtils.getDbType(jdbcUrl, null);
+            dbType = JdbcUtils.getDbType(jdbcUrl);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -94,7 +96,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
                         .refresh(connection, DataSourceProxy.this.getResourceId());
-                } catch (Exception e) {
+                } catch (Exception ignore) {
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
@@ -139,7 +141,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public String getResourceId() {
         if (jdbcUrl.contains("?")) {
-            return jdbcUrl.substring(0, jdbcUrl.indexOf("?"));
+            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
             return jdbcUrl;
         }

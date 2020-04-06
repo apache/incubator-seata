@@ -15,12 +15,12 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,10 +34,24 @@ import java.util.List;
  */
 public class OracleUndoDeleteExecutorTest extends BaseExecutorTest {
 
-    private static OracleUndoDeleteExecutor executor;
+    @Test
+    public void buildUndoSQL() {
+        OracleUndoDeleteExecutor executor = upperCase();
 
-    @BeforeAll
-    public static void beforeAll() {
+        String sql = executor.buildUndoSQL();
+        Assertions.assertNotNull(sql);
+        Assertions.assertTrue(sql.contains("INSERT"));
+        Assertions.assertTrue(sql.contains("ID"));
+        Assertions.assertTrue(sql.contains("TABLE_NAME"));
+    }
+
+    @Test
+    public void getUndoRows() {
+        OracleUndoDeleteExecutor executor = upperCase();
+        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
+    }
+
+    private OracleUndoDeleteExecutor upperCase() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPkName()).thenReturn("ID");
         Mockito.when(tableMeta.getTableName()).thenReturn("TABLE_NAME");
@@ -77,21 +91,8 @@ public class OracleUndoDeleteExecutorTest extends BaseExecutorTest {
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
 
-        executor = new OracleUndoDeleteExecutor(sqlUndoLog);
+        return new OracleUndoDeleteExecutor(sqlUndoLog);
     }
 
-    @Test
-    public void buildUndoSQL() {
-        String sql = executor.buildUndoSQL();
-        Assertions.assertNotNull(sql);
-        Assertions.assertTrue(sql.contains("INSERT"));
-        Assertions.assertTrue(sql.contains("\"ID\""));
-        Assertions.assertTrue(sql.contains("\"TABLE_NAME\""));
-    }
-
-    @Test
-    public void getUndoRows() {
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
-    }
 
 }

@@ -15,20 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.ResourceManagerInbound;
-import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -43,7 +29,22 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.ResourceManagerInbound;
+import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
 /**
  * The type Async worker.
@@ -57,6 +58,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int DEFAULT_RESOURCE_SIZE = 16;
 
     private static final int UNDOLOG_DELETE_LIMIT_SIZE = 1000;
+
 
     private static class Phase2Context {
 
@@ -102,19 +104,16 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
-        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
+        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT);
 
     private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(
         ASYNC_COMMIT_BUFFER_LIMIT);
-
-    private static ScheduledExecutorService timerExecutor;
 
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) throws TransactionException {
         if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
-                + "] will be handled by housekeeping later.");
+            LOGGER.warn("Async commit buffer is FULL. Rejected branch [{}/{}] will be handled by housekeeping later.", branchId, xid);
         }
         return BranchStatus.PhaseTwo_Committed;
     }
@@ -123,38 +122,30 @@ public class AsyncWorker implements ResourceManagerInbound {
      * Init.
      */
     public synchronized void init() {
-        LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
-        timerExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncWorker", 1, true));
-        timerExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
+        LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
+        ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncWorker", 1, true));
+        timerExecutor.scheduleAtFixedRate(() -> {
+            try {
 
-                    doBranchCommits();
+                doBranchCommits();
 
-                } catch (Throwable e) {
-                    LOGGER.info("Failed at async committing ... " + e.getMessage());
+            } catch (Throwable e) {
+                LOGGER.info("Failed at async committing ... {}", e.getMessage());
 
-                }
             }
         }, 10, 1000 * 1, TimeUnit.MILLISECONDS);
     }
 
     private void doBranchCommits() {
-        if (ASYNC_COMMIT_BUFFER.size() == 0) {
+        if (ASYNC_COMMIT_BUFFER.isEmpty()) {
             return;
         }
 
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
         while (!ASYNC_COMMIT_BUFFER.isEmpty()) {
             Phase2Context commitContext = ASYNC_COMMIT_BUFFER.poll();
-            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
-            if (contextsGroupedByResourceId == null) {
-                contextsGroupedByResourceId = new ArrayList<>();
-                mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
-            }
+            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.computeIfAbsent(commitContext.resourceId, k -> new ArrayList<>());
             contextsGroupedByResourceId.add(commitContext);
-
         }
 
         for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
@@ -162,7 +153,7 @@ public class AsyncWorker implements ResourceManagerInbound {
             DataSourceProxy dataSourceProxy;
             try {
                 try {
-                    DataSourceManager resourceManager = (DataSourceManager)DefaultResourceManager.get()
+                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get()
                         .getResourceManager(BranchType.AT);
                     dataSourceProxy = resourceManager.get(entry.getKey());
                     if (dataSourceProxy == null) {
@@ -179,7 +170,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                 for (Phase2Context commitContext : contextsGroupedByResourceId) {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
-                    int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
+                    int maxSize = Math.max(xids.size(), branchIds.size());
                     if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
                             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).batchDeleteUndoLog(
@@ -203,6 +194,16 @@ public class AsyncWorker implements ResourceManagerInbound {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            } catch (Throwable e) {
+                LOGGER.error(e.getMessage(), e);
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    LOGGER.warn("Failed to rollback JDBC resource while deleting undo_log ", rollbackEx);
+                }
             } finally {
                 if (conn != null) {
                     try {

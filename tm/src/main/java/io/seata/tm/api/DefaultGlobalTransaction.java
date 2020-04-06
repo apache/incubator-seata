@@ -15,7 +15,7 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -23,8 +23,12 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 
 /**
  * The type Default global transaction.
@@ -48,10 +52,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalTransactionRole role;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
 
     /**
      * Instantiates a new Default global transaction.
@@ -87,15 +91,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public void begin(int timeout, String name) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
-            check();
+            assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
-        if (xid != null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNull();
         if (RootContext.getXID() != null) {
             throw new IllegalStateException();
         }
@@ -117,9 +119,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
         int retry = COMMIT_RETRY_COUNT;
         try {
             while (retry > 0) {
@@ -135,10 +135,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -156,9 +154,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
 
         int retry = ROLLBACK_RETRY_COUNT;
         try {
@@ -175,14 +171,40 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] rollback status: {}", xid, status);
+        }
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
+        String xid = RootContext.getXID();
+        if (StringUtils.isNotEmpty(xid) && unbindXid) {
+            RootContext.unbind();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Suspending current transaction,xid = {}",xid);
+            }
+        } else {
+            xid = null;
+        }
+        return new SuspendedResourcesHolder(xid);
+    }
+
+    @Override
+    public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
+        if (suspendedResourcesHolder == null) {
+            return;
+        }
+        String xid = suspendedResourcesHolder.getXid();
+        if (StringUtils.isNotEmpty(xid)) {
+            RootContext.bind(xid);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Resumimg the transaction,xid = {}", xid);
+            }
         }
     }
 
@@ -202,9 +224,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
+
         if (globalStatus == null) {
             throw new IllegalStateException();
         }
@@ -214,17 +235,26 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
-            }
+        if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            suspend(true);
         }
     }
 
-    private void check() {
+    @Override
+    public GlobalStatus getLocalStatus() {
+        return status;
+    }
+
+    private void assertXIDNotNull() {
         if (xid == null) {
-            throw new ShouldNeverHappenException();
+            throw new IllegalStateException();
         }
-
     }
+
+    private void assertXIDNull() {
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
+    }
+
 }

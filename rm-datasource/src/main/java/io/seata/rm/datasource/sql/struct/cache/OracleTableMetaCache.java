@@ -21,40 +21,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Table meta cache.
  *
  * @author ygy
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleTableMetaCache extends AbstractTableMetaCache {
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private OracleTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (OracleTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new OracleTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -78,21 +59,14 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        java.sql.Statement stmt = null;
         try {
-            stmt = connection.createStatement();
-            DatabaseMetaData dbmd = connection.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
-        } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
+            return resultSetMetaToSchema(connection.getMetaData(), tableName);
+        }
+        catch (SQLException sqlEx) {
+            throw sqlEx;
+        }
+        catch (Exception e) {
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
 
@@ -102,18 +76,22 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if (schemaName.contains("\"")) {
+            schemaName = schemaName.replace("\"", "");
+        } else {
+            schemaName = schemaName.toUpperCase();
+        }
+
         if (tableName.contains("\"")) {
             tableName = tableName.replace("\"", "");
-            schemaName = schemaName.replace("\"", "");
+
         } else {
             tableName = tableName.toUpperCase();
         }
 
-        ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-        ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName);
-
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -159,9 +137,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                     index.setCardinality(rsIndex.getInt("CARDINALITY"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
-                        index.setIndextype(IndexType.Unique);
+                        index.setIndextype(IndexType.UNIQUE);
                     } else {
-                        index.setIndextype(IndexType.Normal);
+                        index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
 
@@ -176,21 +154,10 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 }
             }
             if (tm.getAllIndexes().isEmpty()) {
-                throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
-            if (rsPrimary != null) {
-                rsPrimary.close();
+                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
             }
         }
 
         return tm;
     }
-
 }

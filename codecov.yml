@@ -11,12 +11,12 @@ coverage:
   precision: 2
   range: "50...100"
 ignore:
- - "codec/seata-codec-protobuf/src/main/java/io/seata/codec/protobuf/generated"
  - "test/.*"
  - ".github/.*"
  - ".mvn/.*"
  - ".style/.*"
  - "*.md"
+ - "rm-datasource/src/test/java/io/seata/rm/datasource/mock"
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default
