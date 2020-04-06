@@ -19,11 +19,12 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +65,7 @@ public class OracleInsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private InsertExecutor insertExecutor;
+    private OracleInsertExecutor insertExecutor;
 
     @BeforeEach
     public void init() {
@@ -77,7 +78,7 @@ public class OracleInsertExecutorTest {
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
     }
 
     @Test
@@ -122,7 +123,7 @@ public class OracleInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
 
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 

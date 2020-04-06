@@ -69,10 +69,11 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
+        String dbType = statementProxy.getConnectionProxy().getDbType();
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+                    dbType);
         }
         Executor<T> executor;
         if (sqlRecognizer == null) {
@@ -80,7 +81,7 @@ public class ExecuteTemplate {
         } else {
             switch (sqlRecognizer.getSQLType()) {
                 case INSERT:
-                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = InsertExecutorFactory.createInsertExecutor(statementProxy, statementCallback, sqlRecognizer, dbType);
                     break;
                 case UPDATE:
                     executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);

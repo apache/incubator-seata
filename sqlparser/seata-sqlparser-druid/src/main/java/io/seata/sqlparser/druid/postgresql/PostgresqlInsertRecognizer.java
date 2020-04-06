@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLDefaultExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
@@ -31,6 +32,7 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import java.util.ArrayList;
@@ -119,6 +121,8 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                     String sequence = sequenceExpr.getSequence().getSimpleName();
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));
+                } else if (expr instanceof SQLDefaultExpr) {
+                    row.add(SqlDefaultExpr.get());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }
