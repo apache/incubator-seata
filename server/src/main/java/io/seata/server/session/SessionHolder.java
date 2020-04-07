@@ -95,10 +95,17 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
+<<<<<<< HEAD
             // file store
             String sessionStorePath =
                 CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
             if (sessionStorePath == null) {
+=======
+            //file store
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+                DEFAULT_SESSION_STORE_FILE_DIR);
+            if (StringUtils.isBlank(sessionStorePath)) {
+>>>>>>> mseata/develop
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
