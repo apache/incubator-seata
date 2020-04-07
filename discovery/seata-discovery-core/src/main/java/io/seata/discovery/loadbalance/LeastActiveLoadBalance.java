@@ -21,7 +21,7 @@ public class LeastActiveLoadBalance extends AbstractLoadBalance {
         int leastCount = 0;
         int[] leastIndexes = new int[length];
         for (int i = 0; i < length; i++) {
-            int active = RpcStatus.getStatus(String.valueOf(invokers.get(i))).getActive();
+            int active = RpcStatus.getStatus(invokers.get(i).toString()).getActive();
             if (leastActive == -1 || active < leastActive) {
                 leastActive = active;
                 leastCount = 1;

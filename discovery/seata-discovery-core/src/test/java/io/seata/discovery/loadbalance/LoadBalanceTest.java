@@ -15,6 +15,7 @@
  */
 package io.seata.discovery.loadbalance;
 
+import io.seata.common.rpc.RpcStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,6 +62,38 @@ public class LoadBalanceTest {
         for (InetSocketAddress address : counter.keySet()) {
             Long count = counter.get(address).get();
             Assertions.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
+        }
+    }
+
+    /**
+     * Test least active load balance select.
+     *
+     * @param addresses the addresses
+     */
+    @ParameterizedTest
+    @MethodSource("addressProvider")
+    public void testLeastActiveLoadBalance_select(List<InetSocketAddress> addresses) throws Exception {
+        int runs = 10000;
+        int size = addresses.size();
+        for (int i = 0; i < size - 1; i++) {
+            RpcStatus.beginCount(addresses.get(i).toString());
+        }
+        InetSocketAddress socketAddress = addresses.get(size - 1);
+        LoadBalance loadBalance = new LeastActiveLoadBalance();
+        for (int i = 0; i < runs; i++) {
+            InetSocketAddress selectAddress = loadBalance.select(addresses);
+            Assertions.assertEquals(selectAddress, socketAddress);
+        }
+        RpcStatus.beginCount(socketAddress.toString());
+        RpcStatus.beginCount(socketAddress.toString());
+        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, loadBalance);
+        for (InetSocketAddress address : counter.keySet()) {
+            Long count = counter.get(address).get();
+            if (address == socketAddress) {
+                Assertions.assertEquals(count, 0);
+            } else {
+                Assertions.assertTrue(count > 0);
+            }
         }
     }
 
