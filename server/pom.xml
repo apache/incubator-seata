@@ -99,10 +99,10 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <!-- mongodb -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <version>3.5.0</version>
         </dependency>
 
     </dependencies>
