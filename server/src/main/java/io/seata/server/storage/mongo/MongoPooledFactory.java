@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.storage.mongo;
 
 import java.util.ArrayList;
@@ -29,13 +44,13 @@ public class MongoPooledFactory {
 
     private static volatile MongoClient mongoClient = null;
 
-    private static final String DEFAULT_BRANCH_TABLE_NAME="branch_table";
+    private static final String DEFAULT_BRANCH_TABLE_NAME = "branch_table";
 
-    private static final String DEFAULT_GLOBAL_TABLE_NAME="global_table";
+    private static final String DEFAULT_GLOBAL_TABLE_NAME = "global_table";
 
-    private static final String DEFAULT_LOCK_TABLE_NAME="lock_table";
+    private static final String DEFAULT_LOCK_TABLE_NAME = "lock_table";
 
-    private static String DEFAULT_DB_NAME="seata";
+    private static String DEFAULT_DB_NAME = "seata";
 
     private static final String HOST = "127.0.0.1";
 
@@ -62,21 +77,20 @@ public class MongoPooledFactory {
                     build.connectTimeout(1000 * 60 * 1);
                     MongoClientOptions mongoClientOptions = build.build();
                     build.threadsAllowedToBlockForConnectionMultiplier(50);
-                    ServerAddress serverAddress = new ServerAddress(CONFIGURATION.getConfig(
-                        ConfigurationKeys.STORE_MONGO_HOST,HOST), CONFIGURATION.getInt(
-                        ConfigurationKeys.STORE_MONGO_PORT,PORT));
+                    ServerAddress serverAddress =
+                        new ServerAddress(CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_HOST, HOST),
+                            CONFIGURATION.getInt(ConfigurationKeys.STORE_MONGO_PORT, PORT));
                     List<ServerAddress> address = new ArrayList<ServerAddress>();
                     address.add(serverAddress);
-                    DEFAULT_DB_NAME=CONFIGURATION.getConfig(
-                        ConfigurationKeys.STORE_MONGO_DATA_BASE_NAME,DEFAULT_DB_NAME);
-                    MongoCredential credential =
-                        MongoCredential.createScramSha1Credential(CONFIGURATION.getConfig(
-                            ConfigurationKeys.STORE_MONGO_USERNAME,USERNAME), DEFAULT_DB_NAME, CONFIGURATION.getConfig(
-                            ConfigurationKeys.STORE_MONGO_PASSWORD,PASSWORD).toCharArray());
+                    DEFAULT_DB_NAME =
+                        CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_DATA_BASE_NAME, DEFAULT_DB_NAME);
+                    MongoCredential credential = MongoCredential.createScramSha1Credential(
+                        CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_USERNAME, USERNAME), DEFAULT_DB_NAME,
+                        CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_PASSWORD, PASSWORD).toCharArray());
                     List<MongoCredential> credentials = new ArrayList<MongoCredential>();
                     credentials.add(credential);
                     mongoClient = new MongoClient(address, credentials, mongoClientOptions);
-                    if(LOGGER.isInfoEnabled()){
+                    if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("initialization of the build mongo db connection pool is complete");
                     }
                 }

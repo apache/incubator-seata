@@ -76,7 +76,7 @@ public class MongoLocker extends AbstractLocker {
     public boolean releaseLock(String xid, Long branchId) {
         try {
             MongoCollection<Document> collection = MongoPooledFactory.getLockCollection();
-            collection.deleteOne(new Document("xid",xid).append("branch_id",branchId));
+            collection.deleteOne(new Document("xid", xid).append("branch_id", branchId));
             return true;
         } catch (Exception t) {
             LOGGER.error("unLock by branchId error, xid {}, branchId:{}", xid, branchId, t);

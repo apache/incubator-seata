@@ -31,7 +31,7 @@ import io.seata.server.session.GlobalSession;
  * @author funkye
  */
 @LoadLevel(name = "mongo")
-public class MongoLockManager  extends AbstractLockManager implements Initialize {
+public class MongoLockManager extends AbstractLockManager implements Initialize {
 
     /**
      * The locker.

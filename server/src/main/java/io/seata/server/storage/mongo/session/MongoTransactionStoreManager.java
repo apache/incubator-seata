@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.storage.mongo.session;
 
 import java.time.LocalDateTime;
@@ -195,7 +210,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
                 for (Document doc : docs) {
                     branchTransactionDOs.add(JSON.parseObject((String)doc.get("do"), BranchTransactionDO.class));
                 }
-                if(branchTransactionDOs.size()>0){
+                if (branchTransactionDOs.size() > 0) {
                     Map<String, List<BranchTransactionDO>> branchTransactionDOsMap =
                         branchTransactionDOs.stream().collect(Collectors.groupingBy(BranchTransactionDO::getXid,
                             LinkedHashMap::new, Collectors.toList()));
@@ -212,13 +227,13 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
 
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        try  {
+        try {
             MongoCollection<Document> collection = MongoPooledFactory.getGlobalCollection();
             if (StringUtils.isNotBlank(sessionCondition.getXid())) {
-                GlobalSession session=null;
-                FindIterable<Document> docs = collection.find(new Document("xid",sessionCondition.getXid()));
+                GlobalSession session = null;
+                FindIterable<Document> docs = collection.find(new Document("xid", sessionCondition.getXid()));
                 for (Document doc : docs) {
-                    session=convertGlobalSession(JSON.parseObject((String)doc.get("do"), GlobalTransactionDO.class));
+                    session = convertGlobalSession(JSON.parseObject((String)doc.get("do"), GlobalTransactionDO.class));
                     break;
                 }
                 if (null != session) {
@@ -227,16 +242,17 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
                     return globalSessions;
                 }
             } else if (sessionCondition.getTransactionId() != null) {
-                FindIterable<Document> docs = collection.find(new Document("transaction_id",sessionCondition.getTransactionId()));
-                GlobalTransactionDO globalTransactionDO=null;
+                FindIterable<Document> docs =
+                    collection.find(new Document("transaction_id", sessionCondition.getTransactionId()));
+                GlobalTransactionDO globalTransactionDO = null;
                 for (Document doc : docs) {
-                    globalTransactionDO=JSON.parseObject((String)doc.get("do"), GlobalTransactionDO.class);
+                    globalTransactionDO = JSON.parseObject((String)doc.get("do"), GlobalTransactionDO.class);
                     break;
                 }
-                if(null!=globalTransactionDO){
+                if (null != globalTransactionDO) {
                     List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
                     MongoCollection<Document> branchCollection = MongoPooledFactory.getBranchCollection();
-                    docs = branchCollection.find(new Document("xid",globalTransactionDO.getXid()));
+                    docs = branchCollection.find(new Document("xid", globalTransactionDO.getXid()));
                     for (Document doc : docs) {
                         branchTransactionDOs.add(JSON.parseObject((String)doc.get("do"), BranchTransactionDO.class));
                     }
@@ -252,7 +268,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
                 return readSession(sessionCondition.getStatuses());
             }
-        }catch (Exception e){
+        } catch (Exception e) {
         }
         return null;
     }
