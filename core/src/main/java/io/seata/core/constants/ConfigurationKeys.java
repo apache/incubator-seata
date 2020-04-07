@@ -160,6 +160,11 @@ public class ConfigurationKeys {
     public static final String STORE_DB_PREFIX = "store.db.";
 
     /**
+     * The constant STORE_MONGO_PREFIX.
+     */
+    public static final String STORE_MONGO_PREFIX = "store.mongo.";
+
+    /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
     public static final String STORE_DB_GLOBAL_TABLE = STORE_DB_PREFIX + "globalTable";
@@ -419,4 +424,30 @@ public class ConfigurationKeys {
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+
+    /**
+     * The constant STORE_MONGO_USERNAME.
+     */
+    public static final String STORE_MONGO_USERNAME = STORE_MONGO_PREFIX + "username";
+
+    /**
+     * The constant STORE_MONGO_HOST.
+     */
+    public static final String STORE_MONGO_HOST = STORE_MONGO_PREFIX + "host";
+
+    /**
+     * The constant STORE_MONGO_PASSWORD.
+     */
+    public static final String STORE_MONGO_PASSWORD = STORE_MONGO_PREFIX + "password";
+
+    /**
+     * The constant STORE_MONGO_PORT.
+     */
+    public static final String STORE_MONGO_PORT = STORE_MONGO_PREFIX + "port";
+
+    /**
+     * The constant STORE_MONGO_DATA_BASE_NAME.
+     */
+    public static final String STORE_MONGO_DATA_BASE_NAME = STORE_MONGO_PREFIX + "databaseName";
+
 }

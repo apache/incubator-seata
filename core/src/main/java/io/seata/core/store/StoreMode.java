@@ -30,7 +30,12 @@ public enum StoreMode {
     /**
      * database store
      */
-    DB("db");
+    DB("db"),
+
+    /**
+     * mongo store
+     */
+    MONGO("mongo");
 
     private String name;
 
