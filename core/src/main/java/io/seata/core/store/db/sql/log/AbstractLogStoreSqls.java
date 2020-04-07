@@ -15,10 +15,6 @@
  */
 package io.seata.core.store.db.sql.log;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 
 
