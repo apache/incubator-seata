@@ -29,11 +29,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    /**
      * The constant GLOBAL_TABLE_PLACEHOLD.
      */
     public static final String GLOBAL_TABLE_PLACEHOLD = " #global_table# ";
@@ -132,14 +127,10 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     @Override
-    public String getInsertGlobalTransactionSQL(String globalTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
+    public abstract String getInsertGlobalTransactionSQL(String globalTable);
 
     @Override
-    public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
+    public abstract String getUpdateGlobalTransactionStatusSQL(String globalTable);
 
     @Override
     public String getDeleteGlobalTransactionSQL(String globalTable) {
@@ -157,24 +148,16 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
+    public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
 
     @Override
-    public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
+    public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
 
     @Override
-    public String getInsertBranchTransactionSQL(String branchTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
+    public abstract String getInsertBranchTransactionSQL(String branchTable);
 
     @Override
-    public String getUpdateBranchTransactionStatusSQL(String branchTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
+    public abstract String getUpdateBranchTransactionStatusSQL(String branchTable);
 
 
     @Override
