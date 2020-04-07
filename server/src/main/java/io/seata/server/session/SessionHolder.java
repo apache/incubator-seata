@@ -75,7 +75,7 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file, db,mongo
+     * @param mode the store mode: file, db
      * @throws IOException the io exception
      */
     public static void init(String mode) throws IOException {
@@ -86,7 +86,7 @@ public class SessionHolder {
         //the store mode
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
-            // database store
+            //database store
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
@@ -95,27 +95,18 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
-<<<<<<< HEAD
-            // file store
-            String sessionStorePath =
-                CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
-            if (sessionStorePath == null) {
-=======
             //file store
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
             if (StringUtils.isBlank(sessionStorePath)) {
->>>>>>> mseata/develop
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
-                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                StoreMode.FILE.getName(), new Class[] {String.class, String.class},
-                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                new Class[] {String.class, String.class}, new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.FILE.getName(), new Class[] {String.class, String.class},
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
@@ -132,7 +123,7 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        //relaod
+        // relaod
         reload();
     }
 
@@ -291,7 +282,7 @@ public class SessionHolder {
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException {
+        throws TransactionException {
         return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
     }
 
