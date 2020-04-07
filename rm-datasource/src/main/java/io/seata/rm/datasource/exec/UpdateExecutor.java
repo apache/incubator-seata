@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import io.seata.common.util.IOUtil;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 
 import io.seata.sqlparser.SQLRecognizer;
@@ -74,8 +75,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        for (String column : tableMeta.getAllColumns().keySet()) {
-            selectSQLJoin.add(column);
+        for (String columnName : tableMeta.getAllColumns().keySet()) {
+            selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType()));
         }
         return selectSQLJoin.toString();
     }
@@ -105,8 +106,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuilder prefix = new StringBuilder("SELECT ");
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        for (String column : tableMeta.getAllColumns().keySet()) {
-            selectSQLJoiner.add(column);
+        for (String columnName : tableMeta.getAllColumns().keySet()) {
+            selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
         }
         return selectSQLJoiner.toString();
     }
