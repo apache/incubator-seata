@@ -155,6 +155,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
             request.getTransactionName(), request.getTimeout()));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("begin new global transaction applicationId: {},transactionServiceGroup:{}, transactionName: "
+                    + "{},timeout:{},xid:{}", rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
+                request.getTransactionName(), request.getTimeout(), response.getXid());
+        }
     }
 
     @Override
