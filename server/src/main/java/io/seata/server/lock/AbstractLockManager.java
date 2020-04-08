@@ -157,9 +157,6 @@ public abstract class AbstractLockManager implements LockManager {
                                             Long branchID) {
         List<RowLock> locks = new ArrayList<RowLock>();
 
-        if (StringUtils.isBlank(lockKey)) {
-            return locks;
-        }
         String[] tableGroupedLockKeys = lockKey.split(";");
         for (String tableGroupedLockKey : tableGroupedLockKeys) {
             int idx = tableGroupedLockKey.indexOf(":");
