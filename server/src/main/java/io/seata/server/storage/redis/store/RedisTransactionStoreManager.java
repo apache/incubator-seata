@@ -236,8 +236,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         List<String> branchs = jedis.lrange(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + xid, 0, 100);
                         if (null != branchs && branchs.size() > 0) {
                             for (String branchKey : branchs) {
-                                branchTransactionDOs
-                                    .add(JSON.parseObject(jedis.get(branchKey), BranchTransactionDO.class));
+                                String branchJson = jedis.get(branchKey);
+                                if (StringUtils.isNotBlank(branchJson)) {
+                                    branchTransactionDOs.add(JSON.parseObject(branchJson, BranchTransactionDO.class));
+                                }
                             }
                         }
                     }
