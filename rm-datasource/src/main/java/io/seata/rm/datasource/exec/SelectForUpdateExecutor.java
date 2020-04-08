@@ -101,7 +101,11 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
                     } else if (RootContext.requireGlobalLock()) {
                         //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus cannot reentrant)
-                        statementProxy.getConnectionProxy().checkLock(lockKeys);
+                        if (originalAutoCommit) {
+                            statementProxy.getConnectionProxy().checkLock(lockKeys);
+                        } else {
+                            statementProxy.getConnectionProxy().appendLockKey(lockKeys);
+                        }
                     } else {
                         throw new RuntimeException("Unknown situation!");
                     }
