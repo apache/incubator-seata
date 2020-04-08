@@ -28,7 +28,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.QueryOperators;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -45,11 +44,15 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author funkye
  */
 public class MongoTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoTransactionStoreManager.class);
 
     private static volatile MongoTransactionStoreManager instance;
 
@@ -70,15 +73,15 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
         if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
-            return insertOrUpdateGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return insertGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
-            return insertOrUpdateGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return updateGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
             return deleteGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
-            return insertOrUpdateBranchTransactionDO(convertBranchTransactionDO(session));
+            return insertBranchTransactionDO(convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
-            return insertOrUpdateBranchTransactionDO(convertBranchTransactionDO(session));
+            return updateBranchTransactionDO(convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
             return deleteBranchTransactionDO(convertBranchTransactionDO(session));
         } else {
@@ -92,17 +95,30 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             collection.deleteOne(new Document("branch_id", convertBranchTransactionDO.getBranchId()));
             return true;
         } catch (Exception e) {
+            LOGGER.error("deleteBranchTransactionDO fail : {}",e.getMessage());
             return false;
         }
     }
 
-    private boolean insertOrUpdateBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
+    private boolean insertBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
         try {
             MongoCollection<Document> collection = MongoPooledFactory.getBranchCollection();
-            collection.findOneAndUpdate(new Document("branch_id", convertBranchTransactionDO.getBranchId()),
-                convertDocumentByBranch(convertBranchTransactionDO), new FindOneAndUpdateOptions().upsert(true));
+            collection.insertOne(convertDocumentByBranch(convertBranchTransactionDO));
             return true;
         } catch (Exception e) {
+            LOGGER.error("insertBranchTransactionDO fail : {}",e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean updateBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
+        try {
+            MongoCollection<Document> collection = MongoPooledFactory.getBranchCollection();
+            collection.updateOne(new Document("branch_id", convertBranchTransactionDO.getBranchId()),
+                new Document("$set",convertDocumentByBranch(convertBranchTransactionDO)));
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("updateBranchTransactionDO fail : {}",e.getMessage());
             return false;
         }
     }
@@ -113,17 +129,30 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             collection.deleteOne(new Document("xid", convertGlobalTransactionDO.getXid()));
             return true;
         } catch (Exception e) {
+            LOGGER.error("deleteGlobalTransactionDO fail : {}",e.getMessage());
             return false;
         }
     }
 
-    private boolean insertOrUpdateGlobalTransactionDO(GlobalTransactionDO convertGlobalTransactionDO) {
+    private boolean insertGlobalTransactionDO(GlobalTransactionDO convertGlobalTransactionDO) {
         try {
             MongoCollection<Document> collection = MongoPooledFactory.getGlobalCollection();
-            collection.findOneAndUpdate(new Document("xid", convertGlobalTransactionDO.getXid()),
-                convertDocumentByGlobal(convertGlobalTransactionDO), new FindOneAndUpdateOptions().upsert(true));
+            collection.insertOne(convertDocumentByGlobal(convertGlobalTransactionDO));
             return true;
         } catch (Exception e) {
+            LOGGER.error("insertGlobalTransactionDO fail : {}",e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean updateGlobalTransactionDO(GlobalTransactionDO convertGlobalTransactionDO) {
+        try {
+            MongoCollection<Document> collection = MongoPooledFactory.getGlobalCollection();
+            collection.updateOne(new Document("xid", convertGlobalTransactionDO.getXid()),
+                new Document("$set", convertDocumentByGlobal(convertGlobalTransactionDO)));
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("updateGlobalTransactionDO fail : {}", e.getMessage());
             return false;
         }
     }
@@ -357,7 +386,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private Document convertDocumentByBranch(BranchTransactionDO branchTransactionDO) {
-        LocalDateTime now = LocalDateTime.now();
+        String now = LocalDateTime.now().toString();
         Document doc = new Document();
         doc.put("branch_id", branchTransactionDO.getBranchId());
         doc.put("xid", branchTransactionDO.getXid());
@@ -374,7 +403,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private Document convertDocumentByGlobal(GlobalTransactionDO globalTransactionDO) {
-        LocalDateTime now = LocalDateTime.now();
+        String now = LocalDateTime.now().toString();
         Document doc = new Document();
         doc.put("xid", globalTransactionDO.getXid());
         doc.put("transaction_id", globalTransactionDO.getTransactionId());

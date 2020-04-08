@@ -26,11 +26,15 @@ import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.mongo.MongoPooledFactory;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author funkye
  */
 public class MongoLocker extends AbstractLocker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoLocker.class);
 
     public MongoLocker() {}
 
@@ -48,6 +52,7 @@ public class MongoLocker extends AbstractLocker {
                 collection.insertOne(doc);
                 successList.add(doc);
             } catch (Exception e) {
+                LOGGER.error("acquireLock fail:{}",e.getMessage());
                 for (Document document : successList) {
                     collection.deleteOne(document);
                 }
@@ -123,7 +128,7 @@ public class MongoLocker extends AbstractLocker {
     }
 
     private List<Document> convertDocument(List<LockDO> locks) {
-        LocalDateTime now = LocalDateTime.now();
+        String now = LocalDateTime.now().toString();
         List<Document> docs = new ArrayList<>();
         for (LockDO lock : locks) {
             Document doc = new Document();
@@ -142,7 +147,6 @@ public class MongoLocker extends AbstractLocker {
     }
 
     private List<Document> convertDocumentByRowKey(List<LockDO> locks) {
-        LocalDateTime now = LocalDateTime.now();
         List<Document> docs = new ArrayList<>();
         for (LockDO lock : locks) {
             Document doc = new Document();
@@ -153,7 +157,6 @@ public class MongoLocker extends AbstractLocker {
     }
 
     private List<Document> convertDocumentByXid(String xid, List<Long> branchIds) {
-        LocalDateTime now = LocalDateTime.now();
         List<Document> docs = new ArrayList<>();
         for (Long branchId : branchIds) {
             Document doc = new Document();
