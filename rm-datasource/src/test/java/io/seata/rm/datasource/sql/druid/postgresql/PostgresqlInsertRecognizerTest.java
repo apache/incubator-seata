@@ -40,7 +40,7 @@ public class PostgresqlInsertRecognizerTest {
     public void testGetSqlType() {
         String sql = "insert into t(id) values (?)";
 
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.INSERT);
     }
 
@@ -48,7 +48,7 @@ public class PostgresqlInsertRecognizerTest {
     public void testGetTableAlias() {
         String sql = "insert into t(id) values (?)";
 
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
@@ -56,7 +56,7 @@ public class PostgresqlInsertRecognizerTest {
     public void testGetTableName() {
         String sql = "insert into t(id) values (?)";
 
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, false);
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 
@@ -66,21 +66,21 @@ public class PostgresqlInsertRecognizerTest {
         //test for no column
         String sql = "insert into t values (?)";
 
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)SQLVisitorFactory.get(sql, DB_TYPE, false);
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
         List<String> insertColumns = recognizer.getInsertColumns();
         Assertions.assertNull(insertColumns);
 
         //test for normal
         sql = "insert into t(a) values (?)";
 
-        recognizer = (SQLInsertRecognizer)SQLVisitorFactory.get(sql, DB_TYPE, false);
+        recognizer = (SQLInsertRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
         insertColumns = recognizer.getInsertColumns();
         Assertions.assertEquals(1, insertColumns.size());
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE, false);
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
             sqlInsertStatement.getColumns().add(new SQLBetweenExpr());
 
@@ -94,7 +94,7 @@ public class PostgresqlInsertRecognizerTest {
         //test for null value
         String sql = "insert into t(id, no, name, age, time) values (nextval('id_seq'), null, 'a', ?, now())";
 
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)SQLVisitorFactory.get(sql, DB_TYPE, false);
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
         List<List<Object>> insertRows = recognizer.getInsertRows();
         Assertions.assertTrue(insertRows.size() == 1);
 

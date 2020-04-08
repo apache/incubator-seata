@@ -43,6 +43,10 @@ public class SQLVisitorFactory {
      * @param dbType the db type
      * @return the sql recognizer
      */
+    public static SQLRecognizer get(String sql, String dbType) {
+        return get(sql, dbType, false);
+    }
+
     public static SQLRecognizer get(String sql, String dbType, boolean isSelectTransformForUpdate) {
         return SQL_RECOGNIZER_FACTORY.create(sql, dbType, isSelectTransformForUpdate);
     }
