@@ -69,6 +69,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static volatile boolean degradeCheck;
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
+    private static volatile Integer reachNum = 0;
     private static ScheduledThreadPoolExecutor executor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
 
@@ -90,7 +91,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             this.degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                startSelfCheck();
+                startDegradeCheck();
             }
         }
     }
@@ -103,7 +104,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
-        boolean localDisable = disable || (degradeCheck && degradeNum > degradeCheckAllowTimes);
+        boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
         if (!localDisable) {
             if (globalTransactionalAnnotation != null) {
                 return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
@@ -171,19 +172,19 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             TransactionalExecutor.Code code = e.getCode();
             switch (code) {
                 case RollbackDone:
-                    succeed = false;
                     throw e.getOriginalException();
                 case BeginFailure:
+                    succeed = false;
                     failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 case CommitFailure:
+                    succeed = false;
                     failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 case RollbackRetrying:
-                    succeed = false;
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 default:
@@ -191,7 +192,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             }
         } finally {
             if (degradeCheck) {
-                onSelfCheck(succeed);
+                onDegradeCheck(succeed);
             }
         }
     }
@@ -231,28 +232,36 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     /**
      * auto upgrade service detection
      */
-    private static void startSelfCheck() {
+    private static void startDegradeCheck() {
         executor.scheduleAtFixedRate(() -> {
             if (degradeCheck) {
                 try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "test", 60000);
+                    String xid = TransactionManagerHolder.get().begin(null, null, "test", 6000);
                     TransactionManagerHolder.get().commit(xid);
-                    onSelfCheck(true);
+                    onDegradeCheck(true);
                 } catch (Exception e) {
-                    onSelfCheck(false);
+                    onDegradeCheck(false);
                 }
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
 
-    private static synchronized void onSelfCheck(boolean succeed) {
+    private static synchronized void onDegradeCheck(boolean succeed) {
         if (succeed) {
-            if (degradeNum > 0) {
-                degradeNum--;
+            if (degradeNum == degradeCheckAllowTimes) {
+                reachNum++;
+                if (reachNum >= degradeNum) {
+                    reachNum = 0;
+                    degradeNum = 0;
+                }
+            } else if (degradeNum != 0) {
+                degradeNum = 0;
             }
         } else {
             if (degradeNum < degradeCheckAllowTimes) {
                 degradeNum++;
+            } else if (reachNum != 0) {
+                reachNum = 0;
             }
         }
     }
