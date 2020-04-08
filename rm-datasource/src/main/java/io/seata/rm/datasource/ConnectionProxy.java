@@ -108,6 +108,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * @throws SQLException the sql exception
      */
     public void checkLock(String lockKeys) throws SQLException {
+        if (StringUtils.isBlank(lockKeys)) {
+            return;
+        }
         // Just check lock without requiring lock by now.
         try {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
@@ -198,7 +201,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
-
         checkLock(context.buildLockKeys());
         try {
             targetConnection.commit();

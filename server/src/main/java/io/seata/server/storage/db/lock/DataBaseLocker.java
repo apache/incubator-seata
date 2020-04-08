@@ -111,6 +111,10 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> locks) {
+        if (CollectionUtils.isEmpty(locks)) {
+            // no lock
+            return true;
+        }
         try {
             return lockStore.isLockable(convertToLockDO(locks));
         } catch (DataAccessException e) {
