@@ -75,6 +75,10 @@ public abstract class AbstractLockManager implements LockManager {
 
     @Override
     public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
+        if (StringUtils.isBlank(lockKey)) {
+            // no lock
+            return true;
+        }
         List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
         try {
             return getLocker().isLockable(locks);
