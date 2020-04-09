@@ -43,7 +43,7 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setMaxTotal(getMaxConn());
         ds.setMinIdle(getMinConn());
         ds.setMaxIdle(getMinConn());
-        ds.setMaxWaitMillis(5000);
+        ds.setMaxWaitMillis(getMaxWait());
         ds.setTimeBetweenEvictionRunsMillis(120000);
         ds.setNumTestsPerEvictionRun(1);
         ds.setTestWhileIdle(true);
