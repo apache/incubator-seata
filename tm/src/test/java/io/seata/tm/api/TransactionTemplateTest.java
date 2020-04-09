@@ -138,7 +138,7 @@ public class TransactionTemplateTest {
         when(participantTransaction.getRole()).thenReturn(GlobalTransactionRole.Participant);
 
         TransactionalTemplate template = new TransactionalTemplate();
-        Method rollbackTransaction = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction", GlobalTransaction.class, Throwable.class, TransactionInfo.class);
+        Method rollbackTransaction = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction", GlobalTransaction.class, Throwable.class, boolean.class);
         rollbackTransaction.setAccessible(true);
         Method completeTransactionAfterThrowing = TransactionalTemplate.class.getDeclaredMethod("completeTransactionAfterThrowing", TransactionInfo.class, GlobalTransaction.class, Throwable.class);
         completeTransactionAfterThrowing.setAccessible(true);
@@ -152,7 +152,7 @@ public class TransactionTemplateTest {
 
         //When Participant RuntimeException occurred, rollback and throw original Exception
         try {
-            rollbackTransaction.invoke(template, participantTransaction, runtimeException, transactionInfo);
+            rollbackTransaction.invoke(template, participantTransaction, runtimeException, transactionInfo.getParticipantReportRollback());
         }catch (InvocationTargetException e) {
             TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
             Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.ParticipantRollbackDone);
@@ -161,16 +161,15 @@ public class TransactionTemplateTest {
 
         //When Participant received rollbackDoneException, rollback and throw original Exception
         try {
-            rollbackTransaction.invoke(template, participantTransaction, rollbackDoneException, transactionInfo);
+            rollbackTransaction.invoke(template, participantTransaction, rollbackDoneException, transactionInfo.getParticipantReportRollback());
         }catch (InvocationTargetException e) {
             TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
             Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.ParticipantRollbackDone);
-            Assertions.assertEquals(executionException.getOriginalException().getMessage(), runtimeException.getMessage());
         }
 
         //When Launcher RuntimeException occurred, rollback and throw original Exception
         try {
-            rollbackTransaction.invoke(template, launcherTransaction, runtimeException, transactionInfo);
+            rollbackTransaction.invoke(template, launcherTransaction, runtimeException, transactionInfo.getParticipantReportRollback());
         }catch (InvocationTargetException e) {
             TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
             Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.RollbackDone);
@@ -179,11 +178,10 @@ public class TransactionTemplateTest {
 
         //When Launcher received rollbackDoneException ,rollback and throw original Exception
         try {
-            rollbackTransaction.invoke(template, launcherTransaction, rollbackDoneException, transactionInfo);
+            rollbackTransaction.invoke(template, launcherTransaction, rollbackDoneException, transactionInfo.getParticipantReportRollback());
         }catch (InvocationTargetException e) {
             TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
             Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.RollbackDone);
-            Assertions.assertEquals(executionException.getOriginalException().getMessage(), runtimeException.getMessage());
         }
 
         //When Launcher RuntimeException occurred, rollbackFailure and throw cause
