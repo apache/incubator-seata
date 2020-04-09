@@ -23,6 +23,14 @@ import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchReportRequest;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
@@ -41,6 +49,23 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * handle client trx message processor.
+ * include mergeMessage and single message.
+ * <p>
+ * Trx message includes the following messages:
+ * 1.Request message:
+ * {@link TransactionMessageHandler#onRequest}
+ * 1) BranchRegisterRequest {@link BranchRegisterRequest}
+ * 2) BranchReportRequest {@link BranchReportRequest}
+ * 3) GlobalBeginRequest {@link GlobalBeginRequest}
+ * 4) GlobalCommitRequest {@link GlobalCommitRequest}
+ * 5) GlobalLockQueryRequest {@link GlobalLockQueryRequest}
+ * 6) GlobalReportRequest {@link GlobalReportRequest}
+ * 7) GlobalRollbackRequest {@link GlobalRollbackRequest}
+ * 8) GlobalStatusRequest {@link GlobalStatusRequest}
+ * <p>
+ * 2.Response message:
+ * {@link TransactionMessageHandler#onResponse}
+ * not yet
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
