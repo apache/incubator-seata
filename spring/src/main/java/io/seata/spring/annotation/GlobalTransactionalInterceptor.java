@@ -253,6 +253,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 if (reachNum >= degradeNum) {
                     reachNum = 0;
                     degradeNum = 0;
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("the current global transaction has been restored");
+                    }
                 }
             } else if (degradeNum != 0) {
                 degradeNum = 0;
@@ -260,6 +263,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         } else {
             if (degradeNum < degradeCheckAllowTimes) {
                 degradeNum++;
+                if (degradeNum == degradeCheckAllowTimes) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("the current global transaction has been automatically downgraded");
+                    }
+                }
             } else if (reachNum != 0) {
                 reachNum = 0;
             }
