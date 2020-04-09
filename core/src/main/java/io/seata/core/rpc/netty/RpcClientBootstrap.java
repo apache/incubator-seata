@@ -27,7 +27,6 @@ import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollMode;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.AbstractChannelPoolMap;
-import io.netty.channel.pool.ChannelHealthChecker;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -53,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author zhaojun
  */
 public class RpcClientBootstrap implements RemotingClient {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
     private final NettyClientConfig nettyClientConfig;
     private final Bootstrap bootstrap = new Bootstrap();
@@ -104,7 +103,7 @@ public class RpcClientBootstrap implements RemotingClient {
             channel.pipeline().addLast(handlers);
         }
     }
-    
+
     @Override
     public void start() {
         if (this.defaultEventExecutorGroup == null) {
@@ -118,7 +117,7 @@ public class RpcClientBootstrap implements RemotingClient {
             ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
             ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
             nettyClientConfig.getClientSocketRcvBufSize());
-    
+
         if (nettyClientConfig.enableNative()) {
             if (PlatformDependent.isOsx()) {
                 if (LOGGER.isInfoEnabled()) {
@@ -129,57 +128,29 @@ public class RpcClientBootstrap implements RemotingClient {
                     .option(EpollChannelOption.TCP_QUICKACK, true);
             }
         }
-        if (nettyClientConfig.isUseConnPool()) {
-            clientChannelPool = new AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool>() {
+
+        bootstrap.handler(
+            new ChannelInitializer<SocketChannel>() {
                 @Override
-                protected FixedChannelPool newPool(InetSocketAddress key) {
-                    return new FixedChannelPool(
-                        bootstrap.remoteAddress(key),
-                        new DefaultChannelPoolHandler() {
-                            @Override
-                            public void channelCreated(Channel ch) throws Exception {
-                                super.channelCreated(ch);
-                                final ChannelPipeline pipeline = ch.pipeline();
-                                pipeline.addLast(defaultEventExecutorGroup,
-                                    new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                        nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                        nettyClientConfig.getChannelMaxAllIdleSeconds()));
-                                pipeline.addLast(defaultEventExecutorGroup, new RpcClientHandler());
-                            }
-                        },
-                        ChannelHealthChecker.ACTIVE,
-                        FixedChannelPool.AcquireTimeoutAction.FAIL,
-                        nettyClientConfig.getMaxAcquireConnMills(),
-                        nettyClientConfig.getPerHostMaxConn(),
-                        nettyClientConfig.getPendingConnSize(),
-                        false
-                    );
-                }
-            };
-        } else {
-            bootstrap.handler(
-                new ChannelInitializer<SocketChannel>() {
-                
-                    @Override
-                    public void initChannel(SocketChannel ch) {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(
-                            new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                                .addLast(new ProtocolV1Decoder())
-                                .addLast(new ProtocolV1Encoder());
-                        if (null != channelHandlers) {
-                            addChannelPipelineLast(ch, channelHandlers);
-                        }
+                public void initChannel(SocketChannel ch) {
+                    ChannelPipeline pipeline = ch.pipeline();
+                    pipeline.addLast(
+                        new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                            nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                            nettyClientConfig.getChannelMaxAllIdleSeconds()))
+                        .addLast(new ProtocolV1Decoder())
+                        .addLast(new ProtocolV1Encoder());
+                    if (null != channelHandlers) {
+                        addChannelPipelineLast(ch, channelHandlers);
                     }
-                });
-        }
+                }
+            });
+
         if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
             LOGGER.info("RpcClientBootstrap has started");
         }
     }
-    
+
     @Override
     public void shutdown() {
         try {
@@ -218,7 +189,7 @@ public class RpcClientBootstrap implements RemotingClient {
         }
         return channel;
     }
-    
+
     /**
      * Gets thread prefix.
      *
