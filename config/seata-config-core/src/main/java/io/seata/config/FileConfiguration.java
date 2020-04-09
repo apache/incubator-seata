@@ -98,7 +98,6 @@ public class FileConfiguration extends AbstractConfiguration {
      * @param allowDynamicRefresh the allow dynamic refresh
      */
     public FileConfiguration(String name, boolean allowDynamicRefresh) {
-        LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
@@ -107,6 +106,9 @@ public class FileConfiguration extends AbstractConfiguration {
                 targetFilePath = targetFile.getPath();
                 Config appConfig = ConfigFactory.parseFileAnySyntax(targetFile);
                 fileConfig = ConfigFactory.load(appConfig);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("The configuration file used is {}", name);
+                }
             } else {
                 targetFilePath = null;
             }
@@ -115,6 +117,9 @@ public class FileConfiguration extends AbstractConfiguration {
             if (null != resource) {
                 targetFilePath = resource.getPath();
                 fileConfig = ConfigFactory.load(name);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("The configuration file used is {}", name);
+                }
 
             } else {
                 targetFilePath = null;
