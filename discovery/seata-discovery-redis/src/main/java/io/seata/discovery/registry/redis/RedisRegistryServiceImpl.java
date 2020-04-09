@@ -52,14 +52,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisRegistryServiceImpl.class);
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
-    private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String REDIS_FILEKEY_PREFIX = "registry.redis.";
-    private static final String DEFAULT_CLUSTER = "default";
-    private static final String REGISTRY_CLUSTER_KEY = "cluster";
-    private static final String CLUSTER_NAME = FILE_CONFIG.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
-    private static final String REGISTRY_KEY = REDIS_FILEKEY_PREFIX + CLUSTER_NAME;
-    private static final String REDIS_DB = "db";
-    private static final String REDIS_PASSWORD = "password";
+    private static final String REGISTRY_KEY = REDIS_FILEKEY_PREFIX + FILE_CONFIG.getConfig(REDIS_FILEKEY_PREFIX + "cluster", "default");
     private static final ConcurrentMap<String, List<RedisListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile RedisRegistryServiceImpl instance;
@@ -69,12 +63,12 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         new NamedThreadFactory("RedisRegistryService", 1));
 
     private RedisRegistryServiceImpl() {
-        String password = FILE_CONFIG.getConfig(getRedisPasswordFileKey());
-        String serverAddr = FILE_CONFIG.getConfig(getRedisAddrFileKey());
+        String password = FILE_CONFIG.getConfig(REDIS_FILEKEY_PREFIX + "password");
+        String serverAddr = FILE_CONFIG.getConfig(REDIS_FILEKEY_PREFIX + "serverAddr");
         String[] serverArr = serverAddr.split(":");
         String host = serverArr[0];
         int port = Integer.parseInt(serverArr[1]);
-        int db = FILE_CONFIG.getInt(getRedisDbFileKey());
+        int db = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "db");
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
         redisConfig.setTestOnBorrow(FILE_CONFIG.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
         redisConfig.setTestOnReturn(FILE_CONFIG.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
@@ -142,8 +136,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource()) {
-            jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
-            jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            jedis.hset(REGISTRY_KEY, serverAddr, ManagementFactory.getRuntimeMXBean().getName());
+            jedis.publish(REGISTRY_KEY, serverAddr + "-" + RedisListener.REGISTER);
         }
     }
 
@@ -152,8 +146,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         NetUtil.validAddress(address);
         String serverAddr = NetUtil.toStringAddress(address);
         try (Jedis jedis = jedisPool.getResource()) {
-            jedis.hdel(getRedisRegistryKey(), serverAddr);
-            jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
+            jedis.hdel(REGISTRY_KEY, serverAddr);
+            jedis.publish(REGISTRY_KEY, serverAddr + "-" + RedisListener.UN_REGISTER);
         }
     }
 
@@ -164,7 +158,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         threadPoolExecutor.submit(() -> {
             try {
                 try (Jedis jedis = jedisPool.getResource()) {
-                    jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), getRedisRegistryKey());
+                    jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), REGISTRY_KEY);
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -185,7 +179,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             Map<String, String> instances;
             try (Jedis jedis = jedisPool.getResource()) {
-                instances = jedis.hgetAll(getRedisRegistryKey());
+                instances = jedis.hgetAll(REGISTRY_KEY);
             }
             if (null != instances && !instances.isEmpty()) {
                 Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
@@ -237,21 +231,4 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             }
         }
     }
-
-    private String getRedisRegistryKey() {
-        return REGISTRY_KEY;
-    }
-
-    private String getRedisAddrFileKey() {
-        return REDIS_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY;
-    }
-
-    private String getRedisPasswordFileKey() {
-        return REDIS_FILEKEY_PREFIX + REDIS_PASSWORD;
-    }
-
-    private String getRedisDbFileKey() {
-        return REDIS_FILEKEY_PREFIX + REDIS_DB;
-    }
-
 }
