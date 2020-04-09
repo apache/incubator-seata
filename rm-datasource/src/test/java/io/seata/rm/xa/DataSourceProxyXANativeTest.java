@@ -15,9 +15,7 @@
  */
 package io.seata.rm.xa;
 
-import com.mysql.jdbc.JDBC4MySQLConnection;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
-import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import io.seata.rm.datasource.xa.DataSourceProxyXANative;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

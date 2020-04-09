@@ -80,9 +80,8 @@ public final class JdbcUtils {
 
     public static void initXADataSourceResource(BaseDataSourceResource dataSourceResource, XADataSource dataSource, String resourceGroupId) {
         dataSourceResource.setResourceGroupId(resourceGroupId);
-        XAConnection xaConnection = null;
         try {
-            xaConnection = dataSource.getXAConnection();
+            XAConnection xaConnection = dataSource.getXAConnection();
             try (Connection connection = xaConnection.getConnection()) {
                 String jdbcUrl = connection.getMetaData().getURL();
                 dataSourceResource.setResourceId(buildResourceId(jdbcUrl));

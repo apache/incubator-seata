@@ -18,7 +18,6 @@ package io.seata.rm.xa;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
-import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.Assertions;

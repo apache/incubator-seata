@@ -32,10 +32,8 @@ import org.mockito.stubbing.Answer;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -247,7 +245,7 @@ public class ConnectionProxyXATest {
         ConnectionProxyXA connectionProxyXA1 = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         connectionProxyXA1.init();
         // Kept
-        connectionProxyXA1.setKept(true);
+        connectionProxyXA1.setHeld(true);
         // call close on proxy
         connectionProxyXA1.close();
         // Assert the original connection was NOT closed
@@ -256,7 +254,7 @@ public class ConnectionProxyXATest {
         ConnectionProxyXA connectionProxyXA2 = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         connectionProxyXA2.init();
         // Kept
-        connectionProxyXA2.setKept(false);
+        connectionProxyXA2.setHeld(false);
         // call close on proxy
         connectionProxyXA2.close();
         // Assert the original connection was ALSO closed

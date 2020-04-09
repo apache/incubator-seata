@@ -15,9 +15,9 @@
  */
 package io.seata.rm.datasource.xa;
 
-public interface Keeper<T extends Keepable> {
+public interface Holder<T extends Holdable> {
 
-    T keep(String key, T value);
+    T hold(String key, T value);
 
     T release(String key, T value);
 

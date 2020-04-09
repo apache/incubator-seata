@@ -35,7 +35,7 @@ import java.sql.SQLException;
  *
  * @author sharajava
  */
-public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Keepable {
+public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Holdable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxyXA.class);
 
@@ -73,13 +73,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Keep
     }
 
     private void keepIfNecessary() {
-        if (shouldBeKept()) {
-            resource.keep(xaBranchXid.toString(), this);
+        if (shouldBeHeld()) {
+            resource.hold(xaBranchXid.toString(), this);
         }
     }
 
     private void releaseIfNecessary() {
-        if (isKept()) {
+        if (isHeld()) {
             resource.release(xaBranchXid.toString(), this);
         }
     }
@@ -165,7 +165,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Keep
             return;
         }
         if (!xaActive || this.xaBranchXid == null) {
-            throw new SQLException("should NOT commit on an inactive session");
+            throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
         }
         try {
             // XA End: Success
@@ -224,14 +224,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Keep
 
     private void cleanXABranchContext() {
         xaActive = false;
-        if (!isKept()) {
+        if (!isHeld()) {
             xaBranchXid = null;
         }
     }
 
     @Override
     public void close() throws SQLException {
-        if (isKept()) {
+        if (isHeld()) {
             // if kept by a keeper, just hold the connection.
             return;
         }
@@ -240,17 +240,17 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Keep
     }
 
     @Override
-    public void setKept(boolean kept) {
+    public void setHeld(boolean kept) {
         this.kept = kept;
     }
 
     @Override
-    public boolean isKept() {
+    public boolean isHeld() {
         return kept;
     }
 
     @Override
-    public boolean shouldBeKept() {
+    public boolean shouldBeHeld() {
         return JdbcUtils.MYSQL.equals(resource.getDbType()) || JdbcUtils.MARIADB.equals(resource.getDbType());
     }
 

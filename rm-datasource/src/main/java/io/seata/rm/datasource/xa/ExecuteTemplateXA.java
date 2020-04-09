@@ -76,14 +76,16 @@ public class ExecuteTemplateXA {
                         "Failed to commit xa branch of " + connectionProxyXA.xid + ") since " + ex.getMessage(),
                         ex);
                     // XA End & Rollback
-                    try {
-                        connectionProxyXA.rollback();
-                    } catch (SQLException sqle) {
-                        // log and ignore the rollback failure.
-                        LOGGER.warn(
-                            "Failed to rollback xa branch of " + connectionProxyXA.xid +
-                                "(caused by commit failure(" + ex.getMessage() + ") since " + sqle.getMessage(),
-                            sqle);
+                    if (!(ex instanceof SQLException) || AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END != ((SQLException) ex).getSQLState()) {
+                        try {
+                            connectionProxyXA.rollback();
+                        } catch (SQLException sqle) {
+                            // log and ignore the rollback failure.
+                            LOGGER.warn(
+                                "Failed to rollback xa branch of " + connectionProxyXA.xid +
+                                    "(caused by commit failure(" + ex.getMessage() + ") since " + sqle.getMessage(),
+                                sqle);
+                        }
                     }
 
                     if (ex instanceof SQLException) {

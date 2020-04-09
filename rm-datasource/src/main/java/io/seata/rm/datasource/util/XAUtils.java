@@ -54,8 +54,7 @@ public class XAUtils {
                     return createOracleXAConnection(physicalConn, "oracle.jdbc.xa.client.OracleXAConnection");
                 }
             } catch (XAException xae) {
-                LOGGER.error("create xaConnection error", xae);
-                return null;
+                throw new SQLException("create xaConnection error", xae);
             }
         }
 
@@ -74,6 +73,7 @@ public class XAUtils {
         try {
             Class xaConnectionClass = Class.forName(xaConnectionClassName);
             Constructor<XAConnection> constructor = xaConnectionClass.getConstructor(Connection.class);
+            constructor.setAccessible(true);
             return constructor.newInstance(physicalConnection);
         } catch (Exception e) {
             LOGGER.warn("Failed to create Oracle XA Connection " + xaConnectionClassName + " on " + physicalConnection);

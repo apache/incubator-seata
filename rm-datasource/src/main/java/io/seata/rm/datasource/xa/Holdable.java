@@ -15,11 +15,11 @@
  */
 package io.seata.rm.datasource.xa;
 
-public interface Keepable {
+public interface Holdable {
 
-    void setKept(boolean kept);
+    void setHeld(boolean held);
 
-    boolean isKept();
+    boolean isHeld();
 
-    boolean shouldBeKept();
+    boolean shouldBeHeld();
 }

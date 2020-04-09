@@ -15,6 +15,8 @@
  */
 package io.seata.server.transaction.xa;
 
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.coordinator.AbstractCore;
@@ -33,5 +35,14 @@ public class XACore extends AbstractCore {
     @Override
     public BranchType getHandleBranchType() {
         return BranchType.XA;
+    }
+
+    @Override
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
+                             String applicationData) throws TransactionException {
+        super.branchReport(branchType, xid, branchId, status, applicationData);
+        if (BranchStatus.PhaseOne_Failed == status) {
+
+        }
     }
 }

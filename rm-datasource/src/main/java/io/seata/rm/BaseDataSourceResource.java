@@ -18,8 +18,8 @@ package io.seata.rm;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.rm.datasource.xa.Keepable;
-import io.seata.rm.datasource.xa.Keeper;
+import io.seata.rm.datasource.xa.Holdable;
+import io.seata.rm.datasource.xa.Holder;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  *
  * @author sharajava
  */
-public abstract class BaseDataSourceResource<T extends Keepable> implements DataSource, Resource, Keeper<T> {
+public abstract class BaseDataSourceResource<T extends Holdable> implements DataSource, Resource, Holder<T> {
 
     protected DataSource dataSource;
 
@@ -115,7 +115,7 @@ public abstract class BaseDataSourceResource<T extends Keepable> implements Data
 
     protected void dataSourceCheck() {
         if (dataSource == null) {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("dataSource CAN NOT be null");
         }
     }
 
@@ -128,9 +128,6 @@ public abstract class BaseDataSourceResource<T extends Keepable> implements Data
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
         dataSourceCheck();
-        if (dataSource == null) {
-
-        }
         dataSource.setLogWriter(out);
     }
 
@@ -153,8 +150,8 @@ public abstract class BaseDataSourceResource<T extends Keepable> implements Data
     }
 
     @Override
-    public T keep(String key, T value) {
-        if (value.isKept()) {
+    public T hold(String key, T value) {
+        if (value.isHeld()) {
             T x = keeper.get(key);
             if (x != value) {
                 throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x +
@@ -163,11 +160,7 @@ public abstract class BaseDataSourceResource<T extends Keepable> implements Data
             return value;
         }
         T x = keeper.put(key, value);
-        if (x != null) {
-            throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x +
-                "] but[" + value + "] is also kept with the same key[" + key + "]");
-        }
-        value.setKept(true);
+        value.setHeld(true);
         return x;
     }
 
@@ -178,7 +171,7 @@ public abstract class BaseDataSourceResource<T extends Keepable> implements Data
             throw new ShouldNeverHappenException("something wrong with keeper, released[" + x +
                 "] but[" + value + "] is wanted with key[" + key + "]");
         }
-        value.setKept(false);
+        value.setHeld(false);
         return x;
     }
 

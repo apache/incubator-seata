@@ -46,6 +46,8 @@ import java.util.concurrent.Executor;
  */
 public abstract class AbstractConnectionProxyXA implements Connection {
 
+    public static final String SQLSTATE_XA_NOT_END = "SQLSTATE_XA_NOT_END";
+
     protected Connection originalConnection;
 
     protected XAConnection xaConnection;
@@ -149,26 +151,6 @@ public abstract class AbstractConnectionProxyXA implements Connection {
     }
 
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        Statement statement = originalConnection.createStatement(resultSetType, resultSetConcurrency);
-        return new StatementProxyXA(this, statement);
-    }
-
-    @Override
-    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-            throws SQLException {
-        PreparedStatement preparedStatement = originalConnection.prepareStatement(sql, resultSetType,
-                resultSetConcurrency);
-        return new PreparedStatementProxyXA(this, preparedStatement);
-    }
-
-    @Override
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        RootContext.assertNotInGlobalTransaction();
-        return originalConnection.prepareCall(sql, resultSetType, resultSetConcurrency);
-    }
-
-    @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
         return originalConnection.getTypeMap();
     }
@@ -210,6 +192,26 @@ public abstract class AbstractConnectionProxyXA implements Connection {
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
         originalConnection.releaseSavepoint(savepoint);
 
+    }
+
+    @Override
+    public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+        Statement statement = originalConnection.createStatement(resultSetType, resultSetConcurrency);
+        return new StatementProxyXA(this, statement);
+    }
+
+    @Override
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+        throws SQLException {
+        PreparedStatement preparedStatement = originalConnection.prepareStatement(sql, resultSetType,
+            resultSetConcurrency);
+        return new PreparedStatementProxyXA(this, preparedStatement);
+    }
+
+    @Override
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
+        RootContext.assertNotInGlobalTransaction();
+        return originalConnection.prepareCall(sql, resultSetType, resultSetConcurrency);
     }
 
     @Override
