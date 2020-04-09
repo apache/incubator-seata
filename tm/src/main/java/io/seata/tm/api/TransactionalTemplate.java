@@ -137,7 +137,7 @@ public class TransactionalTemplate {
         //roll back
         if (txInfo != null && txInfo.rollbackOn(ex)) {
             try {
-                rollbackTransaction(tx, ex, txInfo);
+                rollbackTransaction(tx, ex, txInfo.getParticipantReportRollback());
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -161,10 +161,10 @@ public class TransactionalTemplate {
         }
     }
 
-    private void rollbackTransaction(GlobalTransaction tx, Throwable ex, TransactionInfo txInfo) throws TransactionException, TransactionalExecutor.ExecutionException {
+    private void rollbackTransaction(GlobalTransaction tx, Throwable ex, boolean participantReportRollback) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         //check branch rollback
-        if (tx.getRole() == GlobalTransactionRole.Launcher || txInfo.getParticipantReportRollback()) {
+        if (tx.getRole() == GlobalTransactionRole.Launcher || participantReportRollback) {
             if (!(checkReportedRollback(ex))) {
                 tx.rollback();
             }
