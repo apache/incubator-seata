@@ -27,11 +27,17 @@ public class UndoLogCache {
 
     private static final String DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX = "UNDO_LOG_CACHE_KEY_XID_";
 
-    private static final String DEFAULT_BRANCHID_PREFIX = "BRANCHID_";
+    private static final String DEFAULT_BRANCH_ID_PREFIX = "BRANCH_ID_";
 
-    public static void put(String xid, Long branchId, Object[] objects) {
-        cache.put(getCacheKey(xid, branchId), objects);
-    }
+    private static final int XID = 0;
+
+    private static final int BRANCH_ID = 1;
+
+    public static final int CONTEXT = 2;
+
+    public static final int ROLL_BACK_INFO = 3;
+
+    public static final int STATE = 4;
 
     public static Object[] get(String xid, Long branchId) {
         return cache.get(getCacheKey(xid, branchId));
@@ -52,8 +58,13 @@ public class UndoLogCache {
     }
 
     private static String getCacheKey(String xid, Long branchId) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX).append(xid).append(DEFAULT_BRANCHID_PREFIX).append(branchId);
+        StringBuilder sb = new StringBuilder();
+        sb.append(DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX).append(xid).append(DEFAULT_BRANCH_ID_PREFIX).append(branchId);
         return sb.toString();
     }
+
+    public static void put(Object[] objects) {
+        cache.put(getCacheKey((String)objects[XID], (Long)objects[BRANCH_ID]), objects);
+    }
+
 }

@@ -216,8 +216,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         }
         String rollbackCtx = buildContext(parser.getName());
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
-        Object[] objects = {rollbackCtx, undoLogContent, State.Normal.getValue()};
-        UndoLogCache.put(xid, branchId, objects);
+        Object[] objects = {xid, branchId, rollbackCtx, undoLogContent, State.Normal.getValue()};
+        UndoLogCache.put(objects);
     }
 
     /**
@@ -273,7 +273,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     }
                 } else {
                     exists = true;
-                    int state = (int)cache[2];
+                    int state = (int)cache[UndoLogCache.STATE];
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info("xid {} branch {}, ignore {} undo_log", xid, branchId, state);
@@ -281,7 +281,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         UndoLogCache.remove(xid, branchId);
                         return;
                     }
-                    undo((String)cache[0], (byte[])cache[1], dataSourceProxy, conn);
+                    undo((String)cache[UndoLogCache.CONTEXT], (byte[])cache[UndoLogCache.ROLL_BACK_INFO],
+                        dataSourceProxy, conn);
                 }
 
                 // If undo_log exists, it means that the branch transaction has completed the first phase,
