@@ -15,6 +15,9 @@
  */
 package io.seata.config.nacos;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,8 +49,10 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
     private static final String DEFAULT_GROUP = "SEATA_GROUP";
+    private static final String DEFAULT_DATA_ID = "seata.properties";
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+    private static final String NACOS_DATA_ID_KEY = "dataId";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
@@ -57,7 +62,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> configListenersMap
-        = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+            = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private static Properties seataConfig;
 
     /**
      * Get instance of NacosConfiguration
@@ -82,6 +88,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         if (null == configService) {
             try {
                 configService = NacosFactory.createConfigService(getConfigProperties());
+                initSeataConfig();
             } catch (NacosException e) {
                 throw new RuntimeException(e);
             }
@@ -94,11 +101,17 @@ public class NacosConfiguration extends AbstractConfiguration {
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
         }
-        try {
-            value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
-        } catch (NacosException exx) {
-            LOGGER.error(exx.getErrMsg());
+
+        value = seataConfig.getProperty(dataId);
+
+        if (null == value) {
+            try {
+                value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
+            } catch (NacosException exx) {
+                LOGGER.error(exx.getErrMsg());
+            }
         }
+
         return value == null ? defaultValue : value;
     }
 
@@ -106,7 +119,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.publishConfig(dataId, getNacosGroup(), content);
+            seataConfig.setProperty(dataId, content);
+            result = configService.publishConfig(getNacosDataId(), getNacosGroup(), getSeataConfigStr());
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -122,7 +136,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.removeConfig(dataId, getNacosGroup());
+            seataConfig.remove(dataId);
+            result = configService.publishConfig(getNacosDataId(), getNacosGroup(), getSeataConfigStr());
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -195,10 +210,10 @@ public class NacosConfiguration extends AbstractConfiguration {
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
         String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-            : FILE_CONFIG.getConfig(getNacosUserName());
+                : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
             String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                : FILE_CONFIG.getConfig(getNacosPassword());
+                    : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
@@ -219,18 +234,51 @@ public class NacosConfiguration extends AbstractConfiguration {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
     }
 
+    private static String getNacosDataIdKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, NACOS_DATA_ID_KEY);
+    }
+
     private static String getNacosUserName() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            USER_NAME);
+                USER_NAME);
     }
 
     private static String getNacosPassword() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            PASSWORD);
+                PASSWORD);
     }
 
     private static String getNacosGroup() {
         return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
+    }
+
+    private static String getNacosDataId() {
+        return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
+    }
+
+    private static String getSeataConfigStr() {
+        StringBuilder sb = new StringBuilder();
+
+        Enumeration<?> enumeration = seataConfig.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            String key = (String) enumeration.nextElement();
+            String property = seataConfig.getProperty(key);
+            sb.append(key).append("=").append(property).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    private static void initSeataConfig() {
+        try {
+            String config = configService.getConfig(getNacosDataId(), getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
+            seataConfig = new Properties();
+            if (StringUtils.isNotBlank(config)) {
+                seataConfig.load(new ByteArrayInputStream(config.getBytes()));
+            }
+        } catch (NacosException | IOException e) {
+            LOGGER.error("init config properties error", e);
+        }
     }
 
     @Override
@@ -268,7 +316,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
-                .setNamespace(group);
+                    .setNamespace(group);
             listener.onProcessEvent(event);
         }
     }
