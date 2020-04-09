@@ -131,7 +131,6 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 
-        LOGGER.info("Successfully begin global transaction xid = {}", session.getXid());
         return session.getXid();
     }
 
