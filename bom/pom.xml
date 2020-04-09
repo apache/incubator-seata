@@ -98,7 +98,7 @@
         <druid.version>1.1.12</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
-        <mysql.client.version>5.1.30</mysql.client.version>
+        <mysql.client.version>5.1.35</mysql.client.version>
         <postgres.client.version>42.1.4</postgres.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>

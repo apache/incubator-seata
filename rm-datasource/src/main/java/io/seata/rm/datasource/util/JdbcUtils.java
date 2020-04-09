@@ -18,21 +18,25 @@ package io.seata.rm.datasource.util;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.rm.BaseDataSourceResource;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.DbTypeParser;
 
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.SQLException;
+
 /**
  * @author ggndnn
+ * @author sharajava
  */
 public final class JdbcUtils {
+
     private static volatile DbTypeParser dbTypeParser;
-
-    private JdbcUtils() {
-    }
-
-    public static String getDbType(String jdbcUrl) {
-        return getDbTypeParser().parseFromJdbcUrl(jdbcUrl).toLowerCase();
-    }
 
     static DbTypeParser getDbTypeParser() {
         if (dbTypeParser == null) {
@@ -44,5 +48,89 @@ public final class JdbcUtils {
             }
         }
         return dbTypeParser;
+    }
+
+    private JdbcUtils() {
+    }
+
+    public static String getDbType(String jdbcUrl) {
+        return getDbTypeParser().parseFromJdbcUrl(jdbcUrl).toLowerCase();
+    }
+
+    /**
+     * Init a DataSourceResource instance with DataSource instance and given resource group ID.
+     *
+     * @param dataSourceResource the DataSourceResource instance
+     * @param dataSource the DataSource instance
+     * @param resourceGroupId the given resource group ID
+     */
+    public static void initDataSourceResource(BaseDataSourceResource dataSourceResource, DataSource dataSource, String resourceGroupId) {
+        dataSourceResource.setResourceGroupId(resourceGroupId);
+        try (Connection connection = dataSource.getConnection()) {
+            String jdbcUrl = connection.getMetaData().getURL();
+            dataSourceResource.setResourceId(buildResourceId(jdbcUrl));
+            String driverClassName = com.alibaba.druid.util.JdbcUtils.getDriverClassName(jdbcUrl);
+            dataSourceResource.setDriver(loadDriver(driverClassName));
+            dataSourceResource.setDbType(com.alibaba.druid.util.JdbcUtils.getDbType(jdbcUrl, driverClassName));
+        } catch (SQLException e) {
+            throw new IllegalStateException("can not init DataSourceResource with " + dataSource, e);
+        }
+        DefaultResourceManager.get().registerResource(dataSourceResource);
+    }
+
+    public static void initXADataSourceResource(BaseDataSourceResource dataSourceResource, XADataSource dataSource, String resourceGroupId) {
+        dataSourceResource.setResourceGroupId(resourceGroupId);
+        try {
+            XAConnection xaConnection = dataSource.getXAConnection();
+            try (Connection connection = xaConnection.getConnection()) {
+                String jdbcUrl = connection.getMetaData().getURL();
+                dataSourceResource.setResourceId(buildResourceId(jdbcUrl));
+                String driverClassName = com.alibaba.druid.util.JdbcUtils.getDriverClassName(jdbcUrl);
+                dataSourceResource.setDriver(loadDriver(driverClassName));
+                dataSourceResource.setDbType(com.alibaba.druid.util.JdbcUtils.getDbType(jdbcUrl, driverClassName));
+            } finally {
+                if (xaConnection != null) {
+                    xaConnection.close();
+                }
+            }
+        } catch (SQLException e) {
+            throw new IllegalStateException("can not get XAConnection from DataSourceResource with " + dataSource, e);
+        }
+        DefaultResourceManager.get().registerResource(dataSourceResource);
+    }
+
+    public static String buildResourceId(String jdbcUrl) {
+        if (jdbcUrl.contains("?")) {
+            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+        }
+        return jdbcUrl;
+    }
+
+    public static Driver loadDriver(String driverClassName) throws SQLException {
+        Class clazz = null;
+        try {
+            ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+            if (contextLoader != null) {
+                clazz = contextLoader.loadClass(driverClassName);
+            }
+        } catch (ClassNotFoundException e) {
+            // skip
+        }
+
+        if (clazz == null) {
+            try {
+                clazz = Class.forName(driverClassName);
+            } catch (ClassNotFoundException e) {
+                throw new SQLException(e.getMessage(), e);
+            }
+        }
+
+        try {
+            return (Driver)clazz.newInstance();
+        } catch (IllegalAccessException e) {
+            throw new SQLException(e.getMessage(), e);
+        } catch (InstantiationException e) {
+            throw new SQLException(e.getMessage(), e);
+        }
     }
 }
