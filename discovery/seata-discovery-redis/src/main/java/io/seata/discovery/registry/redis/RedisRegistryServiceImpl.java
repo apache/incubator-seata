@@ -51,11 +51,13 @@ import redis.clients.jedis.Protocol;
 public class RedisRegistryServiceImpl implements RegistryService<RedisListener> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisRegistryServiceImpl.class);
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String REDIS_FILEKEY_PREFIX = "registry.redis.";
     private static final String DEFAULT_CLUSTER = "default";
     private static final String REGISTRY_CLUSTER_KEY = "cluster";
-    private String clusterName;
+    private static final String CLUSTER_NAME = FILE_CONFIG.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
+    private static final String REGISTRY_KEY = REDIS_FILEKEY_PREFIX + CLUSTER_NAME;
     private static final String REDIS_DB = "db";
     private static final String REDIS_PASSWORD = "password";
     private static final ConcurrentMap<String, List<RedisListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
@@ -67,49 +69,47 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         new NamedThreadFactory("RedisRegistryService", 1));
 
     private RedisRegistryServiceImpl() {
-        Configuration seataConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
-        this.clusterName = seataConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
-        String password = seataConfig.getConfig(getRedisPasswordFileKey());
-        String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
+        String password = FILE_CONFIG.getConfig(getRedisPasswordFileKey());
+        String serverAddr = FILE_CONFIG.getConfig(getRedisAddrFileKey());
         String[] serverArr = serverAddr.split(":");
         String host = serverArr[0];
         int port = Integer.parseInt(serverArr[1]);
-        int db = seataConfig.getInt(getRedisDbFileKey());
+        int db = FILE_CONFIG.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
-        redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
-        redisConfig.setTestOnReturn(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
-        redisConfig.setTestWhileIdle(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
-        int maxIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
+        redisConfig.setTestOnBorrow(FILE_CONFIG.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
+        redisConfig.setTestOnReturn(FILE_CONFIG.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
+        redisConfig.setTestWhileIdle(FILE_CONFIG.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
+        int maxIdle = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
         if (maxIdle > 0) {
             redisConfig.setMaxIdle(maxIdle);
         }
-        int minIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
+        int minIdle = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
         if (minIdle > 0) {
             redisConfig.setMinIdle(minIdle);
         }
-        int maxActive = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
+        int maxActive = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
         if (maxActive > 0) {
             redisConfig.setMaxTotal(maxActive);
         }
-        int maxTotal = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
+        int maxTotal = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
         if (maxTotal > 0) {
             redisConfig.setMaxTotal(maxTotal);
         }
-        int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
-            seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+        int maxWait = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
+                FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
         if (maxWait > 0) {
             redisConfig.setMaxWaitMillis(maxWait);
         }
-        int numTestsPerEvictionRun = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
+        int numTestsPerEvictionRun = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
         if (numTestsPerEvictionRun > 0) {
             redisConfig.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
         }
-        int timeBetweenEvictionRunsMillis = seataConfig.getInt(
+        int timeBetweenEvictionRunsMillis = FILE_CONFIG.getInt(
             REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
         if (timeBetweenEvictionRunsMillis > 0) {
             redisConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         }
-        int minEvictableIdleTimeMillis = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
+        int minEvictableIdleTimeMillis = FILE_CONFIG.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
             0);
         if (minEvictableIdleTimeMillis > 0) {
             redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
@@ -159,13 +159,12 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     @Override
     public void subscribe(String cluster, RedisListener listener) {
-        String redisRegistryKey = REDIS_FILEKEY_PREFIX + cluster;
         LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
         LISTENER_SERVICE_MAP.get(cluster).add(listener);
         threadPoolExecutor.submit(() -> {
             try {
                 try (Jedis jedis = jedisPool.getResource()) {
-                    jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), redisRegistryKey);
+                    jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), getRedisRegistryKey());
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -240,7 +239,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     private String getRedisRegistryKey() {
-        return REDIS_FILEKEY_PREFIX + clusterName;
+        return REGISTRY_KEY;
     }
 
     private String getRedisAddrFileKey() {
