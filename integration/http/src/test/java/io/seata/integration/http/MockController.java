@@ -25,56 +25,33 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author : wangxb
- * @Description: Mock springmvc controller,one should be start real server
+ * @Description: Mock springmvc controller
  */
 @Controller
-public class IndexController {
+public class MockController {
 
 
-    @RequestMapping("/index")
+    @RequestMapping("/testGet")
     @ResponseBody
-    public String index() {
-
-        return "Hello World!";
-    }
-
-
-    @ResponseBody
-    @PostMapping("/testPost")
-    public String testPost(@RequestBody Person person) {
+    public String testGet(HttpTest.Person person) {
         /* verify xid propagate by test case */
         Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
         return person.toString();
     }
 
 
-    public static class Person {
-        private String name;
-        private int age;
+    @ResponseBody
+    @PostMapping("/testPost")
+    public String testPost(@RequestBody HttpTest.Person person) {
+        /* verify xid propagate by test case */
+        Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
+        return person.toString();
+    }
 
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-
-        @Override
-        public String toString() {
-            return "Person{" +
-                    "name='" + name + '\'' +
-                    ", age=" + age +
-                    '}';
-        }
+    @RequestMapping("/testException")
+    @ResponseBody
+    public String testException(HttpTest.Person person) {
+        throw new RuntimeException();
     }
 
 }
