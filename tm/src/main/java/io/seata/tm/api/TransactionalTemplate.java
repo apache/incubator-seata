@@ -18,15 +18,17 @@ package io.seata.tm.api;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.core.constants.DefaultValues;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,14 +165,13 @@ public class TransactionalTemplate {
         triggerBeforeRollback();
         //check branch rollback
         if (tx.getRole() == GlobalTransactionRole.Launcher || txInfo.getParticipantReportRollback()) {
-            if (!(ex instanceof TransactionException
-                    && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantReportedRollback)) {
+            if (!(checkReportedRollback(ex))) {
                 tx.rollback();
             }
         }
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, getRollbackCode(tx), getOriginalException(ex));
+        throw new TransactionalExecutor.ExecutionException(tx, getRollbackCode(tx), ex);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
@@ -263,15 +264,7 @@ public class TransactionalTemplate {
         return TransactionHookManager.getHooks();
     }
 
-    private Throwable getOriginalException(Throwable ex) {
-        if (ex instanceof TransactionException) {
-            return ex.getCause();
-        } else {
-            return ex;
-        }
-    }
-
-    private TransactionalExecutor.Code getRollbackCode(GlobalTransaction tx) throws TransactionException {
+    private TransactionalExecutor.Code getRollbackCode(GlobalTransaction tx) {
         if (tx.getLocalStatus() == GlobalStatus.RollbackRetrying) {
             if (tx.getRole() == GlobalTransactionRole.Launcher) {
                 return TransactionalExecutor.Code.RollbackRetrying;
@@ -295,4 +288,28 @@ public class TransactionalTemplate {
         }
     }
 
+    private boolean checkReportedRollback(Throwable ex) {
+        String exStr = null;
+
+        //dubbo
+        exStr = ex.getMessage();
+        if (!StringUtils.isBlank(exStr) && exStr.contains(DefaultValues.DEFAULT_PARTICIPANT_REPORTED_ROLLBACK)) {
+            return true;
+        }
+
+        //feign
+        try {
+            Method m = ex.getClass().getMethod("contentUTF8");
+            exStr = (String) m.invoke(ex);
+            if (!StringUtils.isBlank(exStr) && exStr.contains(DefaultValues.DEFAULT_PARTICIPANT_REPORTED_ROLLBACK)) {
+                return true;
+            }
+        } catch (NoSuchMethodException ignored) {
+
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            return false;
+        }
+
+        return false;
+    }
 }

@@ -75,5 +75,7 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
+    public static final String DEFAULT_PARTICIPANT_REPORTED_ROLLBACK = "participant_reported_rollback";
+
 
 }

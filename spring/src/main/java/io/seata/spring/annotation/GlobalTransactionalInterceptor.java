@@ -26,8 +26,7 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.constants.DefaultValues;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
@@ -161,9 +160,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 case ParticipantRollbackDone:
-                    throw new TransactionException(TransactionExceptionCode.ParticipantReportedRollback, e.getOriginalException());
+                    throw new RuntimeException(DefaultValues.DEFAULT_PARTICIPANT_REPORTED_ROLLBACK, e.getOriginalException());
                 case ParticipantRollbackFailure:
-                    throw new TransactionException(TransactionExceptionCode.ParticipantReportedRollback, e.getCause());
+                    throw new RuntimeException(DefaultValues.DEFAULT_PARTICIPANT_REPORTED_ROLLBACK, e.getCause());
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
