@@ -44,7 +44,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
-    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+    private KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
