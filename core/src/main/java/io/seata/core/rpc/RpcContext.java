@@ -16,6 +16,7 @@
 package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import io.seata.common.util.StringUtils;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -289,7 +290,10 @@ public class RpcContext {
      * @param resource the resource
      */
     public void addResource(String resource) {
-        if (null == resource) {
+        if (StringUtils.isBlank(resource)) {
+            return;
+        }
+        if (null == resourceSets) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.add(resource);
@@ -298,14 +302,14 @@ public class RpcContext {
     /**
      * Add resources.
      *
-     * @param resource the resource
+     * @param resources the resources
      */
-    public void addResources(Set<String> resource) {
-        if (null == resource) { return; }
+    public void addResources(Set<String> resources) {
+        if (null == resources) { return; }
         if (null == resourceSets) {
             this.resourceSets = new HashSet<String>();
         }
-        this.resourceSets.addAll(resource);
+        this.resourceSets.addAll(resources);
     }
 
     /**
