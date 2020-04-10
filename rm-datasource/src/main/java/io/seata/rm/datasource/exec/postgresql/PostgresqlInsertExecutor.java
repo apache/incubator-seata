@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec.postgresql;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
@@ -78,21 +79,26 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor {
     }
 
     private List<Object> getPkValuesBySequence(Object expr) throws SQLException {
+        List<Object> pkValues = null;
         try {
-            return getPkValuesByAuto();
+            pkValues = getPkValuesByAuto();
         } catch (NotSupportYetException | SQLException ignore) {
+        }
+
+        if (!CollectionUtils.isEmpty(pkValues)) {
+            return pkValues;
         }
 
         ResultSet genKeys;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
-            final String sql = "SELECT currval('" + sequenceExpr.getSequence() + "')";
+            final String sql = "SELECT currval(" + sequenceExpr.getSequence() + ")";
             LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
             genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         } else {
             throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
         }
-        List<Object> pkValues = new ArrayList<>();
+        pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
