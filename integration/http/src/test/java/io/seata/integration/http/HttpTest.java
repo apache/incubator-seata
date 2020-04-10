@@ -41,7 +41,8 @@ import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonS
 class HttpTest {
 
     private static final String host = "http://127.0.0.1:8081";
-    private static final String getPath = "/index";
+    private static final String testException = "/testException";
+    private static final String getPath = "/testGet";
     private static final String postPath = "/testPost";
     public static final String XID = "127.0.0.1:8081:87654321";
     private static final int PARAM_TYPE_MAP = 1;
@@ -51,7 +52,8 @@ class HttpTest {
     void testGetProviderXID() {
         RootContext.bind(XID);
         providerStart();
-        consumerGetStart(PARAM_TYPE_MAP);
+        String result = consumerGetStart(PARAM_TYPE_MAP);
+        Assertions.assertEquals("Person{name='zhangsan', age=15}", result);
         RootContext.unbind();
     }
 
@@ -59,12 +61,22 @@ class HttpTest {
     void testPostProviderXID() {
         RootContext.bind(XID);
         providerStart();
-        consumerPostStart(PARAM_TYPE_MAP);
+        String result = consumerPostStart(PARAM_TYPE_MAP);
+        Assertions.assertEquals("Person{name='zhangsan', age=15}", result);
+        RootContext.unbind();
+    }
+
+    @Test
+    void testGetExceptionRemoveXID() {
+        RootContext.bind(XID);
+        providerStart();
+        String result = consumerGetExceptionStart();
+        Assertions.assertEquals("Callee remove local xid success", result);
         RootContext.unbind();
     }
 
     public void providerStart() {
-
+        new MockWebServer().start(8081);
     }
 
     public static class Person {
@@ -87,9 +99,16 @@ class HttpTest {
             this.age = age;
         }
 
+        @Override
+        public String toString() {
+            return "Person{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
     }
 
-    private void consumerPostStart(int param_type) {
+    private String consumerPostStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         String str = "{\n" +
                 "    \"name\":\"zhangsan\",\n" +
@@ -117,17 +136,17 @@ class HttpTest {
                 response = httpExecuter.executePost(host, postPath, str, HttpResponse.class);
             }
 
-            String content = readStreamAsStr(response.getEntity().getContent());
-            Assertions.assertTrue(content.contains("zhangsan") && content.contains("15"));
+            return readStreamAsStr(response.getEntity().getContent());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
-    private void consumerGetStart(int param_type) {
+    private String consumerGetStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         Map<String, String> params = new HashMap<>();
         params.put("name", "zhangsan");
+        params.put("age", "15");
 
         String str = "{\n" +
                 "    \"name\":\"zhangsan\",\n" +
@@ -144,11 +163,39 @@ class HttpTest {
             } else {
                 response = httpExecuter.executeGet(host, getPath, convertParamOfJsonString(str, Person.class), HttpResponse.class);
             }
-            String content = readStreamAsStr(response.getEntity().getContent());
-            Assertions.assertEquals(content, "hello world!");
+            return readStreamAsStr(response.getEntity().getContent());
+
         } catch (IOException e) {
-            e.printStackTrace();
+            /* if in Travis CI env, only mock method call */
+            MockHttpExecuter mockHttpExecuter = new MockHttpExecuter();
+            try {
+                return mockHttpExecuter.executeGet(host, getPath, params, String.class);
+            } catch (IOException ex) {
+                throw new RuntimeException(e);
+            }
         }
+    }
+
+    private String consumerGetExceptionStart() {
+        DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "zhangsan");
+        params.put("age", "15");
+        HttpResponse response;
+        try {
+            response = httpExecuter.executeGet(host, testException, params, HttpResponse.class);
+            return readStreamAsStr(response.getEntity().getContent());
+        } catch (IOException e) {
+            /* if in Travis CI inv, only mock method call */
+            MockHttpExecuter mockHttpExecuter = new MockHttpExecuter();
+            try {
+                return mockHttpExecuter.executeGet(host, testException, params, String.class);
+            } catch (IOException ex) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
     }
 
     public static String readStreamAsStr(InputStream is) throws IOException {
