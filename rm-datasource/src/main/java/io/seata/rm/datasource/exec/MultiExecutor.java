@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * The type MultiSql executor.
+ * The type MultiSql executor. now just support same type
  * ex.
  * <pre>
- *  jdbcTemplate.update("update account_tbl set money = money - ? where user_id = ?;delete from account_tbl where user_id = ?;update account_tbl set money = money - ? where user_id = ?", new Object[] {money, userId,"U10000",money,"U1000"});
+ *  jdbcTemplate.update("update account_tbl set money = money - ? where user_id = ?;update account_tbl set money = money - ? where user_id = ?", new Object[] {money, userId,"U10000",money,"U1000"});
  *  </pre>
  *
  * @param <T> the type parameter
@@ -60,12 +60,12 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
      *
      * @return the table records
      * @throws SQLException the sql exception
-     * @see io.seata.rm.datasource.sql.SQLVisitorFactory#getMulti(String, String) validate sqlType
+     * @see io.seata.rm.datasource.sql.SQLVisitorFactory#get(String, String) validate sqlType
      */
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        //group by sqlType and table
-        multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(t -> t.getSQLType().value() + t.getTableName()));
+        //group by sqlType
+        multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(t -> t.getTableName()));
         AbstractDMLBaseExecutor<T, S> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
