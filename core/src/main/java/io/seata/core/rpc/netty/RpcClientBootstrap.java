@@ -58,7 +58,6 @@ public class RpcClientBootstrap implements RemotingClient {
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup eventLoopGroupWorker;
     private EventExecutorGroup defaultEventExecutorGroup;
-    private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> clientChannelPool;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
     private final NettyPoolKey.TransactionRole transactionRole;
@@ -154,9 +153,6 @@ public class RpcClientBootstrap implements RemotingClient {
     @Override
     public void shutdown() {
         try {
-            if (null != clientChannelPool) {
-                clientChannelPool.close();
-            }
             this.eventLoopGroupWorker.shutdownGracefully();
             if (this.defaultEventExecutorGroup != null) {
                 this.defaultEventExecutorGroup.shutdownGracefully();
