@@ -4,6 +4,7 @@ seata:
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
+  excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
       async-commit-buffer-limit: 1000
@@ -81,6 +82,7 @@ seata:
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
+      application: seata-server
       server-addr: localhost
       namespace:
       userName: ""
