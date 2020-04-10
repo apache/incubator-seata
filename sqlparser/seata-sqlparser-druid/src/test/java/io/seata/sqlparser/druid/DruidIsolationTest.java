@@ -34,12 +34,12 @@ public class DruidIsolationTest {
     public void testDruidIsolation() throws Exception {
         DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
-        SQLRecognizer sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL, false);
+        SQLRecognizer sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL);
         Assertions.assertNotNull(sqlRecognizer);
         DruidLoader druidLoaderForTest = new DruidLoaderForTest();
         recognizerFactory.setClassLoader(new DruidIsolationClassLoader(druidLoaderForTest));
         // because druid-test.jar not exists, so NoClassDefFoundError should be threw
-        Assertions.assertThrows(NoClassDefFoundError.class, () -> recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL, false));
+        Assertions.assertThrows(NoClassDefFoundError.class, () -> recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL));
     }
 
     @AfterAll

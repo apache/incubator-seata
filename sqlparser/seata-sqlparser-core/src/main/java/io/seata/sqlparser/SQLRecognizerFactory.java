@@ -19,5 +19,8 @@ package io.seata.sqlparser;
  * @author ggndnn
  */
 public interface SQLRecognizerFactory {
+
+    SQLRecognizer create(String sql, String dbType);
+
     SQLRecognizer create(String sql, String dbType, boolean isSelectTransformForUpdate);
 }

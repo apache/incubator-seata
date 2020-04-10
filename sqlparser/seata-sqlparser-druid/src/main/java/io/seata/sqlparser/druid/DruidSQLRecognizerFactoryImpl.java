@@ -34,6 +34,11 @@ import io.seata.sqlparser.SQLRecognizerFactory;
  */
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
+    public SQLRecognizer create(String sql, String dbType) {
+        return this.create(sql, dbType, false);
+    }
+
+    @Override
     public SQLRecognizer create(String sql, String dbType, boolean isSelectTransformForUpdate) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
         if (asts == null || asts.size() != 1) {
