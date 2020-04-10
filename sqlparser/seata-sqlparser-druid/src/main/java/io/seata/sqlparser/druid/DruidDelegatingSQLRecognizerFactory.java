@@ -15,13 +15,13 @@
  */
 package io.seata.sqlparser.druid;
 
+import java.lang.reflect.Constructor;
+
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserType;
-
-import java.lang.reflect.Constructor;
 
 /**
  * @author ggndnn
@@ -52,6 +52,11 @@ public class DruidDelegatingSQLRecognizerFactory implements SQLRecognizerFactory
         } catch (Exception e) {
             throw new SQLParsingException(e);
         }
+    }
+
+    @Override
+    public SQLRecognizer create(String sql, String dbType) {
+        return this.create(sql, dbType, false);
     }
 
     @Override
