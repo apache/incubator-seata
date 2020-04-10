@@ -53,21 +53,24 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
         final KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(getDbType());
         final TableMeta tmeta = getTableMeta(sqlRecognizers.get(0).getTableName());
         final ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        final StringBuilder whereCondition = new StringBuilder();
+        StringBuilder whereCondition = new StringBuilder();
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) recognizer;
             String whereConditionStr = buildWhereCondition(visitor, paramAppenderList);
+            if (StringUtils.isBlank(whereConditionStr)) {
+                whereCondition = new StringBuilder();
+                break;
+            }
             if (whereCondition.length() > 0) {
                 whereCondition.append(" OR ");
-            }
-            if (StringUtils.isNotBlank(whereConditionStr)) {
                 whereCondition.append(whereConditionStr);
             }
-
         }
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        suffix.append(" WHERE ").append(whereCondition);
+        if (whereCondition.length() > 0) {
+            suffix.append(" WHERE ").append(whereCondition);
+        }
         suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tmeta.getAllColumns().keySet()) {

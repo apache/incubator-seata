@@ -129,11 +129,9 @@ public class SQLVisitorFactoryTest {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), MySQLUpdateRecognizer.class.getName());
         }
         //test for mysql update and deleted
-        sql = "update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1 ";
-        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertEquals(sqlRecognizers.get(0).getClass().getName(), MySQLUpdateRecognizer.class.getName());
-        Assertions.assertEquals(sqlRecognizers.get(1).getClass().getName(), MySQLUpdateRecognizer.class.getName());
-        Assertions.assertEquals(sqlRecognizers.get(2).getClass().getName(), MySQLDeleteRecognizer.class.getName());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1", JdbcConstants.MYSQL);
+        });
         //test for mysql select
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.MYSQL);

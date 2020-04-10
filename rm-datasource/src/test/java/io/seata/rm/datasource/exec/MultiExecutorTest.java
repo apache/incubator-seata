@@ -91,7 +91,8 @@ public class MultiExecutorTest {
     @Test
     public void testBeforeImageAndAfterImages() throws SQLException {
         //same table and same type
-        String sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL2' where id = 2";
+        String sql = "update table_update_executor_test set name = 'WILL' where id = 1;" +
+                "update table_update_executor_test set name = 'WILL2' where id = 2";
         List<SQLRecognizer> multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -108,8 +109,31 @@ public class MultiExecutorTest {
         Assertions.assertTrue(items.stream().allMatch(t -> Objects.equals(t.getSqlType(), SQLType.UPDATE) && Objects.equals(t.getTableName(), "table_update_executor_test")));
         Assertions.assertEquals(items.size(), 1);
         items.clear();
-        //same table and multi type
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;delete from table_update_executor_test where id = 2;";
+
+
+        //same table delete
+        sql = "delete from table_update_executor_test where id = 2;delete from table_update_executor_test where id = 3";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        beforeImage = executor.beforeImage();
+        multiSqlGroup = executor.getMultiSqlGroup();
+        beforeImagesMap = executor.getBeforeImagesMap();
+        Assertions.assertEquals(multiSqlGroup.size(), 1);
+        Assertions.assertEquals(beforeImagesMap.size(), 1);
+        afterImage = executor.afterImage(beforeImage);
+        Assertions.assertEquals(executor.getAfterImagesMap().size(), 1);
+        executor.prepareUndoLog(beforeImage, afterImage);
+        items = connectionProxy.getContext().getUndoItems();
+        Set<String> itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
+        Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
+        Assertions.assertEquals(items.size(), 1);
+        items.clear();
+
+
+        //multi table update
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test2 set name = 'WILL' where id = 1;update table_update_executor_test2 set name = 'WILL' where id = 3;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -123,16 +147,15 @@ public class MultiExecutorTest {
         Assertions.assertEquals(executor.getAfterImagesMap().size(), 2);
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
-        Set<String> itemSet = items.stream().map(t -> t.getSqlType().value() + t.getTableName()).collect(Collectors.toSet());
-        Assertions.assertTrue(itemSet.contains("2table_update_executor_test"));
-        Assertions.assertTrue(itemSet.contains(SQLType.DELETE.value() + "table_update_executor_test"));
+        itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
+        Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
+        Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
         items.clear();
 
 
-        // multi table and multi type
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;" +
-                "update table_update_executor_test_1 set name = 'WILL' where id = 2;delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 3";
+        // multi table delete
+        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test where id = 3;delete from table_update_executor_test where id = 4;delete from table_update_executor_test";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -140,17 +163,18 @@ public class MultiExecutorTest {
         beforeImage = executor.beforeImage();
         multiSqlGroup = executor.getMultiSqlGroup();
         beforeImagesMap = executor.getBeforeImagesMap();
-        Assertions.assertEquals(multiSqlGroup.size(), 3);
-        Assertions.assertEquals(beforeImagesMap.size(), 3);
+        Assertions.assertEquals(multiSqlGroup.size(), 2);
+        Assertions.assertEquals(beforeImagesMap.size(), 2);
         afterImage = executor.afterImage(beforeImage);
-        Assertions.assertEquals(executor.getAfterImagesMap().size(), 3);
+        Assertions.assertEquals(executor.getAfterImagesMap().size(), 2);
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
-        itemSet = items.stream().map(t -> t.getSqlType().value() + t.getTableName()).collect(Collectors.toSet());
-        Assertions.assertTrue(itemSet.contains(SQLType.UPDATE.value() + "table_update_executor_test"));
-        Assertions.assertTrue(itemSet.contains(SQLType.UPDATE.value() + "table_update_executor_test_1"));
-        Assertions.assertTrue(itemSet.contains(SQLType.DELETE.value() + "table_update_executor_test2"));
-        Assertions.assertEquals(items.size(), 3);
+        itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
+        Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
+        Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
+        Assertions.assertEquals(items.size(), 2);
+
+
 
 
     }

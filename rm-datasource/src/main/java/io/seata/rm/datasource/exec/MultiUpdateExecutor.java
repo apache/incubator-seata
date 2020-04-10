@@ -56,27 +56,30 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
 
         final ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         Set<String> updateColumnsSet = new HashSet<>();
-        final StringBuilder whereCondition = new StringBuilder();
+        StringBuilder whereCondition = new StringBuilder();
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
             updateColumnsSet.addAll(updateColumns);
             String whereConditionStr = buildWhereCondition(sqlUpdateRecognizer, paramAppenderList);
+            if (StringUtils.isBlank(whereConditionStr)) {
+                whereCondition = new StringBuilder();
+                break;
+            }
             if (whereCondition.length() > 0) {
                 whereCondition.append(" OR ");
-            }
-            if (StringUtils.isNotBlank(whereConditionStr)) {
                 whereCondition.append(whereConditionStr);
             }
-
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!containsPK(new ArrayList<>(updateColumnsSet))) {
             prefix.append(getColumnNameInSQL(tmeta.getEscapePkName(getDbType()))).append(", ");
         }
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        suffix.append(" WHERE ").append(whereCondition);
+        if (whereCondition.length() > 0) {
+            suffix.append(" WHERE ").append(whereCondition);
+        }
         suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
         for (String updateCol : updateColumnsSet) {
