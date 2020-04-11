@@ -64,9 +64,9 @@ import java.util.concurrent.TimeUnit;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class ServerOnRequestMessageProcessor implements NettyProcessor {
+public class ServerOnRequestProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
     private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
 
@@ -80,7 +80,7 @@ public class ServerOnRequestMessageProcessor implements NettyProcessor {
     private static final String THREAD_PREFIX = "batchLoggerPrint";
     private static final long BUSY_SLEEP_MILLS = 5L;
 
-    public ServerOnRequestMessageProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
+    public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
         init();

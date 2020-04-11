@@ -60,9 +60,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class ClientOnResponseMessageProcessor implements NettyProcessor {
+public class ClientOnResponseProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
     /**
      * The Merge msg map from AbstractRpcRemoting.
@@ -79,9 +79,9 @@ public class ClientOnResponseMessageProcessor implements NettyProcessor {
      */
     private TransactionMessageHandler transactionMessageHandler;
 
-    public ClientOnResponseMessageProcessor(Map<Integer, MergeMessage> mergeMsgMap,
-                                            ConcurrentHashMap<Integer, MessageFuture> futures,
-                                            TransactionMessageHandler transactionMessageHandler) {
+    public ClientOnResponseProcessor(Map<Integer, MergeMessage> mergeMsgMap,
+                                     ConcurrentHashMap<Integer, MessageFuture> futures,
+                                     TransactionMessageHandler transactionMessageHandler) {
         this.mergeMsgMap = mergeMsgMap;
         this.futures = futures;
         this.transactionMessageHandler = transactionMessageHandler;

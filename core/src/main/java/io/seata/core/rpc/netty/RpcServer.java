@@ -25,7 +25,7 @@ import io.seata.core.rpc.netty.processor.Pair;
 import io.seata.core.rpc.netty.processor.server.ServerHeartbeatMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.RegRmMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.RegTmMessageProcessor;
-import io.seata.core.rpc.netty.processor.server.ServerOnRequestMessageProcessor;
+import io.seata.core.rpc.netty.processor.server.ServerOnRequestProcessor;
 import io.seata.core.rpc.netty.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,31 +60,30 @@ public class RpcServer extends AbstractRpcRemotingServer {
     @Override
     public void init() {
         // registry processor
-        // 1. registry trx message processor
-        // 1.1 on request
-        ServerOnRequestMessageProcessor onRequestMessageProcessor =
-            new ServerOnRequestMessageProcessor(this, getTransactionMessageHandler());
-        registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestMessageProcessor, messageExecutor);
-        // 1.2 on response
+        // 1. registry on request message processor
+        ServerOnRequestProcessor onRequestProcessor =
+            new ServerOnRequestProcessor(this, getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
+        // 2. registry on response message processor
         ServerOnResponseProcessor onResponseProcessor =
             new ServerOnResponseProcessor(getTransactionMessageHandler(), getFutures());
         registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
         registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
-        // 2. registry rm message processor
+        // 3. registry rm message processor
         RegRmMessageProcessor regRmMessageProcessor = new RegRmMessageProcessor(this, null);
         registerProcessor(MessageType.TYPE_REG_RM, regRmMessageProcessor, messageExecutor);
-        // 3. registry tm message processor
+        // 4. registry tm message processor
         RegTmMessageProcessor regTmMessageProcessor = new RegTmMessageProcessor(this, null);
         registerProcessor(MessageType.TYPE_REG_CLT, regTmMessageProcessor, null);
-        // 4. registry heartbeat message processor
+        // 5. registry heartbeat message processor
         ServerHeartbeatMessageProcessor heartbeatMessageProcessor = new ServerHeartbeatMessageProcessor(this);
         registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
 
