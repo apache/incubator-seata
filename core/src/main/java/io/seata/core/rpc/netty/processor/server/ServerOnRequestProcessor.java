@@ -50,16 +50,19 @@ import java.util.concurrent.TimeUnit;
 /**
  * process RM/TM client request message.
  * <p>
+ * message type:
  * RM:
- * 1) {@link BranchRegisterRequest}
- * 2) {@link BranchReportRequest}
- * 3) {@link GlobalLockQueryRequest}
+ * 1) {@link MergedWarpMessage}
+ * 2) {@link BranchRegisterRequest}
+ * 3) {@link BranchReportRequest}
+ * 4) {@link GlobalLockQueryRequest}
  * TM:
- * 1) {@link GlobalBeginRequest}
- * 2) {@link GlobalCommitRequest}
- * 3) {@link GlobalReportRequest}
- * 4) {@link GlobalRollbackRequest}
- * 5) {@link GlobalStatusRequest}
+ * 1) {@link MergedWarpMessage}
+ * 2) {@link GlobalBeginRequest}
+ * 3) {@link GlobalCommitRequest}
+ * 4) {@link GlobalReportRequest}
+ * 5) {@link GlobalRollbackRequest}
+ * 6) {@link GlobalStatusRequest}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0

@@ -1,9 +1,11 @@
 ## request
 
- rm client -> server
+rm client -> server
 
 ```
 RegisterRMRequest
+
+MergedWarpMessage
 
 BranchRegisterRequest
 BranchReportRequest
@@ -14,6 +16,8 @@ tm client -> server
 
 ```
 RegisterTMRequest
+
+MergedWarpMessage
 
 GlobalBeginRequest
 GlobalCommitRequest
