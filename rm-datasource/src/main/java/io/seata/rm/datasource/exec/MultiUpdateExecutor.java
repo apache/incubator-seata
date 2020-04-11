@@ -57,18 +57,22 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         final ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         Set<String> updateColumnsSet = new HashSet<>();
         StringBuilder whereCondition = new StringBuilder();
+        boolean selectAll = false;
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
             updateColumnsSet.addAll(updateColumns);
+            if (selectAll) {
+                continue;
+            }
             String whereConditionStr = buildWhereCondition(sqlUpdateRecognizer, paramAppenderList);
             if (StringUtils.isBlank(whereConditionStr)) {
-                whereCondition = new StringBuilder();
-                break;
-            }
-            if (whereCondition.length() > 0) {
-                whereCondition.append(" OR ");
+                selectAll = true;
+            } else {
+                if (whereCondition.length() > 0) {
+                    whereCondition.append(" OR ");
+                }
                 whereCondition.append(whereConditionStr);
             }
         }
@@ -77,7 +81,10 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             prefix.append(getColumnNameInSQL(tmeta.getEscapePkName(getDbType()))).append(", ");
         }
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        if (whereCondition.length() > 0) {
+        if (selectAll) {
+            //select all row
+            paramAppenderList.clear();
+        } else {
             suffix.append(" WHERE ").append(whereCondition);
         }
         suffix.append(" FOR UPDATE");

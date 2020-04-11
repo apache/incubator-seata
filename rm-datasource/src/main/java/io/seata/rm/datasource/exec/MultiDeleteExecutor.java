@@ -60,12 +60,13 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
             String whereConditionStr = buildWhereCondition(visitor, paramAppenderList);
             if (StringUtils.isBlank(whereConditionStr)) {
                 whereCondition = new StringBuilder();
+                paramAppenderList.clear();
                 break;
             }
             if (whereCondition.length() > 0) {
                 whereCondition.append(" OR ");
-                whereCondition.append(whereConditionStr);
             }
+            whereCondition.append(whereConditionStr);
         }
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (whereCondition.length() > 0) {
