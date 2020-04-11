@@ -37,15 +37,15 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RegTmMessageProcessor implements NettyProcessor {
+public class RegTmProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegTmMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegTmProcessor.class);
 
     private RemotingServer remotingServer;
 
     private RegisterCheckAuthHandler checkAuthHandler;
 
-    public RegTmMessageProcessor(RemotingServer remotingServer, RegisterCheckAuthHandler checkAuthHandler) {
+    public RegTmProcessor(RemotingServer remotingServer, RegisterCheckAuthHandler checkAuthHandler) {
         this.remotingServer = remotingServer;
         this.checkAuthHandler = checkAuthHandler;
     }

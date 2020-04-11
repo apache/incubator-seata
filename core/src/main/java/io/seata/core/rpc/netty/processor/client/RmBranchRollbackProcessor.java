@@ -34,15 +34,15 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RmHandleBranchRollbackProcessor implements NettyProcessor {
+public class RmBranchRollbackProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmHandleBranchRollbackProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmBranchRollbackProcessor.class);
 
     private TransactionMessageHandler handler;
 
     private RemotingClient remotingClient;
 
-    public RmHandleBranchRollbackProcessor(TransactionMessageHandler handler, RemotingClient remotingClient) {
+    public RmBranchRollbackProcessor(TransactionMessageHandler handler, RemotingClient remotingClient) {
         this.handler = handler;
         this.remotingClient = remotingClient;
     }
@@ -54,10 +54,10 @@ public class RmHandleBranchRollbackProcessor implements NettyProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm handle branch rollback process:" + msg);
         }
-        handleBranchRollback(rpcMessage, remoteAddress, (BranchRollbackRequest) msg);
+        doBranchRollback(rpcMessage, remoteAddress, (BranchRollbackRequest) msg);
     }
 
-    private void handleBranchRollback(RpcMessage request, String serverAddress, BranchRollbackRequest branchRollbackRequest) {
+    private void doBranchRollback(RpcMessage request, String serverAddress, BranchRollbackRequest branchRollbackRequest) {
         BranchRollbackResponse resultMessage;
         resultMessage = (BranchRollbackResponse) handler.onRequest(branchRollbackRequest, null);
         if (LOGGER.isDebugEnabled()) {

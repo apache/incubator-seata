@@ -37,15 +37,15 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RmHandleBranchCommitProcessor implements NettyProcessor {
+public class RmBranchCommitProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmHandleBranchCommitProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmBranchCommitProcessor.class);
 
     private TransactionMessageHandler handler;
 
     private RemotingClient remotingClient;
 
-    public RmHandleBranchCommitProcessor(TransactionMessageHandler handler, RemotingClient remotingClient) {
+    public RmBranchCommitProcessor(TransactionMessageHandler handler, RemotingClient remotingClient) {
         this.handler = handler;
         this.remotingClient = remotingClient;
     }
@@ -57,10 +57,10 @@ public class RmHandleBranchCommitProcessor implements NettyProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm client handle branch commit process:" + msg);
         }
-        handleBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
+        doBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
     }
 
-    private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
+    private void doBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
 
         BranchCommitResponse resultMessage = null;
         try {
