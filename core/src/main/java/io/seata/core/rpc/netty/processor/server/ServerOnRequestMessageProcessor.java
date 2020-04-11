@@ -48,31 +48,25 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * handle client trx message processor.
- * include mergeMessage and single message.
+ * process RM/TM client request message.
  * <p>
- * Trx message includes the following messages:
- * 1.Request message:
- * {@link TransactionMessageHandler#onRequest}
- * 1) BranchRegisterRequest {@link BranchRegisterRequest}
- * 2) BranchReportRequest {@link BranchReportRequest}
- * 3) GlobalBeginRequest {@link GlobalBeginRequest}
- * 4) GlobalCommitRequest {@link GlobalCommitRequest}
- * 5) GlobalLockQueryRequest {@link GlobalLockQueryRequest}
- * 6) GlobalReportRequest {@link GlobalReportRequest}
- * 7) GlobalRollbackRequest {@link GlobalRollbackRequest}
- * 8) GlobalStatusRequest {@link GlobalStatusRequest}
- * <p>
- * 2.Response message:
- * {@link TransactionMessageHandler#onResponse}
- * not yet
+ * RM:
+ * 1) {@link BranchRegisterRequest}
+ * 2) {@link BranchReportRequest}
+ * 3) {@link GlobalLockQueryRequest}
+ * TM:
+ * 1) {@link GlobalBeginRequest}
+ * 2) {@link GlobalCommitRequest}
+ * 3) {@link GlobalReportRequest}
+ * 4) {@link GlobalRollbackRequest}
+ * 5) {@link GlobalStatusRequest}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class TrxMessageProcessor implements NettyProcessor {
+public class ServerOnRequestMessageProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TrxMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestMessageProcessor.class);
 
     private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
 
@@ -86,7 +80,7 @@ public class TrxMessageProcessor implements NettyProcessor {
     private static final String THREAD_PREFIX = "batchLoggerPrint";
     private static final long BUSY_SLEEP_MILLS = 5L;
 
-    public TrxMessageProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
+    public ServerOnRequestMessageProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
         init();
@@ -95,7 +89,7 @@ public class TrxMessageProcessor implements NettyProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (ChannelManager.isRegistered(ctx.channel())) {
-            onTrxMessage(ctx, rpcMessage);
+            onRequestMessage(ctx, rpcMessage);
         } else {
             try {
                 if (LOGGER.isInfoEnabled()) {
@@ -112,7 +106,7 @@ public class TrxMessageProcessor implements NettyProcessor {
         }
     }
 
-    private void onTrxMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object message = rpcMessage.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
@@ -138,8 +132,6 @@ public class TrxMessageProcessor implements NettyProcessor {
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
             remotingServer.sendResponse(rpcMessage, ctx.channel(), resultMessage);
-        } else if (message instanceof AbstractResultMessage) {
-            transactionMessageHandler.onResponse((AbstractResultMessage) message, rpcContext);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;

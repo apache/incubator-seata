@@ -27,9 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The rm client handle branch commit processor
- * <p>
- * handle TC do global rollback command.
+ * process TC do global rollback command.
+ * message type:
  * {@link BranchRollbackRequest}
  *
  * @author zhangchenghui.dev@gmail.com

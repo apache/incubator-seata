@@ -25,7 +25,8 @@ import io.seata.core.rpc.netty.processor.Pair;
 import io.seata.core.rpc.netty.processor.server.ServerHeartbeatMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.RegRmMessageProcessor;
 import io.seata.core.rpc.netty.processor.server.RegTmMessageProcessor;
-import io.seata.core.rpc.netty.processor.server.TrxMessageProcessor;
+import io.seata.core.rpc.netty.processor.server.ServerOnRequestMessageProcessor;
+import io.seata.core.rpc.netty.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,30 +61,23 @@ public class RpcServer extends AbstractRpcRemotingServer {
     public void init() {
         // registry processor
         // 1. registry trx message processor
-        TrxMessageProcessor trxMessageProcessor = new TrxMessageProcessor(this, getTransactionMessageHandler());
-        // 1.1 request
-        registerProcessor(MessageType.TYPE_BRANCH_REGISTER, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_REPORT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_STATUS, trxMessageProcessor, messageExecutor);
-        // 1.2 response
-        registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_REG_RM_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_REG_CLT_RESULT, trxMessageProcessor, messageExecutor);
-        registerProcessor(MessageType.TYPE_SEATA_MERGE, trxMessageProcessor, messageExecutor);
+        // 1.1 on request
+        ServerOnRequestMessageProcessor onRequestMessageProcessor =
+            new ServerOnRequestMessageProcessor(this, getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestMessageProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestMessageProcessor, messageExecutor);
+        // 1.2 on response
+        ServerOnResponseProcessor onResponseProcessor =
+            new ServerOnResponseProcessor(getTransactionMessageHandler(), getFutures());
+        registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
         // 2. registry rm message processor
         RegRmMessageProcessor regRmMessageProcessor = new RegRmMessageProcessor(this, null);
         registerProcessor(MessageType.TYPE_REG_RM, regRmMessageProcessor, messageExecutor);

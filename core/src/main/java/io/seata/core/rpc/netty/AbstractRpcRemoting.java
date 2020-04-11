@@ -25,7 +25,6 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
-import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.MessageTypeAware;
@@ -444,35 +443,6 @@ public abstract class AbstractRpcRemoting implements Disposable {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
         }
-        switch (rpcMessage.getType()) {
-            case REQUEST_COMMAND:
-                processRequestMessage(ctx, rpcMessage);
-                break;
-            case RESPONSE_COMMAND:
-                processResponseMessage(ctx, rpcMessage);
-                break;
-            default:
-                break;
-        }
-    }
-
-    protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        doProcess(ctx, rpcMessage);
-    }
-
-    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        MessageFuture messageFuture = null;
-        if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
-            messageFuture = futures.remove(rpcMessage.getId());
-        }
-        if (messageFuture != null) {
-            messageFuture.setResultMessage(rpcMessage.getBody());
-        } else {
-            doProcess(ctx, rpcMessage);
-        }
-    }
-
-    private void doProcess(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object body = rpcMessage.getBody();
         if (body instanceof MessageTypeAware) {
             MessageTypeAware messageTypeAware = (MessageTypeAware) body;

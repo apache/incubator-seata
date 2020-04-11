@@ -20,7 +20,7 @@ import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
 import io.seata.core.rpc.netty.processor.client.ClientHeartbeatMessageProcessor;
-import io.seata.core.rpc.netty.processor.client.MergeResultMessageProcessor;
+import io.seata.core.rpc.netty.processor.client.ClientOnResponseMessageProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,11 +42,17 @@ public class TMClient {
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
 
         Map<Integer, Pair<NettyProcessor, Boolean>> processorMap = new HashMap<>();
-        // handle TC response about process merge message
-        Pair<NettyProcessor, Boolean> mergeMsgProcessor =
-            new Pair<>(new MergeResultMessageProcessor(tmRpcClient.getMergeMsgMap(), tmRpcClient.getFutures()), false);
-        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, mergeMsgProcessor);
-        tmRpcClient.setTmProcessor(processorMap);
+        // handle TC response processor
+        Pair<NettyProcessor, Boolean> onResponseMessageProcessor =
+            new Pair<>(new ClientOnResponseMessageProcessor(tmRpcClient.getMergeMsgMap(), tmRpcClient.getFutures(), null), false);
+        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, onResponseMessageProcessor);
+        processorMap.put((int) MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseMessageProcessor);
+        processorMap.put((int) MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseMessageProcessor);
+        processorMap.put((int) MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseMessageProcessor);
+        processorMap.put((int) MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseMessageProcessor);
+        processorMap.put((int) MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseMessageProcessor);
+        processorMap.put((int) MessageType.TYPE_REG_CLT_RESULT, onResponseMessageProcessor);
+
         // handle heartbeat message processor
         Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatMessageProcessor(), false);
         processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);
