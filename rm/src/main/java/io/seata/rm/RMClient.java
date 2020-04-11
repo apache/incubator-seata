@@ -23,7 +23,7 @@ import io.seata.core.rpc.netty.processor.client.ClientHeartbeatMessageProcessor;
 import io.seata.core.rpc.netty.processor.client.RmHandleBranchCommitProcessor;
 import io.seata.core.rpc.netty.processor.client.RmHandleBranchRollbackProcessor;
 import io.seata.core.rpc.netty.processor.client.RmHandleUndoLogProcessor;
-import io.seata.core.rpc.netty.processor.client.MergeResultMessageProcessor;
+import io.seata.core.rpc.netty.processor.client.ClientOnResponseProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,12 +59,14 @@ public class RMClient {
         Pair<NettyProcessor, Boolean> deleteUndoLogProcessor =
             new Pair<>(new RmHandleUndoLogProcessor(handler), true);
         processorMap.put((int) MessageType.TYPE_RM_DELETE_UNDOLOG, deleteUndoLogProcessor);
-        // handle TC response about process merge message
-        Pair<NettyProcessor, Boolean> mergeMsgProcessor =
-            new Pair<>(new MergeResultMessageProcessor(rmRpcClient.getMergeMsgMap(), rmRpcClient.getFutures()), false);
-        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, mergeMsgProcessor);
-        rmRpcClient.setRmProcessor(processorMap);
-
+        // process TC response processor
+        Pair<NettyProcessor, Boolean> onResponseProcessor =
+            new Pair<>(new ClientOnResponseProcessor(rmRpcClient.getMergeMsgMap(), rmRpcClient.getFutures(), handler), false);
+        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor);
+        processorMap.put((int) MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor);
+        processorMap.put((int) MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor);
+        processorMap.put((int) MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor);
+        processorMap.put((int) MessageType.TYPE_REG_RM_RESULT, onResponseProcessor);
         // handle heartbeat message processor
         Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatMessageProcessor(), false);
         processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);

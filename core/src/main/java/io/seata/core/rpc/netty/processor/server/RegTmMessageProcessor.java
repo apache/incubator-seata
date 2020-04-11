@@ -29,7 +29,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * handle tm client registry message processor.
+ * process TM client registry message.
+ * <p>
+ * message type:
+ * {@link RegisterTMRequest}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0

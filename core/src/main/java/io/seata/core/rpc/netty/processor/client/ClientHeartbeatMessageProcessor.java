@@ -23,7 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * handle TC heartbeat message request(PONG) processor
+ * process TC heartbeat message request(PONG)
+ * <p>
+ * message type:
+ * {@link HeartbeatMessage}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
