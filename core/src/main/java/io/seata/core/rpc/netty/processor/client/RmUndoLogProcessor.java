@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RmHandleUndoLogProcessor implements NettyProcessor {
+public class RmUndoLogProcessor implements NettyProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmHandleUndoLogProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmUndoLogProcessor.class);
 
     private TransactionMessageHandler handler;
 
-    public RmHandleUndoLogProcessor(TransactionMessageHandler handler) {
+    public RmUndoLogProcessor(TransactionMessageHandler handler) {
         this.handler = handler;
     }
 
@@ -48,10 +48,10 @@ public class RmHandleUndoLogProcessor implements NettyProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm handle undo log process:" + msg);
         }
-        handleUndoLogDelete((UndoLogDeleteRequest) msg);
+        doUndoLogDelete((UndoLogDeleteRequest) msg);
     }
 
-    private void handleUndoLogDelete(UndoLogDeleteRequest undoLogDeleteRequest) {
+    private void doUndoLogDelete(UndoLogDeleteRequest undoLogDeleteRequest) {
         try {
             handler.onRequest(undoLogDeleteRequest, null);
         } catch (Exception e) {

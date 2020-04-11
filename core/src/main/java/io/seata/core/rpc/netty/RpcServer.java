@@ -22,9 +22,9 @@ import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.server.ServerHeartbeatMessageProcessor;
-import io.seata.core.rpc.netty.processor.server.RegRmMessageProcessor;
-import io.seata.core.rpc.netty.processor.server.RegTmMessageProcessor;
+import io.seata.core.rpc.netty.processor.server.ServerHeartbeatProcessor;
+import io.seata.core.rpc.netty.processor.server.RegRmProcessor;
+import io.seata.core.rpc.netty.processor.server.RegTmProcessor;
 import io.seata.core.rpc.netty.processor.server.ServerOnRequestProcessor;
 import io.seata.core.rpc.netty.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
@@ -78,13 +78,13 @@ public class RpcServer extends AbstractRpcRemotingServer {
         registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
         registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
         // 3. registry rm message processor
-        RegRmMessageProcessor regRmMessageProcessor = new RegRmMessageProcessor(this, null);
-        registerProcessor(MessageType.TYPE_REG_RM, regRmMessageProcessor, messageExecutor);
+        RegRmProcessor regRmProcessor = new RegRmProcessor(this, null);
+        registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
         // 4. registry tm message processor
-        RegTmMessageProcessor regTmMessageProcessor = new RegTmMessageProcessor(this, null);
-        registerProcessor(MessageType.TYPE_REG_CLT, regTmMessageProcessor, null);
+        RegTmProcessor regTmProcessor = new RegTmProcessor(this, null);
+        registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
         // 5. registry heartbeat message processor
-        ServerHeartbeatMessageProcessor heartbeatMessageProcessor = new ServerHeartbeatMessageProcessor(this);
+        ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
         registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
 
         super.setChannelHandlers(new ServerHandler());

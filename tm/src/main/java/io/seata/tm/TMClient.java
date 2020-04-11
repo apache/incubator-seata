@@ -19,7 +19,7 @@ import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.client.ClientHeartbeatMessageProcessor;
+import io.seata.core.rpc.netty.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.netty.processor.client.ClientOnResponseProcessor;
 
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class TMClient {
         processorMap.put((int) MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor);
 
         // heartbeat message processor
-        Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatMessageProcessor(), false);
+        Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatProcessor(), false);
         processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);
         tmRpcClient.setTmProcessor(processorMap);
 
