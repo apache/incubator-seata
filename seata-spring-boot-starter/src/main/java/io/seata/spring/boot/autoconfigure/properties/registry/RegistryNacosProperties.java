@@ -31,6 +31,7 @@ public class RegistryNacosProperties {
     private String cluster = "default";
     private String username = "";
     private String password = "";
+    private String application = "seata-server";
 
     public String getServerAddr() {
         return serverAddr;
@@ -73,6 +74,15 @@ public class RegistryNacosProperties {
 
     public RegistryNacosProperties setPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public RegistryNacosProperties setApplication(String application) {
+        this.application = application;
         return this;
     }
 }

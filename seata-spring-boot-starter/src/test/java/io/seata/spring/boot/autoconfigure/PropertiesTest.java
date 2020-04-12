@@ -204,6 +204,9 @@ public class PropertiesTest {
         assertEquals("localhost", context.getBean(RegistryNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
+        assertEquals("", context.getBean(RegistryNacosProperties.class).getUsername());
+        assertEquals("", context.getBean(RegistryNacosProperties.class).getPassword());
+        assertEquals("seata-server", context.getBean(RegistryNacosProperties.class).getApplication());
     }
 
     @Test
