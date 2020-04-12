@@ -18,14 +18,13 @@ package io.seata.core.rpc.netty;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.DefaultServerMessageListenerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract rpc server.
@@ -107,10 +106,12 @@ public class RpcServer extends AbstractRpcRemotingServer {
      */
     @Override
     public Object sendSyncRequest(String resourceId, String clientId, Object message,
-                                  long timeout) throws TimeoutException {
+        long timeout) throws TimeoutException {
         Channel clientChannel = ChannelManager.getChannel(resourceId, clientId);
         if (clientChannel == null) {
-            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId
+                + ",clientId:" + clientId);
+
         }
         return sendAsyncRequestWithResponse(null, clientChannel, message, timeout);
     }
