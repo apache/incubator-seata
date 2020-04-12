@@ -38,6 +38,7 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
+
         ds.setPassword(getPassword());
         ds.setInitialSize(getMinConn());
         ds.setMaxTotal(getMaxConn());

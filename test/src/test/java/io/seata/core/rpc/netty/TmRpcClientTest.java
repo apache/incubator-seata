@@ -137,7 +137,7 @@ public class TmRpcClientTest {
         request.setXid("127.0.0.1:8091:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
-        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(request);
+        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendSyncRequest(request);
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assertions.assertEquals("RuntimeException[SessionManager is NOT init!]",

@@ -16,14 +16,12 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
-import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
@@ -42,10 +40,8 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -81,10 +77,6 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * The Futures.
      */
     protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
-    /**
-     * The Basket map.
-     */
-    protected final ConcurrentHashMap<String, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
 
     private static final long NOT_WRITEABLE_CHECK_MILLS = 10L;
     /**
@@ -170,180 +162,76 @@ public abstract class AbstractRpcRemoting implements Disposable {
         messageExecutor.shutdown();
     }
 
-    /**
-     * Send async request with response object.
-     *
-     * @param channel the channel
-     * @param msg     the msg
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    protected Object sendAsyncRequestWithResponse(Channel channel, Object msg) throws TimeoutException {
-        return sendAsyncRequestWithResponse(null, channel, msg, NettyClientConfig.getRpcRequestTimeout());
-    }
-
-    /**
-     * Send async request with response object.
-     *
-     * @param address the address
-     * @param channel the channel
-     * @param msg     the msg
-     * @param timeout the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg, long timeout) throws
-        TimeoutException {
-        if (timeout <= 0) {
+    protected Object sendSync(Channel channel, RpcMessage rpcMessage, long timeoutMillis) throws TimeoutException {
+        if (timeoutMillis <= 0) {
             throw new FrameworkException("timeout should more than 0ms");
         }
-        return sendAsyncRequest(address, channel, msg, timeout);
-    }
-
-    /**
-     * Send async request without response object.
-     *
-     * @param channel the channel
-     * @param msg     the msg
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    protected Object sendAsyncRequestWithoutResponse(Channel channel, Object msg) throws
-        TimeoutException {
-        return sendAsyncRequest(null, channel, msg, 0);
-    }
-
-    private Object sendAsyncRequest(String address, Channel channel, Object msg, long timeout)
-        throws TimeoutException {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequestWithResponse nothing, caused by null channel.");
             return null;
         }
-        final RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setId(getNextMessageId());
-        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
-        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
-        rpcMessage.setBody(msg);
 
-        final MessageFuture messageFuture = new MessageFuture();
+        MessageFuture messageFuture = new MessageFuture();
         messageFuture.setRequestMessage(rpcMessage);
-        messageFuture.setTimeout(timeout);
+        messageFuture.setTimeout(timeoutMillis);
         futures.put(rpcMessage.getId(), messageFuture);
 
-        if (address != null) {
-            /*
-            The batch send.
-            Object From big to small: RpcMessage -> MergedWarpMessage -> AbstractMessage
-            @see AbstractRpcRemotingClient.MergedSendRunnable
-            */
-            if (NettyClientConfig.isEnableClientBatchSendRequest()) {
-                ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-                BlockingQueue<RpcMessage> basket = map.get(address);
-                if (basket == null) {
-                    map.putIfAbsent(address, new LinkedBlockingQueue<>());
-                    basket = map.get(address);
-                }
-                basket.offer(rpcMessage);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("offer message: {}", rpcMessage.getBody());
-                }
-                if (!isSending) {
-                    synchronized (mergeLock) {
-                        mergeLock.notifyAll();
-                    }
-                }
-            } else {
-                // the single send.
-                sendSingleRequest(channel, msg, rpcMessage);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("send this msg[{}] by single send.", msg);
-                }
-            }
-        } else {
-            sendSingleRequest(channel, msg, rpcMessage);
-        }
-        if (timeout > 0) {
-            try {
-                return messageFuture.get(timeout, TimeUnit.MILLISECONDS);
-            } catch (Exception exx) {
-                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), address, msg);
-                if (exx instanceof TimeoutException) {
-                    throw (TimeoutException) exx;
-                } else {
-                    throw new RuntimeException(exx);
-                }
-            }
-        } else {
-            return null;
-        }
-    }
+        channelWritableCheck(channel, rpcMessage.getBody());
 
-    private void sendSingleRequest(Channel channel, Object msg, RpcMessage rpcMessage) {
-        ChannelFuture future;
-        channelWritableCheck(channel, msg);
-        future = channel.writeAndFlush(rpcMessage);
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                if (!future.isSuccess()) {
-                    MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-                    if (messageFuture != null) {
-                        messageFuture.setResultMessage(future.cause());
-                    }
-                    destroyChannel(future.channel());
+        channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
+            if (!future.isSuccess()) {
+                MessageFuture messageFuture1 = futures.remove(rpcMessage.getId());
+                if (messageFuture1 != null) {
+                    messageFuture1.setResultMessage(future.cause());
                 }
+                destroyChannel(future.channel());
             }
         });
+
+        try {
+            return messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (Exception exx) {
+            LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), channel.remoteAddress(),
+                rpcMessage.getBody());
+            if (exx instanceof TimeoutException) {
+                throw (TimeoutException) exx;
+            } else {
+                throw new RuntimeException(exx);
+            }
+        }
     }
 
-    /**
-     * Default Send request.
-     *
-     * @param channel the channel
-     * @param msg     the msg
-     */
-    protected void defaultSendRequest(Channel channel, Object msg) {
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-            ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-            : ProtocolConstants.MSGTYPE_RESQUEST);
-        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
-        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
-        rpcMessage.setBody(msg);
-        rpcMessage.setId(getNextMessageId());
-        if (msg instanceof MergeMessage) {
-            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) msg);
-        }
-        channelWritableCheck(channel, msg);
+    protected void sendAsync(Channel channel, RpcMessage rpcMessage, ChannelFutureListener listener) {
+        channelWritableCheck(channel, rpcMessage.getBody());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
         }
-        channel.writeAndFlush(rpcMessage);
+        channel.writeAndFlush(rpcMessage).addListener(listener == null ? (ChannelFutureListener) future -> {
+            if (!future.isSuccess()) {
+                destroyChannel(future.channel());
+            }
+        } : listener);
     }
 
-    /**
-     * Default Send response.
-     *
-     * @param request the msg id
-     * @param channel the channel
-     * @param msg     the msg
-     */
-    protected void defaultSendResponse(RpcMessage request, Channel channel, Object msg) {
+    protected RpcMessage buildRequestMessage(Object msg, byte messageType) {
         RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-            ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
-            ProtocolConstants.MSGTYPE_RESPONSE);
-        rpcMessage.setCodec(request.getCodec()); // same with request
-        rpcMessage.setCompressor(request.getCompressor());
+        rpcMessage.setId(getNextMessageId());
+        rpcMessage.setMessageType(messageType);
+        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
-        rpcMessage.setId(request.getId());
-        channelWritableCheck(channel, msg);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("send response:" + rpcMessage.getBody() + ",channel:" + channel);
-        }
-        channel.writeAndFlush(rpcMessage);
+        return rpcMessage;
+    }
+
+    protected RpcMessage buildResponseMessage(RpcMessage rpcMessage, Object msg, byte messageType) {
+        RpcMessage rpcMsg = new RpcMessage();
+        rpcMsg.setMessageType(messageType);
+        rpcMsg.setCodec(rpcMessage.getCodec()); // same with request
+        rpcMsg.setCompressor(rpcMessage.getCompressor());
+        rpcMsg.setBody(msg);
+        rpcMsg.setId(rpcMessage.getId());
+        return rpcMsg;
     }
 
     private void channelWritableCheck(Channel channel, Object msg) {

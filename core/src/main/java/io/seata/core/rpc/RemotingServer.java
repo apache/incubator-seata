@@ -19,7 +19,6 @@ import io.netty.channel.Channel;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
@@ -31,74 +30,13 @@ import java.util.concurrent.TimeoutException;
  */
 public interface RemotingServer {
 
-    /**
-     * Send response.
-     *
-     * @param request the request
-     * @param channel the channel
-     * @param msg     the msg
-     */
-    void sendResponse(RpcMessage request, Channel channel, Object msg);
+    Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException;
 
-    /**
-     * Sync call to RM with timeout.
-     *
-     * @param resourceId Resource ID
-     * @param clientId   Client ID
-     * @param message    Request message
-     * @param timeout    timeout of the call
-     * @return Response message
-     * @throws IOException      .
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout)
-        throws IOException, TimeoutException;
+    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
 
-    /**
-     * Sync call to RM
-     *
-     * @param resourceId Resource ID
-     * @param clientId   Client ID
-     * @param message    Request message
-     * @return Response message
-     * @throws IOException      .
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException;
+    void sendAsyncRequest(Channel channel, Object msg);
 
-    /**
-     * Send request with response object.
-     * send syn request for rm
-     *
-     * @param clientChannel the client channel
-     * @param message       the message
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException;
-
-    /**
-     * Send request with response object.
-     * send syn request for rm
-     *
-     * @param clientChannel the client channel
-     * @param message       the message
-     * @param timeout       the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException;
-
-    /**
-     * ASync call to RM
-     *
-     * @param channel channel
-     * @param message Request message
-     * @return Response message
-     * @throws IOException      .
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException;
+    void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg);
 
     /**
      * register processor

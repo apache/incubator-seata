@@ -16,6 +16,7 @@
 package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.processor.NettyProcessor;
@@ -31,44 +32,15 @@ import java.util.concurrent.TimeoutException;
  */
 public interface RemotingClient {
 
-    /**
-     * Send msg with response object.
-     *
-     * @param msg     the msg
-     * @param timeout the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException;
+    Object sendSyncRequest(Object msg) throws TimeoutException;
 
-    /**
-     * Send msg with response object.
-     *
-     * @param serverAddress the server address
-     * @param msg           the msg
-     * @param timeout       the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException;
+    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
 
-    /**
-     * Send msg with response object.
-     *
-     * @param msg the msg
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendMsgWithResponse(Object msg) throws TimeoutException;
+    void sendAsyncRequest(Object msg, ChannelFutureListener listener);
 
-    /**
-     * Send response.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
-     * @param msg           the msg
-     */
-    void sendResponse(RpcMessage request, String serverAddress, Object msg);
+    void sendAsyncRequest(Channel channel, Object msg, ChannelFutureListener listener);
+
+    void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg);
 
     /**
      * On register msg success.

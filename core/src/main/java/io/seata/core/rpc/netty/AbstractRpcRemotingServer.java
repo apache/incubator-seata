@@ -23,15 +23,21 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.netty.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Rpc remoting server.
@@ -148,6 +154,56 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
         channel.disconnect();
         channel.close();
+    }
+
+    @Override
+    public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
+        Channel channel = ChannelManager.getChannel(resourceId, clientId);
+        if (channel == null) {
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    @Override
+    public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
+        if (channel == null) {
+            throw new RuntimeException("client is not connected");
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    @Override
+    public void sendAsyncRequest(Channel channel, Object msg) {
+        if (channel == null) {
+            throw new RuntimeException("client is not connected");
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        super.sendAsync(channel, rpcMessage, null);
+    }
+
+    @Override
+    public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
+        Channel clientChannel = channel;
+        if (!(msg instanceof HeartbeatMessage)) {
+            clientChannel = ChannelManager.getSameClientChannel(channel);
+        }
+        if (clientChannel != null) {
+            RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
+                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
+                : ProtocolConstants.MSGTYPE_RESPONSE);
+            super.sendAsync(clientChannel, rpcMsg, null);
+        } else {
+            throw new RuntimeException("channel is error.");
+        }
+    }
+
+    @Override
+    public void registerProcessor(int messageType, NettyProcessor processor, ExecutorService executor) {
+        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(messageType, pair);
     }
 
     /**

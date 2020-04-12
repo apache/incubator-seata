@@ -56,8 +56,10 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
-    private Map<Integer/*MessageType*/, Pair<NettyProcessor, Boolean/*Whether thread pool processing is required*/>> tmProcessorTable = null;
-    
+
+    private Map<Integer/*MessageType*/, Pair<NettyProcessor,
+        Boolean/*Whether thread pool processing is required*/>> tmProcessorTable = null;
+
     /**
      * The constant enableDegrade.
      */
@@ -106,7 +108,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         }
         return instance;
     }
-    
+
     /**
      * Sets application id.
      *
@@ -115,7 +117,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
-    
+
     /**
      * Sets transaction service group.
      *
@@ -128,7 +130,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     public void setTmProcessor(Map<Integer, Pair<NettyProcessor, Boolean>> processorMap) {
         this.tmProcessorTable = processorMap;
     }
-    
+
     @Override
     public void init() {
         // registry processor
@@ -142,14 +144,14 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             super.init();
         }
     }
-    
+
     @Override
     public void destroy() {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
     }
-    
+
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (severAddress) -> {
@@ -157,17 +159,17 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
     }
-    
+
     @Override
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
-    
+
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register TM success. server version:{},channel:{}", ((RegisterTMResponse)response).getVersion(), channel);
+            LOGGER.info("register TM success. server version:{},channel:{}", ((RegisterTMResponse) response).getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
     }
@@ -177,7 +179,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                                   AbstractMessage requestMessage) {
         if (response instanceof RegisterTMResponse && LOGGER.isInfoEnabled()) {
             LOGGER.info("register client failed, server version:"
-                + ((RegisterTMResponse)response).getVersion());
+                + ((RegisterTMResponse) response).getVersion());
         }
         throw new FrameworkException("register client app failed.");
     }

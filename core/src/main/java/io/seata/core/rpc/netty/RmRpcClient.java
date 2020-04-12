@@ -38,7 +38,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -62,7 +61,9 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final int MAX_QUEUE_SIZE = 20000;
     private String applicationId;
     private String transactionServiceGroup;
-    private Map<Integer/*MessageType*/, Pair<NettyProcessor, Boolean/*Whether thread pool processing is required*/>> rmProcessorTable = null;
+
+    private Map<Integer/*MessageType*/, Pair<NettyProcessor,
+        Boolean/*Whether thread pool processing is required*/>> rmProcessorTable = null;
 
     private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
@@ -229,7 +230,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
         message.setResourceIds(resourceId);
         try {
-            super.sendAsyncRequestWithoutResponse(channel, message);
+            super.sendAsyncRequest(channel, message, null);
         } catch (FrameworkException e) {
             if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && serverAddress != null) {
                 getClientChannelManager().releaseChannel(channel, serverAddress);
@@ -239,8 +240,6 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             } else {
                 LOGGER.error("register resource failed, channel:{},resourceId:{}", channel, resourceId, e);
             }
-        } catch (TimeoutException e) {
-            LOGGER.error(e.getMessage());
         }
     }
 

@@ -45,7 +45,7 @@ public class ServerHeartbeatProcessor implements NettyProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         try {
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }

@@ -259,12 +259,7 @@ public class DefaultCoordinatorTest {
     public static class MockServerMessageSender implements RemotingServer {
 
         @Override
-        public void sendResponse(RpcMessage request, Channel channel, Object msg) {
-
-        }
-
-        @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout) throws IOException, TimeoutException {
+        public Object sendSyncRequest(String resourceId, String clientId, Object message) throws TimeoutException {
             if (message instanceof BranchCommitRequest) {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
@@ -279,29 +274,22 @@ public class DefaultCoordinatorTest {
         }
 
         @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException {
-
-            return sendSyncRequest(resourceId, clientId, message, 3000);
-
-        }
-
-        @Override
-        public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
-            return null;
-        }
-
-        @Override
         public Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException {
             return null;
         }
 
         @Override
-        public Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException {
-            return null;
+        public void registerProcessor(int messageType, NettyProcessor processor, ExecutorService executor) {
+
         }
 
         @Override
-        public void registerProcessor(int messageType, NettyProcessor processor, ExecutorService executor) {
+        public void sendAsyncRequest(Channel channel, Object msg) {
+
+        }
+
+        @Override
+        public void sendAsyncResponse(RpcMessage request, Channel channel, Object msg) {
 
         }
     }

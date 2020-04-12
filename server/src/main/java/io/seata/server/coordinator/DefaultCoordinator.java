@@ -374,7 +374,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             deleteRequest.setResourceId(resourceId);
             deleteRequest.setSaveDays(saveDays > 0 ? saveDays : UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
             try {
-                remotingServer.sendASyncRequest(channelEntry.getValue(), deleteRequest);
+                remotingServer.sendAsyncRequest(channelEntry.getValue(), deleteRequest);
             } catch (Exception e) {
                 LOGGER.error("Failed to async delete undo log resourceId = " + resourceId);
             }

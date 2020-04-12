@@ -65,7 +65,7 @@ public class RmBranchCommitProcessor implements NettyProcessor {
         BranchCommitResponse resultMessage = null;
         try {
             resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
-            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
         } catch (Exception e) {
             LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
             if (resultMessage == null) {
@@ -73,7 +73,7 @@ public class RmBranchCommitProcessor implements NettyProcessor {
             }
             resultMessage.setResultCode(ResultCode.Failed);
             resultMessage.setMsg(e.getMessage());
-            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
         }
     }
 }

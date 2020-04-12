@@ -64,7 +64,7 @@ public class RmBranchRollbackProcessor implements NettyProcessor {
             LOGGER.debug("branch rollback result:" + resultMessage);
         }
         try {
-            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
         } catch (Throwable throwable) {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }

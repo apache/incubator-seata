@@ -74,7 +74,7 @@ public class RegTmProcessor implements NettyProcessor {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        remotingServer.sendResponse(rpcMessage, ctx.channel(), new RegisterTMResponse(isSuccess));
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), new RegisterTMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{}", message, ctx.channel());
         }

@@ -134,12 +134,12 @@ public class ServerOnRequestProcessor implements NettyProcessor {
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), resultMessage);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), result);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
     }
 

@@ -15,7 +15,6 @@
  */
 package io.seata.rm;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -153,7 +152,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     @Override
     public void onResponse(AbstractResultMessage response, RpcContext context) {
-        throw new ShouldNeverHappenException();
+
     }
 
     public abstract BranchType getBranchType();

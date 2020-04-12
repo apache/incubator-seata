@@ -73,7 +73,7 @@ public class RegRmProcessor implements NettyProcessor {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        remotingServer.sendResponse(rpcMessage, ctx.channel(), new RegisterRMResponse(isSuccess));
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), new RegisterRMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{}", message, ctx.channel());
         }

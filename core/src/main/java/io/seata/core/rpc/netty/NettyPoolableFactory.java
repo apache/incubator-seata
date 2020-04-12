@@ -63,7 +63,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
             throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }
         try {
-            response = rpcRemotingClient.sendAsyncRequestWithResponse(tmpChannel, key.getMessage());
+            response = rpcRemotingClient.sendSyncRequest(tmpChannel, key.getMessage());
             if (!isResponseSuccess(response, key.getTransactionRole())) {
                 rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
             } else {
@@ -93,21 +93,21 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
             if (!(response instanceof RegisterTMResponse)) {
                 return false;
             }
-            return ((RegisterTMResponse)response).isIdentified();
+            return ((RegisterTMResponse) response).isIdentified();
         } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
-            return ((RegisterRMResponse)response).isIdentified();
+            return ((RegisterRMResponse) response).isIdentified();
         }
         return false;
     }
 
     private String getVersion(Object response, NettyPoolKey.TransactionRole transactionRole) {
         if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
-            return ((RegisterTMResponse)response).getVersion();
+            return ((RegisterTMResponse) response).getVersion();
         } else {
-            return ((RegisterRMResponse)response).getVersion();
+            return ((RegisterRMResponse) response).getVersion();
         }
     }
 
