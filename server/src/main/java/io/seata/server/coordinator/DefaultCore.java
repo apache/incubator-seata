@@ -304,8 +304,9 @@ public class DefaultCore implements Core {
                             return false;
                     }
                 } catch (Exception ex) {
-                    StackTraceLogger.error(LOGGER, ex, "Exception rollbacking branch xid={} branchId={}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId())});
+                    StackTraceLogger.error(LOGGER, ex, "Exception rollbacking branch xid={} branchId={} error msg={}",
+                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()),
+                            ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }
