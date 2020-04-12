@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.channel.Channel;
-import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
@@ -111,9 +110,7 @@ public class RpcServer extends AbstractRpcRemotingServer {
                                   long timeout) throws TimeoutException {
         Channel clientChannel = ChannelManager.getChannel(resourceId, clientId);
         if (clientChannel == null) {
-            StackTraceLogger.warn(LOGGER,
-                new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId),
-                "rm client is not connected. dbkey: {},clientId: {}", new String[] {resourceId, clientId});
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
         return sendAsyncRequestWithResponse(null, clientChannel, message, timeout);
     }

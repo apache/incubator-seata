@@ -216,7 +216,7 @@ public class DefaultCore implements Core {
                             }
                     }
                 } catch (Exception ex) {
-                    StackTraceLogger.warn(LOGGER, ex, "Exception committing branch {}",
+                    StackTraceLogger.error(LOGGER, ex, "Exception committing branch {}",
                         new String[] {branchSession.toString()});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
@@ -304,7 +304,7 @@ public class DefaultCore implements Core {
                             return false;
                     }
                 } catch (Exception ex) {
-                    StackTraceLogger.warn(LOGGER, ex, "Exception rollbacking branch xid={} branchId={}",
+                    StackTraceLogger.error(LOGGER, ex, "Exception rollbacking branch xid={} branchId={}",
                         new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId())});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
