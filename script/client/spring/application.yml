@@ -101,6 +101,7 @@ seata:
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
       addressWaitTime: 3000
+      application: default
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
