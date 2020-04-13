@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process TM client registry message.
  * <p>
- * message type:
+ * process message type:
  * {@link RegisterTMRequest}
  *
  * @author zhangchenghui.dev@gmail.com

@@ -28,7 +28,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * process TC do global rollback command.
- * message type:
+ * <p>
+ * process message type:
  * {@link BranchRollbackRequest}
  *
  * @author zhangchenghui.dev@gmail.com

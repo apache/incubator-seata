@@ -29,8 +29,8 @@ import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,8 @@ public abstract class AbstractNettyRemoting implements Disposable {
     protected final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
 
     /**
-     * The Futures.
+     * Obtain the return result through MessageFuture blocking.
+     * @see AbstractNettyRemoting#sendSync
      */
     protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
 
@@ -162,6 +163,16 @@ public abstract class AbstractNettyRemoting implements Disposable {
         messageExecutor.shutdown();
     }
 
+    /**
+     * rpc sync request
+     * Obtain the return result through MessageFuture blocking.
+     *
+     * @param channel       netty channel
+     * @param rpcMessage    rpc message
+     * @param timeoutMillis rpc communication timeout
+     * @return response message
+     * @throws TimeoutException
+     */
     protected Object sendSync(Channel channel, RpcMessage rpcMessage, long timeoutMillis) throws TimeoutException {
         if (timeoutMillis <= 0) {
             throw new FrameworkException("timeout should more than 0ms");
@@ -201,17 +212,23 @@ public abstract class AbstractNettyRemoting implements Disposable {
         }
     }
 
-    protected void sendAsync(Channel channel, RpcMessage rpcMessage, ChannelFutureListener listener) {
+    /**
+     * rpc async request.
+     *
+     * @param channel    netty channel
+     * @param rpcMessage rpc message
+     */
+    protected void sendAsync(Channel channel, RpcMessage rpcMessage) {
         channelWritableCheck(channel, rpcMessage.getBody());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
         }
-        channel.writeAndFlush(rpcMessage).addListener(listener == null ? (ChannelFutureListener) future -> {
+        channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 destroyChannel(future.channel());
             }
-        } : listener);
+        });
     }
 
     protected RpcMessage buildRequestMessage(Object msg, byte messageType) {

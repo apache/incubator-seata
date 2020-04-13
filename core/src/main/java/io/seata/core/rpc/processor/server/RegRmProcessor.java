@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process RM client registry message.
  * <p>
- * message type:
+ * process message type:
  * {@link RegisterRMRequest}
  *
  * @author zhangchenghui.dev@gmail.com

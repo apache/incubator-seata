@@ -155,7 +155,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         // put message into basketMap, @see MergedSendRunnable
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
 
-            // TODO
+            // send batch message is sync request, needs to create messageFuture and put it in futures.
             MessageFuture messageFuture = new MessageFuture();
             messageFuture.setRequestMessage(rpcMessage);
             messageFuture.setTimeout(timeoutMillis);
@@ -208,7 +208,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     @Override
-    public void sendAsyncRequest(Object msg, ChannelFutureListener listener) {
+    public void sendAsyncRequest(Object msg) {
         String serverAddress = loadBalance(getTransactionServiceGroup());
         RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
             ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
@@ -217,11 +217,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
         }
         Channel channel = clientChannelManager.acquireChannel(serverAddress);
-        super.sendAsync(channel, rpcMessage, listener);
+        super.sendAsync(channel, rpcMessage);
     }
 
     @Override
-    public void sendAsyncRequest(Channel channel, Object msg, ChannelFutureListener listener) {
+    public void sendAsyncRequest(Channel channel, Object msg) {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequest nothing, caused by null channel.");
             return;
@@ -232,14 +232,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         if (rpcMessage.getBody() instanceof MergeMessage) {
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
         }
-        super.sendAsync(channel, rpcMessage, listener);
+        super.sendAsync(channel, rpcMessage);
     }
 
     @Override
     public void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg) {
         RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, ProtocolConstants.MSGTYPE_RESPONSE);
         Channel channel = clientChannelManager.acquireChannel(serverAddress);
-        super.sendAsync(channel, rpcMsg, null);
+        super.sendAsync(channel, rpcMsg);
     }
 
     @Override
@@ -298,21 +298,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
                     Channel sendChannel = null;
                     try {
-                        // TODO
+                        // send batch message is sync request, but there is no need to get the return value.
+                        // Since the messageFuture has been created before the message is placed in basketMap,
+                        // the return value will be obtained in ClientOnResponseProcessor.
                         RpcMessage rpcMessage = buildRequestMessage(mergeMessage, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
                         mergeMsgMap.put(rpcMessage.getId(), mergeMessage);
-
                         sendChannel = clientChannelManager.acquireChannel(address);
-                        AbstractNettyRemotingClient.super.sendAsync(sendChannel, rpcMessage, future -> {
-                            if (!future.isSuccess()) {
-                                MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-                                if (messageFuture != null) {
-                                    messageFuture.setResultMessage(future.cause());
-                                }
-                                destroyChannel(future.channel());
-                            }
-                        });
-
+                        AbstractNettyRemotingClient.super.sendAsync(sendChannel, rpcMessage);
                     } catch (FrameworkException e) {
                         if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && sendChannel != null) {
                             destroyChannel(address, sendChannel);
@@ -408,7 +400,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                         }
-                        AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING, null);
+                        AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING);
                     } catch (Throwable throwable) {
                         LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                     }

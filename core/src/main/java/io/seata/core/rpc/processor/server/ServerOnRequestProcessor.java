@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * process RM/TM client request message.
  * <p>
- * message type:
+ * process message type:
  * RM:
  * 1) {@link MergedWarpMessage}
  * 2) {@link BranchRegisterRequest}

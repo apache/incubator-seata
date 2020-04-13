@@ -230,7 +230,7 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
         RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
         message.setResourceIds(resourceId);
         try {
-            super.sendAsyncRequest(channel, message, null);
+            super.sendAsyncRequest(channel, message);
         } catch (FrameworkException e) {
             if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && serverAddress != null) {
                 getClientChannelManager().releaseChannel(channel, serverAddress);

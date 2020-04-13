@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * handle RM/TM response message.
  * <p>
- * message type:
+ * process message type:
  * RM:
  * 1) {@link BranchCommitResponse}
  * 2) {@link BranchRollbackResponse}
@@ -42,8 +42,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServerOnResponseProcessor implements RemotingProcessor {
 
+    /**
+     * To handle the received RPC message on upper level.
+     */
     private TransactionMessageHandler transactionMessageHandler;
 
+    /**
+     * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
+     */
     private ConcurrentHashMap<Integer, MessageFuture> futures;
 
     public ServerOnResponseProcessor(TransactionMessageHandler transactionMessageHandler,

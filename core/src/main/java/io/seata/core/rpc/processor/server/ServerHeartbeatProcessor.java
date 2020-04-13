@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process client heartbeat message request(PING).
  * <p>
- * message type:
+ * process message type:
  * {@link HeartbeatMessage}
  *
  * @author zhangchenghui.dev@gmail.com

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process TC global commit command.
  * <p>
- * message type:
+ * process message type:
  * {@link BranchCommitRequest}
  *
  * @author zhangchenghui.dev@gmail.com

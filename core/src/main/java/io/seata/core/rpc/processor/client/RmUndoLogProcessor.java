@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process TC undo log delete command.
  * <p>
- * message type:
+ * process message type:
  * {@link UndoLogDeleteRequest}
  *
  * @author zhangchenghui.dev@gmail.com

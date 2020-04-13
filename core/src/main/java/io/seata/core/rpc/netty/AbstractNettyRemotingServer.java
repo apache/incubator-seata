@@ -181,7 +181,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        super.sendAsync(channel, rpcMessage, null);
+        super.sendAsync(channel, rpcMessage);
     }
 
     @Override
@@ -194,7 +194,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
-            super.sendAsync(clientChannel, rpcMsg, null);
+            super.sendAsync(clientChannel, rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");
         }

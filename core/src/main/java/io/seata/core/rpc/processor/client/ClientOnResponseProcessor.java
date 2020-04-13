@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * process TC response message.
  * <p>
- * message type:
+ * process message type:
  * RM:
  * 1) {@link MergeResultMessage}
  * 2) {@link RegisterRMResponse}
@@ -65,12 +65,12 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
     /**
-     * The Merge msg map from abstractNettyRemoting.
+     * The Merge msg map from io.seata.core.rpc.netty.AbstractNettyRemotingClient#basketMap.
      */
     private Map<Integer, MergeMessage> mergeMsgMap;
 
     /**
-     * The Futures from abstractNettyRemoting.
+     * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
     private ConcurrentHashMap<Integer, MessageFuture> futures;
 

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process TC heartbeat message request(PONG)
  * <p>
- * message type:
+ * process message type:
  * {@link HeartbeatMessage}
  *
  * @author zhangchenghui.dev@gmail.com
