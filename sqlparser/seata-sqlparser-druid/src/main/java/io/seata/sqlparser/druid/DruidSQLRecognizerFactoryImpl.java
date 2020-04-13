@@ -21,6 +21,7 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 
@@ -37,7 +38,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
     public List<SQLRecognizer> create(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if (asts == null || asts.size() == 0) {
+        if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
         if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)

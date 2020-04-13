@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
@@ -76,7 +77,7 @@ public class ExecuteTemplate {
                     statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor;
-        if (sqlRecognizers == null || sqlRecognizers.size() == 0) {
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
             if (sqlRecognizers.size() == 1) {
