@@ -29,8 +29,8 @@ import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * The type Abstract rpc remoting.
+ * The abstract netty remoting.
  *
  * @author slievrly
  * @author zhangchenghui.dev@gmail.com
@@ -103,7 +103,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * This container holds all processors.
      * processor type {@link MessageType}
      */
-    protected final HashMap<Integer/*MessageType*/, Pair<NettyProcessor, ExecutorService>> processorTable = new HashMap<>(32);
+    protected final HashMap<Integer/*MessageType*/, Pair<RemotingProcessor, ExecutorService>> processorTable = new HashMap<>(32);
 
     /**
      * Instantiates a new Abstract rpc remoting.
@@ -334,7 +334,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
         Object body = rpcMessage.getBody();
         if (body instanceof MessageTypeAware) {
             MessageTypeAware messageTypeAware = (MessageTypeAware) body;
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
+            final Pair<RemotingProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
             if (pair != null) {
                 if (pair.getObject2() != null) {
                     try {

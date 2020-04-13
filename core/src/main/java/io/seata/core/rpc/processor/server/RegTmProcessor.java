@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.server;
+package io.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
@@ -24,7 +24,7 @@ import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RegTmProcessor implements NettyProcessor {
+public class RegTmProcessor implements RemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegTmProcessor.class);
 

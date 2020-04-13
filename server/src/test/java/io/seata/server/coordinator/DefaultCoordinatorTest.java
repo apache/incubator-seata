@@ -32,7 +32,7 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -279,7 +279,7 @@ public class DefaultCoordinatorTest {
         }
 
         @Override
-        public void registerProcessor(int messageType, NettyProcessor processor, ExecutorService executor) {
+        public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
 
         }
 

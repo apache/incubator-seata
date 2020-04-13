@@ -13,36 +13,39 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.client;
+package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.transaction.BranchRollbackRequest;
-import io.seata.core.protocol.transaction.BranchRollbackResponse;
+import io.seata.core.protocol.transaction.BranchCommitRequest;
+import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * process TC do global rollback command.
+ * process TC global commit command.
+ * <p>
  * message type:
- * {@link BranchRollbackRequest}
+ * {@link BranchCommitRequest}
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RmBranchRollbackProcessor implements NettyProcessor {
+public class RmBranchCommitProcessor implements RemotingProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmBranchRollbackProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmBranchCommitProcessor.class);
 
     private TransactionMessageHandler handler;
 
     private RemotingClient remotingClient;
 
-    public RmBranchRollbackProcessor(TransactionMessageHandler handler, RemotingClient remotingClient) {
+    public RmBranchCommitProcessor(TransactionMessageHandler handler, RemotingClient remotingClient) {
         this.handler = handler;
         this.remotingClient = remotingClient;
     }
@@ -52,21 +55,25 @@ public class RmBranchRollbackProcessor implements NettyProcessor {
         String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Object msg = rpcMessage.getBody();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("rm handle branch rollback process:" + msg);
+            LOGGER.info("rm client handle branch commit process:" + msg);
         }
-        doBranchRollback(rpcMessage, remoteAddress, (BranchRollbackRequest) msg);
+        doBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
     }
 
-    private void doBranchRollback(RpcMessage request, String serverAddress, BranchRollbackRequest branchRollbackRequest) {
-        BranchRollbackResponse resultMessage;
-        resultMessage = (BranchRollbackResponse) handler.onRequest(branchRollbackRequest, null);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("branch rollback result:" + resultMessage);
-        }
+    private void doBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
+
+        BranchCommitResponse resultMessage = null;
         try {
+            resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
             this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
-        } catch (Throwable throwable) {
-            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
+        } catch (Exception e) {
+            LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
+            if (resultMessage == null) {
+                resultMessage = new BranchCommitResponse();
+            }
+            resultMessage.setResultCode(ResultCode.Failed);
+            resultMessage.setMsg(e.getMessage());
+            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
         }
     }
 }

@@ -55,7 +55,7 @@ import java.util.function.Function;
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
- * The type Rpc remoting client.
+ * The netty remoting client.
  *
  * @author slievrly
  * @author zhaojun
@@ -155,6 +155,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         // put message into basketMap, @see MergedSendRunnable
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
 
+            // TODO
             MessageFuture messageFuture = new MessageFuture();
             messageFuture.setRequestMessage(rpcMessage);
             messageFuture.setTimeout(timeoutMillis);

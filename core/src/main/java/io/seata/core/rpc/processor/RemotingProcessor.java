@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor;
+package io.seata.core.rpc.processor;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.AbstractNettyRemoting;
 
 /**
- * The netty processor
+ * The remoting processor
  * <p>
  * Used to encapsulate remote interaction logic.
  * In order to separate the processing business from netty.
@@ -30,7 +30,7 @@ import io.seata.core.rpc.netty.AbstractNettyRemoting;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public interface NettyProcessor {
+public interface RemotingProcessor {
 
     /**
      * Process message

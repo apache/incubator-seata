@@ -16,18 +16,18 @@
 package io.seata.core.rpc.netty;
 
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.netty.processor.server.RegRmProcessor;
-import io.seata.core.rpc.netty.processor.server.RegTmProcessor;
-import io.seata.core.rpc.netty.processor.server.ServerHeartbeatProcessor;
-import io.seata.core.rpc.netty.processor.server.ServerOnRequestProcessor;
-import io.seata.core.rpc.netty.processor.server.ServerOnResponseProcessor;
+import io.seata.core.rpc.processor.server.RegRmProcessor;
+import io.seata.core.rpc.processor.server.RegTmProcessor;
+import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
+import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
+import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * The type Abstract rpc server.
+ * The netty server.
  *
  * @author slievrly
  * @author zhangchenghui.dev@gmail.com

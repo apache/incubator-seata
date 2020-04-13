@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.client;
+package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -32,7 +32,7 @@ import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class ClientOnResponseProcessor implements NettyProcessor {
+public class ClientOnResponseProcessor implements RemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 

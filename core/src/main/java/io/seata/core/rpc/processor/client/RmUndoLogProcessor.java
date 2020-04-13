@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.client;
+package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class RmUndoLogProcessor implements NettyProcessor {
+public class RmUndoLogProcessor implements RemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmUndoLogProcessor.class);
 

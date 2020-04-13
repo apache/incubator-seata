@@ -27,8 +27,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 /**
- * The type Rpc client.
+ * The rm netty client.
  *
  * @author slievrly
  * @author zhaojun
@@ -57,7 +57,7 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     private String applicationId;
     private String transactionServiceGroup;
 
-    private Map<Integer/*MessageType*/, Pair<NettyProcessor,
+    private Map<Integer/*MessageType*/, Pair<RemotingProcessor,
         Boolean/*Whether thread pool processing is required*/>> tmProcessorTable = null;
 
     /**
@@ -127,7 +127,7 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
         this.transactionServiceGroup = transactionServiceGroup;
     }
 
-    public void setTmProcessor(Map<Integer, Pair<NettyProcessor, Boolean>> processorMap) {
+    public void setTmProcessor(Map<Integer, Pair<RemotingProcessor, Boolean>> processorMap) {
         this.tmProcessorTable = processorMap;
     }
 
@@ -135,7 +135,7 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     public void init() {
         // registry processor
         if (tmProcessorTable != null) {
-            for (Map.Entry<Integer, Pair<NettyProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
+            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
                 registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
             }
         }
@@ -185,8 +185,8 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    public void registerProcessor(int requestCode, NettyProcessor processor, ExecutorService executor) {
-        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+    public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(requestCode, pair);
     }
 }

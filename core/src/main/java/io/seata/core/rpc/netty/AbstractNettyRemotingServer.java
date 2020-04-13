@@ -30,8 +30,8 @@ import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
 /**
- * The type Rpc remoting server.
+ * The netty remoting server.
  *
  * @author slievrly
  * @author xingfudeshi@gmail.com
@@ -201,8 +201,8 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     @Override
-    public void registerProcessor(int messageType, NettyProcessor processor, ExecutorService executor) {
-        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+    public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(messageType, pair);
     }
 
