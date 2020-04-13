@@ -268,7 +268,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                        commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
+                    commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
