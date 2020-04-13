@@ -82,7 +82,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (selectAll) {
-            //select all row
+            //select all rows
             paramAppenderList.clear();
         } else {
             suffix.append(" WHERE ").append(whereCondition);
