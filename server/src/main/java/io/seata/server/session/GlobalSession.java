@@ -70,7 +70,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
@@ -106,7 +106,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC) {
+            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
                 return false;
             }
         }

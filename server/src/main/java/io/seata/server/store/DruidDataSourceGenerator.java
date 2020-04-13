@@ -40,11 +40,11 @@ public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setInitialSize(getMinConn());
         ds.setMaxActive(getMaxConn());
         ds.setMinIdle(getMinConn());
-        ds.setMaxWait(5000);
+        ds.setMaxWait(getMaxWait());
         ds.setTimeBetweenEvictionRunsMillis(120000);
         ds.setMinEvictableIdleTimeMillis(300000);
         ds.setTestWhileIdle(true);
-        ds.setTestOnBorrow(true);
+        ds.setTestOnBorrow(false);
         ds.setPoolPreparedStatements(true);
         ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(getValidationQuery(getDBType()));
