@@ -57,18 +57,18 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         final ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         Set<String> updateColumnsSet = new HashSet<>();
         StringBuilder whereCondition = new StringBuilder();
-        boolean selectAll = false;
+        boolean noWhereCondition = false;
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
             updateColumnsSet.addAll(updateColumns);
-            if (selectAll) {
+            if (noWhereCondition) {
                 continue;
             }
             String whereConditionStr = buildWhereCondition(sqlUpdateRecognizer, paramAppenderList);
             if (StringUtils.isBlank(whereConditionStr)) {
-                selectAll = true;
+                noWhereCondition = true;
             } else {
                 if (whereCondition.length() > 0) {
                     whereCondition.append(" OR ");
@@ -81,7 +81,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             prefix.append(getColumnNameInSQL(tmeta.getEscapePkName(getDbType()))).append(", ");
         }
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        if (selectAll) {
+        if (noWhereCondition) {
             //select all rows
             paramAppenderList.clear();
         } else {
