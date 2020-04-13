@@ -147,7 +147,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void recognizeLockKeyConflictException(TransactionException te, String lockKeys) throws SQLException {
         if (te.getCode() == TransactionExceptionCode.LockKeyConflict) {
-            StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:" + context.getXid());
+            StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:");
+            reasonBuilder.append(context.getXid());
             if (StringUtils.isNotBlank(lockKeys)) {
                 reasonBuilder.append(", lockKeys:").append(lockKeys);
             }
@@ -211,35 +212,29 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processGlobalTransactionCommit() throws SQLException {
-        if (context.hasUndoLog()) {
-            try {
-                register();
-            } catch (TransactionException e) {
-                recognizeLockKeyConflictException(e, context.buildLockKeys());
-            }
-            try {
-                UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
-                targetConnection.commit();
-            } catch (Throwable ex) {
-                LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
-                report(false);
-                throw new SQLException(ex);
-            }
-            if (IS_REPORT_SUCCESS_ENABLE) {
-                report(true);
-            }
-        } else {
-            try {
-                targetConnection.commit();
-            } catch (Throwable ex) {
-                LOGGER.error("undoLog is null,process connectionProxy commit error: {}", ex.getMessage(), ex);
-                throw new SQLException(ex);
-            }
+        try {
+            register();
+        } catch (TransactionException e) {
+            recognizeLockKeyConflictException(e, context.buildLockKeys());
+        }
+        try {
+            UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
+            targetConnection.commit();
+        } catch (Throwable ex) {
+            LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
+            report(false);
+            throw new SQLException(ex);
+        }
+        if (IS_REPORT_SUCCESS_ENABLE) {
+            report(true);
         }
         context.reset();
     }
 
     private void register() throws TransactionException {
+        if (!context.hasUndoLog() || context.getLockKeysBuffer().isEmpty()) {
+            return;
+        }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
@@ -264,6 +259,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
+        if (context.getBranchId() == null) {
+            return;
+        }
         int retry = REPORT_RETRY_COUNT;
         while (retry > 0) {
             try {
