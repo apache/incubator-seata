@@ -211,8 +211,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processGlobalTransactionCommit() throws SQLException {
-        boolean hasUndoLog = context.hasUndoLog();
-        if (hasUndoLog) {
+        if (context.hasUndoLog()) {
             try {
                 register();
             } catch (TransactionException e) {
