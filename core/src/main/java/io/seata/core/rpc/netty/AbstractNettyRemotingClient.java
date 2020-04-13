@@ -61,9 +61,9 @@ import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting implements RemotingClient {
+public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting implements RemotingClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
@@ -76,7 +76,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
 
-    private final RpcClientBootstrap clientBootstrap;
+    private final NettyClientBootstrap clientBootstrap;
     private NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
@@ -88,11 +88,11 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
 
-    public AbstractRpcRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
-                                     ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
+    public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+                                       ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
-        clientBootstrap = new RpcClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
+        clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
         clientChannelManager = new NettyClientChannelManager(
             new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
@@ -262,7 +262,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     }
 
     private String getThreadPrefix() {
-        return AbstractRpcRemotingClient.MERGE_THREAD_PREFIX + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
+        return AbstractNettyRemotingClient.MERGE_THREAD_PREFIX + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
     }
 
     /**
@@ -297,11 +297,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
                     }
                     Channel sendChannel = null;
                     try {
+                        // TODO
                         RpcMessage rpcMessage = buildRequestMessage(mergeMessage, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
                         mergeMsgMap.put(rpcMessage.getId(), mergeMessage);
 
                         sendChannel = clientChannelManager.acquireChannel(address);
-                        AbstractRpcRemotingClient.super.sendAsync(sendChannel, rpcMessage, future -> {
+                        AbstractNettyRemotingClient.super.sendAsync(sendChannel, rpcMessage, future -> {
                             if (!future.isSuccess()) {
                                 MessageFuture messageFuture = futures.remove(rpcMessage.getId());
                                 if (messageFuture != null) {
@@ -406,7 +407,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                         }
-                        AbstractRpcRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING, null);
+                        AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING, null);
                     } catch (Throwable throwable) {
                         LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                     }

@@ -22,7 +22,7 @@ import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.processor.NettyProcessor;

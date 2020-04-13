@@ -24,9 +24,9 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RmRpcClient;
-import io.seata.core.rpc.netty.ShutdownHook;
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.RmNettyClient;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.TmNettyClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
@@ -187,8 +187,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
-        ShutdownHook.getInstance().addDisposable(RmRpcClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(RmNettyClient.getInstance(applicationId, txServiceGroup));
     }
 
     @Override

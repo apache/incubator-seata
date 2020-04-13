@@ -26,7 +26,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
@@ -46,11 +46,11 @@ import java.util.concurrent.TimeoutException;
  * @author xingfudeshi@gmail.com
  * @author zhangchenghui.dev@gmail.com
  */
-public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
+public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting implements RemotingServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingServer.class);
 
-    private final RpcServerBootstrap serverBootstrap;
+    private final NettyServerBootstrap serverBootstrap;
 
     private TransactionMessageHandler transactionMessageHandler;
 
@@ -62,9 +62,9 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      * @param messageExecutor   the message executor
      * @param nettyServerConfig the netty server config
      */
-    public AbstractRpcRemotingServer(final ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
+    public AbstractNettyRemotingServer(final ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
         super(messageExecutor);
-        serverBootstrap = new RpcServerBootstrap(nettyServerConfig);
+        serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
     }
 
     /**

@@ -55,9 +55,9 @@ import java.util.concurrent.TimeoutException;
  * @author slievrly
  * @author zhangchenghui.dev@gmail.com
  */
-public abstract class AbstractRpcRemoting implements Disposable {
+public abstract class AbstractNettyRemoting implements Disposable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemoting.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemoting.class);
     /**
      * The Timer executor.
      */
@@ -110,7 +110,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      *
      * @param messageExecutor the message executor
      */
-    public AbstractRpcRemoting(ThreadPoolExecutor messageExecutor) {
+    public AbstractNettyRemoting(ThreadPoolExecutor messageExecutor) {
         this.messageExecutor = messageExecutor;
     }
 

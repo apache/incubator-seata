@@ -65,12 +65,12 @@ public class ClientOnResponseProcessor implements NettyProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
     /**
-     * The Merge msg map from AbstractRpcRemoting.
+     * The Merge msg map from abstractNettyRemoting.
      */
     private Map<Integer, MergeMessage> mergeMsgMap;
 
     /**
-     * The Futures from AbstractRpcRemoting.
+     * The Futures from abstractNettyRemoting.
      */
     private ConcurrentHashMap<Integer, MessageFuture> futures;
 

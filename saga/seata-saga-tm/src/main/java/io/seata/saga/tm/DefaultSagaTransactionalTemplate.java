@@ -21,9 +21,9 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.netty.RmRpcClient;
-import io.seata.core.rpc.netty.ShutdownHook;
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.RmNettyClient;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.TmNettyClient;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
 import io.seata.saga.rm.SagaResource;
@@ -246,8 +246,8 @@ public class DefaultSagaTransactionalTemplate
             ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
-        ShutdownHook.getInstance().addDisposable(RmRpcClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(RmNettyClient.getInstance(applicationId, txServiceGroup));
     }
 
     @Override

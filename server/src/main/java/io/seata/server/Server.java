@@ -19,8 +19,8 @@ import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RpcServer;
-import io.seata.core.rpc.netty.ShutdownHook;
+import io.seata.core.rpc.netty.NettyServer;
+import io.seata.core.rpc.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -67,19 +67,19 @@ public class Server {
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-        RpcServer rpcServer = new RpcServer(WORKING_THREADS);
+        NettyServer nettyServer = new NettyServer(WORKING_THREADS);
         //server port
-        rpcServer.setListenPort(parameterParser.getPort());
+        nettyServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db
         SessionHolder.init(parameterParser.getStoreMode());
 
-        DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+        DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
         coordinator.init();
-        rpcServer.setHandler(coordinator);
+        nettyServer.setHandler(coordinator);
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
-        ShutdownHook.getInstance().addDisposable(rpcServer);
+        ShutdownHook.getInstance().addDisposable(nettyServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -87,12 +87,12 @@ public class Server {
         } else {
             XID.setIpAddress(NetUtil.getLocalIp());
         }
-        XID.setPort(rpcServer.getListenPort());
+        XID.setPort(nettyServer.getListenPort());
 
         try {
-            rpcServer.init();
+            nettyServer.init();
         } catch (Throwable e) {
-            LOGGER.error("rpcServer init error:{}", e.getMessage(), e);
+            LOGGER.error("nettyServer init error:{}", e.getMessage(), e);
             System.exit(-1);
         }
 

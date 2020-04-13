@@ -32,16 +32,16 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author slievrly
  * @author zhangchenghui.dev@gmail.com
  */
-public class RpcServer extends AbstractRpcRemotingServer {
+public class NettyServer extends AbstractNettyRemotingServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyServer.class);
 
     /**
      * Instantiates a new Abstract rpc server.
      *
      * @param messageExecutor the message executor
      */
-    public RpcServer(ThreadPoolExecutor messageExecutor) {
+    public NettyServer(ThreadPoolExecutor messageExecutor) {
         super(messageExecutor, new NettyServerConfig());
     }
 
@@ -89,7 +89,7 @@ public class RpcServer extends AbstractRpcRemotingServer {
     public void destroy() {
         super.destroy();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("destroyed rpcServer");
+            LOGGER.info("destroyed nettyServer");
         }
     }
 

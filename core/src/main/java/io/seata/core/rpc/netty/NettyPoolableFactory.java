@@ -35,16 +35,16 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyPoolableFactory.class);
 
-    private final AbstractRpcRemotingClient rpcRemotingClient;
+    private final AbstractNettyRemotingClient rpcRemotingClient;
 
-    private final RpcClientBootstrap clientBootstrap;
+    private final NettyClientBootstrap clientBootstrap;
 
     /**
      * Instantiates a new Netty key poolable factory.
      *
      * @param rpcRemotingClient the rpc remoting client
      */
-    public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient, RpcClientBootstrap clientBootstrap) {
+    public NettyPoolableFactory(AbstractNettyRemotingClient rpcRemotingClient, NettyClientBootstrap clientBootstrap) {
         this.rpcRemotingClient = rpcRemotingClient;
         this.clientBootstrap = clientBootstrap;
     }

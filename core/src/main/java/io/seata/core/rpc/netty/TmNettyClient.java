@@ -47,9 +47,9 @@ import java.util.function.Function;
  * @author zhaojun
  */
 @Sharable
-public final class TmRpcClient extends AbstractRpcRemotingClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TmRpcClient.class);
-    private static volatile TmRpcClient instance;
+public final class TmNettyClient extends AbstractNettyRemotingClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClient.class);
+    private static volatile TmNettyClient instance;
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 2000;
@@ -65,9 +65,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      */
     public static boolean enableDegrade = false;
 
-    private TmRpcClient(NettyClientConfig nettyClientConfig,
-                        EventExecutorGroup eventExecutorGroup,
-                        ThreadPoolExecutor messageExecutor) {
+    private TmNettyClient(NettyClientConfig nettyClientConfig,
+                          EventExecutorGroup eventExecutorGroup,
+                          ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
     }
 
@@ -78,11 +78,11 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      * @param transactionServiceGroup the transaction service group
      * @return the instance
      */
-    public static TmRpcClient getInstance(String applicationId, String transactionServiceGroup) {
-        TmRpcClient tmRpcClient = getInstance();
-        tmRpcClient.setApplicationId(applicationId);
-        tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
-        return tmRpcClient;
+    public static TmNettyClient getInstance(String applicationId, String transactionServiceGroup) {
+        TmNettyClient tmNettyClient = getInstance();
+        tmNettyClient.setApplicationId(applicationId);
+        tmNettyClient.setTransactionServiceGroup(transactionServiceGroup);
+        return tmNettyClient;
     }
 
     /**
@@ -90,9 +90,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      *
      * @return the instance
      */
-    public static TmRpcClient getInstance() {
+    public static TmNettyClient getInstance() {
         if (null == instance) {
-            synchronized (TmRpcClient.class) {
+            synchronized (TmNettyClient.class) {
                 if (null == instance) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
@@ -102,7 +102,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmRpcClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyClient(nettyClientConfig, null, messageExecutor);
                 }
             }
         }

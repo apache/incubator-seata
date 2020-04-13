@@ -46,12 +46,12 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.RpcServer;
+import io.seata.core.rpc.netty.NettyServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
@@ -461,8 +461,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         }
         // 2. second close netty flow
-        if (remotingServer instanceof RpcServer) {
-            ((RpcServer) remotingServer).destroy();
+        if (remotingServer instanceof NettyServer) {
+            ((NettyServer) remotingServer).destroy();
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();

@@ -51,11 +51,11 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
-public final class RmRpcClient extends AbstractRpcRemotingClient {
+public final class RmNettyClient extends AbstractNettyRemotingClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmRpcClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyClient.class);
     private ResourceManager resourceManager;
-    private static volatile RmRpcClient instance;
+    private static volatile RmNettyClient instance;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 20000;
@@ -65,8 +65,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private Map<Integer/*MessageType*/, Pair<NettyProcessor,
         Boolean/*Whether thread pool processing is required*/>> rmProcessorTable = null;
 
-    private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
-                        ThreadPoolExecutor messageExecutor) {
+    private RmNettyClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+                          ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
     }
 
@@ -77,11 +77,11 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @param transactionServiceGroup the transaction service group
      * @return the instance
      */
-    public static RmRpcClient getInstance(String applicationId, String transactionServiceGroup) {
-        RmRpcClient rmRpcClient = getInstance();
-        rmRpcClient.setApplicationId(applicationId);
-        rmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
-        return rmRpcClient;
+    public static RmNettyClient getInstance(String applicationId, String transactionServiceGroup) {
+        RmNettyClient rmNettyClient = getInstance();
+        rmNettyClient.setApplicationId(applicationId);
+        rmNettyClient.setTransactionServiceGroup(transactionServiceGroup);
+        return rmNettyClient;
     }
 
     /**
@@ -89,9 +89,9 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      *
      * @return the instance
      */
-    public static RmRpcClient getInstance() {
+    public static RmNettyClient getInstance() {
         if (null == instance) {
-            synchronized (RmRpcClient.class) {
+            synchronized (RmNettyClient.class) {
                 if (null == instance) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
@@ -99,7 +99,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
-                    instance = new RmRpcClient(nettyClientConfig, null, messageExecutor);
+                    instance = new RmNettyClient(nettyClientConfig, null, messageExecutor);
                 }
             }
         }

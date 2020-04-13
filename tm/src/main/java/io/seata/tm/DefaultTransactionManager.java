@@ -33,7 +33,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.TmNettyClient;
 
 import java.util.concurrent.TimeoutException;
 
@@ -92,7 +92,7 @@ public class DefaultTransactionManager implements TransactionManager {
 
     private AbstractTransactionResponse syncCall(AbstractTransactionRequest request) throws TransactionException {
         try {
-            return (AbstractTransactionResponse) TmRpcClient.getInstance().sendSyncRequest(request);
+            return (AbstractTransactionResponse) TmNettyClient.getInstance().sendSyncRequest(request);
         } catch (TimeoutException toe) {
             throw new TmTransactionException(TransactionExceptionCode.IO, "RPC timeout", toe);
         }
