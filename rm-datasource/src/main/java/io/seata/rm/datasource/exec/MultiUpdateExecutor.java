@@ -101,10 +101,10 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             UpdateExecutor executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizers.get(0));
             return executor.afterImage(beforeImage);
         }
-        TableMeta tmeta = getTableMeta(beforeImage.getTableName());
         if (beforeImage == null || beforeImage.size() == 0) {
-            return TableRecords.empty(getTableMeta());
+            return TableRecords.empty(getTableMeta(sqlRecognizers.get(0).getTableName()));
         }
+        TableMeta tmeta = getTableMeta(sqlRecognizers.get(0).getTableName());
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {

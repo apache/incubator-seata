@@ -82,6 +82,6 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        return TableRecords.empty(getTableMeta(beforeImage.getTableName()));
+        return TableRecords.empty(getTableMeta(sqlRecognizers.get(0).getTableName()));
     }
 }
