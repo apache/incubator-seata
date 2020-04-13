@@ -36,18 +36,6 @@ public class NettyServer extends AbstractNettyRemotingServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyServer.class);
 
-    /**
-     * Instantiates a new Abstract rpc server.
-     *
-     * @param messageExecutor the message executor
-     */
-    public NettyServer(ThreadPoolExecutor messageExecutor) {
-        super(messageExecutor, new NettyServerConfig());
-    }
-
-    /**
-     * Init.
-     */
     @Override
     public void init() {
         // registry processor
@@ -80,6 +68,15 @@ public class NettyServer extends AbstractNettyRemotingServer {
 
         super.setChannelHandlers(new ServerHandler());
         super.init();
+    }
+
+    /**
+     * Instantiates a new Abstract rpc server.
+     *
+     * @param messageExecutor the message executor
+     */
+    public NettyServer(ThreadPoolExecutor messageExecutor) {
+        super(messageExecutor, new NettyServerConfig());
     }
 
     /**

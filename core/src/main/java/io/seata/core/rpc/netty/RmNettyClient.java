@@ -65,6 +65,19 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
     private Map<Integer/*MessageType*/, Pair<RemotingProcessor,
         Boolean/*Whether thread pool processing is required*/>> rmProcessorTable = null;
 
+    @Override
+    public void init() {
+        // registry processor
+        if (rmProcessorTable != null) {
+            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : rmProcessorTable.entrySet()) {
+                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
+            }
+        }
+        if (initialized.compareAndSet(false, true)) {
+            super.init();
+        }
+    }
+
     private RmNettyClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                           ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
@@ -138,42 +151,10 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    public void init() {
-        // registry processor
-        if (rmProcessorTable != null) {
-            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : rmProcessorTable.entrySet()) {
-                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
-            }
-        }
-        if (initialized.compareAndSet(false, true)) {
-            super.init();
-        }
-    }
-
-    @Override
     public void destroy() {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
-    }
-
-    @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (serverAddress) -> {
-            String resourceIds = getMergedResourceKeys();
-            if (null != resourceIds && LOGGER.isInfoEnabled()) {
-                LOGGER.info("RM will register :{}", resourceIds);
-            }
-            RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
-            message.setResourceIds(resourceIds);
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
-        };
-    }
-
-
-    @Override
-    protected String getTransactionServiceGroup() {
-        return transactionServiceGroup;
     }
 
     @Override
@@ -266,5 +247,23 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
     public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(requestCode, pair);
+    }
+
+    @Override
+    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+        return (serverAddress) -> {
+            String resourceIds = getMergedResourceKeys();
+            if (null != resourceIds && LOGGER.isInfoEnabled()) {
+                LOGGER.info("RM will register :{}", resourceIds);
+            }
+            RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
+            message.setResourceIds(resourceIds);
+            return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
+        };
+    }
+
+    @Override
+    protected String getTransactionServiceGroup() {
+        return transactionServiceGroup;
     }
 }

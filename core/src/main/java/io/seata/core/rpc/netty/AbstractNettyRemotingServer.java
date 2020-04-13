@@ -56,6 +56,12 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     private RegisterCheckAuthHandler checkAuthHandler;
 
+    @Override
+    public void init() {
+        super.init();
+        serverBootstrap.start();
+    }
+
     /**
      * Instantiates a new Rpc remoting server.
      *
@@ -65,6 +71,50 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     public AbstractNettyRemotingServer(final ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
         super(messageExecutor);
         serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
+    }
+
+    @Override
+    public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
+        Channel channel = ChannelManager.getChannel(resourceId, clientId);
+        if (channel == null) {
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    @Override
+    public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
+        if (channel == null) {
+            throw new RuntimeException("client is not connected");
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    @Override
+    public void sendAsyncRequest(Channel channel, Object msg) {
+        if (channel == null) {
+            throw new RuntimeException("client is not connected");
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        super.sendAsync(channel, rpcMessage);
+    }
+
+    @Override
+    public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
+        Channel clientChannel = channel;
+        if (!(msg instanceof HeartbeatMessage)) {
+            clientChannel = ChannelManager.getSameClientChannel(channel);
+        }
+        if (clientChannel != null) {
+            RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
+                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
+                : ProtocolConstants.MSGTYPE_RESPONSE);
+            super.sendAsync(clientChannel, rpcMsg);
+        } else {
+            throw new RuntimeException("channel is error.");
+        }
     }
 
     /**
@@ -117,12 +167,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     @Override
-    public void init() {
-        super.init();
-        serverBootstrap.start();
-    }
-
-    @Override
     public void destroy() {
         serverBootstrap.shutdown();
         super.destroy();
@@ -139,14 +183,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
     }
 
-    private void closeChannelHandlerContext(ChannelHandlerContext ctx) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
-        }
-        ctx.disconnect();
-        ctx.close();
-    }
-
     @Override
     public void destroyChannel(String serverAddress, Channel channel) {
         if (LOGGER.isInfoEnabled()) {
@@ -157,53 +193,17 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     @Override
-    public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
-        Channel channel = ChannelManager.getChannel(resourceId, clientId);
-        if (channel == null) {
-            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
-        }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
-    }
-
-    @Override
-    public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
-        if (channel == null) {
-            throw new RuntimeException("client is not connected");
-        }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
-    }
-
-    @Override
-    public void sendAsyncRequest(Channel channel, Object msg) {
-        if (channel == null) {
-            throw new RuntimeException("client is not connected");
-        }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        super.sendAsync(channel, rpcMessage);
-    }
-
-    @Override
-    public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
-        Channel clientChannel = channel;
-        if (!(msg instanceof HeartbeatMessage)) {
-            clientChannel = ChannelManager.getSameClientChannel(channel);
-        }
-        if (clientChannel != null) {
-            RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
-                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
-                : ProtocolConstants.MSGTYPE_RESPONSE);
-            super.sendAsync(clientChannel, rpcMsg);
-        } else {
-            throw new RuntimeException("channel is error.");
-        }
-    }
-
-    @Override
     public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(messageType, pair);
+    }
+
+    private void closeChannelHandlerContext(ChannelHandlerContext ctx) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
+        }
+        ctx.disconnect();
+        ctx.close();
     }
 
     /**

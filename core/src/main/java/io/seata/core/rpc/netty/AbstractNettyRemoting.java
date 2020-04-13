@@ -75,6 +75,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
     /**
      * Obtain the return result through MessageFuture blocking.
+     *
      * @see AbstractNettyRemoting#sendSync
      */
     protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
@@ -106,35 +107,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     protected final HashMap<Integer/*MessageType*/, Pair<RemotingProcessor, ExecutorService>> processorTable = new HashMap<>(32);
 
-    /**
-     * Instantiates a new Abstract rpc remoting.
-     *
-     * @param messageExecutor the message executor
-     */
-    public AbstractNettyRemoting(ThreadPoolExecutor messageExecutor) {
-        this.messageExecutor = messageExecutor;
-    }
-
-    /**
-     * Gets next message id.
-     *
-     * @return the next message id
-     */
-    public int getNextMessageId() {
-        return idGenerator.incrementAndGet();
-    }
-
-    public Map<Integer, MergeMessage> getMergeMsgMap() {
-        return mergeMsgMap;
-    }
-
-    public ConcurrentHashMap<Integer, MessageFuture> getFutures() {
-        return futures;
-    }
-
-    /**
-     * Init.
-     */
     public void init() {
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -154,9 +126,34 @@ public abstract class AbstractNettyRemoting implements Disposable {
         }, TIMEOUT_CHECK_INTERNAL, TIMEOUT_CHECK_INTERNAL, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Destroy.
-     */
+    public AbstractNettyRemoting(ThreadPoolExecutor messageExecutor) {
+        this.messageExecutor = messageExecutor;
+    }
+
+    public int getNextMessageId() {
+        return idGenerator.incrementAndGet();
+    }
+
+    public Map<Integer, MergeMessage> getMergeMsgMap() {
+        return mergeMsgMap;
+    }
+
+    public ConcurrentHashMap<Integer, MessageFuture> getFutures() {
+        return futures;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public void destroyChannel(Channel channel) {
+        destroyChannel(getAddressFromChannel(channel), channel);
+    }
+
     @Override
     public void destroy() {
         timerExecutor.shutdown();
@@ -251,90 +248,10 @@ public abstract class AbstractNettyRemoting implements Disposable {
         return rpcMsg;
     }
 
-    private void channelWritableCheck(Channel channel, Object msg) {
-        int tryTimes = 0;
-        synchronized (lock) {
-            while (!channel.isWritable()) {
-                try {
-                    tryTimes++;
-                    if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
-                        destroyChannel(channel);
-                        throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
-                            FrameworkErrorCode.ChannelIsNotWritable);
-                    }
-                    lock.wait(NOT_WRITEABLE_CHECK_MILLS);
-                } catch (InterruptedException exx) {
-                    LOGGER.error(exx.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets group.
-     *
-     * @return the group
-     */
-    public String getGroup() {
-        return group;
-    }
-
-    /**
-     * Sets group.
-     *
-     * @param group the group
-     */
-    public void setGroup(String group) {
-        this.group = group;
-    }
-
-    /**
-     * Destroy channel.
-     *
-     * @param channel the channel
-     */
-    public void destroyChannel(Channel channel) {
-        destroyChannel(getAddressFromChannel(channel), channel);
-    }
-
-    /**
-     * Destroy channel.
-     *
-     * @param serverAddress the server address
-     * @param channel       the channel
-     */
-    public abstract void destroyChannel(String serverAddress, Channel channel);
-
-    /**
-     * Gets address from context.
-     *
-     * @param ctx the ctx
-     * @return the address from context
-     */
-    protected String getAddressFromContext(ChannelHandlerContext ctx) {
-        return getAddressFromChannel(ctx.channel());
-    }
-
-    /**
-     * Gets address from channel.
-     *
-     * @param channel the channel
-     * @return the address from channel
-     */
-    protected String getAddressFromChannel(Channel channel) {
-        SocketAddress socketAddress = channel.remoteAddress();
-        String address = socketAddress.toString();
-        if (socketAddress.toString().indexOf(NettyClientConfig.getSocketAddressStartChar()) == 0) {
-            address = socketAddress.toString().substring(NettyClientConfig.getSocketAddressStartChar().length());
-        }
-        return address;
-    }
-
     /**
      * For testing. When the thread pool is full, you can change this variable and share the stack
      */
     boolean allowDumpStack = false;
-
 
     /**
      * Rpc message processing.
@@ -344,7 +261,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * @throws Exception throws exception process message error.
      * @since 1.2.0
      */
-    public void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+    protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
         }
@@ -391,5 +308,57 @@ public abstract class AbstractNettyRemoting implements Disposable {
             LOGGER.warn("This rpcMessage body[{}] is not MessageTypeAware type.", body);
         }
     }
+
+    /**
+     * Gets address from context.
+     *
+     * @param ctx the ctx
+     * @return the address from context
+     */
+    protected String getAddressFromContext(ChannelHandlerContext ctx) {
+        return getAddressFromChannel(ctx.channel());
+    }
+
+    /**
+     * Gets address from channel.
+     *
+     * @param channel the channel
+     * @return the address from channel
+     */
+    protected String getAddressFromChannel(Channel channel) {
+        SocketAddress socketAddress = channel.remoteAddress();
+        String address = socketAddress.toString();
+        if (socketAddress.toString().indexOf(NettyClientConfig.getSocketAddressStartChar()) == 0) {
+            address = socketAddress.toString().substring(NettyClientConfig.getSocketAddressStartChar().length());
+        }
+        return address;
+    }
+
+    private void channelWritableCheck(Channel channel, Object msg) {
+        int tryTimes = 0;
+        synchronized (lock) {
+            while (!channel.isWritable()) {
+                try {
+                    tryTimes++;
+                    if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
+                        destroyChannel(channel);
+                        throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
+                            FrameworkErrorCode.ChannelIsNotWritable);
+                    }
+                    lock.wait(NOT_WRITEABLE_CHECK_MILLS);
+                } catch (InterruptedException exx) {
+                    LOGGER.error(exx.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
+     * Destroy channel.
+     *
+     * @param serverAddress the server address
+     * @param channel       the channel
+     */
+    public abstract void destroyChannel(String serverAddress, Channel channel);
 
 }

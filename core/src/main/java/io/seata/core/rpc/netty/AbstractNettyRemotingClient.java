@@ -17,7 +17,6 @@ package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -88,33 +87,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
 
-    public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
-                                       ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
-        super(messageExecutor);
-        this.transactionRole = transactionRole;
-        clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
-        clientChannelManager = new NettyClientChannelManager(
-            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
-    }
-
-    public NettyClientChannelManager getClientChannelManager() {
-        return clientChannelManager;
-    }
-
-    /**
-     * Get pool key function.
-     *
-     * @return lambda function
-     */
-    protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
-
-    /**
-     * Get transaction service group.
-     *
-     * @return transaction service group
-     */
-    protected abstract String getTransactionServiceGroup();
-
     @Override
     public void init() {
         clientBootstrap.setChannelHandlers(new ClientHandler());
@@ -136,13 +108,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         super.init();
     }
 
-    @Override
-    public void destroy() {
-        clientBootstrap.shutdown();
-        if (mergeSendExecutorService != null) {
-            mergeSendExecutorService.shutdown();
-        }
-        super.destroy();
+    public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+                                       ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
+        super(messageExecutor);
+        this.transactionRole = transactionRole;
+        clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
+        clientChannelManager = new NettyClientChannelManager(
+            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
 
     @Override
@@ -247,6 +219,19 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientChannelManager.destroyChannel(serverAddress, channel);
     }
 
+    public NettyClientChannelManager getClientChannelManager() {
+        return clientChannelManager;
+    }
+
+    @Override
+    public void destroy() {
+        clientBootstrap.shutdown();
+        if (mergeSendExecutorService != null) {
+            mergeSendExecutorService.shutdown();
+        }
+        super.destroy();
+    }
+
     private String loadBalance(String transactionServiceGroup) {
         InetSocketAddress address = null;
         try {
@@ -265,6 +250,20 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private String getThreadPrefix() {
         return AbstractNettyRemotingClient.MERGE_THREAD_PREFIX + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
     }
+
+    /**
+     * Get pool key function.
+     *
+     * @return lambda function
+     */
+    protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
+
+    /**
+     * Get transaction service group.
+     *
+     * @return transaction service group
+     */
+    protected abstract String getTransactionServiceGroup();
 
     /**
      * The type Merged send runnable.
@@ -427,5 +426,4 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             super.close(ctx, future);
         }
     }
-
 }

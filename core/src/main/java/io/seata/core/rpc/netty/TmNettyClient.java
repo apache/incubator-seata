@@ -65,6 +65,20 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
      */
     public static boolean enableDegrade = false;
 
+    @Override
+    public void init() {
+        // registry processor
+        if (tmProcessorTable != null) {
+            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
+                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
+            }
+        }
+        if (initialized.compareAndSet(false, true)) {
+            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
+            super.init();
+        }
+    }
+
     private TmNettyClient(NettyClientConfig nettyClientConfig,
                           EventExecutorGroup eventExecutorGroup,
                           ThreadPoolExecutor messageExecutor) {
@@ -132,32 +146,10 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    public void init() {
-        // registry processor
-        if (tmProcessorTable != null) {
-            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
-                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
-            }
-        }
-        if (initialized.compareAndSet(false, true)) {
-            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
-            super.init();
-        }
-    }
-
-    @Override
     public void destroy() {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
-    }
-
-    @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (severAddress) -> {
-            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
-        };
     }
 
     @Override
@@ -188,5 +180,13 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(requestCode, pair);
+    }
+
+    @Override
+    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+        return (severAddress) -> {
+            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
+            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
+        };
     }
 }
