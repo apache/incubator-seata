@@ -48,6 +48,7 @@ public class ActionContextUtil {
             Map<String, Object> context = new HashMap<>(8);
             List<Field> fields = new ArrayList<>();
             getAllField(targetParam.getClass(), fields);
+
             for (Field f : fields) {
                 String fieldName = f.getName();
                 BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
@@ -56,27 +57,19 @@ public class ActionContextUtil {
                     f.setAccessible(true);
                     Object paramObject = f.get(targetParam);
                     int index = annotation.index();
-                    if (index >= 0) {
-                        @SuppressWarnings("unchecked")
-                        Object targetObject = ((List<Object>)paramObject).get(index);
-                        if (annotation.isParamInProperty()) {
+                    if (annotation.isParamInProperty()) {
+                        if (index >= 0) {
+                            @SuppressWarnings("unchecked")
+                            Object targetObject = ((List<Object>) paramObject).get(index);
                             context.putAll(fetchContextFromObject(targetObject));
                         } else {
-                            if (StringUtils.isBlank(annotation.paramName())) {
-                                context.put(fieldName, paramObject);
-                            } else {
-                                context.put(annotation.paramName(), paramObject);
-                            }
+                            context.putAll(fetchContextFromObject(paramObject));
                         }
                     } else {
-                        if (annotation.isParamInProperty()) {
-                            context.putAll(fetchContextFromObject(paramObject));
+                        if (StringUtils.isBlank(annotation.paramName())) {
+                            context.put(fieldName, paramObject);
                         } else {
-                            if (StringUtils.isBlank(annotation.paramName())) {
-                                context.put(fieldName, paramObject);
-                            } else {
-                                context.put(annotation.paramName(), paramObject);
-                            }
+                            context.put(annotation.paramName(), paramObject);
                         }
                     }
                 }
