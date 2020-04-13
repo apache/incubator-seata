@@ -175,7 +175,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
             throw new FrameworkException("timeout should more than 0ms");
         }
         if (channel == null) {
-            LOGGER.warn("sendAsyncRequestWithResponse nothing, caused by null channel.");
+            LOGGER.warn("sendSync nothing, caused by null channel.");
             return null;
         }
 
