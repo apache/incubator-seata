@@ -220,24 +220,22 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
             try {
                 UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
-            } catch (SQLException sqlEx) {
-                LOGGER.error("add undoLog error:{}", sqlEx.getMessage(), sqlEx);
-                throw new SQLException(sqlEx);
-            }
-        }
-        try {
-            targetConnection.commit();
-        } catch (Throwable ex) {
-            if (hasUndoLog) {
+                targetConnection.commit();
+            } catch (Throwable ex) {
                 LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
                 report(false);
                 throw new SQLException(ex);
-            } else {
-                LOGGER.error("process connectionProxy commit error: {},and the undolog is null", ex.getMessage(), ex);
             }
-        }
-        if (IS_REPORT_SUCCESS_ENABLE && hasUndoLog) {
-            report(true);
+            if (IS_REPORT_SUCCESS_ENABLE) {
+                report(true);
+            }
+        } else {
+            try {
+                targetConnection.commit();
+            } catch (Throwable ex) {
+                LOGGER.error("undoLog is null,process connectionProxy commit error: {}", ex.getMessage(), ex);
+                throw new SQLException(ex);
+            }
         }
         context.reset();
     }
