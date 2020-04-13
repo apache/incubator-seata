@@ -81,10 +81,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
     protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
 
     private static final long NOT_WRITEABLE_CHECK_MILLS = 10L;
-    /**
-     * The Merge lock.
-     */
-    protected final Object mergeLock = new Object();
+
     /**
      * The Now mills.
      */

@@ -74,6 +74,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
+    protected final Object mergeLock = new Object();
 
     private final NettyClientBootstrap clientBootstrap;
     private NettyClientChannelManager clientChannelManager;
