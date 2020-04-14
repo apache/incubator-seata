@@ -15,15 +15,7 @@
  */
 package io.seata.tm;
 
-import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.TmNettyClient;
-import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.rpc.processor.Pair;
-import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
-import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The type Tm client.
@@ -40,24 +32,6 @@ public class TMClient {
      */
     public static void init(String applicationId, String transactionServiceGroup) {
         TmNettyClient tmNettyClient = TmNettyClient.getInstance(applicationId, transactionServiceGroup);
-
-        Map<Integer, Pair<RemotingProcessor, Boolean>> processorMap = new HashMap<>();
-        // on response processor
-        Pair<RemotingProcessor, Boolean> onResponseProcessor =
-            new Pair<>(new ClientOnResponseProcessor(tmNettyClient.getMergeMsgMap(), tmNettyClient.getFutures(), null), false);
-        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor);
-
-        // heartbeat message processor
-        Pair<RemotingProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatProcessor(), false);
-        processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);
-        tmNettyClient.setTmProcessor(processorMap);
-
         tmNettyClient.init();
     }
 

@@ -35,6 +35,7 @@ import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -76,10 +78,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     protected final Object mergeLock = new Object();
 
-    private final NettyClientBootstrap clientBootstrap;
-    private NettyClientChannelManager clientChannelManager;
-    private final NettyPoolKey.TransactionRole transactionRole;
-    private ExecutorService mergeSendExecutorService;
+    /**
+     * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
+     */
+    protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
@@ -87,6 +89,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * {@link NettyClientConfig#isEnableClientBatchSendRequest}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
+
+    private final NettyClientBootstrap clientBootstrap;
+    private NettyClientChannelManager clientChannelManager;
+    private final NettyPoolKey.TransactionRole transactionRole;
+    private ExecutorService mergeSendExecutorService;
+    private TransactionMessageHandler transactionMessageHandler;
 
     @Override
     public void init() {
@@ -220,10 +228,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientChannelManager.destroyChannel(serverAddress, channel);
     }
 
-    public NettyClientChannelManager getClientChannelManager() {
-        return clientChannelManager;
-    }
-
     @Override
     public void destroy() {
         clientBootstrap.shutdown();
@@ -231,6 +235,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             mergeSendExecutorService.shutdown();
         }
         super.destroy();
+    }
+
+    public void setTransactionMessageHandler(TransactionMessageHandler transactionMessageHandler) {
+        this.transactionMessageHandler = transactionMessageHandler;
+    }
+
+    public TransactionMessageHandler getTransactionMessageHandler() {
+        return transactionMessageHandler;
+    }
+
+    public NettyClientChannelManager getClientChannelManager() {
+        return clientChannelManager;
     }
 
     private String loadBalance(String transactionServiceGroup) {

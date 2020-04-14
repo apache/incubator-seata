@@ -24,11 +24,17 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
+import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
+import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
+import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
+import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,17 +68,30 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
     private String applicationId;
     private String transactionServiceGroup;
 
-    private Map<Integer/*MessageType*/, Pair<RemotingProcessor,
-        Boolean/*Whether thread pool processing is required*/>> rmProcessorTable = null;
-
     @Override
     public void init() {
         // registry processor
-        if (rmProcessorTable != null) {
-            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : rmProcessorTable.entrySet()) {
-                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
-            }
-        }
+        // 1.registry rm client handle branch commit processor
+        RmBranchCommitProcessor rmBranchCommitProcessor = new RmBranchCommitProcessor(getTransactionMessageHandler(), this);
+        registerProcessor(MessageType.TYPE_BRANCH_COMMIT, rmBranchCommitProcessor, messageExecutor);
+        // 2.registry rm client handle branch commit processor
+        RmBranchRollbackProcessor rmBranchRollbackProcessor = new RmBranchRollbackProcessor(getTransactionMessageHandler(), this);
+        registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK, rmBranchRollbackProcessor, messageExecutor);
+        // 3.registry rm handler undo log processor
+        RmUndoLogProcessor rmUndoLogProcessor = new RmUndoLogProcessor(getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_RM_DELETE_UNDOLOG, rmUndoLogProcessor, messageExecutor);
+        // 4.registry TC response processor
+        ClientOnResponseProcessor onResponseProcessor =
+            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
+        // 5.registry heartbeat message processor
+        ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
+        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+
         if (initialized.compareAndSet(false, true)) {
             super.init();
         }
@@ -144,17 +163,6 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
      */
     public void setResourceManager(ResourceManager resourceManager) {
         this.resourceManager = resourceManager;
-    }
-
-    public void setRmProcessor(Map<Integer, Pair<RemotingProcessor, Boolean>> processorMap) {
-        this.rmProcessorTable = processorMap;
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        initialized.getAndSet(false);
-        instance = null;
     }
 
     @Override
@@ -247,6 +255,13 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
     public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(requestCode, pair);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        initialized.getAndSet(false);
+        instance = null;
     }
 
     @Override

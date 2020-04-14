@@ -22,7 +22,6 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
-import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.MessageTypeAware;
@@ -93,10 +92,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     protected volatile boolean isSending = false;
     private String group = "DEFAULT";
-    /**
-     * The Merge msg map.
-     */
-    protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
 
     /**
      * This container holds all processors.
@@ -129,10 +124,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
     public int getNextMessageId() {
         return idGenerator.incrementAndGet();
-    }
-
-    public Map<Integer, MergeMessage> getMergeMsgMap() {
-        return mergeMsgMap;
     }
 
     public ConcurrentHashMap<Integer, MessageFuture> getFutures() {

@@ -25,14 +25,16 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
+import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -45,6 +47,7 @@ import java.util.function.Function;
  *
  * @author slievrly
  * @author zhaojun
+ * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
 public final class TmNettyClient extends AbstractNettyRemotingClient {
@@ -57,9 +60,6 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     private String applicationId;
     private String transactionServiceGroup;
 
-    private Map<Integer/*MessageType*/, Pair<RemotingProcessor,
-        Boolean/*Whether thread pool processing is required*/>> tmProcessorTable = null;
-
     /**
      * The constant enableDegrade.
      */
@@ -68,11 +68,20 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     @Override
     public void init() {
         // registry processor
-        if (tmProcessorTable != null) {
-            for (Map.Entry<Integer, Pair<RemotingProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
-                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
-            }
-        }
+        // 1.registry TC response processor
+        ClientOnResponseProcessor onResponseProcessor =
+            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
+        // 2.registry heartbeat message processor
+        ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
+        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+
         if (initialized.compareAndSet(false, true)) {
             enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
             super.init();
@@ -141,17 +150,6 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
         this.transactionServiceGroup = transactionServiceGroup;
     }
 
-    public void setTmProcessor(Map<Integer, Pair<RemotingProcessor, Boolean>> processorMap) {
-        this.tmProcessorTable = processorMap;
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        initialized.getAndSet(false);
-        instance = null;
-    }
-
     @Override
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
@@ -180,6 +178,13 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
     public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(requestCode, pair);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        initialized.getAndSet(false);
+        instance = null;
     }
 
     @Override
