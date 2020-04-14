@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * The type Root context.
@@ -30,172 +31,209 @@ import java.util.Map;
  */
 public class RootContext {
 
-    private RootContext() {
+	private RootContext() {
 
-    }
+	}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
 
-    /**
-     * The constant KEY_XID.
-     */
-    public static final String KEY_XID = "TX_XID";
+	/**
+	 * The constant KEY_XID.
+	 */
+	public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_XID_INTERCEPTOR_TYPE = "tx-xid-interceptor-type";
+	public static final String KEY_XID_INTERCEPTOR_TYPE = "tx-xid-interceptor-type";
 
-    public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
+	public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
-    private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
+	private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public static String getXID() {
-        String xid = CONTEXT_HOLDER.get(KEY_XID);
-        if (StringUtils.isNotBlank(xid)) {
-            return xid;
-        }
+	/**
+	 * Gets xid.
+	 *
+	 * @return the xid
+	 */
+	public static String getXID() {
+		String xid = CONTEXT_HOLDER.get(KEY_XID);
+		if (StringUtils.isNotBlank(xid)) {
+			return xid;
+		}
 
-        String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType) && xidType.contains("_")) {
-            return xidType.split("_")[0];
-        }
+		String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
+		if (StringUtils.isNotBlank(xidType) && xidType.contains("_")) {
+			return xidType.split("_")[0];
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public static String getXIDInterceptorType() {
-        return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-    }
+	/**
+	 * Gets xid.
+	 *
+	 * @return the xid
+	 */
+	public static String getXIDInterceptorType() {
+		return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
+	}
 
-    /**
-     * Bind.
-     *
-     * @param xid the xid
-     */
-    public static void bind(String xid) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind {}", xid);
-        }
-        CONTEXT_HOLDER.put(KEY_XID, xid);
-    }
+	/**
+	 * Bind.
+	 *
+	 * @param xid the xid
+	 */
+	public static void bind(String xid) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("bind {}", xid);
+		}
+		CONTEXT_HOLDER.put(KEY_XID, xid);
+	}
 
-    /**
-     * Bind interceptor type
-     *
-     * @param xidType
-     */
-    public static void bindInterceptorType(String xidType) {
-        if (StringUtils.isNotBlank(xidType)) {
+	/**
+	 * Bind interceptor type
+	 *
+	 * @param xidType
+	 */
+	public static void bindInterceptorType(String xidType) {
+		if (StringUtils.isNotBlank(xidType)) {
 
-            String[] xidTypes = xidType.split("_");
+			String[] xidTypes = xidType.split("_");
 
-            if (xidTypes.length == 2) {
-                bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
-            }
-        }
-    }
+			if (xidTypes.length == 2) {
+				bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+			}
+		}
+	}
 
-    /**
-     * Bind interceptor type
-     *
-     * @param xid
-     * @param branchType
-     */
-    public static void bindInterceptorType(String xid, BranchType branchType) {
-        String xidType = String.format("%s_%s", xid, branchType.name());
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind interceptor type xid={} branchType={}", xid, branchType);
-        }
-        CONTEXT_HOLDER.put(KEY_XID_INTERCEPTOR_TYPE, xidType);
-    }
+	/**
+	 * Bind interceptor type
+	 *
+	 * @param xid
+	 * @param branchType
+	 */
+	public static void bindInterceptorType(String xid, BranchType branchType) {
+		String xidType = String.format("%s_%s", xid, branchType.name());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("bind interceptor type xid={} branchType={}", xid, branchType);
+		}
+		CONTEXT_HOLDER.put(KEY_XID_INTERCEPTOR_TYPE, xidType);
+	}
 
-    /**
-     * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL
-     */
-    public static void bindGlobalLockFlag() {
+	/**
+	 * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL
+	 */
+	public static void bindGlobalLockFlag() {
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Local Transaction Global Lock support enabled");
-        }
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Local Transaction Global Lock support enabled");
+		}
 
-        //just put something not null
-        CONTEXT_HOLDER.put(KEY_GLOBAL_LOCK_FLAG, KEY_GLOBAL_LOCK_FLAG);
-    }
+		//just put something not null
+		CONTEXT_HOLDER.put(KEY_GLOBAL_LOCK_FLAG, KEY_GLOBAL_LOCK_FLAG);
+	}
 
-    /**
-     * Unbind string.
-     *
-     * @return the string
-     */
-    public static String unbind() {
-        String xid = CONTEXT_HOLDER.remove(KEY_XID);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind {} ", xid);
-        }
-        return xid;
-    }
+	/**
+	 * Unbind string.
+	 *
+	 * @return the string
+	 */
+	public static String unbind() {
+		String xid = CONTEXT_HOLDER.remove(KEY_XID);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("unbind {} ", xid);
+		}
+		return xid;
+	}
 
-    /**
-     * Unbind temporary string
-     *
-     * @return the string
-     */
-    public static String unbindInterceptorType() {
-        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind inteceptor type {}", xidType);
-        }
-        return xidType;
-    }
+	/**
+	 * Unbind temporary string
+	 *
+	 * @return the string
+	 */
+	public static String unbindInterceptorType() {
+		String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("unbind inteceptor type {}", xidType);
+		}
+		return xidType;
+	}
 
-    public static void unbindGlobalLockFlag() {
-        String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
-        if (LOGGER.isDebugEnabled() && lockFlag != null) {
-            LOGGER.debug("unbind global lock flag");
-        }
-    }
+	public static void unbindGlobalLockFlag() {
+		String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
+		if (LOGGER.isDebugEnabled() && lockFlag != null) {
+			LOGGER.debug("unbind global lock flag");
+		}
+	}
 
-    /**
-     * In global transaction boolean.
-     *
-     * @return the boolean
-     */
-    public static boolean inGlobalTransaction() {
-        return CONTEXT_HOLDER.get(KEY_XID) != null;
-    }
+	/**
+	 * In global transaction boolean.
+	 *
+	 * @return the boolean
+	 */
+	public static boolean inGlobalTransaction() {
+		return CONTEXT_HOLDER.get(KEY_XID) != null;
+	}
 
-    /**
-     * requires global lock check
-     *
-     * @return
-     */
-    public static boolean requireGlobalLock() {
-        return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;
-    }
+	/**
+	 * requires global lock check
+	 *
+	 * @return
+	 */
+	public static boolean requireGlobalLock() {
+		return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;
+	}
 
-    /**
-     * Assert not in global transaction.
-     */
-    public static void assertNotInGlobalTransaction() {
-        if (inGlobalTransaction()) {
-            throw new ShouldNeverHappenException();
-        }
-    }
+	/**
+	 * Assert not in global transaction.
+	 */
+	public static void assertNotInGlobalTransaction() {
+		if (inGlobalTransaction()) {
+			throw new ShouldNeverHappenException();
+		}
+	}
 
-    /**
-     * entry map
-     *
-     * @return
-     */
-    public static Map<String, String> entries() {
-        return CONTEXT_HOLDER.entries();
-    }
+	/**
+	 * entry map
+	 *
+	 * @return
+	 */
+	public static Map<String, String> entries() {
+		return CONTEXT_HOLDER.entries();
+	}
+
+	/**
+	 * 在全局事务之外运行
+	 *
+	 * @param runnable
+	 * @return
+	 * @throws Throwable
+	 */
+	public static void withoutGlobalTransaction(Runnable runnable) {
+		String unbindXid = RootContext.unbind();
+		try {
+			runnable.run();
+		} finally {
+			if (StringUtils.isNotBlank(unbindXid)) {
+				RootContext.bind(unbindXid);
+			}
+		}
+	}
+
+	/**
+	 * 在全局事务之外运行
+	 *
+	 * @param supplier
+	 * @return
+	 * @throws Throwable
+	 */
+	public static <R> R withoutGlobalTransaction(Supplier<R> supplier) {
+		String unbindXid = RootContext.unbind();
+		try {
+			return supplier.get();
+		} finally {
+			if (StringUtils.isNotBlank(unbindXid)) {
+				RootContext.bind(unbindXid);
+			}
+		}
+	}
+
 }

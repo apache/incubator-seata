@@ -15,14 +15,15 @@
  */
 package io.seata.saga.proctrl.eventing.impl;
 
-import java.util.List;
-import java.util.Stack;
-
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.proctrl.ProcessUtil;
 import io.seata.saga.proctrl.eventing.EventConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Stack;
 
 /**
  * Deliver event to event consumer directly
@@ -31,47 +32,54 @@ import org.slf4j.LoggerFactory;
  */
 public class DirectEventBus extends AbstractEventBus<ProcessContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DirectEventBus.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DirectEventBus.class);
 
-    private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
+	private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
 
-    @Override
-    public boolean offer(ProcessContext context) throws FrameworkException {
-        List<EventConsumer> eventHandlers = getEventConsumers(context.getClass());
-        if (eventHandlers == null || eventHandlers.size() == 0) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("cannot find event handler by class: " + context.getClass());
-            }
-            return false;
-        }
+	@Override
+	public boolean offer(ProcessContext context) throws FrameworkException {
+		List<EventConsumer> eventHandlers = getEventConsumers(context.getClass());
+		if (eventHandlers == null || eventHandlers.size() == 0) {
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("cannot find event handler by class: " + context.getClass());
+			}
+			return false;
+		}
 
-        boolean isFirstEvent = false;
-        Stack<ProcessContext> currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
-        if (currentStack == null) {
-            synchronized (context) {
-                currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
-                if (currentStack == null) {
-                    currentStack = new Stack<>();
-                    context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
-                    isFirstEvent = true;
-                }
-            }
-        }
+		boolean isFirstEvent = false;
+		Stack<ProcessContext> currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
+		if (currentStack == null) {
+			synchronized (context) {
+				currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
+				if (currentStack == null) {
+					currentStack = new Stack<>();
+					context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
+					isFirstEvent = true;
+				}
+			}
+		}
 
-        currentStack.push(context);
+		currentStack.push(context);
 
-        if (isFirstEvent) {
-            try {
-                while (currentStack.size() > 0) {
-                    ProcessContext currentContext = currentStack.pop();
-                    for (EventConsumer eventHandler : eventHandlers) {
-                        eventHandler.process(currentContext);
-                    }
-                }
-            } finally {
-                context.removeVariable(VAR_NAME_SYNC_EXE_STACK);
-            }
-        }
-        return true;
-    }
+		if (isFirstEvent) {
+			this.process(context, currentStack, eventHandlers);
+		}
+		return true;
+	}
+
+	protected void process(ProcessContext context, Stack<ProcessContext> currentStack, List<EventConsumer> eventHandlers) {
+		ProcessUtil.runInSagaBranch(context, () -> {
+			try {
+				while (currentStack.size() > 0) {
+					ProcessContext currentContext = currentStack.pop();
+					for (EventConsumer eventHandler : eventHandlers) {
+						eventHandler.process(currentContext);
+					}
+				}
+			} finally {
+				context.removeVariable(VAR_NAME_SYNC_EXE_STACK);
+			}
+		});
+	}
+
 }
