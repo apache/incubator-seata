@@ -47,10 +47,10 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
         }
 
         boolean isFirstEvent = false;
-        Stack<ProcessContext> currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
+        Stack<ProcessContext> currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
         if (currentStack == null) {
             synchronized (context) {
-                currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
+                currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
                 if (currentStack == null) {
                     currentStack = new Stack<>();
                     context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
