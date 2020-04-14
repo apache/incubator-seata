@@ -18,6 +18,7 @@ package io.seata.core.rpc;
 import io.netty.channel.Channel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.NettyClientConfig;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
 import java.util.concurrent.ExecutorService;
@@ -33,6 +34,8 @@ public interface RemotingClient {
 
     /**
      * client send sync request.
+     * In this request, if {@link NettyClientConfig#isEnableClientBatchSendRequest} is enabled,
+     * the message will be sent in batches.
      *
      * @param msg transaction message {@link io.seata.core.protocol}
      * @return server result message
