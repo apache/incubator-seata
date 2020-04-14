@@ -119,6 +119,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_RM_PREFIX + "reportSuccessEnable";
 
     /**
+     * The constant CLIENT_REPORT_BRANCH_ENABLE.
+     */
+    public static final String CLIENT_REPORT_BRANCH_ENABLE = CLIENT_RM_PREFIX + "reportBranchEnable";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
