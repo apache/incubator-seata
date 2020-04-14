@@ -22,6 +22,8 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserType;
 
+import java.util.List;
+
 /**
  * @author ggndnn
  */
@@ -43,7 +45,9 @@ public class SQLVisitorFactory {
      * @param dbType the db type
      * @return the sql recognizer
      */
-    public static SQLRecognizer get(String sql, String dbType) {
+    public static List<SQLRecognizer> get(String sql, String dbType) {
         return SQL_RECOGNIZER_FACTORY.create(sql, dbType);
     }
+
+
 }
