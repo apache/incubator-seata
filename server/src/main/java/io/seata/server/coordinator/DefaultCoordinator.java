@@ -51,7 +51,7 @@ import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.NettyServer;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
@@ -461,8 +461,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         }
         // 2. second close netty flow
-        if (remotingServer instanceof NettyServer) {
-            ((NettyServer) remotingServer).destroy();
+        if (remotingServer instanceof NettyRemotingServer) {
+            ((NettyRemotingServer) remotingServer).destroy();
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();

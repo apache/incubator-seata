@@ -36,6 +36,8 @@ import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -208,6 +210,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, ProtocolConstants.MSGTYPE_RESPONSE);
         Channel channel = clientChannelManager.acquireChannel(serverAddress);
         super.sendAsync(channel, rpcMsg);
+    }
+
+    @Override
+    public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(requestCode, pair);
     }
 
     @Override

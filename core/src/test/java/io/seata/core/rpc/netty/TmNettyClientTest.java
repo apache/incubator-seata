@@ -50,10 +50,10 @@ public class TmNettyClientTest {
     public void testGetInstance() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmNettyClient tmNettyClient = TmNettyClient.getInstance(applicationId, transactionServiceGroup);
-        Field nettyClientKeyPoolField = getDeclaredField(tmNettyClient.getClientChannelManager(), "nettyClientKeyPool");
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        Field nettyClientKeyPoolField = getDeclaredField(tmNettyRemotingClient.getClientChannelManager(), "nettyClientKeyPool");
         nettyClientKeyPoolField.setAccessible(true);
-        GenericKeyedObjectPool nettyClientKeyPool = (GenericKeyedObjectPool) nettyClientKeyPoolField.get(tmNettyClient.getClientChannelManager());
+        GenericKeyedObjectPool nettyClientKeyPool = (GenericKeyedObjectPool) nettyClientKeyPoolField.get(tmNettyRemotingClient.getClientChannelManager());
         NettyClientConfig defaultNettyClientConfig = new NettyClientConfig();
         Assertions.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), nettyClientKeyPool.getMaxActive());
         Assertions.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), nettyClientKeyPool.getMinIdle());
@@ -72,14 +72,14 @@ public class TmNettyClientTest {
     public void testInit() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmNettyClient tmNettyClient = TmNettyClient.getInstance(applicationId, transactionServiceGroup);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
-        tmNettyClient.init();
+        tmNettyRemotingClient.init();
 
         //check if attr of tmNettyClient object has been set success
-        Field clientBootstrapField = getDeclaredField(tmNettyClient, "clientBootstrap");
+        Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
         clientBootstrapField.setAccessible(true);
-        NettyClientBootstrap clientBootstrap = (NettyClientBootstrap)clientBootstrapField.get(tmNettyClient);
+        NettyClientBootstrap clientBootstrap = (NettyClientBootstrap)clientBootstrapField.get(tmNettyRemotingClient);
         Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
         bootstrapField.setAccessible(true);
         Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);

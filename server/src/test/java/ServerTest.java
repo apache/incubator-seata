@@ -15,7 +15,7 @@
  */
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.netty.NettyServer;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
@@ -41,7 +41,7 @@ public class ServerTest {
      */
     public static void main(String[] args) {
 
-        NettyServer nettyServer = new NettyServer(workingThreads);
+        NettyRemotingServer nettyServer = new NettyRemotingServer(workingThreads);
         nettyServer.setHandler(new DefaultCoordinator(nettyServer));
         UUIDGenerator.init(1);
         XID.setIpAddress(NetUtil.getLocalIp());

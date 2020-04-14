@@ -18,8 +18,8 @@ package io.seata.saga.engine.db;
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.NettyServer;
 import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.ParameterParser;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractServerTest {
 
 
-    private static NettyServer nettyServer;
+    private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -61,7 +61,7 @@ public abstract class AbstractServerTest {
 
                     System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-                    nettyServer = new NettyServer(workingThreads);
+                    nettyServer = new NettyRemotingServer(workingThreads);
                     //server port
                     nettyServer.setListenPort(parameterParser.getPort());
                     UUIDGenerator.init(parameterParser.getServerNode());

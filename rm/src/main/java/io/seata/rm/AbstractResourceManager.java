@@ -28,7 +28,7 @@ import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.BranchReportResponse;
-import io.seata.core.rpc.netty.RmNettyClient;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +64,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setBranchType(branchType);
             request.setApplicationData(applicationData);
 
-            BranchRegisterResponse response = (BranchRegisterResponse) RmNettyClient.getInstance().sendSyncRequest(request);
+            BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
@@ -95,7 +95,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setStatus(status);
             request.setApplicationData(applicationData);
 
-            BranchReportResponse response = (BranchReportResponse) RmNettyClient.getInstance().sendSyncRequest(request);
+            BranchReportResponse response = (BranchReportResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
@@ -118,6 +118,6 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     @Override
     public void registerResource(Resource resource) {
-        RmNettyClient.getInstance().registerResource(resource.getResourceGroupId(), resource.getResourceId());
+        RmNettyRemotingClient.getInstance().registerResource(resource.getResourceGroupId(), resource.getResourceId());
     }
 }

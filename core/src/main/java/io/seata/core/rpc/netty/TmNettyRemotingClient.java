@@ -28,14 +28,11 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.rpc.processor.Pair;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -50,9 +47,9 @@ import java.util.function.Function;
  * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
-public final class TmNettyClient extends AbstractNettyRemotingClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClient.class);
-    private static volatile TmNettyClient instance;
+public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);
+    private static volatile TmNettyRemotingClient instance;
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 2000;
@@ -80,7 +77,7 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
         registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
         // 2.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
-        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
 
         if (initialized.compareAndSet(false, true)) {
             enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
@@ -88,9 +85,9 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
         }
     }
 
-    private TmNettyClient(NettyClientConfig nettyClientConfig,
-                          EventExecutorGroup eventExecutorGroup,
-                          ThreadPoolExecutor messageExecutor) {
+    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
+                                  EventExecutorGroup eventExecutorGroup,
+                                  ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
     }
 
@@ -101,11 +98,11 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
      * @param transactionServiceGroup the transaction service group
      * @return the instance
      */
-    public static TmNettyClient getInstance(String applicationId, String transactionServiceGroup) {
-        TmNettyClient tmNettyClient = getInstance();
-        tmNettyClient.setApplicationId(applicationId);
-        tmNettyClient.setTransactionServiceGroup(transactionServiceGroup);
-        return tmNettyClient;
+    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
+        TmNettyRemotingClient tmNettyRemotingClient = getInstance();
+        tmNettyRemotingClient.setApplicationId(applicationId);
+        tmNettyRemotingClient.setTransactionServiceGroup(transactionServiceGroup);
+        return tmNettyRemotingClient;
     }
 
     /**
@@ -113,9 +110,9 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
      *
      * @return the instance
      */
-    public static TmNettyClient getInstance() {
+    public static TmNettyRemotingClient getInstance() {
         if (null == instance) {
-            synchronized (TmNettyClient.class) {
+            synchronized (TmNettyRemotingClient.class) {
                 if (null == instance) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
@@ -125,7 +122,7 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
                 }
             }
         }
@@ -172,12 +169,6 @@ public final class TmNettyClient extends AbstractNettyRemotingClient {
                 + ((RegisterTMResponse) response).getVersion());
         }
         throw new FrameworkException("register client app failed.");
-    }
-
-    @Override
-    public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
-        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
-        this.processorTable.put(requestCode, pair);
     }
 
     @Override

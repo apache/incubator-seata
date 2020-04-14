@@ -15,7 +15,7 @@
  */
 package io.seata.tm;
 
-import io.seata.core.rpc.netty.TmNettyClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 /**
  * The type Tm client.
@@ -31,8 +31,8 @@ public class TMClient {
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {
-        TmNettyClient tmNettyClient = TmNettyClient.getInstance(applicationId, transactionServiceGroup);
-        tmNettyClient.init();
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        tmNettyRemotingClient.init();
     }
 
 }

@@ -28,8 +28,6 @@ import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
-import io.seata.core.rpc.processor.Pair;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -57,11 +54,11 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
-public final class RmNettyClient extends AbstractNettyRemotingClient {
+public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyRemotingClient.class);
     private ResourceManager resourceManager;
-    private static volatile RmNettyClient instance;
+    private static volatile RmNettyRemotingClient instance;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 20000;
@@ -90,15 +87,15 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
         registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
         // 5.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
-        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
 
         if (initialized.compareAndSet(false, true)) {
             super.init();
         }
     }
 
-    private RmNettyClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
-                          ThreadPoolExecutor messageExecutor) {
+    private RmNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+                                  ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
     }
 
@@ -109,11 +106,11 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
      * @param transactionServiceGroup the transaction service group
      * @return the instance
      */
-    public static RmNettyClient getInstance(String applicationId, String transactionServiceGroup) {
-        RmNettyClient rmNettyClient = getInstance();
-        rmNettyClient.setApplicationId(applicationId);
-        rmNettyClient.setTransactionServiceGroup(transactionServiceGroup);
-        return rmNettyClient;
+    public static RmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
+        RmNettyRemotingClient rmNettyRemotingClient = getInstance();
+        rmNettyRemotingClient.setApplicationId(applicationId);
+        rmNettyRemotingClient.setTransactionServiceGroup(transactionServiceGroup);
+        return rmNettyRemotingClient;
     }
 
     /**
@@ -121,9 +118,9 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
      *
      * @return the instance
      */
-    public static RmNettyClient getInstance() {
+    public static RmNettyRemotingClient getInstance() {
         if (null == instance) {
-            synchronized (RmNettyClient.class) {
+            synchronized (RmNettyRemotingClient.class) {
                 if (null == instance) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
@@ -131,7 +128,7 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
-                    instance = new RmNettyClient(nettyClientConfig, null, messageExecutor);
+                    instance = new RmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
                 }
             }
         }
@@ -249,12 +246,6 @@ public final class RmNettyClient extends AbstractNettyRemotingClient {
             return sb.toString();
         }
         return null;
-    }
-
-    @Override
-    public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
-        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
-        this.processorTable.put(requestCode, pair);
     }
 
     @Override

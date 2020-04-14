@@ -32,8 +32,8 @@ import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
-import io.seata.core.rpc.netty.RmNettyClient;
-import io.seata.core.rpc.netty.TmNettyClient;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
@@ -82,7 +82,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
             GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmNettyClient.getInstance().sendSyncRequest(request);
+                response = (GlobalLockQueryResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             } else {
                 throw new RuntimeException("unknow situation!");
             }
@@ -106,7 +106,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         InetSocketAddress address = null;
         try {
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
-                TmNettyClient.getInstance().getTransactionServiceGroup());
+                TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
             address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
         } catch (Exception ignore) {
             LOGGER.error(ignore.getMessage());

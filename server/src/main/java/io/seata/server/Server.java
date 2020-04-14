@@ -19,8 +19,8 @@ import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.NettyServer;
 import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -67,19 +67,19 @@ public class Server {
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-        NettyServer nettyServer = new NettyServer(WORKING_THREADS);
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(WORKING_THREADS);
         //server port
-        nettyServer.setListenPort(parameterParser.getPort());
+        nettyRemotingServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db
         SessionHolder.init(parameterParser.getStoreMode());
 
-        DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
+        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
-        nettyServer.setHandler(coordinator);
+        nettyRemotingServer.setHandler(coordinator);
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
-        ShutdownHook.getInstance().addDisposable(nettyServer);
+        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -87,10 +87,10 @@ public class Server {
         } else {
             XID.setIpAddress(NetUtil.getLocalIp());
         }
-        XID.setPort(nettyServer.getListenPort());
+        XID.setPort(nettyRemotingServer.getListenPort());
 
         try {
-            nettyServer.init();
+            nettyRemotingServer.init();
         } catch (Throwable e) {
             LOGGER.error("nettyServer init error:{}", e.getMessage(), e);
             System.exit(-1);

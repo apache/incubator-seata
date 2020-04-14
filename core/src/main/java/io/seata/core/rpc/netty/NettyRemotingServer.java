@@ -24,6 +24,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
@@ -32,6 +33,11 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.server.RegRmProcessor;
+import io.seata.core.rpc.processor.server.RegTmProcessor;
+import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
+import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
+import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,9 +52,9 @@ import java.util.concurrent.TimeoutException;
  * @author xingfudeshi@gmail.com
  * @author zhangchenghui.dev@gmail.com
  */
-public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting implements RemotingServer {
+public class NettyRemotingServer extends AbstractNettyRemoting implements RemotingServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyRemotingServer.class);
 
     private final NettyServerBootstrap serverBootstrap;
 
@@ -59,18 +65,41 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     @Override
     public void init() {
         super.init();
+        // registry processor
+        // 1. registry on request message processor
+        ServerOnRequestProcessor onRequestProcessor =
+            new ServerOnRequestProcessor(this, getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
+        // 2. registry on response message processor
+        ServerOnResponseProcessor onResponseProcessor =
+            new ServerOnResponseProcessor(getTransactionMessageHandler(), getFutures());
+        registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
+        registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
+        // 3. registry rm message processor
+        RegRmProcessor regRmProcessor = new RegRmProcessor(this, null);
+        registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
+        // 4. registry tm message processor
+        RegTmProcessor regTmProcessor = new RegTmProcessor(this, null);
+        registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
+        // 5. registry heartbeat message processor
+        ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
+        registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
+
+        setChannelHandlers(new ServerHandler());
         serverBootstrap.start();
     }
 
-    /**
-     * Instantiates a new Rpc remoting server.
-     *
-     * @param messageExecutor   the message executor
-     * @param nettyServerConfig the netty server config
-     */
-    public AbstractNettyRemotingServer(final ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
+    public NettyRemotingServer(ThreadPoolExecutor messageExecutor) {
         super(messageExecutor);
-        serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
+        serverBootstrap = new NettyServerBootstrap(new NettyServerConfig());
     }
 
     @Override

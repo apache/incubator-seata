@@ -33,13 +33,13 @@ class RmNettyClientTest {
     
     @Test
     public void assertGetInstanceAfterDestroy() {
-        RmNettyClient oldClient = RmNettyClient.getInstance("ap", "group");
+        RmNettyRemotingClient oldClient = RmNettyRemotingClient.getInstance("ap", "group");
         AtomicBoolean initialized = getInitializeStatus(oldClient);
         oldClient.init();
         assertTrue(initialized.get());
         oldClient.destroy();
         assertFalse(initialized.get());
-        RmNettyClient newClient = RmNettyClient.getInstance("ap", "group");
+        RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("ap", "group");
         Assertions.assertNotEquals(oldClient, newClient);
         initialized = getInitializeStatus(newClient);
         assertFalse(initialized.get());
@@ -48,11 +48,11 @@ class RmNettyClientTest {
         newClient.destroy();
     }
     
-    private AtomicBoolean getInitializeStatus(final RmNettyClient rmNettyClient) {
+    private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {
         try {
-            Field field = rmNettyClient.getClass().getDeclaredField("initialized");
+            Field field = rmNettyRemotingClient.getClass().getDeclaredField("initialized");
             field.setAccessible(true);
-            return (AtomicBoolean) field.get(rmNettyClient);
+            return (AtomicBoolean) field.get(rmNettyRemotingClient);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
