@@ -7,8 +7,6 @@ You only need to keep the following configuration from 'config.txt'. For more co
 
 | server                   | client                                 |
 | ------------------------ | -------------------------------------- |
-| registry.type            | registry.type                          |
-| config.type              | config.type                            |
 | store.mode               | service.vgroupMapping.my_test_tx_group |
 | store.db.driverClassName | service.default.grouplist              |
 | store.db.url             | service.disableGlobalTransaction       |
