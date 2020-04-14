@@ -21,6 +21,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -30,8 +31,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -214,7 +213,8 @@ public class DefaultCore implements Core {
                             }
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("Exception committing branch {}", branchSession, ex);
+                    StackTraceLogger.error(LOGGER, ex, "Exception committing branch {}",
+                        new String[] {branchSession.toString()});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
@@ -301,8 +301,9 @@ public class DefaultCore implements Core {
                             return false;
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("Exception rollbacking branch xid={} branchId={}", globalSession.getXid(),
-                            branchSession.getBranchId(), ex);
+                    StackTraceLogger.error(LOGGER, ex, "Exception rollbacking branch xid={} branchId={} error msg={}",
+                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()),
+                            ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }
