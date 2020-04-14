@@ -65,20 +65,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public void init() {
         // registry processor
-        // 1.registry TC response processor
-        ClientOnResponseProcessor onResponseProcessor =
-            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
-        registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
-        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
-        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
-        registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);
-        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
-        registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor, null);
-        registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
-        // 2.registry heartbeat message processor
-        ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
-        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
-
+        registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
             super.init();
@@ -184,5 +171,21 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
             RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
             return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
+    }
+
+    private void registerProcessor() {
+        // 1.registry TC response processor
+        ClientOnResponseProcessor onResponseProcessor =
+            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
+        // 2.registry heartbeat message processor
+        ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
     }
 }
