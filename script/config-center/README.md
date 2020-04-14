@@ -5,7 +5,7 @@
 
 You only need to keep the following configuration from 'config.txt'. For more configuration information, please visit [seata.io](https://seata.io/)
 
-| server端                 | client端                               |
+| server                   | client                                 |
 | ------------------------ | -------------------------------------- |
 | registry.type            | registry.type                          |
 | config.type              | config.type                            |
