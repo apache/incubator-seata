@@ -117,7 +117,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("getConfig {} is error or timeout,return defaultValue {}", dataId, defaultValue);
+            LOGGER.error("getConfig {} is error or timeout,return defaultValue {},error : {}",
+                    dataId, defaultValue,e.getMessage(),e);
             return defaultValue;
         }
     }
