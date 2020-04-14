@@ -22,6 +22,7 @@ import io.seata.core.model.ResourceManager;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockWaitTimeoutException;
+import io.seata.rm.datasource.undo.SQLUndoLog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,8 @@ public class ConnectionProxyTest {
 
     private final static String TEST_XID = "testXid";
 
+    private final static String lockKey = "order:123";
+
     private Field branchRollbackFlagField;
 
     @BeforeEach
@@ -58,7 +61,7 @@ public class ConnectionProxyTest {
         Mockito.when(dataSourceProxy.getResourceId())
                 .thenReturn(TEST_RESOURCE_ID);
         ResourceManager rm = Mockito.mock(ResourceManager.class);
-        Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, null, null))
+        Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, null, lockKey))
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
@@ -71,6 +74,8 @@ public class ConnectionProxyTest {
         branchRollbackFlagField.set(null, true);
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, null);
         connectionProxy.bind(TEST_XID);
+        connectionProxy.appendUndoLog(new SQLUndoLog());
+        connectionProxy.appendLockKey(lockKey);
         Assertions.assertThrows(LockConflictException.class, connectionProxy::commit);
         branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
@@ -81,6 +86,8 @@ public class ConnectionProxyTest {
         branchRollbackFlagField.set(null, false);
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, null);
         connectionProxy.bind(TEST_XID);
+        connectionProxy.appendUndoLog(new SQLUndoLog());
+        connectionProxy.appendLockKey(lockKey);
         Assertions.assertThrows(LockWaitTimeoutException.class, connectionProxy::commit);
         branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }

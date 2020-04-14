@@ -198,6 +198,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     @Override
     public void flushUndoLogs(ConnectionProxy cp) throws SQLException {
         ConnectionContext connectionContext = cp.getContext();
+        if (!connectionContext.hasUndoLog()) {
+            return;
+        }
+
         String xid = connectionContext.getXid();
         long branchId = connectionContext.getBranchId();
 
