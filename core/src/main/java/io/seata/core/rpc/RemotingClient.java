@@ -53,13 +53,6 @@ public interface RemotingClient {
     /**
      * client send async request.
      *
-     * @param msg transaction message {@link io.seata.core.protocol}
-     */
-    void sendAsyncRequest(Object msg);
-
-    /**
-     * client send async request.
-     *
      * @param channel client channel
      * @param msg     transaction message {@link io.seata.core.protocol}
      */

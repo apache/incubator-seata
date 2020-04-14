@@ -189,19 +189,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     @Override
-    public void sendAsyncRequest(Object msg) {
-        String serverAddress = loadBalance(getTransactionServiceGroup());
-        RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
-            ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-            : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        if (rpcMessage.getBody() instanceof MergeMessage) {
-            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
-        }
-        Channel channel = clientChannelManager.acquireChannel(serverAddress);
-        super.sendAsync(channel, rpcMessage);
-    }
-
-    @Override
     public void sendAsyncRequest(Channel channel, Object msg) {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequest nothing, caused by null channel.");
@@ -317,10 +304,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         // send batch message is sync request, but there is no need to get the return value.
                         // Since the messageFuture has been created before the message is placed in basketMap,
                         // the return value will be obtained in ClientOnResponseProcessor.
-                        RpcMessage rpcMessage = buildRequestMessage(mergeMessage, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-                        mergeMsgMap.put(rpcMessage.getId(), mergeMessage);
                         sendChannel = clientChannelManager.acquireChannel(address);
-                        AbstractNettyRemotingClient.super.sendAsync(sendChannel, rpcMessage);
+                        AbstractNettyRemotingClient.this.sendAsyncRequest(sendChannel, mergeMessage);
                     } catch (FrameworkException e) {
                         if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && sendChannel != null) {
                             destroyChannel(address, sendChannel);
