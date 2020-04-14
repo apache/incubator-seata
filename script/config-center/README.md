@@ -1,9 +1,9 @@
 # Script usage demo
 ![Since 1.1.0](https://img.shields.io/badge/Since%20-1.1.0-orange.svg?style=flat-square)
 
-## must([full configuration reading](http://seata.io/zh-cn/docs/user/configurations.html))
+## required attributes 
 
-You only need to keep the following configuration from 'config.txt'. For more configuration information, please visit seata.io
+You only need to keep the following configuration from 'config.txt'. For more configuration information, please visit [seata.io](https://seata.io/)
 
 | server端                 | client端                               |
 | ------------------------ | -------------------------------------- |
