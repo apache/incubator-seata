@@ -34,7 +34,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.LockerFactory;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
@@ -108,7 +108,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC) {
+            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
                 return false;
             }
         }
@@ -202,7 +202,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void clean() throws TransactionException {
-        LockerFactory.getLockManager().releaseGlobalSessionLock(this);
+        LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
 
     }
 
@@ -605,24 +605,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void unlock() {
         globalSessionLock.unlock();
-    }
-
-    public void lockAndExecute(LockRunnable excuteRunnable) throws TransactionException {
-        this.lock();
-        try {
-            excuteRunnable.run();
-        } finally {
-            this.unlock();
-        }
-    }
-
-    public <T> T lockAndExecute(LockCallable<T> lockCallable) throws TransactionException {
-        this.lock();
-        try {
-            return lockCallable.call();
-        } finally {
-            this.unlock();
-        }
     }
 
     private static class GlobalSessionLock {

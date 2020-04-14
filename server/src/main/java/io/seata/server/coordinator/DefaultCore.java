@@ -19,12 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -34,8 +38,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Default core.
@@ -131,7 +133,6 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 
-        LOGGER.info("Successfully begin global transaction xid = {}", session.getXid());
         return session.getXid();
     }
 
@@ -144,7 +145,7 @@ public class DefaultCore implements Core {
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
 
-        boolean shouldCommit = globalSession.lockAndExecute(() -> {
+        boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
             // the lock should release after branch commit
             // Highlight: Firstly, close the session, then no more branch can be registered.
             globalSession.closeAndClean();
@@ -215,7 +216,8 @@ public class DefaultCore implements Core {
                             }
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("Exception committing branch {}", branchSession, ex);
+                    StackTraceLogger.error(LOGGER, ex, "Exception committing branch {}",
+                        new String[] {branchSession.toString()});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
@@ -248,7 +250,7 @@ public class DefaultCore implements Core {
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
-        boolean shouldRollBack = globalSession.lockAndExecute(() -> {
+        boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
             if (globalSession.getStatus() == GlobalStatus.Begin) {
                 globalSession.changeStatus(GlobalStatus.Rollbacking);
@@ -302,8 +304,9 @@ public class DefaultCore implements Core {
                             return false;
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("Exception rollbacking branch xid={} branchId={}", globalSession.getXid(),
-                            branchSession.getBranchId(), ex);
+                    StackTraceLogger.error(LOGGER, ex, "Exception rollbacking branch xid={} branchId={} error msg={}",
+                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()),
+                            ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }

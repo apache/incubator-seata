@@ -4,6 +4,7 @@ seata:
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
+  excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
       async-commit-buffer-limit: 1000
@@ -63,6 +64,8 @@ seata:
       namespace:
       serverAddr: localhost
       group: SEATA_GROUP
+      userName: ""
+      password: ""
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
@@ -79,8 +82,11 @@ seata:
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
+      application: seata-server
       server-addr: localhost
       namespace:
+      userName: ""
+      password: ""
     redis:
       server-addr: localhost:6379
       db: 0
@@ -92,6 +98,7 @@ seata:
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
       addressWaitTime: 3000
+      application: default
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
