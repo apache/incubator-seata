@@ -43,11 +43,14 @@ public class ProcessUtil {
 	public static void runInSagaBranch(ProcessContext context, Runnable runnable) {
 		String xid = RootContext.unbind();
 		String xidType = RootContext.getXIDInterceptorType();
+		boolean isSagaBranch = xidType != null && xidType.endsWith(BranchType.SAGA.name());
 		boolean inGlobalTransaction = (xid != null);
 		if (xid == null) {
 			xid = getXIDFromProcessContext(context);
 		}
-		RootContext.bindInterceptorType(xid, BranchType.SAGA);
+		if (!isSagaBranch) {
+			RootContext.bindInterceptorType(xid, BranchType.SAGA);
+		}
 
 		try {
 			runnable.run();
@@ -55,10 +58,12 @@ public class ProcessUtil {
 			if (inGlobalTransaction) {
 				RootContext.bind(xid);
 			}
-			if (StringUtils.isNotBlank(xidType)) {
-				RootContext.bindInterceptorType(xidType);
-			} else {
-				RootContext.unbindInterceptorType();
+			if (!isSagaBranch) {
+				if (StringUtils.isNotBlank(xidType)) {
+					RootContext.bindInterceptorType(xidType);
+				} else {
+					RootContext.unbindInterceptorType();
+				}
 			}
 		}
 	}
