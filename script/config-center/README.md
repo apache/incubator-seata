@@ -1,6 +1,20 @@
 # Script usage demo
 ![Since 1.1.0](https://img.shields.io/badge/Since%20-1.1.0-orange.svg?style=flat-square)
 
+## must([full configuration reading](http://seata.io/zh-cn/docs/user/configurations.html))
+
+You only need to keep the following configuration from 'config.txt'. For more configuration information, please visit seata.io
+
+| server端                 | client端                               |
+| ------------------------ | -------------------------------------- |
+| registry.type            | registry.type                          |
+| config.type              | config.type                            |
+| store.mode               | service.vgroupMapping.my_test_tx_group |
+| store.db.driverClassName | service.default.grouplist              |
+| store.db.url             | service.disableGlobalTransaction       |
+| store.db.user            |                                        |
+| store.db.password        |                                        |
+
 ## Nacos
 shell:
 ```bash
