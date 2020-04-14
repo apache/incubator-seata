@@ -22,6 +22,7 @@ import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserType;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 
 /**
  * @author ggndnn
@@ -55,7 +56,7 @@ public class DruidDelegatingSQLRecognizerFactory implements SQLRecognizerFactory
     }
 
     @Override
-    public SQLRecognizer create(String sql, String dbType) {
+    public List<SQLRecognizer> create(String sql, String dbType) {
         return recognizerFactoryImpl.create(sql, dbType);
     }
 }

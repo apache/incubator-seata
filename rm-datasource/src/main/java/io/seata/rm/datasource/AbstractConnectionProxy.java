@@ -37,6 +37,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -108,12 +109,15 @@ public abstract class AbstractConnectionProxy implements Connection {
         // support oracle 10.2+
         PreparedStatement targetPreparedStatement = null;
         if (RootContext.inGlobalTransaction()) {
-            SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
-            if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-                String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
-                TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
-                    tableName,getDataSourceProxy().getResourceId());
-                targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
+            List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
+            if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
+                    String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
+                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
+                            tableName, getDataSourceProxy().getResourceId());
+                    targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
+                }
             }
         }
         if (targetPreparedStatement == null) {

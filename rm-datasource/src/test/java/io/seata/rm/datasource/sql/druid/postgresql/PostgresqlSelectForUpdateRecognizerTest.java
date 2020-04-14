@@ -34,7 +34,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     public void testGetSqlType() {
         String sql = "select * from t where id = ? for update";
 
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
     }
 
@@ -42,7 +42,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     public void testGetWhereCondition_0() {
         String sql = "select * from t for update";
 
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -56,7 +56,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     public void testGetWhereCondition_1() {
         String sql = "select * from t for update";
 
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         String whereCondition = recognizer.getWhereCondition();
 
         Assertions.assertEquals("", whereCondition);
@@ -65,14 +65,14 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     @Test
     public void testGetTableAlias() {
         String sql = "select * from t where id = ? for update";
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
     @Test
     public void testGetTableName() {
         String sql = "select * from t where id = ? for update";
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 }
