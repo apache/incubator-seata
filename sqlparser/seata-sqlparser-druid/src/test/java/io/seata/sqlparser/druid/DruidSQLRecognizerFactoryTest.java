@@ -24,13 +24,16 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 public class DruidSQLRecognizerFactoryTest {
     @Test
     public void testSqlRecognizerCreation() {
         SQLRecognizerFactory recognizerFactory = EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
-        SQLRecognizer recognizer = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL);
-        Assertions.assertNotNull(recognizer);
-        Assertions.assertEquals(SQLType.DELETE, recognizer.getSQLType());
+        List<SQLRecognizer> recognizers = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL);
+        Assertions.assertNotNull(recognizers);
+        Assertions.assertEquals(recognizers.size(),1);
+        Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
     }
 }
