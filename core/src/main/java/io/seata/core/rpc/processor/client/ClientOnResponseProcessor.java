@@ -65,7 +65,7 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientOnResponseProcessor.class);
 
     /**
-     * The Merge msg map from io.seata.core.rpc.netty.AbstractNettyRemotingClient#basketMap.
+     * The Merge msg map from io.seata.core.rpc.netty.AbstractNettyRemotingClient#mergeMsgMap.
      */
     private Map<Integer, MergeMessage> mergeMsgMap;
 
