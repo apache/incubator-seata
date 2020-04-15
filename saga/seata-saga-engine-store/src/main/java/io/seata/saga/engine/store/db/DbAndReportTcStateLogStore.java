@@ -278,9 +278,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
             if (stateMachineConfig instanceof DbStateMachineConfig
-                    && !((DbStateMachineConfig)stateMachineConfig).isRmReportEnable()) {
+                    && !((DbStateMachineConfig)stateMachineConfig).isSagaBranchRegisterEnable()) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("rmReportEnable = false, skip register branch. state[" + stateInstance.getName() + "]");
+                    LOGGER.debug("sagaBranchRegisterEnable = false, skip register branch. state[" + stateInstance.getName() + "]");
                 }
                 return;
             }
@@ -422,9 +422,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
             if (stateMachineConfig instanceof DbStateMachineConfig
-                    && !((DbStateMachineConfig)stateMachineConfig).isRmReportEnable()) {
+                    && !((DbStateMachineConfig)stateMachineConfig).isSagaBranchRegisterEnable()) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("rmReportEnable = false, skip branch report. state[" + stateInstance.getName() + "]");
+                    LOGGER.debug("sagaBranchRegisterEnable = false, skip branch report. state[" + stateInstance.getName() + "]");
                 }
                 return;
             }
