@@ -53,6 +53,7 @@ import io.seata.saga.proctrl.handler.RouterHandler;
 import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.parser.utils.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -91,7 +92,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private boolean enableAsync;
     private ServiceInvokerManager serviceInvokerManager;
 
-    private Resource[] resources = new Resource[0];
+    private boolean autoRegisterResources = true;
+    private String[] resources;
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
 
@@ -130,8 +132,9 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             stateMachineRepository.setSeqGenerator(seqGenerator);
             stateMachineRepository.setStateLangStore(stateLangStore);
             stateMachineRepository.setDefaultTenantId(defaultTenantId);
-            if (resources != null) {
+            if (this.autoRegisterResources && this.resources != null && this.resources.length > 0) {
                 try {
+                    Resource[] resources = ResourceUtil.getResources(this.resources);
                     stateMachineRepository.registryByResources(resources, defaultTenantId);
                 } catch (IOException e) {
                     LOGGER.error("Load State Language Resources failed.", e);
@@ -364,7 +367,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.syncProcessCtrlEventPublisher = syncProcessCtrlEventPublisher;
     }
 
-    public void setResources(Resource[] resources) {
+    public void setAutoRegisterResources(boolean autoRegisterResources) {
+        this.autoRegisterResources = autoRegisterResources;
+    }
+
+    public void setResources(String[] resources) {
         this.resources = resources;
     }
 
