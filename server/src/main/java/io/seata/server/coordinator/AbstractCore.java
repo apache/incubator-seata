@@ -84,8 +84,7 @@ public abstract class AbstractCore implements Core {
                                 branchSession.getBranchId()), ex);
             }
             if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,"
-                        + "lockKeys = {}",
+                LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
                     globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
             }
             return branchSession.getBranchId();
@@ -95,8 +94,8 @@ public abstract class AbstractCore implements Core {
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
         if (!globalSession.isActive()) {
             throw new GlobalTransactionException(GlobalTransactionNotActive, String.format(
-                "Could not register branch into global session xid = %s status = %s, cause by globalSession not "
-                    + "active", globalSession.getXid(), globalSession.getStatus()));
+                "Could not register branch into global session xid = %s status = %s, cause by globalSession not active",
+                globalSession.getXid(), globalSession.getStatus()));
         }
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String

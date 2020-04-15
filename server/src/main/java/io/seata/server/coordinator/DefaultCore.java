@@ -193,14 +193,11 @@ public class DefaultCore implements Core {
                         case PhaseTwo_CommitFailed_Unretryable:
                             if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error(
-                                    "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, "
-                                        + "please check the business log.", branchSession.getBranchId());
+                                    "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
                                 continue;
                             } else {
                                 SessionHelper.endCommitFailed(globalSession);
-                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch "
-                                        + "transaction[{}] commit failed.", globalSession.getXid(),
-                                    branchSession.getBranchId());
+                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
                                 return false;
                             }
                         default:
@@ -214,9 +211,7 @@ public class DefaultCore implements Core {
                                 continue;
                             } else {
                                 LOGGER.error(
-                                    "Committing global transaction[{}] failed, caused by branch transaction[{}] commit "
-                                        + "failed, will retry later.", globalSession.getXid(),
-                                    branchSession.getBranchId());
+                                    "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.", globalSession.getXid(), branchSession.getBranchId());
                                 return false;
                             }
                     }
@@ -292,17 +287,14 @@ public class DefaultCore implements Core {
                     switch (branchStatus) {
                         case PhaseTwo_Rollbacked:
                             globalSession.removeBranch(branchSession);
-                            LOGGER.info("Rollback branch transaction  successfully, xid = {} branchId = {}",
-                                globalSession.getXid(), branchSession.getBranchId());
+                            LOGGER.info("Rollback branch transaction  successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             continue;
                         case PhaseTwo_RollbackFailed_Unretryable:
                             SessionHelper.endRollbackFailed(globalSession);
-                            LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}",
-                                globalSession.getXid(), branchSession.getBranchId());
+                            LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return false;
                         default:
-                            LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}",
-                                globalSession.getXid(), branchSession.getBranchId());
+                            LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             if (!retrying) {
                                 globalSession.queueToRetryRollback();
                             }
@@ -310,9 +302,8 @@ public class DefaultCore implements Core {
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
-                        "Rollback branch transaction exception, xid = {} branchId = {} exception" + " = {}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()),
-                            ex.getMessage()});
+                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
+                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }
