@@ -83,7 +83,7 @@ public abstract class AbstractCore implements Core {
                         .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
                                 branchSession.getBranchId()), ex);
             }
-            if(LOGGER.isInfoEnabled()) {
+            if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
                     globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
             }
