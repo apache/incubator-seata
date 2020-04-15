@@ -7,12 +7,12 @@ you only need to follow the instructions below and keep the corresponding config
 
 | server                   | client                                                       |
 | ------------------------ | ------------------------------------------------------------ |
-| store.mode: file,db      | config.type: file 、nacos 、eureka、redis、zk、consul、etcd3、sofa、custom |
-| #only db:                | service.disableGlobalTransaction                             |
-| store.db.driverClassName | service.vgroupMapping.my_test_tx_group                       |
-| store.db.url             | #only file:                                                  |
-| store.db.user            | service.default.grouplist                                    |
-| store.db.password        |                                                              |
+| store.mode: file,db      | config.type: file、nacos 、apollo、zk、consul、etcd3、custom |
+| #only db:                | #only file:                                                  |
+| store.db.driverClassName | service.default.grouplist                                    |
+| store.db.url             | #All:                                                        |
+| store.db.user            | service.vgroupMapping.my_test_tx_group                       |
+| store.db.password        | service.disableGlobalTransaction                             |
 
 ## Nacos
 shell:
