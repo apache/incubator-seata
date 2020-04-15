@@ -201,7 +201,7 @@ public class RootContext {
     }
 
     /**
-     * 在全局事务之外运行
+     * Run without global transaction.
      *
      * @param runnable
      * @return
@@ -219,7 +219,7 @@ public class RootContext {
     }
 
     /**
-     * 在全局事务之外运行
+     * Run without global transaction.
      *
      * @param supplier
      * @return

@@ -94,4 +94,28 @@ public class RootContextTest {
         assertThat(RootContext.getXID()).isNull();
     }
 
+    /**
+     * Test without global transaction.
+     */
+    @Test
+    public void testWithoutGlobalTransaction() {
+        RootContext.bind(DEFAULT_XID);
+
+        // test runnable
+        RootContext.withoutGlobalTransaction(() -> {
+            assertThat(RootContext.inGlobalTransaction()).isFalse();
+        });
+        assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+
+        // test supplier
+        int x = RootContext.withoutGlobalTransaction(() -> {
+            assertThat(RootContext.inGlobalTransaction()).isFalse();
+            return 1;
+        });
+        assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+        assertThat(x).isEqualTo(1);
+
+        RootContext.unbind();
+    }
+
 }
