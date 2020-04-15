@@ -290,10 +290,10 @@ public abstract class AbstractNettyRemoting implements Disposable {
                     }
                 }
             } else {
-                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
+                LOGGER.error("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         } else {
-            LOGGER.warn("This rpcMessage body[{}] is not MessageTypeAware type.", body);
+            LOGGER.error("This rpcMessage body[{}] is not MessageTypeAware type.", body);
         }
     }
 
