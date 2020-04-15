@@ -13,7 +13,7 @@
       "type": "java.lang.Boolean",
       "description": "Whether enable state machine async function.",
       "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
-      "defaultValue": true
+      "defaultValue": false
     },
     {
       "name": "seata.saga.state-machine.charset",
