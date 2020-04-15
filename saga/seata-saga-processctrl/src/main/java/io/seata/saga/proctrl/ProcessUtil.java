@@ -24,7 +24,7 @@ public class ProcessUtil {
 	 *
 	 * @return the xid
 	 */
-	public static String getXIDFromProcessContext(ProcessContext context) {
+	public static String getXidFromProcessContext(ProcessContext context) {
 		String xid = null;
 		Map<String, Object> contextVariable = (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
 		if (contextVariable != null && contextVariable.containsKey(DomainConstants.VAR_NAME_GLOBAL_TX)) {
@@ -58,7 +58,7 @@ public class ProcessUtil {
 			xid = RootContext.unbind();
 			inGlobalTransaction = (xid != null);
 			if (xid == null) {
-				xid = getXIDFromProcessContext(context);
+				xid = getXidFromProcessContext(context);
 			}
 
 			// bind xidType to saga
