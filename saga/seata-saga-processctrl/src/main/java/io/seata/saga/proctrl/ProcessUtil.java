@@ -9,6 +9,11 @@ import io.seata.tm.api.GlobalTransaction;
 
 import java.util.Map;
 
+/**
+ * Process Util
+ *
+ * @author wang.liang
+ */
 public class ProcessUtil {
 
 	private ProcessUtil() {
