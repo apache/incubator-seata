@@ -72,6 +72,7 @@ seata:
       connect-timeout: 2000
       username: ""
       password: ""
+      serializer: ""
   registry:
     type: file
     consul:
