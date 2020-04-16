@@ -1,5 +1,5 @@
 # Script usage demo
-![Since 1.1.0](https://img.shields.io/badge/Since%20-1.1.0-orange.svg?style=flat-square)
+![Since 1.2.0](https://img.shields.io/badge/Since%20-1.2.0-orange.svg?style=flat-square)
 
 ## important attributes 
 
