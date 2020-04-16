@@ -15,11 +15,12 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.exception.NotSupportYetException;
+import com.alibaba.druid.mock.MockStatement;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.struct.Null;
@@ -193,21 +194,11 @@ public class InsertExecutorTest {
     }
 
     @Test
-    public void testGetPkValuesByAuto_NotSupportYetException() {
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-            columnMetaMap.put(ID_COLUMN, new ColumnMeta());
-            columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
-            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            insertExecutor.getPkValuesByAuto();
-        });
-    }
-
-    @Test
     public void testGetPkValuesByAuto_ShouldNeverHappenException() {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            doReturn(new MockStatement(new MockConnection(null, null, null)))
+                    .when(statementProxy).getTargetStatement();
             Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
             ColumnMeta columnMeta = mock(ColumnMeta.class);
             columnMetaMap.put(ID_COLUMN, columnMeta);

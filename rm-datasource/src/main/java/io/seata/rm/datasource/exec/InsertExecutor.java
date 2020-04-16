@@ -189,14 +189,16 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @throws SQLException
      */
     private List<Object> getPkValuesByDefault() throws SQLException {
-        Map<String, ColumnMeta> pkMetaMap = checkPrimaryKeyMap();
+        // current version 1.2 only support postgresql.
+        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         String columnDef = pkMeta.getColumnDef();
         // sample: nextval('test_id_seq'::regclass)
         String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
         String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
         if (StringUtils.isBlank(seq)) {
-            throw new ShouldNeverHappenException("columnDef is " + columnDef);
+            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
         }
         return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
     }
@@ -336,7 +338,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      */
     private List<Object> mysqlGeneratedKeys() throws SQLException {
         // PK is just auto generated
-        Map<String, ColumnMeta> pkMetaMap = checkPrimaryKeyMap();
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         if (!pkMeta.isAutoincrement()) {
             throw new ShouldNeverHappenException();
@@ -375,7 +377,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @throws SQLException the SQL exception
      */
     private List<Object> defaultGeneratedKeys() throws SQLException {
-        Map<String, ColumnMeta> pkMetaMap = checkPrimaryKeyMap();
         ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
@@ -386,14 +387,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValues;
-    }
-
-    private Map<String, ColumnMeta> checkPrimaryKeyMap() {
-        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        if (pkMetaMap.size() != 1) {
-            throw new NotSupportYetException();
-        }
-        return pkMetaMap;
     }
 
 }
