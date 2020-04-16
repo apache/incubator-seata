@@ -261,12 +261,12 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 zkSerializer = (ZkSerializer) aClass.newInstance();
             } catch (ClassNotFoundException cfe) {
                 LOGGER.error("No zk serializer class found, serializer:{}", serializer, cfe);
-            } catch (Exception e) {
-                LOGGER.error("found zk serializer encountered an unknown exception", e);
+            } catch (Throwable cause) {
+                LOGGER.error("found zk serializer encountered an unknown exception", cause);
             }
         }
         if (zkSerializer == null) {
-            zkSerializer = new SerializableSerializer();
+            zkSerializer = new DefaultZkSerializer();
         }
         return zkSerializer;
     }
