@@ -50,6 +50,7 @@
 		<property name="threadPoolExecutor" ref="threadExecutor"></property>
 		<property name="applicationId" value="test_saga"></property>
 		<property name="txServiceGroup" value="my_test_tx_group"></property>
+		<property name="sagaBranchRegisterEnable" value="false"></property>
 	</bean>
 
 	<bean id="threadExecutor"
