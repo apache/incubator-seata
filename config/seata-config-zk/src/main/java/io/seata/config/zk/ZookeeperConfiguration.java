@@ -122,7 +122,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("getConfig {} is error or timeout,return defaultValue {}", dataId, defaultValue);
+            LOGGER.error("getConfig {} error or timeout, return defaultValue {}, exception:{} ",
+                    dataId, defaultValue, e.getMessage());
             return defaultValue;
         }
     }
@@ -142,7 +143,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.warn("putConfig {} : {} is error or timeout", dataId, content);
+            LOGGER.error("putConfig {}, value: {} is error or timeout, exception: {}",
+                    dataId, content, e.getMessage());
             return false;
         }
     }
@@ -162,7 +164,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.warn("removeConfig {} is error or timeout", dataId);
+            LOGGER.error("removeConfig {} is error or timeout, exception:{}", dataId, e.getMessage());
             return false;
         }
 
