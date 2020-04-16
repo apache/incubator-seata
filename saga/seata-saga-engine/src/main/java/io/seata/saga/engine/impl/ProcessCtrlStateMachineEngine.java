@@ -238,7 +238,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         ProcessContext context = contextBuilder.build();
 
-        Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
+        Map<String, Object> contextVariables = getStateMachineContextVariables(stateMachineInstance);
 
         if (replaceParams != null) {
             contextVariables.putAll(replaceParams);
@@ -316,59 +316,61 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         return stateMachineInstance;
     }
 
-    private Map<String, Object> getStateMachineContextVariables(ProcessContext context,
-                                                                StateMachineInstance stateMachineInstance) {
+    private Map<String, Object> getStateMachineContextVariables(StateMachineInstance stateMachineInstance) {
 
         Map<String, Object> contextVariables = stateMachineInstance.getEndParams();
         if (contextVariables == null || contextVariables.size() == 0) {
-            contextVariables = stateMachineInstance.getStartParams();
+            contextVariables = replayContextVariables(stateMachineInstance);
         }
-        if (contextVariables == null) {
-            contextVariables = new HashMap<>();
+        return contextVariables;
+    }
+
+    protected Map<String, Object> replayContextVariables(StateMachineInstance stateMachineInstance) {
+
+        Map<String, Object> contextVariables = new HashMap<>();
+        if (stateMachineInstance.getStartParams() == null) {
+            contextVariables.putAll(stateMachineInstance.getStartParams());
         }
 
-        if (stateMachineInstance.isRunning()) {
-            List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
-            if (stateInstanceList == null || stateInstanceList.size() == 0) {
-                return contextVariables;
-            }
+        List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
+        if (stateInstanceList == null || stateInstanceList.size() == 0) {
+            return contextVariables;
+        }
 
-            for (StateInstance stateInstance : stateInstanceList) {
-                Object serviceOutputParams = stateInstance.getOutputParams();
-                if (serviceOutputParams != null) {
-                    ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
+        for (StateInstance stateInstance : stateInstanceList) {
+            Object serviceOutputParams = stateInstance.getOutputParams();
+            if (serviceOutputParams != null) {
+                ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
                         stateInstance.getName());
-                    if (state == null) {
-                        throw new EngineExecutionException(
+                if (state == null) {
+                    throw new EngineExecutionException(
                             "Cannot find State by state name [" + stateInstance.getName() + "], may be this is a bug",
                             FrameworkErrorCode.ObjectNotExists);
-                    }
+                }
 
-                    if (state.getOutput() != null && state.getOutput().size() > 0) {
-                        try {
-                            Map<String, Object> outputVariablesToContext = ServiceTaskHandlerInterceptor
+                if (state.getOutput() != null && state.getOutput().size() > 0) {
+                    try {
+                        Map<String, Object> outputVariablesToContext = ServiceTaskHandlerInterceptor
                                 .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
-                                    serviceOutputParams);
-                            if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
-                                contextVariables.putAll(outputVariablesToContext);
-                            }
+                                        serviceOutputParams);
+                        if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
+                            contextVariables.putAll(outputVariablesToContext);
+                        }
 
-                            if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
+                        if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
 
-                                ((Map<String, Object>)context.getVariable(
-                                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)).put(
+                            contextVariables.put(
                                     state.getName() + DomainConstants.VAR_NAME_BUSINESSKEY,
                                     stateInstance.getBusinessKey());
-                            }
-                        } catch (Exception e) {
-                            throw new EngineExecutionException(e, "Context variables replay faied",
-                                FrameworkErrorCode.ContextVariableReplayFailed);
                         }
+                    } catch (Exception e) {
+                        throw new EngineExecutionException(e, "Context variables replay faied",
+                                FrameworkErrorCode.ContextVariableReplayFailed);
                     }
-
                 }
 
             }
+
         }
         return contextVariables;
     }
@@ -475,7 +477,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         ProcessContext context = contextBuilder.build();
 
-        Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
+        Map<String, Object> contextVariables = getStateMachineContextVariables(stateMachineInstance);
 
         if (replaceParams != null) {
             contextVariables.putAll(replaceParams);
@@ -562,6 +564,10 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                         inst.putStateInstance(tmpStateInstance.getId(), tmpStateInstance);
                     }
                 }
+            }
+
+            if (inst.getEndParams() == null || inst.getEndParams().size() == 0) {
+                inst.setEndParams(replayContextVariables(inst));
             }
         }
         return inst;

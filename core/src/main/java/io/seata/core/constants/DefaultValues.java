@@ -27,6 +27,7 @@ public class DefaultValues {
     public static final int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     public static final boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
     public static final boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    public static final boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
     /**
      * Shutdown timeout default 3s
      */

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
@@ -34,6 +35,7 @@ public class RmProperties {
     private int reportRetryCount = DEFAULT_CLIENT_REPORT_RETRY_COUNT;
     private boolean tableMetaCheckEnable = DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
     private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+    private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -69,5 +71,13 @@ public class RmProperties {
     public RmProperties setReportSuccessEnable(boolean reportSuccessEnable) {
         this.reportSuccessEnable = reportSuccessEnable;
         return this;
+    }
+
+    public boolean isSagaBranchRegisterEnable() {
+        return sagaBranchRegisterEnable;
+    }
+
+    public void setSagaBranchRegisterEnable(boolean sagaBranchRegisterEnable) {
+        this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
     }
 }
