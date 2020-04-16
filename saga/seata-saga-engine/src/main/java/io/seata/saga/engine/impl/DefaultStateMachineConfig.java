@@ -198,7 +198,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         }
     }
 
-    private ProcessControllerImpl createProcessorController(ProcessCtrlEventPublisher eventPublisher) throws Exception {
+    protected ProcessControllerImpl createProcessorController(ProcessCtrlEventPublisher eventPublisher) throws Exception {
 
         StateMachineProcessRouter stateMachineProcessRouter = new StateMachineProcessRouter();
         stateMachineProcessRouter.initDefaultStateRouters();
