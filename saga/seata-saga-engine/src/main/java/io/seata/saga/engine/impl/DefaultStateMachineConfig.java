@@ -132,15 +132,16 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             stateMachineRepository.setSeqGenerator(seqGenerator);
             stateMachineRepository.setStateLangStore(stateLangStore);
             stateMachineRepository.setDefaultTenantId(defaultTenantId);
-            if (this.autoRegisterResources && this.resources != null && this.resources.length > 0) {
-                try {
-                    Resource[] resources = ResourceUtil.getResources(this.resources);
-                    stateMachineRepository.registryByResources(resources, defaultTenantId);
-                } catch (IOException e) {
-                    LOGGER.error("Load State Language Resources failed.", e);
-                }
-            }
             this.stateMachineRepository = stateMachineRepository;
+        }
+        if (this.autoRegisterResources && this.resources != null && this.resources.length > 0) {
+            try {
+                Resource[] resources = ResourceUtil.getResources(this.resources);
+                stateMachineRepository.registryByResources(resources, defaultTenantId);
+                this.resources = null;
+            } catch (IOException e) {
+                LOGGER.error("Load State Language Resources failed.", e);
+            }
         }
 
         if (stateLogRepository == null) {
