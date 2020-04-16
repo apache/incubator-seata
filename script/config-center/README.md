@@ -1,5 +1,18 @@
 # Script usage demo
-![Since 1.1.0](https://img.shields.io/badge/Since%20-1.1.0-orange.svg?style=flat-square)
+![Since 1.2.0](https://img.shields.io/badge/Since%20-1.2.0-orange.svg?style=flat-square)
+
+## important attributes 
+
+you only need to follow the instructions below and keep the corresponding configuration in 'config.txt' to run. For more configuration information, please visit [seata.io](https://seata.io/)
+
+| server                   | client                                                       |
+| ------------------------ | ------------------------------------------------------------ |
+| store.mode: file,db      | config.type: file、nacos 、apollo、zk、consul、etcd3、custom |
+| #only db:                | #only file:                                                  |
+| store.db.driverClassName | service.default.grouplist                                    |
+| store.db.url             | #All:                                                        |
+| store.db.user            | service.vgroupMapping.my_test_tx_group                       |
+| store.db.password        | service.disableGlobalTransaction                             |
 
 ## Nacos
 shell:
