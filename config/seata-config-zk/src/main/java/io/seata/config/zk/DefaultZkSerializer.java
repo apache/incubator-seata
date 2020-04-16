@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Default zk serializer.
  * <p>
- * If the user is not configured in config.zk.serializer, then use default serializer.
+ * If the user is not configured in config.zk.serializer configuration item, then use default serializer.
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
