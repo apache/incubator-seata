@@ -260,13 +260,14 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 Class<?> aClass = Class.forName(serializer);
                 zkSerializer = (ZkSerializer) aClass.newInstance();
             } catch (ClassNotFoundException cfe) {
-                LOGGER.error("No zk serializer class found, serializer:{}", serializer, cfe);
+                LOGGER.warn("No zk serializer class found, serializer:{}", serializer, cfe);
             } catch (Throwable cause) {
-                LOGGER.error("found zk serializer encountered an unknown exception", cause);
+                LOGGER.warn("found zk serializer encountered an unknown exception", cause);
             }
         }
         if (zkSerializer == null) {
             zkSerializer = new DefaultZkSerializer();
+            LOGGER.info("Use default zk serializer: io.seata.config.zk.DefaultZkSerializer.");
         }
         return zkSerializer;
     }
