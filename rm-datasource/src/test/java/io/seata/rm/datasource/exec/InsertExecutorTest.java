@@ -15,12 +15,19 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.alibaba.druid.mock.MockStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.struct.Null;
@@ -34,15 +41,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -197,8 +195,9 @@ public class InsertExecutorTest {
     public void testGetPkValuesByAuto_ShouldNeverHappenException() {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            doReturn(new MockStatement(new MockConnection(null, null, null)))
-                    .when(statementProxy).getTargetStatement();
+            PreparedStatement preparedStatement = mock(PreparedStatement.class);
+            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
+            when(preparedStatement.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
             Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
             ColumnMeta columnMeta = mock(ColumnMeta.class);
             columnMetaMap.put(ID_COLUMN, columnMeta);
