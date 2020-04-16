@@ -9,6 +9,12 @@
       "defaultValue": false
     },
     {
+      "name": "seata.saga.state-machine.rm-report-success-enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
+      "defaultValue": false
+    },
+    {
       "name": "seata.saga.state-machine.enable-async",
       "type": "java.lang.Boolean",
       "description": "Whether enable state machine async function.",
@@ -41,6 +47,18 @@
       "type": "java.util.List<java.lang.String>",
       "description": "State lang resources.",
       "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig"
+    },
+    {
+      "name": "seata.saga.state-machine.service-invoke-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": 300000
+    },
+    {
+      "name": "seata.saga.state-machine.trans-operation-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": 1800000
     }
   ],
   "hints": [
