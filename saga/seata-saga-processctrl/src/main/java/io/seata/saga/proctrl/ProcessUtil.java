@@ -34,6 +34,15 @@ public class ProcessUtil {
     }
 
     /**
+     * Get state machine instance from process context.
+     * @param context
+     * @return the stateMachineInstance
+     */
+    public static StateMachineInstance getStateMachineInstanceFromProcessContext(ProcessContext context) {
+        return (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+    }
+
+    /**
      * Gets xid from saga process context.
      *
      * @return the xid

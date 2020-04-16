@@ -154,6 +154,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 endParams.remove(DomainConstants.VAR_NAME_GLOBAL_TX);
             }
 
+            // if success, clear exception
+            if (ExecutionStatus.SU.equals(machineInstance.getStatus()) && machineInstance.getException() != null) {
+                machineInstance.setException(null);
+            }
+
             machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));
             machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
             int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType),
