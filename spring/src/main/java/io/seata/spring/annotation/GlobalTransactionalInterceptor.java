@@ -77,8 +77,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
-        final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
-        final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
+        final GlobalTransactional globalTransactionalAnnotation =
+            getAnnotation(method, targetClass, GlobalTransactional.class);
+        final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
         if (!disable && globalTransactionalAnnotation != null) {
             return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
         } else if (!disable && globalLockAnnotation != null) {
@@ -164,9 +165,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private <T extends Annotation> T getAnnotation(Method method, Class<T> clazz) {
-        return method == null ? null : method.getAnnotation(clazz);
+    private <T extends Annotation> T getAnnotation(Method method, Class<?> clazz, Class<T> clz) {
+        return method == null ? clazz == null ? null : clazz.getAnnotation(clz) : method.getAnnotation(clz);
     }
+
 
     private String formatMethod(Method method) {
         StringBuilder sb = new StringBuilder(method.getName()).append("(");
