@@ -35,7 +35,6 @@ import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
