@@ -68,7 +68,7 @@ public class SQLVisitorFactoryTest {
         //test for mysql select transform selectForUpdate
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL, true);
-        Assertions.assertEquals(recognizer.getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
 
         //test for mysql select for update
         sql = "select * from t for update";
@@ -98,7 +98,7 @@ public class SQLVisitorFactoryTest {
         //test for oracle select for update
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE, true);
-        Assertions.assertEquals(recognizer.getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleSelectForUpdateRecognizer.class.getName());
 
         //test for oracle select for update
         sql = "select * from t for update";
