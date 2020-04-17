@@ -15,15 +15,15 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
 
 /**
  * The type Execute template.
@@ -66,7 +66,7 @@ public class ExecuteTemplate {
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
+    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
@@ -76,33 +76,38 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-        if (sqlRecognizer == null) {
+        if (sqlRecognizers == null) {
             boolean isSelectTransformForUpdate = (RootContext.requireGlobalLock() && CLIENT_RM_GLOBAL_LOCK_SELECT_FOR_UPDATE_ENABLE)
                 || (RootContext.inGlobalTransaction() && CLIENT_RM_GLOBAL_TRANSACTION_SELECT_FOR_UPDATE_ENABLE);
-            sqlRecognizer = SQLVisitorFactory.get(
-                statementProxy.getTargetSQL(),
-                statementProxy.getConnectionProxy().getDbType(), isSelectTransformForUpdate);
+            sqlRecognizers = SQLVisitorFactory.get(
+                    statementProxy.getTargetSQL(),
+                    statementProxy.getConnectionProxy().getDbType(), isSelectTransformForUpdate);
         }
         Executor<T> executor;
-        if (sqlRecognizer == null) {
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
-            switch (sqlRecognizer.getSQLType()) {
-                case INSERT:
-                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case UPDATE:
-                    executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case DELETE:
-                    executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                default:
-                    executor = new PlainExecutor<>(statementProxy, statementCallback);
-                    break;
+            if (sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                switch (sqlRecognizer.getSQLType()) {
+                    case INSERT:
+                        executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case UPDATE:
+                        executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case DELETE:
+                        executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case SELECT_FOR_UPDATE:
+                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    default:
+                        executor = new PlainExecutor<>(statementProxy, statementCallback);
+                        break;
+                }
+            } else {
+                executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
             }
         }
         T rs;

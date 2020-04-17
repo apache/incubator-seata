@@ -15,16 +15,18 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DruidSQLRecognizerFactoryImpl
@@ -33,30 +35,43 @@ import io.seata.sqlparser.SQLRecognizerFactory;
  * @author ggndnn
  */
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
+
     @Override
-    public SQLRecognizer create(String sql, String dbType) {
+    public List<SQLRecognizer> create(String sql, String dbType) {
         return this.create(sql, dbType, false);
     }
 
     @Override
-    public SQLRecognizer create(String sql, String dbType, boolean isSelectTransformForUpdate) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if (asts == null || asts.size() != 1) {
+    public List<SQLRecognizer> create(String sql, String dbType, boolean isSelectTransformForUpdate) {
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType, isSelectTransformForUpdate);
+        if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
-        SQLRecognizer recognizer = null;
-        SQLStatement ast = asts.get(0);
-        SQLOperateRecognizerHolder recognizerHolder =
-            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-        if (ast instanceof SQLInsertStatement) {
-            recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-        } else if (ast instanceof SQLUpdateStatement) {
-            recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-        } else if (ast instanceof SQLDeleteStatement) {
-            recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-        } else if (ast instanceof SQLSelectStatement) {
-            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast, isSelectTransformForUpdate);
+        if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
+                || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
+            throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
         }
-        return recognizer;
+        List<SQLRecognizer> recognizers = null;
+        SQLRecognizer recognizer = null;
+        for (SQLStatement ast : asts) {
+            SQLOperateRecognizerHolder recognizerHolder =
+                    SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
+            if (ast instanceof SQLInsertStatement) {
+                recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
+            } else if (ast instanceof SQLUpdateStatement) {
+                recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
+            } else if (ast instanceof SQLDeleteStatement) {
+                recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
+            } else if (ast instanceof SQLSelectStatement) {
+                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+            }
+            if (recognizer != null) {
+                if (recognizers == null) {
+                    recognizers = new ArrayList<>();
+                }
+                recognizers.add(recognizer);
+            }
+        }
+        return recognizers;
     }
 }

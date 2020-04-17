@@ -13,15 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
-
-import java.util.List;
+package io.seata.sqlparser.struct;
 
 /**
- * @author ggndnn
+ * @author jsbxyyx
  */
-public interface SQLRecognizerFactory {
-    List<SQLRecognizer> create(String sql, String dbType);
+public class SqlDefaultExpr {
 
-    List<SQLRecognizer> create(String sql, String dbType, boolean isSelectTransformForUpdate);
+    private static SqlDefaultExpr instance = new SqlDefaultExpr();
+
+    /**
+     * Get SqlDefaultExpr.
+     *
+     * @return the SqlDefaultExpr
+     */
+    public static SqlDefaultExpr get() {
+        return instance;
+    }
+
+    private SqlDefaultExpr() {
+    }
+
+    @Override
+    public String toString() {
+        return "DEFAULT";
+    }
+
 }
