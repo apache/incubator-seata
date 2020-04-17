@@ -17,9 +17,12 @@ package io.seata.rm.datasource.sql.druid.postgresql;
 
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -41,14 +44,14 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     @Test
     public void testFalseGetSqlType() {
         String sql = "select * from t where id = ?";
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE);
-        Assertions.assertNull(recognizer);
+        List<SQLRecognizer> recognizers = SQLVisitorFactory.get(sql, DB_TYPE);
+        Assertions.assertNull(recognizers);
     }
 
     @Test
     public void testTrueGetSqlType() {
         String sql = "select * from t where id = ?";
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, true);
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE, true).get(0);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
     }
 
