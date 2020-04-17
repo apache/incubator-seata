@@ -427,6 +427,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         globalTransactionDO.setTransactionServiceGroup(
             rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
+        globalTransactionDO.setDecisionMaker(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_DECISION_MAKER));
         globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalTransactionDO;

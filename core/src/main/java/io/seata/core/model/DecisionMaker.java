@@ -15,39 +15,32 @@
  */
 package io.seata.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.seata.common.util.StringUtils;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-
+/**
+ * The enum decision maker
+ * @author zjinlei
+ */
 public enum DecisionMaker {
-    TC(0),
-    TM(1);
 
-    private int code;
+    /**
+     * The TC
+     */
+    TC,
+    /**
+     * The TM
+     */
+    TM;
 
-    DecisionMaker(int code) {
-        this.code = code;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    private static final Map<Integer, DecisionMaker> MAP = new HashMap<>(values().length);
-
-    static {
-        for (DecisionMaker decisionMaker : values()) {
-            MAP.put(decisionMaker.getCode(), decisionMaker);
+    public static DecisionMaker get(String name) {
+        if (StringUtils.isNullOrEmpty(name)) {
+            return null;
         }
-    }
-
-    public static DecisionMaker get(int code) {
-        DecisionMaker status = MAP.get(code);
-        if (null == status) {
-            throw new ShouldNeverHappenException("Unknown DecisionMaker[" + code + "]");
+        for (DecisionMaker decisionMaker : DecisionMaker.values()) {
+            if (decisionMaker.name().equals(name)) {
+                return decisionMaker;
+            }
         }
-
-        return status;
+        throw new IllegalArgumentException("Unknown DecisionMaker[" + name + "]");
     }
 }

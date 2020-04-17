@@ -468,7 +468,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
-        return createGlobalSession(applicationId, txServiceGroup, txName, timeout, null);
+        return createGlobalSession(applicationId, txServiceGroup, txName, timeout, DecisionMaker.TM);
     }
 
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
@@ -513,22 +513,22 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
         if (null != byApplicationIdBytes) {
-            byteBuffer.putShort((short) byApplicationIdBytes.length);
+            byteBuffer.putShort((short)byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (null != byServiceGroupBytes) {
-            byteBuffer.putShort((short) byServiceGroupBytes.length);
+            byteBuffer.putShort((short)byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (null != byTxNameBytes) {
-            byteBuffer.putShort((short) byTxNameBytes.length);
+            byteBuffer.putShort((short)byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (xidBytes != null) {
             byteBuffer.putInt(xidBytes.length);
@@ -544,7 +544,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
 
         byteBuffer.putLong(beginTime);
-        byteBuffer.put((byte) status.getCode());
+        byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);

@@ -48,7 +48,7 @@ public class DefaultTransactionManager implements TransactionManager {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
-        return this.begin(applicationId, transactionServiceGroup, name, timeout, null);
+        return this.begin(applicationId, transactionServiceGroup, name, timeout, DecisionMaker.TM);
     }
 
     @Override

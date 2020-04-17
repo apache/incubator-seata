@@ -15,12 +15,12 @@
  */
 package io.seata.server.storage.db.store;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -31,6 +31,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -151,7 +152,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     /**
      * Read session global session.
      *
-     * @param xid the xid
+     * @param xid                the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
@@ -246,6 +247,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
+        session.setDecisionMaker(StringUtils.isNullOrEmpty(globalTransactionDO.getDecisionMaker()) ? null : DecisionMaker.get(globalTransactionDO.getDecisionMaker()));
         return session;
     }
 
@@ -268,7 +270,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             throw new IllegalArgumentException(
                 "the parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
         }
-        GlobalSession globalSession = (GlobalSession)session;
+        GlobalSession globalSession = (GlobalSession) session;
 
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(globalSession.getXid());
@@ -280,6 +282,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         globalTransactionDO.setTransactionName(globalSession.getTransactionName());
         globalTransactionDO.setTransactionServiceGroup(globalSession.getTransactionServiceGroup());
         globalTransactionDO.setApplicationData(globalSession.getApplicationData());
+        globalTransactionDO.setDecisionMaker(globalSession.getDecisionMaker() == null ? null : globalSession.getDecisionMaker().name());
         return globalTransactionDO;
     }
 
@@ -288,7 +291,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             throw new IllegalArgumentException(
                 "the parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
         }
-        BranchSession branchSession = (BranchSession)session;
+        BranchSession branchSession = (BranchSession) session;
 
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
         branchTransactionDO.setXid(branchSession.getXid());

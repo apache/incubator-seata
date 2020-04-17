@@ -35,26 +35,32 @@ public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest)t;
+        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest) t;
         int timeout = globalBeginRequest.getTimeout();
         String transactionName = globalBeginRequest.getTransactionName();
         DecisionMaker decisionMaker = globalBeginRequest.getDecisionMaker();
         out.writeInt(timeout);
         if (transactionName != null) {
             byte[] bs = transactionName.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
-        out.writeByte(decisionMaker.getCode());
+        if (decisionMaker == null) {
+            out.writeShort((short) 0);
+        } else {
+            byte[] bs = decisionMaker.name().getBytes(UTF8);
+            out.writeShort((short) bs.length);
+            out.writeBytes(bs);
+        }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest)t;
+        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest) t;
 
         globalBeginRequest.setTimeout(in.getInt());
         short len = in.getShort();
@@ -63,7 +69,12 @@ public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec
             in.get(bs);
             globalBeginRequest.setTransactionName(new String(bs, UTF8));
         }
-        globalBeginRequest.setDecisionMaker(DecisionMaker.get(in.get()));
+        short decisionMakerLen = in.getShort();
+        if (decisionMakerLen > 0) {
+            byte[] bs = new byte[decisionMakerLen];
+            in.get(bs);
+            globalBeginRequest.setDecisionMaker(DecisionMaker.get(new String(bs, UTF8)));
+        }
     }
 
 }
