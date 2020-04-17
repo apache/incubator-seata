@@ -138,11 +138,12 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             try {
                 Resource[] resources = ResourceUtil.getResources(this.resources);
                 stateMachineRepository.registryByResources(resources, defaultTenantId);
-                this.resources = null;
             } catch (IOException e) {
                 LOGGER.error("Load State Language Resources failed.", e);
             }
         }
+        // clear resources
+        this.resources = null;
 
         if (stateLogRepository == null) {
             StateLogRepositoryImpl stateLogRepositoryImpl = new StateLogRepositoryImpl();
