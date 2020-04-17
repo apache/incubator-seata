@@ -73,7 +73,7 @@ public class ApplicationKeeper {
             LOGGER.info("Application is keep running ... ");
             STOP.await();
         } catch (InterruptedException e) {
-            LOGGER.error("ApplicationKeeper Interrupted ", e);
+            LOGGER.error("interrupted error ", e);
         } finally {
             LOCK.unlock();
         }
