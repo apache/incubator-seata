@@ -15,7 +15,15 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.exception.NotSupportYetException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -33,15 +41,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -193,21 +192,12 @@ public class InsertExecutorTest {
     }
 
     @Test
-    public void testGetPkValuesByAuto_NotSupportYetException() {
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-            columnMetaMap.put(ID_COLUMN, new ColumnMeta());
-            columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
-            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            insertExecutor.getPkValuesByAuto();
-        });
-    }
-
-    @Test
     public void testGetPkValuesByAuto_ShouldNeverHappenException() {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            PreparedStatement preparedStatement = mock(PreparedStatement.class);
+            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
+            when(preparedStatement.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
             Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
             ColumnMeta columnMeta = mock(ColumnMeta.class);
             columnMetaMap.put(ID_COLUMN, columnMeta);
