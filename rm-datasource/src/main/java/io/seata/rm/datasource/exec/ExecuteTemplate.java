@@ -16,6 +16,8 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
@@ -59,7 +61,7 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizers     the sql recognizer
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
