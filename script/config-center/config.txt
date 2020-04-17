@@ -24,6 +24,7 @@ client.rm.reportRetryCount=5
 client.rm.tableMetaCheckEnable=false
 client.rm.sqlParserType=druid
 client.rm.reportSuccessEnable=false
+client.rm.sagaBranchRegisterEnable=false
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
 client.tm.degradeCheck=false
