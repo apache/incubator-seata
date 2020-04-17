@@ -20,6 +20,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -90,6 +91,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
+        begin(timeout, name, null);
+    }
+
+    @Override
+    public void begin(int timeout, String name, DecisionMaker decisionMaker) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -101,13 +107,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (RootContext.getXID() != null) {
             throw new IllegalStateException();
         }
-        xid = transactionManager.begin(null, null, name, timeout);
+        xid = transactionManager.begin(null, null, name, timeout, decisionMaker);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
-
     }
 
     @Override

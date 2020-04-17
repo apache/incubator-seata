@@ -40,6 +40,9 @@ public interface TransactionManager {
     String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException;
 
+    String begin(String applicationId, String transactionServiceGroup, String name, int timeout, DecisionMaker decisionMaker)
+        throws TransactionException;
+
     /**
      * Global commit.
      *

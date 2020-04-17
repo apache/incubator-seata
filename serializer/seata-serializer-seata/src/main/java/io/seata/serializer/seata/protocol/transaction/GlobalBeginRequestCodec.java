@@ -18,6 +18,7 @@ package io.seata.serializer.seata.protocol.transaction;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 
 /**
@@ -37,7 +38,7 @@ public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec
         GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest)t;
         int timeout = globalBeginRequest.getTimeout();
         String transactionName = globalBeginRequest.getTransactionName();
-
+        DecisionMaker decisionMaker = globalBeginRequest.getDecisionMaker();
         out.writeInt(timeout);
         if (transactionName != null) {
             byte[] bs = transactionName.getBytes(UTF8);
@@ -48,6 +49,7 @@ public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec
         } else {
             out.writeShort((short)0);
         }
+        out.writeByte(decisionMaker.getCode());
     }
 
     @Override
@@ -61,6 +63,7 @@ public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec
             in.get(bs);
             globalBeginRequest.setTransactionName(new String(bs, UTF8));
         }
+        globalBeginRequest.setDecisionMaker(DecisionMaker.get(in.get()));
     }
 
 }

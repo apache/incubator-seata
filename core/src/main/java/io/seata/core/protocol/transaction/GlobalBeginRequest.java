@@ -15,6 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
@@ -28,6 +29,8 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
     private int timeout = 60000;
 
     private String transactionName;
+
+    private DecisionMaker decisionMaker;
 
     /**
      * Gets timeout.
@@ -63,6 +66,14 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
      */
     public void setTransactionName(String transactionName) {
         this.transactionName = transactionName;
+    }
+
+    public DecisionMaker getDecisionMaker() {
+        return decisionMaker;
+    }
+
+    public void setDecisionMaker(DecisionMaker decisionMaker) {
+        this.decisionMaker = decisionMaker;
     }
 
     @Override

@@ -44,6 +44,8 @@ public class GlobalTransactionDO {
 
     private String applicationData;
 
+    private String decisionMaker;
+
     private Date gmtCreate;
 
     private Date gmtModified;
@@ -208,6 +210,14 @@ public class GlobalTransactionDO {
      */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
+    }
+
+    public String getDecisionMaker() {
+        return decisionMaker;
+    }
+
+    public void setDecisionMaker(String decisionMaker) {
+        this.decisionMaker = decisionMaker;
     }
 
     /**

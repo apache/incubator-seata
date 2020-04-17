@@ -20,6 +20,7 @@ import java.util.concurrent.TimeoutException;
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.core.protocol.ResultCode;
@@ -47,9 +48,15 @@ public class DefaultTransactionManager implements TransactionManager {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
+        return this.begin(applicationId, transactionServiceGroup, name, timeout, null);
+    }
+
+    @Override
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, DecisionMaker decisionMaker) throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
+        request.setDecisionMaker(decisionMaker);
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());

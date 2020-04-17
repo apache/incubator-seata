@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
@@ -31,6 +28,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.event.EventBusManager;
@@ -38,6 +36,8 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Default core.
@@ -59,7 +59,7 @@ public class DefaultCore implements Core {
      */
     public DefaultCore(ServerMessageSender messageSender) {
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
-                new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
+            new Class[]{ServerMessageSender.class}, new Object[]{messageSender});
         if (CollectionUtils.isNotEmpty(allCore)) {
             for (AbstractCore core : allCore) {
                 coreMap.put(core.getHandleBranchType(), core);
@@ -85,7 +85,7 @@ public class DefaultCore implements Core {
      * only for mock
      *
      * @param branchType the branchType
-     * @param core the core
+     * @param core       the core
      */
     public void mockCore(BranchType branchType, AbstractCore core) {
         coreMap.put(branchType, core);
@@ -95,7 +95,7 @@ public class DefaultCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         return getCore(branchType).branchRegister(branchType, resourceId, clientId, xid,
-                applicationData, lockKeys);
+            applicationData, lockKeys);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class DefaultCore implements Core {
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-            throws TransactionException {
+        throws TransactionException {
         return getCore(branchType).lockQuery(branchType, resourceId, xid, lockKeys);
     }
 
@@ -121,17 +121,21 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-            throws TransactionException {
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+        return begin(applicationId, transactionServiceGroup, name, timeout, null);
+    }
+
+    @Override
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, DecisionMaker decisionMaker) throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name,
-                timeout);
+            timeout, decisionMaker);
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
 
         // transaction start event
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
+            session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 
         return session.getXid();
     }
@@ -141,6 +145,11 @@ public class DefaultCore implements Core {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         if (globalSession == null) {
             return GlobalStatus.Finished;
+        }
+        if (globalSession.getDecisionMaker() == DecisionMaker.TC) {
+            if (globalSession.getBranchSessions().stream().anyMatch(branchSession -> branchSession.getStatus() == BranchStatus.PhaseOne_Failed)) {
+                return rollback(xid);
+            }
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
@@ -172,7 +181,7 @@ public class DefaultCore implements Core {
         boolean success = true;
         // start committing event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
@@ -217,7 +226,7 @@ public class DefaultCore implements Core {
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {}",
-                        new String[] {branchSession.toString()});
+                        new String[]{branchSession.toString()});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
@@ -234,8 +243,8 @@ public class DefaultCore implements Core {
 
             // committed event
             eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                    globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                    globalSession.getStatus()));
+                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                globalSession.getStatus()));
 
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
@@ -271,7 +280,7 @@ public class DefaultCore implements Core {
         boolean success = true;
         // start rollback event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
@@ -303,7 +312,7 @@ public class DefaultCore implements Core {
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
                         "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                        new String[]{globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }
@@ -328,8 +337,8 @@ public class DefaultCore implements Core {
 
             // rollbacked event
             eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                    globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                    globalSession.getStatus()));
+                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                globalSession.getStatus()));
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
         }

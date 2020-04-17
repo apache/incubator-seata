@@ -32,6 +32,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
@@ -78,6 +79,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
+    private DecisionMaker decisionMaker;
 
     /**
      * Add boolean.
@@ -123,9 +125,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public boolean isSaga() {
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
-        }
-        else if (StringUtils.isNotBlank(transactionName)
-                && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX)) {
+        } else if (StringUtils.isNotBlank(transactionName)
+            && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX)) {
             return true;
         }
         return false;
@@ -142,6 +143,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     /**
      * prevent could not handle rollbacking transaction
+     *
      * @return if true force roll back
      */
     public boolean isRollbackingDead() {
@@ -295,7 +297,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     /**
      * Instantiates a new Global session.
      */
-    public GlobalSession() {}
+    public GlobalSession() {
+    }
 
     /**
      * Instantiates a new Global session.
@@ -316,6 +319,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.xid = XID.generateXID(transactionId);
     }
 
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout, DecisionMaker decisionMaker) {
+        this(applicationId, transactionServiceGroup, transactionName, timeout);
+        this.decisionMaker = decisionMaker;
+    }
     /**
      * Gets transaction id.
      *
@@ -442,6 +449,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.applicationData = applicationData;
     }
 
+    public DecisionMaker getDecisionMaker() {
+        return decisionMaker;
+    }
+
+    public void setDecisionMaker(DecisionMaker decisionMaker) {
+        this.decisionMaker = decisionMaker;
+    }
+
     /**
      * Create global session global session.
      *
@@ -453,7 +468,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
-        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
+        return createGlobalSession(applicationId, txServiceGroup, txName, timeout, null);
+    }
+
+    public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
+                                                    int timeout, DecisionMaker decisionMaker) {
+        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout, decisionMaker);
         return session;
     }
 
@@ -493,22 +513,22 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
         if (null != byApplicationIdBytes) {
-            byteBuffer.putShort((short)byApplicationIdBytes.length);
+            byteBuffer.putShort((short) byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
         if (null != byServiceGroupBytes) {
-            byteBuffer.putShort((short)byServiceGroupBytes.length);
+            byteBuffer.putShort((short) byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
         if (null != byTxNameBytes) {
-            byteBuffer.putShort((short)byTxNameBytes.length);
+            byteBuffer.putShort((short) byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
         if (xidBytes != null) {
             byteBuffer.putInt(xidBytes.length);
@@ -524,7 +544,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
 
         byteBuffer.putLong(beginTime);
-        byteBuffer.put((byte)status.getCode());
+        byteBuffer.put((byte) status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);

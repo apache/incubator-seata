@@ -17,6 +17,7 @@ package io.seata.tm.api;
 
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -37,6 +38,11 @@ class GlobalTransactionContextTest {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
                     throws TransactionException {
+                return DEFAULT_XID;
+            }
+
+            @Override
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, DecisionMaker decisionMaker) throws TransactionException {
                 return DEFAULT_XID;
             }
 

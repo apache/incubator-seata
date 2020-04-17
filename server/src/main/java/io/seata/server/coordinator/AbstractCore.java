@@ -24,6 +24,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -200,6 +201,11 @@ public abstract class AbstractCore implements Core {
         return null;
     }
 
+    @Override
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout, DecisionMaker decisionMaker) throws TransactionException {
+        return null;
+    }
+    
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
         return null;

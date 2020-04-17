@@ -172,7 +172,7 @@ public class TransactionalTemplate {
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName());
+            tx.begin(txInfo.getTimeOut(), txInfo.getName(), txInfo.getDecisionMaker());
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,

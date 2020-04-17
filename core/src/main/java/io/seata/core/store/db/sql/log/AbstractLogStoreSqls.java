@@ -48,8 +48,8 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.GLOBAL_TABLE_STATUS + ", " + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID + ", "
             + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP + ", " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME + ", "
             + ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT + ", " + ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME + ", "
-            + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", "
-            + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
+            + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", " + ServerTableColumnsName.GLOBAL_TABLE_DECISION_MAKER + ", "
+            + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
 
     /**
      * The constant ALL_BRANCH_COLUMNS.

@@ -16,6 +16,7 @@
 package io.seata.saga.engine.mock;
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
 import io.seata.tm.api.GlobalTransaction;
@@ -56,6 +57,11 @@ public class MockGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
+
+    }
+
+    @Override
+    public void begin(int timeout, String name, DecisionMaker decisionMaker) throws TransactionException {
 
     }
 

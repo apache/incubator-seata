@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.DecisionMaker;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 
@@ -52,6 +53,8 @@ public interface GlobalTransaction {
      * out.
      */
     void begin(int timeout, String name) throws TransactionException;
+
+    void begin(int timeout, String name, DecisionMaker decisionMaker) throws TransactionException;
 
     /**
      * Commit the global transaction.

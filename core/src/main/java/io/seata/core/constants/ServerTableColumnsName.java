@@ -67,6 +67,8 @@ public class ServerTableColumnsName {
      */
     public static final String GLOBAL_TABLE_APPLICATION_DATA = "application_data";
 
+    public static final String GLOBAL_TABLE_DECISION_MAKER = "decision_maker";
+
     /**
      * The constant global_table column name gmt_create
      */

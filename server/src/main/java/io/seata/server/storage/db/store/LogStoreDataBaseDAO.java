@@ -213,6 +213,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
             ps.setString(9, globalTransactionDO.getApplicationData());
+            ps.setString(10, globalTransactionDO.getDecisionMaker());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);

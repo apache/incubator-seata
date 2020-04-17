@@ -30,7 +30,7 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_GLOBAL_TRANSACTION_MYSQL = "insert into " + GLOBAL_TABLE_PLACEHOLD + "("
             + ALL_GLOBAL_COLUMNS + ")" +
-            "values(?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now()) ";
+            "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now()) ";
 
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_MYSQL.

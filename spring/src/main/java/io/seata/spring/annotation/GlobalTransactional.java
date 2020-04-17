@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.core.model.DecisionMaker;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionInfo;
 
@@ -75,4 +76,6 @@ public @interface GlobalTransactional {
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;
+
+    DecisionMaker decisionMaker() default DecisionMaker.TM;
 }
