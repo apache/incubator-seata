@@ -13,27 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.spring.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.GlobalLockTemplate;
+import io.seata.spring.annotation.GlobalLock;
+import io.seata.spring.annotation.GlobalTransactional;
+import io.seata.spring.annotation.HandleGlobalTransaction;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
-import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
-import io.seata.tm.api.transaction.NoRollbackRule;
-import io.seata.tm.api.transaction.RollbackRule;
-import io.seata.tm.api.transaction.TransactionInfo;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -41,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
+
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
@@ -53,7 +48,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
-
+    private final HandleGlobalTransaction handleGlobalTransaction = new HandleGlobalTransaction();
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
@@ -72,15 +67,16 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis())
-            : null;
+        Class<?> targetClass =
+            methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
         final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
         if (!disable && globalTransactionalAnnotation != null) {
-            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+            return handleGlobalTransaction.runTransaction(methodInvocation, globalTransactionalAnnotation,
+                failureHandler, transactionalTemplate);
         } else if (!disable && globalLockAnnotation != null) {
             return handleGlobalLock(methodInvocation);
         } else {
@@ -100,86 +96,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         });
     }
 
-    private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-                                           final GlobalTransactional globalTrxAnno) throws Throwable {
-        try {
-            return transactionalTemplate.execute(new TransactionalExecutor() {
-                @Override
-                public Object execute() throws Throwable {
-                    return methodInvocation.proceed();
-                }
-
-                public String name() {
-                    String name = globalTrxAnno.name();
-                    if (!StringUtils.isNullOrEmpty(name)) {
-                        return name;
-                    }
-                    return formatMethod(methodInvocation.getMethod());
-                }
-
-                @Override
-                public TransactionInfo getTransactionInfo() {
-                    TransactionInfo transactionInfo = new TransactionInfo();
-                    transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
-                    transactionInfo.setName(name());
-                    transactionInfo.setPropagation(globalTrxAnno.propagation());
-                    Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
-                    for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
-                        rollbackRules.add(new RollbackRule(rbRule));
-                    }
-                    for (String rbRule : globalTrxAnno.rollbackForClassName()) {
-                        rollbackRules.add(new RollbackRule(rbRule));
-                    }
-                    for (Class<?> rbRule : globalTrxAnno.noRollbackFor()) {
-                        rollbackRules.add(new NoRollbackRule(rbRule));
-                    }
-                    for (String rbRule : globalTrxAnno.noRollbackForClassName()) {
-                        rollbackRules.add(new NoRollbackRule(rbRule));
-                    }
-                    transactionInfo.setRollbackRules(rollbackRules);
-                    return transactionInfo;
-                }
-            });
-        } catch (TransactionalExecutor.ExecutionException e) {
-            TransactionalExecutor.Code code = e.getCode();
-            switch (code) {
-                case RollbackDone:
-                    throw e.getOriginalException();
-                case BeginFailure:
-                    failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
-                case CommitFailure:
-                    failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
-                case RollbackFailure:
-                    failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
-                case RollbackRetrying:
-                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
-                    throw e.getCause();
-                default:
-                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
-
-            }
-        }
-    }
 
     private <T extends Annotation> T getAnnotation(Method method, Class<T> clazz) {
         return method == null ? null : method.getAnnotation(clazz);
-    }
-
-    private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder(method.getName()).append("(");
-
-        Class<?>[] params = method.getParameterTypes();
-        int in = 0;
-        for (Class<?> clazz : params) {
-            sb.append(clazz.getName());
-            if (++in < params.length) {
-                sb.append(", ");
-            }
-        }
-        return sb.append(")").toString();
     }
 
     @Override
