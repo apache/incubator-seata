@@ -15,6 +15,7 @@
  */
 package io.seata.config.zk;
 
+import java.lang.reflect.Constructor;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -256,8 +257,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         String serializer = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERIALIZER_KEY);
         if (StringUtils.isNotBlank(serializer)) {
             try {
-                Class<?> aClass = Class.forName(serializer);
-                zkSerializer = (ZkSerializer) aClass.newInstance();
+                Class<?> clazz = Class.forName(serializer);
+                Constructor<?> constructor = clazz.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                zkSerializer = (ZkSerializer) constructor.newInstance();
             } catch (ClassNotFoundException cfe) {
                 LOGGER.warn("No zk serializer class found, serializer:{}", serializer, cfe);
             } catch (Throwable cause) {
