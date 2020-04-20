@@ -222,7 +222,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void clearBatch() throws SQLException {
         targetStatement.clearBatch();
-
+        targetSQL = null;
     }
 
     @Override
