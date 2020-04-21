@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,11 +62,13 @@ public final class ConfigurationFactory {
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("load extConfiguration:{}",
-                    extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+                LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
+                    : extConfiguration.getClass().getSimpleName());
             }
+        } catch (EnhancedServiceNotFoundException ignore) {
+
         } catch (Exception e) {
-            LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
+            LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
@@ -110,13 +113,15 @@ public final class ConfigurationFactory {
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load extConfiguration:{}",
-                        extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+                    LOGGER.info("load Configuration:{}",
+                        extConfiguration == null ? configuration.getClass().getSimpleName()
+                            : extConfiguration.getClass().getSimpleName());
                 }
-            } catch (Exception e) {
-                LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
-            }
+            } catch (EnhancedServiceNotFoundException ignore) {
 
+            } catch (Exception e) {
+                LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
+            }
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())

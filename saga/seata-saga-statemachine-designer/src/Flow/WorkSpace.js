@@ -38,12 +38,24 @@ class WorkSpaceBase extends React.Component {
     const { executeCommand, update } = propsAPI;
 
     if (param.action == 'add' && param.item.type == 'edge') {
+      // Default polyline-round type
+      if (param.item.target
+        && param.item.target.model
+        && param.item.source
+        && param.item.source.model) {
+        executeCommand(() => {
+          update(param.item, {
+            shape: 'flow-polyline-round',
+          });
+        });
+      }
       if (param.item.target && param.item.target.model && param.item.target.model.stateType == 'Compensation') {
         executeCommand(() => {
           update(param.item, {
             style: {
               lineDash: "4",
-            }
+            },
+            type: 'Compensation',
           });
         });
       }
@@ -78,6 +90,15 @@ class WorkSpaceBase extends React.Component {
         || param.item.model.stateType == 'Compensation'
         || param.item.model.stateType == 'SubStateMachine') {
         param.item.model.label = param.item.model.stateId;
+      }
+      if (param.item.model.stateType == 'SubStateMachine') {
+        executeCommand(() => {
+          update(param.item, {
+            style: {
+              lineWidth: 2,
+            },
+          });
+        });
       }
     }
 

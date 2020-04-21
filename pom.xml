@@ -55,9 +55,6 @@
     <name>Seata Parent POM ${project.version}</name>
     <url>http://seata.io</url>
     <description>top seata project pom.xml file</description>
-    <prerequisites>
-        <maven>3.6.0</maven>
-    </prerequisites>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -91,7 +88,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.1.0</revision>
+        <revision>1.2.0</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -121,6 +118,9 @@
         <!-- for docker image-->
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
+
+        <checkstyle.skip>true</checkstyle.skip>
+        <license.skip>true</license.skip>
     </properties>
 
     <!--test-->
@@ -287,6 +287,68 @@
                 <image.tags>latest</image.tags>
             </properties>
         </profile>
+        <profile>
+            <id>checkstyle</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.mycila</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>${license-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>remove</goal>
+                                    <goal>format</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <quiet>true</quiet>
+                            <header>${user.dir}/style/copyright</header>
+                            <includes>
+                                <include>**/src/main/java/**</include>
+                                <include>**/src/test/java/**</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/generated/**</exclude>
+                            </excludes>
+                            <strictCheck>true</strictCheck>
+                            <mapping>
+                                <java>SLASHSTAR_STYLE</java>
+                            </mapping>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>${maven-checkstyle-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>validate</id>
+                                <phase>validate</phase>
+                                <configuration>
+                                    <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
+                                    <encoding>UTF-8</encoding>
+                                    <consoleOutput>true</consoleOutput>
+                                    <failsOnError>true</failsOnError>
+                                    <failOnViolation>false</failOnViolation>
+                                    <excludes>**/generated/**/*</excludes>
+                                    <excludes>io/seata/integration/grpc/interceptor/</excludes>
+                                </configuration>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -429,54 +491,22 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>${license-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>remove</goal>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <quiet>true</quiet>
-                    <header>${user.dir}/style/copyright</header>
-                    <includes>
-                        <include>**/src/main/java/**</include>
-                        <include>**/src/test/java/**</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/generated/**</exclude>
-                    </excludes>
-                    <strictCheck>true</strictCheck>
-                    <mapping>
-                        <java>SLASHSTAR_STYLE</java>
-                    </mapping>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven-checkstyle-plugin.version}</version>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
                 <executions>
                     <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <failOnViolation>false</failOnViolation>
-                            <excludes>**/generated/**/*</excludes>
-                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
-                        </configuration>
+                        <id>enforce-maven</id>
                         <goals>
-                            <goal>check</goal>
+                            <goal>enforce</goal>
                         </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
