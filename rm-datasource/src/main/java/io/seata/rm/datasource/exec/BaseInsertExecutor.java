@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -34,6 +36,9 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Base InsertExecutor
@@ -69,10 +74,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return afterImage;
     }
 
-    /**
-     * judge sql has primary key column
-     * @return true: contains. ,false: not contains.
-     */
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
@@ -194,6 +195,101 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValues;
+    }
+
+    /**
+     * get primary key values by default
+     * @return
+     * @throws SQLException
+     */
+    private List<Object> getPkValuesByDefault() throws SQLException {
+        // current version 1.2 only support postgresql.
+        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
+        String columnDef = pkMeta.getColumnDef();
+        // sample: nextval('test_id_seq'::regclass)
+        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
+        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
+        if (StringUtils.isBlank(seq)) {
+            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
+        }
+        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
+    }
+
+    /**
+     * get primary key values by sequence.
+     * @param expr
+     * @return
+     * @throws SQLException
+     */
+    protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
+        // priority use defaultGeneratedKeys
+        List<Object> pkValues = null;
+        try {
+            pkValues = defaultGeneratedKeys();
+        } catch (NotSupportYetException | SQLException ignore) {
+        }
+
+        if (!CollectionUtils.isEmpty(pkValues)) {
+            return pkValues;
+        }
+
+        ResultSet genKeys;
+        if (expr instanceof SqlSequenceExpr) {
+            SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
+            String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
+            if (StringUtils.equalsIgnoreCase(JdbcConstants.POSTGRESQL, getDbType())) {
+                sql = "SELECT currval(" + sequenceExpr.getSequence() + ")";
+            }
+            LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+            genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
+        } else {
+            throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
+        }
+        pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
+        }
+        return pkValues;
+    }
+
+    protected List<Object> getPkValuesByAuto() throws SQLException {
+        boolean mysql = StringUtils.equalsIgnoreCase(JdbcConstants.MYSQL, getDbType());
+        if (mysql) {
+            return mysqlGeneratedKeys();
+        }
+        return defaultGeneratedKeys();
+    }
+
+    /**
+     * get pk index
+     * @return -1 not found pk index
+     */
+    protected int getPkIndex() {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        List<String> insertColumns = recognizer.getInsertColumns();
+        if (CollectionUtils.isNotEmpty(insertColumns)) {
+            final int insertColumnsSize = insertColumns.size();
+            int pkIndex = -1;
+            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
+                if (equalsPK(insertColumns.get(paramIdx))) {
+                    pkIndex = paramIdx;
+                    break;
+                }
+            }
+            return pkIndex;
+        }
+        int pkIndex = -1;
+        Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
+        for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
+            pkIndex++;
+            if (equalsPK(entry.getValue().getColumnName())) {
+                break;
+            }
+        }
+        return pkIndex;
     }
 
     /**
