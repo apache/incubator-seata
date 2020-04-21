@@ -22,6 +22,7 @@ import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import java.util.Map;
 /**
  * @author jsbxyyx
  */
-public class MySQLInsertExecutor extends BaseInsertExecutor {
+public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLInsertExecutor.class);
 
@@ -52,7 +53,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor {
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public MySQLInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public MySQLInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+                               SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -68,9 +70,6 @@ public class MySQLInsertExecutor extends BaseInsertExecutor {
     public List<Object> getPkValuesByAuto() throws SQLException {
         // PK is just auto generated
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        if (pkMetaMap.size() != 1) {
-            throw new NotSupportYetException();
-        }
         ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         if (!pkMeta.isAutoincrement()) {
             throw new ShouldNeverHappenException();

@@ -24,6 +24,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.Statement;
+import java.util.List;
 
 /**
  * @author jsbxyyx

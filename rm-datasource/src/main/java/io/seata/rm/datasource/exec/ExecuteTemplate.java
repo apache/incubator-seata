@@ -54,7 +54,7 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizers    the sql recognizer list
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
@@ -71,11 +71,9 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-        if (sqlRecognizers == null) {
-            sqlRecognizers = SQLVisitorFactory.get(
         String dbType = statementProxy.getConnectionProxy().getDbType();
-        if (sqlRecognizer == null) {
-            sqlRecognizer = SQLVisitorFactory.get(
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
+            sqlRecognizers = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
                     dbType);
         }
@@ -87,7 +85,8 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = InsertExecutorFactory.createInsertExecutor(statementProxy, statementCallback,
+                                sqlRecognizer, dbType);
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);

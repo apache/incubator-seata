@@ -71,7 +71,7 @@ public class PostgresqlInsertExecutorTest {
     }
 
     @Test
-    public void testInsertDefault_ByAuto() throws Exception {
+    public void testInsertDefault_ByDefault() throws Exception {
         mockInsertColumns();
         mockInsertRows();
         mockParametersPkWithDefault();
@@ -80,10 +80,10 @@ public class PostgresqlInsertExecutorTest {
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
+        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        //pk value = DEFAULT so getPkValuesByAuto
-        verify(insertExecutor).getPkValuesByAuto();
+        //pk value = DEFAULT so getPkValuesByDefault
+        verify(insertExecutor).getPkValuesByDefault();
         Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
     }
 

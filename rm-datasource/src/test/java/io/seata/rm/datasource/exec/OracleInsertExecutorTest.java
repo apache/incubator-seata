@@ -108,10 +108,10 @@ public class OracleInsertExecutorTest {
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
 
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
+        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
+        List pkValuesByAuto = insertExecutor.getGeneratedKeys();
 
-        verify(insertExecutor).getPkValuesByAuto();
+        verify(insertExecutor).getGeneratedKeys();
         Assertions.assertEquals(pkValuesByAuto, pkValuesAuto);
     }
 
@@ -139,7 +139,7 @@ public class OracleInsertExecutorTest {
         doReturn(false).when(rs).next();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
-            insertExecutor.getPkValuesByAuto();
+            insertExecutor.getGeneratedKeys();
         });
 
         int pkIndex = 0;
@@ -162,7 +162,7 @@ public class OracleInsertExecutorTest {
             columnMetaMap.put(ID_COLUMN, new ColumnMeta());
             columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
             when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            insertExecutor.getPkValuesByAuto();
+            insertExecutor.getGeneratedKeys();
         });
     }
 

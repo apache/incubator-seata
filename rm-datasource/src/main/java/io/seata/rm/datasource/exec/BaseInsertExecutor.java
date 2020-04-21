@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -34,9 +33,9 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +44,8 @@ import org.slf4j.LoggerFactory;
  * @author tt
  */
 public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseInsertExecutor.class);
 
     protected static final String PLACEHOLDER = "?";
 
@@ -55,7 +56,8 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public BaseInsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
+    public BaseInsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
+                              SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -198,36 +200,31 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     }
 
     /**
-     * get primary key values by default
+     * default get generated keys.
      * @return
      * @throws SQLException
      */
-    private List<Object> getPkValuesByDefault() throws SQLException {
-        // current version 1.2 only support postgresql.
-        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
-        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
-        String columnDef = pkMeta.getColumnDef();
-        // sample: nextval('test_id_seq'::regclass)
-        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
-        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
-        if (StringUtils.isBlank(seq)) {
-            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
+    public List<Object> getGeneratedKeys() throws SQLException {
+        // PK is just auto generated
+        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
         }
-        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
+        if (pkValues.isEmpty()) {
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
+        }
+        return pkValues;
     }
 
     /**
-     * get primary key values by sequence.
-     * @param expr
-     * @return
-     * @throws SQLException
+     * the modify for test
      */
-    protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
-        // priority use defaultGeneratedKeys
+    protected List<Object> getPkValuesBySequence(SqlSequenceExpr expr) throws SQLException {
         List<Object> pkValues = null;
         try {
-            pkValues = defaultGeneratedKeys();
+            pkValues = getGeneratedKeys();
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
@@ -235,61 +232,18 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             return pkValues;
         }
 
+        Sequenceable sequenceable = (Sequenceable) this;
+        final String sql = sequenceable.getSequenceSql(expr);
+        LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+
         ResultSet genKeys;
-        if (expr instanceof SqlSequenceExpr) {
-            SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
-            String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
-            if (StringUtils.equalsIgnoreCase(JdbcConstants.POSTGRESQL, getDbType())) {
-                sql = "SELECT currval(" + sequenceExpr.getSequence() + ")";
-            }
-            LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
-            genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
-        } else {
-            throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
-        }
+        genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
         return pkValues;
-    }
-
-    protected List<Object> getPkValuesByAuto() throws SQLException {
-        boolean mysql = StringUtils.equalsIgnoreCase(JdbcConstants.MYSQL, getDbType());
-        if (mysql) {
-            return mysqlGeneratedKeys();
-        }
-        return defaultGeneratedKeys();
-    }
-
-    /**
-     * get pk index
-     * @return -1 not found pk index
-     */
-    protected int getPkIndex() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recognizer.getInsertColumns();
-        if (CollectionUtils.isNotEmpty(insertColumns)) {
-            final int insertColumnsSize = insertColumns.size();
-            int pkIndex = -1;
-            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (equalsPK(insertColumns.get(paramIdx))) {
-                    pkIndex = paramIdx;
-                    break;
-                }
-            }
-            return pkIndex;
-        }
-        int pkIndex = -1;
-        Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
-        for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
-            pkIndex++;
-            if (equalsPK(entry.getValue().getColumnName())) {
-                break;
-            }
-        }
-        return pkIndex;
     }
 
     /**
@@ -321,7 +275,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
             if (pkValue instanceof SqlMethodExpr) {
                 m++;
-                break;
+                continue;
             }
             if (pkValue instanceof SqlSequenceExpr) {
                 s++;
