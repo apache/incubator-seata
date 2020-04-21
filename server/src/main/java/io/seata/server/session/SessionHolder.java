@@ -80,13 +80,10 @@ public class SessionHolder {
      */
     public static void init(String mode) throws IOException {
         if (StringUtils.isBlank(mode)) {
-            //use default
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         }
-        //the store mode
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
-            //database store
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
@@ -95,10 +92,9 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
-            //file store
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
-            if (sessionStorePath == null) {
+            if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
@@ -110,10 +106,8 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
         } else {
-            //unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        //relaod
         reload();
     }
 
@@ -148,7 +142,6 @@ public class SessionHolder {
                             break;
                         default: {
                             ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-                            // Lock
                             branchSessions.forEach(branchSession -> {
                                 try {
                                     branchSession.lock();
@@ -184,12 +177,9 @@ public class SessionHolder {
                                 default:
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
-
                             break;
-
                         }
                     }
-
                 });
             }
         }

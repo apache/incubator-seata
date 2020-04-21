@@ -155,6 +155,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
             request.getTransactionName(), request.getTimeout()));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Begin new global transaction applicationId: {},transactionServiceGroup: {}, transactionName: {},timeout:{},xid:{}",
+                rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout(), response.getXid());
+        }
     }
 
     @Override
@@ -214,7 +218,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Transaction Timeout Check Begin: " + allSessions.size());
+            LOGGER.debug("Global transaction timeout check begin, size: {}", allSessions.size());
         }
         for (GlobalSession globalSession : allSessions) {
             if (LOGGER.isDebugEnabled()) {
@@ -241,14 +245,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             if (!shouldTimeout) {
                 continue;
             }
-            LOGGER.info("Global transaction[" + globalSession.getXid() + "] is timeout and will be rolled back.");
+            LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
 
             globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
             SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
         }
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Transaction Timeout Check End. ");
+            LOGGER.debug("Global transaction timeout check end. ");
         }
 
     }
@@ -276,14 +280,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.error("GlobalSession rollback retry timeout and removed [{}]", rollbackingSession.getXid());
+                    LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
                     continue;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(),
-                    ex.getMessage());
+                LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         }
     }
@@ -304,26 +307,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("GlobalSession commit retry timeout and removed [{}]", committingSession.getXid());
+                    LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
                     continue;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info("Failed to retry committing [{}] {} {}", committingSession.getXid(), ex.getCode(),
-                    ex.getMessage());
+                LOGGER.info("Failed to retry committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         }
     }
 
     private boolean isRetryTimeout(long now, long timeout, long beginTime) {
-        /**
-         * Start timing when the session begin
-         */
-        if (timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout) {
-            return true;
-        }
-        return false;
+        return timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout;
     }
 
     /**
@@ -344,8 +340,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(),
-                    ex.getMessage(), ex);
+                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
             }
         }
     }
@@ -371,7 +366,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             try {
                 messageSender.sendASyncRequest(channelEntry.getValue(), deleteRequest);
             } catch (Exception e) {
-                LOGGER.error("Failed to async delete undo log resourceId = " + resourceId);
+                LOGGER.error("Failed to async delete undo log resourceId = {}, exception: {}", resourceId, e.getMessage());
             }
         }
     }
