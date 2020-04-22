@@ -15,14 +15,13 @@
  */
 package io.seata.integration.http;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Springmvc Intercepter.
@@ -31,25 +30,31 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter {
 
+    public static final String BIND_XID = "BIND_XID";
+
+    public static final String UNBIND_XID = "UNBIND_XID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationIntercepter.class);
 
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String xid = RootContext.getXID();
-        String rpcXid = request.getHeader(RootContext.KEY_XID);
+        Object xid_status = request.getAttribute(BIND_XID);
+        if (null == xid_status || !(boolean)xid_status) {
+            String xid = RootContext.getXID();
+            String rpcXid = request.getHeader(RootContext.KEY_XID);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
-        }
-        if (rpcXid != null) {
-            RootContext.bind(rpcXid);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("bind[{}] to RootContext", rpcXid);
+                LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
+            }
+            if (rpcXid != null) {
+                RootContext.bind(rpcXid);
+                request.setAttribute(BIND_XID, true);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("bind[{}] to RootContext", rpcXid);
+                }
             }
         }
-
 
         return true;
     }
@@ -57,7 +62,10 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
     @Override
     public void postHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
-        XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
+        Object xid_status = request.getAttribute(UNBIND_XID);
+        if (null == xid_status || !(boolean)xid_status) {
+            XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
+        }
     }
 
 
