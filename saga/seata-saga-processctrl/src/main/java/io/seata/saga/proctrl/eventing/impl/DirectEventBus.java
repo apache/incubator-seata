@@ -15,14 +15,14 @@
  */
 package io.seata.saga.proctrl.eventing.impl;
 
+import java.util.List;
+import java.util.Stack;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.EventConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Stack;
 
 /**
  * Deliver event to event consumer directly
