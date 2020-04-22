@@ -165,10 +165,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private <T extends Annotation> T getAnnotation(Method method, Class<?> clazz, Class<T> clz) {
-        return method == null ? clazz == null ? null : clazz.getAnnotation(clz) : method.getAnnotation(clz);
+    private <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return method == null ? targetClass == null ? null : targetClass.getAnnotation(annotationClass)
+            : method.getAnnotation(annotationClass);
     }
-
 
     private String formatMethod(Method method) {
         StringBuilder sb = new StringBuilder(method.getName()).append("(");
