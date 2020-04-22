@@ -30,9 +30,9 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter {
 
-    public static final String BIND_XID = "BIND_XID";
+    private static final String BIND_XID = "BIND_XID";
 
-    public static final String UNBIND_XID = "UNBIND_XID";
+    private static final String UNBIND_XID = "UNBIND_XID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationIntercepter.class);
 
