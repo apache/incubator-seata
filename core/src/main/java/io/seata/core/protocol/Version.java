@@ -31,7 +31,7 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    public static final String CURRENT = "1.2.0-SNAPSHOT";
+    public static final String CURRENT = "1.3.0-SNAPSHOT";
 
     /**
      * The constant VERSION_MAP.
