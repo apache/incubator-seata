@@ -39,8 +39,8 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Object xid_status = request.getAttribute(BIND_XID);
-        if (null == xid_status || !(boolean)xid_status) {
+        Object xidStatus = request.getAttribute(BIND_XID);
+        if (null == xidStatus || !(boolean)xidStatus) {
             String xid = RootContext.getXID();
             String rpcXid = request.getHeader(RootContext.KEY_XID);
 
@@ -62,8 +62,8 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
     @Override
     public void postHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
-        Object xid_status = request.getAttribute(UNBIND_XID);
-        if (null == xid_status || !(boolean)xid_status) {
+        Object xidStatus = request.getAttribute(UNBIND_XID);
+        if (null == xidStatus || !(boolean)xidStatus) {
             XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
         }
     }
