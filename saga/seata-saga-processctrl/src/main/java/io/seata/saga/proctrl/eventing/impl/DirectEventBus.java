@@ -17,7 +17,6 @@ package io.seata.saga.proctrl.eventing.impl;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.ProcessUtil;
 import io.seata.saga.proctrl.eventing.EventConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,19 +61,16 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
         currentStack.push(context);
 
         if (isFirstEvent) {
-            Stack<ProcessContext> finalCurrentStack = currentStack;
-            ProcessUtil.runInSagaBranch(context, () -> {
-                try {
-                    while (finalCurrentStack.size() > 0) {
-                        ProcessContext currentContext = finalCurrentStack.pop();
-                        for (EventConsumer eventHandler : eventHandlers) {
-                            eventHandler.process(currentContext);
-                        }
+            try {
+                while (currentStack.size() > 0) {
+                    ProcessContext currentContext = currentStack.pop();
+                    for (EventConsumer eventHandler : eventHandlers) {
+                        eventHandler.process(currentContext);
                     }
-                } finally {
-                    context.removeVariable(VAR_NAME_SYNC_EXE_STACK);
                 }
-            });
+            } finally {
+                context.removeVariable(VAR_NAME_SYNC_EXE_STACK);
+            }
         }
         return true;
     }

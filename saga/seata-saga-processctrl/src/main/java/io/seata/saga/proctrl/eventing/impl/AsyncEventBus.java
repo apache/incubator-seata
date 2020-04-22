@@ -20,7 +20,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.ProcessUtil;
 import io.seata.saga.proctrl.eventing.EventConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +51,7 @@ public class AsyncEventBus extends AbstractEventBus<ProcessContext> {
             threadPoolExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    ProcessUtil.runInSagaBranch(context, () -> {
-                        eventConsumer.process(context);
-                    });
+                    eventConsumer.process(context);
                 }
             });
         }

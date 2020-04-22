@@ -47,7 +47,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 @Configuration
 @ConditionalOnProperty(StarterConstants.SEATA_PREFIX + ".saga.enabled")
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
-@EnableConfigurationProperties({SeataSagaThreadPoolProperties.class})
 public class SeataSagaAutoConfiguration {
 
     /**
@@ -83,6 +82,7 @@ public class SeataSagaAutoConfiguration {
 
     @Configuration
     @ConditionalOnProperty(name = StarterConstants.SEATA_PREFIX + ".saga.state-machine.enable-async", havingValue = "true")
+    @EnableConfigurationProperties({SeataSagaThreadPoolProperties.class})
     static class SagaAsyncExecuteThreadPoolConfiguration {
 
         /**

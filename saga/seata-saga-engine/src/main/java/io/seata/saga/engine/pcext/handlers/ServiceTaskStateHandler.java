@@ -31,7 +31,6 @@ import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.ProcessUtil;
 import io.seata.saga.statelang.domain.CompensateSubStateMachineState;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
@@ -182,8 +181,12 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
             ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
-            StateMachineInstance stateMachineInstance = ProcessUtil.getStateMachineInstanceFromProcessContext(context);
-            if (stateMachineInstance != null && e instanceof Exception) {
+            // Set the first exception to stateMachineInstance in the Saga Transaction.
+            StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            if (stateMachineInstance != null && stateMachineInstance.getException() == null && e instanceof Exception) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("[{}] Set the exception to stateMachineInstance.", stateMachineInstance.getId());
+                }
                 stateMachineInstance.setException((Exception) e);
             }
 
