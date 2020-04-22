@@ -26,7 +26,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.StoreException;
-import io.seata.core.context.RootContext;
 import io.seata.saga.engine.store.utils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,69 +125,65 @@ public class AbstractStore {
     }
 
     protected <T> int executeUpdate(String sql, ObjectToStatement<T> objectToStatement, T o) {
-        return RootContext.withoutGlobalTransaction(() -> {
-            Connection connection = null;
-            PreparedStatement stmt = null;
-            try {
-                connection = dataSource.getConnection();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = dataSource.getConnection();
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Preparing SQL: {}", sql);
-                }
-
-                stmt = connection.prepareStatement(sql);
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("setting params to PreparedStatement: {}", BeanUtils.beanToString(o));
-                }
-
-                objectToStatement.toStatement(o, stmt);
-                int count = stmt.executeUpdate();
-                if (!connection.getAutoCommit()) {
-                    connection.commit();
-                }
-                return count;
-            } catch (SQLException e) {
-                throw new StoreException(e);
-            } finally {
-                closeSilent(stmt);
-                closeSilent(connection);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Preparing SQL: {}", sql);
             }
-        });
+
+            stmt = connection.prepareStatement(sql);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("setting params to PreparedStatement: {}", BeanUtils.beanToString(o));
+            }
+
+            objectToStatement.toStatement(o, stmt);
+            int count = stmt.executeUpdate();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
+            return count;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            closeSilent(stmt);
+            closeSilent(connection);
+        }
     }
 
     protected int executeUpdate(String sql, Object... args) {
-        return RootContext.withoutGlobalTransaction(() -> {
-            Connection connection = null;
-            PreparedStatement stmt = null;
-            try {
-                connection = dataSource.getConnection();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        try {
+            connection = dataSource.getConnection();
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Preparing SQL: {}", sql);
-                }
-
-                stmt = connection.prepareStatement(sql);
-
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
-                }
-
-                for (int i = 0; i < args.length; i++) {
-                    stmt.setObject(i + 1, args[i]);
-                }
-                int count = stmt.executeUpdate();
-                if (!connection.getAutoCommit()) {
-                    connection.commit();
-                }
-                return count;
-            } catch (SQLException e) {
-                throw new StoreException(e);
-            } finally {
-                closeSilent(stmt);
-                closeSilent(connection);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Preparing SQL: {}", sql);
             }
-        });
+
+            stmt = connection.prepareStatement(sql);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
+            }
+
+            for (int i = 0; i < args.length; i++) {
+                stmt.setObject(i + 1, args[i]);
+            }
+            int count = stmt.executeUpdate();
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
+            return count;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            closeSilent(stmt);
+            closeSilent(connection);
+        }
     }
 
     public void setDataSource(DataSource dataSource) {

@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.store.db;
 
+import io.seata.core.model.BranchType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -101,6 +102,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
             }
 
+            // set xidType = saga
+            RootContext.bindInterceptorType(machineInstance.getId(), BranchType.SAGA);
+
             // save to db
             machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
             executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType),
@@ -138,9 +142,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                                 .getMessage(), FrameworkErrorCode.TransactionManagerError);
             }
             finally {
-                if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_ASYNC_EXECUTION))) {
-                    RootContext.unbind();
-                }
+                RootContext.unbind();
             }
         }
     }
@@ -177,6 +179,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 }
             }
             RootContext.unbind();
+            RootContext.unbindInterceptorType();
         }
     }
 
