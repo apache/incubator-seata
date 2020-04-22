@@ -26,6 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -50,40 +51,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 public class SeataSagaAutoConfiguration {
 
     /**
-     * Create state machine thread pool bean.
-     */
-    @Bean
-    public ThreadPoolExecutor sagaStateMachineThreadPoolExecutor(SeataSagaThreadPoolProperties properties) {
-        ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
-        threadFactory.setCorePoolSize(properties.getCorePoolSize());
-        threadFactory.setMaxPoolSize(properties.getMaxPoolSize());
-        threadFactory.setKeepAliveSeconds(properties.getKeepAliveTime());
-
-        BlockingQueue<Runnable> queue = new LinkedBlockingQueue();
-
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-            properties.getCorePoolSize(),
-            properties.getMaxPoolSize(),
-            properties.getKeepAliveTime(),
-            TimeUnit.SECONDS,
-            queue,
-            threadFactory
-        );
-
-        return threadPoolExecutor;
-    }
-
-    /**
      * Create state machine config bean.
      */
     @Bean
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
     @ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine")
-    public DbStateMachineConfig dbStateMachineConfig(DataSource dataSource, ThreadPoolExecutor threadPoolExecutor) {
+    public DbStateMachineConfig dbStateMachineConfig(DataSource dataSource,
+        @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor) {
         DbStateMachineConfig config = new DbStateMachineConfig();
         config.setDataSource(dataSource);
-        config.setThreadPoolExecutor(threadPoolExecutor);
+
+        if (threadPoolExecutor != null) {
+            config.setThreadPoolExecutor(threadPoolExecutor);
+        }
+
         return config;
     }
 
@@ -97,5 +79,38 @@ public class SeataSagaAutoConfiguration {
         engine.setStateMachineConfig(config);
         new StateMachineEngineHolder().setStateMachineEngine(engine);
         return engine;
+    }
+
+    @Configuration
+    @ConditionalOnProperty(name = StarterConstants.SEATA_PREFIX + ".saga.state-machine.enable-async", havingValue = "true")
+    static class SagaAsyncExecuteThreadPoolConfiguration {
+
+        /**
+         * Create state machine async thread pool executor bean.
+         */
+        @Bean
+        @ConditionalOnMissingBean
+        public ThreadPoolExecutor sagaStateMachineThreadPoolExecutor(SeataSagaThreadPoolProperties properties) {
+            ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
+            threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
+            threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
+            threadFactory.setCorePoolSize(properties.getCorePoolSize());
+            threadFactory.setMaxPoolSize(properties.getMaxPoolSize());
+            threadFactory.setKeepAliveSeconds(properties.getKeepAliveTime());
+
+            BlockingQueue<Runnable> queue = new LinkedBlockingQueue();
+
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                properties.getCorePoolSize(),
+                properties.getMaxPoolSize(),
+                properties.getKeepAliveTime(),
+                TimeUnit.SECONDS,
+                queue,
+                threadFactory
+            );
+
+            return threadPoolExecutor;
+        }
+
     }
 }
