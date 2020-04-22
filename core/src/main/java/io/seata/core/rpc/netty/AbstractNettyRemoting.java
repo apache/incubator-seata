@@ -247,7 +247,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * @param ctx        Channel handler context.
      * @param rpcMessage rpc message.
      * @throws Exception throws exception process message error.
-     * @since 1.2.0
+     * @since 1.3.0
      */
     protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (LOGGER.isDebugEnabled()) {

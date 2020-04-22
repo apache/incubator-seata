@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 6) {@link GlobalRollbackResponse}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class ClientOnResponseProcessor implements RemotingProcessor {
 

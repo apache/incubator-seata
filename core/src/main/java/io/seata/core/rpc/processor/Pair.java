@@ -19,7 +19,7 @@ package io.seata.core.rpc.processor;
  * Currently used to associate object1 and object2
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class Pair<T1, T2> {
     private T1 object1;

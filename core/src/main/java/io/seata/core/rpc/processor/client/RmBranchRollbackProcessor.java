@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * {@link BranchRollbackRequest}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class RmBranchRollbackProcessor implements RemotingProcessor {
 

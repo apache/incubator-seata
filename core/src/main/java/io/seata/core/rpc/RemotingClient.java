@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
 public interface RemotingClient {
 
