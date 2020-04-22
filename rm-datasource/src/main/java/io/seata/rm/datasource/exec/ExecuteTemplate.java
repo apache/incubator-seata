@@ -56,7 +56,7 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizers     the sql recognizer
+     * @param sqlRecognizers     the sql recognizer list
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
@@ -119,18 +119,15 @@ public class ExecuteTemplate {
     }
 
     private static boolean requiresUndoFunction() {
-
         if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
             return false;
         }
-
         if (RootContext.inGlobalTransaction()) {
             String branchType = RootContext.getBranchType();
-            if ((StringUtils.equals(BranchType.TCC.name(), branchType) || StringUtils.equals(BranchType.SAGA.name(), branchType))) {
+            if (StringUtils.equals(BranchType.TCC.name(), branchType) || StringUtils.equals(BranchType.SAGA.name(), branchType)) {
                 return false;
             }
         }
-
         return true;
     }
 }
