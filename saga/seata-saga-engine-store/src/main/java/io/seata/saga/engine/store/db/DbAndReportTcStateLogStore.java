@@ -142,7 +142,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                                 .getMessage(), FrameworkErrorCode.TransactionManagerError);
             }
             finally {
-                RootContext.unbind();
+                if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_ASYNC_EXECUTION))) {
+                    RootContext.unbind();
+                }
             }
         }
     }
