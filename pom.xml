@@ -336,12 +336,11 @@
                                     <encoding>UTF-8</encoding>
                                     <consoleOutput>true</consoleOutput>
                                     <failsOnError>true</failsOnError>
-                                    <failOnViolation>false</failOnViolation>
                                     <excludes>**/generated/**/*</excludes>
                                     <excludes>io/seata/integration/grpc/interceptor/</excludes>
                                 </configuration>
                                 <goals>
-                                    <goal>check</goal>
+                                    <goal>checkstyle</goal>
                                 </goals>
                             </execution>
                         </executions>
