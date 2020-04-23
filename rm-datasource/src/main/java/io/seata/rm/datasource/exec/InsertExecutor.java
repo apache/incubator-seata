@@ -34,6 +34,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -172,6 +173,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
+        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
+            pkValues = getPkValuesByDefault();
+        }
         // pk auto generated while column exists and value is null
         else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
@@ -179,24 +183,57 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return pkValues;
     }
 
-    protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
+    /**
+     * get primary key values by default
+     * @return
+     * @throws SQLException
+     */
+    private List<Object> getPkValuesByDefault() throws SQLException {
+        // current version 1.2 only support postgresql.
+        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
+        String columnDef = pkMeta.getColumnDef();
+        // sample: nextval('test_id_seq'::regclass)
+        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
+        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
+        if (StringUtils.isBlank(seq)) {
+            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
+        }
+        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
+    }
 
-        // priority use getGeneratedKeys
+    /**
+     * get primary key values by sequence.
+     * @param expr
+     * @return
+     * @throws SQLException
+     */
+    protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
+        // priority use defaultGeneratedKeys
+        List<Object> pkValues = null;
         try {
-            return oracleByAuto();
+            pkValues = defaultGeneratedKeys();
         } catch (NotSupportYetException | SQLException ignore) {
+        }
+
+        if (!CollectionUtils.isEmpty(pkValues)) {
+            return pkValues;
         }
 
         ResultSet genKeys;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
-            final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
+            String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
+            if (StringUtils.equalsIgnoreCase(JdbcConstants.POSTGRESQL, getDbType())) {
+                sql = "SELECT currval(" + sequenceExpr.getSequence() + ")";
+            }
             LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
             genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         } else {
             throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
         }
-        List<Object> pkValues = new ArrayList<>();
+        pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
@@ -205,11 +242,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected List<Object> getPkValuesByAuto() throws SQLException {
-        boolean oracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, getDbType());
-        if (oracle) {
-            return oracleByAuto();
+        boolean mysql = StringUtils.equalsIgnoreCase(JdbcConstants.MYSQL, getDbType());
+        if (mysql) {
+            return mysqlGeneratedKeys();
         }
-        return defaultByAuto();
+        return defaultGeneratedKeys();
     }
 
     /**
@@ -295,16 +332,13 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     /**
-     * default auto increment
+     * mysql get generated keys
      * @return the primary key value
      * @throws SQLException the SQL exception
      */
-    private List<Object> defaultByAuto() throws SQLException {
+    private List<Object> mysqlGeneratedKeys() throws SQLException {
         // PK is just auto generated
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        if (pkMetaMap.size() != 1) {
-            throw new NotSupportYetException();
-        }
         ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         if (!pkMeta.isAutoincrement()) {
             throw new ShouldNeverHappenException();
@@ -338,15 +372,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     /**
-     * oracle auto increment sequence
+     * default get generated keys
      * @return the primary key value
      * @throws SQLException the SQL exception
      */
-    private List<Object> oracleByAuto() throws SQLException {
-        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        if (pkMetaMap.size() != 1) {
-            throw new NotSupportYetException();
-        }
+    private List<Object> defaultGeneratedKeys() throws SQLException {
         ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {

@@ -184,9 +184,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             return null;
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+            String redisRegistryKey = REDIS_FILEKEY_PREFIX + clusterName;
             Map<String, String> instances;
             try (Jedis jedis = jedisPool.getResource()) {
-                instances = jedis.hgetAll(getRedisRegistryKey());
+                instances = jedis.hgetAll(redisRegistryKey);
             }
             if (null != instances && !instances.isEmpty()) {
                 Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
