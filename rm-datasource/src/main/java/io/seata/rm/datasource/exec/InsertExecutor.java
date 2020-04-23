@@ -109,8 +109,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkIndex == -1) {
             throw new ShouldNeverHappenException(String.format("pkIndex is %d", pkIndex));
         }
+        boolean ps = false;
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
+            ps = true;
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
             List<List<Object>> insertRows = recognizer.getInsertRows();
@@ -166,18 +168,21 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkValues == null) {
             throw new ShouldNeverHappenException();
         }
-        boolean b = this.checkPkValues(pkValues);
+        boolean b = this.checkPkValues(pkValues, ps);
         if (!b) {
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
+        // pk auto generated while column exists and value is null
+        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
+            pkValues = getPkValuesByAuto();
+        }
         else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
             pkValues = getPkValuesByDefault();
         }
-        // pk auto generated while column exists and value is null
-        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
+        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlMethodExpr) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
@@ -281,25 +286,32 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * check pk values
      * @param pkValues
+     * @param ps is prepared statement.
      * @return true: support. false: not support.
      */
-    protected boolean checkPkValues(List<Object> pkValues) {
+    protected boolean checkPkValues(List<Object> pkValues, boolean ps) {
+
         /*
+        ps = true
         -----------------------------------------------
                   one    more
         null       O      O
         value      O      O
-        method     X      X
-        sequence   O      X
+        method     O      O
+        sequence   O      O
+        default    O      O
         -----------------------------------------------
-                  null    value    method    sequence
-        null       O        X         X         X
-        value      X        O         X         X
-        method     X        X         X         X
-        sequence   X        X         X         X
+        ps = false
+        -----------------------------------------------
+                  one    more
+        null       O      X
+        value      O      O
+        method     O      X
+        sequence   O      X
+        default    O      X
         -----------------------------------------------
         */
-        int n = 0, v = 0, m = 0, s = 0;
+        int n = 0, v = 0, m = 0, s = 0, d = 0;
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
                 n++;
@@ -307,25 +319,51 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
             if (pkValue instanceof SqlMethodExpr) {
                 m++;
-                break;
+                continue;
             }
             if (pkValue instanceof SqlSequenceExpr) {
                 s++;
                 continue;
             }
+            if (pkValue instanceof SqlDefaultExpr) {
+                d++;
+                continue;
+            }
             v++;
         }
-        // not support sql primary key is function.
-        if (m > 0) {
+
+        if (!ps) {
+            if (n == 1 && v == 0 && m == 0 && s == 0 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v == 0 && m == 1 && s == 0 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v == 0 && m == 0 && s == 1 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v == 0 && m == 0 && s == 0 && d == 1) {
+                return true;
+            }
             return false;
         }
-        if (n > 0 && v == 0 && s == 0) {
+
+        if (n > 0 && v == 0 && m == 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v > 0 && s == 0) {
+        if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v == 0 && s == 1) {
+        if (n == 0 && v == 0 && m > 0 && s == 0 && d == 0) {
+            return true;
+        }
+        if (n == 0 && v == 0 && m == 0 && s > 0 && d == 0) {
+            return true;
+        }
+        if (n == 0 && v == 0 && m == 0 && s == 0 && d > 0) {
             return true;
         }
         return false;
@@ -346,7 +384,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
         ResultSet genKeys;
         try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+            genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
             // java.sql.SQLException: Generated keys not requested. You need to
             // specify Statement.RETURN_GENERATED_KEYS to
@@ -377,7 +415,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @throws SQLException the SQL exception
      */
     private List<Object> defaultGeneratedKeys() throws SQLException {
-        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        ResultSet genKeys = statementProxy.getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
@@ -385,6 +423,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         if (pkValues.isEmpty()) {
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }
         return pkValues;
     }

@@ -313,83 +313,83 @@ public class InsertExecutorTest {
         // pk is null support
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is sequence support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is specify value support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // more parameters.
         // pk is specify value support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(2);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is null support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is sql sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is specify value and null not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(Null.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is specify value and sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is specify value and sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is null and sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is null and sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
 
         // pk is sql function and sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
     }
 
     private List<String> mockInsertColumns() {
