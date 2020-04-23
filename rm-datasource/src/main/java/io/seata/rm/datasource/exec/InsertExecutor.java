@@ -346,7 +346,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
         ResultSet genKeys;
         try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+            genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
             // java.sql.SQLException: Generated keys not requested. You need to
             // specify Statement.RETURN_GENERATED_KEYS to
@@ -377,7 +377,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @throws SQLException the SQL exception
      */
     private List<Object> defaultGeneratedKeys() throws SQLException {
-        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        ResultSet genKeys = statementProxy.getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
@@ -385,6 +385,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         if (pkValues.isEmpty()) {
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }
         return pkValues;
     }
