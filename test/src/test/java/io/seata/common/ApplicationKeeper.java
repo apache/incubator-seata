@@ -68,13 +68,14 @@ public class ApplicationKeeper {
      * Keep.
      */
     public void keep() {
-        synchronized (LOCK) {
-            try {
-                LOGGER.info("Application is keep running ... ");
-                LOCK.wait();
-            } catch (InterruptedException e) {
-                LOGGER.error("interrupted error", e);
-            }
+        LOCK.lock();
+        try {
+            LOGGER.info("Application is keep running ... ");
+            STOP.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("interrupted error ", e);
+        } finally {
+            LOCK.unlock();
         }
     }
 }
