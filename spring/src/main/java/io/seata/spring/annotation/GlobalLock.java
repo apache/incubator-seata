@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE})
 @Inherited
 public @interface GlobalLock {
 }
