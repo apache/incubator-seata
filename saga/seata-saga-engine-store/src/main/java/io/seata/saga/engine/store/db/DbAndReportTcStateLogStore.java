@@ -103,7 +103,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
 
             // set xidType = saga
-            RootContext.bindInterceptorType(machineInstance.getId(), BranchType.SAGA);
+            if (RootContext.inGlobalTransaction()) {
+                RootContext.bindInterceptorType(machineInstance.getId(), BranchType.SAGA);
+            }
 
             // save to db
             machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
