@@ -49,7 +49,6 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
             }
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
-                request.setAttribute(BIND_XID, true);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("bind[{}] to RootContext", rpcXid);
                 }
@@ -63,6 +62,7 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
         ModelAndView modelAndView) {
         XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
+        request.setAttribute(UNBIND_XID, true);
     }
 
 }
