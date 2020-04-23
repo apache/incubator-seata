@@ -16,7 +16,7 @@
 package io.seata.discovery.loadbalance;
 
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import io.seata.common.loader.LoadLevel;
 
@@ -28,11 +28,9 @@ import io.seata.common.loader.LoadLevel;
 @LoadLevel(name = "RandomLoadBalance", order = 2)
 public class RandomLoadBalance extends AbstractLoadBalance {
 
-    private final Random random = new Random();
-
     @Override
     protected <T> T doSelect(List<T> invokers) {
         int length = invokers.size();
-        return invokers.get(random.nextInt(length));
+        return invokers.get(ThreadLocalRandom.current().nextInt(length));
     }
 }
