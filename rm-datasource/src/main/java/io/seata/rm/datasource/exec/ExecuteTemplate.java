@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
@@ -22,6 +23,7 @@ import io.seata.sqlparser.SQLRecognizer;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 /**
  * The type Execute template.
@@ -52,14 +54,14 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizers    the sql recognizer
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
+    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
@@ -68,16 +70,22 @@ public class ExecuteTemplate {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
-        if (sqlRecognizer == null) {
-            sqlRecognizer = SQLVisitorFactory.get(
+
+        if (sqlRecognizers == null) {
+            sqlRecognizers = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
                     statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor;
-        if (sqlRecognizer == null) {
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
-            executor = createExecutor(sqlRecognizer, statementProxy, statementCallback);
+            if (sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                executor = createExecutor(sqlRecognizer, statementProxy, statementCallback);
+            } else {
+                executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
+            }
         }
         T rs;
         try {
