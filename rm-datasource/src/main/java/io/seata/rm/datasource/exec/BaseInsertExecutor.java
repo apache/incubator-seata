@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * The Base InsertExecutor
  * @author tt
  */
-public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseInsertExecutor.class);
 
@@ -298,11 +298,5 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
         return false;
     }
-
-    /**
-     * get primary key values
-     * @return
-     */
-    protected abstract List<Object> getPkValues() throws SQLException;
 
 }

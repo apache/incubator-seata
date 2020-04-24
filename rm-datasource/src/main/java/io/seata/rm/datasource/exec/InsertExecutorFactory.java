@@ -15,16 +15,11 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
-import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
-import io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.Statement;
-import java.util.List;
 
 /**
  * @author jsbxyyx
@@ -46,17 +41,11 @@ public class InsertExecutorFactory {
                                                                          StatementCallback<T, S> statementCallback,
                                                                          SQLRecognizer sqlRecognizer,
                                                                          String dbType) {
-        switch (dbType) {
-            case JdbcConstants.MYSQL:
-                return new MySQLInsertExecutor(statementProxy, statementCallback, sqlRecognizer);
-            case JdbcConstants.ORACLE:
-                return new OracleInsertExecutor(statementProxy, statementCallback, sqlRecognizer);
-            case JdbcConstants.POSTGRESQL:
-                return new PostgresqlInsertExecutor(statementProxy, statementCallback, sqlRecognizer);
-            default:
-                break;
-        }
-        throw new NotSupportYetException("not support dbType[" + dbType + "]");
+
+        InsertExecutor executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+        return executor;
     }
 
 }

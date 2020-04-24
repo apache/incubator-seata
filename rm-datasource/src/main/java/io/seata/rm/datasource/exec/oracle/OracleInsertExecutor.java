@@ -16,28 +16,27 @@
 package io.seata.rm.datasource.exec.oracle;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.util.CollectionUtils;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author jsbxyyx
  */
+@LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
 public class OracleInsertExecutor extends BaseInsertExecutor implements Sequenceable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleInsertExecutor.class);
@@ -55,7 +54,7 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
     }
 
     @Override
-    protected List<Object> getPkValues() throws SQLException {
+    public List<Object> getPkValues() throws SQLException {
         return containsPK() ? getPkValuesByColumn() :
                 (containsColumns() ? getGeneratedKeys() : getPkValuesByColumn());
     }

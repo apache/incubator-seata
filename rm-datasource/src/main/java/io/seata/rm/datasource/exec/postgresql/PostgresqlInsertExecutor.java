@@ -16,6 +16,8 @@
 package io.seata.rm.datasource.exec.postgresql;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
@@ -27,6 +29,7 @@ import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +40,7 @@ import java.util.Map;
 /**
  * @author jsbxyyx
  */
+@LoadLevel(name = JdbcConstants.POSTGRESQL, scope = Scope.PROTOTYPE)
 public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequenceable, Defaultable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlInsertExecutor.class);
@@ -54,7 +58,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     }
 
     @Override
-    protected List<Object> getPkValues() throws SQLException {
+    public List<Object> getPkValues() throws SQLException {
         return containsPK() ? getPkValuesByColumn() :
                 (containsColumns() ? getGeneratedKeys() : getPkValuesByColumn());
     }
