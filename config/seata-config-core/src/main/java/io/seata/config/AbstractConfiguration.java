@@ -15,10 +15,11 @@
  */
 package io.seata.config;
 
-
-import io.seata.common.util.DurationUtil;
-
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import io.seata.common.util.DurationUtil;
 
 /**
  * The type Abstract configuration.
@@ -27,6 +28,13 @@ import java.time.Duration;
  */
 public abstract class AbstractConfiguration implements Configuration {
 
+    private static final long CACHE_SIZE = 100;
+
+    private static final long EXPIRE_TIME = 30 * 1000;
+
+    private static final Cache<String, Object> CONFIG_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
+        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.
      */
@@ -34,7 +42,9 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        });
         return Short.parseShort(result);
     }
 
@@ -45,12 +55,14 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId) {
-        return getShort(dataId, (short) 0);
+        return getShort(dataId, (short)0);
     }
 
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        });
         return Integer.parseInt(result);
     }
 
@@ -66,7 +78,9 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        });
         return Long.parseLong(result);
     }
 
@@ -92,13 +106,17 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
+        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
+        });
         return DurationUtil.parse(result);
     }
 
     @Override
     public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        });
         return Boolean.parseBoolean(result);
     }
 
@@ -114,12 +132,16 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public String getConfig(String dataId, String defaultValue) {
-        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+        return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+        });
     }
 
     @Override
     public String getConfig(String dataId, long timeoutMills) {
-        return getConfig(dataId, null, timeoutMills);
+        return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfig(dataId, null, timeoutMills);
+        });
     }
 
     @Override
