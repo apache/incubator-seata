@@ -61,10 +61,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                 }
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[{}] to RootContext", rpcXid);
-                    if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
-                        LOGGER.debug("bind branchType [{}] to RootContext", rpcBranchType);
-                    }
+                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
                 }
             }
         }
@@ -78,16 +75,14 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind[{}] from RootContext", unbindXid);
-                    if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
-                        LOGGER.debug("unbind branchType [{}] from RootContext", rpcBranchType);
-                    }
+                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
+                    LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
+                            rpcBranchType, previousBranchType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        LOGGER.warn("bind [{}] back to RootContext", unbindXid);
+                        LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
                         if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
                             RootContext.bindBranchType(BranchType.TCC);
                             LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);

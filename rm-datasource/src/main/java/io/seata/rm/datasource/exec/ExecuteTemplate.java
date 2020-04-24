@@ -68,7 +68,7 @@ public class ExecuteTemplate {
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
 
-        if (!requiresUndoFunction()) {
+        if (!requiresLockOrUndoFunction()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
@@ -118,7 +118,7 @@ public class ExecuteTemplate {
         return rs;
     }
 
-    private static boolean requiresUndoFunction() {
+    private static boolean requiresLockOrUndoFunction() {
         if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
             return false;
         }
