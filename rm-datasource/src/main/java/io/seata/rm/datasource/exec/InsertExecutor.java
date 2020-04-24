@@ -306,7 +306,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                   one    more
         null       O      X
         value      O      O
-        method     O      X
+        method     X      X
         sequence   O      X
         default    O      X
         -----------------------------------------------
@@ -333,13 +333,13 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
 
         if (!ps) {
+            if (m > 0) {
+                return false;
+            }
             if (n == 1 && v == 0 && m == 0 && s == 0 && d == 0) {
                 return true;
             }
             if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
-                return true;
-            }
-            if (n == 0 && v == 0 && m == 1 && s == 0 && d == 0) {
                 return true;
             }
             if (n == 0 && v == 0 && m == 0 && s == 1 && d == 0) {
@@ -384,7 +384,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
         ResultSet genKeys;
         try {
-            genKeys = statementProxy.getGeneratedKeys();
+            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         } catch (SQLException e) {
             // java.sql.SQLException: Generated keys not requested. You need to
             // specify Statement.RETURN_GENERATED_KEYS to
@@ -415,7 +415,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @throws SQLException the SQL exception
      */
     private List<Object> defaultGeneratedKeys() throws SQLException {
-        ResultSet genKeys = statementProxy.getGeneratedKeys();
+        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
