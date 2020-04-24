@@ -11,6 +11,7 @@ seata:
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: false
+      saga-branch-register-enable: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -98,6 +99,7 @@ seata:
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
       addressWaitTime: 3000
+      application: default
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000

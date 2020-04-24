@@ -108,6 +108,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * @throws SQLException the sql exception
      */
     public void checkLock(String lockKeys) throws SQLException {
+        if (StringUtils.isBlank(lockKeys)) {
+            return;
+        }
         // Just check lock without requiring lock by now.
         try {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
@@ -144,7 +147,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void recognizeLockKeyConflictException(TransactionException te, String lockKeys) throws SQLException {
         if (te.getCode() == TransactionExceptionCode.LockKeyConflict) {
-            StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:" + context.getXid());
+            StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:");
+            reasonBuilder.append(context.getXid());
             if (StringUtils.isNotBlank(lockKeys)) {
                 reasonBuilder.append(", lockKeys:").append(lockKeys);
             }
@@ -198,7 +202,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
-
         checkLock(context.buildLockKeys());
         try {
             targetConnection.commit();
@@ -214,11 +217,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, context.buildLockKeys());
         }
-
         try {
-            if (context.hasUndoLog()) {
-                UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
-            }
+            UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
             targetConnection.commit();
         } catch (Throwable ex) {
             LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
@@ -232,6 +232,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void register() throws TransactionException {
+        if (!context.hasUndoLog() || context.getLockKeysBuffer().isEmpty()) {
+            return;
+        }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
@@ -256,6 +259,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
+        if (context.getBranchId() == null) {
+            return;
+        }
         int retry = REPORT_RETRY_COUNT;
         while (retry > 0) {
             try {
