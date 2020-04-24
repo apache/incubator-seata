@@ -19,6 +19,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
@@ -30,7 +31,9 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -75,14 +78,23 @@ public class PostgresqlInsertExecutorTest {
         mockInsertColumns();
         mockInsertRows();
         mockParametersPkWithDefault();
+
+        Map<String, ColumnMeta> pkMap = new HashMap<>();
+        ColumnMeta columnMeta = mock(ColumnMeta.class);
+        doReturn("nextval('test_id_seq'::regclass)").when(columnMeta).getColumnDef();
+        pkMap.put(ID_COLUMN, columnMeta);
+        doReturn(pkMap).when(tableMeta).getPrimaryKeyMap();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
         doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         //pk value = DEFAULT so getPkValuesByDefault
+        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault();
+
         verify(insertExecutor).getPkValuesByDefault();
         Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
     }
