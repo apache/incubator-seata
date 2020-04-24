@@ -313,12 +313,13 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
+                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId,true);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);
                         event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
                         listener.onChangeEvent(event);
+                        getConfigCache().put(dataId,currentConfig);
                     }
                 } catch (Exception exx) {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage());

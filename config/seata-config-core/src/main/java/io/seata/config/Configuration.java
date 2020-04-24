@@ -207,6 +207,14 @@ public interface Configuration {
     boolean putConfig(String dataId, String content, long timeoutMills);
 
     /**
+     *
+     * @param dataId the data id
+     * @param now the current value
+     * @return the config
+     */
+    String getConfig(String dataId, boolean now);
+
+    /**
      * Put config boolean.
      *
      * @param dataId  the data id

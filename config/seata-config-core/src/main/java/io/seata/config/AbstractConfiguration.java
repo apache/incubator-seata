@@ -150,6 +150,11 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     @Override
+    public String getConfig(String dataId, boolean now) {
+        return now ? getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT) : getConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    @Override
     public boolean putConfig(String dataId, String content) {
         return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
     }
@@ -170,4 +175,8 @@ public abstract class AbstractConfiguration implements Configuration {
      * @return the type name
      */
     public abstract String getTypeName();
+
+    public static Cache<String, Object> getConfigCache() {
+        return CONFIG_CACHE;
+    }
 }
