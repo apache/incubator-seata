@@ -141,9 +141,17 @@ public class FileConfiguration extends AbstractConfiguration {
             for (String s : FileConfigFactory.getSuffixSet()) {
                 targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
                 if (targetFile.exists()) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("The configuration file used is {}", targetFile.getPath());
+                    }
                     return targetFile;
                 }
             }
+        } else {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("The configuration file used is {}", name);
+            }
+            return targetFile;
         }
 
         if (!filePathCustom) {
@@ -152,10 +160,16 @@ public class FileConfiguration extends AbstractConfiguration {
                 for (String s : FileConfigFactory.getSuffixSet()) {
                     resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
                     if (resource != null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("The configuration file used is {}", resource.getPath());
+                        }
                         return new File(resource.getPath());
                     }
                 }
             } else {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("The configuration file used is {}", name);
+                }
                 return new File(resource.getPath());
             }
         }
