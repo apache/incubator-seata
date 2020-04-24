@@ -16,7 +16,6 @@ create table seata_state_machine_def
 
 create table seata_state_machine_inst
 (
-
     id varchar(128) not null,
     machine_id varchar(32) not null,
     tenant_id varchar(32) not null,
