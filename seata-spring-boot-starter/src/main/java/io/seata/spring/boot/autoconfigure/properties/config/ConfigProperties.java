@@ -13,28 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.spring.boot.autoconfigure.properties.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = CONFIG_CONSUL_PREFIX)
-public class ConfigConsulProperties {
-    private String serverAddr = "127.0.0.1:8500";
+@ConfigurationProperties(prefix = CONFIG_PREFIX)
+public class ConfigProperties {
+    /**
+     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
+     */
+    private String type = "file";
 
-    public String getServerAddr() {
-        return serverAddr;
+    public String getType() {
+        return type;
     }
 
-    public ConfigConsulProperties setServerAddr(String serverAddr) {
-        this.serverAddr = serverAddr;
+    public ConfigProperties setType(String type) {
+        this.type = type;
         return this;
     }
-
 }

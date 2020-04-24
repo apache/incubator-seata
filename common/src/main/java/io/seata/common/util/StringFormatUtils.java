@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.util;
+package io.seata.common.util;
 
 /**
  * @author xingfudeshi@gmail.com

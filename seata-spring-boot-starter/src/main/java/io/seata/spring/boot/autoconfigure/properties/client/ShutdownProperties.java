@@ -13,30 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.spring.boot.autoconfigure.properties.client;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = CONFIG_PREFIX)
-public class ConfigProperties {
+@ConfigurationProperties(prefix = SHUTDOWN_PREFIX)
+public class ShutdownProperties {
     /**
-     * file, nacos, apollo, zk, consul, etcd3, springCloudConfig
+     * when destroy server, wait seconds
      */
-    private String type = "file";
+    private long wait = DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 
-    public String getType() {
-        return type;
+    public long getWait() {
+        return wait;
     }
 
-    public ConfigProperties setType(String type) {
-        this.type = type;
+    public ShutdownProperties setWait(long wait) {
+        this.wait = wait;
         return this;
     }
 }
