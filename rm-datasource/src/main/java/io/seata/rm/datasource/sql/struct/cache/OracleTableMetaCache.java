@@ -61,11 +61,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
             return resultSetMetaToSchema(connection.getMetaData(), tableName);
-        }
-        catch (SQLException sqlEx) {
+        } catch (SQLException sqlEx) {
             throw sqlEx;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
