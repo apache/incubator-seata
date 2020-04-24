@@ -13,31 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.file;
+package io.seata.spring.boot.autoconfigure.properties.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = SHUTDOWN_PREFIX)
-public class ShutdownProperties {
-    /**
-     * when destroy server, wait seconds
-     */
-    private long wait = DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+@ConfigurationProperties(prefix = CONFIG_FILE_PREFIX)
+public class ConfigFileProperties {
+    private String name = "file.conf";
 
-    public long getWait() {
-        return wait;
+    public String getName() {
+        return name;
     }
 
-    public ShutdownProperties setWait(long wait) {
-        this.wait = wait;
+    public ConfigFileProperties setName(String name) {
+        this.name = name;
         return this;
     }
 }
