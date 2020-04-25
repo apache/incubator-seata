@@ -30,6 +30,7 @@ import io.seata.saga.tm.SagaTransactionalTemplate;
 import org.springframework.beans.factory.DisposableBean;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 
 /**
  * DbStateMachineConfig
@@ -45,6 +46,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
     private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+    private boolean sagaBranchRegisterEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         try (Connection con = dataSource.getConnection()) {
@@ -146,6 +148,14 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public boolean isRmReportSuccessEnable() {
         return rmReportSuccessEnable;
+    }
+
+    public boolean isSagaBranchRegisterEnable() {
+        return sagaBranchRegisterEnable;
+    }
+
+    public void setSagaBranchRegisterEnable(boolean sagaBranchRegisterEnable) {
+        this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
     }
 
     public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {

@@ -13,24 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.loadbalance;
-
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
-import io.seata.common.loader.LoadLevel;
+package io.seata.sqlparser.struct;
 
 /**
- * The type Random load balance.
- *
- * @author yuoyao
+ * @author jsbxyyx
  */
-@LoadLevel(name = "RandomLoadBalance", order = 2)
-public class RandomLoadBalance extends AbstractLoadBalance {
+public class SqlDefaultExpr {
+
+    private static SqlDefaultExpr instance = new SqlDefaultExpr();
+
+    /**
+     * Get SqlDefaultExpr.
+     *
+     * @return the SqlDefaultExpr
+     */
+    public static SqlDefaultExpr get() {
+        return instance;
+    }
+
+    private SqlDefaultExpr() {
+    }
 
     @Override
-    protected <T> T doSelect(List<T> invokers) {
-        int length = invokers.size();
-        return invokers.get(ThreadLocalRandom.current().nextInt(length));
+    public String toString() {
+        return "DEFAULT";
     }
+
 }
