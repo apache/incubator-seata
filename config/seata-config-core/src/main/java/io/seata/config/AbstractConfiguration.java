@@ -54,7 +54,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId) {
-        return getShort(dataId, (short)0);
+        return getShort(dataId, (short) 0);
     }
 
     @Override
@@ -138,9 +138,21 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public String getConfig(String dataId, String content, long timeoutMills) {
-        return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfigNow(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+        Object result = CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return null;
         });
+        if (null == result) {
+            synchronized (AbstractConfiguration.class) {
+                result = CONFIG_CACHE.get(dataId, mappingFunction -> {
+                    return null;
+                });
+                if (null == result) {
+                    result = getConfigNow(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+                    CONFIG_CACHE.put(dataId, result);
+                }
+            }
+        }
+        return (String)result;
     }
 
     @Override
