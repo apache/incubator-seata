@@ -148,7 +148,9 @@ public abstract class AbstractConfiguration implements Configuration {
                 });
                 if (null == result) {
                     result = getConfigNow(dataId, content, DEFAULT_CONFIG_TIMEOUT);
-                    CONFIG_CACHE.put(dataId, result);
+                    if (null != result) {
+                        CONFIG_CACHE.put(dataId, result);
+                    }
                 }
             }
         }
