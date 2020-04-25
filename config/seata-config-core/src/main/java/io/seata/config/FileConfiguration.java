@@ -313,7 +313,8 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId,true);
+                    String currentConfig =
+                        ConfigurationFactory.getInstance().getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, true);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);

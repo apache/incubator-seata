@@ -208,11 +208,13 @@ public interface Configuration {
 
     /**
      *
-     * @param dataId the data id
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
      * @param now the current value
      * @return the config
      */
-    String getConfig(String dataId, boolean now);
+    String getConfig(String dataId, String defaultValue, long timeoutMills,boolean now);
 
     /**
      * Put config boolean.

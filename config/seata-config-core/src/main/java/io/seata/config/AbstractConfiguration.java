@@ -42,9 +42,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId, int defaultValue, long timeoutMills) {
-        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        });
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
         return Short.parseShort(result);
     }
 
@@ -60,9 +58,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        });
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
         return Integer.parseInt(result);
     }
 
@@ -78,9 +74,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        });
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
         return Long.parseLong(result);
     }
 
@@ -106,17 +100,13 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
-        });
+        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills, false);
         return DurationUtil.parse(result);
     }
 
     @Override
     public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        });
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
         return Boolean.parseBoolean(result);
     }
 
@@ -132,16 +122,12 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public String getConfig(String dataId, String defaultValue) {
-        return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-        });
+        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT, false);
     }
 
     @Override
     public String getConfig(String dataId, long timeoutMills) {
-        return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return getConfig(dataId, null, timeoutMills);
-        });
+        return getConfig(dataId, null, timeoutMills, false);
     }
 
     @Override
@@ -150,17 +136,25 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     @Override
-    public String getConfig(String dataId, boolean now) {
-        return now ? getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT) : getConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    public String getConfig(String dataId, String content, long timeoutMills, boolean now) {
+        if (now) {
+            return getConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+        } else {
+            return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+                return getConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+            });
+        }
     }
 
     @Override
     public boolean putConfig(String dataId, String content) {
+        CONFIG_CACHE.put(dataId, content);
         return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content) {
+        CONFIG_CACHE.put(dataId, content);
         return putConfigIfAbsent(dataId, content, DEFAULT_CONFIG_TIMEOUT);
     }
 
