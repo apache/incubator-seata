@@ -106,7 +106,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getConfigNow(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;

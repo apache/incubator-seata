@@ -17,6 +17,7 @@ package io.seata.config;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.util.DurationUtil;
@@ -42,7 +43,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
         return Short.parseShort(result);
     }
 
@@ -58,7 +59,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
         return Integer.parseInt(result);
     }
 
@@ -74,7 +75,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
         return Long.parseLong(result);
     }
 
@@ -100,13 +101,13 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills, false);
+        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
         return DurationUtil.parse(result);
     }
 
     @Override
     public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills, false);
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
         return Boolean.parseBoolean(result);
     }
 
@@ -122,12 +123,12 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public String getConfig(String dataId, String defaultValue) {
-        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT, false);
+        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
     }
 
     @Override
     public String getConfig(String dataId, long timeoutMills) {
-        return getConfig(dataId, null, timeoutMills, false);
+        return getConfig(dataId, null, timeoutMills);
     }
 
     @Override
@@ -136,14 +137,10 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     @Override
-    public String getConfig(String dataId, String content, long timeoutMills, boolean now) {
-        if (now) {
-            return getConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
-        } else {
-            return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
-                return getConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
-            });
-        }
+    public String getConfig(String dataId, String content, long timeoutMills) {
+        return (String)CONFIG_CACHE.get(dataId, mappingFunction -> {
+            return getConfigNow(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+        });
     }
 
     @Override

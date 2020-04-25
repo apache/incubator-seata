@@ -144,7 +144,7 @@ public class FileConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getConfigNow(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -314,7 +314,7 @@ public class FileConfiguration extends AbstractConfiguration {
             while (true) {
                 try {
                     String currentConfig =
-                        ConfigurationFactory.getInstance().getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, true);
+                        ConfigurationFactory.getInstance().getConfigNow(dataId, null, DEFAULT_CONFIG_TIMEOUT);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);
