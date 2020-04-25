@@ -26,7 +26,7 @@ public class SqlDefaultExpr {
     /**
      * Get SqlDefaultExpr.
      *
-     * @return the sqlDefaultExpr
+     * @return the SqlDefaultExpr
      */
     public static SqlDefaultExpr get() {
         return instance;
