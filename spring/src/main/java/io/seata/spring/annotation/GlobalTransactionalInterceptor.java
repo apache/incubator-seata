@@ -72,8 +72,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis())
-            : null;
+        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
@@ -102,7 +101,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-                                           final GlobalTransactional globalTrxAnno) throws Throwable {
+        final GlobalTransactional globalTrxAnno) throws Throwable {
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
@@ -166,8 +165,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     private <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return method == null ? targetClass == null ? null : targetClass.getAnnotation(annotationClass)
-            : method.getAnnotation(annotationClass);
+        T annotation = null == method ? null : method.getAnnotation(annotationClass);
+        if (null == annotation) {
+            annotation = null == targetClass ? null : targetClass.getAnnotation(annotationClass);
+        }
+        return annotation;
     }
 
     private String formatMethod(Method method) {
