@@ -177,10 +177,12 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
+    @Override
     public String getQueryGlobalMax(String globalTable) {
         return QUERY_MAX_TRANS_ID.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
+    @Override
     public String getQueryBranchMax(String branchTable) {
         return QUERY_MAX_BTANCH_ID.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
