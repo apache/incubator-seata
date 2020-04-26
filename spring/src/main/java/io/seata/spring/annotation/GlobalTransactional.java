@@ -27,7 +27,7 @@ import io.seata.tm.api.transaction.TransactionInfo;
  * The interface Global transactional.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE})
 @Inherited
 public @interface GlobalTransactional {
 
