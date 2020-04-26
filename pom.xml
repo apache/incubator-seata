@@ -340,7 +340,7 @@
                                     <excludes>io/seata/integration/grpc/interceptor/</excludes>
                                 </configuration>
                                 <goals>
-                                    <goal>checkstyle-aggregate</goal>
+                                    <goal>checkstyle</goal>
                                 </goals>
                             </execution>
                         </executions>

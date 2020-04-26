@@ -88,7 +88,7 @@ public class ExecuteTemplate {
                     case INSERT:
                         executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
                                 new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[]{statementProxy, statementCallback, sqlRecognizer});;
+                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
