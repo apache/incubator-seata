@@ -61,7 +61,7 @@ public class ActionInterceptorHandler {
         String actionName = businessAction.name();
         BusinessActionContext actionContext = new BusinessActionContext();
         actionContext.setXid(xid);
-        //set action anme
+        //set action name
         actionContext.setActionName(actionName);
 
         //Creating Branch Record
