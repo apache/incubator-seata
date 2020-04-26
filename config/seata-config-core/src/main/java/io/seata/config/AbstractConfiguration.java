@@ -43,7 +43,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId) {
-        return getShort(dataId, (short)0);
+        return getShort(dataId, (short) 0);
     }
 
     @Override
