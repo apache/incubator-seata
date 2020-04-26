@@ -19,11 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.GlobalLockTemplate;
@@ -42,6 +39,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
+
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
 /**
@@ -49,7 +47,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
+public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -184,12 +182,4 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return sb.append(")").toString();
     }
 
-    @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
-            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                disable, event.getNewValue());
-            disable = Boolean.parseBoolean(event.getNewValue().trim());
-        }
-    }
 }

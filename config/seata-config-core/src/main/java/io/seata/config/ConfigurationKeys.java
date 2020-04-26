@@ -41,4 +41,15 @@ public final class ConfigurationKeys {
      * The constant FILE_ROOT_TYPE.
      */
     public static final String FILE_ROOT_TYPE = "type";
+
+    /**
+     * The constant SERVICE_PREFIX.
+     */
+    public static final String SERVICE_PREFIX = "service.";
+
+    /**
+     * The constant DISABLE_GLOBAL_TRANSACTION.
+     */
+    public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
+
 }

@@ -18,7 +18,7 @@ package io.seata.config;
 /**
  * @author funkye
  */
-public interface CacheConfigurationProvider {
+public interface ConfigurationCacheProvider {
     /**
      * provide a AbstractConfiguration implementation instance
      * @param originalConfiguration

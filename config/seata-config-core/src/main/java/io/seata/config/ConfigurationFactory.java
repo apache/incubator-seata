@@ -126,7 +126,7 @@ public final class ConfigurationFactory {
             configuration = EnhancedServiceLoader
                 .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
             try {
-                extConfiguration = EnhancedServiceLoader.load(CacheConfigurationProvider.class).provide(configuration);
+                extConfiguration = EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(configuration);
             } catch (EnhancedServiceNotFoundException ignore) {
 
             } catch (Exception e) {
