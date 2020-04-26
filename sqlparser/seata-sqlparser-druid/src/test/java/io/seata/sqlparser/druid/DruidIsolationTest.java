@@ -24,6 +24,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 /**
  * @author ggndnn
  */
@@ -34,7 +36,7 @@ public class DruidIsolationTest {
     public void testDruidIsolation() throws Exception {
         DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
-        SQLRecognizer sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL);
+        List<SQLRecognizer> sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL);
         Assertions.assertNotNull(sqlRecognizer);
         DruidLoader druidLoaderForTest = new DruidLoaderForTest();
         recognizerFactory.setClassLoader(new DruidIsolationClassLoader(druidLoaderForTest));
