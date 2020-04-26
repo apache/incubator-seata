@@ -13,31 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.provider;
+package io.seata.config;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.seata.config.CacheConfigurationProvider;
-import io.seata.config.Configuration;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
-import org.springframework.cglib.proxy.MethodProxy;
+import java.util.concurrent.ConcurrentHashMap;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 
 /**
  * @author funkye
  */
-public class SpringCacheConfigurationProvider implements CacheConfigurationProvider {
+public class SeataConfigurationCacheProvider implements ConfigurationCacheProvider {
 
     private static final String INTERCEPT_METHOD_PREFIX = "getConfig";
 
-    private static final long CACHE_SIZE = 100;
-
-    private static final long EXPIRE_TIME = 30 * 1000;
-
-    private static final Cache<String, Object> CONFIG_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+    private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
@@ -47,9 +38,7 @@ public class SpringCacheConfigurationProvider implements CacheConfigurationProvi
                 throws Throwable {
                 if (method.getName().equalsIgnoreCase(INTERCEPT_METHOD_PREFIX)) {
                     String rawDataId = (String)args[0];
-                    Object result = CONFIG_CACHE.get(rawDataId, mappingFuncation -> {
-                        return null;
-                    });
+                    Object result = CONFIG_CACHE.get(rawDataId);
                     if (null == result) {
                         result = method.invoke(originalConfiguration, args);
                         if (result != null) {
