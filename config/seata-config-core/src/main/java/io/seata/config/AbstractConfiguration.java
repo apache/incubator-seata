@@ -16,10 +16,6 @@
 package io.seata.config;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.util.DurationUtil;
 
 /**
@@ -28,13 +24,6 @@ import io.seata.common.util.DurationUtil;
  * @author slievrly
  */
 public abstract class AbstractConfiguration implements Configuration {
-
-    private static final long CACHE_SIZE = 100;
-
-    private static final long EXPIRE_TIME = 30 * 1000;
-
-    private static final Cache<String, Object> CONFIG_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.
@@ -54,7 +43,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId) {
-        return getShort(dataId, (short) 0);
+        return getShort(dataId, (short)0);
     }
 
     @Override
@@ -132,40 +121,22 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     @Override
+    public String getConfig(String dataId, String content, long timeoutMills) {
+        return getConfigNow(dataId, content, timeoutMills);
+    }
+
+    @Override
     public String getConfig(String dataId) {
         return getConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
     @Override
-    public String getConfig(String dataId, String content, long timeoutMills) {
-        Object result = CONFIG_CACHE.get(dataId, mappingFunction -> {
-            return null;
-        });
-        if (null == result) {
-            synchronized (AbstractConfiguration.class) {
-                result = CONFIG_CACHE.get(dataId, mappingFunction -> {
-                    return null;
-                });
-                if (null == result) {
-                    result = getConfigNow(dataId, content, DEFAULT_CONFIG_TIMEOUT);
-                    if (null != result) {
-                        CONFIG_CACHE.put(dataId, result);
-                    }
-                }
-            }
-        }
-        return (String)result;
-    }
-
-    @Override
     public boolean putConfig(String dataId, String content) {
-        CONFIG_CACHE.put(dataId, content);
         return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content) {
-        CONFIG_CACHE.put(dataId, content);
         return putConfigIfAbsent(dataId, content, DEFAULT_CONFIG_TIMEOUT);
     }
 
@@ -180,8 +151,4 @@ public abstract class AbstractConfiguration implements Configuration {
      * @return the type name
      */
     public abstract String getTypeName();
-
-    public static Cache<String, Object> getConfigCache() {
-        return CONFIG_CACHE;
-    }
 }

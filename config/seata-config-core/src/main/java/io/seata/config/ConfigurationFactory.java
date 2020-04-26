@@ -105,27 +105,36 @@ public final class ConfigurationFactory {
         } catch (Exception e) {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
+        Configuration extConfiguration = null;
+        Configuration configuration = null;
         if (ConfigType.File == configType) {
-            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
+            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            Configuration configuration = new FileConfiguration(name);
-            Configuration extConfiguration = null;
+            configuration = new FileConfiguration(name);
+            extConfiguration = null;
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load Configuration:{}",
-                        extConfiguration == null ? configuration.getClass().getSimpleName()
-                            : extConfiguration.getClass().getSimpleName());
+                    LOGGER.info("load Configuration:{}", extConfiguration == null
+                        ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 
             } catch (Exception e) {
                 LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
-            return null == extConfiguration ? configuration : extConfiguration;
         } else {
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
-                .provide();
+            configuration = EnhancedServiceLoader
+                .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+            try {
+                extConfiguration = EnhancedServiceLoader.load(CacheConfigurationProvider.class).provide(configuration);
+            } catch (EnhancedServiceNotFoundException ignore) {
+
+            } catch (Exception e) {
+                LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
+            }
         }
+        return null == extConfiguration ? configuration : extConfiguration;
     }
 }

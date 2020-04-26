@@ -320,7 +320,6 @@ public class FileConfiguration extends AbstractConfiguration {
                         listenedConfigMap.put(dataId, currentConfig);
                         event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
                         listener.onChangeEvent(event);
-                        getConfigCache().put(dataId,currentConfig);
                     }
                 } catch (Exception exx) {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage());
