@@ -105,13 +105,12 @@ public final class ConfigurationFactory {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
         Configuration extConfiguration = null;
-        Configuration configuration = null;
+        Configuration configuration;
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
                 ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
-            extConfiguration = null;
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
