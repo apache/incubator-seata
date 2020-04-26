@@ -108,15 +108,15 @@ seata:
       password: ""
   saga:
     enabled: false
-    async-thread-pool:
-      core-pool-size: 1
-      max-pool-size: 20
-      keep-alive-time: 60
     state-machine:
       application-id: ${spring.application.name:}
       tx-service-group: ${seata.tx-service-group:}
       table-prefix: seata_
       enable-async: false
+      async-thread-pool:
+        core-pool-size: 1
+        max-pool-size: 20
+        keep-alive-time: 60
       rm-report-success-enable: false
       saga-branch-register-enable: false
       trans-operation-timeout: 1800000

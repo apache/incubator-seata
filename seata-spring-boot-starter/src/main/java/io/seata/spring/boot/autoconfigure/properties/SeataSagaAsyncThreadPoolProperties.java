@@ -19,12 +19,12 @@ import io.seata.spring.boot.autoconfigure.StarterConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Saga state machine thread pool properties.
+ * Saga state machine async thread pool properties.
  *
  * @author wang.liang
  */
-@ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.async-thread-pool")
-public class SeataSagaThreadPoolProperties {
+@ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine.async-thread-pool")
+public class SeataSagaAsyncThreadPoolProperties {
 
     /**
      * core pool size.

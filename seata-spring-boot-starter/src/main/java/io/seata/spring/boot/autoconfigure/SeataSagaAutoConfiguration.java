@@ -20,7 +20,7 @@ import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine;
 import io.seata.saga.rm.StateMachineEngineHolder;
-import io.seata.spring.boot.autoconfigure.properties.SeataSagaThreadPoolProperties;
+import io.seata.spring.boot.autoconfigure.properties.SeataSagaAsyncThreadPoolProperties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -81,15 +81,15 @@ public class SeataSagaAutoConfiguration {
 
     @Configuration
     @ConditionalOnProperty(name = StarterConstants.SEATA_PREFIX + ".saga.state-machine.enable-async", havingValue = "true")
-    @EnableConfigurationProperties({SeataSagaThreadPoolProperties.class})
-    static class SagaAsyncExecuteThreadPoolConfiguration {
+    @EnableConfigurationProperties({SeataSagaAsyncThreadPoolProperties.class})
+    static class SagaAsyncThreadPoolExecutorConfiguration {
 
         /**
          * Create state machine async thread pool executor bean.
          */
         @Bean
         @ConditionalOnMissingBean
-        public ThreadPoolExecutor sagaStateMachineThreadPoolExecutor(SeataSagaThreadPoolProperties properties) {
+        public ThreadPoolExecutor sagaStateMachineAsyncThreadPoolExecutor(SeataSagaAsyncThreadPoolProperties properties) {
             ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
             threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
             threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
