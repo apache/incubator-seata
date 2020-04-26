@@ -16,6 +16,7 @@
 package io.seata.integration.dubbo;
 
 import io.seata.common.util.StringUtils;
+import io.seata.core.constants.DubboConstants;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import org.apache.dubbo.common.extension.Activate;
@@ -27,7 +28,6 @@ import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.seata.core.constants.DubboConstants;
 
 /**
  * The type Transaction propagation filter.
@@ -61,7 +61,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                 }
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
+                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType != null ? rpcBranchType : "AT");
                 }
             }
         }
@@ -75,17 +75,17 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
+                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType != null ? previousBranchType : "AT");
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
-                            rpcBranchType, previousBranchType);
+                            rpcBranchType != null ? rpcBranchType : "AT", previousBranchType != null ? previousBranchType : "AT");
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
                         if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
                             RootContext.bindBranchType(BranchType.TCC);
-                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
+                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType != null ? previousBranchType : "AT");
                         }
                     }
                 }

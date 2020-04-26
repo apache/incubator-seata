@@ -64,7 +64,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                 }
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
+                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType != null ? rpcBranchType : "AT");
                 }
             }
         }
@@ -78,17 +78,17 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
+                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType != null ? previousBranchType : "AT");
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
-                            rpcBranchType, previousBranchType);
+                            rpcBranchType != null ? rpcBranchType : "AT", previousBranchType != null ? previousBranchType : "AT");
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
                         if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
                             RootContext.bindBranchType(BranchType.TCC);
-                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
+                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType != null ? previousBranchType : "AT");
                         }
                     }
                 }
