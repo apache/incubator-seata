@@ -106,3 +106,23 @@ seata:
       connect-timeout: 2000
       username: ""
       password: ""
+  saga:
+    enabled: false
+    async-thread-pool:
+      core-pool-size: 1
+      max-pool-size: 20
+      keep-alive-time: 60
+    state-machine:
+      application-id: ${spring.application.name:}
+      tx-service-group: ${seata.tx-service-group:}
+      table-prefix: seata_
+      enable-async: false
+      rm-report-success-enable: false
+      saga-branch-register-enable: false
+      trans-operation-timeout: 1800000
+      service-invoke-timeout: 300000
+      auto-register-resources: true
+      resources:
+        - classpath*:statelang/*.json
+      default-tenant-id: 000001
+      charset: UTF-8
