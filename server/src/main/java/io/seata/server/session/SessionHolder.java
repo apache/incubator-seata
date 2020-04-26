@@ -80,13 +80,10 @@ public class SessionHolder {
      */
     public static void init(String mode) throws IOException {
         if (StringUtils.isBlank(mode)) {
-            //use default
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         }
-        //the store mode
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
-            //database store
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
@@ -95,7 +92,6 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
-            //file store
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
             if (StringUtils.isBlank(sessionStorePath)) {
@@ -121,7 +117,6 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        //relaod
         reload();
     }
 
@@ -156,7 +151,6 @@ public class SessionHolder {
                             break;
                         default: {
                             ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-                            // Lock
                             branchSessions.forEach(branchSession -> {
                                 try {
                                     branchSession.lock();
@@ -192,12 +186,9 @@ public class SessionHolder {
                                 default:
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
-
                             break;
-
                         }
                     }
-
                 });
             }
         }
