@@ -89,11 +89,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
-    private boolean enableAsync;
+    private boolean enableAsync = false;
     private ServiceInvokerManager serviceInvokerManager;
 
     private boolean autoRegisterResources = true;
-    private String[] resources;
+    private String[] resources = new String[]{"classpath*:statelang/*.json"};
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
 

@@ -55,7 +55,7 @@ public class SeataSagaAutoConfiguration {
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
     @ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine")
-    public DbStateMachineConfig dbStateMachineConfig(DataSource dataSource,
+    public StateMachineConfig dbStateMachineConfig(DataSource dataSource,
         @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor) {
         DbStateMachineConfig config = new DbStateMachineConfig();
         config.setDataSource(dataSource);
@@ -89,7 +89,8 @@ public class SeataSagaAutoConfiguration {
          */
         @Bean
         @ConditionalOnMissingBean
-        public ThreadPoolExecutor sagaStateMachineAsyncThreadPoolExecutor(SeataSagaAsyncThreadPoolProperties properties) {
+        public ThreadPoolExecutor sagaStateMachineAsyncThreadPoolExecutor(
+            SeataSagaAsyncThreadPoolProperties properties) {
             ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
             threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
             threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
