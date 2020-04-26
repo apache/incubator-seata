@@ -13,27 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.spring.boot.autoconfigure.properties.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
+
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = CONFIG_FILE_PREFIX)
-public class ConfigFileProperties {
-    private String name = "file.conf";
+@ConfigurationProperties(prefix = CONFIG_ETCD3_PREFIX)
+public class ConfigEtcd3Properties {
+    private String serverAddr = "http://localhost:2379";
 
-    public String getName() {
-        return name;
+    public String getServerAddr() {
+        return serverAddr;
     }
 
-    public ConfigFileProperties setName(String name) {
-        this.name = name;
+    public ConfigEtcd3Properties setServerAddr(String serverAddr) {
+        this.serverAddr = serverAddr;
         return this;
     }
+
 }
