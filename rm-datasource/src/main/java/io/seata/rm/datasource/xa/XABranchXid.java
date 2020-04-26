@@ -49,10 +49,12 @@ public class XABranchXid implements XAXid {
         decode();
     }
 
+    @Override
     public String getGlobalXid() {
         return xid;
     }
 
+    @Override
     public long getBranchId() {
         return branchId;
     }
