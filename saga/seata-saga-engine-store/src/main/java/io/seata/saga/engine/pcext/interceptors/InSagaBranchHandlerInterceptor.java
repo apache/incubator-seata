@@ -16,6 +16,7 @@
 package io.seata.saga.engine.pcext.interceptors;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.saga.engine.exception.EngineExecutionException;
@@ -43,33 +44,32 @@ public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {
         // get xid
         String xid = this.getXidFromProcessContext(context);
 
-        // set xidType
-        RootContext.bindInterceptorType(xid, BranchType.SAGA);
-
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[{}] Handle the state instance in the saga branch.", xid);
+        // logger.warn if previousXid is not equals to xid
+        if (LOGGER.isWarnEnabled()) {
+            String previousXid = RootContext.getXID();
+            if (previousXid != null) {
+                if (!StringUtils.equalsIgnoreCase(previousXid, xid)) {
+                    LOGGER.warn("xid in change from {} to {}, Please don't use state machine engine in other global transaction.",
+                        previousXid, xid);
+                }
+            }
         }
 
-        // unbind
-        String currentXid = RootContext.unbind();
-        if (currentXid != null && !currentXid.equalsIgnoreCase(xid)) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Xid from {} to {}, Please don't use state machine engine in other global transaction.",
-                    currentXid, xid);
-            }
+        // bind xid and branchType
+        RootContext.bind(xid);
+        RootContext.bindBranchType(BranchType.SAGA);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("[{}] Begin process the state instance in the saga branch.", xid);
         }
     }
 
     @Override
     public void postProcess(ProcessContext context, Exception exp) throws EngineExecutionException {
-        // get xid
-        String xid = this.getXidFromProcessContext(context);
-
-        // unbind xidType
-        RootContext.unbindInterceptorType();
-
+        // unbind xid and branchType
+        String xid = RootContext.unbind();
+        RootContext.unbindBranchType();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[{}] End of branch transaction.", xid);
+            LOGGER.info("[{}] Finish process the state instance in the saga branch.", xid);
         }
     }
 

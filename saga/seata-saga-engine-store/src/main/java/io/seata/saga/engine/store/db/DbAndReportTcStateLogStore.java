@@ -102,9 +102,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
             }
 
-            // set xidType = saga
+            // bind branchType to SAGA
             if (RootContext.inGlobalTransaction()) {
-                RootContext.bindInterceptorType(machineInstance.getId(), BranchType.SAGA);
+                RootContext.bindBranchType(BranchType.SAGA);
             }
 
             // save to db
@@ -183,7 +183,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 }
             }
             RootContext.unbind();
-            RootContext.unbindInterceptorType();
+            RootContext.unbindBranchType();
         }
     }
 
