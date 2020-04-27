@@ -201,10 +201,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
         String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-                : FILE_CONFIG.getConfig(getNacosUserName());
+            : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
             String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                    : FILE_CONFIG.getConfig(getNacosPassword());
+                : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
