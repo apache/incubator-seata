@@ -68,7 +68,7 @@ public class ExecuteTemplate {
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
 
-        if (!executeInATMode()) {
+        if (!shouldExecuteInATMode()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
@@ -118,7 +118,7 @@ public class ExecuteTemplate {
         return rs;
     }
 
-    private static boolean executeInATMode() {
+    private static boolean shouldExecuteInATMode() {
         if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
             return false;
         }
