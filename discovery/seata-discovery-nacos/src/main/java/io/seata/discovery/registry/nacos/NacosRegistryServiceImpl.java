@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-import com.alibaba.nacos.api.naming.NamingFactory;
+import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
@@ -171,7 +171,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         if (null == naming) {
             synchronized (NacosRegistryServiceImpl.class) {
                 if (null == naming) {
-                    naming = NamingFactory.createNamingService(getNamingProperties());
+                    naming = NacosFactory.createNamingService(getNamingProperties());
                 }
             }
         }
@@ -235,12 +235,12 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     private static String getNacosUserName() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE,
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE,
             USER_NAME);
     }
 
     private static String getNacosPassword() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, REGISTRY_TYPE,
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE,
             PASSWORD);
     }
 }
