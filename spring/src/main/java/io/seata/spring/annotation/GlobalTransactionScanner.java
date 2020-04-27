@@ -216,6 +216,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
                     if (interceptor == null) {
                         interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                        ConfigurationFactory.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION);
                     }
                 }
 

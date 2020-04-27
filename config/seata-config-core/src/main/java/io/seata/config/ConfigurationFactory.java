@@ -15,11 +15,14 @@
  */
 package io.seata.config;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,8 @@ public final class ConfigurationFactory {
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
     public static final Configuration CURRENT_FILE_INSTANCE;
+
+    private static final Set<String> LISTENER_KEYS = new HashSet<>();
 
     static {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
@@ -88,12 +93,19 @@ public final class ConfigurationFactory {
             synchronized (Configuration.class) {
                 if (instance == null) {
                     instance = buildConfiguration();
-                    instance.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                        (ConfigurationChangeListener)SeataConfigurationCacheProvider.getInstance());
                 }
             }
         }
         return instance;
+    }
+
+    public static synchronized void addConfigListener(String key) {
+        if (StringUtils.isBlank(key) || LISTENER_KEYS.contains(key)) {
+            return;
+        }
+        getInstance().addConfigListener(key,
+            (ConfigurationChangeListener)SeataConfigurationCacheProvider.getInstance());
+        LISTENER_KEYS.add(key);
     }
 
     private static Configuration buildConfiguration() {

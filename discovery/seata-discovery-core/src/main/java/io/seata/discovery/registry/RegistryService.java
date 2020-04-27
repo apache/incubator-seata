@@ -99,6 +99,8 @@ public interface RegistryService<T> {
      */
     default String getServiceGroup(String key) {
         Configuration config = ConfigurationFactory.getInstance();
-        return config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        key = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+        ConfigurationFactory.addConfigListener(key);
+        return config.getConfig(key);
     }
 }
