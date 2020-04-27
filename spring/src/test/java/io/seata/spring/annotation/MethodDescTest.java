@@ -18,6 +18,7 @@ package io.seata.spring.annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Wu
  */
-@GlobalTransactional
 public class MethodDescTest {
 
     private static final GlobalTransactionScanner GLOBAL_TRANSACTION_SCANNER = new GlobalTransactionScanner(
@@ -44,16 +44,19 @@ public class MethodDescTest {
 
     @Test
     public void testGetAnnotation() throws NoSuchMethodException {
-        Method  method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
-        Class<?> targetClass = null;
+        Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
+        targetClass = Mockito.mock(MockBusiness.class).getClass();
         transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
             .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
-        Assertions.assertNotNull(transactional);
-        targetClass = Mockito.mock(MethodDescTest.class).getClass();
+        Assertions.assertEquals(transactional.timeoutMills(), 300000);
         method = null;
         transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
             .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
-        Assertions.assertNotNull(transactional);
+        Assertions.assertEquals(transactional.timeoutMills(), TransactionInfo.DEFAULT_TIME_OUT * 2);
+        targetClass = null;
+        transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
+        Assertions.assertNull(transactional);
     }
 
     @Test
@@ -99,6 +102,7 @@ public class MethodDescTest {
     /**
      * the type mock business
      */
+    @GlobalTransactional(timeoutMills = TransactionInfo.DEFAULT_TIME_OUT * 2)
     private static class MockBusiness {
         @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
         public String doBiz(String msg) {
