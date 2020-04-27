@@ -38,7 +38,7 @@ import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
 
 /**
- * The type Nacos registry service.
+ * The type Nacos registry service .
  *
  * @author slievrly
  */
