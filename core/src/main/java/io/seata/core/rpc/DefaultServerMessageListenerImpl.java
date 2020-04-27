@@ -105,8 +105,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx,
-                               RegisterCheckAuthHandler checkAuthHandler) {
+    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
         RegisterRMRequest message = (RegisterRMRequest)request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
@@ -117,8 +116,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort,
-                        message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
@@ -138,8 +136,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx,
-                               RegisterCheckAuthHandler checkAuthHandler) {
+    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
         RegisterTMRequest message = (RegisterTMRequest)request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
@@ -151,8 +148,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort,
-                        message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
