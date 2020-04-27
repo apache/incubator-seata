@@ -17,7 +17,7 @@ you only need to follow the instructions below and keep the corresponding config
 ## Nacos
 shell:
 ```bash
-sh ${SEATAPATH}/script/config-center/nacos/nacos-config.sh -h localhost -p 8848 -g SEATA_GROUP -t 5a3c7d6c-f497-4d68-a71a-2e5e3340b3ca
+sh ${SEATAPATH}/script/config-center/nacos/nacos-config.sh -h localhost -p 8848 -g SEATA_GROUP -t 5a3c7d6c-f497-4d68-a71a-2e5e3340b3ca -u username -w password
 ```
 
 Parameter Description:
@@ -29,6 +29,10 @@ Parameter Description:
 -g: Configure grouping, the default value is 'SEATA_GROUP'.
 
 -t: Tenant information, corresponding to the namespace ID field of Nacos, the default value is ''.
+
+-u: username, nacos 1.2.0+ on permission control, the default value is ''.
+
+-w: password, nacos 1.2.0+ on permission control, the default value is ''.
 
 python:
 ```bash
