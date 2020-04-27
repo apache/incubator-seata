@@ -163,14 +163,16 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
+        RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register RM success. server version:{},channel:{}", ((RegisterRMResponse)response).getVersion(), channel);
+            LOGGER.info("register RM success. client version:{}, server version:{},channel:{}",
+                registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
         String dbKey = getMergedResourceKeys();
-        RegisterRMRequest message = (RegisterRMRequest)requestMessage;
-        if (message.getResourceIds() != null) {
-            if (!message.getResourceIds().equals(dbKey)) {
+        if (registerRMRequest.getResourceIds() != null) {
+            if (!registerRMRequest.getResourceIds().equals(dbKey)) {
                 sendRegisterMessage(serverAddress, channel, dbKey);
             }
         }
@@ -180,11 +182,12 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void onRegisterMsgFail(String serverAddress, Channel channel, Object response,
                                   AbstractMessage requestMessage) {
-
-        if (response instanceof RegisterRMResponse && LOGGER.isInfoEnabled()) {
-            LOGGER.info("register RM failed. server version:{}", ((RegisterRMResponse)response).getVersion());
-        }
-        throw new FrameworkException("register RM failed, channel:" + channel);
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
+        RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
+        String errMsg = String.format(
+            "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s",
+            registerRMRequest.getVersion(), registerRMResponse.getVersion(), registerRMResponse.getMsg(), channel);
+        throw new FrameworkException(errMsg);
     }
 
     /**
