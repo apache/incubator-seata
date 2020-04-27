@@ -139,13 +139,18 @@ public final class ConfigurationFactory {
         } else {
             configuration = EnhancedServiceLoader
                 .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
-            try {
+        }
+        try {
+            if (null != extConfiguration) {
+                extConfiguration =
+                    EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(extConfiguration);
+            } else {
                 extConfiguration = EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(configuration);
-            } catch (EnhancedServiceNotFoundException ignore) {
-
-            } catch (Exception e) {
-                LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
+        } catch (EnhancedServiceNotFoundException ignore) {
+
+        } catch (Exception e) {
+            LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
         }
         return null == extConfiguration ? configuration : extConfiguration;
     }
