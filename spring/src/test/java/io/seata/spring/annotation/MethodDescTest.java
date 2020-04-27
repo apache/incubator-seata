@@ -17,24 +17,43 @@ package io.seata.spring.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Wu
  */
+@GlobalTransactional
 public class MethodDescTest {
 
     private static final GlobalTransactionScanner GLOBAL_TRANSACTION_SCANNER = new GlobalTransactionScanner(
         "global-trans-scanner-test");
     private static Method method = null;
+    private static Class<?> targetClass = null;
     private static GlobalTransactional transactional = null;
 
     public MethodDescTest() throws NoSuchMethodException {
         method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         transactional = method.getAnnotation(GlobalTransactional.class);
+    }
+
+    @Test
+    public void testGetAnnotation() throws NoSuchMethodException {
+        Method  method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
+        Class<?> targetClass = null;
+        transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
+        Assertions.assertNotNull(transactional);
+        targetClass = Mockito.mock(MethodDescTest.class).getClass();
+        method = null;
+        transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
+        Assertions.assertNotNull(transactional);
     }
 
     @Test

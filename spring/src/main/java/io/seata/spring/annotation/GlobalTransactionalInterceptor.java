@@ -18,6 +18,7 @@ package io.seata.spring.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -165,11 +166,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     private <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        T annotation = null == method ? null : method.getAnnotation(annotationClass);
-        if (null == annotation) {
-            annotation = null == targetClass ? null : targetClass.getAnnotation(annotationClass);
-        }
-        return annotation;
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
 
     private String formatMethod(Method method) {
