@@ -166,8 +166,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
         RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register RM success. client version:{}, server version:{},channel:{}",
-                registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
+            LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
         String dbKey = getMergedResourceKeys();
@@ -185,8 +184,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
         RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
         String errMsg = String.format(
-            "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s",
-            registerRMRequest.getVersion(), registerRMResponse.getVersion(), registerRMResponse.getMsg(), channel);
+            "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerRMRequest.getVersion(), registerRMResponse.getVersion(), registerRMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
     }
 

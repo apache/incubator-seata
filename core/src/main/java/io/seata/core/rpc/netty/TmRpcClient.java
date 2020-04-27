@@ -154,8 +154,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest)requestMessage;
         RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register TM success. client version:{}, server version:{},channel:{}",
-                registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
+            LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
     }
@@ -166,8 +165,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest)requestMessage;
         RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
         String errMsg = String.format(
-            "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s",
-            registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
+            "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
     }
 }
