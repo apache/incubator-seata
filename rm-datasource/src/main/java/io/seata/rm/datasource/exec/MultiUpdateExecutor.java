@@ -44,7 +44,7 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author wangwei -ying
+ * @author wangwei-ying
  */
 public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
