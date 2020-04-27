@@ -17,7 +17,6 @@ package io.seata.spring.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -37,6 +36,8 @@ public class MethodDescTest {
     private static Class<?> targetClass = null;
     private static GlobalTransactional transactional = null;
 
+    private static final GlobalTransactionalInterceptor globalTransactionalInterceptor=new GlobalTransactionalInterceptor(null);
+
     public MethodDescTest() throws NoSuchMethodException {
         method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         transactional = method.getAnnotation(GlobalTransactional.class);
@@ -46,16 +47,12 @@ public class MethodDescTest {
     public void testGetAnnotation() throws NoSuchMethodException {
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
-        transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertEquals(transactional.timeoutMills(), 300000);
         method = null;
-        transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
-        Assertions.assertEquals(transactional.timeoutMills(), TransactionInfo.DEFAULT_TIME_OUT * 2);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         targetClass = null;
-        transactional = Optional.ofNullable(method).map(m -> m.getAnnotation(GlobalTransactional.class))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(GlobalTransactional.class)).orElse(null));
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertNull(transactional);
     }
 
