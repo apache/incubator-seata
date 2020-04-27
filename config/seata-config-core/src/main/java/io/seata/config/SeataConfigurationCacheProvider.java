@@ -24,12 +24,12 @@ import net.sf.cglib.proxy.MethodProxy;
 /**
  * @author funkye
  */
-public class SeataConfigurationCacheProvider implements ConfigurationCacheProvider {
+public class SeataConfigurationCacheProvider implements ConfigurationCacheProvider, ConfigurationChangeListener {
 
     private static final String INTERCEPT_METHOD_PREFIX = "getConfig";
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
-
+    
     @Override
     public Configuration provide(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class, new MethodInterceptor() {
@@ -54,4 +54,21 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
             }
         });
     }
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        Object oldValue = CONFIG_CACHE.get(event.getDataId());
+        if (null == oldValue || !oldValue.equals(event.getNewValue())) {
+            CONFIG_CACHE.put(event.getDataId(), event.getNewValue());
+        }
+    }
+
+    public static SeataConfigurationCacheProvider getInstance() {
+        return SeataConfigurationCacheProviderInstance.INSTANCE;
+    }
+
+    private static class SeataConfigurationCacheProviderInstance {
+        private static final SeataConfigurationCacheProvider INSTANCE = new SeataConfigurationCacheProvider();
+    }
+
 }

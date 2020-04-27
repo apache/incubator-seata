@@ -78,6 +78,8 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         final GlobalTransactional globalTransactionalAnnotation =
             getAnnotation(method, targetClass, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+        disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
         if (!disable && globalTransactionalAnnotation != null) {
             return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
         } else if (!disable && globalLockAnnotation != null) {

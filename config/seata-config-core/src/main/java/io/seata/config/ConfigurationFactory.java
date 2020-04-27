@@ -88,6 +88,8 @@ public final class ConfigurationFactory {
             synchronized (Configuration.class) {
                 if (instance == null) {
                     instance = buildConfiguration();
+                    instance.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                        (ConfigurationChangeListener)SeataConfigurationCacheProvider.getInstance());
                 }
             }
         }
