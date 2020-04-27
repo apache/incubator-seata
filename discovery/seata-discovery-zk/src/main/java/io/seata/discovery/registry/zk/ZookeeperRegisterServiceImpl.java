@@ -223,14 +223,14 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     // visible for test.
     ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
         ZkClient zkClient = new ZkClient(address, sessionTimeout, connectTimeout);
-        if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
-            zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
-        }
         if (null != authInfo && authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
                 StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
                 zkClient.addAuthInfo("digest", auth.toString().getBytes());
             }
+        }
+        if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
+            zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
         }
         zkClient.subscribeStateChanges(new IZkStateListener() {
 
