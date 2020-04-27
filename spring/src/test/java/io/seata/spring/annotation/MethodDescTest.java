@@ -36,8 +36,6 @@ public class MethodDescTest {
     private static Class<?> targetClass = null;
     private static GlobalTransactional transactional = null;
 
-    private static final GlobalTransactionalInterceptor globalTransactionalInterceptor=new GlobalTransactionalInterceptor(null);
-
     public MethodDescTest() throws NoSuchMethodException {
         method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         transactional = method.getAnnotation(GlobalTransactional.class);
@@ -45,6 +43,7 @@ public class MethodDescTest {
 
     @Test
     public void testGetAnnotation() throws NoSuchMethodException {
+        GlobalTransactionalInterceptor globalTransactionalInterceptor = new GlobalTransactionalInterceptor(null);
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
