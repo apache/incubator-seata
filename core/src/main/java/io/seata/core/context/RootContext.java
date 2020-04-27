@@ -15,13 +15,14 @@
  */
 package io.seata.core.context;
 
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 
 /**
  * The type Root context.
@@ -41,7 +42,10 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_XID_INTERCEPTOR_TYPE = "tx-xid-interceptor-type";
+    /**
+     * The constant KEY_BRANCH_TYPE
+     */
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
@@ -57,22 +61,7 @@ public class RootContext {
         if (StringUtils.isNotBlank(xid)) {
             return xid;
         }
-
-        String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType) && xidType.contains("_")) {
-            return xidType.split("_")[0];
-        }
-
         return null;
-    }
-
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public static String getXIDInterceptorType() {
-        return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
     }
 
     /**
@@ -85,36 +74,6 @@ public class RootContext {
             LOGGER.debug("bind {}", xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
-    }
-
-    /**
-     * Bind interceptor type
-     *
-     * @param xidType
-     */
-    public static void bindInterceptorType(String xidType) {
-        if (StringUtils.isNotBlank(xidType)) {
-
-            String[] xidTypes = xidType.split("_");
-
-            if (xidTypes.length == 2) {
-                bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
-            }
-        }
-    }
-
-    /**
-     * Bind interceptor type
-     *
-     * @param xid
-     * @param branchType
-     */
-    public static void bindInterceptorType(String xid, BranchType branchType) {
-        String xidType = String.format("%s_%s", xid, branchType.name());
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind interceptor type xid={} branchType={}", xid, branchType);
-        }
-        CONTEXT_HOLDER.put(KEY_XID_INTERCEPTOR_TYPE, xidType);
     }
 
     /**
@@ -143,19 +102,6 @@ public class RootContext {
         return xid;
     }
 
-    /**
-     * Unbind temporary string
-     *
-     * @return the string
-     */
-    public static String unbindInterceptorType() {
-        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind inteceptor type {}", xidType);
-        }
-        return xidType;
-    }
-
     public static void unbindGlobalLockFlag() {
         String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
         if (LOGGER.isDebugEnabled() && lockFlag != null) {
@@ -170,6 +116,45 @@ public class RootContext {
      */
     public static boolean inGlobalTransaction() {
         return CONTEXT_HOLDER.get(KEY_XID) != null;
+    }
+
+    /**
+     * get the branch type
+     *
+     * @return the branch type String
+     */
+    public static String getBranchType() {
+        String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+        if (StringUtils.isNotBlank(branchType)) {
+            return branchType;
+        }
+        return null;
+    }
+
+    /**
+     * bind branch type
+     *
+     * @param branchType the branch type
+     */
+    public static void bindBranchType(BranchType branchType) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("bind branch type {}", branchType);
+        }
+
+        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, branchType.name());
+    }
+
+    /**
+     * unbind branch type
+     *
+     * @return the previous branch type string
+     */
+    public static String unbindBranchType() {
+        String unbindBranchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind branch type {}", unbindBranchType);
+        }
+        return unbindBranchType;
     }
 
     /**
