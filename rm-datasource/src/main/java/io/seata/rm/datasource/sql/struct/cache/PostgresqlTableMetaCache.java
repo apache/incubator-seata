@@ -31,8 +31,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Table meta cache.
@@ -42,8 +40,6 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlTableMetaCache.class);
-
     private KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
 
     @Override
@@ -51,26 +47,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //get schema name
-        try (Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery("select current_schema()")) {
-
-            if (!rs.next()) {
-                return null;
-            }
-            String schemaName = rs.getString(1);
-            cacheKey.append(schemaName);
-            cacheKey.append(".");
-        } catch (SQLException e) {
-            LOGGER.error("could not get cache key.", e);
-            return null;
-        }
-
-        /*
-         * get table name
-         *
-         * separate it to schemaName and tableName like "select id from public.table"
-         */
         String[] tableNameWithSchema = tableName.split("\\.");
         String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
 
