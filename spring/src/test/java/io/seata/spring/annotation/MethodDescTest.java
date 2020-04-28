@@ -50,9 +50,20 @@ public class MethodDescTest {
         Assertions.assertEquals(transactional.timeoutMills(), 300000);
         method = null;
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        Assertions.assertEquals(transactional.timeoutMills(), TransactionInfo.DEFAULT_TIME_OUT * 2);
         targetClass = null;
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertNull(transactional);
+        // only class has Annotation, method is not null
+        targetClass = Mockito.mock(MockMethodAnnotation.class).getClass();
+        method = MockMethodAnnotation.class.getDeclaredMethod("doBiz", String.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        Assertions.assertEquals(transactional.name(), "doBiz");
+        // only method has Annotation, class is not null
+        targetClass = Mockito.mock(MockClassAnnotation.class).getClass();
+        method = MockClassAnnotation.class.getDeclaredMethod("doBiz", String.class);
+        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        Assertions.assertEquals(transactional.name(), "MockClassAnnotation");
     }
 
     @Test
@@ -101,6 +112,26 @@ public class MethodDescTest {
     @GlobalTransactional(timeoutMills = TransactionInfo.DEFAULT_TIME_OUT * 2)
     private static class MockBusiness {
         @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+        public String doBiz(String msg) {
+            return "hello " + msg;
+        }
+    }
+
+    /**
+     * the type mock class annotation
+     */
+    @GlobalTransactional(name = "MockClassAnnotation")
+    private static class MockClassAnnotation {
+        public String doBiz(String msg) {
+            return "hello " + msg;
+        }
+    }
+
+    /**
+     * the type mock method annotation
+     */
+    private static class MockMethodAnnotation {
+        @GlobalTransactional(name = "doBiz")
         public String doBiz(String msg) {
             return "hello " + msg;
         }
