@@ -80,7 +80,7 @@ public class Version {
         long current = convertVersion(CURRENT);
         long clientVersion = convertVersion(version);
         long divideVersion = convertVersion(VERSION_0_7_1);
-        if ((current - divideVersion > 0 && clientVersion - divideVersion < 0) || (current - divideVersion < 0 && clientVersion - divideVersion > 0)) {
+        if ((current > divideVersion && clientVersion < divideVersion) || (current < divideVersion && clientVersion > divideVersion)) {
             throw new IncompatibleVersionException("incompatible client version:" + version);
         }
     }
