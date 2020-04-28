@@ -93,6 +93,7 @@ public class Version {
         if (size > MAX_VERSION_DOT + 1) {
             throw new IncompatibleVersionException("incompatible version format:" + version);
         }
+        size = MAX_VERSION_DOT + 1;
         for (String part : parts) {
             if (StringUtils.isNumeric(part)) {
                 result += Long.valueOf(part) * Double.valueOf(Math.pow(100, size - i)).longValue();
