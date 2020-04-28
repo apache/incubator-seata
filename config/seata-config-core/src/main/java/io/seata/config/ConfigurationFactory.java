@@ -141,11 +141,16 @@ public final class ConfigurationFactory {
                 .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
         }
         try {
+            Configuration configurationCache;
             if (null != extConfiguration) {
-                extConfiguration =
+                configurationCache =
                     EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(extConfiguration);
             } else {
-                extConfiguration = EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(configuration);
+                configurationCache =
+                    EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(configuration);
+            }
+            if (null != configurationCache) {
+                extConfiguration = configurationCache;
             }
         } catch (EnhancedServiceNotFoundException ignore) {
 
