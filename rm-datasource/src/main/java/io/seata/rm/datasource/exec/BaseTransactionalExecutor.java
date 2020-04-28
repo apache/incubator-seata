@@ -47,10 +47,9 @@ import java.util.StringJoiner;
 /**
  * The type Base transactional executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
@@ -69,6 +68,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected SQLRecognizer sqlRecognizer;
 
+    /**
+     * The Sql recognizer.
+     */
+    protected List<SQLRecognizer> sqlRecognizers;
+
     private TableMeta tableMeta;
 
     /**
@@ -83,6 +87,20 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
+    }
+
+    /**
+     * Instantiates a new Base transactional executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the multi sql recognizer
+     */
+    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
+                                     List<SQLRecognizer> sqlRecognizers) {
+        this.statementProxy = statementProxy;
+        this.statementCallback = statementCallback;
+        this.sqlRecognizers = sqlRecognizers;
     }
 
     @Override
@@ -240,6 +258,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * the columns contains table meta pk
+     *
      * @param columns the column name list
      * @return true: contains pk false: not contains pk
      */
@@ -253,6 +272,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * compare column name and primary key name
+     *
      * @param columnName the primary key column name
      * @return true: contain false: not contain
      */
@@ -417,6 +437,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * get db type
+     *
      * @return
      */
     protected String getDbType() {

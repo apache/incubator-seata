@@ -115,4 +115,12 @@ public class Constants {
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
     public static final String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
+    /**
+     * The constant BEAN_NAME_FAILURE_HANDLER
+     */
+    public static final String BEAN_NAME_FAILURE_HANDLER = "failureHandler";
+    /**
+     * The constant SAGA_TRANS_NAME_PREFIX
+     */
+    public static final String SAGA_TRANS_NAME_PREFIX = "$Saga_";
 }

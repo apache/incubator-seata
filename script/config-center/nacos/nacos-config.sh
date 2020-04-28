@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-while getopts ":h:p:g:t:" opt
+while getopts ":h:p:g:t:u:w:" opt
 do
   case $opt in
   h)
@@ -28,8 +28,14 @@ do
   t)
     tenant=$OPTARG
     ;;
+  u)
+    username=$OPTARG
+    ;;
+  w)
+    password=$OPTARG
+    ;;
   ?)
-    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] [-g group] [-t tenant] \033[0m"
+    echo " USAGE OPTION: $0 [-h host] [-p port] [-g group] [-t tenant] [-u username] [-w password] "
     exit 1
     ;;
   esac
@@ -47,6 +53,12 @@ fi
 if [[ -z ${tenant} ]]; then
     tenant=""
 fi
+if [[ -z ${username} ]]; then
+    username=""
+fi
+if [[ -z ${password} ]]; then
+    password=""
+fi
 
 nacosAddr=$host:$port
 contentType="content-type:application/json;charset=UTF-8"
@@ -57,33 +69,33 @@ echo "set group=$group"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X POST -H "${1}" "http://$2/nacos/v1/cs/configs?dataId=$3&group=$group&content=$4&tenant=$tenant" >"${tempLog}" 2>/dev/null
+  curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$1&group=$group&content=$2&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat "${tempLog}") ]]; then
-    echo "\033[31m Please check the cluster status. \033[0m"
+    echo " Please check the cluster status. "
     exit 1
   fi
   if [[ $(cat "${tempLog}") =~ "true" ]]; then
-    echo "Set $3=$4\033[32m successfully \033[0m"
+    echo "Set $1=$2 successfully "
   else
-    echo "Set $3=$4\033[31m failure \033[0m"
+    echo "Set $1=$2 failure "
     (( failCount++ ))
   fi
 }
 
 count=0
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
   (( count++ ))
 	key=${line%%=*}
-  value=${line#*=}
-	addConfig "${contentType}" "${nacosAddr}" "${key}" "${value}"
+    value=${line#*=}
+	addConfig "${key}" "${value}"
 done
 
 echo "========================================================================="
-echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
+echo " Complete initialization parameters,  total-count:$count ,  failure-count:$failCount "
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo "\033[32m Init nacos config finished, please start seata-server. \033[0m"
+	echo " Init nacos config finished, please start seata-server. "
 else
-	echo "\033[31m init nacos config fail. \033[0m"
+	echo " init nacos config fail. "
 fi

@@ -15,13 +15,14 @@
  */
 package io.seata.core.context;
 
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 
 /**
  * The type Root context.
@@ -41,7 +42,10 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_BRANCH_TYPE = "BRANCH_TYPE";
+    /**
+     * The constant KEY_BRANCH_TYPE
+     */
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
@@ -61,15 +65,6 @@ public class RootContext {
     }
 
     /**
-     * Gets the current branchType
-     *
-     * @return the xid
-     */
-    public static String getBranchType() {
-        return CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
-    }
-
-    /**
      * Bind.
      *
      * @param xid the xid
@@ -79,15 +74,6 @@ public class RootContext {
             LOGGER.debug("bind {}", xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
-    }
-
-    /**
-     * Bind the current branchType
-     *
-     * @param branchType
-     */
-    public static void bindBranchType(BranchType branchType) {
-        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, String.valueOf(branchType.ordinal()));
     }
 
     /**
@@ -116,19 +102,6 @@ public class RootContext {
         return xid;
     }
 
-    /**
-     * Unbind branchType
-     *
-     * @return the string
-     */
-    public static String unbindBranchType() {
-        String branchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind {} ", branchType);
-        }
-        return branchType;
-    }
-
     public static void unbindGlobalLockFlag() {
         String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
         if (LOGGER.isDebugEnabled() && lockFlag != null) {
@@ -143,6 +116,45 @@ public class RootContext {
      */
     public static boolean inGlobalTransaction() {
         return CONTEXT_HOLDER.get(KEY_XID) != null;
+    }
+
+    /**
+     * get the branch type
+     *
+     * @return the branch type String
+     */
+    public static String getBranchType() {
+        String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+        if (StringUtils.isNotBlank(branchType)) {
+            return branchType;
+        }
+        return null;
+    }
+
+    /**
+     * bind branch type
+     *
+     * @param branchType the branch type
+     */
+    public static void bindBranchType(BranchType branchType) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("bind branch type {}", branchType);
+        }
+
+        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, branchType.name());
+    }
+
+    /**
+     * unbind branch type
+     *
+     * @return the previous branch type string
+     */
+    public static String unbindBranchType() {
+        String unbindBranchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind branch type {}", unbindBranchType);
+        }
+        return unbindBranchType;
     }
 
     /**

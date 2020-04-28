@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.3.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -252,6 +252,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-serializer-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-serializer-fst</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -533,6 +538,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
             <scope>provided</scope>
@@ -652,6 +662,7 @@
                                     <include>io.seata:seata-serializer-seata</include>
                                     <include>io.seata:seata-serializer-protobuf</include>
                                     <include>io.seata:seata-serializer-kryo</include>
+                                    <include>io.seata:seata-serializer-fst</include>
                                     <include>io.seata:seata-serializer-hessian</include>
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>

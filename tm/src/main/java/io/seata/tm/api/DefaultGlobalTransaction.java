@@ -15,14 +15,15 @@
  */
 package io.seata.tm.api;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +42,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private static final int DEFAULT_GLOBAL_TX_TIMEOUT = 60000;
 
     private static final String DEFAULT_GLOBAL_TX_NAME = "default";
-
-    private static final BranchType DEFAULT_GLOBAL_TX_BRANCH_TYPE = BranchType.AT;
 
     private TransactionManager transactionManager;
 
@@ -86,11 +85,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout) throws TransactionException {
-        begin(timeout, DEFAULT_GLOBAL_TX_NAME, DEFAULT_GLOBAL_TX_BRANCH_TYPE);
+        begin(timeout, DEFAULT_GLOBAL_TX_NAME);
     }
 
     @Override
-    public void begin(int timeout, String name, BranchType branchType) throws TransactionException {
+    public void begin(int timeout, String name) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -105,7 +104,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
-        RootContext.bindBranchType(branchType);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
@@ -138,8 +136,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
-                RootContext.unbindBranchType();
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -175,12 +172,39 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
-                RootContext.unbindBranchType();
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] rollback status: {}", xid, status);
+        }
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
+        String xid = RootContext.getXID();
+        if (StringUtils.isNotEmpty(xid) && unbindXid) {
+            RootContext.unbind();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Suspending current transaction,xid = {}",xid);
+            }
+        } else {
+            xid = null;
+        }
+        return new SuspendedResourcesHolder(xid);
+    }
+
+    @Override
+    public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
+        if (suspendedResourcesHolder == null) {
+            return;
+        }
+        String xid = suspendedResourcesHolder.getXid();
+        if (StringUtils.isNotEmpty(xid)) {
+            RootContext.bind(xid);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Resumimg the transaction,xid = {}", xid);
+            }
         }
     }
 
@@ -212,8 +236,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-            RootContext.unbind();
-            RootContext.unbindBranchType();
+            suspend(true);
         }
     }
 

@@ -53,7 +53,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
-    private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
+    private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
 
@@ -98,7 +98,6 @@ public class FileConfiguration extends AbstractConfiguration {
      * @param allowDynamicRefresh the allow dynamic refresh
      */
     public FileConfiguration(String name, boolean allowDynamicRefresh) {
-        LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
@@ -107,6 +106,9 @@ public class FileConfiguration extends AbstractConfiguration {
                 targetFilePath = targetFile.getPath();
                 Config appConfig = ConfigFactory.parseFileAnySyntax(targetFile);
                 fileConfig = ConfigFactory.load(appConfig);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("The configuration file used is {}", name);
+                }
             } else {
                 targetFilePath = null;
             }
@@ -115,6 +117,9 @@ public class FileConfiguration extends AbstractConfiguration {
             if (null != resource) {
                 targetFilePath = resource.getPath();
                 fileConfig = ConfigFactory.load(name);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("The configuration file used is {}", name);
+                }
 
             } else {
                 targetFilePath = null;
@@ -264,8 +269,8 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (Exception e) {
                     setFailResult(configFuture);
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Could not found property {}, try to use default value instead.",
-                            configFuture.getDataId());
+                        LOGGER.debug("Could not found property {}, try to use default value instead. exception:{}",
+                            configFuture.getDataId(), e.getMessage());
                     }
                 }
             }
@@ -315,9 +320,13 @@ public class FileConfiguration extends AbstractConfiguration {
                         event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
                         listener.onChangeEvent(event);
                     }
-                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
                 } catch (Exception exx) {
-                    LOGGER.error("fileListener execute error:{}", exx.getMessage(), exx);
+                    LOGGER.error("fileListener execute error:{}", exx.getMessage());
+                }
+                try {
+                    Thread.sleep(LISTENER_CONFIG_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
             }
         }

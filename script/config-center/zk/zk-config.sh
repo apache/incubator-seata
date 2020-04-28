@@ -31,7 +31,7 @@ do
     zkHome=$OPTARG
     ;;
   ?)
-    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] [-z zkHome] \033[0m"
+    echo " USAGE OPTION: $0 [-h host] [-p port] [-z zkHome] "
     exit 1
     ;;
   esac
@@ -44,7 +44,7 @@ if [[ -z ${port} ]]; then
     port=2181
 fi
 if [[ -z ${zkHome} ]]; then
-    echo "\033[31m zk home is empty, please usage option: [-z zkHome] \033[0m"
+    echo " zk home is empty, please usage option: [-z zkHome] "
     exit 1
 fi
 
@@ -76,10 +76,10 @@ function delete_node() {
 check_node "${zkAddr}" "${zkHome}"
 
 if [[ $(cat "${tempLog}") =~ "No such file or directory" ]]; then
-	echo "\033[31m ZK home is error, please enter correct zk home! \033[0m"
+	echo " ZK home is error, please enter correct zk home! "
 	exit 1
 elif [[ $(cat "${tempLog}") =~ "Exception" ]]; then
-	echo "\033[31m Exception error, please check zk cluster status or if the zk address is entered correctly! \033[0m"
+	echo " Exception error, please check zk cluster status or if the zk address is entered correctly! "
 	exit 1
 elif [[ $(cat "${tempLog}") =~ "Node does not exist" ]]; then
 	create_node "${zkAddr}" "${zkHome}"
@@ -94,7 +94,7 @@ else
 	fi
 fi
 
-for line in $(cat $(dirname "$PWD")/config.txt); do
+for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
 	key=${line%%=*}
 	value=${line#*=}
 	echo "Set" "${key}" "=" "${value}"

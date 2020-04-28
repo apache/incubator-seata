@@ -433,7 +433,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
     }
 
-    @Test
+    @Disabled("https://github.com/seata/seata/issues/2564")
     public void testCompensationStateMachineAsync() throws Exception {
 
         long start = System.currentTimeMillis();

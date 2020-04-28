@@ -76,7 +76,9 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
      * @param request the request
      */
     @Override
-    public abstract void handle(UndoLogDeleteRequest request);
+    public void handle(UndoLogDeleteRequest request) {
+        // https://github.com/seata/seata/issues/2226
+    }
 
     /**
      * Do branch commit.
