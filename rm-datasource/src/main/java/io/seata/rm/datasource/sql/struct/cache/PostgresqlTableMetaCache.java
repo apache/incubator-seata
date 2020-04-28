@@ -47,6 +47,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
+        //separate it to schemaName and tableName
         String[] tableNameWithSchema = tableName.split("\\.");
         String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
 
