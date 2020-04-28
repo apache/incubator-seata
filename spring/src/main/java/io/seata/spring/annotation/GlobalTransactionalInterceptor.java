@@ -73,20 +73,21 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
+        Class<?> targetClass =
+            methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
-        final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
-
-        final GlobalTransactional globalTransactionalAnnotation =
-            getAnnotation(method, targetClass, GlobalTransactional.class);
-        final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-        if (!disable && globalTransactionalAnnotation != null) {
-            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
-        } else if (!disable && globalLockAnnotation != null) {
-            return handleGlobalLock(methodInvocation);
-        } else {
-            return methodInvocation.proceed();
+        if (null != specificMethod && !specificMethod.getDeclaringClass().equals(Object.class)) {
+            final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final GlobalTransactional globalTransactionalAnnotation =
+                getAnnotation(method, targetClass, GlobalTransactional.class);
+            final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            if (!disable && globalTransactionalAnnotation != null) {
+                return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+            } else if (!disable && globalLockAnnotation != null) {
+                return handleGlobalLock(methodInvocation);
+            }
         }
+        return methodInvocation.proceed();
     }
 
     private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
@@ -165,7 +166,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    public  <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
         return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
             .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
