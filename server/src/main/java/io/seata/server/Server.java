@@ -17,6 +17,7 @@ package io.seata.server;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.seata.common.XID;
@@ -82,7 +83,7 @@ public class Server {
         ShutdownHook.getInstance().addDisposable(rpcServer);
         //IdWorker Instantiate by service node
         Long serverNode = Long.valueOf(parameterParser.getServerNode());
-        IdWorker.getInstance(serverNode, serverNode);
+        IdWorker.getInstance(serverNode, ThreadLocalRandom.current().nextLong(32));
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
