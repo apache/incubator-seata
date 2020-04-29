@@ -16,6 +16,7 @@
 package io.seata.server.storage.redis.store;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +42,8 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 
 /**
  * @author funkye
@@ -48,16 +51,16 @@ import redis.clients.jedis.Jedis;
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     // global transaction prefix
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA-GLOBAL-";
+    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
 
     // the prefix of the branchs transaction
-    private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA-XID-BRANCHS-";
+    private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA_XID_BRANCHS_";
 
     // the prefix of the branch transaction
-    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA-BRANCH-";
+    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
 
     // global transaction id PREFIX
-    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA-TRANSACTION-ID-GLOBAL-";
+    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA_TRANSACTION_ID_GLOBAL_";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -218,7 +221,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             states.add(statuses[i].getCode());
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Set<String> keys = jedis.keys(DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + "*");
+            Set<String> keys = new HashSet<>();
+            String cursor = "0";
+            ScanParams params = new ScanParams();
+            params.count(100);
+            params.match(DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + "*");
+            ScanResult<String> scans;
+            do {
+                scans = jedis.scan(cursor, params);
+                keys.addAll(scans.getResult().stream().collect(Collectors.toSet()));
+                cursor = scans.getCursor();
+            } while (!cursor.equalsIgnoreCase("0"));
             if (null != keys && keys.size() > 0) {
                 List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>();
                 for (String globalKey : keys) {
