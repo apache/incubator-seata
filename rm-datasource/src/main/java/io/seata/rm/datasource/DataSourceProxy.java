@@ -158,6 +158,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             for (String urlParam : urlParams) {
                 if (urlParam.contains("currentSchema")) {
                     paramsBuilder.append(urlParam);
+                    break;
                 }
             }
 
