@@ -245,12 +245,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (clazz == null) {
                     continue;
                 }
+                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
+                if (trxAnno != null) {
+                    return true;
+                }
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
-                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
-                    if (null == trxAnno) {
-                        trxAnno = clazz.getAnnotation(GlobalTransactional.class);
-                    }
+                    trxAnno = method.getAnnotation(GlobalTransactional.class);
                     if (trxAnno != null) {
                         return true;
                     }
