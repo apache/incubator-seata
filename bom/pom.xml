@@ -108,6 +108,7 @@
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.19</commons-compress.version>
         <ant.version>1.10.6</ant.version>
+        <lz4.version>1.7.1</lz4.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -490,6 +491,11 @@
                 <groupId>org.apache.ant</groupId>
                 <artifactId>ant</artifactId>
                 <version>${ant.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <version>${lz4.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
