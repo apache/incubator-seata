@@ -141,12 +141,20 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
+        if (DBType.POSTGRESQL.name().equalsIgnoreCase(getDbType())) {
+            return getPGResourceId();
+        } else {
+            return getDefaultResourceId();
+        }
+    }
+
+    /**
+     * get the default resource id
+     * @return resource id
+     */
+    private String getDefaultResourceId() {
         if (jdbcUrl.contains("?")) {
-            if (DBType.POSTGRESQL.name().equalsIgnoreCase(getDbType())) {
-                return getPGResourceId();
-            } else {
-                return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
-            }
+            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
             return jdbcUrl;
         }
@@ -163,23 +171,27 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * @return resourceId
      */
     private String getPGResourceId() {
-        StringBuilder jdbcUrlBuilder = new StringBuilder();
-        jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
-        StringBuilder paramsBuilder = new StringBuilder();
-        String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
-        String[] urlParams = paramUrl.split("&");
-        for (String urlParam : urlParams) {
-            if (urlParam.contains("currentSchema")) {
-                paramsBuilder.append(urlParam);
-                break;
+        if (jdbcUrl.contains("?")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
+            String[] urlParams = paramUrl.split("&");
+            for (String urlParam : urlParams) {
+                if (urlParam.contains("currentSchema")) {
+                    paramsBuilder.append(urlParam);
+                    break;
+                }
             }
-        }
 
-        if (paramsBuilder.length() > 0) {
-            jdbcUrlBuilder.append("?");
-            jdbcUrlBuilder.append(paramsBuilder);
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            return jdbcUrlBuilder.toString();
+        } else {
+            return jdbcUrl;
         }
-        return jdbcUrlBuilder.toString();
     }
 
     @Override
