@@ -15,6 +15,13 @@
  */
 package io.seata.server;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
@@ -25,11 +32,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
 
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 
@@ -47,11 +49,13 @@ public class ParameterParser {
 
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final int SERVER_DEFAULT_NODE = 1;
+    private static final Long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(32);
+    private static final Long DATA_CENTER_DEFAULT_ID = ThreadLocalRandom.current().nextLong(32);
 
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
     private static final String ENV_SERVER_NODE_KEY = "SERVER_NODE";
+    private static final String ENV_DATA_CENTER_ID_KEY = "DATA_CENTER_ID";
     private static final String ENV_SEATA_PORT_KEY = "SEATA_PORT";
     private static final String ENV_STORE_MODE_KEY = "STORE_MODE";
     private static final String C_GROUP_PATH = "/proc/1/cgroup";
@@ -67,10 +71,13 @@ public class ParameterParser {
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
-    private int serverNode = SERVER_DEFAULT_NODE;
+    private Long serverNode = SERVER_DEFAULT_NODE;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
     private String seataEnv;
+    @Parameter(names = {"--dataCenterId", "-c"}, description = "data center id, such as 1, 2, 3.",
+        order = 6)
+    private Long dataCenterId = DATA_CENTER_DEFAULT_ID;
 
     /**
      * Instantiates a new Parameter parser.
@@ -92,7 +99,8 @@ public class ParameterParser {
 
                 this.seataEnv = StringUtils.trimToNull(System.getenv(ENV_SYSTEM_KEY));
                 this.host = StringUtils.trimToNull(System.getenv(ENV_SEATA_IP_KEY));
-                this.serverNode = NumberUtils.toInt(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
+                this.serverNode = NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
+                this.dataCenterId = NumberUtils.toLong(System.getenv(ENV_DATA_CENTER_ID_KEY), DATA_CENTER_DEFAULT_ID);
                 this.port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
                 this.storeMode = StringUtils.trimToNull(System.getenv(ENV_STORE_MODE_KEY));
             } else {
@@ -182,7 +190,7 @@ public class ParameterParser {
      *
      * @return the server node
      */
-    public int getServerNode() {
+    public Long getServerNode() {
         return serverNode;
     }
 
@@ -194,4 +202,14 @@ public class ParameterParser {
     public String getSeataEnv() {
         return seataEnv;
     }
+
+    /**
+     * Gets data center id
+     *
+     * @return the data center id
+     */
+    public Long getDataCenterId() {
+        return dataCenterId;
+    }
+
 }
