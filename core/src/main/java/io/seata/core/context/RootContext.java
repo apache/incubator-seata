@@ -119,6 +119,24 @@ public class RootContext {
     }
 
     /**
+     * In tcc branch boolean.
+     *
+     * @return the boolean
+     */
+    public static boolean inTccBranch() {
+        return BranchType.TCC.name().equalsIgnoreCase(getBranchType());
+    }
+
+    /**
+     * In saga branch boolean.
+     *
+     * @return the boolean
+     */
+    public static boolean inSagaBranch() {
+        return BranchType.SAGA.name().equalsIgnoreCase(getBranchType());
+    }
+
+    /**
      * get the branch type
      *
      * @return the branch type String
