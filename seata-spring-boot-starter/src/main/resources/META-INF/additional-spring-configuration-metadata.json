@@ -27,12 +27,14 @@
     {
       "name": "seata.saga.state-machine.rm-report-success-enable",
       "type": "java.lang.Boolean",
+      "description": "The default value is equals to ${seata.client.rm.report-success-enable} .",
       "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
       "defaultValue": false
     },
     {
       "name": "seata.saga.state-machine.saga-branch-register-enable",
       "type": "java.lang.Boolean",
+      "description": "The default value is equals to ${seata.client.rm.saga-branch-register-enable} .",
       "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
       "defaultValue": false
     },

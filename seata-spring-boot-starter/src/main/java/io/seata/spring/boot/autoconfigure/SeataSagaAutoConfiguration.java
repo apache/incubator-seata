@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -56,9 +57,13 @@ public class SeataSagaAutoConfiguration {
     @ConditionalOnMissingBean
     @ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine")
     public StateMachineConfig dbStateMachineConfig(DataSource dataSource,
-        @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor) {
+        @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
+        @Value("${spring.application.name:}") String applicationId,
+        @Value("${seata.tx-service-group:}") String txServiceGroup) {
         DbStateMachineConfig config = new DbStateMachineConfig();
         config.setDataSource(dataSource);
+        config.setApplicationId(applicationId);
+        config.setTxServiceGroup(txServiceGroup);
 
         if (threadPoolExecutor != null) {
             config.setThreadPoolExecutor(threadPoolExecutor);

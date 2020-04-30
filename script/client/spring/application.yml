@@ -117,8 +117,8 @@ seata:
         core-pool-size: 1
         max-pool-size: 20
         keep-alive-time: 60
-      rm-report-success-enable: false
-      saga-branch-register-enable: false
+      rm-report-success-enable: ${seata.client.rm.report-success-enable:false}
+      saga-branch-register-enable: ${seata.client.rm.saga-branch-register-enable:false}
       trans-operation-timeout: 1800000
       service-invoke-timeout: 300000
       auto-register-resources: true
