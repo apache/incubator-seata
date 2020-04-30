@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.config;
 
+import io.seata.core.constants.DefaultValues;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -42,7 +43,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource dataSource;
     private String applicationId;
     private String txServiceGroup;
-    private String tablePrefix = "seata_";
+    private String tablePrefix = DefaultValues.DEFAULT_STATE_MACHINE_TABLE_PREFIX;
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
     private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);

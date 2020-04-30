@@ -2,3 +2,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 io.seata.spring.boot.autoconfigure.SeataAutoConfiguration,\
 io.seata.spring.boot.autoconfigure.SeataSagaAutoConfiguration
+
+# Environment Post Processors
+org.springframework.boot.env.EnvironmentPostProcessor=\
+io.seata.spring.boot.autoconfigure.SeataEnvironmentPostProcessor
