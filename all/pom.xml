@@ -284,6 +284,11 @@
             <artifactId>seata-compressor-zip</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-lz4</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- saga -->
         <dependency>
@@ -552,6 +557,11 @@
             <artifactId>kryo-serializers</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -675,6 +685,7 @@
                                     <include>io.seata:seata-compressor-7z</include>
                                     <include>io.seata:seata-compressor-bzip2</include>
                                     <include>io.seata:seata-compressor-zip</include>
+                                    <include>io.seata:seata-compressor-lz4</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
