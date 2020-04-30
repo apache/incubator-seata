@@ -142,38 +142,44 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public String getResourceId() {
         if (jdbcUrl.contains("?")) {
-            StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
-            /*
-             * prevent pg sql url like
-             * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
-             * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata
-             * cause the duplicated resourceId
-             * it will cause the problem like
-             * 1.get file lock fail
-             * 2.error table meta cache
-             */
             if (DBType.POSTGRESQL.name().equalsIgnoreCase(getDbType())) {
-                StringBuilder paramsBuilder = new StringBuilder();
-                String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
-                String[] urlParams = paramUrl.split("&");
-                for (String urlParam : urlParams) {
-                    if (urlParam.contains("currentSchema")) {
-                        paramsBuilder.append(urlParam);
-                        break;
-                    }
-                }
-
-                if (paramsBuilder.length() > 0) {
-                    jdbcUrlBuilder.append("?");
-                    jdbcUrlBuilder.append(paramsBuilder);
-                }
+                return getPGResourceId();
+            } else {
+                return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
             }
-
-            return jdbcUrlBuilder.toString();
         } else {
             return jdbcUrl;
         }
+    }
+
+    /**
+     * prevent pg sql url like
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata
+     * cause the duplicated resourceId
+     * it will cause the problem like
+     * 1.get file lock fail
+     * 2.error table meta cache
+     * @return resourceId
+     */
+    private String getPGResourceId() {
+        StringBuilder jdbcUrlBuilder = new StringBuilder();
+        jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
+        StringBuilder paramsBuilder = new StringBuilder();
+        String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
+        String[] urlParams = paramUrl.split("&");
+        for (String urlParam : urlParams) {
+            if (urlParam.contains("currentSchema")) {
+                paramsBuilder.append(urlParam);
+                break;
+            }
+        }
+
+        if (paramsBuilder.length() > 0) {
+            jdbcUrlBuilder.append("?");
+            jdbcUrlBuilder.append(paramsBuilder);
+        }
+        return jdbcUrlBuilder.toString();
     }
 
     @Override
