@@ -49,13 +49,11 @@ public class ParameterParser {
 
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final Long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(32);
-    private static final Long DATA_CENTER_DEFAULT_ID = ThreadLocalRandom.current().nextLong(32);
+    private static final Long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
     private static final String ENV_SERVER_NODE_KEY = "SERVER_NODE";
-    private static final String ENV_DATA_CENTER_ID_KEY = "DATA_CENTER_ID";
     private static final String ENV_SEATA_PORT_KEY = "SEATA_PORT";
     private static final String ENV_STORE_MODE_KEY = "STORE_MODE";
     private static final String C_GROUP_PATH = "/proc/1/cgroup";
@@ -75,10 +73,6 @@ public class ParameterParser {
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
     private String seataEnv;
-    @Parameter(names = {"--dataCenterId", "-c"}, description = "data center id, such as 1, 2, 3.",
-        order = 6)
-    private Long dataCenterId = DATA_CENTER_DEFAULT_ID;
-
     /**
      * Instantiates a new Parameter parser.
      *
@@ -100,7 +94,6 @@ public class ParameterParser {
                 this.seataEnv = StringUtils.trimToNull(System.getenv(ENV_SYSTEM_KEY));
                 this.host = StringUtils.trimToNull(System.getenv(ENV_SEATA_IP_KEY));
                 this.serverNode = NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
-                this.dataCenterId = NumberUtils.toLong(System.getenv(ENV_DATA_CENTER_ID_KEY), DATA_CENTER_DEFAULT_ID);
                 this.port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
                 this.storeMode = StringUtils.trimToNull(System.getenv(ENV_STORE_MODE_KEY));
             } else {
@@ -201,15 +194,6 @@ public class ParameterParser {
      */
     public String getSeataEnv() {
         return seataEnv;
-    }
-
-    /**
-     * Gets data center id
-     *
-     * @return the data center id
-     */
-    public Long getDataCenterId() {
-        return dataCenterId;
     }
 
 }

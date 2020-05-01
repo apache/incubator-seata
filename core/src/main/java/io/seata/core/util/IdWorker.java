@@ -30,23 +30,13 @@ public class IdWorker {
     /**
      * The number of bits occupied by the machine id
      */
-    private final long workerIdBits = 5L;
+    private final long workerIdBits = 10L;
 
     /**
-     * The number of bits occupied by the data identification id
-     */
-    private final long datacenterIdBits = 5L;
-
-    /**
-     * Maximum supported machine id, the result is 31 (this shift algorithm can quickly calculate the largest decimal
+     * Maximum supported machine id, the result is 1023 (this shift algorithm can quickly calculate the largest decimal
      * number that can be represented by a few binary numbers)
      */
     private final long maxWorkerId = -1L ^ (-1L << workerIdBits);
-
-    /**
-     * The maximum data identifier id supported, the result is 31
-     */
-    private final long maxDatacenterId = -1L ^ (-1L << datacenterIdBits);
 
     /**
      * The number of bits the sequence occupies in id
@@ -59,14 +49,9 @@ public class IdWorker {
     private final long workerIdShift = sequenceBits;
 
     /**
-     * Data ID id shifted 17 bits to the left (12 + 5)
+     * Time truncated to the left by 22 bits (10 + 12)
      */
-    private final long datacenterIdShift = sequenceBits + workerIdBits;
-
-    /**
-     * Time truncated to the left by 22 bits (5 + 5 + 12)
-     */
-    private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
+    private final long timestampLeftShift = sequenceBits + workerIdBits;
 
     /**
      * Generate sequence mask
@@ -74,14 +59,9 @@ public class IdWorker {
     private final long sequenceMask = -1L ^ (-1L << sequenceBits);
 
     /**
-     * Machine ID (0 ~ 31)
+     * Machine ID (0 ~ 1023)
      */
     private long workerId;
-
-    /**
-     * Data center ID (0 ~ 31)
-     */
-    private long datacenterId;
 
     /**
      * Sequence in milliseconds (0 ~ 4095)
@@ -97,21 +77,14 @@ public class IdWorker {
      * Constructor
      *
      * @param workerId
-     *            Job ID (0 ~ 31)
-     * @param datacenterId
-     *            Data Center ID (0 ~ 31)
+     *            Job ID (0 ~ 1023)
      */
-    public IdWorker(long workerId, long datacenterId) {
+    public IdWorker(long workerId) {
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(
                 String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
         }
-        if (datacenterId > maxDatacenterId || datacenterId < 0) {
-            throw new IllegalArgumentException(
-                String.format("datacenter Id can't be greater than %d or less than 0", maxDatacenterId));
-        }
         this.workerId = workerId;
-        this.datacenterId = datacenterId;
     }
 
     /**
@@ -137,9 +110,7 @@ public class IdWorker {
         }
 
         lastTimestamp = timestamp;
-
-        return ((timestamp - twepoch) << timestampLeftShift) | (datacenterId << datacenterIdShift)
-            | (workerId << workerIdShift) | sequence;
+        return ((timestamp - twepoch) << timestampLeftShift) | (workerId << workerIdShift) | sequence;
     }
 
     /**
@@ -170,10 +141,10 @@ public class IdWorker {
         if (idWorker == null) {
             synchronized (IdWorker.class) {
                 if (idWorker == null) {
-                    if (ids.length == 2) {
-                        idWorker = new IdWorker(ids[0], ids[1]);
+                    if (ids.length > 0) {
+                        idWorker = new IdWorker(ids[0]);
                     } else {
-                        idWorker = new IdWorker(1L, 1L);
+                        idWorker = new IdWorker(1L);
                     }
                 }
             }
