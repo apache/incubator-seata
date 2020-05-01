@@ -15,10 +15,12 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.util.StringUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
@@ -61,7 +63,7 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizers     the sql recognizer
+     * @param sqlRecognizers     the sql recognizer list
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
@@ -73,7 +75,7 @@ public class ExecuteTemplate {
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
 
-        if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
+        if (!shouldExecuteInATMode()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
@@ -123,5 +125,18 @@ public class ExecuteTemplate {
             throw (SQLException) ex;
         }
         return rs;
+    }
+
+    private static boolean shouldExecuteInATMode() {
+        if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
+            return false;
+        }
+        if (RootContext.inGlobalTransaction()) {
+            String branchType = RootContext.getBranchType();
+            if (StringUtils.equals(BranchType.TCC.name(), branchType) || StringUtils.equals(BranchType.SAGA.name(), branchType)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
