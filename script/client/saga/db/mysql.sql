@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS `seata_state_machine_def`
     `ver`              VARCHAR(16)  NOT NULL COMMENT 'version',
     `gmt_create`       DATETIME     NOT NULL COMMENT 'create time',
     `status`           VARCHAR(2)   NOT NULL COMMENT 'status(AC:active|IN:inactive)',
-    `content`          TEXT COMMENT 'content',
-    `recover_strategy` VARCHAR(16) COMMENT 'transaction recover strategy(compensate|retry)',
+    `content`          TEXT         COMMENT 'content',
+    `recover_strategy` VARCHAR(16)  COMMENT 'transaction recover strategy(compensate|retry)',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
