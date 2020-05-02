@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.file;
+package io.seata.spring.boot.autoconfigure.properties.client;
 
 import io.seata.core.rpc.netty.NettyBaseConfig.WorkThreadMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
