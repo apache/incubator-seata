@@ -19,22 +19,22 @@ import java.util.Map;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
-import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
@@ -204,6 +204,9 @@ public class PropertiesTest {
         assertEquals("localhost", context.getBean(RegistryNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
+        assertEquals("", context.getBean(RegistryNacosProperties.class).getUsername());
+        assertEquals("", context.getBean(RegistryNacosProperties.class).getPassword());
+        assertEquals("seata-server", context.getBean(RegistryNacosProperties.class).getApplication());
     }
 
     @Test
