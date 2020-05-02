@@ -83,17 +83,19 @@ public abstract class AbstractCore implements Core {
                         .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
                                 branchSession.getBranchId()), ex);
             }
-            LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(),
-                    branchSession.getBranchId());
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
+                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+            }
             return branchSession.getBranchId();
         });
     }
 
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
         if (!globalSession.isActive()) {
-            throw new GlobalTransactionException(GlobalTransactionNotActive, String
-                    .format("Could not register branch into global session xid = %s status = %s",
-                            globalSession.getXid(), globalSession.getStatus()));
+            throw new GlobalTransactionException(GlobalTransactionNotActive, String.format(
+                "Could not register branch into global session xid = %s status = %s, cause by globalSession not active",
+                globalSession.getXid(), globalSession.getStatus()));
         }
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
@@ -115,7 +117,7 @@ public abstract class AbstractCore implements Core {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid, withBranchSessions);
         if (globalSession == null) {
             throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist,
-                    String.format("Could not found global transaction xid = %s", xid));
+                    String.format("Could not found global transaction xid = %s, may be has finished.", xid));
         }
         return globalSession;
     }
@@ -132,8 +134,10 @@ public abstract class AbstractCore implements Core {
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
 
-        LOGGER.info("Successfully branch report xid = {}, branchId = {}", globalSession.getXid(),
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Report branch status successfully, xid = {}, branchId = {}", globalSession.getXid(),
                 branchSession.getBranchId());
+        }
     }
 
     @Override

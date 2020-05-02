@@ -35,7 +35,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
-import static io.seata.spring.boot.autoconfigure.util.StringFormatUtils.DOT;
+import static io.seata.common.util.StringFormatUtils.DOT;
 
 /**
  * @author xingfudeshi@gmail.com
