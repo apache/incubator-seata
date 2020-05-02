@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource.exec;
-
 import io.seata.common.util.StringUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
@@ -22,7 +21,6 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
