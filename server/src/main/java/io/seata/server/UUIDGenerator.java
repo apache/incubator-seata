@@ -24,15 +24,13 @@ import io.seata.core.util.IdWorker;
  */
 public class UUIDGenerator {
 
-    private static IdWorker idWorker = IdWorker.getInstance();
-
     /**
      * Generate uuid long.
      *
      * @return the long
      */
     public static long generateUUID() {
-        return idWorker.nextId();
+        return IdWorker.getInstance().nextId();
     }
 
 }
