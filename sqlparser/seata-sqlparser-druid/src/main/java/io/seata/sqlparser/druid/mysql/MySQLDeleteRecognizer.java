@@ -55,7 +55,10 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
 
     @Override
     public String getTableAlias() {
-        return ast.getTableSource().getAlias();
+        if (ast.getFrom() == null) {
+            return ast.getTableSource().getAlias();
+        }
+        return ast.getFrom().getAlias();
     }
 
     @Override
@@ -69,7 +72,11 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
+        if (ast.getFrom() == null) {
+            visitor.visit((SQLExprTableSource) ast.getTableSource());
+        } else {
+            visitor.visit((SQLExprTableSource) ast.getFrom());
+        }
         return sb.toString();
     }
 
