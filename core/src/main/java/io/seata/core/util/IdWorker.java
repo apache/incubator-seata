@@ -23,9 +23,9 @@ public class IdWorker {
     private volatile static IdWorker idWorker = null;
 
     /**
-     * Start time cut (2015-01-01)
+     * Start time cut (2020-05-03)
      */
-    private final long twepoch = 1546272000000L;
+    private final long twepoch = 1588435200000L;
 
     /**
      * The number of bits occupied by the machine id
