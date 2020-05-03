@@ -25,6 +25,7 @@ seata:
       data-validation: true
       log-serialization: jackson
       log-table: undo_log
+      only-care-update-columns: true
     log:
       exceptionRate: 100
   service:

@@ -272,6 +272,11 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = CLIENT_UNDO_PREFIX + "logSerialization";
 
     /**
+     * The constant TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS.
+     */
+    public static final String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
+
+    /**
      * The constant METRICS_PREFIX.
      */
     public static final String METRICS_PREFIX = "metrics.";
