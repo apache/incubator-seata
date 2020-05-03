@@ -34,9 +34,11 @@ public class UUIDGenerator {
     public static long generateUUID() {
         return idWorker.nextId();
     }
+
     /**
-     * IdWorker Instantiate by service node
+     * Init.
      *
+     * @param serverNode the server node id
      */
     public static void init(Long serverNode) {
         IdWorker.init(serverNode);

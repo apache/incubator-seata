@@ -109,8 +109,8 @@ public class IdWorker {
             } else {
                 sequence = 0L;
             }
+            lastTimestamp = timestamp;
         }
-        lastTimestamp = timestamp;
         return ((timestamp - twepoch) << timestampLeftShift) | (workerId << workerIdShift) | sequence;
     }
 
