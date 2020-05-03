@@ -31,7 +31,7 @@ public class UUIDGeneratorOverflowTest {
      */
     @Test
     public void testGenerateUUID() {
-        IdWorker.getInstance(SERVER_NODE_ID);
+        IdWorker.init(SERVER_NODE_ID);
         for (int i = 0; i < UUID_GENERATE_COUNT; i++) {
             System.out.println("[UUID " + i + "] is: " + UUIDGenerator.generateUUID());
         }
