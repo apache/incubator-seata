@@ -80,8 +80,7 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(rpcServer);
-        //IdWorker Instantiate by service node
-        IdWorker.init(parameterParser.getServerNode());
+        UUIDGenerator.init(parameterParser.getServerNode());
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());

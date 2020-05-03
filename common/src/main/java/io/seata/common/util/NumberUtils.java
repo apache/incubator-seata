@@ -38,7 +38,7 @@ public class NumberUtils {
         }
         try {
             return Integer.parseInt(str);
-        } catch (final NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             return defaultValue;
         }
     }
@@ -49,7 +49,7 @@ public class NumberUtils {
         }
         try {
             return Long.valueOf(str);
-        } catch (final NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             return defaultValue;
         }
     }

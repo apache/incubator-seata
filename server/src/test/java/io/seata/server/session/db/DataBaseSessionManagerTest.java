@@ -15,18 +15,13 @@
  */
 package io.seata.server.session.db;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
 import io.seata.common.XID;
 import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -34,11 +29,17 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.session.DataBaseSessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * The type Data base session manager test.
@@ -110,7 +111,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_addGlobalSession() throws TransactionException, SQLException {
         GlobalSession session = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -144,7 +145,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
         GlobalSession session = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -181,7 +182,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_removeGlobalSession() throws Exception {
         GlobalSession session = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -226,7 +227,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_findGlobalSession() throws Exception {
         GlobalSession session = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -265,7 +266,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_addBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -310,7 +311,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_updateBranchSessionStatus() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -359,7 +360,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_removeBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -407,7 +408,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_allSessions() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -477,7 +478,7 @@ public class DataBaseSessionManagerTest {
         String xid = null;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                    "test", "test123", 100);
+                "test", "test123", 100);
             xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
             globalSession.setTransactionId(146757978);
@@ -504,7 +505,7 @@ public class DataBaseSessionManagerTest {
         String xid2 = null;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                    "test", "test123", 100);
+                "test", "test123", 100);
             xid2 = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
             globalSession.setTransactionId(146757978);
@@ -567,7 +568,7 @@ public class DataBaseSessionManagerTest {
         sb.append("1321465454545436");
 
         GlobalSession session = GlobalSession.createGlobalSession("test",
-                "test", sb.toString(), 100);
+            "test", sb.toString(), 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);

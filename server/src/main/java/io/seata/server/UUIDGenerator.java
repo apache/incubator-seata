@@ -24,7 +24,7 @@ import io.seata.core.util.IdWorker;
  */
 public class UUIDGenerator {
 
-    private static IdWorker idWorker = IdWorker.getInstance();
+    private static IdWorker idWorker;
 
     /**
      * Generate uuid long.
@@ -33,6 +33,14 @@ public class UUIDGenerator {
      */
     public static long generateUUID() {
         return idWorker.nextId();
+    }
+    /**
+     * IdWorker Instantiate by service node
+     *
+     */
+    public static void init(Long serverNode) {
+        IdWorker.init(serverNode);
+        idWorker = IdWorker.getInstance();
     }
 
 }
