@@ -92,25 +92,27 @@ public class IdWorker {
      *
      * @return SnowflakeId
      */
-    public synchronized long nextId() {
+    public long nextId() {
         long timestamp = timeGen();
 
         if (timestamp < lastTimestamp) {
             throw new RuntimeException(String.format(
-                "Clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+                "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
-        if (lastTimestamp == timestamp) {
-            sequence = (sequence + 1) & sequenceMask;
-            if (sequence == 0) {
-                timestamp = tilNextMillis(lastTimestamp);
+        synchronized (this) {
+            if (lastTimestamp == timestamp) {
+                sequence = (sequence + 1) & sequenceMask;
+                if (sequence == 0) {
+                    timestamp = tilNextMillis(lastTimestamp);
+                }
+            } else {
+                sequence = 0L;
             }
-        } else {
-            sequence = 0L;
-        }
 
-        lastTimestamp = timestamp;
-        return ((timestamp - twepoch) << timestampLeftShift) | (workerId << workerIdShift) | sequence;
+            lastTimestamp = timestamp;
+            return ((timestamp - twepoch) << timestampLeftShift) | (workerId << workerIdShift) | sequence;
+        }
     }
 
     /**
