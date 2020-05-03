@@ -137,19 +137,25 @@ public class IdWorker {
         return System.currentTimeMillis();
     }
 
-    public static IdWorker getInstance(Long... ids) {
+    public static IdWorker getInstance() {
         if (idWorker == null) {
             synchronized (IdWorker.class) {
                 if (idWorker == null) {
-                    if (ids.length > 0) {
-                        idWorker = new IdWorker(ids[0]);
-                    } else {
-                        idWorker = new IdWorker(1L);
-                    }
+                    init(1L);
                 }
             }
         }
         return idWorker;
     }
 
-} 
+    public static void init(Long serverNodeId) {
+        if (idWorker == null) {
+            synchronized (IdWorker.class) {
+                if (idWorker == null) {
+                    idWorker = new IdWorker(serverNodeId);
+                }
+            }
+        }
+    }
+
+}
