@@ -15,6 +15,8 @@
  */
 package io.seata.core.util;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * @author funkye
  */
@@ -142,7 +144,7 @@ public class IdWorker {
         if (idWorker == null) {
             synchronized (IdWorker.class) {
                 if (idWorker == null) {
-                    init(1L);
+                    init(ThreadLocalRandom.current().nextLong(1024));
                 }
             }
         }
