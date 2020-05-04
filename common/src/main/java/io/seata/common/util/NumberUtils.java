@@ -38,7 +38,18 @@ public class NumberUtils {
         }
         try {
             return Integer.parseInt(str);
-        } catch (final NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
+            return defaultValue;
+        }
+    }
+
+    public static Long toLong(String str, final Long defaultValue) {
+        if (str == null) {
+            return defaultValue;
+        }
+        try {
+            return Long.valueOf(str);
+        } catch (NumberFormatException nfe) {
             return defaultValue;
         }
     }

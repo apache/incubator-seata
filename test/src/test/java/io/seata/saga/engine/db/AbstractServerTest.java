@@ -21,7 +21,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.ParameterParser;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -64,7 +63,6 @@ public abstract class AbstractServerTest {
                     rpcServer = new RpcServer(workingThreads);
                     //server port
                     rpcServer.setListenPort(parameterParser.getPort());
-                    UUIDGenerator.init(parameterParser.getServerNode());
                     //log store mode : file、db
                     SessionHolder.init(parameterParser.getStoreMode());
 
