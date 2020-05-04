@@ -48,6 +48,7 @@ public class DefaultValues {
     public static final boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
     public static final boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
     public static final String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
+    public static final boolean DEFAULT_ONLY_CARE_UPDATE_COLUMNS = true;
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
      */
