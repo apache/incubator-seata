@@ -15,6 +15,7 @@
  */
 package io.seata.config.consul;
 
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -30,6 +31,7 @@ import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
@@ -174,7 +176,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
         if (null == client) {
             synchronized (ConsulConfiguration.class) {
                 if (null == client) {
-                    client = new ConsulClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY));
+                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
+                    client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
             }
         }

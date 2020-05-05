@@ -168,7 +168,9 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         if (null == client) {
             synchronized (ConsulRegistryServiceImpl.class) {
                 if (null == client) {
-                    client = new ConsulClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY));
+                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
+                    client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
             }
         }
