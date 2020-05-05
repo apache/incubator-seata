@@ -302,11 +302,6 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
         return null;
     }
 
-    @Override
-    public long getCurrentMaxSessionId() {
-        return 0;
-    }
-
     private GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
         if (session == null || !(session instanceof GlobalSession)) {
             throw new IllegalArgumentException(

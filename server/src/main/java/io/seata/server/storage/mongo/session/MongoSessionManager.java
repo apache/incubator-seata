@@ -17,10 +17,6 @@ package io.seata.server.storage.mongo.session;
 
 import java.util.Collection;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -29,7 +25,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -39,6 +34,8 @@ import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionLifecycleListener;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author funkye
@@ -199,9 +196,5 @@ public class MongoSessionManager extends AbstractSessionManager
 
     @Override
     public void reload() {
-        long maxSessionId = transactionStoreManager.getCurrentMaxSessionId();
-        if (maxSessionId > UUIDGenerator.getCurrentUUID()) {
-            UUIDGenerator.setUUID(UUIDGenerator.getCurrentUUID(), maxSessionId);
-        }
     }
 }
