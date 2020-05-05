@@ -152,11 +152,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    @Override
-    public long getCurrentMaxSessionId() {
-        return 0;
-    }
-
     /**
      * Read session global session.
      *
