@@ -252,7 +252,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         if (succeed) {
             if (degradeNum == degradeCheckAllowTimes) {
                 reachNum++;
-                if (reachNum >= degradeNum) {
+                if (reachNum == degradeCheckAllowTimes) {
                     reachNum = 0;
                     degradeNum = 0;
                     if (LOGGER.isInfoEnabled()) {
