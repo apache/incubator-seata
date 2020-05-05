@@ -59,6 +59,7 @@ server.maxRollbackRetryTimeout=-1
 server.rollbackRetryTimeoutUnlockEnable=false
 client.undo.dataValidation=true
 client.undo.logSerialization=jackson
+client.undo.onlyCareUpdateColumns=true
 server.undo.logSaveDays=7
 server.undo.logDeletePeriod=86400000
 client.undo.logTable=undo_log

@@ -26,6 +26,7 @@ seata:
       data-validation: true
       log-serialization: jackson
       log-table: undo_log
+      only-care-update-columns: true
     log:
       exceptionRate: 100
   service:
@@ -66,7 +67,7 @@ seata:
       server-addr: http://localhost:2379
     nacos:
       namespace:
-      serverAddr: localhost
+      serverAddr: 127.0.0.1:8848
       group: SEATA_GROUP
       userName: ""
       password: ""
@@ -87,7 +88,7 @@ seata:
       service-url: http://localhost:8761/eureka
     nacos:
       application: seata-server
-      server-addr: localhost
+      server-addr: 127.0.0.1:8848
       namespace:
       userName: ""
       password: ""
