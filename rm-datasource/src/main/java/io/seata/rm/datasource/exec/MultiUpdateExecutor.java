@@ -103,7 +103,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
-                selectSQLAppender.add(getColumnNameInSQL(tmeta.getEscapePkName(getDbType())));
+                selectSQLAppender.add(getColumnNamesInSQL(tmeta.getEscapePkNameList(getDbType())));
             }
             for (String updateCol : updateColumnsSet) {
                 selectSQLAppender.add(updateCol);
@@ -163,7 +163,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
-                selectSQLJoiner.add(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType())));
+                selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
             for (String updateCol : updateColumnsSet) {
                 selectSQLJoiner.add(updateCol);

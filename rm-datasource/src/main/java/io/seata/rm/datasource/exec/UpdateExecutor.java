@@ -89,7 +89,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (ONLY_CARE_UPDATE_COLUMNS) {
             List<String> updateColumns = recognizer.getUpdateColumns();
             if (!containsPK(updateColumns)) {
-                selectSQLJoin.add(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType())));
+                selectSQLJoin.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
             for (String columnName : updateColumns) {
                 selectSQLJoin.add(columnName);
@@ -140,7 +140,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
             List<String> updateColumns = recognizer.getUpdateColumns();
             if (!containsPK(updateColumns)) {
-                selectSQLJoiner.add(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType())));
+                selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
             }
             for (String columnName : updateColumns) {
                 selectSQLJoiner.add(columnName);
