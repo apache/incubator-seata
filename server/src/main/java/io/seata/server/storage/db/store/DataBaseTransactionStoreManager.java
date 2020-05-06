@@ -36,7 +36,6 @@ import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceGenerator;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -216,12 +215,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return readSession(sessionCondition.getStatuses());
         }
         return null;
-    }
-
-    @Override
-    public long getCurrentMaxSessionId() {
-        //check max transId or branchId
-        return logStore.getCurrentMaxSessionId(UUIDGenerator.getMaxUUID(), UUIDGenerator.getInitUUID());
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
