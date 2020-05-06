@@ -15,28 +15,26 @@
  */
 package io.seata.config;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 
 /**
  * @author funkye
  */
 public class SeataConfigurationCacheProvider implements ConfigurationCacheProvider, ConfigurationChangeListener {
 
-    private static final String INTERCEPT_METHOD_PREFIX = "getConfig";
+    private static final String METHOD_PREFIX = "get";
+
+    private static final String METHOD_CONFIG_NOW = METHOD_PREFIX + "ConfigNow";
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
     
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Enhancer.create(Configuration.class, new MethodInterceptor() {
-            @Override
-            public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
-                throws Throwable {
-                if (method.getName().equalsIgnoreCase(INTERCEPT_METHOD_PREFIX)) {
+        return (Configuration)Enhancer.create(Configuration.class,
+            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+                if (method.getName().startsWith(METHOD_PREFIX)&&!method.getName().equalsIgnoreCase(METHOD_CONFIG_NOW)) {
                     String rawDataId = (String)args[0];
                     Object result = CONFIG_CACHE.get(rawDataId);
                     if (null == result) {
@@ -51,8 +49,7 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
                     return result;
                 }
                 return method.invoke(originalConfiguration, args);
-            }
-        });
+            });
     }
 
     @Override
