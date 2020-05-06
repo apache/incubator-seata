@@ -25,6 +25,7 @@ import java.util.Date;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.BlobUtils;
 import io.seata.core.constants.ClientTableColumnsName;
+import io.seata.core.util.IdWorker;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -46,8 +47,8 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             " (" + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", " + ClientTableColumnsName.UNDO_LOG_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", " + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
-            + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")" +
-            " VALUES (?, ?, ?, ?, ?, now(), now())";
+            + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ", " + ClientTableColumnsName.UNDO_LOG_ID + ")" +
+            " VALUES (?, ?, ?, ?, ?, now(), now(), ?)";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE log_created <= ? LIMIT ?";
@@ -97,6 +98,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             pst.setString(3, rollbackCtx);
             pst.setBlob(4, BlobUtils.bytes2Blob(undoLogContent));
             pst.setInt(5, state.getValue());
+            pst.setLong(6, IdWorker.getInstance().nextId());
             pst.executeUpdate();
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {

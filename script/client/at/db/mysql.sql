@@ -1,7 +1,7 @@
 -- for AT mode you must to init this sql for you business database. the seata server not need it.
 CREATE TABLE IF NOT EXISTS `undo_log`
 (
-    `id`            BIGINT(20)   NOT NULL AUTO_INCREMENT COMMENT 'increment id',
+    `id`            BIGINT(20)   NOT NULL COMMENT 'increment id',
     `branch_id`     BIGINT(20)   NOT NULL COMMENT 'branch transaction id',
     `xid`           VARCHAR(100) NOT NULL COMMENT 'global transaction id',
     `context`       VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',

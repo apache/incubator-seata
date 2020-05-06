@@ -23,6 +23,11 @@ package io.seata.core.constants;
 public class ClientTableColumnsName {
 
     /**
+     * The constant undo_log column name id
+     */
+    public static final String UNDO_LOG_ID = "id";
+
+    /**
      * The constant undo_log column name xid
      */
     public static final String UNDO_LOG_XID = "xid";
