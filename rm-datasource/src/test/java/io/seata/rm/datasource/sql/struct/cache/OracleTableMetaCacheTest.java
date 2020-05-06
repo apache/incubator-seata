@@ -63,8 +63,6 @@ public class OracleTableMetaCacheTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
-        dataSource.setUsername("username");
-        dataSource.setPassword("password");
 
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
