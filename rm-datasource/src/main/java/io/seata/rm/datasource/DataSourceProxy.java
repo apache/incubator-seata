@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
@@ -140,8 +141,54 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
+        if (DBType.POSTGRESQL.name().equalsIgnoreCase(getDbType())) {
+            return getPGResourceId();
+        } else {
+            return getDefaultResourceId();
+        }
+    }
+
+    /**
+     * get the default resource id
+     * @return resource id
+     */
+    private String getDefaultResourceId() {
         if (jdbcUrl.contains("?")) {
             return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+        } else {
+            return jdbcUrl;
+        }
+    }
+
+    /**
+     * prevent pg sql url like
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata
+     * cause the duplicated resourceId
+     * it will cause the problem like
+     * 1.get file lock fail
+     * 2.error table meta cache
+     * @return resourceId
+     */
+    private String getPGResourceId() {
+        if (jdbcUrl.contains("?")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
+            String[] urlParams = paramUrl.split("&");
+            for (String urlParam : urlParams) {
+                if (urlParam.contains("currentSchema")) {
+                    paramsBuilder.append(urlParam);
+                    break;
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            return jdbcUrlBuilder.toString();
         } else {
             return jdbcUrl;
         }
