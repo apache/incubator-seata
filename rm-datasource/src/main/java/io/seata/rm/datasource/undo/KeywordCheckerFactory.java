@@ -15,12 +15,11 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.constants.DBType;
-import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Keyword checker factory.

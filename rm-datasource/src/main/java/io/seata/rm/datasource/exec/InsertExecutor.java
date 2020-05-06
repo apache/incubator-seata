@@ -111,7 +111,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             //1,all pk columns are filled value.
             //2,the auto increment pk column value is null, and other pk value are not null.
             pkValuesMap = getPkValuesByColumn();
-            System.out.println("after image1:"+pkValuesMap);
             for (String columnName:pkColumnNameList) {
                 if (!pkValuesMap.containsKey(columnName)) {
                     ColumnMeta pkColumnMeta = getTableMeta().getColumnMeta(columnName);
@@ -123,7 +122,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
 
-        System.out.println("after image2:"+pkValuesMap);
         TableRecords afterImage = buildTableRecords(pkValuesMap);
 
         if (afterImage == null) {
@@ -254,7 +252,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
             }
             // pk auto generated while single insert primary key is expression
-            else if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr||pkValues.get(0) instanceof SqlDefaultExpr)) {
+            else if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr || pkValues.get(0) instanceof SqlDefaultExpr)) {
                 pkValuesMap.putAll(getPkValuesByAuto());
             }
             // pk auto generated while column exists and value is null

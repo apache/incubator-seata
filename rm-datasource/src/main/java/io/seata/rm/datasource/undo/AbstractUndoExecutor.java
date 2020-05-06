@@ -120,7 +120,6 @@ public abstract class AbstractUndoExecutor {
             PreparedStatement undoPST = conn.prepareStatement(undoSQL);
 
             TableRecords undoRecords = getUndoRows();
-            System.out.println("undoRecords:"+undoRecords.getRows().size());
             for (Row undoRow : undoRecords.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
                 List<Field> pkValueList =  getOrderedPkList(undoRecords,undoRow,getDbType(conn));
