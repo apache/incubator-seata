@@ -118,11 +118,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     private RegistryClient getRegistryInstance() {
-        RegistryClient result = registryClient;
-        if (null == result) {
+        if (null == registryClient) {
             synchronized (SofaRegistryServiceImpl.class) {
-                result = registryClient;
-                if (null == result) {
+                if (null == registryClient) {
                     String address = registryProps.getProperty(PRO_SERVER_ADDR_KEY);
                     final String portStr = StringUtils.substringAfter(address, HOST_SEPERATOR);
 
@@ -133,13 +131,13 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                         .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
                         .setRegistryEndpointPort(Integer.parseInt(portStr)).build();
 
-                    result = new DefaultRegistryClient(config);
-                    ((DefaultRegistryClient) result).init();
+                    DefaultRegistryClient result = new DefaultRegistryClient(config);
+                    result.init();
                     registryClient = result;
                 }
             }
         }
-        return result;
+        return registryClient;
     }
 
     @Override
