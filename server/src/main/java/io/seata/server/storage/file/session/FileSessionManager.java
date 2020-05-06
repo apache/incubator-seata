@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -32,7 +31,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.UUIDGenerator;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -79,22 +77,6 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                 @Override
                 public boolean writeSession(LogOperation logOperation, SessionStorable session) {
                     return true;
-                }
-
-                @Override
-                public long getCurrentMaxSessionId() {
-                    long maxSessionId = 0L;
-                    for (Map.Entry<String, GlobalSession> entry : sessionMap.entrySet()) {
-                        GlobalSession globalSession = entry.getValue();
-                        if (globalSession.hasBranch()) {
-                            long maxBranchId = globalSession.getSortedBranches().get(globalSession.getSortedBranches().size() - 1)
-                                    .getBranchId();
-                            if (maxBranchId > maxSessionId) {
-                                maxSessionId = maxBranchId;
-                            }
-                        }
-                    }
-                    return maxSessionId;
                 }
             };
         }
@@ -223,11 +205,9 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     }
 
     private void restore(List<TransactionWriteStore> stores, Map<Long, BranchSession> unhandledBranchSessions) {
-        long maxRecoverId = UUIDGenerator.getCurrentUUID();
         for (TransactionWriteStore store : stores) {
             TransactionStoreManager.LogOperation logOperation = store.getOperate();
             SessionStorable sessionStorable = store.getSessionRequest();
-            maxRecoverId = getMaxId(maxRecoverId, sessionStorable);
             switch (logOperation) {
                 case GLOBAL_ADD:
                 case GLOBAL_UPDATE: {
@@ -318,32 +298,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
             }
         }
-        setMaxId(maxRecoverId);
 
-    }
-
-    private long getMaxId(long maxRecoverId, SessionStorable sessionStorable) {
-        long currentId = 0;
-        if (sessionStorable instanceof GlobalSession) {
-            currentId = ((GlobalSession)sessionStorable).getTransactionId();
-        } else if (sessionStorable instanceof BranchSession) {
-            currentId = ((BranchSession)sessionStorable).getBranchId();
-        }
-
-        return maxRecoverId > currentId ? maxRecoverId : currentId;
-    }
-
-    private void setMaxId(long maxRecoverId) {
-        long currentId;
-        // will be recover multi-thread later
-        while ((currentId = UUIDGenerator.getCurrentUUID()) < maxRecoverId) {
-            if (UUIDGenerator.setUUID(currentId, maxRecoverId)) {
-                break;
-            }
-        }
-    }
-
-    private void restore(TransactionWriteStore store) {
     }
 
     @Override
