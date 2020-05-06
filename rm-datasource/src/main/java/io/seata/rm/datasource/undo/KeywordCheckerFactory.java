@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.constants.DBType;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Keyword checker factory.
@@ -37,9 +38,9 @@ public class KeywordCheckerFactory {
      * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
-        if (DBType.H2.name().equalsIgnoreCase(dbType)) {
+        if (JdbcConstants.H2.equalsIgnoreCase(dbType)) {
             //otherwise it can't get a H2 KeywordChecker
-            dbType = DBType.MYSQL.name();
+            dbType = JdbcConstants.MYSQL;
         }
         if (KEYWORD_CHECKER_MAP.get(dbType) != null) {
             return KEYWORD_CHECKER_MAP.get(dbType);

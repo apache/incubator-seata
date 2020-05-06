@@ -148,20 +148,6 @@ public class OracleInsertExecutorTest {
 
     }
 
-    @Test
-    public void testGetPkValuesByAuto_NotSupportYetException() {
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            PreparedStatement preparedStatement = mock(PreparedStatement.class);
-            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-            when(preparedStatement.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
-            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-            columnMetaMap.put(ID_COLUMN, new ColumnMeta());
-            columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
-            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            insertExecutor.getPkValuesByAuto();
-        });
-    }
 
 
     private List<String> mockInsertColumns() {

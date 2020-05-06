@@ -88,9 +88,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         // Not support statement batch insert sql
         List<List<Object>> insertRows = recognizer.getInsertRows();
         boolean moreThanOneRow = Objects.nonNull(insertRows) && !insertRows.isEmpty() && insertRows.size() > 1;
-        boolean isStatement = ! (statementProxy instanceof PreparedStatementProxy);
         Boolean isContainsPk = containsPK();
-        if (isStatement && moreThanOneRow)
+        if (moreThanOneRow)
         {
             //Because we can't obtain the auto increment value if the program run batch insert sql in the form of statement.
             //We can't rollback without the auto increment value.
@@ -112,7 +111,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             //1,all pk columns are filled value.
             //2,the auto increment pk column value is null, and other pk value are not null.
             pkValuesMap = getPkValuesByColumn();
-
+            System.out.println("after image1:"+pkValuesMap);
             for (String columnName:pkColumnNameList) {
                 if (!pkValuesMap.containsKey(columnName)) {
                     ColumnMeta pkColumnMeta = getTableMeta().getColumnMeta(columnName);
@@ -124,7 +123,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
 
-
+        System.out.println("after image2:"+pkValuesMap);
         TableRecords afterImage = buildTableRecords(pkValuesMap);
 
         if (afterImage == null) {
@@ -241,19 +240,27 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkValuesMap.isEmpty()) {
             throw new ShouldNeverHappenException();
         }
-        boolean b = this.checkPkValues(pkValues);
-        if (!b) {
-            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
-        }
-        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValues = getPkValuesBySequence(pkValues.get(0));
-        }
-        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
-            pkValues = getPkValuesByDefault();
-        }
-        // pk auto generated while column exists and value is null
-        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
-            pkValues = getPkValuesByAuto();
+
+        Set<String> keySet = new HashSet<>(pkValuesMap.keySet());
+        //auto increment
+        for (String pkKey:keySet) {
+            List<Object> pkValues = pkValuesMap.get(pkKey);
+            boolean b = this.checkPkValues(pkValues);
+            if (!b) {
+                throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            }
+            if (!pkValuesMap.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
+                pkValues = getPkValuesBySequence(pkValues.get(0));
+                pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
+            }
+            // pk auto generated while single insert primary key is expression
+            else if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr||pkValues.get(0) instanceof SqlDefaultExpr)) {
+                pkValuesMap.putAll(getPkValuesByAuto());
+            }
+            // pk auto generated while column exists and value is null
+            else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
+                pkValuesMap.putAll(getPkValuesByAuto());
+            }
         }
 
         return pkValuesMap;
@@ -317,12 +324,29 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return pkValues;
     }
 
-    protected List<Object> getPkValuesByAuto() throws SQLException {
+
+    protected Map<String,List<Object>> getPkValuesByAuto() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = new HashMap<>();
         boolean mysql = StringUtils.equalsIgnoreCase(JdbcConstants.MYSQL, getDbType());
-        if (mysql) {
-            return mysqlGeneratedKeys();
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        for (String pkColumnName : pkMetaMap.keySet()) {
+            List<Object> valueList = null;
+            if (mysql) {
+                //auto increment only for primary key
+                if (!pkMetaMap.get(pkColumnName).isAutoincrement())
+                {
+                    continue;
+                }
+                valueList = mysqlGeneratedKeys();
+            } else {
+                valueList = defaultGeneratedKeys();
+            }
+            pkValuesMap.put(pkColumnName, valueList);
         }
-        return defaultGeneratedKeys();
+        if (pkValuesMap.isEmpty()) {
+            throw new ShouldNeverHappenException();
+        }
+        return pkValuesMap;
     }
 
     /**

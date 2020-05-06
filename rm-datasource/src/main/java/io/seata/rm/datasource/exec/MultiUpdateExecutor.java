@@ -28,11 +28,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The type MultiSql executor.
@@ -78,7 +75,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!containsPK(new ArrayList<>(updateColumnsSet))) {
-            prefix.append(getColumnNameInSQL(tmeta.getEscapePkName(getDbType()))).append(", ");
+            prefix.append(getColumnNamesInSQL(tmeta.getEscapePkNameList(getDbType())));
         }
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (noWhereCondition) {
@@ -108,10 +105,19 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {
-            List<Field> pkRows = beforeImage.pkRows();
-            for (int i = 1; i <= pkRows.size(); i++) {
-                Field pkField = pkRows.get(i - 1);
-                pst.setObject(i, pkField.getValue(), pkField.getType());
+            List<Map<String,Field>> pkRowsList = beforeImage.pkRows();
+            List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+            int paramIndex = 1;
+            for (int i = 0;i < pkColumnNameList.size(); i++) {
+                String pkKey = pkColumnNameList.get(i);
+                List<Field> fieldList = pkRowsList.stream()
+                        .map(e -> e.get(pkKey))
+                        .filter(e -> Objects.nonNull(e))
+                        .collect(Collectors.toList());
+                for (Field pkField:fieldList) {
+                    pst.setObject(paramIndex, pkField.getValue(), pkField.getType());
+                    paramIndex++;
+                }
             }
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
@@ -131,7 +137,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!containsPK(new ArrayList<>(updateColumnsSet))) {
             // PK should be included.
-            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
+            prefix.append(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
         }
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
