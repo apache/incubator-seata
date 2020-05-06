@@ -13,33 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server;
+package io.seata.compressor.lz4;
 
-import io.seata.core.util.IdWorker;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * The type Uuid generator.
- *
- * @author sharajava
+ * @author diguage
  */
-public class UUIDGenerator {
-
-    /**
-     * Generate uuid long.
-     *
-     * @return the long
-     */
-    public static long generateUUID() {
-        return IdWorker.getInstance().nextId();
+class Lz4UtilTest {
+    @Test
+    public void testCompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Lz4Util.compress(null);
+        });
     }
 
-    /**
-     * Init.
-     *
-     * @param serverNode the server node id
-     */
-    public static void init(Long serverNode) {
-        IdWorker.init(serverNode);
+    @Test
+    public void testDecompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Lz4Util.decompress(null);
+        });
     }
 
 }

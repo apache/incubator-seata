@@ -13,33 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server;
+package io.seata.compressor.lz4;
 
-import io.seata.core.util.IdWorker;
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.compressor.Compressor;
 
 /**
- * The type Uuid generator.
+ * the Lz4 Compressor
  *
- * @author sharajava
+ * @author diguage
  */
-public class UUIDGenerator {
-
-    /**
-     * Generate uuid long.
-     *
-     * @return the long
-     */
-    public static long generateUUID() {
-        return IdWorker.getInstance().nextId();
+@LoadLevel(name = "LZ4")
+public class Lz4Compressor implements Compressor {
+    @Override
+    public byte[] compress(byte[] bytes) {
+        return Lz4Util.compress(bytes);
     }
 
-    /**
-     * Init.
-     *
-     * @param serverNode the server node id
-     */
-    public static void init(Long serverNode) {
-        IdWorker.init(serverNode);
+    @Override
+    public byte[] decompress(byte[] bytes) {
+        return Lz4Util.decompress(bytes);
     }
-
 }
