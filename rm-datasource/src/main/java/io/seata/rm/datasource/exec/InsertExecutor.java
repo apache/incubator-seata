@@ -31,4 +31,11 @@ public interface InsertExecutor<T> extends Executor<T> {
      */
     List<Object> getPkValues() throws SQLException;
 
+    /**
+     * get primary key values by insert column.
+     * @return
+     * @throws SQLException
+     */
+    List<Object> getPkValuesByColumn() throws SQLException;
+
 }

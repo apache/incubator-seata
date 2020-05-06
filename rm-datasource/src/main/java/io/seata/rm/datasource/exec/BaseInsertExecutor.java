@@ -90,9 +90,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * @return true: contains column. false: not contains column.
      */
     protected boolean containsColumns() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recognizer.getInsertColumns();
-        return insertColumns != null && !insertColumns.isEmpty();
+        return !((SQLInsertRecognizer) sqlRecognizer).insertColumnsIsEmpty();
     }
 
     /**

@@ -59,9 +59,7 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
                 (containsColumns() ? getGeneratedKeys() : getPkValuesByColumn());
     }
 
-    /**
-     * the modify for test
-     */
+    @Override
     public List<Object> getPkValuesByColumn() throws SQLException {
         List<Object> pkValues = parsePkValuesFromStatement();
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {

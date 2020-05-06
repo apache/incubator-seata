@@ -15,9 +15,20 @@
  */
 package io.seata.sqlparser.struct;
 
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  * The default expr able.
  * @author jsbxyyx
  */
 public interface Defaultable {
+
+    /**
+     * get primary key values by default keyword.
+     * @return
+     * @throws SQLException
+     */
+    List<Object> getPkValuesByDefault() throws SQLException;
+
 }

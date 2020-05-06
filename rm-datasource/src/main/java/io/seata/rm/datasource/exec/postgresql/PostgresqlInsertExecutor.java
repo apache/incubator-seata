@@ -63,6 +63,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
                 (containsColumns() ? getGeneratedKeys() : getPkValuesByColumn());
     }
 
+    @Override
     public List<Object> getPkValuesByColumn() throws SQLException {
         List<Object> pkValues = parsePkValuesFromStatement();
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
@@ -80,9 +81,9 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
      * @return
      * @throws SQLException
      */
+    @Override
     public List<Object> getPkValuesByDefault() throws SQLException {
         // current version 1.2 only support postgresql.
-        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         String columnDef = pkMeta.getColumnDef();

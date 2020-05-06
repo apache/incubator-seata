@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -105,9 +106,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         return pkValues;
     }
 
-    /**
-     * the modify for test
-     */
+    @Override
     public List<Object> getPkValuesByColumn() throws SQLException {
         List<Object> pkValues = parsePkValuesFromStatement();
         if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
@@ -118,4 +117,9 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         return pkValues;
     }
 
+    @Override
+    public List<Object> getPkValuesByDefault() throws SQLException {
+        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        throw new NotSupportYetException();
+    }
 }
