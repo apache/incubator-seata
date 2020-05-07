@@ -34,7 +34,8 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
     public Configuration provide(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class,
             (MethodInterceptor)(proxy, method, args, methodProxy) -> {
-                if (method.getName().startsWith(METHOD_PREFIX)&&!method.getName().equalsIgnoreCase(METHOD_CONFIG_NOW)) {
+                if (method.getName().startsWith(METHOD_PREFIX)
+                    && !method.getName().equalsIgnoreCase(METHOD_CONFIG_NOW)) {
                     String rawDataId = (String)args[0];
                     Object result = CONFIG_CACHE.get(rawDataId);
                     if (null == result) {
