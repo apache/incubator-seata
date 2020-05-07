@@ -20,7 +20,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
