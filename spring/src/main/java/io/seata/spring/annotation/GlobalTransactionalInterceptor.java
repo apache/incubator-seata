@@ -250,9 +250,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     private static synchronized void onDegradeCheck(boolean succeed) {
         if (succeed) {
-            if (degradeNum == degradeCheckAllowTimes) {
+            if (degradeNum >= degradeCheckAllowTimes) {
                 reachNum++;
-                if (reachNum == degradeCheckAllowTimes) {
+                if (reachNum >= degradeCheckAllowTimes) {
                     reachNum = 0;
                     degradeNum = 0;
                     if (LOGGER.isInfoEnabled()) {
@@ -265,7 +265,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         } else {
             if (degradeNum < degradeCheckAllowTimes) {
                 degradeNum++;
-                if (degradeNum == degradeCheckAllowTimes) {
+                if (degradeNum >= degradeCheckAllowTimes) {
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("the current global transaction has been automatically downgraded");
                     }
