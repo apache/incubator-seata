@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `undo_log`
     `log_status`    INT(11)      NOT NULL COMMENT '0:normal status,1:defense status',
     `log_created`   DATETIME(6)  NOT NULL COMMENT 'create datetime',
     `log_modified`  DATETIME(6)  NOT NULL COMMENT 'modify datetime',
-    PRIMARY KEY (`xid`, `branch_id`)
+    UNIQUE KEY `ux_undo_log` (`xid`, `branch_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARSET = utf8 COMMENT ='AT transaction mode undo table';
