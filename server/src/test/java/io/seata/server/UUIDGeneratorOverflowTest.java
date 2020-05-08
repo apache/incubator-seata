@@ -17,8 +17,6 @@ package io.seata.server;
 
 import org.junit.jupiter.api.Test;
 
-import io.seata.core.util.IdWorker;
-
 /**
  * The type Uuid generator overflow test.
  */
