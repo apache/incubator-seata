@@ -114,7 +114,7 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
         if (!degradeCheck) {
             return disable;
         }
-        return (disable || degradeCheck && degradeNum >= degradeCheckAllowTimes);
+        return disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
     }
 
     @Override
