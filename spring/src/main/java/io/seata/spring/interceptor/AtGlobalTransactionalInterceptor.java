@@ -15,13 +15,15 @@
  */
 package io.seata.spring.interceptor;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import io.seata.spring.annotation.AtTransactional;
 import io.seata.spring.annotation.HandleGlobalTransaction;
+import io.seata.spring.util.GlobalTransactionalCheck;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.TransactionalTemplate;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author funkye
@@ -46,7 +48,11 @@ public class AtGlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        return handleGlobalTransaction.runTransaction(invocation, atTransactional, failureHandler,
-            transactionalTemplate);
+        if (!GlobalTransactionalCheck.getStatus()) {
+            return handleGlobalTransaction.runTransaction(invocation, atTransactional, failureHandler,
+                transactionalTemplate);
+        }
+        return invocation.proceed();
     }
+
 }
