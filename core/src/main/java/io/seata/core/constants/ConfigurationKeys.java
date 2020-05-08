@@ -460,4 +460,18 @@ public class ConfigurationKeys {
      */
     public static final String STORE_MONGO_DATA_BASE_NAME = STORE_MONGO_PREFIX + "databaseName";
 
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_PERIOD.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK.
+     */
+    public static final String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
 }
