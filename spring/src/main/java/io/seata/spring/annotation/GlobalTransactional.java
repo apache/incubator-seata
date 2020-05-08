@@ -71,6 +71,7 @@ public @interface GlobalTransactional {
 
     /**
      * the propagation of the global transaction
+     * 
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;

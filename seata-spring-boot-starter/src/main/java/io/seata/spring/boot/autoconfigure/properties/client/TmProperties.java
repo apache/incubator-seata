@@ -18,7 +18,11 @@ package io.seata.spring.boot.autoconfigure.properties.client;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
+import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 
@@ -30,6 +34,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREF
 public class TmProperties {
     private int commitRetryCount = DEFAULT_TM_COMMIT_RETRY_COUNT;
     private int rollbackRetryCount = DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+    private boolean degradeCheck = DEFAULT_TM_DEGRADE_CHECK;
+    private int degradeCheckAllowTimes = DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
+    private int degradeCheckPeriod = DEFAULT_TM_DEGRADE_CHECK_PERIOD;
 
     public int getCommitRetryCount() {
         return commitRetryCount;
@@ -47,5 +54,31 @@ public class TmProperties {
     public TmProperties setRollbackRetryCount(int rollbackRetryCount) {
         this.rollbackRetryCount = rollbackRetryCount;
         return this;
+    }
+
+    public boolean isDegradeCheck() {
+        return degradeCheck;
+    }
+
+    public TmProperties setDegradeCheck(boolean degradeCheck) {
+        this.degradeCheck = degradeCheck;
+        return this;
+    }
+
+    public int getDegradeCheckPeriod() {
+        return degradeCheckPeriod;
+    }
+
+    public TmProperties setDegradeCheckPeriod(int degradeCheckPeriod) {
+        this.degradeCheckPeriod = degradeCheckPeriod;
+        return this;
+    }
+
+    public int getDegradeCheckAllowTimes() {
+        return degradeCheckAllowTimes;
+    }
+
+    public void setDegradeCheckAllowTimes(int degradeCheckAllowTimes) {
+        this.degradeCheckAllowTimes = degradeCheckAllowTimes;
     }
 }
