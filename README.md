@@ -221,6 +221,26 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='商银信支付' height='40' src='https://img.alicdn.com/tfs/TB1rxndw4n1gK0jSZKPXXXvUXXa-150-68.png'   /img>
     <img alt='钛师傅云' height='40'  src='https://www.tsfyun.com/images/logo.png'  /img>
     <img alt='广州力生信息' height='40'  src='https://user-images.githubusercontent.com/21170967/75753185-30cc5900-5d65-11ea-8eba-cd24ee669c64.jpg'  /img>
-</div>
+    <img alt='杭州启舰科技有限公司' height='40'  src='http://www.qijian-tech.com/assets/onepage/img/logo/red.png'  /img>
+    <img alt='上海美浮特' height='40'  src='https://user-images.githubusercontent.com/40849539/75839221-485a1f00-5e03-11ea-9518-a52c01a6188c.jpg'  /img>    
+    <img alt='杭州中威慧云医疗科技有限公司' height='40'  src='https://user-images.githubusercontent.com/25860264/75963179-006cf200-5f00-11ea-8d75-b65efea055ff.png'  /img> 
+    <img alt='易族智汇（北京）' height='40'  src='http://www.javamall.com.cn/images/logonew.jpg'  /img> 
+    <img alt='佛山宅无限' height='40'  src='https://zwxnetwork.oss-cn-shenzhen.aliyuncs.com/static/temporary_official_website/logo.png'  /img>     
+    <img alt='F5未来商店' height='40'  src='https://cdn.f5-store.cn/front_end/common_images/logo.png'  /img>  
+    <img alt='甄品信息科技' height='40'  src='https://tiebapic.baidu.com/forum/pic/item/2fdda3cc7cd98d103f551c5a363fb80e7aec90d3.jpg'  /img>  
+    <img alt='行云全球汇跨境电商（杭州分部）' height='40'  src='http://www.xyb2b.com/_nuxt/img/5e5584f.png'  /img>  
+    <img alt='世纪加华' height='40'  src='https://zhengxin-pub.bj.bcebos.com/logopic/a4ff4990e2ba2d57c90e8d16c649b952_fullsize.jpg?x-bce-process=image/resize,m_lfit,w_200'  /img>  
+    <img alt='海牛电子商务' height='40'  src='http://www.hainiuec.com/public/assets/addons/cms/img/company-logo.png'  /img>    
+    <img alt='杭州华网信息' height='40'  src='https://img03.51jobcdn.com/fansImg/CompLogo/5/4234/4233200/4233200_120.gif?636221689705890487'  /img>   
+    <img alt='快陪练' height='40'  src='https://cdn.office.kuaipeilian.com/images/logo_sun.png'  /img> 
+    <img alt='西南石油大学' height='40'  src='https://dss2.bdstatic.com/6Ot1bjeh1BF3odCf/it/u=829617221,290823158&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=b0b603710dd0af061a278d11cfe327ae'  /img> 
+    <img alt='领课网络' height='40'  src='https://edu.roncoo.net/public/images/index/logo2.jpg'  /img> 
+    <img alt='美通社' height='40'  src='https://www.prnasia.com/prnasia.com-PC/images/logo-cn-blue.png'  /img> 
+    <img alt='睿维科技有限公司' height='40'  src='https://user-images.githubusercontent.com/54613299/80465869-585b2e80-896e-11ea-9ed8-738d756e7351.jpg'  /img> 
+    <img alt='郑州信源信息技术' height='40'  src='http://www.xinyuan.com.cn/skin/default/images/logo.png'  /img>     
+    </div>
+
+
+
 
 
