@@ -18,6 +18,7 @@ package io.seata.core.context;
 import com.alibaba.ttl.TransmittableThreadLocal;
 import io.seata.common.loader.LoadLevel;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,7 +30,12 @@ import java.util.Map;
 @LoadLevel(name = "TransmittableThreadLocalContextCore", order = Integer.MIN_VALUE + 2)
 public class TransmittableThreadLocalContextCore implements ContextCore {
 
-    private TransmittableThreadLocal<Map<String, String>> ttlThreadLocal = new TransmittableThreadLocal<>();
+    private TransmittableThreadLocal<Map<String, String>> ttlThreadLocal = new TransmittableThreadLocal<Map<String, String>>() {
+        @Override
+        protected Map<String, String> initialValue() {
+            return new HashMap<>();
+        }
+    };
 
     @Override
     public String put(String key, String value) {
