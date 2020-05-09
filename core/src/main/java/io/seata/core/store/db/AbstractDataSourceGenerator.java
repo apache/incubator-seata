@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import io.seata.common.exception.StoreException;
+import io.seata.common.executor.Initialize;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -38,7 +39,7 @@ import javax.sql.DataSource;
  *
  * @author zhangsen
  */
-public abstract class AbstractDataSourceGenerator implements DataSourceGenerator {
+public abstract class AbstractDataSourceGenerator implements DataSourceGenerator, Initialize {
 
     private DataSource dataSource;
 
@@ -65,10 +66,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
 
     private static final long DEFAULT_DB_MAX_WAIT = 5000;
 
-    /**
-     * generate the data source
-     */
-    public AbstractDataSourceGenerator() {
+    @Override
+    public void init() {
         this.dataSource = this.generate();
     }
 
