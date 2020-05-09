@@ -15,6 +15,8 @@
  */
 package io.seata.saga.tm;
 
+import java.util.List;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -41,8 +43,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import java.util.List;
 
 /**
  * Template of executing business logic with a global transaction for SAGA mode
