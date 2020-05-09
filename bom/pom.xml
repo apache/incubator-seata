@@ -75,6 +75,7 @@
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <commons-pool.version>1.6</commons-pool.version>
         <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
+        <hikari.version>3.4.3</hikari.version>
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
@@ -465,6 +466,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-dbcp2</artifactId>
                 <version>${commons-dbcp2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.h2database</groupId>

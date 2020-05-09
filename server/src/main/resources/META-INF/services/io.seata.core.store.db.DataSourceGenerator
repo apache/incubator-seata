@@ -1,2 +1,3 @@
 io.seata.server.store.DbcpDataSourceGenerator
 io.seata.server.store.DruidDataSourceGenerator
+io.seata.server.store.HikariDataSourceGenerator
