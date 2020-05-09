@@ -112,9 +112,9 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
             if (!degradeCheckNow && degradeNum != 0) {
                 degradeNum = 0;
             }
-            disable = degradeCheckNow;
+            degradeCheck = degradeCheckNow;
         }
-        boolean localDisable = degradeCheckNow || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
+        boolean localDisable = disable || (degradeCheckNow && degradeNum >= degradeCheckAllowTimes);
         if (!localDisable) {
             if (globalTransactionalAnnotation != null) {
                 return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
