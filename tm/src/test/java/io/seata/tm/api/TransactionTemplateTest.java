@@ -19,11 +19,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.transaction.NoRollbackRule;
-import io.seata.tm.api.transaction.RollbackRule;
-import io.seata.tm.api.transaction.TransactionHook;
-import io.seata.tm.api.transaction.TransactionHookManager;
-import io.seata.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author guoyao
@@ -76,7 +70,7 @@ public class TransactionTemplateTest {
     public void testTransactionCommitHook() throws Throwable {
         TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
 
-        TransactionHookManager.registerHook(transactionHook);
+        TransactionHookManager.registerLocalHook(transactionHook);
         TransactionalTemplate template = new TransactionalTemplate();
         template.execute(transactionalExecutor);
         verifyCommit(transactionHook);
@@ -86,7 +80,7 @@ public class TransactionTemplateTest {
     public void testTransactionRollbackHook() throws Throwable {
         TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
         when(transactionalExecutor.execute()).thenThrow(new RuntimeException());
-        TransactionHookManager.registerHook(transactionHook);
+        TransactionHookManager.registerLocalHook(transactionHook);
         TransactionalTemplate template = new TransactionalTemplate();
         try {
             template.execute(transactionalExecutor);
@@ -131,7 +125,7 @@ public class TransactionTemplateTest {
         when(transactionalExecutor.getTransactionInfo()).thenReturn(txInfo);
 
         when(transactionalExecutor.execute()).thenThrow(throwable);
-        TransactionHookManager.registerHook(transactionHook);
+        TransactionHookManager.registerLocalHook(transactionHook);
         TransactionalTemplate template = new TransactionalTemplate();
         try {
             template.execute(transactionalExecutor);
@@ -142,19 +136,19 @@ public class TransactionTemplateTest {
     }
 
     private void verifyCommit(TransactionHook transactionHook) {
-        verify(transactionHook).beforeBegin();
-        verify(transactionHook).afterBegin();
-        verify(transactionHook).beforeCommit();
-        verify(transactionHook).afterCommit();
-        verify(transactionHook).afterCompletion();
+        verify(transactionHook).beforeBegin(null);
+        verify(transactionHook).afterBegin(null);
+        verify(transactionHook).beforeCommit(null);
+        verify(transactionHook).afterCommit(null);
+        verify(transactionHook).afterCompletion(null);
     }
 
     private void verifyRollBack(TransactionHook transactionHook) {
-        verify(transactionHook).beforeBegin();
-        verify(transactionHook).afterBegin();
-        verify(transactionHook).beforeRollback();
-        verify(transactionHook).afterRollback();
-        verify(transactionHook).afterCompletion();
+        verify(transactionHook).beforeBegin(null);
+        verify(transactionHook).afterBegin(null);
+        verify(transactionHook).beforeRollback(null);
+        verify(transactionHook).afterRollback(null);
+        verify(transactionHook).afterCompletion(null);
     }
 
 

@@ -15,43 +15,45 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.tm.api.GlobalTransaction;
+
 /**
  * @author guoyao
  */
 public class TransactionHookAdapter implements TransactionHook {
 
     @Override
-    public void beforeBegin() {
+    public void beforeBegin(GlobalTransaction tx) {
 
     }
 
     @Override
-    public void afterBegin() {
+    public void afterBegin(GlobalTransaction tx) {
 
     }
 
     @Override
-    public void beforeCommit() {
+    public void beforeCommit(GlobalTransaction tx) {
 
     }
 
     @Override
-    public void afterCommit() {
+    public void afterCommit(GlobalTransaction tx) {
 
     }
 
     @Override
-    public void beforeRollback() {
+    public void beforeRollback(GlobalTransaction tx) {
 
     }
 
     @Override
-    public void afterRollback() {
+    public void afterRollback(GlobalTransaction tx) {
 
     }
 
     @Override
-    public void afterCompletion() {
+    public void afterCompletion(GlobalTransaction tx) {
 
     }
 }

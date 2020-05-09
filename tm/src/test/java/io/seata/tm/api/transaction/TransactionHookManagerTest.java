@@ -36,29 +36,32 @@ public class TransactionHookManagerTest {
     @Test
     public void testRegisterHook() {
         TransactionHookAdapter transactionHookAdapter = new TransactionHookAdapter();
-        TransactionHookManager.registerHook(transactionHookAdapter);
+        TransactionHookAdapter transactionHookAdapter2 = new TransactionHookAdapter();
+        TransactionHookManager.registerLocalHook(transactionHookAdapter);
+        TransactionHookManager.registerGlobalHook(transactionHookAdapter2);
         List<TransactionHook> hooks = TransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
-        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
+        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter2);
+        assertThat(hooks.get(1)).isEqualTo(transactionHookAdapter);
     }
 
     @Test
     public void testGetHooks() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
-        TransactionHookManager.registerHook(new TransactionHookAdapter());
+        TransactionHookManager.registerLocalHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
     }
 
     @Test
     public void testClear() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
-        TransactionHookManager.registerHook(new TransactionHookAdapter());
+        TransactionHookManager.registerLocalHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
     @Test
     public void testNPE() {
-        Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerHook(null));
+        Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerLocalHook(null));
     }
 }

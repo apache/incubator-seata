@@ -15,8 +15,6 @@
  */
 package io.seata.saga.tm;
 
-import java.util.List;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -44,6 +42,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.List;
+
 /**
  * Template of executing business logic with a global transaction for SAGA mode
  *
@@ -61,9 +61,9 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
-            triggerBeforeCommit();
+            triggerBeforeCommit(tx);
             tx.commit();
-            triggerAfterCommit();
+            triggerAfterCommit(tx);
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
@@ -73,9 +73,9 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public void rollbackTransaction(GlobalTransaction tx, Throwable ex)
         throws TransactionException, TransactionalExecutor.ExecutionException {
-        triggerBeforeRollback();
+        triggerBeforeRollback(tx);
         tx.rollback();
-        triggerAfterRollback();
+        triggerAfterRollback(tx);
         // Successfully rolled back
     }
 
@@ -83,9 +83,9 @@ public class DefaultSagaTransactionalTemplate
     public GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         try {
-            triggerBeforeBegin();
+            triggerBeforeBegin(tx);
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
-            triggerAfterBegin();
+            triggerAfterBegin(tx);
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
 
@@ -103,7 +103,7 @@ public class DefaultSagaTransactionalTemplate
         throws TransactionalExecutor.ExecutionException {
         try {
             tx.globalReport(globalStatus);
-            triggerAfterCompletion();
+            triggerAfterCompletion(tx);
         } catch (TransactionException txe) {
 
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
@@ -123,60 +123,60 @@ public class DefaultSagaTransactionalTemplate
         DefaultResourceManager.get().branchReport(BranchType.SAGA, xid, branchId, status, applicationData);
     }
 
-    protected void triggerBeforeBegin() {
+    protected void triggerBeforeBegin(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.beforeBegin();
+                hook.beforeBegin(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
             }
         }
     }
 
-    protected void triggerAfterBegin() {
+    protected void triggerAfterBegin(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.afterBegin();
+                hook.afterBegin(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute afterBegin in hook {} ", e.getMessage(), e);
             }
         }
     }
 
-    protected void triggerBeforeRollback() {
+    protected void triggerBeforeRollback(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.beforeRollback();
+                hook.beforeRollback(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute beforeRollback in hook {} ", e.getMessage(), e);
             }
         }
     }
 
-    protected void triggerAfterRollback() {
+    protected void triggerAfterRollback(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.afterRollback();
+                hook.afterRollback(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
             }
         }
     }
 
-    protected void triggerBeforeCommit() {
+    protected void triggerBeforeCommit(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.beforeCommit();
+                hook.beforeCommit(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
             }
         }
     }
 
-    protected void triggerAfterCommit() {
+    protected void triggerAfterCommit(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.afterCommit();
+                hook.afterCommit(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
             }
@@ -184,10 +184,10 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public void triggerAfterCompletion() {
+    public void triggerAfterCompletion(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
-                hook.afterCompletion();
+                hook.afterCompletion(tx);
             } catch (Exception e) {
                 LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
             }

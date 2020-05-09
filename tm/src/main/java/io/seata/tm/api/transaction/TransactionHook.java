@@ -15,6 +15,8 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.tm.api.GlobalTransaction;
+
 /**
  * @author guoyao
  */
@@ -23,35 +25,35 @@ public interface TransactionHook {
     /**
      * before tx begin
      */
-    void beforeBegin();
+    void beforeBegin(GlobalTransaction tx);
 
     /**
      * after tx begin
      */
-    void afterBegin();
+    void afterBegin(GlobalTransaction tx);
 
     /**
      * before tx commit
      */
-    void beforeCommit();
+    void beforeCommit(GlobalTransaction tx);
 
     /**
      * after tx commit
      */
-    void afterCommit();
+    void afterCommit(GlobalTransaction tx);
 
     /**
      * before tx rollback
      */
-    void beforeRollback();
+    void beforeRollback(GlobalTransaction tx);
 
     /**
      * after tx rollback
      */
-    void afterRollback();
+    void afterRollback(GlobalTransaction tx);
 
     /**
      * after tx all Completed
      */
-    void afterCompletion();
+    void afterCompletion(GlobalTransaction tx);
 }
