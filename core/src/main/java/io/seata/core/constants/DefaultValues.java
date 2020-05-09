@@ -80,5 +80,7 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
+    public static final String DEFAULT_CONTEXT_TYPE = "FastThreadLocalContextCore";
+
 
 }
