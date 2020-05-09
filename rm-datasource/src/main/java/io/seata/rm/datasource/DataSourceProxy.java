@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DBType;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
@@ -147,7 +146,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
-        if (DBType.POSTGRESQL.name().equalsIgnoreCase(getDbType())) {
+        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
             return getPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             return getDefaultResourceId() + "/" + userName;
