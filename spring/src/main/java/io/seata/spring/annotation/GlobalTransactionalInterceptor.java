@@ -108,13 +108,13 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
         boolean degradeCheckNow = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
-        if (degradeCheckNow != disable) {
+        if (degradeCheckNow != degradeCheck) {
             if (!degradeCheckNow && degradeNum != 0) {
                 degradeNum = 0;
             }
             degradeCheck = degradeCheckNow;
         }
-        boolean localDisable = disable || (degradeCheckNow && degradeNum >= degradeCheckAllowTimes);
+        boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
         if (!localDisable) {
             if (globalTransactionalAnnotation != null) {
                 return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
