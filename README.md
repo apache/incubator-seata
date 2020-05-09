@@ -193,7 +193,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='居然之家' height='40'  src='https://img.alicdn.com/tfs/TB1LK6jrUT1gK0jSZFrXXcNCXXa-180-54.png'  /img>
     <img alt='臻善科技' height='40'  src='http://www.gisquest.com/static/web/img/img-1.png?v=v3'  /img>
     <img alt='中国支付通' height='40'  src='http://www.chinasmartpay.com/img/index_logo.png'  /img>
-    <img alt='众网小贷' height='40'  src='http://imassbank.com/images/zw_logo.png'  /img>
+    <img alt='众网小贷' height='40'  src='https://img.alicdn.com/tfs/TB19Y8XFEY1gK0jSZFMXXaWcVXa-160-60.png'  /img>
     <img alt='谐云科技' height='40'  src='https://img.alicdn.com/tfs/TB1V1YlrRv0gK0jSZKbXXbK2FXa-514-160.png'  /img>
     <img alt='浙江甄品' height='40'  src='https://img.alicdn.com/tfs/TB1oC2prND1gK0jSZFyXXciOVXa-246-124.jpg'  /img>
     <img alt='深圳海豚网' height='40'  src='https://img.alicdn.com/tfs/TB1defkrLb2gK0jSZK9XXaEgFXa-434-146.jpg'  /img>
