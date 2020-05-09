@@ -131,8 +131,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                         .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
                         .setRegistryEndpointPort(Integer.parseInt(portStr)).build();
 
-                    registryClient = new DefaultRegistryClient(config);
-                    ((DefaultRegistryClient)registryClient).init();
+                    DefaultRegistryClient result = new DefaultRegistryClient(config);
+                    result.init();
+                    registryClient = result;
                 }
             }
         }
