@@ -15,10 +15,19 @@
  */
 package io.seata.server.store;
 
+import java.sql.SQLException;
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.druid.filter.config.ConfigFilter;
 import com.alibaba.druid.pool.DruidDataSource;
+
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
 import io.seata.core.store.db.AbstractDataSourceGenerator;
 
 /**
@@ -29,6 +38,9 @@ import io.seata.core.store.db.AbstractDataSourceGenerator;
  */
 @LoadLevel(name = "druid")
 public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DruidDataSourceGenerator.class);
+
     @Override
     public DataSource generateDataSource() {
         DruidDataSource ds = new DruidDataSource();
@@ -36,6 +48,20 @@ public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
+        String publicKey = getPublicKey();
+        if (StringUtils.isNotBlank(publicKey)) {
+            try {
+                ds.setFilters("config");
+            } catch (SQLException e) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("failed to start config filter error msg : {}", e.getMessage());
+                }
+            }
+            Properties properties = new Properties();
+            properties.setProperty(ConfigFilter.CONFIG_DECRYPT, "true");
+            properties.setProperty(ConfigFilter.CONFIG_KEY, publicKey);
+            ds.setConnectProperties(properties);
+        }
         ds.setPassword(getPassword());
         ds.setInitialSize(getMinConn());
         ds.setMaxActive(getMaxConn());

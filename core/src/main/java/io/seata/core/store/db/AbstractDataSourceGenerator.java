@@ -104,39 +104,39 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
             return loaders;
         }
         Stream.of(cp.split(File.pathSeparator))
-                .map(File::new)
-                .filter(File::exists)
-                .map(file -> file.isFile() ? file.getParentFile() : file)
-                .filter(Objects::nonNull)
-                .filter(File::isDirectory)
-                .map(file -> new File(file, "jdbc"))
-                .filter(File::exists)
-                .filter(File::isDirectory)
-                .distinct()
-                .flatMap(file -> {
-                    File[] files = file.listFiles((f, name) -> name.startsWith(MYSQL_DRIVER_FILE_PREFIX));
-                    if (files != null) {
-                        return Stream.of(files);
-                    } else {
-                        return Stream.of();
-                    }
-                })
-                .forEach(file -> {
-                    if (loaders.containsKey(MYSQL8_DRIVER_CLASS_NAME) && loaders.containsKey(MYSQL_DRIVER_CLASS_NAME)) {
-                        return;
-                    }
+            .map(File::new)
+            .filter(File::exists)
+            .map(file -> file.isFile() ? file.getParentFile() : file)
+            .filter(Objects::nonNull)
+            .filter(File::isDirectory)
+            .map(file -> new File(file, "jdbc"))
+            .filter(File::exists)
+            .filter(File::isDirectory)
+            .distinct()
+            .flatMap(file -> {
+                File[] files = file.listFiles((f, name) -> name.startsWith(MYSQL_DRIVER_FILE_PREFIX));
+                if (files != null) {
+                    return Stream.of(files);
+                } else {
+                    return Stream.of();
+                }
+            })
+            .forEach(file -> {
+                if (loaders.containsKey(MYSQL8_DRIVER_CLASS_NAME) && loaders.containsKey(MYSQL_DRIVER_CLASS_NAME)) {
+                    return;
+                }
+                try {
+                    URL url = file.toURI().toURL();
+                    ClassLoader loader = new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
                     try {
-                        URL url = file.toURI().toURL();
-                        ClassLoader loader = new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
-                        try {
-                            loader.loadClass(MYSQL8_DRIVER_CLASS_NAME);
-                            loaders.putIfAbsent(MYSQL8_DRIVER_CLASS_NAME, loader);
-                        } catch (ClassNotFoundException e) {
-                            loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
-                        }
-                    } catch (MalformedURLException ignore) {
+                        loader.loadClass(MYSQL8_DRIVER_CLASS_NAME);
+                        loaders.putIfAbsent(MYSQL8_DRIVER_CLASS_NAME, loader);
+                    } catch (ClassNotFoundException e) {
+                        loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
                     }
-                });
+                } catch (MalformedURLException ignore) {
+                }
+            });
         return loaders;
     }
 
@@ -164,6 +164,15 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
             throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_USER));
         }
         return user;
+    }
+
+    /**
+     * Get public key.
+     *
+     * @return the string
+     */
+    protected String getPublicKey() {
+        return CONFIG.getConfig(ConfigurationKeys.STORE_DB_PUBLIC_KER);
     }
 
     /**
