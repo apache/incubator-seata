@@ -13,27 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.compressor.lz4;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * @author xingfudeshi@gmail.com
+ * @author diguage
  */
-@Component
-@ConfigurationProperties(prefix = CONFIG_FILE_PREFIX)
-public class ConfigFileProperties {
-    private String name = "file.conf";
-
-    public String getName() {
-        return name;
+class Lz4UtilTest {
+    @Test
+    public void testCompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Lz4Util.compress(null);
+        });
     }
 
-    public ConfigFileProperties setName(String name) {
-        this.name = name;
-        return this;
+    @Test
+    public void testDecompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            Lz4Util.decompress(null);
+        });
     }
+
 }
