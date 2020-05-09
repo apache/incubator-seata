@@ -52,7 +52,8 @@ public class HikariDataSourceGenerator extends AbstractDataSourceGenerator {
         config.setMaximumPoolSize(getMaxConn());
         config.setMinimumIdle(getMinConn());
         config.setAutoCommit(true);
-
+        config.setConnectionTimeout(getMaxWait());
+        
         return new HikariDataSource(config);
     }
 }
