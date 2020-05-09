@@ -218,5 +218,5 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getPublicKey() {
         return CONFIG.getConfig(ConfigurationKeys.STORE_DB_PUBLIC_KER);
     }
-    
+
 }
