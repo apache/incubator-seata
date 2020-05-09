@@ -29,8 +29,9 @@ import org.apache.commons.dbcp2.BasicDataSource;
  */
 @LoadLevel(name = "dbcp")
 public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
+
     @Override
-    public DataSource generateDataSource() {
+    protected DataSource generate() {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(getDriverClassName());
         // DriverClassLoader works if upgrade commons-dbcp to at least 1.3.1.
@@ -51,4 +52,5 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
         return ds;
     }
+
 }

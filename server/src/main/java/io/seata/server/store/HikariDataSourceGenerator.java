@@ -30,8 +30,9 @@ import io.seata.core.store.db.AbstractDataSourceGenerator;
  */
 @LoadLevel(name = "hikari")
 public class HikariDataSourceGenerator extends AbstractDataSourceGenerator {
+
     @Override
-    public DataSource generateDataSource() {
+    protected DataSource generate() {
         Properties properties = new Properties();
         properties.setProperty("dataSource.cachePrepStmts", "true");
         properties.setProperty("dataSource.prepStmtCacheSize", "250");
@@ -53,7 +54,6 @@ public class HikariDataSourceGenerator extends AbstractDataSourceGenerator {
         config.setMinimumIdle(getMinConn());
         config.setAutoCommit(true);
         config.setConnectionTimeout(getMaxWait());
-        
         return new HikariDataSource(config);
     }
 }

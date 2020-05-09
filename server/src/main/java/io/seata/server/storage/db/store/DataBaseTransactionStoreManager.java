@@ -95,7 +95,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
         DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
-        DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
+        DataSource logStoreDataSource = dataSourceGenerator.get();
         logStore = new LogStoreDataBaseDAO(logStoreDataSource);
     }
 

@@ -25,10 +25,9 @@ import javax.sql.DataSource;
 public interface DataSourceGenerator {
 
     /**
-     * create DataSource from config
-     *
+     * get the data source
      * @return data source
      */
-    DataSource generateDataSource();
+    DataSource get();
 
 }

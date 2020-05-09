@@ -31,12 +31,17 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.DBType;
 
+import javax.sql.DataSource;
+
 /**
  * The type Abstract data source generator.
  *
  * @author zhangsen
  */
 public abstract class AbstractDataSourceGenerator implements DataSourceGenerator {
+
+    private DataSource dataSource;
+
     private final static String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
 
     private final static String MYSQL8_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
@@ -59,6 +64,24 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     private static final int DEFAULT_DB_MIN_CONN = 1;
 
     private static final long DEFAULT_DB_MAX_WAIT = 5000;
+
+    /**
+     * generate the data source
+     */
+    public AbstractDataSourceGenerator() {
+        this.dataSource = this.generate();
+    }
+
+    /**
+     * generate the data source
+     * @return data source
+     */
+    protected abstract DataSource generate();
+
+    @Override
+    public DataSource get() {
+        return this.dataSource;
+    }
 
     /**
      * Get db type db type.

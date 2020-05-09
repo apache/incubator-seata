@@ -30,7 +30,7 @@ public class DataSourceGeneratorTest {
     @Test
     public void testDbcpGenerateDataSource() {
         DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, "dbcp");
-        BasicDataSource dataSource = (BasicDataSource) dataSourceGenerator.generateDataSource();
+        BasicDataSource dataSource = (BasicDataSource) dataSourceGenerator.get();
         ClassLoader driverClassLoader = dataSource.getDriverClassLoader();
         Assertions.assertNotNull(driverClassLoader);
     }
@@ -38,7 +38,7 @@ public class DataSourceGeneratorTest {
     @Test
     public void testDruidGenerateDataSource() {
         DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, "druid");
-        DruidDataSource dataSource = (DruidDataSource) dataSourceGenerator.generateDataSource();
+        DruidDataSource dataSource = (DruidDataSource) dataSourceGenerator.get();
         ClassLoader driverClassLoader = dataSource.getDriverClassLoader();
         Assertions.assertNotNull(driverClassLoader);
         try (Connection conn = dataSource.getConnection()) {

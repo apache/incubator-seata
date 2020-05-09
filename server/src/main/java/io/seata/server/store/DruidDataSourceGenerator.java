@@ -29,8 +29,9 @@ import io.seata.core.store.db.AbstractDataSourceGenerator;
  */
 @LoadLevel(name = "druid")
 public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
+
     @Override
-    public DataSource generateDataSource() {
+    protected DataSource generate() {
         DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
         ds.setDriverClassLoader(getDriverClassLoader());
