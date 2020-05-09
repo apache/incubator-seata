@@ -167,15 +167,6 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     }
 
     /**
-     * Get public key.
-     *
-     * @return the string
-     */
-    protected String getPublicKey() {
-        return CONFIG.getConfig(ConfigurationKeys.STORE_DB_PUBLIC_KER);
-    }
-
-    /**
      * Get password string.
      *
      * @return the string
@@ -218,4 +209,14 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
             return "select 1";
         }
     }
+
+    /**
+     * Get public key.
+     *
+     * @return the string
+     */
+    protected String getPublicKey() {
+        return CONFIG.getConfig(ConfigurationKeys.STORE_DB_PUBLIC_KER);
+    }
+    
 }
