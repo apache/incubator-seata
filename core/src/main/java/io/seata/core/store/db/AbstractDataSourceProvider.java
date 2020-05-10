@@ -15,6 +15,14 @@
  */
 package io.seata.core.store.db;
 
+import io.seata.common.exception.StoreException;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DBType;
+
+import javax.sql.DataSource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,24 +32,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DBType;
-
-import javax.sql.DataSource;
-
 /**
- * The type Abstract data source generator.
- *
- * @author zhangsen
+ * The abstract datasource provider
+ * @author will
  */
-public abstract class AbstractDataSourceGenerator implements DataSourceGenerator, Initialize {
+public abstract class AbstractDataSourceProvider implements DataSourceProvider {
 
     private DataSource dataSource;
+
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private final static String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
 
@@ -51,36 +53,16 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
 
     private final static Map<String, ClassLoader> MYSQL_DRIVER_LOADERS;
 
-    static {
-        MYSQL_DRIVER_LOADERS = createMysqlDriverClassLoaders();
-    }
-
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    private static final int DEFAULT_DB_MAX_CONN = 10;
+    private static final int DEFAULT_DB_MAX_CONN = 20;
 
     private static final int DEFAULT_DB_MIN_CONN = 1;
 
     private static final long DEFAULT_DB_MAX_WAIT = 5000;
 
-    @Override
-    public void init() {
-        this.dataSource = this.generate();
+    static {
+        MYSQL_DRIVER_LOADERS = createMysqlDriverClassLoaders();
     }
 
-    /**
-     * generate the data source
-     * @return data source
-     */
-    protected abstract DataSource generate();
-
-    @Override
-    public DataSource get() {
-        return this.dataSource;
-    }
 
     /**
      * Get db type db type.
@@ -100,7 +82,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
         String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
         if (StringUtils.isBlank(driverClassName)) {
             throw new StoreException(
-                String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
+                    String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
     }
@@ -230,5 +212,21 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
         } else {
             return "select 1";
         }
+    }
+
+    /**
+     * get datasource
+     * @return datasource
+     */
+    public DataSource getDataSource() {
+        return this.dataSource;
+    }
+
+    /**
+     * set datasource
+     * @param dataSource
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

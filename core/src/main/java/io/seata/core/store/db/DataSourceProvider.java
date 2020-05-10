@@ -18,16 +18,14 @@ package io.seata.core.store.db;
 import javax.sql.DataSource;
 
 /**
- * The interface Data source generator.
- *
- * @author zhangsen
+ * The datasource provider
+ * @author will
  */
-public interface DataSourceGenerator {
+public interface DataSourceProvider {
 
     /**
-     * get the data source
-     * @return data source
+     * provide the datasource
+     * @return datasource
      */
-    DataSource get();
-
+    DataSource provide();
 }
