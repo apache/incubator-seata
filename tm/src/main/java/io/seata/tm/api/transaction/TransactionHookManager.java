@@ -16,7 +16,6 @@
 package io.seata.tm.api.transaction;
 
 import io.seata.core.context.RootContext;
-import io.seata.tm.api.GlobalTransaction;
 
 import java.util.ArrayList;
 import java.util.Collections;
