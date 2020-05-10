@@ -181,7 +181,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerBeforeBegin(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.beforeBegin();
@@ -193,7 +193,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerAfterBegin(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterBegin();
@@ -205,7 +205,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerBeforeRollback(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.beforeRollback();
@@ -217,7 +217,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerAfterRollback(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterRollback();
@@ -229,7 +229,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerBeforeCommit(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.beforeCommit();
@@ -241,7 +241,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerAfterCommit(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterCommit();
@@ -253,7 +253,7 @@ public class TransactionalTemplate {
     }
 
     private void triggerAfterCompletion(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterCompletion();

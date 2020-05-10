@@ -122,7 +122,7 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerBeforeBegin(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.beforeBegin();
@@ -134,7 +134,7 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerAfterBegin(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterBegin();
@@ -146,7 +146,7 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerBeforeRollback(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.beforeRollback();
@@ -158,7 +158,7 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerAfterRollback(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterRollback();
@@ -170,7 +170,7 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerBeforeCommit(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.beforeCommit();
@@ -182,7 +182,7 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerAfterCommit(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterCommit();
@@ -195,7 +195,7 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public void triggerAfterCompletion(GlobalTransaction tx) {
-        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+        TransactionHookManager.triggerHooks(tx.getXid(), (hooks) -> {
             for (TransactionHook hook : hooks) {
                 try {
                     hook.afterCompletion();

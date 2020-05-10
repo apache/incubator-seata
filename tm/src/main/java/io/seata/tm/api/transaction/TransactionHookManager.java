@@ -36,6 +36,15 @@ public final class TransactionHookManager {
     private static final ThreadLocal<List<TransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
 
     /**
+     * get the global hooks
+     *
+     * @return
+     */
+    public static List<TransactionHook> getGlobalHooks() {
+        return GLOBAL_HOOKS;
+    }
+
+    /**
      * get the current hooks
      *
      * @return
@@ -83,16 +92,15 @@ public final class TransactionHookManager {
     /**
      * trigger hooks
      *
-     * @param tx
+     * @param xid
      * @param trigger
      */
-    public static void triggerHooks(GlobalTransaction tx, Consumer<List<TransactionHook>> trigger) {
+    public static void triggerHooks(String xid, Consumer<List<TransactionHook>> trigger) {
         List<TransactionHook> hooks = getHooks();
         if (hooks == null || hooks.isEmpty()) {
             return;
         }
 
-        String xid = tx.getXid();
         boolean inGlobalTransaction = RootContext.inGlobalTransaction();
 
         try {

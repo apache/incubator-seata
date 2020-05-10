@@ -15,6 +15,7 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TransactionHookManagerTest {
 
+    private final String DEFAULT_XID = "default_xid";
+
     @AfterEach
     public void clear() {
         TransactionHookManager.clear();
+        TransactionHookManager.getGlobalHooks().clear();
     }
 
     @Test
@@ -46,10 +50,27 @@ public class TransactionHookManagerTest {
     }
 
     @Test
+    public void testGetGlobalHooks() {
+        assertThat(TransactionHookManager.getGlobalHooks()).isEmpty();
+        TransactionHookManager.registerGlobalHook(new TransactionHookAdapter());
+        assertThat(TransactionHookManager.getGlobalHooks()).isNotEmpty();
+    }
+
+    @Test
     public void testGetHooks() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
         TransactionHookManager.registerLocalHook(new TransactionHookAdapter());
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
+    }
+
+    @Test
+    public void testTriggerHooks() {
+        TransactionHook transactionHook = new TransactionHookAdapter();
+        TransactionHookManager.registerLocalHook(transactionHook);
+        TransactionHookManager.triggerHooks(DEFAULT_XID, (hooks) -> {
+            assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+            assertThat(hooks.get(0)).isEqualTo(transactionHook);
+        });
     }
 
     @Test
@@ -60,6 +81,7 @@ public class TransactionHookManagerTest {
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
+
     @Test
     public void testNPE() {
         Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerLocalHook(null));
