@@ -101,7 +101,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public String getUserName() throws SQLException {
-        return null;
+        return this.connection.getConnectProperties().getProperty("user");
     }
 
     @Override

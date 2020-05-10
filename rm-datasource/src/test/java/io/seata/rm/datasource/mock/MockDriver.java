@@ -64,6 +64,10 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      */
     private MockExecuteHandler mockExecuteHandler;
 
+    public MockDriver() {
+        this(Lists.newArrayList(), new Object[][]{}, new Object[][]{}, new Object[][]{},  new Object[][]{});
+    }
+
     public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
         this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue,  new Object[][]{});
     }
