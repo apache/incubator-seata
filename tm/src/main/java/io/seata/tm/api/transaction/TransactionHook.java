@@ -15,8 +15,6 @@
  */
 package io.seata.tm.api.transaction;
 
-import io.seata.tm.api.GlobalTransaction;
-
 /**
  * @author guoyao
  */
