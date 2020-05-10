@@ -65,6 +65,7 @@ public class TransactionHookManagerTest {
 
     @Test
     public void testTriggerHooks() {
+        RootContext.unbind();
         TransactionHook transactionHook = new TransactionHookAdapter();
         TransactionHookManager.registerLocalHook(transactionHook);
         TransactionHookManager.triggerHooks(DEFAULT_XID, (hooks) -> {
