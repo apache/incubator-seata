@@ -142,19 +142,19 @@ public class TransactionTemplateTest {
     }
 
     private void verifyCommit(TransactionHook transactionHook) {
-        verify(transactionHook).beforeBegin(null);
-        verify(transactionHook).afterBegin(null);
-        verify(transactionHook).beforeCommit(null);
-        verify(transactionHook).afterCommit(null);
-        verify(transactionHook).afterCompletion(null);
+        verify(transactionHook).beforeBegin();
+        verify(transactionHook).afterBegin();
+        verify(transactionHook).beforeCommit();
+        verify(transactionHook).afterCommit();
+        verify(transactionHook).afterCompletion();
     }
 
     private void verifyRollBack(TransactionHook transactionHook) {
-        verify(transactionHook).beforeBegin(null);
-        verify(transactionHook).afterBegin(null);
-        verify(transactionHook).beforeRollback(null);
-        verify(transactionHook).afterRollback(null);
-        verify(transactionHook).afterCompletion(null);
+        verify(transactionHook).beforeBegin();
+        verify(transactionHook).afterBegin();
+        verify(transactionHook).beforeRollback();
+        verify(transactionHook).afterRollback();
+        verify(transactionHook).afterCompletion();
     }
 
 

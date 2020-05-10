@@ -15,9 +15,13 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.core.context.RootContext;
+import io.seata.tm.api.GlobalTransaction;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author guoyao
@@ -74,6 +78,34 @@ public final class TransactionHookManager {
             LOCAL_HOOKS.set(new ArrayList<>());
         }
         LOCAL_HOOKS.get().add(transactionHook);
+    }
+
+    /**
+     * trigger hooks
+     *
+     * @param tx
+     * @param trigger
+     */
+    public static void triggerHooks(GlobalTransaction tx, Consumer<List<TransactionHook>> trigger) {
+        List<TransactionHook> hooks = getHooks();
+        if (hooks == null || hooks.isEmpty()) {
+            return;
+        }
+
+        String xid = tx.getXid();
+        boolean inGlobalTransaction = RootContext.inGlobalTransaction();
+
+        try {
+            if (!inGlobalTransaction) {
+                RootContext.bind(xid);
+            }
+
+            trigger.accept(hooks);
+        } finally {
+            if (!inGlobalTransaction) {
+                RootContext.unbind();
+            }
+        }
     }
 
     /**

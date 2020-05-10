@@ -25,35 +25,35 @@ public interface TransactionHook {
     /**
      * before tx begin
      */
-    void beforeBegin(GlobalTransaction tx);
+    void beforeBegin();
 
     /**
      * after tx begin
      */
-    void afterBegin(GlobalTransaction tx);
+    void afterBegin();
 
     /**
      * before tx commit
      */
-    void beforeCommit(GlobalTransaction tx);
+    void beforeCommit();
 
     /**
      * after tx commit
      */
-    void afterCommit(GlobalTransaction tx);
+    void afterCommit();
 
     /**
      * before tx rollback
      */
-    void beforeRollback(GlobalTransaction tx);
+    void beforeRollback();
 
     /**
      * after tx rollback
      */
-    void afterRollback(GlobalTransaction tx);
+    void afterRollback();
 
     /**
      * after tx all Completed
      */
-    void afterCompletion(GlobalTransaction tx);
+    void afterCompletion();
 }

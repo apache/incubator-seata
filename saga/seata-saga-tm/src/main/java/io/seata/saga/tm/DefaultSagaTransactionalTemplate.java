@@ -15,8 +15,6 @@
  */
 package io.seata.saga.tm;
 
-import java.util.List;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -124,74 +122,88 @@ public class DefaultSagaTransactionalTemplate
     }
 
     protected void triggerBeforeBegin(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeBegin(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.beforeBegin();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     protected void triggerAfterBegin(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterBegin(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook {} ", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.afterBegin();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterBegin in hook {} ", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     protected void triggerBeforeRollback(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeRollback(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook {} ", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.beforeRollback();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeRollback in hook {} ", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     protected void triggerAfterRollback(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterRollback(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.afterRollback();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     protected void triggerBeforeCommit(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeCommit(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.beforeCommit();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     protected void triggerAfterCommit(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCommit(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.afterCommit();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     @Override
     public void triggerAfterCompletion(GlobalTransaction tx) {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCompletion(tx);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+        TransactionHookManager.triggerHooks(tx, (hooks) -> {
+            for (TransactionHook hook : hooks) {
+                try {
+                    hook.afterCompletion();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+                }
             }
-        }
+        });
     }
 
     @Override
@@ -258,10 +270,6 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public void cleanUp() {
         TransactionHookManager.clear();
-    }
-
-    protected List<TransactionHook> getCurrentHooks() {
-        return TransactionHookManager.getHooks();
     }
 
     public String getApplicationId() {
