@@ -135,7 +135,7 @@ public class RedisLocker extends AbstractLocker {
                 while (it.hasNext()) {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                    if (null != lock && lock.getBranchId().equals(branchId)) {
+                    if (null != lock && branchId.equals(lock.getBranchId())) {
                         jedis.del(key);
                         jedis.lrem(lockListKey, 0, key);
                         it.remove();
