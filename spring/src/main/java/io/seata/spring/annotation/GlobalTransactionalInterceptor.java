@@ -226,7 +226,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                 disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
-            if(!disable){
+            if (!disable) {
                 wakingUpThread();
             }
         } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
@@ -305,7 +305,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private void wakingUpThread(){
+    private void wakingUpThread() {
         synchronized (this) {
             if (executor.getActiveCount() <= 0) {
                 startDegradeCheck();
