@@ -17,6 +17,7 @@ package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 
+import io.seata.core.model.BranchType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RootContextTest {
 
     private final String DEFAULT_XID = "default_xid";
+
+    private final BranchType DEFAULT_BRANCH_TYPE = BranchType.AT;
 
     /**
      * Test bind and unbind.
@@ -92,6 +95,17 @@ public class RootContextTest {
     public void testAssertNotInGlobalTransaction() {
         RootContext.assertNotInGlobalTransaction();
         assertThat(RootContext.getXID()).isNull();
+    }
+
+    @Test
+    public void testBindBranchType_And_UnbindBranchType(){
+        assertThat(RootContext.getBranchType()).isNull();
+        assertThat(RootContext.unbindBranchType()).isNull();
+        RootContext.bindBranchType(DEFAULT_BRANCH_TYPE);
+        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        RootContext.unbindBranchType();
+        assertThat(RootContext.getBranchType()).isNull();
+        assertThat(RootContext.unbindBranchType()).isNull();
     }
 
 }
