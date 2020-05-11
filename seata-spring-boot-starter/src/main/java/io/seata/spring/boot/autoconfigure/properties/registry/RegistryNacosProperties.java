@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS
 public class RegistryNacosProperties {
     private String serverAddr = "localhost";
     private String namespace = "";
-    private String group = "";
+    private String group = "SEATA_GROUP";
     private String cluster = "default";
     private String username = "";
     private String password = "";
