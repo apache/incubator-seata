@@ -20,11 +20,11 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
-
-import javax.sql.DataSource;
 import java.util.Properties;
 
 /**
+ * The hikari datasource provider
+ * @author diguage
  * @author will
  */
 @LoadLevel(name = "hikari")

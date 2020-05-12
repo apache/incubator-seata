@@ -20,9 +20,10 @@ import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
 
-import javax.sql.DataSource;
-
 /**
+ * The druid datasource provider
+ * @author zhangsen
+ * @author ggndnn
  * @author will
  */
 @LoadLevel(name = "druid")
