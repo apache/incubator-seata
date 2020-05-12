@@ -24,7 +24,10 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.SeataConfigurationCacheProvider;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.TransactionManagerHolder;
@@ -54,7 +57,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PER
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -90,7 +93,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
-                ConfigurationFactory.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK);
+                SeataConfigurationCacheProvider.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,this);
             }
         }
     }
@@ -104,16 +107,6 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         final GlobalTransactional globalTransactionalAnnotation =
             getAnnotation(method, targetClass, GlobalTransactional.class);
         final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-        disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-        boolean degradeCheckNow = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
-            DEFAULT_TM_DEGRADE_CHECK);
-        if (degradeCheckNow != degradeCheck) {
-            if (!degradeCheckNow && degradeNum != 0) {
-                degradeNum = 0;
-            }
-            degradeCheck = degradeCheckNow;
-        }
         boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
         if (!localDisable) {
             if (globalTransactionalAnnotation != null) {
@@ -226,6 +219,20 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         return sb.append(")").toString();
     }
 
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                disable, event.getNewValue());
+            disable = Boolean.parseBoolean(event.getNewValue().trim());
+        } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
+            degradeCheck = Boolean.parseBoolean(event.getNewValue());
+            if (!degradeCheck) {
+                degradeNum = 0;
+            }
+        }
+    }
+
     /**
      * auto upgrade service detection
      */
@@ -270,5 +277,4 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
             }
         }
     }
-
 }

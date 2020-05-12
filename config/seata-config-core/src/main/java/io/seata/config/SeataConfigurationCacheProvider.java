@@ -15,7 +15,11 @@
  */
 package io.seata.config;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -29,7 +33,9 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
     private static final String METHOD_CONFIG_NOW = METHOD_PREFIX + "ConfigNow";
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
-    
+
+    private static final Set<String> LISTENER_KEYS = new CopyOnWriteArraySet<>();
+
     @Override
     public Configuration provide(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class,
@@ -53,11 +59,28 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
             });
     }
 
+    public static void addConfigListener(String key, ConfigurationChangeListener... listeners) {
+        synchronized (SeataConfigurationCacheProvider.class) {
+            if (StringUtils.isBlank(key) || LISTENER_KEYS.contains(key)) {
+                return;
+            }
+            ConfigurationFactory.getInstance().addConfigListener(key, getInstance());
+            LISTENER_KEYS.add(key);
+        }
+        for (int i = 0; i < listeners.length; i++) {
+            ConfigurationFactory.getInstance().addConfigListener(key, listeners[i]);
+        }
+    }
+
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
         Object oldValue = CONFIG_CACHE.get(event.getDataId());
         if (null == oldValue || !oldValue.equals(event.getNewValue())) {
-            CONFIG_CACHE.put(event.getDataId(), event.getNewValue());
+            if (StringUtils.isNotBlank(event.getNewValue())) {
+                CONFIG_CACHE.put(event.getDataId(), event.getNewValue());
+            } else {
+                CONFIG_CACHE.remove(event.getDataId());
+            }
         }
     }
 

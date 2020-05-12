@@ -20,6 +20,7 @@ import java.util.List;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.SeataConfigurationCacheProvider;
 
 /**
  * The interface Registry service.
@@ -100,7 +101,7 @@ public interface RegistryService<T> {
     default String getServiceGroup(String key) {
         Configuration config = ConfigurationFactory.getInstance();
         key = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        ConfigurationFactory.addConfigListener(key);
+        SeataConfigurationCacheProvider.addConfigListener(key);
         return config.getConfig(key);
     }
 }
