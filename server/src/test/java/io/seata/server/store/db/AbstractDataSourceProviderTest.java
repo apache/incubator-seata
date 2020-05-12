@@ -23,15 +23,31 @@ import org.junit.jupiter.api.Test;
 import javax.sql.DataSource;
 
 /**
- * @author will
+ * @author: will
  */
-public class HikariDataSourceProviderTest {
+public class AbstractDataSourceProviderTest {
 
-    private final String datasourceType = "hikari";
+    private final String dbcpDatasourceType = "dbcp";
+
+    private final String druidDatasourceType = "druid";
+
+    private final String hikariDatasourceType = "hikari";
 
     @Test
     public void testDbcpDataSourceProvider() {
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
+        Assertions.assertNotNull(dataSource);
+    }
+
+    @Test
+    public void testDruidDataSourceProvider() {
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, druidDatasourceType).provide();
+        Assertions.assertNotNull(dataSource);
+    }
+
+    @Test
+    public void testHikariDataSourceProvider() {
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType).provide();
         Assertions.assertNotNull(dataSource);
     }
 }
