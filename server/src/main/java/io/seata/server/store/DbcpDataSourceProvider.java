@@ -15,40 +15,41 @@
  */
 package io.seata.server.store;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.store.db.AbstractDataSourceProvider;
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import javax.sql.DataSource;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.store.db.AbstractDataSourceGenerator;
-
 /**
- * The type Druid data source generator.
- *
+ * The dbcp datasource provider
  * @author zhangsen
  * @author ggndnn
+ * @author will
  */
-@LoadLevel(name = "druid")
-public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
+@LoadLevel(name = "dbcp")
+public class DbcpDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public DataSource generateDataSource() {
-        DruidDataSource ds = new DruidDataSource();
+    public DataSource generate() {
+        BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(getDriverClassName());
+        // DriverClassLoader works if upgrade commons-dbcp to at least 1.3.1.
+        // https://issues.apache.org/jira/browse/DBCP-333
         ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
         ds.setInitialSize(getMinConn());
-        ds.setMaxActive(getMaxConn());
+        ds.setMaxTotal(getMaxConn());
         ds.setMinIdle(getMinConn());
-        ds.setMaxWait(getMaxWait());
+        ds.setMaxIdle(getMinConn());
+        ds.setMaxWaitMillis(getMaxWait());
         ds.setTimeBetweenEvictionRunsMillis(120000);
-        ds.setMinEvictableIdleTimeMillis(300000);
+        ds.setNumTestsPerEvictionRun(1);
         ds.setTestWhileIdle(true);
-        ds.setTestOnBorrow(false);
-        ds.setPoolPreparedStatements(true);
-        ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(getValidationQuery(getDBType()));
-        ds.setDefaultAutoCommit(true);
+        ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
         return ds;
     }
 }

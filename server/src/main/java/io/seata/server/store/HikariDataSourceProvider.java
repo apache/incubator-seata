@@ -15,23 +15,24 @@
  */
 package io.seata.server.store;
 
-import javax.sql.DataSource;
-import java.util.Properties;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.store.db.AbstractDataSourceGenerator;
+import io.seata.core.store.db.AbstractDataSourceProvider;
+
+import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
- * The type Hikari data source generator.
- *
+ * The hikari datasource provider
  * @author diguage
+ * @author will
  */
 @LoadLevel(name = "hikari")
-public class HikariDataSourceGenerator extends AbstractDataSourceGenerator {
+public class HikariDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public DataSource generateDataSource() {
+    public DataSource generate() {
         Properties properties = new Properties();
         properties.setProperty("dataSource.cachePrepStmts", "true");
         properties.setProperty("dataSource.prepStmtCacheSize", "250");
@@ -53,7 +54,7 @@ public class HikariDataSourceGenerator extends AbstractDataSourceGenerator {
         config.setMinimumIdle(getMinConn());
         config.setAutoCommit(true);
         config.setConnectionTimeout(getMaxWait());
-        
+        config.setInitializationFailTimeout(-1);
         return new HikariDataSource(config);
     }
 }
