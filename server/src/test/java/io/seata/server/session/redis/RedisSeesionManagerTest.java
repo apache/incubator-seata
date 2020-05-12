@@ -88,6 +88,17 @@ public class RedisSeesionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
+        BranchSession branchSession = new BranchSession();
+        branchSession.setBranchId(UUIDGenerator.generateUUID());
+        branchSession.setXid(xid);
+        branchSession.setTransactionId(session.getTransactionId());
+        branchSession.setBranchId(1L);
+        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceId("tb_1");
+        branchSession.setLockKey("t_1");
+        branchSession.setBranchType(BranchType.AT);
+        branchSession.setApplicationData("{\"data\":\"test\"}");
+        sessionManager.addBranchSession(session,branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
