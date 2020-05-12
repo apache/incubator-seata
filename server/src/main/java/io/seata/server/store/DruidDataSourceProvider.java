@@ -16,9 +16,10 @@
 package io.seata.server.store;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
+
+import javax.sql.DataSource;
 
 /**
  * The druid datasource provider
@@ -27,9 +28,10 @@ import io.seata.core.store.db.AbstractDataSourceProvider;
  * @author will
  */
 @LoadLevel(name = "druid")
-public class DruidDataSourceProvider extends AbstractDataSourceProvider implements Initialize {
+public class DruidDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public void init() {
+    public DataSource generate() {
         DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
         ds.setDriverClassLoader(getDriverClassLoader());
@@ -48,6 +50,6 @@ public class DruidDataSourceProvider extends AbstractDataSourceProvider implemen
         ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(getValidationQuery(getDBType()));
         ds.setDefaultAutoCommit(true);
-        setDataSource(ds);
+        return ds;
     }
 }

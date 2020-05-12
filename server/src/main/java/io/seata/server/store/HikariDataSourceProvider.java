@@ -17,9 +17,10 @@ package io.seata.server.store;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
+
+import javax.sql.DataSource;
 import java.util.Properties;
 
 /**
@@ -28,9 +29,10 @@ import java.util.Properties;
  * @author will
  */
 @LoadLevel(name = "hikari")
-public class HikariDataSourceProvider extends AbstractDataSourceProvider implements Initialize {
+public class HikariDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public void init() {
+    public DataSource generate() {
         Properties properties = new Properties();
         properties.setProperty("dataSource.cachePrepStmts", "true");
         properties.setProperty("dataSource.prepStmtCacheSize", "250");
@@ -53,6 +55,6 @@ public class HikariDataSourceProvider extends AbstractDataSourceProvider impleme
         config.setAutoCommit(true);
         config.setConnectionTimeout(getMaxWait());
         config.setInitializationFailTimeout(-1);
-        setDataSource(new HikariDataSource(config));
+        return new HikariDataSource(config);
     }
 }

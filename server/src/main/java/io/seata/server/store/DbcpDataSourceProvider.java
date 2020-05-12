@@ -15,10 +15,11 @@
  */
 package io.seata.server.store;
 
-import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
 import org.apache.commons.dbcp2.BasicDataSource;
+
+import javax.sql.DataSource;
 
 /**
  * The dbcp datasource provider
@@ -27,10 +28,10 @@ import org.apache.commons.dbcp2.BasicDataSource;
  * @author will
  */
 @LoadLevel(name = "dbcp")
-public class DbcpDataSourceProvider extends AbstractDataSourceProvider implements Initialize {
+public class DbcpDataSourceProvider extends AbstractDataSourceProvider {
 
     @Override
-    public void init() {
+    public DataSource generate() {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(getDriverClassName());
         // DriverClassLoader works if upgrade commons-dbcp to at least 1.3.1.
@@ -49,6 +50,6 @@ public class DbcpDataSourceProvider extends AbstractDataSourceProvider implement
         ds.setTestWhileIdle(true);
         ds.setValidationQuery(getValidationQuery(getDBType()));
         ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
-        setDataSource(ds);
+        return ds;
     }
 }

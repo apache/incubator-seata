@@ -16,6 +16,7 @@
 package io.seata.core.store.db;
 
 import io.seata.common.exception.StoreException;
+import io.seata.common.executor.Initialize;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
  * The abstract datasource provider
  * @author will
  */
-public abstract class AbstractDataSourceProvider implements DataSourceProvider {
+public abstract class AbstractDataSourceProvider implements DataSourceProvider, Initialize {
 
     private DataSource dataSource;
 
@@ -64,9 +65,20 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider {
     }
 
     @Override
-    public DataSource provide() {
-        return getDataSource();
+    public void init() {
+        this.dataSource = generate();
     }
+
+    @Override
+    public DataSource provide() {
+        return this.dataSource;
+    }
+
+    /**
+     * generate the datasource
+     * @return datasource
+     */
+    public abstract DataSource generate();
 
     /**
      * Get db type db type.
@@ -216,21 +228,5 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider {
         } else {
             return "select 1";
         }
-    }
-
-    /**
-     * get datasource
-     * @return datasource
-     */
-    public DataSource getDataSource() {
-        return this.dataSource;
-    }
-
-    /**
-     * set datasource
-     * @param dataSource
-     */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
     }
 }
