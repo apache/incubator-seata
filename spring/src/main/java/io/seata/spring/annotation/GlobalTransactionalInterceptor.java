@@ -65,13 +65,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
-    private volatile boolean disable;
-    private int degradeCheckPeriod;
-    private volatile boolean degradeCheck;
-    private int degradeCheckAllowTimes;
-    private volatile Integer degradeNum = 0;
-    private volatile Integer reachNum = 0;
-    private ThreadPoolExecutor executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+    private static volatile boolean disable;
+    private static int degradeCheckPeriod;
+    private static volatile boolean degradeCheck;
+    private static int degradeCheckAllowTimes;
+    private static volatile Integer degradeNum = 0;
+    private static volatile Integer reachNum = 0;
+    private static volatile ThreadPoolExecutor executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
         new SynchronousQueue<Runnable>(), new NamedThreadFactory("degradeCheckWorker", 1, true));
 
     /**
@@ -82,19 +82,19 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
-        this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+        disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-        this.degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+        degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
             ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
                 (ConfigurationChangeListener)this);
-            this.degradeCheckPeriod = ConfigurationFactory.getInstance()
+            degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
-            this.degradeCheckAllowTimes = ConfigurationFactory.getInstance()
+            degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                startDegradeCheck();
+                wakingUpThread();
             }
         }
     }
@@ -305,8 +305,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private void wakingUpThread() {
-        synchronized (this) {
+    private void  wakingUpThread() {
+        synchronized (GlobalTransactionalInterceptor.class) {
             if (executor.getActiveCount() <= 0) {
                 startDegradeCheck();
             } else {
