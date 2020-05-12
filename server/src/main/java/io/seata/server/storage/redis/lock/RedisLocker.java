@@ -18,6 +18,7 @@ package io.seata.server.storage.redis.lock;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -110,7 +111,7 @@ public class RedisLocker extends AbstractLocker {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
                     for (int i = 0; i < branchIds.size(); i++) {
-                        if (lock.getBranchId().equals(branchIds.get(i))) {
+                        if (Objects.equals(lock.getBranchId(), branchIds.get(i))) {
                             jedis.del(key);
                             jedis.lrem(lockListKey, 0, key);
                             it.remove();
@@ -135,7 +136,7 @@ public class RedisLocker extends AbstractLocker {
                 while (it.hasNext()) {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                    if (null != lock && branchId.equals(lock.getBranchId())) {
+                    if (null != lock && Objects.equals(branchId, lock.getBranchId())) {
                         jedis.del(key);
                         jedis.lrem(lockListKey, 0, key);
                         it.remove();

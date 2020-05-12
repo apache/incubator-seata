@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -115,7 +116,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 Iterator<String> it = branchs.iterator();
                 while (it.hasNext()) {
                     String s = it.next();
-                    if (s.equals(key)) {
+                    if (Objects.equals(s, key)) {
                         it.remove();
                         jedis.del(key);
                         jedis.lrem(branchsKey, 0, key);
