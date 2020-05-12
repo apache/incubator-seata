@@ -49,9 +49,4 @@ public class DruidDataSourceProvider extends AbstractDataSourceProvider implemen
         ds.setDefaultAutoCommit(true);
         setDataSource(ds);
     }
-
-    @Override
-    public DataSource provide() {
-        return getDataSource();
-    }
 }

@@ -51,9 +51,4 @@ public class DbcpDataSourceProvider extends AbstractDataSourceProvider implement
         ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
         setDataSource(ds);
     }
-
-    @Override
-    public DataSource provide() {
-        return getDataSource();
-    }
 }

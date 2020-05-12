@@ -55,9 +55,4 @@ public class HikariDataSourceProvider extends AbstractDataSourceProvider impleme
         config.setInitializationFailTimeout(-1);
         setDataSource(new HikariDataSource(config));
     }
-
-    @Override
-    public DataSource provide() {
-        return getDataSource();
-    }
 }

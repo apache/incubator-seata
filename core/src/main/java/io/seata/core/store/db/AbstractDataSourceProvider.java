@@ -63,6 +63,10 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider {
         MYSQL_DRIVER_LOADERS = createMysqlDriverClassLoaders();
     }
 
+    @Override
+    public DataSource provide() {
+        return getDataSource();
+    }
 
     /**
      * Get db type db type.
