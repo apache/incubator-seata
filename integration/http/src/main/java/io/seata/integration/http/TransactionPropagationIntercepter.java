@@ -17,11 +17,13 @@ package io.seata.integration.http;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
 
 /**
  * Springmvc Intercepter.
@@ -30,30 +32,25 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter {
 
-    private static final String BIND_XID = "BIND_XID";
-
-    private static final String UNBIND_XID = "UNBIND_XID";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationIntercepter.class);
 
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Object xidStatus = request.getAttribute(BIND_XID);
-        if (null == xidStatus || !(boolean)xidStatus) {
-            String xid = RootContext.getXID();
-            String rpcXid = request.getHeader(RootContext.KEY_XID);
+        String xid = RootContext.getXID();
+        String rpcXid = request.getHeader(RootContext.KEY_XID);
 
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
+        }
+        if (StringUtils.isBlank(xid) && rpcXid != null) {
+            RootContext.bind(rpcXid);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
-            }
-            if (rpcXid != null) {
-                RootContext.bind(rpcXid);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[{}] to RootContext", rpcXid);
-                }
+                LOGGER.debug("bind[{}] to RootContext", rpcXid);
             }
         }
+
 
         return true;
     }
@@ -61,8 +58,9 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
         ModelAndView modelAndView) {
-        XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
-        request.setAttribute(UNBIND_XID, true);
+        if (StringUtils.isNotBlank(RootContext.getXID())) {
+            XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
+        }
     }
 
 }
