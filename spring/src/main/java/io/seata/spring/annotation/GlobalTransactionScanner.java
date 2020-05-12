@@ -72,6 +72,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final Set<String> PROXYED_SET = new HashSet<>();
 
     private MethodInterceptor interceptor;
+    private MethodInterceptor globalTransactionalInterceptor;
 
     private final String applicationId;
     private final String txServiceGroup;
@@ -80,7 +81,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     private final FailureHandler failureHandlerHook;
-    private final MethodInterceptor globalTransactionalInterceptor;
 
     private ApplicationContext applicationContext;
 
@@ -151,8 +151,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.txServiceGroup = txServiceGroup;
         this.mode = mode;
         this.failureHandlerHook = failureHandlerHook;
-        this.globalTransactionalInterceptor = new GlobalTransactionalInterceptor(this.failureHandlerHook);
-        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) globalTransactionalInterceptor);
     }
 
     @Override
@@ -219,6 +217,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
 
                     if (interceptor == null) {
+                        if (globalTransactionalInterceptor == null) {
+                            globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) globalTransactionalInterceptor);
+                        }
                         interceptor = globalTransactionalInterceptor;
                     }
                 }
