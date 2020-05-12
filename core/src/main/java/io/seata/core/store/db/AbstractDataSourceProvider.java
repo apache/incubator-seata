@@ -35,6 +35,8 @@ import java.util.stream.Stream;
 
 /**
  * The abstract datasource provider
+ * 
+ * @author zhangsen
  * @author will
  */
 public abstract class AbstractDataSourceProvider implements DataSourceProvider, Initialize {
@@ -98,7 +100,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
         String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
         if (StringUtils.isBlank(driverClassName)) {
             throw new StoreException(
-                    String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
+                String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
     }
