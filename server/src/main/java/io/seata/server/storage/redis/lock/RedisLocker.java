@@ -104,7 +104,16 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
-            List<String> keys = jedis.lrange(lockListKey, 0, 100);
+            List<String> keys = new ArrayList<>();
+            List<String> redisLockJson = null;
+            int start = 0;
+            do {
+                redisLockJson = jedis.lrange(lockListKey, start, 100);
+                if (null != redisLockJson) {
+                    keys.addAll(redisLockJson);
+                    start = keys.size();
+                }
+            } while (null != redisLockJson && redisLockJson.size() >= 100);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -130,7 +139,16 @@ public class RedisLocker extends AbstractLocker {
     public boolean releaseLock(String xid, Long branchId) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
-            List<String> keys = jedis.lrange(lockListKey, 0, 100);
+            List<String> keys = new ArrayList<>();
+            List<String> redisLockJson = null;
+            int start = 0;
+            do {
+                redisLockJson = jedis.lrange(lockListKey, start, 100);
+                if (null != redisLockJson) {
+                    keys.addAll(redisLockJson);
+                    start = keys.size();
+                }
+            } while (null != redisLockJson && redisLockJson.size() >= 100);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {

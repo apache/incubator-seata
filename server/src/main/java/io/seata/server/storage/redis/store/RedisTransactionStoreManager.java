@@ -108,9 +108,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 redisBranchJson = jedis.lrange(branchsKey, start, 100);
                 if (null != redisBranchJson) {
                     branchs.addAll(redisBranchJson);
-                    start = redisBranchJson.size();
+                    start = branchs.size();
                 }
-            } while (null != redisBranchJson && redisBranchJson.size() == 100);
+            } while (null != redisBranchJson && redisBranchJson.size() >= 100);
             if (null != branchs && branchs.size() > 0) {
                 String key = DEFAULT_REDIS_SEATA_BRANCH_PREFIX + convertBranchTransactionDO.getBranchId();
                 Iterator<String> it = branchs.iterator();
@@ -201,9 +201,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         jedis.lrange(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + globalTransactionDO.getXid(), start, 100);
                     if (null != redisBranchJson) {
                         branchJson.addAll(redisBranchJson);
-                        start = redisBranchJson.size();
+                        start = branchJson.size();
                     }
-                } while (null != redisBranchJson && redisBranchJson.size() == 100);
+                } while (null != redisBranchJson && redisBranchJson.size() >= 100);
                 if (null != branchJson && branchJson.size() > 0) {
                     branchTransactionDOs = new ArrayList<>();
                     for (String s : branchJson) {
@@ -272,9 +272,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                             redisBranchs = jedis.lrange(DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + xid, start, 100);
                             if (null != redisBranchs) {
                                 branchs.addAll(redisBranchs);
-                                start = redisBranchs.size();
+                                start = branchs.size();
                             }
-                        } while (null != redisBranchs && redisBranchs.size() == 100);
+                        } while (null != redisBranchs && redisBranchs.size() >= 100);
                         if (null != branchs && branchs.size() > 0) {
                             for (String branchKey : branchs) {
                                 String branchJson = jedis.get(branchKey);
@@ -325,9 +325,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     redisBranchJson = jedis.lrange(branchsKey, start, 100);
                     if (null != redisBranchJson) {
                         branchJson.addAll(redisBranchJson);
-                        start = redisBranchJson.size();
+                        start = branchJson.size();
                     }
-                } while (null != redisBranchJson && redisBranchJson.size() == 100);
+                } while (null != redisBranchJson && redisBranchJson.size() >= 100);
                 List<BranchTransactionDO> branchTransactionDOS = new ArrayList<>();
                 if (null != branchJson && branchJson.size() > 0) {
                     for (String s : branchJson) {
