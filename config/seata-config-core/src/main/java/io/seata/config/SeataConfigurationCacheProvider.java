@@ -59,16 +59,16 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
             });
     }
 
-    public static void addConfigListener(String key, ConfigurationChangeListener... listeners) {
+    public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         synchronized (SeataConfigurationCacheProvider.class) {
-            if (StringUtils.isBlank(key) || LISTENER_KEYS.contains(key)) {
+            if (StringUtils.isBlank(dataId) || LISTENER_KEYS.contains(dataId)) {
                 return;
             }
-            ConfigurationFactory.getInstance().addConfigListener(key, getInstance());
-            LISTENER_KEYS.add(key);
+            ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
+            LISTENER_KEYS.add(dataId);
         }
         for (int i = 0; i < listeners.length; i++) {
-            ConfigurationFactory.getInstance().addConfigListener(key, listeners[i]);
+            ConfigurationFactory.getInstance().addConfigListener(dataId, listeners[i]);
         }
     }
 
