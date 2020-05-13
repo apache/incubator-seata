@@ -33,6 +33,9 @@ import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -76,6 +79,15 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     private NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
+    private TransactionMessageHandler transactionMessageHandler;
+
+    public void setTransactionMessageHandler(TransactionMessageHandler transactionMessageHandler) {
+        this.transactionMessageHandler = transactionMessageHandler;
+    }
+
+    public TransactionMessageHandler getTransactionMessageHandler() {
+        return transactionMessageHandler;
+    }
 
     public AbstractRpcRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                                      ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
@@ -156,6 +168,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     @Override
     public void sendResponse(RpcMessage request, String serverAddress, Object msg) {
         super.defaultSendResponse(request, clientChannelManager.acquireChannel(serverAddress), msg);
+    }
+
+    @Override
+    public void registerProcessor(int requestCode, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(requestCode, pair);
     }
 
     @Override

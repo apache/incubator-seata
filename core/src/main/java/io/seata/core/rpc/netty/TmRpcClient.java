@@ -25,15 +25,17 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
+import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -56,8 +58,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
-    private Map<Integer/*MessageType*/, Pair<NettyProcessor, Boolean/*Whether thread pool processing is required*/>> tmProcessorTable = null;
-    
+
     /**
      * The constant enableDegrade.
      */
@@ -124,19 +125,11 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
     }
-
-    public void setTmProcessor(Map<Integer, Pair<NettyProcessor, Boolean>> processorMap) {
-        this.tmProcessorTable = processorMap;
-    }
     
     @Override
     public void init() {
         // registry processor
-        if (tmProcessorTable != null) {
-            for (Map.Entry<Integer, Pair<NettyProcessor, Boolean>> entry : tmProcessorTable.entrySet()) {
-                registerProcessor(entry.getKey(), entry.getValue().getObject1(), entry.getValue().getObject2() ? messageExecutor : null);
-            }
-        }
+        registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
             super.init();
@@ -182,9 +175,19 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         throw new FrameworkException("register client app failed.");
     }
 
-    @Override
-    public void registerProcessor(int requestCode, NettyProcessor processor, ExecutorService executor) {
-        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
-        this.processorTable.put(requestCode, pair);
+    private void registerProcessor() {
+        // 1.registry TC response processor
+        ClientOnResponseProcessor onResponseProcessor =
+            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+        registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor, null);
+        registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
+        // 2.registry heartbeat message processor
+        ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
     }
 }

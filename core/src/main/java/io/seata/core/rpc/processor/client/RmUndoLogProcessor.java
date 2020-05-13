@@ -13,32 +13,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.client;
+package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The rm handler undo log processor
+ * process TC undo log delete command.
  * <p>
- * handle TC undo log delete command.
+ * process message type:
  * {@link UndoLogDeleteRequest}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
-public class RmHandleUndoLogProcessor implements NettyProcessor {
+public class RmUndoLogProcessor implements RemotingProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RmHandleUndoLogProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmUndoLogProcessor.class);
 
     private TransactionMessageHandler handler;
 
-    public RmHandleUndoLogProcessor(TransactionMessageHandler handler) {
+    public RmUndoLogProcessor(TransactionMessageHandler handler) {
         this.handler = handler;
     }
 

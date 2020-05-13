@@ -13,24 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor;
+package io.seata.core.rpc.processor;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.seata.core.protocol.RpcMessage;
 
 /**
- * The remoting command type
+ * The remoting processor
+ * <p>
+ * Used to encapsulate remote interaction logic.
+ * In order to separate the processing business from netty.
+ * When netty starts, it will register processors to abstractNettyRemoting#processorTable.
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
-public enum RemotingCommandType {
+public interface RemotingProcessor {
 
     /**
-     * request
+     * Process message
+     *
+     * @param ctx        Channel handler context.
+     * @param rpcMessage rpc message.
+     * @throws Exception throws exception process message error.
      */
-    REQUEST_COMMAND,
-
-    /**
-     * response
-     */
-    RESPONSE_COMMAND
+    void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception;
 
 }

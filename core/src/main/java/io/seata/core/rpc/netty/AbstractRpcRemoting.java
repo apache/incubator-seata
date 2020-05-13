@@ -27,15 +27,14 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
-import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +113,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * This container holds all processors.
      * processor type {@link MessageType}
      */
-    protected final HashMap<Integer/*MessageType*/, Pair<NettyProcessor, ExecutorService>> processorTable = new HashMap<>(8);
+    protected final HashMap<Integer/*MessageType*/, Pair<RemotingProcessor, ExecutorService>> processorTable = new HashMap<>(8);
 
     /**
      * Instantiates a new Abstract rpc remoting.
@@ -440,45 +439,16 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * @param ctx        Channel handler context.
      * @param rpcMessage rpc message.
      * @throws Exception throws exception process message error.
-     * @since 1.2.0
+     * @since 1.3.0
      */
-    public void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+    protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
         }
-        switch (rpcMessage.getType()) {
-            case REQUEST_COMMAND:
-                processRequestMessage(ctx, rpcMessage);
-                break;
-            case RESPONSE_COMMAND:
-                processResponseMessage(ctx, rpcMessage);
-                break;
-            default:
-                break;
-        }
-    }
-
-    protected void processRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        doProcess(ctx, rpcMessage);
-    }
-
-    protected void processResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        MessageFuture messageFuture = null;
-        if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
-            messageFuture = futures.remove(rpcMessage.getId());
-        }
-        if (messageFuture != null) {
-            messageFuture.setResultMessage(rpcMessage.getBody());
-        } else {
-            doProcess(ctx, rpcMessage);
-        }
-    }
-
-    private void doProcess(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object body = rpcMessage.getBody();
         if (body instanceof MessageTypeAware) {
             MessageTypeAware messageTypeAware = (MessageTypeAware) body;
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
+            final Pair<RemotingProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
             if (pair != null) {
                 if (pair.getObject2() != null) {
                     try {
@@ -512,10 +482,10 @@ public abstract class AbstractRpcRemoting implements Disposable {
                     }
                 }
             } else {
-                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
+                LOGGER.error("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         } else {
-            LOGGER.warn("This rpcMessage body[{}] is not MessageTypeAware type.", body);
+            LOGGER.error("This rpcMessage body[{}] is not MessageTypeAware type.", body);
         }
     }
 

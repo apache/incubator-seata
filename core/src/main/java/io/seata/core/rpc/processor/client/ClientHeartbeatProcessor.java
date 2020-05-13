@@ -13,24 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.client;
+package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * handle heartbeat message processor
+ * process TC heartbeat message request(PONG)
+ * <p>
+ * process message type:
+ * {@link HeartbeatMessage}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
-public class ClientHeartbeatMessageProcessor implements NettyProcessor {
+public class ClientHeartbeatProcessor implements RemotingProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientHeartbeatMessageProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientHeartbeatProcessor.class);
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
