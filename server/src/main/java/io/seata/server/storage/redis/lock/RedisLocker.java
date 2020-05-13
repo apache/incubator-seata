@@ -111,13 +111,17 @@ public class RedisLocker extends AbstractLocker {
             Set<String> keys = new HashSet<>();
             List<String> redisLockJson = null;
             int start = 0;
-            do {
-                redisLockJson = jedis.lrange(lockListKey, start, 100);
+            int stop = 100;
+            for (;;) {
+                redisLockJson = jedis.lrange(lockListKey, start, stop);
                 if (null != redisLockJson) {
                     keys.addAll(redisLockJson);
                     start = keys.size();
+                    stop = start + 100;
+                } else {
+                    break;
                 }
-            } while (null != redisLockJson && redisLockJson.size() >= 100);
+            }
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -146,13 +150,17 @@ public class RedisLocker extends AbstractLocker {
             Set<String> keys = new HashSet<>();
             List<String> redisLockJson = null;
             int start = 0;
-            do {
-                redisLockJson = jedis.lrange(lockListKey, start, 100);
+            int stop = 100;
+            for (;;) {
+                redisLockJson = jedis.lrange(lockListKey, start, stop);
                 if (null != redisLockJson) {
                     keys.addAll(redisLockJson);
                     start = keys.size();
+                    stop = start + 100;
+                } else {
+                    break;
                 }
-            } while (null != redisLockJson && redisLockJson.size() >= 100);
+            }
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
