@@ -131,8 +131,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                         .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
                         .setRegistryEndpointPort(Integer.parseInt(portStr)).build();
 
-                    registryClient = new DefaultRegistryClient(config);
-                    ((DefaultRegistryClient)registryClient).init();
+                    DefaultRegistryClient result = new DefaultRegistryClient(config);
+                    result.init();
+                    registryClient = result;
                 }
             }
         }
@@ -204,7 +205,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     private static Properties getNamingProperties() {
         Properties properties = new Properties();
         if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY)) {
-            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
+            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getSofaAddrFileKey());
             if (null != address) {
@@ -212,7 +213,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
             }
         }
         if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY)) {
-            properties.setProperty(PRO_REGION_KEY, System.getProperty(PRO_REGION_KEY));
+            properties.setProperty(PRO_REGION_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY));
         } else {
             String region = FILE_CONFIG.getConfig(getSofaRegionFileKey());
             if (null == region) {
@@ -222,7 +223,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
 
         if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY)) {
-            properties.setProperty(PRO_DATACENTER_KEY, System.getProperty(PRO_DATACENTER_KEY));
+            properties.setProperty(PRO_DATACENTER_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY));
         } else {
             String datacenter = FILE_CONFIG.getConfig(getSofaDataCenterFileKey());
             if (null == datacenter) {
@@ -232,7 +233,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
 
         if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY)) {
-            properties.setProperty(PRO_GROUP_KEY, System.getProperty(PRO_GROUP_KEY));
+            properties.setProperty(PRO_GROUP_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY));
         } else {
             String group = FILE_CONFIG.getConfig(getSofaGroupFileKey());
             if (null == group) {
@@ -242,7 +243,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
 
         if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY)) {
-            properties.setProperty(PRO_CLUSTER_KEY, System.getProperty(PRO_CLUSTER_KEY));
+            properties.setProperty(PRO_CLUSTER_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY));
         } else {
             String cluster = FILE_CONFIG.getConfig(getSofaClusterFileKey());
             if (null == cluster) {
@@ -252,7 +253,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
 
         if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY)) {
-            properties.setProperty(PRO_ADDRESS_WAIT_TIME_KEY, System.getProperty(PRO_ADDRESS_WAIT_TIME_KEY));
+            properties.setProperty(PRO_ADDRESS_WAIT_TIME_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY));
         } else {
             String group = FILE_CONFIG.getConfig(getSofaAddressWaitTimeFileKey());
             if (null == group) {

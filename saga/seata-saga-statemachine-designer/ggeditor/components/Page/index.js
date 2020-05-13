@@ -35,6 +35,15 @@ class Page extends React.Component {
     }
 
     if (newData !== oldData) {
+      // Remove the arrow after the connection point of the compensation type
+      newData.edges.forEach((item) => {
+        if (item.type === 'Compensation') {
+          item.style = {
+            ...item.style,
+            endArrow: false,
+          };
+        }
+      });
       this.page.read(newData);
 
       return true;
