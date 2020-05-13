@@ -15,18 +15,7 @@
  */
 package io.seata.rm;
 
-import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.RmRpcClient;
-import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.rpc.processor.Pair;
-import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
-import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
-import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
-import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
-import io.seata.core.rpc.processor.client.MergeResultMessageProcessor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The Rm client Initiator.
