@@ -16,9 +16,7 @@
 package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -61,19 +59,15 @@ public class RmBranchCommitProcessor implements RemotingProcessor {
     }
 
     private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
-
-        BranchCommitResponse resultMessage = null;
+        BranchCommitResponse resultMessage;
+        resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("branch commit result:" + resultMessage);
+        }
         try {
-            resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
             this.remotingClient.sendResponse(request, serverAddress, resultMessage);
-        } catch (Exception e) {
-            LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
-            if (resultMessage == null) {
-                resultMessage = new BranchCommitResponse();
-            }
-            resultMessage.setResultCode(ResultCode.Failed);
-            resultMessage.setMsg(e.getMessage());
-            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+        } catch (Throwable throwable) {
+            LOGGER.error("branch commit error: {}", throwable.getMessage(), throwable);
         }
     }
 }
