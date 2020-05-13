@@ -65,13 +65,22 @@ public class TransactionHookManagerTest {
 
     @Test
     public void testTriggerHooks() {
-        RootContext.unbind();
         TransactionHook transactionHook = new TransactionHookAdapter();
         TransactionHookManager.registerLocalHook(transactionHook);
+
+        RootContext.bind(DEFAULT_XID);
         TransactionHookManager.triggerHooks(DEFAULT_XID, (hooks) -> {
             assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
             assertThat(hooks.get(0)).isEqualTo(transactionHook);
         });
+        assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+
+        RootContext.unbind();
+        TransactionHookManager.triggerHooks(DEFAULT_XID, (hooks) -> {
+            assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+            assertThat(hooks.get(0)).isEqualTo(transactionHook);
+        });
+        assertThat(RootContext.getXID()).isNull();
     }
 
     @Test
