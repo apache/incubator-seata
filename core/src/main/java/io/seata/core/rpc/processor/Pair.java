@@ -21,7 +21,7 @@ package io.seata.core.rpc.processor;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class Pair<T1, T2> {
+public final class Pair<T1, T2> {
     private T1 object1;
     private T2 object2;
 
