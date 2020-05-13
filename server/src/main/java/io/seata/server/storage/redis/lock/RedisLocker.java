@@ -16,10 +16,14 @@
 package io.seata.server.storage.redis.lock;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
 import com.alibaba.fastjson.JSON;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.lock.AbstractLocker;
@@ -104,7 +108,7 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
-            List<String> keys = new ArrayList<>();
+            Set<String> keys = new HashSet<>();
             List<String> redisLockJson = null;
             int start = 0;
             do {
@@ -139,7 +143,7 @@ public class RedisLocker extends AbstractLocker {
     public boolean releaseLock(String xid, Long branchId) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
-            List<String> keys = new ArrayList<>();
+            Set<String> keys = new HashSet<>();
             List<String> redisLockJson = null;
             int start = 0;
             do {

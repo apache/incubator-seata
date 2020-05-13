@@ -101,7 +101,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String branchsKey = DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + convertBranchTransactionDO.getXid();
-            List<String> branchs = new ArrayList<>();
+            Set<String> branchs = new HashSet<>();
             List<String> redisBranchJson = null;
             int start = 0;
             do {
@@ -193,7 +193,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             List<BranchTransactionDO> branchTransactionDOs = null;
             // reduce rpc with db when branchRegister and getGlobalStatus
             if (withBranchSessions) {
-                List<String> branchJson = new ArrayList<>();
+                Set<String> branchJson = new HashSet<>();
                 int start = 0;
                 List<String> redisBranchJson = null;
                 do {
@@ -265,7 +265,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
                     List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
                     for (String xid : xids) {
-                        List<String> branchs = new ArrayList<>();
+                        Set<String> branchs = new HashSet<>();
                         int start = 0;
                         List<String> redisBranchs = null;
                         do {
@@ -319,7 +319,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(global, GlobalTransactionDO.class);
                 String branchsKey = DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + globalTransactionDO.getXid();
                 int start = 0;
-                List<String> branchJson = new ArrayList<>();
+                Set<String> branchJson = new HashSet<>();
                 List<String> redisBranchJson = null;
                 do {
                     redisBranchJson = jedis.lrange(branchsKey, start, 100);
