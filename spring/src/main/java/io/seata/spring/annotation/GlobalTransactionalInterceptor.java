@@ -87,15 +87,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
-            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
-                (ConfigurationChangeListener)this);
             degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
             degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
-            if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                wakingUpThread();
-            }
+            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+                (ConfigurationChangeListener)this);
+            wakingUpThread();
         }
     }
 
@@ -305,12 +303,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private void  wakingUpThread() {
-        synchronized (GlobalTransactionalInterceptor.class) {
-            if (executor.getActiveCount() <= 0) {
-                startDegradeCheck();
-            } else {
-                this.notifyAll();
+    private void wakingUpThread() {
+        synchronized (this) {
+            if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
+                if (executor.getActiveCount() <= 0) {
+                    startDegradeCheck();
+                } else {
+                    this.notifyAll();
+                }
             }
         }
     }
