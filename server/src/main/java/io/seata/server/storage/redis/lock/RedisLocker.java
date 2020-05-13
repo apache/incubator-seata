@@ -120,7 +120,7 @@ public class RedisLocker extends AbstractLocker {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
                     for (int i = 0; i < branchIds.size(); i++) {
-                        if (Objects.equals(lock.getBranchId(), branchIds.get(i))) {
+                        if (null != lock && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
                             jedis.del(key);
                             jedis.lrem(lockListKey, 0, key);
                             it.remove();
@@ -180,7 +180,7 @@ public class RedisLocker extends AbstractLocker {
                 String rowlockJson = jedis.get(DEFAULT_REDIS_SEATA_LOCK_PREFIX + rowlock.getRowKey());
                 if (StringUtils.isNotBlank(rowlockJson)) {
                     LockDO lock = JSON.parseObject(rowlockJson, LockDO.class);
-                    if (!lock.getXid().equals(rowlock.getXid())) {
+                    if (null != lock && !Objects.equals(lock.getXid(), rowlock.getXid())) {
                         return false;
                     }
                 }
