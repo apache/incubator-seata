@@ -40,7 +40,6 @@ public class MessageFutureTest {
     private static final byte CODEC_FIELD = 1;
     private static final byte COMPRESS_FIELD = 2;
     private static final byte MSG_TYPE_FIELD = 3;
-    private static final String REQUEST_COMMAND = "REQUEST_COMMAND";
     private static final HashMap<String, String> HEAD_FIELD = new HashMap<>();
     private static final long TIME_OUT_FIELD = 100L;
 
@@ -50,17 +49,16 @@ public class MessageFutureTest {
     @Test
     public void testFieldSetGet() {
         String fromJson = "{\n" +
-                "\t\"requestMessage\":{\n" +
-                "\t\t\"body\":\"" + BODY_FIELD + "\",\n" +
-                "\t\t\"codec\":" + CODEC_FIELD + ",\n" +
-                "\t\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
-                "\t\t\"headMap\":" + HEAD_FIELD + ",\n" +
-                "\t\t\"id\":" + ID_FIELD + ",\n" +
-                "\t\t\"messageType\":" + MSG_TYPE_FIELD + ",\n" +
-                "\t\t\"type\":" + "\"" + REQUEST_COMMAND + "\"" + "\n" +
-                "\t},\n" +
-                "\t\"timeout\":" + TIME_OUT_FIELD + "\n" +
-                "}";
+            "\t\"requestMessage\":{\n" +
+            "\t\t\"body\":\"" + BODY_FIELD + "\",\n" +
+            "\t\t\"codec\":" + CODEC_FIELD + ",\n" +
+            "\t\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
+            "\t\t\"headMap\":" + HEAD_FIELD + ",\n" +
+            "\t\t\"id\":" + ID_FIELD + ",\n" +
+            "\t\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
+            "\t},\n" +
+            "\t\"timeout\":" + TIME_OUT_FIELD + "\n" +
+            "}";
         MessageFuture fromJsonFuture = JSON.parseObject(fromJson, MessageFuture.class);
         assertThat(fromJsonFuture.getTimeout()).isEqualTo(TIME_OUT_FIELD);
         MessageFuture toJsonFuture = new MessageFuture();

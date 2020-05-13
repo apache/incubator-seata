@@ -34,7 +34,6 @@ public class RpcMessageTest {
     private static final byte CODEC_FIELD = 1;
     private static final byte COMPRESS_FIELD = 2;
     private static final byte MSG_TYPE_FIELD = 3;
-    private static final String REQUEST_COMMAND = "REQUEST_COMMAND";
     private static final HashMap<String, String> HEAD_FIELD = new HashMap<>();
 
     /**
@@ -43,14 +42,13 @@ public class RpcMessageTest {
     @Test
     public void testFieldGetSetFromJson() {
         String fromJson = "{\n" +
-                "\t\"body\":\"" + BODY_FIELD + "\",\n" +
-                "\t\"codec\":" + CODEC_FIELD + ",\n" +
-                "\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
-                "\t\"headMap\":" + HEAD_FIELD + ",\n" +
-                "\t\"id\":" + ID_FIELD + ",\n" +
-                "\t\"messageType\":" + MSG_TYPE_FIELD + ",\n" +
-                "\t\"type\":" + "\"" + REQUEST_COMMAND + "\"" + "\n" +
-                "}";
+            "\t\"body\":\"" + BODY_FIELD + "\",\n" +
+            "\t\"codec\":" + CODEC_FIELD + ",\n" +
+            "\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
+            "\t\"headMap\":" + HEAD_FIELD + ",\n" +
+            "\t\"id\":" + ID_FIELD + ",\n" +
+            "\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
+            "}";
         RpcMessage fromJsonMessage = JSON.parseObject(fromJson, RpcMessage.class);
         assertThat(fromJsonMessage.getBody()).isEqualTo(BODY_FIELD);
         assertThat(fromJsonMessage.getId()).isEqualTo(ID_FIELD);
