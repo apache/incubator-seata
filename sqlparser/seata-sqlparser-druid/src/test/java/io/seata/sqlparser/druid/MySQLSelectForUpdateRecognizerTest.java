@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 /**
  * The type My sql select for update recognizer test.
  */
-public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
+public class MySQLSelectForUpdateRecognizerTest extends AbstractRecognizerTest {
 
     /**
      * Select for update recognizer test 0.
@@ -221,5 +221,10 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
 
         MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
         Assertions.assertNull(recognizer.getTableAlias());
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
     }
 }

@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author hanwen created at 2019-01-25
  */
-public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
+public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
 
     @Test
     public void testVMarker() {
@@ -294,5 +294,10 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             deleteAst.setWhere(new MySqlOrderingExpr());
             new MySQLDeleteRecognizer(s, deleteAst).getWhereCondition();
         });
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
     }
 }

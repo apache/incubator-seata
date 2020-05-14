@@ -23,6 +23,7 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleBinaryDoubleExpr;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -93,12 +94,13 @@ public class OracleInsertRecognizerTest {
 
     @Test
     public void testGetInsertRows() {
+        final int pkIndex = 0;
         //test for null value
         String sql = "insert into t(id, no, name, age, time) values (id_seq.nextval, null, 'a', ?, now())";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleInsertRecognizer recognizer = new OracleInsertRecognizer(sql, asts.get(0));
-        List<List<Object>> insertRows = recognizer.getInsertRows();
+        List<List<Object>> insertRows = recognizer.getInsertRows(pkIndex);
         Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
@@ -106,10 +108,20 @@ public class OracleInsertRecognizerTest {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
-            sqlInsertStatement.getValuesList().get(0).getValues().add(new OracleBinaryDoubleExpr());
+            sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new OracleBinaryDoubleExpr());
 
             OracleInsertRecognizer oracleInsertRecognizer = new OracleInsertRecognizer(s, sqlInsertStatement);
-            oracleInsertRecognizer.getInsertRows();
+            oracleInsertRecognizer.getInsertRows(pkIndex);
         });
+    }
+
+    @Test
+    public void testNotPlaceholder_giveValidPkIndex() {
+        String sql = "insert into test(create_time) values(sysdate)";
+        List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DB_TYPE);;
+
+        OracleInsertRecognizer oracle = new OracleInsertRecognizer(sql, sqlStatements.get(0));
+        List<List<Object>> insertRows = oracle.getInsertRows(-1);
+        Assertions.assertTrue(insertRows.get(0).get(0) instanceof NotPlaceholderExpr);
     }
 }

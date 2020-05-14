@@ -67,6 +67,8 @@ public class InsertExecutorTest {
 
     private InsertExecutor insertExecutor;
 
+    private final int pkIndex = 0;
+
     @BeforeEach
     public void init() {
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
@@ -157,7 +159,7 @@ public class InsertExecutorTest {
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(pkIndex).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertEquals(pkValuesByColumn, pkValues);
     }
@@ -184,7 +186,7 @@ public class InsertExecutorTest {
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
         doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(pkIndex).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
@@ -450,6 +452,6 @@ public class InsertExecutorTest {
     private void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
     }
 }

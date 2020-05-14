@@ -67,6 +67,8 @@ public class OracleInsertExecutorTest {
 
     private InsertExecutor insertExecutor;
 
+    private final int pkIndex = 0;
+
     @BeforeEach
     public void init() {
         connectionProxy = mock(ConnectionProxy.class);
@@ -91,7 +93,7 @@ public class OracleInsertExecutorTest {
         pkValuesSeq.add(PK_VALUE);
 
         doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr);
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(pkIndex).when(insertExecutor).getPkIndex();
 
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         verify(insertExecutor).getPkValuesBySequence(expr);
@@ -141,7 +143,6 @@ public class OracleInsertExecutorTest {
             insertExecutor.getPkValuesByAuto();
         });
 
-        int pkIndex = 0;
         doReturn(pkIndex).when(insertExecutor).getPkIndex();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
@@ -196,7 +197,7 @@ public class OracleInsertExecutorTest {
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
 
         return expr;
     }
@@ -220,13 +221,13 @@ public class OracleInsertExecutorTest {
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
     }
 
     private void mockStatementInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
     }
 
 

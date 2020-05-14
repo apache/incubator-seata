@@ -109,8 +109,8 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
-            int index = 0;
-            for (SQLExpr expr : exprs) {
+            for (int i = 0, len = exprs.size(); i < len; i++) {
+                SQLExpr expr = exprs.get(i);
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
@@ -125,7 +125,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));
                 } else {
-                    if (index++ == primaryKeyIndex) {
+                    if (i == primaryKeyIndex) {
                         throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                     }
                     row.add(new NotPlaceholderExpr());
