@@ -15,40 +15,41 @@
  */
 package io.seata.server.store;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.store.db.AbstractDataSourceProvider;
+
 import javax.sql.DataSource;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.store.db.AbstractDataSourceGenerator;
-import org.apache.commons.dbcp2.BasicDataSource;
-
 /**
- * The type Dbcp data source generator.
- *
+ * The druid datasource provider
  * @author zhangsen
  * @author ggndnn
+ * @author will
  */
-@LoadLevel(name = "dbcp")
-public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
+@LoadLevel(name = "druid")
+public class DruidDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public DataSource generateDataSource() {
-        BasicDataSource ds = new BasicDataSource();
+    public DataSource generate() {
+        DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
-        // DriverClassLoader works if upgrade commons-dbcp to at least 1.3.1.
-        // https://issues.apache.org/jira/browse/DBCP-333
         ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
         ds.setInitialSize(getMinConn());
-        ds.setMaxTotal(getMaxConn());
+        ds.setMaxActive(getMaxConn());
         ds.setMinIdle(getMinConn());
-        ds.setMaxIdle(getMinConn());
-        ds.setMaxWaitMillis(getMaxWait());
+        ds.setMaxWait(getMaxWait());
         ds.setTimeBetweenEvictionRunsMillis(120000);
-        ds.setNumTestsPerEvictionRun(1);
+        ds.setMinEvictableIdleTimeMillis(300000);
         ds.setTestWhileIdle(true);
+        ds.setTestOnBorrow(false);
+        ds.setPoolPreparedStatements(true);
+        ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(getValidationQuery(getDBType()));
-        ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
+        ds.setDefaultAutoCommit(true);
         return ds;
     }
 }
