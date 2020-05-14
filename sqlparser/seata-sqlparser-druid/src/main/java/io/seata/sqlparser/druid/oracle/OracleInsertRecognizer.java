@@ -28,16 +28,15 @@ import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleSysdateExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.sqlparser.struct.oracle.SysdateExpr;
 
 /**
  * The type oracle insert recognizer.
@@ -103,31 +102,33 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     }
 
     @Override
-    public List<List<Object>> getInsertRows() {
+    public List<List<Object>> getInsertRows(int primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
-            for (SQLExpr expr : valuesClause.getValues()) {
+            int index = 0;
+            for (SQLExpr expr : exprs) {
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
-                    row.add(((SQLValuableExpr)expr).getValue());
+                    row.add(((SQLValuableExpr) expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
-                    row.add(((SQLVariantRefExpr)expr).getName());
+                    row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(new SqlMethodExpr());
                 } else if (expr instanceof SQLSequenceExpr) {
-                    SQLSequenceExpr sequenceExpr = (SQLSequenceExpr)expr;
+                    SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
                     String sequence = sequenceExpr.getSequence().getSimpleName();
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));
-                } else if (expr instanceof OracleSysdateExpr) {
-                    row.add(new SysdateExpr());
                 } else {
-                    throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    if (index++ == primaryKeyIndex) {
+                        throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    }
+                    row.add(new NotPlaceholderExpr());
                 }
             }
         }

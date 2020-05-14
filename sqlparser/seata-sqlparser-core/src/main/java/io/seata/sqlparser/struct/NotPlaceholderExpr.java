@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.struct.oracle;
+
+package io.seata.sqlparser.struct;
 
 /**
- * The oracle sysdate expression
- * TODO
+ * The not placeholder expression.
  * @author jsbxyyx
  */
-public class SysdateExpr {
+public class NotPlaceholderExpr {
 }

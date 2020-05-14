@@ -32,6 +32,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
@@ -101,14 +102,15 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
-    public List<List<Object>> getInsertRows() {
+    public List<List<Object>> getInsertRows(int primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
-            for (SQLExpr expr : valuesClause.getValues()) {
+            int index = 0;
+            for (SQLExpr expr : exprs) {
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
@@ -132,7 +134,10 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                 } else if (expr instanceof SQLDefaultExpr) {
                     row.add(SqlDefaultExpr.get());
                 } else {
-                    throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    if (index++ == primaryKeyIndex) {
+                        throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    }
+                    row.add(new NotPlaceholderExpr());
                 }
             }
         }

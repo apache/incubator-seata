@@ -113,7 +113,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
-            List<List<Object>> insertRows = recognizer.getInsertRows();
+            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndex);
             if (insertRows != null && !insertRows.isEmpty()) {
                 ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
@@ -157,7 +157,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 }
             }
         } else {
-            List<List<Object>> insertRows = recognizer.getInsertRows();
+            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndex);
             pkValues = new ArrayList<>(insertRows.size());
             for (List<Object> row : insertRows) {
                 pkValues.add(row.get(pkIndex));
