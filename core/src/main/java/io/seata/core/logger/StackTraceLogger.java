@@ -52,6 +52,17 @@ public final class StackTraceLogger {
         }
     }
 
+    public static void error(Logger logger, Throwable cause, String format, Object[] args) {
+        if (logger.isErrorEnabled()) {
+            int rate = getRate();
+            if (System.currentTimeMillis() % rate == 0) {
+                logger.error(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
+            } else {
+                logger.error(format, args);
+            }
+        }
+    }
+
     private static int getRate() {
         return CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, DEFAULT_LOG_EXCEPTION_RATE);
     }

@@ -81,7 +81,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>1.1.0</seata.version>
+<seata.version>1.2.0</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
@@ -117,7 +117,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
   
 
-<img src="https://img.alicdn.com/tfs/TB1vuPqzXT7gK0jSZFpXXaTkpXa-1078-352.jpg"  height="200" width="630">
+<img src="https://img.alicdn.com/tfs/TB1NvtaFrj1gK0jSZFOXXc7GpXa-1218-404.jpg"  height="200" width="630">
 
 
 ## Seata ecosystem
@@ -156,7 +156,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='政采云' height='40'  src='https://img.alicdn.com/tfs/TB1DDiCorY1gK0jSZTEXXXDQVXa-440-114.jpg'  /img>
     <img alt='浙江公安厅' height='40'  src='https://img.alicdn.com/tfs/TB1SXGzoxn1gK0jSZKPXXXvUXXa-426-180.jpg'  /img>
     <img alt='特步' height='40'  src='https://www.xtep.com/images/logo.png'  /img>
-    <img alt='中通快递' height='40'  src='https://www.zto.com/imgs/logo.png'  /img>
+    <img alt='中通快递' height='40'  src='https://img.alicdn.com/tfs/TB1rCNSFxn1gK0jSZKPXXXvUXXa-172-31.png'  /img>
     <img alt='美的集团' height='40' src='https://img.alicdn.com/tfs/TB1cgvjwYj1gK0jSZFOXXc7GpXa-1040-282.png'  /img>    
     <img alt='浙江烟草' height='40'  src='https://img.alicdn.com/tfs/TB1e7Wiovb2gK0jSZK9XXaEgFXa-1028-160.jpg'  /img>
     <img alt='韵达快递' height='40'  src='http://www.yunda56.com/cn/images/ky_images/logo.png'  /img>
@@ -192,8 +192,8 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='浙大睿医' height='40'  src='https://img.alicdn.com/tfs/TB1kQThrFY7gK0jSZKzXXaikpXa-220-110.jpg'  /img>
     <img alt='居然之家' height='40'  src='https://img.alicdn.com/tfs/TB1LK6jrUT1gK0jSZFrXXcNCXXa-180-54.png'  /img>
     <img alt='臻善科技' height='40'  src='http://www.gisquest.com/static/web/img/img-1.png?v=v3'  /img>
-    <img alt='中国支付通' height='40'  src='http://www.chinasmartpay.com/img/index_logo.png'  /img>
-    <img alt='众网小贷' height='40'  src='http://imassbank.com/images/zw_logo.png'  /img>
+    <img alt='中国支付通' height='40'  src='https://img.alicdn.com/tfs/TB1VGpTFET1gK0jSZFrXXcNCXXa-193-55.png'  /img>
+    <img alt='众网小贷' height='40'  src='https://img.alicdn.com/tfs/TB19Y8XFEY1gK0jSZFMXXaWcVXa-160-60.png'  /img>
     <img alt='谐云科技' height='40'  src='https://img.alicdn.com/tfs/TB1V1YlrRv0gK0jSZKbXXbK2FXa-514-160.png'  /img>
     <img alt='浙江甄品' height='40'  src='https://img.alicdn.com/tfs/TB1oC2prND1gK0jSZFyXXciOVXa-246-124.jpg'  /img>
     <img alt='深圳海豚网' height='40'  src='https://img.alicdn.com/tfs/TB1defkrLb2gK0jSZK9XXaEgFXa-434-146.jpg'  /img>
@@ -209,18 +209,43 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='维恩贝特' height='40'  src='http://www.vivebest.com/templates/crs/images/vnb_logo.png'  /img>
     <img alt='八库' height='40' src='https://img.alicdn.com/tfs/TB1hC5cwVY7gK0jSZKzXXaikpXa-318-134.png'  /img>
     <img alt='大诚若谷' height='40'  src='https://img.alicdn.com/tfs/TB1VuPhw4D1gK0jSZFyXXciOVXa-294-124.png'  /img>
-    <img alt='成都数智索' height='40'  src='https://img.alicdn.com/tfs/TB1oJKiw4D1gK0jSZFyXXciOVXa-2053-377.png'  /img>    
+    <img alt='成都数智索' height='40'  src='https://img.alicdn.com/tfs/TB1oJKiw4D1gK0jSZFyXXciOVXa-2053-377.png'  /img>  
+     <img alt='北京超图' height='40'  src='https://img.alicdn.com/tfs/TB1eKFXFEz1gK0jSZLeXXb9kVXa-163-54.png'  /img>
+    <img alt='深圳易佰' height='40'  src='https://img.alicdn.com/tfs/TB1gkXaFrr1gK0jSZR0XXbP8XXa-187-57.png'  /img>
     <img alt='宿迁民丰农商银行' height='40'  src='https://img.alicdn.com/tfs/TB1bH5fw7L0gK0jSZFAXXcA9pXa-442-39.png'  /img>
     <img alt='杭州喜团科技' height='40'  src='https://img.alicdn.com/tfs/TB1IXqgwYj1gK0jSZFuXXcrHpXa-197-58.png'  /img>
-    <img alt='上海海智在线' height='40' src='https://user-images.githubusercontent.com/2938725/75735507-cbad3f00-5d35-11ea-9ce8-cad175948b7f.png'  /img>
+    <img alt='上海海智在线' height='40' src='https://img.alicdn.com/tfs/TB1xAJUFy_1gK0jSZFqXXcpaXXa-320-80.jpg'  /img>
     <img alt='丞家（上海）公寓管理' height='40'  src='https://image.cjia.com/website/apartment/webresource/image/logo_8f2f47fe.png'  /img>
-    <img alt='北京超图' height='40'  src='https://user-images.githubusercontent.com/20411887/75741329-3a45c900-5d45-11ea-84db-aafed13bb8bc.png'  /img>
-    <img alt='深圳易佰' height='40'  src='https://user-images.githubusercontent.com/19617516/75748727-1beac800-5d5b-11ea-8ee1-71467e93c24f.png'  /img>
-    <img alt='安徽国科新材科' height='40'  src='https://user-images.githubusercontent.com/61726674/75748449-70da0e80-5d5a-11ea-8e4d-d22fe0442caf.png'  /img>
-    <img alt='易点生活' height='40'  src='https://user-images.githubusercontent.com/44664389/75748761-31f88880-5d5b-11ea-8223-d819b3430916.jpg'  /img>
+    <img alt='安徽国科新材科' height='40'  src='https://img.alicdn.com/tfs/TB1ICJfFuH2gK0jSZJnXXaT1FXa-654-232.png'  /img>
+    <img alt='易点生活' height='40'  src='https://img.alicdn.com/tfs/TB1AdI5FeL2gK0jSZPhXXahvXXa-1518-542.jpg'  /img>
     <img alt='商银信支付' height='40' src='https://img.alicdn.com/tfs/TB1rxndw4n1gK0jSZKPXXXvUXXa-150-68.png'   /img>
     <img alt='钛师傅云' height='40'  src='https://www.tsfyun.com/images/logo.png'  /img>
-    <img alt='广州力生信息' height='40'  src='https://user-images.githubusercontent.com/21170967/75753185-30cc5900-5d65-11ea-8eba-cd24ee669c64.jpg'  /img>
-</div>
+    <img alt='广州力生信息' height='40'  src='https://img.alicdn.com/tfs/TB1m0FcFuH2gK0jSZFEXXcqMpXa-139-48.png'  /img>
+    <img alt='杭州启舰科技有限公司' height='40'  src='http://www.qijian-tech.com/assets/onepage/img/logo/red.png'  /img>
+    <img alt='上海美浮特' height='40'  src='https://img.alicdn.com/tfs/TB1uUtaFuT2gK0jSZFvXXXnFXXa-370-45.jpg'  /img>    
+    <img alt='杭州中威慧云医疗科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1iqo_FaL7gK0jSZFBXXXZZpXa-361-54.jpg'  /img> 
+    <img alt='易族智汇（北京）' height='40'  src='http://www.javamall.com.cn/images/logonew.jpg'  /img> 
+    <img alt='佛山宅无限' height='40'  src='https://zwxnetwork.oss-cn-shenzhen.aliyuncs.com/static/temporary_official_website/logo.png'  /img>     
+    <img alt='F5未来商店' height='40'  src='https://cdn.f5-store.cn/front_end/common_images/logo.png'  /img>  
+    <img alt='甄品信息科技' height='40'  src='https://img.alicdn.com/tfs/TB1SxJWFEY1gK0jSZFCXXcwqXXa-185-65.png'  /img>  
+    <img alt='行云全球汇跨境电商（杭州分部）' height='40'  src='http://www.xyb2b.com/_nuxt/img/5e5584f.png'  /img>  
+    <img alt='世纪加华' height='40'  src='https://zhengxin-pub.bj.bcebos.com/logopic/a4ff4990e2ba2d57c90e8d16c649b952_fullsize.jpg?x-bce-process=image/resize,m_lfit,w_200'  /img>  
+    <img alt='海牛电子商务' height='40'  src='http://www.hainiuec.com/public/assets/addons/cms/img/company-logo.png'  /img>    
+    <img alt='杭州华网信息' height='40'  src='https://img.alicdn.com/tfs/TB1FFX6FqL7gK0jSZFBXXXZZpXa-288-101.png'  /img>   
+    <img alt='快陪练' height='40'  src='https://img.alicdn.com/tfs/TB1rhNRFAL0gK0jSZFtXXXQCXXa-321-96.png'  /img> 
+    <img alt='西南石油大学' height='40'  src='https://dss2.bdstatic.com/6Ot1bjeh1BF3odCf/it/u=829617221,290823158&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=b0b603710dd0af061a278d11cfe327ae'  /img> 
+    <img alt='领课网络' height='40'  src='https://img.alicdn.com/tfs/TB18TNRFEz1gK0jSZLeXXb9kVXa-244-60.jpg'  /img> 
+    <img alt='美通社' height='40'  src='https://img.alicdn.com/tfs/TB1i1JTFCf2gK0jSZFPXXXsopXa-151-60.png'  /img> 
+    <img alt='睿维科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1ztXXFpY7gK0jSZKzXXaikpXa-179-60.png'  /img> 
+    <img alt='郑州信源信息技术' height='40'  src='https://img.alicdn.com/tfs/TB1SkJ9FuT2gK0jSZFvXXXnFXXa-266-56.png'  /img>     
+    <img alt='荣怀集团' height='40'  src='https://img.alicdn.com/tfs/TB1AzbWgZKfxu4jSZPfXXb3dXXa-1117-382.png'  /img>  
+    <img alt='浙江群集大数据科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1HtFZFq61gK0jSZFlXXXDKFXa-1375-214.png'  /img>  
+    <img alt='北京易点租有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1nax.FuH2gK0jSZFEXXcqMpXa-336-154.png'  /img>  
+    </div>
+
+
+
+
+
 
 

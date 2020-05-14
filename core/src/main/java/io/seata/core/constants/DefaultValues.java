@@ -20,13 +20,17 @@ package io.seata.core.constants;
  */
 public class DefaultValues {
     public static final int DEFAULT_CLIENT_LOCK_RETRY_INTERVAL = 10;
+    public static final int DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES = 10;
     public static final int DEFAULT_CLIENT_LOCK_RETRY_TIMES = 30;
     public static final boolean DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = true;
     public static final int DEFAULT_LOG_EXCEPTION_RATE = 100;
     public static final int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = 10000;
+    public static final int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
     public static final int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     public static final boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
     public static final boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    public static final boolean DEFAULT_TM_DEGRADE_CHECK = false;
+    public static final boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
     /**
      * Shutdown timeout default 3s
      */
@@ -47,6 +51,7 @@ public class DefaultValues {
     public static final boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
     public static final boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
     public static final String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
+    public static final boolean DEFAULT_ONLY_CARE_UPDATE_COLUMNS = true;
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
      */

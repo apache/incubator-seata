@@ -15,15 +15,7 @@
  */
 package io.seata.server;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicLong;
-
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.IdWorker;
 
 /**
  * The type Uuid generator.
@@ -32,89 +24,22 @@ import io.seata.common.exception.ShouldNeverHappenException;
  */
 public class UUIDGenerator {
 
-    private static final AtomicLong UUID = new AtomicLong(1000);
-    private static int serverNodeId = 1;
-    private static final long UUID_INTERNAL = 2000000000;
-    private static long initUUID = 0;
-
     /**
      * Generate uuid long.
      *
      * @return the long
      */
     public static long generateUUID() {
-        long id = UUID.incrementAndGet();
-        if (id >= getMaxUUID()) {
-            synchronized (UUID) {
-                if (UUID.get() >= id) {
-                    id -= UUID_INTERNAL;
-                    UUID.set(id);
-                }
-            }
-        }
-        return id;
-    }
-
-    /**
-     * Gets current uuid.
-     *
-     * @return the current uuid
-     */
-    public static long getCurrentUUID() {
-        return UUID.get();
-    }
-
-    /**
-     * Sets uuid.
-     *
-     * @param expect the expect
-     * @param update the update
-     * @return the uuid
-     */
-    public static boolean setUUID(long expect, long update) {
-        return UUID.compareAndSet(expect, update);
-
-    }
-
-    /**
-     * Gets max uuid.
-     *
-     * @return the max uuid
-     */
-    public static long getMaxUUID() {
-        return UUID_INTERNAL * (serverNodeId + 1);
-    }
-
-    /**
-     * Gets init uuid.
-     *
-     * @return the init uuid
-     */
-    public static long getInitUUID() {
-        return initUUID;
+        return IdWorker.getInstance().nextId();
     }
 
     /**
      * Init.
      *
-     * @param serverNodeId the server node id
+     * @param serverNode the server node id
      */
-    public static void init(int serverNodeId) {
-        try {
-            UUIDGenerator.serverNodeId = serverNodeId;
-            UUID.set(UUID_INTERNAL * serverNodeId);
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Calendar cal = Calendar.getInstance();
-            String firstDayOfYear = LocalDate.now()
-                    .with(TemporalAdjusters.firstDayOfYear()).toString();
-            Date date = format.parse(firstDayOfYear);
-            cal.setTime(date);
-            long base = cal.getTimeInMillis();
-            long current = System.currentTimeMillis();
-            UUID.addAndGet((current - base) / 1000);
-            initUUID = getCurrentUUID();
-        } catch (ParseException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+    public static void init(Long serverNode) {
+        IdWorker.init(serverNode);
     }
+
 }
