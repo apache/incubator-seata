@@ -15,6 +15,8 @@
  */
 package io.seata.core.store.db.sql.lock;
 
+import java.util.StringJoiner;
+
 import io.seata.common.loader.LoadLevel;
 
 /**
@@ -29,12 +31,21 @@ public class MysqlLockStoreSql extends AbstractLockStoreSql {
     /**
      * The constant INSERT_LOCK_SQL_MYSQL.
      */
-    private static final String INSERT_LOCK_SQL_MYSQL = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")"
-        + " values (?, ?, ?, ?, ?, ?, ?, now(), now())";
+    private static final String INSERT_LOCK_SQL_MYSQL_PREFIX = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")  values";
+
+    private static final String INSERT_LOCK_SQL_MYSQL_SUFFIX = "  (?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     @Override
     public String getInsertLockSQL(String lockTable) {
-        return INSERT_LOCK_SQL_MYSQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
+        return (INSERT_LOCK_SQL_MYSQL_PREFIX + INSERT_LOCK_SQL_MYSQL_SUFFIX).replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
 
+    @Override
+    public String getBatchInsertLockSQL(String lockTable, int size) {
+        StringJoiner insertLockSQL = new StringJoiner(",", INSERT_LOCK_SQL_MYSQL_PREFIX, "");
+        for (int i = 0; i < size; i++) {
+            insertLockSQL.add(INSERT_LOCK_SQL_MYSQL_SUFFIX);
+        }
+        return insertLockSQL.toString().replace(LOCK_TABLE_PLACE_HOLD, lockTable);
+    }
 }

@@ -36,6 +36,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
@@ -325,42 +326,39 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @return the boolean
      */
     protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) {
-        PreparedStatement ps = null;
-        try {
-            LOGGER.info("doAcquireLocks start");
-            //insert
-            String ALL_COLUMNS
-                = ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
-                + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID + ", "
-                + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + ", " + ServerTableColumnsName.LOCK_TABLE_PK + ", "
-                + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
-                + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED;
-            StringJoiner insertLockSQL = new StringJoiner(",", "insert into lock_table (" + ALL_COLUMNS + ")  values ", "");
-            int length = lockDOs.size();
-            for (int i = 0; i < length; i++) {
-                insertLockSQL.add("(?, ?, ?, ?, ?, ?, ?, now(), now())");
+        int length = lockDOs.size();
+        String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchInsertLockSQL(lockTable, length);
+        try (PreparedStatement ps = conn.prepareStatement(insertLockSQL)) {
+            if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+                for (int i = 0; i < length; i++) {
+                    LockDO lockDO = lockDOs.get(i);
+                    int n = i * 7;
+                    ps.setString(n + 1, lockDO.getXid());
+                    ps.setLong(n + 2, lockDO.getTransactionId());
+                    ps.setLong(n + 3, lockDO.getBranchId());
+                    ps.setString(n + 4, lockDO.getResourceId());
+                    ps.setString(n + 5, lockDO.getTableName());
+                    ps.setString(n + 6, lockDO.getPk());
+                    ps.setString(n + 7, lockDO.getRowKey());
+                }
+                return ps.executeUpdate() == length;
+            } else {
+                for (LockDO lockDO : lockDOs) {
+                    ps.setString(1, lockDO.getXid());
+                    ps.setLong(2, lockDO.getTransactionId());
+                    ps.setLong(3, lockDO.getBranchId());
+                    ps.setString(4, lockDO.getResourceId());
+                    ps.setString(5, lockDO.getTableName());
+                    ps.setString(6, lockDO.getPk());
+                    ps.setString(7, lockDO.getRowKey());
+                    ps.addBatch();
+                }
+                return ps.executeBatch().length == length;
             }
-            ps = conn.prepareStatement(insertLockSQL.toString());
-            for (int i = 0; i < length; i++) {
-                LockDO lockDO = lockDOs.get(i);
-                int n = i * 7;
-                ps.setString(n + 1, lockDO.getXid());
-                ps.setLong(n + 2, lockDO.getTransactionId());
-                ps.setLong(n + 3, lockDO.getBranchId());
-                ps.setString(n + 4, lockDO.getResourceId());
-                ps.setString(n + 5, lockDO.getTableName());
-                ps.setString(n + 6, lockDO.getPk());
-                ps.setString(n + 7, lockDO.getRowKey());
-            }
-            boolean bool = ps.execute();
-            LOGGER.info("doAcquireLocks end bool {}", bool);
-            return true;
         } catch (SQLException e) {
             LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
             //return false,let the caller go to conn.rollabck()
             return false;
-        } finally {
-            IOUtil.close(ps);
         }
     }
 

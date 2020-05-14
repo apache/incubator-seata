@@ -32,6 +32,15 @@ public interface LockStoreSql {
     String getInsertLockSQL(String lockTable);
 
     /**
+     * Get insert batch locks sql string.
+     *
+     * @param lockTable the lock table
+     * @param size the insert number
+     * @return the string
+     */
+    String getBatchInsertLockSQL(String lockTable, int size);
+
+    /**
      * Get delete lock sql string.
      *
      * @param lockTable the lock table

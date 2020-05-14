@@ -100,6 +100,11 @@ public class AbstractLockStoreSql implements LockStoreSql {
     }
 
     @Override
+    public String getBatchInsertLockSQL(String lockTable, int size) {
+        return this.getInsertLockSQL(lockTable);
+    }
+
+    @Override
     public String getDeleteLockSql(String lockTable) {
         return DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
