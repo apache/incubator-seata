@@ -117,12 +117,12 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
-                    row.add(new SqlMethodExpr());
+                    row.add(SqlMethodExpr.get());
                 } else {
                     if (i == primaryKeyIndex) {
                         throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                     }
-                    row.add(new NotPlaceholderExpr());
+                    row.add(NotPlaceholderExpr.get());
                 }
             }
         }

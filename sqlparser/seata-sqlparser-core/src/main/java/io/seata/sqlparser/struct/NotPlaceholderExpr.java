@@ -21,4 +21,24 @@ package io.seata.sqlparser.struct;
  * @author jsbxyyx
  */
 public class NotPlaceholderExpr {
+
+    private static NotPlaceholderExpr instance = new NotPlaceholderExpr();
+
+    /**
+     * Get NotPlaceholder.
+     *
+     * @return the NotPlaceholder
+     */
+    public static NotPlaceholderExpr get() {
+        return instance;
+    }
+
+    private NotPlaceholderExpr() {
+    }
+
+    @Override
+    public String toString() {
+        return "NOT_PLACEHOLDER";
+    }
+
 }

@@ -124,7 +124,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                         String sequence = sqlMethodInvokeExpr.getParameters().get(0).toString();
                         row.add(new SqlSequenceExpr(sequence, function));
                     } else {
-                        row.add(new SqlMethodExpr());
+                        row.add(SqlMethodExpr.get());
                     }
                 } else if (expr instanceof SQLSequenceExpr) {
                     SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
@@ -137,7 +137,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                     if (i == primaryKeyIndex) {
                         throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                     }
-                    row.add(new NotPlaceholderExpr());
+                    row.add(NotPlaceholderExpr.get());
                 }
             }
         }

@@ -329,7 +329,7 @@ public class InsertExecutorTest {
 
         // pk is sql function not support.
         pkValues = new ArrayList<>();
-        pkValues.add(new SqlMethodExpr());
+        pkValues.add(SqlMethodExpr.get());
         Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
 
         // more parameters.
@@ -347,8 +347,8 @@ public class InsertExecutorTest {
 
         // pk is sql function not support.
         pkValues = new ArrayList<>();
-        pkValues.add(new SqlMethodExpr());
-        pkValues.add(new SqlMethodExpr());
+        pkValues.add(SqlMethodExpr.get());
+        pkValues.add(SqlMethodExpr.get());
         Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
 
         // pk is sql sequence not support.
@@ -366,7 +366,7 @@ public class InsertExecutorTest {
         // pk is specify value and sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
-        pkValues.add(new SqlMethodExpr());
+        pkValues.add(SqlMethodExpr.get());
         Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
 
         // pk is specify value and sequence not support.
@@ -378,7 +378,7 @@ public class InsertExecutorTest {
         // pk is null and sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
-        pkValues.add(new SqlMethodExpr());
+        pkValues.add(SqlMethodExpr.get());
         Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
 
         // pk is null and sequence not support.
@@ -389,7 +389,7 @@ public class InsertExecutorTest {
 
         // pk is sql function and sequence not support.
         pkValues = new ArrayList<>();
-        pkValues.add(new SqlMethodExpr());
+        pkValues.add(SqlMethodExpr.get());
         pkValues.add(new SqlSequenceExpr());
         Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
     }
