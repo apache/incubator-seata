@@ -71,8 +71,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
-    private static volatile ThreadPoolExecutor executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
+    private static volatile ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS,
         new SynchronousQueue<Runnable>(), new NamedThreadFactory("degradeCheckWorker", 1, true));
+    private static volatile ThreadPoolExecutor taskThreadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L,
+        TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new NamedThreadFactory("asyncDegradeCheckWorker", 1, true));
 
     /**
      * Instantiates a new Global transactional interceptor.
@@ -194,7 +196,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             }
         } finally {
             if (degradeCheck) {
-                onDegradeCheck(succeed);
+                addTaskDegradeCheck(succeed);
             }
         }
     }
@@ -251,16 +253,17 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                         try {
                             String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
                             TransactionManagerHolder.get().commit(xid);
-                            onDegradeCheck(true);
+                            addTaskDegradeCheck(true);
                         } catch (Exception e) {
-                            onDegradeCheck(false);
+                            addTaskDegradeCheck(false);
                         }
                     } else {
                         try {
                             this.wait();
                         } catch (InterruptedException e) {
                             if (LOGGER.isErrorEnabled()) {
-                                LOGGER.error("an unknown error occurred and the self - checking thread could not wait");
+                                LOGGER.error("an unknown error occurred and the self - checking thread could not wait error: {}",
+                                    e.getMessage());
                             }
                             break;
                         }
@@ -272,6 +275,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     break;
                 }
             }
+        });
+    }
+
+    private void addTaskDegradeCheck(boolean succeed) {
+        taskThreadPool.execute(() -> {
+            onDegradeCheck(succeed);
         });
     }
 
