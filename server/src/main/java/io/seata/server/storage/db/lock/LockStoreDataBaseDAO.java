@@ -356,9 +356,7 @@ public class LockStoreDataBaseDAO implements LockStore {
                 return ps.executeBatch().length == length;
             }
         } catch (SQLException e) {
-            LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
-            //return false,let the caller go to conn.rollabck()
-            return false;
+            throw new StoreException(e);
         }
     }
 
