@@ -450,11 +450,11 @@ public abstract class AbstractRpcRemoting implements Disposable {
             MessageTypeAware messageTypeAware = (MessageTypeAware) body;
             final Pair<RemotingProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
             if (pair != null) {
-                if (pair.getObject2() != null) {
+                if (pair.getSecond() != null) {
                     try {
-                        pair.getObject2().execute(() -> {
+                        pair.getSecond().execute(() -> {
                             try {
-                                pair.getObject1().process(ctx, rpcMessage);
+                                pair.getFirst().process(ctx, rpcMessage);
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             }
@@ -476,7 +476,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
                     }
                 } else {
                     try {
-                        pair.getObject1().process(ctx, rpcMessage);
+                        pair.getFirst().process(ctx, rpcMessage);
                     } catch (Throwable th) {
                         LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                     }
