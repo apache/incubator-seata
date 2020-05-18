@@ -20,6 +20,7 @@ package io.seata.core.rpc;
  *
  * @author slievrly
  */
+@Deprecated
 public interface RemotingService {
     /**
      * Start.

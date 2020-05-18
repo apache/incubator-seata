@@ -20,6 +20,7 @@ package io.seata.core.rpc;
  *
  * @author slievrly
  */
+@Deprecated
 public enum ClientType {
 
     /**

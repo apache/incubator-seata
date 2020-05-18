@@ -13,22 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.core.rpc.processor;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.RpcMessage;
 
 /**
- * The interface Client message listener.
+ * The remoting processor
+ * <p>
+ * Used to encapsulate remote interaction logic.
+ * In order to separate the processing business from netty.
+ * When netty starts, it will register processors to abstractNettyRemoting#processorTable.
  *
- * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-@Deprecated
-public interface ClientMessageListener {
+public interface RemotingProcessor {
+
     /**
-     * On message.
+     * Process message
      *
-     * @param request       the msg id
-     * @param serverAddress the server address
+     * @param ctx        Channel handler context.
+     * @param rpcMessage rpc message.
+     * @throws Exception throws exception process message error.
      */
-    void onMessage(RpcMessage request, String serverAddress);
+    void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception;
+
 }
