@@ -24,6 +24,7 @@ import io.netty.channel.EventLoopGroup;
  *
  * @author slievrly
  */
+@Deprecated
 public interface RpcEventLoopGroup {
 
     // EventLoopGroup WORKER_GROUP = new RpcEventLoopGroup() {
