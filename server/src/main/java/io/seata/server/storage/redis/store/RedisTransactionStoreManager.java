@@ -67,7 +67,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private static volatile RedisTransactionStoreManager instance;
 
-    private static final String initialCursor = "0";
+    private static final String INITIAL_CURSOR = "0";
     /**
      * The query limit.
      */
@@ -234,7 +234,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Set<String> keys = new HashSet<>();
-            String cursor = initialCursor;
+            String cursor = INITIAL_CURSOR;
             ScanParams params = new ScanParams();
             params.count(logQueryLimit);
             params.match(getGlobalKeyByXid("*"));
@@ -243,7 +243,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 scans = jedis.scan(cursor, params);
                 keys.addAll(scans.getResult().stream().collect(Collectors.toSet()));
                 cursor = scans.getCursor();
-            } while (!cursor.equalsIgnoreCase(initialCursor));
+            } while (!cursor.equalsIgnoreCase(INITIAL_CURSOR));
             if (null != keys && keys.size() > 0) {
                 List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>();
                 for (String globalKey : keys) {
