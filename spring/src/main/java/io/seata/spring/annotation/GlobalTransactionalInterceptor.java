@@ -74,7 +74,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static volatile Integer reachNum = 0;
     private static volatile ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS,
         new SynchronousQueue<Runnable>(), new NamedThreadFactory("degradeCheckWorker", 1, true));
-    private static volatile ThreadPoolExecutor taskThreadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L,
+    private static volatile ThreadPoolExecutor taskThreadPool = new ThreadPoolExecutor(0, 200, 60L,
         TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new NamedThreadFactory("asyncDegradeCheckWorker", 1, true));
 
     /**
