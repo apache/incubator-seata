@@ -37,6 +37,7 @@ import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
+import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -155,6 +156,15 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
+                    try {
+                        transactionInfo
+                            .setTransactionHook((TransactionHook)globalTrxAnno.transactionHook().newInstance());
+                    } catch (Exception e) {
+                        if (LOGGER.isErrorEnabled()) {
+                            LOGGER.error("you need to pass in the implementation class for transactionHook , error:{}",
+                                e.getMessage());
+                        }
+                    }
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));

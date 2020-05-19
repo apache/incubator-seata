@@ -75,4 +75,10 @@ public @interface GlobalTransactional {
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;
+
+    /**
+     * the Transaction hook
+     * @return
+     */
+    Class transactionHook();
 }
