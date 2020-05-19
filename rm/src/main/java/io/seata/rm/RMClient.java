@@ -15,18 +15,7 @@
  */
 package io.seata.rm;
 
-import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.netty.RmRpcClient;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.client.ClientHeartbeatProcessor;
-import io.seata.core.rpc.netty.processor.client.RmBranchCommitProcessor;
-import io.seata.core.rpc.netty.processor.client.RmBranchRollbackProcessor;
-import io.seata.core.rpc.netty.processor.client.RmUndoLogProcessor;
-import io.seata.core.rpc.netty.processor.client.ClientOnResponseProcessor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The Rm client Initiator.
@@ -44,34 +33,7 @@ public class RMClient {
     public static void init(String applicationId, String transactionServiceGroup) {
         RmRpcClient rmRpcClient = RmRpcClient.getInstance(applicationId, transactionServiceGroup);
         rmRpcClient.setResourceManager(DefaultResourceManager.get());
-        AbstractRMHandler handler = DefaultRMHandler.get();
-
-        Map<Integer, Pair<NettyProcessor, Boolean>> processorMap = new HashMap<>();
-        // rm client handle branch commit processor
-        Pair<NettyProcessor, Boolean> branchCommitProcessor =
-            new Pair<>(new RmBranchCommitProcessor(handler, rmRpcClient), true);
-        processorMap.put((int) MessageType.TYPE_BRANCH_COMMIT, branchCommitProcessor);
-        // rm client handle branch commit processor
-        Pair<NettyProcessor, Boolean> branchRollbackProcessor =
-            new Pair<>(new RmBranchRollbackProcessor(handler, rmRpcClient), true);
-        processorMap.put((int) MessageType.TYPE_BRANCH_ROLLBACK, branchRollbackProcessor);
-        // rm handler undo log processor
-        Pair<NettyProcessor, Boolean> deleteUndoLogProcessor =
-            new Pair<>(new RmUndoLogProcessor(handler), true);
-        processorMap.put((int) MessageType.TYPE_RM_DELETE_UNDOLOG, deleteUndoLogProcessor);
-        // process TC response processor
-        Pair<NettyProcessor, Boolean> onResponseProcessor =
-            new Pair<>(new ClientOnResponseProcessor(rmRpcClient.getMergeMsgMap(), rmRpcClient.getFutures(), handler), false);
-        processorMap.put((int) MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor);
-        processorMap.put((int) MessageType.TYPE_REG_RM_RESULT, onResponseProcessor);
-        // handle heartbeat message processor
-        Pair<NettyProcessor, Boolean> heartbeatMessageProcessor = new Pair<>(new ClientHeartbeatProcessor(), false);
-        processorMap.put((int) MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor);
-        rmRpcClient.setRmProcessor(processorMap);
-
+        rmRpcClient.setTransactionMessageHandler(DefaultRMHandler.get());
         rmRpcClient.init();
     }
 

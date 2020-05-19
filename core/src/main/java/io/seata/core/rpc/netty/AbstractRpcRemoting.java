@@ -31,8 +31,8 @@ import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * This container holds all processors.
      * processor type {@link MessageType}
      */
-    protected final HashMap<Integer/*MessageType*/, Pair<NettyProcessor, ExecutorService>> processorTable = new HashMap<>(32);
+    protected final HashMap<Integer/*MessageType*/, Pair<RemotingProcessor, ExecutorService>> processorTable = new HashMap<>(8);
 
     /**
      * Instantiates a new Abstract rpc remoting.
@@ -437,22 +437,22 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * @param ctx        Channel handler context.
      * @param rpcMessage rpc message.
      * @throws Exception throws exception process message error.
-     * @since 1.2.0
+     * @since 1.3.0
      */
-    public void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+    protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
         }
         Object body = rpcMessage.getBody();
         if (body instanceof MessageTypeAware) {
             MessageTypeAware messageTypeAware = (MessageTypeAware) body;
-            final Pair<NettyProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
+            final Pair<RemotingProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
             if (pair != null) {
-                if (pair.getObject2() != null) {
+                if (pair.getSecond() != null) {
                     try {
-                        pair.getObject2().execute(() -> {
+                        pair.getSecond().execute(() -> {
                             try {
-                                pair.getObject1().process(ctx, rpcMessage);
+                                pair.getFirst().process(ctx, rpcMessage);
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             }
@@ -474,17 +474,16 @@ public abstract class AbstractRpcRemoting implements Disposable {
                     }
                 } else {
                     try {
-                        pair.getObject1().process(ctx, rpcMessage);
+                        pair.getFirst().process(ctx, rpcMessage);
                     } catch (Throwable th) {
                         LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                     }
                 }
             } else {
-                LOGGER.warn("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
+                LOGGER.error("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
             }
         } else {
-            LOGGER.warn("This rpcMessage body[{}] is not MessageTypeAware type.", body);
+            LOGGER.error("This rpcMessage body[{}] is not MessageTypeAware type.", body);
         }
     }
-
 }

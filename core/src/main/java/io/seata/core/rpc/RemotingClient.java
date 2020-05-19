@@ -18,7 +18,7 @@ package io.seata.core.rpc;
 import io.netty.channel.Channel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
@@ -28,6 +28,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
 public interface RemotingClient {
 
@@ -94,8 +95,8 @@ public interface RemotingClient {
      * register processor
      *
      * @param messageType {@link io.seata.core.protocol.MessageType}
-     * @param processor   {@link NettyProcessor}
+     * @param processor   {@link RemotingProcessor}
      * @param executor    thread pool
      */
-    void registerProcessor(final int messageType, final NettyProcessor processor, final ExecutorService executor);
+    void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
 }
