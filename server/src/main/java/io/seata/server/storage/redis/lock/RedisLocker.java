@@ -21,9 +21,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
 import com.alibaba.fastjson.JSON;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
@@ -42,10 +46,17 @@ public class RedisLocker extends AbstractLocker {
     private static final String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
 
     /**
+     * The query limit.
+     */
+    private int logQueryLimit;
+
+    /**
      * Instantiates a new Redis locker.
      *
      */
-    public RedisLocker() {}
+    public RedisLocker() {
+        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, 100);
+    }
 
     @Override
     public boolean acquireLock(List<RowLock> rowLocks) {
@@ -106,7 +117,7 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
-            Set<String> keys = Range(jedis, lockListKey);
+            Set<String> keys = lRange(jedis, lockListKey);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -132,7 +143,7 @@ public class RedisLocker extends AbstractLocker {
     public boolean releaseLock(String xid, Long branchId) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
-            Set<String> keys = Range(jedis, lockListKey);
+            Set<String> keys = lRange(jedis, lockListKey);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -199,17 +210,17 @@ public class RedisLocker extends AbstractLocker {
         return lockDOs;
     }
 
-    private Set<String> Range(Jedis jedis, String Key) {
+    private Set<String> lRange(Jedis jedis, String key) {
         Set<String> keys = new HashSet<>();
-        List<String> redisLockJson = null;
+        List<String> redisLockJson;
         int start = 0;
-        int stop = 100;
+        int stop = logQueryLimit;
         for (;;) {
-            redisLockJson = jedis.lrange(Key, start, stop);
+            redisLockJson = jedis.lrange(key, start, stop);
             if (null != redisLockJson) {
                 keys.addAll(redisLockJson);
                 start = keys.size();
-                stop = start + 100;
+                stop = start + logQueryLimit;
             } else {
                 break;
             }
