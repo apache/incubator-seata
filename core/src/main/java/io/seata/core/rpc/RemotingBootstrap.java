@@ -15,20 +15,22 @@
  */
 package io.seata.core.rpc;
 
-import io.seata.core.protocol.RpcMessage;
-
 /**
- * The interface Client message listener.
+ * The boot strap of the remoting process, generally there are client and server implementation classes
  *
- * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-@Deprecated
-public interface ClientMessageListener {
+public interface RemotingBootstrap {
+
     /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
+     * Start.
      */
-    void onMessage(RpcMessage request, String serverAddress);
+    void start();
+
+    /**
+     * Shutdown.
+     */
+    void shutdown();
+
 }
