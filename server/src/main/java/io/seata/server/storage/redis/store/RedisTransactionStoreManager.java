@@ -112,7 +112,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String branchesKey = getBranchListKeyByXid(convertBranchTransactionDO.getXid());
-            Set<String> keys = range(jedis, branchesKey);
+            Set<String> keys = Range(jedis, branchesKey);
             if (null != keys && keys.size() > 0) {
                 String key = getBranchKey(convertBranchTransactionDO.getBranchId());
                 Iterator<String> it = keys.iterator();
@@ -195,7 +195,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             List<BranchTransactionDO> branchTransactionDOs = null;
             // reduce rpc with db when branchRegister and getGlobalStatus
             if (withBranchSessions) {
-                Set<String> keys = range(jedis, getBranchListKeyByXid(globalTransactionDO.getXid()));
+                Set<String> keys = Range(jedis, getBranchListKeyByXid(globalTransactionDO.getXid()));
                 if (null != keys && keys.size() > 0) {
                     branchTransactionDOs = new ArrayList<>();
                     for (String s : keys) {
@@ -257,7 +257,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
                     List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
                     for (String xid : xids) {
-                        Set<String> branches = range(jedis, getBranchListKeyByXid(xid));
+                        Set<String> branches = Range(jedis, getBranchListKeyByXid(xid));
                         if (null != branches && branches.size() > 0) {
                             for (String branchKey : branches) {
                                 String branchJson = jedis.get(branchKey);
@@ -300,7 +300,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 }
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(global, GlobalTransactionDO.class);
                 String branchKey = getBranchListKeyByXid(globalTransactionDO.getXid());
-                Set<String> keys = range(jedis, branchKey);
+                Set<String> keys = Range(jedis, branchKey);
                 List<BranchTransactionDO> branchTransactionDOS = new ArrayList<>();
                 if (null != keys && keys.size() > 0) {
                     for (String s : keys) {
@@ -398,7 +398,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return globalSession;
     }
 
-    private Set<String> range(Jedis jedis, String Key) {
+    private Set<String> Range(Jedis jedis, String Key) {
         Set<String> keys = new HashSet<>();
         List<String> redisBranchJson = null;
         int start = 0;
