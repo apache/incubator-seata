@@ -20,13 +20,13 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
-import io.seata.core.rpc.netty.processor.Pair;
-import io.seata.core.rpc.netty.processor.server.ServerHeartbeatProcessor;
-import io.seata.core.rpc.netty.processor.server.RegRmProcessor;
-import io.seata.core.rpc.netty.processor.server.RegTmProcessor;
-import io.seata.core.rpc.netty.processor.server.ServerOnRequestProcessor;
-import io.seata.core.rpc.netty.processor.server.ServerOnResponseProcessor;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.rpc.processor.server.RegRmProcessor;
+import io.seata.core.rpc.processor.server.RegTmProcessor;
+import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
+import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
+import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,8 +209,8 @@ public class RpcServer extends AbstractRpcRemotingServer {
     }
 
     @Override
-    public void registerProcessor(int messageType, NettyProcessor processor, ExecutorService executor) {
-        Pair<NettyProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+    public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(messageType, pair);
     }
 }

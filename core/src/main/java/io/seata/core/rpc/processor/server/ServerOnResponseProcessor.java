@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.processor.server;
+package io.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -25,7 +25,7 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.processor.NettyProcessor;
+import io.seata.core.rpc.processor.RemotingProcessor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class ServerOnResponseProcessor implements NettyProcessor {
+public class ServerOnResponseProcessor implements RemotingProcessor {
 
     private TransactionMessageHandler transactionMessageHandler;
 
