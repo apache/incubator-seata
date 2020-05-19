@@ -106,7 +106,7 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
-            Set<String> keys = lRange(jedis, lockListKey);
+            Set<String> keys = range(jedis, lockListKey);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -132,7 +132,7 @@ public class RedisLocker extends AbstractLocker {
     public boolean releaseLock(String xid, Long branchId) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
-            Set<String> keys = lRange(jedis, lockListKey);
+            Set<String> keys = range(jedis, lockListKey);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -199,7 +199,7 @@ public class RedisLocker extends AbstractLocker {
         return lockDOs;
     }
 
-    private Set<String> lRange(Jedis jedis, String Key) {
+    private Set<String> range(Jedis jedis, String Key) {
         Set<String> keys = new HashSet<>();
         List<String> redisLockJson = null;
         int start = 0;
