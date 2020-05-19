@@ -461,9 +461,14 @@ public class ConfigurationKeys {
     public static final String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
 
     /**
-     * The constant STORE_REDIS_DATABASE.
+     * The constant STORE_REDIS_PASSWORD.
      */
     public static final String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
+
+    /**
+     * The constant STORE_REDIS_QUERY_LIMIT.
+     */
+    public static final String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
 
     /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.

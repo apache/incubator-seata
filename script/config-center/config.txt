@@ -56,6 +56,7 @@ store.redis.maxConn=10
 store.redis.minConn=1
 store.redis.database=0
 store.redis.password=null
+store.redis.queryLimit=100
 server.recovery.committingRetryPeriod=1000
 server.recovery.asynCommittingRetryPeriod=1000
 server.recovery.rollbackingRetryPeriod=1000

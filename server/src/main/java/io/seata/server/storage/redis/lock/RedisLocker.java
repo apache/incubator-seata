@@ -21,9 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 import com.alibaba.fastjson.JSON;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.lock.AbstractLocker;
@@ -60,11 +58,11 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
             for (LockDO lock : locks) {
-                String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + lock.getRowKey();
+                String key = getLockKey(lock.getRowKey());
                 status = jedis.setnx(key, JSON.toJSONString(lock));
                 if (status == 1) {
                     successList.add(key);
-                    jedis.lpush(DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + lock.getXid(), key);
+                    jedis.lpush(getXidLockKey(lock.getXid()), key);
                     jedis.expire(key, DEFAULT_SECONDS);
                 } else {
                     break;
@@ -91,7 +89,7 @@ public class RedisLocker extends AbstractLocker {
         String[] keys = new String[rowLocks.size()];
         List<LockDO> locks = convertToLockDO(rowLocks);
         for (int i = 0; i < locks.size(); i++) {
-            String key = DEFAULT_REDIS_SEATA_LOCK_PREFIX + locks.get(i).getRowKey();
+            String key = getLockKey(locks.get(i).getRowKey());
             keys[i] = key;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
@@ -107,21 +105,8 @@ public class RedisLocker extends AbstractLocker {
             return true;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
-            Set<String> keys = new HashSet<>();
-            List<String> redisLockJson = null;
-            int start = 0;
-            int stop = 100;
-            for (;;) {
-                redisLockJson = jedis.lrange(lockListKey, start, stop);
-                if (null != redisLockJson) {
-                    keys.addAll(redisLockJson);
-                    start = keys.size();
-                    stop = start + 100;
-                } else {
-                    break;
-                }
-            }
+            String lockListKey = getXidLockKey(xid);
+            Set<String> keys = lRange(jedis, lockListKey);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -146,21 +131,8 @@ public class RedisLocker extends AbstractLocker {
     @Override
     public boolean releaseLock(String xid, Long branchId) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String lockListKey = DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
-            Set<String> keys = new HashSet<>();
-            List<String> redisLockJson = null;
-            int start = 0;
-            int stop = 100;
-            for (;;) {
-                redisLockJson = jedis.lrange(lockListKey, start, stop);
-                if (null != redisLockJson) {
-                    keys.addAll(redisLockJson);
-                    start = keys.size();
-                    stop = start + 100;
-                } else {
-                    break;
-                }
-            }
+            String lockListKey = getXidLockKey(xid);
+            Set<String> keys = lRange(jedis, lockListKey);
             if (null != keys && keys.size() > 0) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
@@ -189,7 +161,7 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
             for (LockDO rowlock : locks) {
-                String rowlockJson = jedis.get(DEFAULT_REDIS_SEATA_LOCK_PREFIX + rowlock.getRowKey());
+                String rowlockJson = jedis.get(getLockKey(rowlock.getRowKey()));
                 if (StringUtils.isNotBlank(rowlockJson)) {
                     LockDO lock = JSON.parseObject(rowlockJson, LockDO.class);
                     if (null != lock && !Objects.equals(lock.getXid(), rowlock.getXid())) {
@@ -225,6 +197,32 @@ public class RedisLocker extends AbstractLocker {
             lockDOs.add(lockDO);
         }
         return lockDOs;
+    }
+
+    private Set<String> lRange(Jedis jedis, String Key) {
+        Set<String> keys = new HashSet<>();
+        List<String> redisLockJson = null;
+        int start = 0;
+        int stop = 100;
+        for (;;) {
+            redisLockJson = jedis.lrange(Key, start, stop);
+            if (null != redisLockJson) {
+                keys.addAll(redisLockJson);
+                start = keys.size();
+                stop = start + 100;
+            } else {
+                break;
+            }
+        }
+        return keys;
+    }
+
+    private String getXidLockKey(String xid) {
+        return DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
+    }
+
+    private String getLockKey(String rowKey) {
+        return DEFAULT_REDIS_SEATA_LOCK_PREFIX + rowKey;
     }
 
 }
