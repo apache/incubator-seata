@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 2) {@link BranchRollbackResponse}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class ServerOnResponseProcessor implements RemotingProcessor {
 

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * {@link RegisterRMRequest}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class RegRmProcessor implements RemotingProcessor {
 

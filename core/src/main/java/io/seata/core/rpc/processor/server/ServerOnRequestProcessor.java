@@ -65,7 +65,7 @@ import java.util.concurrent.TimeUnit;
  * 6) {@link GlobalStatusRequest}
  *
  * @author zhangchenghui.dev@gmail.com
- * @since 1.2.0
+ * @since 1.3.0
  */
 public class ServerOnRequestProcessor implements RemotingProcessor {
 
