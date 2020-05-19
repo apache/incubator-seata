@@ -48,11 +48,15 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String DEFAULT_GROUP = "SEATA_GROUP";
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+    public final static String ENDPOINT = "endpoint";
+    public final static String ENDPOINT_PORT = "endpointPort";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
+    public final static String ACCESS_KEY = "accessKey";
+    public final static String SECRET_KEY = "secretKey";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
