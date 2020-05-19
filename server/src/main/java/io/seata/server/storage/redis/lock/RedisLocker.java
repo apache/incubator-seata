@@ -217,7 +217,7 @@ public class RedisLocker extends AbstractLocker {
         int stop = logQueryLimit;
         for (;;) {
             redisLockJson = jedis.lrange(key, start, stop);
-            if (null != redisLockJson) {
+            if (null != redisLockJson && redisLockJson.size() > 0) {
                 keys.addAll(redisLockJson);
                 start = keys.size();
                 stop = start + logQueryLimit;

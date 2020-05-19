@@ -406,7 +406,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         int stop = logQueryLimit;
         for (;;) {
             redisBranchJson = jedis.lrange(key, start, stop);
-            if (null != redisBranchJson) {
+            if (null != redisBranchJson && redisBranchJson.size() > 0) {
                 keys.addAll(redisBranchJson);
                 start = keys.size();
                 stop = start + logQueryLimit;
