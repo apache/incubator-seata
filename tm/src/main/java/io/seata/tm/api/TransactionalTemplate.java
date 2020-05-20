@@ -99,8 +99,8 @@ public class TransactionalTemplate {
 
                 // 2. begin transaction
                 beginTransaction(txInfo, tx);
-                Set<TransactionHook> transactionHooks=txInfo.getTransactionHooks();
-                if(CollectionUtils.isNotEmpty(transactionHooks)){
+                Set<TransactionHook> transactionHooks = txInfo.getTransactionHooks();
+                if (CollectionUtils.isNotEmpty(transactionHooks)) {
                     TransactionHookManager.registerHooks(transactionHooks);
                 }
                 Object rs = null;
