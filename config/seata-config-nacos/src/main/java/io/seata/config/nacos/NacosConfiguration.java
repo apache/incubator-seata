@@ -50,7 +50,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String DEFAULT_GROUP = "SEATA_GROUP";
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
-    public  static final String ENDPOINT_KEY = "endpoint";
+    private static final String ENDPOINT_KEY = "endpoint";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
