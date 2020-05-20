@@ -15,11 +15,18 @@
  */
 package io.seata.core.store.db.sql.lock;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.StoreException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.LockDO;
 
 /**
  * the database abstract lock store sql interface
@@ -136,4 +143,22 @@ public class AbstractLockStoreSql implements LockStoreSql {
         return CHECK_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(IN_PARAMS_PLACE_HOLD, paramPlaceHold);
     }
 
+    @Override
+    public int executeBatchInsert(String lockTable, Connection conn, List<LockDO> lockDOs) {
+        try(PreparedStatement ps = conn.prepareStatement(this.getBatchInsertLockSQL(lockTable, lockDOs.size()))) {
+            for (LockDO lockDO : lockDOs) {
+                ps.setString(1, lockDO.getXid());
+                ps.setLong(2, lockDO.getTransactionId());
+                ps.setLong(3, lockDO.getBranchId());
+                ps.setString(4, lockDO.getResourceId());
+                ps.setString(5, lockDO.getTableName());
+                ps.setString(6, lockDO.getPk());
+                ps.setString(7, lockDO.getRowKey());
+                ps.addBatch();
+            }
+            return ps.executeBatch().length;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        }
+    }
 }

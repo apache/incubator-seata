@@ -15,6 +15,11 @@
  */
 package io.seata.core.store.db.sql.lock;
 
+import java.sql.Connection;
+import java.util.List;
+
+import io.seata.core.store.LockDO;
+
 /**
  * the database lock store sql interface
  *
@@ -91,4 +96,5 @@ public interface LockStoreSql {
      */
     String getCheckLockableSql(String lockTable, String paramPlaceHold);
 
+    int executeBatchInsert(String lockTable, Connection conn, List<LockDO> lockDOs);
 }
