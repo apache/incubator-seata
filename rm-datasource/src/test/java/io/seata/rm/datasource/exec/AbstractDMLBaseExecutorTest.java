@@ -18,9 +18,10 @@ package io.seata.rm.datasource.exec;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
-import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ public class AbstractDMLBaseExecutorTest {
         StatementCallback statementCallback = Mockito.mock(StatementCallback.class);
         SQLInsertRecognizer sqlInsertRecognizer = Mockito.mock(SQLInsertRecognizer.class);
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        executor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        executor = Mockito.spy(new MySQLInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
         Mockito.doReturn(tableMeta)
                 .when(executor).getTableMeta();
         TableRecords tableRecords = new TableRecords();
