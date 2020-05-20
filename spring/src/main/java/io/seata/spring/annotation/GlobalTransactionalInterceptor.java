@@ -17,6 +17,7 @@ package io.seata.spring.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -156,15 +157,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
-                    try {
-                        transactionInfo
-                            .setTransactionHook((TransactionHook)globalTrxAnno.transactionHook().newInstance());
-                    } catch (Exception e) {
-                        if (LOGGER.isErrorEnabled()) {
-                            LOGGER.error("you need to pass in the implementation class for transactionHook , error:{}",
-                                e.getMessage());
-                        }
-                    }
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
@@ -179,6 +171,16 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
                     transactionInfo.setRollbackRules(rollbackRules);
+                    Set<TransactionHook> hooks = new HashSet<>();
+                    for (Class<?> hook : globalTrxAnno.transactionHooks()) {
+                        try {
+                            hooks.add((TransactionHook)hook.newInstance());
+                        } catch (Exception e) {
+                            LOGGER.error("you need to pass in the implementation class for transactionHook , error:{}",
+                                e.getMessage());
+                        }
+                    }
+                    transactionInfo.setTransactionHooks(hooks);
                     return transactionInfo;
                 }
             });

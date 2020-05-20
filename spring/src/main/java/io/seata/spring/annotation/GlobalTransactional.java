@@ -20,7 +20,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
 import io.seata.tm.api.transaction.Propagation;
+import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionInfo;
 
 /**
@@ -78,7 +80,8 @@ public @interface GlobalTransactional {
 
     /**
      * the Transaction hook
+     * 
      * @return
      */
-    Class transactionHook();
+    Class<? extends TransactionHook>[] transactionHooks() default {};
 }

@@ -34,7 +34,7 @@ public final class TransactionInfo implements Serializable {
 
     private Propagation propagation;
 
-    private TransactionHook transactionHook;
+    private Set<TransactionHook> transactionHooks;
 
     public int getTimeOut() {
         return timeOut;
@@ -91,13 +91,12 @@ public final class TransactionInfo implements Serializable {
         this.propagation = propagation;
     }
 
-
-    public TransactionHook getTransactionHook() {
-        return transactionHook;
+    public Set<TransactionHook> getTransactionHooks() {
+        return transactionHooks;
     }
 
-    public void setTransactionHook(TransactionHook transactionHooks) {
-        this.transactionHook = transactionHooks;
+    public void setTransactionHooks(Set<TransactionHook> transactionHooks) {
+        this.transactionHooks = transactionHooks;
     }
 
 }

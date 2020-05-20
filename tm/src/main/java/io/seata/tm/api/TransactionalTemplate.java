@@ -15,6 +15,12 @@
  */
 package io.seata.tm.api;
 
+import java.util.List;
+import java.util.Set;
+
+import io.seata.common.util.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
@@ -26,9 +32,6 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Template of executing business logic with a global transaction.
@@ -96,7 +99,10 @@ public class TransactionalTemplate {
 
                 // 2. begin transaction
                 beginTransaction(txInfo, tx);
-
+                Set<TransactionHook> transactionHooks=txInfo.getTransactionHooks();
+                if(CollectionUtils.isNotEmpty(transactionHooks)){
+                    TransactionHookManager.registerHooks(transactionHooks);
+                }
                 Object rs = null;
                 try {
 
