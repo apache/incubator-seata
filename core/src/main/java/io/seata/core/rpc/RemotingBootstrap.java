@@ -13,34 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
-
-import java.util.List;
+package io.seata.core.rpc;
 
 /**
- * The interface Sql insert recognizer.
+ * The boot strap of the remoting process, generally there are client and server implementation classes
  *
- * @author sharajava
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-public interface SQLInsertRecognizer extends SQLRecognizer {
+public interface RemotingBootstrap {
 
     /**
-     * insert columns is empty.
-     * @return true: empty. false: not empty.
+     * Start.
      */
-    boolean insertColumnsIsEmpty();
+    void start();
 
     /**
-     * Gets insert columns.
-     *
-     * @return the insert columns
+     * Shutdown.
      */
-    List<String> getInsertColumns();
+    void shutdown();
 
-    /**
-     * Gets insert rows.
-     *
-     * @return the insert rows
-     */
-    List<List<Object>> getInsertRows();
 }

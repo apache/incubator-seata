@@ -15,6 +15,8 @@
  */
 package io.seata.spring.tcc;
 
+import java.lang.reflect.Method;
+import java.util.Map;
 import io.seata.common.Constants;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -28,9 +30,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * TCC Interceptor
@@ -104,8 +103,8 @@ public class TccActionInterceptor implements MethodInterceptor {
      * @return the action interface method
      */
     protected Method getActionInterfaceMethod(MethodInvocation invocation) {
+        Class<?> interfaceType = null;
         try {
-            Class<?> interfaceType;
             if (remotingDesc == null) {
                 interfaceType = getProxyInterface(invocation.getThis());
             } else {
@@ -120,6 +119,11 @@ public class TccActionInterceptor implements MethodInterceptor {
             }
             return interfaceType.getMethod(invocation.getMethod().getName(),
                 invocation.getMethod().getParameterTypes());
+        } catch (NoSuchMethodException e) {
+            if (interfaceType != null && !invocation.getMethod().getName().equals("toString")) {
+                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
+            }
+            return invocation.getMethod();
         } catch (Exception e) {
             LOGGER.warn("get Method from interface failed", e);
             return invocation.getMethod();

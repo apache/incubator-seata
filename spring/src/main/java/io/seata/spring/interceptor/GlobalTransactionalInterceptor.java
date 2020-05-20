@@ -59,16 +59,18 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         Class<?> targetClass =
             methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
-        final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
-        final GlobalTransactional globalTransactionalAnnotation =
-            getAnnotation(method, targetClass, GlobalTransactional.class);
-        final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-        if (!GlobalTransactionalCheck.getStatus()) {
-            if (globalTransactionalAnnotation != null) {
-                return handleGlobalTransaction.runTransaction(methodInvocation, globalTransactionalAnnotation,
-                    failureHandler, transactionalTemplate);
-            } else if (globalLockAnnotation != null) {
-                return handleGlobalLock(methodInvocation);
+        if (null != specificMethod && !specificMethod.getDeclaringClass().equals(Object.class)) {
+            final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass, GlobalTransactional.class);
+            final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            if (!GlobalTransactionalCheck.getStatus()) {
+                if (globalTransactionalAnnotation != null) {
+                    return handleGlobalTransaction
+                        .runTransaction(methodInvocation, globalTransactionalAnnotation, failureHandler,
+                            transactionalTemplate);
+                } else if (globalLockAnnotation != null) {
+                    return handleGlobalLock(methodInvocation);
+                }
             }
         }
         return methodInvocation.proceed();
