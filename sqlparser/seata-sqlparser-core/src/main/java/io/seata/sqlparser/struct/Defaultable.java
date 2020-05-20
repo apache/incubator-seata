@@ -13,34 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
+package io.seata.sqlparser.struct;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
- * The interface Sql insert recognizer.
- *
- * @author sharajava
+ * The default expr able.
+ * @author jsbxyyx
  */
-public interface SQLInsertRecognizer extends SQLRecognizer {
+public interface Defaultable {
 
     /**
-     * insert columns is empty.
-     * @return true: empty. false: not empty.
+     * get primary key values by default keyword.
+     * @return
+     * @throws SQLException
      */
-    boolean insertColumnsIsEmpty();
+    List<Object> getPkValuesByDefault() throws SQLException;
 
-    /**
-     * Gets insert columns.
-     *
-     * @return the insert columns
-     */
-    List<String> getInsertColumns();
-
-    /**
-     * Gets insert rows.
-     *
-     * @return the insert rows
-     */
-    List<List<Object>> getInsertRows();
 }
