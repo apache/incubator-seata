@@ -60,7 +60,8 @@ public class RedisLocker extends AbstractLocker {
      *
      */
     public RedisLocker() {
-        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
+        logQueryLimit =
+            ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     @Override
@@ -74,9 +75,10 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
             if (locks.size() > 1) {
-                locks = locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+                locks =
+                    locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
-            Pipeline pipeline=jedis.pipelined();
+            Pipeline pipeline = jedis.pipelined();
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
                 pipeline.setnx(key, JSON.toJSONString(lock));

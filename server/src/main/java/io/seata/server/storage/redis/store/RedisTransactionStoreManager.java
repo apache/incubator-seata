@@ -77,7 +77,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private int logQueryLimit;
 
     public RedisTransactionStoreManager() {
-        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
+        logQueryLimit =
+            ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     /**
@@ -140,7 +141,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertOrUpdateBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String key = getBranchKey(convertBranchTransactionDO.getBranchId());
-            Pipeline pipeline=jedis.pipelined();
+            Pipeline pipeline = jedis.pipelined();
             if (jedis.get(key) == null) {
                 pipeline.lpush(getBranchListKeyByXid(convertBranchTransactionDO.getXid()), key);
             }
@@ -168,7 +169,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertOrUpdateGlobalTransactionDO(GlobalTransactionDO convertGlobalTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String keys = getGlobalKeyByXid(convertGlobalTransactionDO.getXid());
-            Pipeline pipeline=jedis.pipelined();
+            Pipeline pipeline = jedis.pipelined();
             pipeline.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
             keys = getGlobalKeyByTransactionId(convertGlobalTransactionDO.getTransactionId());
             pipeline.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
