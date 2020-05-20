@@ -36,6 +36,7 @@ import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Transaction;
 
 /**
  * @author funkye
@@ -70,7 +71,7 @@ public class RedisLocker extends AbstractLocker {
             // no lock
             return true;
         }
-        List<String> successList = new ArrayList<>();
+        Set<String> successList = new HashSet<>();
         long status = 1;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
@@ -79,14 +80,18 @@ public class RedisLocker extends AbstractLocker {
                     locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
             Pipeline pipeline = jedis.pipelined();
+            List<String> readyKeys = new ArrayList<>();
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
                 pipeline.setnx(key, JSON.toJSONString(lock));
+                readyKeys.add(key);
+                pipeline.expire(key, DEFAULT_SECONDS);
+                readyKeys.add(key);
             }
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
                 Long result = (long)results.get(i);
-                String key = getLockKey(locks.get(i).getRowKey());
+                String key = readyKeys.get(i);
                 if (result != 1) {
                     status = result;
                 } else {
@@ -100,13 +105,18 @@ public class RedisLocker extends AbstractLocker {
                 }
                 return false;
             } else {
-                for (LockDO lock : locks) {
-                    pipeline = jedis.pipelined();
-                    String key = getLockKey(lock.getRowKey());
-                    pipeline.lpush(getXidLockKey(lock.getXid()), key);
-                    pipeline.expire(key, DEFAULT_SECONDS);
+                Transaction multi = jedis.multi();
+                try {
+                    for (LockDO lock : locks) {
+                        String xidLockKey = getXidLockKey(lock.getXid());
+                        String key = getLockKey(lock.getRowKey());
+                        multi.lpush(xidLockKey, key);
+                    }
+                } catch (Exception e) {
+                    multi.discard();
+                    return false;
                 }
-                pipeline.syncAndReturnAll();
+                multi.exec();
                 return true;
             }
         }
@@ -162,26 +172,9 @@ public class RedisLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(String xid, Long branchId) {
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String lockListKey = getXidLockKey(xid);
-            Set<String> keys = lRange(jedis, lockListKey);
-            if (CollectionUtils.isNotEmpty(keys)) {
-                Iterator<String> it = keys.iterator();
-                while (it.hasNext()) {
-                    String key = it.next();
-                    LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                    if (null != lock && Objects.equals(branchId, lock.getBranchId())) {
-                        jedis.del(key);
-                        jedis.lrem(lockListKey, 0, key);
-                        it.remove();
-                    }
-                }
-                if (keys.size() == 0) {
-                    jedis.del(lockListKey);
-                }
-            }
-            return true;
-        }
+        List<Long> branchIds = new ArrayList<>();
+        branchIds.add(branchId);
+        return releaseLock(xid, branchIds);
     }
 
     @Override

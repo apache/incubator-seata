@@ -251,7 +251,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 scans = jedis.scan(cursor, params);
                 keys.addAll(scans.getResult().stream().collect(Collectors.toSet()));
                 cursor = scans.getCursor();
-            } while (!INITIAL_CURSOR.equalsIgnoreCase(cursor));
+            } while (!INITIAL_CURSOR.equals(cursor));
             if (CollectionUtils.isNotEmpty(keys)) {
                 List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>();
                 for (String globalKey : keys) {
