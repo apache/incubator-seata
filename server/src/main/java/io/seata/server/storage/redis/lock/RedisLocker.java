@@ -21,10 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -33,6 +35,7 @@ import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 /**
  * @author funkye
@@ -67,18 +70,25 @@ public class RedisLocker extends AbstractLocker {
             return true;
         }
         List<String> successList = new ArrayList<>();
-        long status = 0;
+        long status = 1;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
+            if (locks.size() > 1) {
+                locks = locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+            }
+            Pipeline pipeline=jedis.pipelined();
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
-                status = jedis.setnx(key, JSON.toJSONString(lock));
-                if (status == 1) {
-                    successList.add(key);
-                    jedis.lpush(getXidLockKey(lock.getXid()), key);
-                    jedis.expire(key, DEFAULT_SECONDS);
+                pipeline.setnx(key, JSON.toJSONString(lock));
+            }
+            List<Object> results = pipeline.syncAndReturnAll();
+            for (int i = 0; i < results.size(); i++) {
+                Long result = (long)results.get(i);
+                String key = getLockKey(locks.get(i).getRowKey());
+                if (result != 1) {
+                    status = result;
                 } else {
-                    break;
+                    successList.add(key);
                 }
             }
             if (status != 1) {
@@ -88,6 +98,13 @@ public class RedisLocker extends AbstractLocker {
                 }
                 return false;
             } else {
+                for (LockDO lock : locks) {
+                    pipeline = jedis.pipelined();
+                    String key = getLockKey(lock.getRowKey());
+                    pipeline.lpush(getXidLockKey(lock.getXid()), key);
+                    pipeline.expire(key, DEFAULT_SECONDS);
+                }
+                pipeline.syncAndReturnAll();
                 return true;
             }
         }

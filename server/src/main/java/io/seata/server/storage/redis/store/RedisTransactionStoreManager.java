@@ -45,6 +45,7 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
@@ -139,10 +140,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertOrUpdateBranchTransactionDO(BranchTransactionDO convertBranchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String key = getBranchKey(convertBranchTransactionDO.getBranchId());
+            Pipeline pipeline=jedis.pipelined();
             if (jedis.get(key) == null) {
-                jedis.lpush(getBranchListKeyByXid(convertBranchTransactionDO.getXid()), key);
+                pipeline.lpush(getBranchListKeyByXid(convertBranchTransactionDO.getXid()), key);
             }
-            jedis.set(key, JSON.toJSONString(convertBranchTransactionDO));
+            pipeline.set(key, JSON.toJSONString(convertBranchTransactionDO));
+            pipeline.sync();
             return true;
         }
     }
@@ -165,9 +168,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertOrUpdateGlobalTransactionDO(GlobalTransactionDO convertGlobalTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String keys = getGlobalKeyByXid(convertGlobalTransactionDO.getXid());
-            jedis.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
+            Pipeline pipeline=jedis.pipelined();
+            pipeline.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
             keys = getGlobalKeyByTransactionId(convertGlobalTransactionDO.getTransactionId());
-            jedis.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
+            pipeline.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
+            pipeline.sync();
             return true;
         }
     }
