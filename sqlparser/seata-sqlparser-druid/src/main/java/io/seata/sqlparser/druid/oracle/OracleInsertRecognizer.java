@@ -30,6 +30,7 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
@@ -80,6 +81,11 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
         };
         visitor.visit(ast.getTableSource());
         return sb.toString();
+    }
+
+    @Override
+    public boolean insertColumnsIsEmpty() {
+        return CollectionUtils.isEmpty(ast.getColumns());
     }
 
     @Override
