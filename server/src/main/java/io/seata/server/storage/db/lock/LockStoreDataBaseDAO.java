@@ -330,7 +330,7 @@ public class LockStoreDataBaseDAO implements LockStore {
         String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchInsertLockSQL(lockTable, length);
         try (PreparedStatement ps = conn.prepareStatement(insertLockSQL)) {
             if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
-                int n = 0;
+                int n;
                 for (int i = 0; i < length; i++) {
                     LockDO lockDO = lockDOs.get(i);
                     n = i * 7;
