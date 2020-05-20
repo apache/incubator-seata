@@ -145,7 +145,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
 
     @Override
     public int executeBatchInsert(String lockTable, Connection conn, List<LockDO> lockDOs) {
-        try(PreparedStatement ps = conn.prepareStatement(this.getBatchInsertLockSQL(lockTable, lockDOs.size()))) {
+        try (PreparedStatement ps = conn.prepareStatement(this.getBatchInsertLockSQL(lockTable, lockDOs.size()))) {
             for (LockDO lockDO : lockDOs) {
                 ps.setString(1, lockDO.getXid());
                 ps.setLong(2, lockDO.getTransactionId());
