@@ -70,6 +70,10 @@ public final class TransactionHookManager {
      */
     public static void registerHooks(Set<TransactionHook> transactionHook) {
         if (CollectionUtils.isNotEmpty(transactionHook)) {
+            List<TransactionHook> transactionHooks = LOCAL_HOOKS.get();
+            if (transactionHooks == null) {
+                LOCAL_HOOKS.set(new ArrayList<>());
+            }
             LOCAL_HOOKS.get().addAll(transactionHook);
         }
     }
