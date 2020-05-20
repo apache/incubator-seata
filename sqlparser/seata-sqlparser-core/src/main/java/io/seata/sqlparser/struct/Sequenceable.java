@@ -13,34 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
-
-import java.util.List;
+package io.seata.sqlparser.struct;
 
 /**
- * The interface Sql insert recognizer.
- *
- * @author sharajava
+ * The sequence able.
+ * @author jsbxyyx
  */
-public interface SQLInsertRecognizer extends SQLRecognizer {
+public interface Sequenceable {
 
     /**
-     * insert columns is empty.
-     * @return true: empty. false: not empty.
+     * get sequence sql.
+     * @param expr
+     * @return
      */
-    boolean insertColumnsIsEmpty();
+    String getSequenceSql(SqlSequenceExpr expr);
 
-    /**
-     * Gets insert columns.
-     *
-     * @return the insert columns
-     */
-    List<String> getInsertColumns();
-
-    /**
-     * Gets insert rows.
-     *
-     * @return the insert rows
-     */
-    List<List<Object>> getInsertRows();
 }
