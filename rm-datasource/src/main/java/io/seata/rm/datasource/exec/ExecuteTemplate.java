@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
@@ -56,7 +57,7 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizers     the sql recognizer list
+     * @param sqlRecognizers    the sql recognizer list
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
@@ -73,10 +74,11 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-        if (sqlRecognizers == null) {
+        String dbType = statementProxy.getConnectionProxy().getDbType();
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
             sqlRecognizers = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+                    dbType);
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
@@ -86,7 +88,9 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
