@@ -26,15 +26,15 @@ import org.junit.jupiter.api.Test;
  */
 public class LockStoreSqlFactoryTest {
 
-    private static LockStoreSql MYSQL_LOCK_STORE = LockStoreSqlFactory.getLockStoreSql("mysql");
+    private static LockStoreSql MYSQL_LOCK_STORE = LockStoreSqlFactory.getLogStoreSql("mysql");
 
-    private static LockStoreSql ORACLE_LOCK_STORE = LockStoreSqlFactory.getLockStoreSql("oracle");
+    private static LockStoreSql ORACLE_LOCK_STORE = LockStoreSqlFactory.getLogStoreSql("oracle");
 
-    private static LockStoreSql POSTGRESQL_LOCK_STORE = LockStoreSqlFactory.getLockStoreSql("postgresql");
+    private static LockStoreSql POSTGRESQL_LOCK_STORE = LockStoreSqlFactory.getLogStoreSql("postgresql");
 
-    private static LockStoreSql H2_LOCK_STORE = LockStoreSqlFactory.getLockStoreSql("h2");
+    private static LockStoreSql H2_LOCK_STORE = LockStoreSqlFactory.getLogStoreSql("h2");
 
-    private static LockStoreSql OCEANBASE_LOCK_STORE = LockStoreSqlFactory.getLockStoreSql("oceanbase");
+    private static LockStoreSql OCEANBASE_LOCK_STORE = LockStoreSqlFactory.getLogStoreSql("oceanbase");
 
     private static String GLOBAL_TABLE = "global_table";
 

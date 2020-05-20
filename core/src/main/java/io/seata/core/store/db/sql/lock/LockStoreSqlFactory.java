@@ -37,7 +37,7 @@ public class LockStoreSqlFactory {
      * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase
      * @return lock store sql
      */
-    public static LockStoreSql getLockStoreSql(String dbType) {
+    public static LockStoreSql getLogStoreSql(String dbType) {
         if (!LOCK_STORE_SQL_MAP.containsKey(dbType)) {
             LockStoreSql lockStoreSql = EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase());
             LOCK_STORE_SQL_MAP.put(dbType, lockStoreSql);
