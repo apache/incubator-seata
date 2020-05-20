@@ -118,7 +118,7 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
             Set<String> keys = lRange(jedis, lockListKey);
-            if (null != keys && keys.size() > 0) {
+            if (CollectionUtils.isNotEmpty(keys)) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
                     String key = it.next();
@@ -144,7 +144,7 @@ public class RedisLocker extends AbstractLocker {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
             Set<String> keys = lRange(jedis, lockListKey);
-            if (null != keys && keys.size() > 0) {
+            if (CollectionUtils.isNotEmpty(keys)) {
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
                     String key = it.next();
@@ -217,7 +217,7 @@ public class RedisLocker extends AbstractLocker {
         int stop = logQueryLimit;
         for (;;) {
             redisLockJson = jedis.lrange(key, start, stop);
-            if (null != redisLockJson && redisLockJson.size() > 0) {
+            if (CollectionUtils.isNotEmpty(redisLockJson)) {
                 keys.addAll(redisLockJson);
                 start = keys.size();
                 stop = start + logQueryLimit;
