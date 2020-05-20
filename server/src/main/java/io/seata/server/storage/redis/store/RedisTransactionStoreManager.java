@@ -67,6 +67,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private static volatile RedisTransactionStoreManager instance;
 
+    private static final Integer DEFAULT_QUERY_LIMIT = 100;
+
     private static final String INITIAL_CURSOR = "0";
     /**
      * The query limit.
@@ -74,7 +76,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private int logQueryLimit;
 
     public RedisTransactionStoreManager() {
-        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, 100);
+        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     /**
@@ -401,19 +403,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private Set<String> lRange(Jedis jedis, String key) {
         Set<String> keys = new HashSet<>();
-        List<String> redisBranchJson;
+        List<String> redisBranchJson = null;
         int start = 0;
         int stop = logQueryLimit;
-        for (;;) {
+        do {
             redisBranchJson = jedis.lrange(key, start, stop);
-            if (CollectionUtils.isNotEmpty(redisBranchJson)) {
-                keys.addAll(redisBranchJson);
-                start = keys.size();
-                stop = start + logQueryLimit;
-            } else {
-                break;
-            }
-        }
+            keys.addAll(redisBranchJson);
+            start = keys.size();
+            stop = start + logQueryLimit;
+        } while (CollectionUtils.isNotEmpty(redisBranchJson));
         return keys;
     }
 

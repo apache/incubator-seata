@@ -41,6 +41,8 @@ public class RedisLocker extends AbstractLocker {
 
     private static final Integer DEFAULT_SECONDS = 30;
 
+    private static final Integer DEFAULT_QUERY_LIMIT = 100;
+
     private static final String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
 
     private static final String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
@@ -55,7 +57,7 @@ public class RedisLocker extends AbstractLocker {
      *
      */
     public RedisLocker() {
-        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, 100);
+        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     @Override
@@ -215,16 +217,12 @@ public class RedisLocker extends AbstractLocker {
         List<String> redisLockJson;
         int start = 0;
         int stop = logQueryLimit;
-        for (;;) {
+        do {
             redisLockJson = jedis.lrange(key, start, stop);
-            if (CollectionUtils.isNotEmpty(redisLockJson)) {
-                keys.addAll(redisLockJson);
-                start = keys.size();
-                stop = start + logQueryLimit;
-            } else {
-                break;
-            }
-        }
+            keys.addAll(redisLockJson);
+            start = keys.size();
+            stop = start + logQueryLimit;
+        } while (CollectionUtils.isNotEmpty(redisLockJson));
         return keys;
     }
 
