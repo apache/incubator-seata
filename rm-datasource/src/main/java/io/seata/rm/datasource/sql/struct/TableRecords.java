@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.sql.struct;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.sql.struct.undo.parser.UndoSerialArray;
+import io.seata.rm.datasource.sql.serial.SerialArray;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -209,7 +209,7 @@ public class TableRecords {
                 } else if (dataType == JDBCType.ARRAY.getVendorTypeNumber()) {
                     Array array = resultSet.getArray(i);
                     if (array != null) {
-                        field.setValue(new UndoSerialArray(array));
+                        field.setValue(new SerialArray(array));
                     }
                 } else if (dataType == JDBCType.REF.getVendorTypeNumber()) {
                     Ref ref = resultSet.getRef(i);
