@@ -28,19 +28,25 @@ import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.MessageType;
+import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketAddress;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,6 +59,7 @@ import java.util.concurrent.TimeoutException;
  * The type Abstract rpc remoting.
  *
  * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
  */
 public abstract class AbstractRpcRemoting implements Disposable {
 
@@ -91,7 +98,7 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     protected volatile long nowMills = 0;
     private static final int TIMEOUT_CHECK_INTERNAL = 3000;
-    private final Object lock = new Object();
+    protected final Object lock = new Object();
     /**
      * The Is sending.
      */
@@ -101,6 +108,12 @@ public abstract class AbstractRpcRemoting implements Disposable {
      * The Merge msg map.
      */
     protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
+
+    /**
+     * This container holds all processors.
+     * processor type {@link MessageType}
+     */
+    protected final HashMap<Integer/*MessageType*/, Pair<RemotingProcessor, ExecutorService>> processorTable = new HashMap<>(8);
 
     /**
      * Instantiates a new Abstract rpc remoting.
@@ -118,6 +131,14 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     public int getNextMessageId() {
         return idGenerator.incrementAndGet();
+    }
+
+    public Map<Integer, MergeMessage> getMergeMsgMap() {
+        return mergeMsgMap;
+    }
+
+    public ConcurrentHashMap<Integer, MessageFuture> getFutures() {
+        return futures;
     }
 
     /**
@@ -411,9 +432,67 @@ public abstract class AbstractRpcRemoting implements Disposable {
      */
     boolean allowDumpStack = false;
 
+
+    /**
+     * Rpc message processing.
+     *
+     * @param ctx        Channel handler context.
+     * @param rpcMessage rpc message.
+     * @throws Exception throws exception process message error.
+     * @since 1.3.0
+     */
+    protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
+        }
+        Object body = rpcMessage.getBody();
+        if (body instanceof MessageTypeAware) {
+            MessageTypeAware messageTypeAware = (MessageTypeAware) body;
+            final Pair<RemotingProcessor, ExecutorService> pair = this.processorTable.get((int) messageTypeAware.getTypeCode());
+            if (pair != null) {
+                if (pair.getSecond() != null) {
+                    try {
+                        pair.getSecond().execute(() -> {
+                            try {
+                                pair.getFirst().process(ctx, rpcMessage);
+                            } catch (Throwable th) {
+                                LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                            }
+                        });
+                    } catch (RejectedExecutionException e) {
+                        LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
+                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                        if (allowDumpStack) {
+                            String name = ManagementFactory.getRuntimeMXBean().getName();
+                            String pid = name.split("@")[0];
+                            int idx = new Random().nextInt(100);
+                            try {
+                                Runtime.getRuntime().exec("jstack " + pid + " >d:/" + idx + ".log");
+                            } catch (IOException exx) {
+                                LOGGER.error(exx.getMessage());
+                            }
+                            allowDumpStack = false;
+                        }
+                    }
+                } else {
+                    try {
+                        pair.getFirst().process(ctx, rpcMessage);
+                    } catch (Throwable th) {
+                        LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                    }
+                }
+            } else {
+                LOGGER.error("This message type [{}] has no processor.", messageTypeAware.getTypeCode());
+            }
+        } else {
+            LOGGER.error("This rpcMessage body[{}] is not MessageTypeAware type.", body);
+        }
+    }
+
     /**
      * The type AbstractHandler.
      */
+    @Deprecated
     abstract class AbstractHandler extends ChannelDuplexHandler {
 
         /**

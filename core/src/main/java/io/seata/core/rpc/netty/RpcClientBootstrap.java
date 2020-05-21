@@ -33,7 +33,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author slievrly
  * @author zhaojun
  */
-public class RpcClientBootstrap implements RemotingClient {
+public class RpcClientBootstrap implements RemotingBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
     private final NettyClientConfig nettyClientConfig;

@@ -18,6 +18,7 @@ package io.seata.spring.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -103,16 +104,18 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         Class<?> targetClass =
             methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
-        final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
-        final GlobalTransactional globalTransactionalAnnotation =
-            getAnnotation(method, targetClass, GlobalTransactional.class);
-        final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-        boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
-        if (!localDisable) {
-            if (globalTransactionalAnnotation != null) {
-                return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
-            } else if (globalLockAnnotation != null) {
-                return handleGlobalLock(methodInvocation);
+        if (null != specificMethod && !specificMethod.getDeclaringClass().equals(Object.class)) {
+            final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final GlobalTransactional globalTransactionalAnnotation =
+                getAnnotation(method, targetClass, GlobalTransactional.class);
+            final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
+            if (!localDisable) {
+                if (globalTransactionalAnnotation != null) {
+                    return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+                } else if (globalLockAnnotation != null) {
+                    return handleGlobalLock(methodInvocation);
+                }
             }
         }
         return methodInvocation.proceed();
@@ -200,9 +203,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return method == null ? targetClass == null ? null : targetClass.getAnnotation(annotationClass)
-            : method.getAnnotation(annotationClass);
+    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
 
     private String formatMethod(Method method) {
