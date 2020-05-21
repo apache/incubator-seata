@@ -30,7 +30,7 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
 
     private static final String METHOD_PREFIX = "get";
 
-    private static final String METHOD_CONFIG_NOW = METHOD_PREFIX + "ConfigNow";
+    private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
@@ -41,7 +41,7 @@ public class SeataConfigurationCacheProvider implements ConfigurationCacheProvid
         return (Configuration)Enhancer.create(Configuration.class,
             (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(METHOD_PREFIX)
-                    && !method.getName().equalsIgnoreCase(METHOD_CONFIG_NOW)) {
+                    && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
                     Object result = CONFIG_CACHE.get(rawDataId);
                     if (null == result) {

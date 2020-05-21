@@ -211,9 +211,9 @@ public interface Configuration {
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return the config now
+     * @return the Latest config
      */
-    String getConfigNow(String dataId, String defaultValue, long timeoutMills);
+    String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
 
     /**
      * Put config boolean.
