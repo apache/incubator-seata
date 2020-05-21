@@ -28,18 +28,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * used for jdbc type is JDBCType.ARRAY serialize.
  *
  * @author jsbxyyx
  */
-public class SerialArray implements java.sql.Array {
+public class SerialArray implements java.sql.Array, java.io.Serializable {
+
+    static final long serialVersionUID = 1L;
 
     private Object[] elements;
     private int baseType;
     private String baseTypeName;
+    private int len;
 
     public SerialArray() {
     }
@@ -57,7 +59,7 @@ public class SerialArray implements java.sql.Array {
 
         baseType = array.getBaseType();
         baseTypeName = array.getBaseTypeName();
-        int len = elements.length;
+        len = elements.length;
 
         switch (baseType) {
             case java.sql.Types.BLOB:
@@ -164,24 +166,24 @@ public class SerialArray implements java.sql.Array {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
+
+        if (obj instanceof SerialArray) {
+            SerialArray sa = (SerialArray)obj;
+            return baseType == sa.baseType &&
+                    baseTypeName.equals(sa.baseTypeName) &&
+                    Arrays.equals(elements, sa.elements);
         }
-        SerialArray that = (SerialArray) o;
-        return baseType == that.baseType &&
-                Arrays.equals(elements, that.elements) &&
-                Objects.equals(baseTypeName, that.baseTypeName);
+        return false;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(baseType, baseTypeName);
-        result = 31 * result + Arrays.hashCode(elements);
-        return result;
+        return (((31 + Arrays.hashCode(elements)) * 31 + len)  * 31 +
+                baseType) * 31 + baseTypeName.hashCode();
     }
-    
+
 }

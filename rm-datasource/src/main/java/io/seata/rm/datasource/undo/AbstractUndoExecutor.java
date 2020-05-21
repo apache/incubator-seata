@@ -18,6 +18,7 @@ package io.seata.rm.datasource.undo;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.JDBCType;
 import java.sql.PreparedStatement;
@@ -33,6 +34,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
 import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.sql.serial.SerialArray;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -173,10 +175,18 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
+            } else if (type == JDBCType.ARRAY.getVendorTypeNumber()) {
+                SerialArray array = (SerialArray) value;
+                if (array != null) {
+                    Array arrayOf = undoPST.getConnection().createArrayOf(array.getBaseTypeName(), array.getElements());
+                    undoPST.setArray(undoIndex, arrayOf);
+                } else {
+                    undoPST.setObject(undoIndex, null);
+                }
             } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
                 undoPST.setObject(undoIndex, value);
             } else {
-                // JDBCType.ARRAY, JDBCType.REF, JDBCType.JAVA_OBJECT etc...
+                // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
                 undoPST.setObject(undoIndex, value, type);
             }
         }
