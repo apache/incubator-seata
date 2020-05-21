@@ -37,12 +37,12 @@ public class RedisLockManagerTest {
     static LockManager lockManager = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start() {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
         JedisPooledFactory.getJedisPoolInstance(new MockJedisPool(poolConfig, "test"));
-        lockManager= new RedisLockManagerForTest();
+        lockManager = new RedisLockManagerForTest();
     }
 
     @Test
@@ -88,9 +88,7 @@ public class RedisLockManagerTest {
 
     public static class RedisLockManagerForTest extends FileLockManager {
 
-
-        public RedisLockManagerForTest(){
-        }
+        public RedisLockManagerForTest() {}
 
         @Override
         public Locker getLocker(BranchSession branchSession) {
