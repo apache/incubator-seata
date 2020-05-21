@@ -13,22 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.sqlparser.struct;
 
-import io.seata.core.protocol.RpcMessage;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
- * The interface Client message listener.
- *
- * @author slievrly
+ * The default expr able.
+ * @author jsbxyyx
  */
-@Deprecated
-public interface ClientMessageListener {
+public interface Defaultable {
+
     /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
+     * get primary key values by default keyword.
+     * @return
+     * @throws SQLException
      */
-    void onMessage(RpcMessage request, String serverAddress);
+    List<Object> getPkValuesByDefault() throws SQLException;
+
 }

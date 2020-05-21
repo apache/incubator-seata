@@ -19,9 +19,10 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ public class BatchInsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private InsertExecutor insertExecutor;
+    private MySQLInsertExecutor insertExecutor;
 
     private final int pkIndex = 1;
 
@@ -73,7 +74,7 @@ public class BatchInsertExecutorTest {
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new MySQLInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(pkIndex).when(insertExecutor).getPkIndex();
     }
@@ -85,7 +86,7 @@ public class BatchInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 
@@ -96,7 +97,7 @@ public class BatchInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 
@@ -107,7 +108,7 @@ public class BatchInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 
@@ -120,7 +121,7 @@ public class BatchInsertExecutorTest {
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(pkId);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 
@@ -133,7 +134,7 @@ public class BatchInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 
@@ -145,7 +146,7 @@ public class BatchInsertExecutorTest {
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>();
         pkValues.addAll(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 
@@ -156,7 +157,7 @@ public class BatchInsertExecutorTest {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
     }
 

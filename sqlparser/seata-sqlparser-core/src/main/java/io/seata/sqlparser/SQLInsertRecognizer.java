@@ -25,6 +25,12 @@ import java.util.List;
 public interface SQLInsertRecognizer extends SQLRecognizer {
 
     /**
+     * insert columns is empty.
+     * @return true: empty. false: not empty.
+     */
+    boolean insertColumnsIsEmpty();
+
+    /**
      * Gets insert columns.
      *
      * @return the insert columns

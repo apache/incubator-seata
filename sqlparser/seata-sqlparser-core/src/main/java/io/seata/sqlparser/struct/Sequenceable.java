@@ -13,22 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
-
-import io.seata.core.protocol.RpcMessage;
+package io.seata.sqlparser.struct;
 
 /**
- * The interface Client message listener.
- *
- * @author slievrly
+ * The sequence able.
+ * @author jsbxyyx
  */
-@Deprecated
-public interface ClientMessageListener {
+public interface Sequenceable {
+
     /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
+     * get sequence sql.
+     * @param expr
+     * @return
      */
-    void onMessage(RpcMessage request, String serverAddress);
+    String getSequenceSql(SqlSequenceExpr expr);
+
 }
