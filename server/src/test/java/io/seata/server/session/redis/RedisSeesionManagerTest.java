@@ -16,7 +16,8 @@
 
 package io.seata.server.session.redis;
 
-import com.fiftyonred.mock_jedis.MockJedisPool;
+import java.io.IOException;
+import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -29,27 +30,35 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author funkye
  */
 public class RedisSeesionManagerTest {
-
-    static SessionManager sessionManager = null;
+    private static RedisServer server = null;
+    private static SessionManager sessionManager = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start() {
+        try {
+            server = RedisServer.newRedisServer(6789);
+            server.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new MockJedisPool(poolConfig, "test"));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         RedisTransactionStoreManager transactionStoreManager = RedisTransactionStoreManager.getInstance();
-        RedisSessionManager redisSessionManager= new RedisSessionManager();
+        RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(transactionStoreManager);
-        sessionManager=redisSessionManager;
+        sessionManager = redisSessionManager;
     }
 
     @Test
@@ -98,7 +107,8 @@ public class RedisSeesionManagerTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        sessionManager.addBranchSession(session,branchSession);
+        sessionManager.addBranchSession(session, branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
@@ -150,6 +160,12 @@ public class RedisSeesionManagerTest {
         sessionManager.addBranchSession(globalSession, branchSession);
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
+    }
+
+    @AfterAll
+    public static void after() {
+        server.stop();
+        server = null;
     }
 
 }

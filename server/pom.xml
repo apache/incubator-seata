@@ -110,8 +110,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fiftyonred</groupId>
-            <artifactId>mock-jedis</artifactId>
+            <groupId>com.github.fppt</groupId>
+            <artifactId>jedis-mock</artifactId>
             <scope>test</scope>
         </dependency>
 

@@ -153,15 +153,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO convertGlobalTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String[] keys = new String[3];
-            keys[0] = getGlobalKeyByXid(convertGlobalTransactionDO.getXid());
-            keys[1] = getGlobalKeyByTransactionId(convertGlobalTransactionDO.getTransactionId());
+            List<String> keys = new ArrayList<>();
+            keys.add(getGlobalKeyByXid(convertGlobalTransactionDO.getXid()));
+            keys.add(getGlobalKeyByTransactionId(convertGlobalTransactionDO.getTransactionId()));
             String branchesKey = getBranchListKeyByXid(convertGlobalTransactionDO.getXid());
             List<String> redisBranches = jedis.lrange(branchesKey, 0, 1);
             if (null == redisBranches || redisBranches.size() <= 0) {
-                keys[2] = branchesKey;
+                keys.add(branchesKey);
             }
-            jedis.del(keys);
+            jedis.del(keys.toArray(new String[keys.size()]));
             return true;
         }
     }

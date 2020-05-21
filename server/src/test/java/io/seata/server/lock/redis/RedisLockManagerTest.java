@@ -16,7 +16,15 @@
 
 package io.seata.server.lock.redis;
 
-import com.fiftyonred.mock_jedis.MockJedisPool;
+import java.io.IOException;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.github.fppt.jedismock.RedisServer;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
@@ -24,24 +32,29 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.lock.RedisLocker;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author funkye
  */
 public class RedisLockManagerTest {
-
+    static RedisServer server = null;
     static LockManager lockManager = null;
 
     @BeforeAll
     public static void start() {
+        try {
+            server = RedisServer.newRedisServer(6789);
+            server.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new MockJedisPool(poolConfig, "test"));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1",
+            6789, 60000));
         lockManager = new RedisLockManagerForTest();
     }
 
@@ -84,6 +97,12 @@ public class RedisLockManagerTest {
         branchSession2.setLockKey("t1:8");
         Assertions.assertTrue(lockManager.isLockable(branchSession2.getXid(), branchSession2.getResourceId(),
             branchSession2.getLockKey()));
+    }
+
+    @AfterAll
+    public static void after() {
+        server.stop();
+        server = null;
     }
 
     public static class RedisLockManagerForTest extends FileLockManager {
