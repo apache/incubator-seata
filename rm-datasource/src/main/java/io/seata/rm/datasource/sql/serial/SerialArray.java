@@ -26,7 +26,9 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * used for jdbc type is JDBCType.ARRAY serialize.
@@ -161,4 +163,25 @@ public class SerialArray implements java.sql.Array {
         this.elements = elements;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SerialArray that = (SerialArray) o;
+        return baseType == that.baseType &&
+                Arrays.equals(elements, that.elements) &&
+                Objects.equals(baseTypeName, that.baseTypeName);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(baseType, baseTypeName);
+        result = 31 * result + Arrays.hashCode(elements);
+        return result;
+    }
+    
 }
