@@ -122,7 +122,7 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public String getConfig(String dataId, String content, long timeoutMills) {
-        return getConfigNow(dataId, content, timeoutMills);
+        return getLatestConfig(dataId, content, timeoutMills);
     }
 
     @Override

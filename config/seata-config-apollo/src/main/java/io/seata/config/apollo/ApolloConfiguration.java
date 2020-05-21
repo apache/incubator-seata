@@ -108,7 +108,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfigNow(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
