@@ -43,18 +43,13 @@ public class RedisLockManagerTest {
     static LockManager lockManager = null;
 
     @BeforeAll
-    public static void start() {
-        try {
-            server = RedisServer.newRedisServer(6789);
-            server.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void start() throws IOException {
+        server = RedisServer.newRedisServer(6789);
+        server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1",
-            6789, 60000));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
         lockManager = new RedisLockManagerForTest();
     }
 

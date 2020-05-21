@@ -44,13 +44,9 @@ public class RedisSeesionManagerTest {
     private static SessionManager sessionManager = null;
 
     @BeforeAll
-    public static void start() {
-        try {
-            server = RedisServer.newRedisServer(6789);
-            server.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void start() throws IOException {
+        server = RedisServer.newRedisServer(6789);
+        server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
