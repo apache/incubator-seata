@@ -133,4 +133,9 @@ public class MessageType {
      * The constant TYPE_RM_DELETE_UNDOLOG.
      */
     public static final short TYPE_RM_DELETE_UNDOLOG = 111;
+
+    /**
+     * the constant TYPE_HEARTBEAT_MSG
+     */
+    public static final short TYPE_HEARTBEAT_MSG = 120;
 }
