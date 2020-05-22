@@ -59,6 +59,8 @@ public class PostgresqlInsertExecutorTest {
 
     private PostgresqlInsertExecutor insertExecutor;
 
+    private final int pkIndex = 0;
+
     @BeforeEach
     public void init() {
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
@@ -120,7 +122,7 @@ public class PostgresqlInsertExecutorTest {
     private void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
     }
 
     private List<String> mockInsertColumns() {
