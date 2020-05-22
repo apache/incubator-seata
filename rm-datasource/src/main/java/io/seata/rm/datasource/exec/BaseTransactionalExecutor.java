@@ -20,12 +20,10 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
+import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.*;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
@@ -248,6 +246,30 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
+        List<Row> rows = lockKeyRecords.getRows();
+
+        if (rows.size() > 1) {
+            ConnectionContext context = connectionProxy.getContext();
+            List<SQLUndoLog> undoItems = context.getUndoItems();
+            for (SQLUndoLog undoItem : undoItems) {
+                String oldTableName = undoItem.getTableName();
+                String tableName = lockKeyRecords.getTableName();
+                if (oldTableName.equals(tableName)) {
+                    TableRecords oldLockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? undoItem.getBeforeImage() : undoItem.getAfterImage();
+                    List<Row> oldRows = oldLockKeyRecords.getRows();
+                    // 每一个已经保存的row 和这次要保存的作比较
+                    for (Row oldRow : oldRows) {
+                        for (int i = rows.size() - 1; i >= 0; i--) {
+                            if (oldRow.equals(rows.get(i))){
+                                rows.remove(i);
+                            }
+                        }
+                    }
+                }
+            }
+            lockKeyRecords.setRows(rows);
+        }
+
         String lockKeys = buildLockKey(lockKeyRecords);
         connectionProxy.appendLockKey(lockKeys);
 
