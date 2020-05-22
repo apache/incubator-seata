@@ -43,8 +43,6 @@ import redis.clients.jedis.Transaction;
  */
 public class RedisLocker extends AbstractLocker {
 
-    private static final Integer DEFAULT_SECONDS = 30;
-
     private static final Integer DEFAULT_QUERY_LIMIT = 100;
 
     private static final String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
@@ -84,8 +82,6 @@ public class RedisLocker extends AbstractLocker {
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
                 pipeline.setnx(key, JSON.toJSONString(lock));
-                readyKeys.add(key);
-                pipeline.expire(key, DEFAULT_SECONDS);
                 readyKeys.add(key);
             }
             List<Object> results = pipeline.syncAndReturnAll();
