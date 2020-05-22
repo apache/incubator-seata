@@ -163,6 +163,7 @@ public class SerialArray implements java.sql.Array, java.io.Serializable {
 
     public void setElements(Object[] elements) {
         this.elements = elements;
+        this.len = elements != null ? elements.length : 0;
     }
 
     @Override
@@ -172,7 +173,7 @@ public class SerialArray implements java.sql.Array, java.io.Serializable {
         }
 
         if (obj instanceof SerialArray) {
-            SerialArray sa = (SerialArray)obj;
+            SerialArray sa = (SerialArray) obj;
             return baseType == sa.baseType &&
                     baseTypeName.equals(sa.baseTypeName) &&
                     Arrays.equals(elements, sa.elements);
@@ -182,7 +183,7 @@ public class SerialArray implements java.sql.Array, java.io.Serializable {
 
     @Override
     public int hashCode() {
-        return (((31 + Arrays.hashCode(elements)) * 31 + len)  * 31 +
+        return (((31 + Arrays.hashCode(elements)) * 31 + len) * 31 +
                 baseType) * 31 + baseTypeName.hashCode();
     }
 
