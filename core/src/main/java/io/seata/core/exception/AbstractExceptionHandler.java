@@ -111,8 +111,7 @@ public abstract class AbstractExceptionHandler {
      * @param request  the request
      * @param response the response
      */
-    public void exceptionHandleTemplate(Callback callback, AbstractTransactionRequest request,
-        AbstractTransactionResponse response) {
+    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
             callback.execute(request, response);
             callback.onSuccess(request, response);
