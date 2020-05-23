@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.exec.ExecuteTemplate;
 
 /**
@@ -111,6 +112,16 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
     public boolean execute(String sql, String[] columnNames) throws SQLException {
         this.targetSQL = sql;
         return ExecuteTemplate.execute(this, (statement, args) -> statement.execute((String) args[0],(String[])args[1]), sql,columnNames);
+    }
+
+    @Override
+    public void addBatch(String sql) throws SQLException {
+        if (StringUtils.isNotBlank(targetSQL)) {
+            targetSQL += "; " + sql;
+        } else {
+            targetSQL = sql;
+        }
+        targetStatement.addBatch(sql);
     }
 
     @Override
