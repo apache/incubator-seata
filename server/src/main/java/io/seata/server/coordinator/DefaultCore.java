@@ -83,7 +83,7 @@ public class DefaultCore implements Core {
 
     /**
      * only for mock
-     *·
+     *
      * @param branchType the branchType
      * @param core the core
      */
