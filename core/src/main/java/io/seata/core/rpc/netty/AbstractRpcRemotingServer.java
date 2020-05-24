@@ -28,9 +28,12 @@ import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.processor.Pair;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -148,6 +151,12 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
         channel.disconnect();
         channel.close();
+    }
+
+    @Override
+    public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(messageType, pair);
     }
 
     /**
