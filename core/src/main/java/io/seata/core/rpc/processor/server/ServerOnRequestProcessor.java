@@ -16,7 +16,6 @@
 package io.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -38,14 +37,6 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * process RM/TM client request message.
@@ -71,22 +62,13 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
-    private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
-
     private RemotingServer remotingServer;
 
     private TransactionMessageHandler transactionMessageHandler;
 
-    private static final int MAX_LOG_SEND_THREAD = 1;
-    private static final int MAX_LOG_TAKE_SIZE = 1024;
-    private static final long KEEP_ALIVE_TIME = 0L;
-    private static final String THREAD_PREFIX = "batchLoggerPrint";
-    private static final long BUSY_SLEEP_MILLS = 5L;
-
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
-        init();
     }
 
     @Override
@@ -117,8 +99,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
         } else {
             try {
-                logQueue.put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                    + rpcContext.getTransactionServiceGroup());
+                BatchLogHandler.INSTANCE.getLogQueue()
+                    .put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                        + rpcContext.getTransactionServiceGroup());
             } catch (InterruptedException e) {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
             }
@@ -140,43 +123,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
             remotingServer.sendResponse(rpcMessage, ctx.channel(), result);
-        }
-    }
-
-    /**
-     * Init.
-     */
-    private void init() {
-        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_LOG_SEND_THREAD, MAX_LOG_SEND_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
-        mergeSendExecutorService.submit(new BatchLogRunnable());
-    }
-
-    /**
-     * The type Batch log runnable.
-     */
-    static class BatchLogRunnable implements Runnable {
-
-        @Override
-        public void run() {
-            List<String> logList = new ArrayList<>();
-            while (true) {
-                try {
-                    logList.add(logQueue.take());
-                    logQueue.drainTo(logList, MAX_LOG_TAKE_SIZE);
-                    if (LOGGER.isInfoEnabled()) {
-                        for (String str : logList) {
-                            LOGGER.info(str);
-                        }
-                    }
-                    logList.clear();
-                    TimeUnit.MILLISECONDS.sleep(BUSY_SLEEP_MILLS);
-                } catch (InterruptedException exx) {
-                    LOGGER.error("batch log busy sleep error:{}", exx.getMessage(), exx);
-                }
-
-            }
         }
     }
 
