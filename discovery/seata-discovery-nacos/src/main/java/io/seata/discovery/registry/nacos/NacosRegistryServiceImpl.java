@@ -15,6 +15,18 @@
  */
 package io.seata.discovery.registry.nacos;
 
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.naming.NamingService;
+import com.alibaba.nacos.api.naming.listener.EventListener;
+import com.alibaba.nacos.api.naming.listener.NamingEvent;
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
+import io.seata.discovery.registry.RegistryService;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +34,6 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
-
-import com.alibaba.nacos.api.NacosFactory;
-import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.listener.EventListener;
-import com.alibaba.nacos.api.naming.listener.NamingEvent;
-import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
-
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
-import io.seata.discovery.registry.RegistryService;
 
 /**
  * The type Nacos registry service.
@@ -83,13 +82,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     @Override
     public void register(InetSocketAddress address) throws Exception {
         validAddress(address);
-        getNamingInstance().registerInstance(getServiceName(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
+        getNamingInstance().registerInstance(getServiceName(), getServiceGroup(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         validAddress(address);
-        getNamingInstance().deregisterInstance(getServiceName(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
+        getNamingInstance().deregisterInstance(getServiceName(), getServiceGroup(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
     }
 
     @Override
@@ -98,7 +97,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         clusters.add(cluster);
         LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
         LISTENER_SERVICE_MAP.get(cluster).add(listener);
-        getNamingInstance().subscribe(getServiceName(), clusters, listener);
+        getNamingInstance().subscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
     @Override
@@ -112,7 +111,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     .collect(Collectors.toList());
             LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
         }
-        getNamingInstance().unsubscribe(getServiceName(), clusters, listener);
+        getNamingInstance().unsubscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
     @Override
@@ -200,10 +199,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
         String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-            : FILE_CONFIG.getConfig(getNacosUserName());
+                : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
             String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                : FILE_CONFIG.getConfig(getNacosPassword());
+                    : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
