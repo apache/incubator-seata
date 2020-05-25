@@ -103,7 +103,7 @@ public final class ConfigurationFactory {
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + ConfigurationKeys.FILE_ROOT_TYPE);
 
-            if (StringUtils.isEmpty(configTypeName)) {
+            if (StringUtils.isBlank(configTypeName)) {
                 throw new NotSupportYetException("can not get config type: " + configTypeName);
             }
 

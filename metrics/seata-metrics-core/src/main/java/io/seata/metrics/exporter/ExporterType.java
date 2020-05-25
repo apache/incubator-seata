@@ -42,7 +42,7 @@ public enum ExporterType {
         if (PROMETHEUS.name().equalsIgnoreCase(name)) {
             return PROMETHEUS;
         } else {
-            throw new NotSupportYetException("unsupported type:" + name);
+            throw new IllegalArgumentException("not support exporter type: " + name);
         }
     }
 }

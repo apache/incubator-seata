@@ -72,6 +72,6 @@ public enum RegistryType {
                 return registryType;
             }
         }
-        throw new NotSupportYetException("unsupported type:" + name);
+        throw new IllegalArgumentException("not support registry type: " + name);
     }
 }

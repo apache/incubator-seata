@@ -42,7 +42,7 @@ public enum RegistryType {
         if (COMPACT.name().equalsIgnoreCase(name)) {
             return COMPACT;
         } else {
-            throw new NotSupportYetException("unsupported type:" + name);
+            throw new IllegalArgumentException("not support registry type: " + name);
         }
     }
 }
