@@ -13,34 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
-
-import java.util.List;
+package io.seata.core.rpc.processor;
 
 /**
- * The interface Sql insert recognizer.
+ * Currently used to associate first and second object.
  *
- * @author sharajava
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-public interface SQLInsertRecognizer extends SQLRecognizer {
+public final class Pair<T1, T2> {
+    private final T1 first;
+    private final T2 second;
 
-    /**
-     * insert columns is empty.
-     * @return true: empty. false: not empty.
-     */
-    boolean insertColumnsIsEmpty();
+    public Pair(T1 first, T2 second) {
+        this.first = first;
+        this.second = second;
+    }
 
-    /**
-     * Gets insert columns.
-     *
-     * @return the insert columns
-     */
-    List<String> getInsertColumns();
+    public T1 getFirst() {
+        return first;
+    }
 
-    /**
-     * Gets insert rows.
-     *
-     * @return the insert rows
-     */
-    List<List<Object>> getInsertRows();
+    public T2 getSecond() {
+        return second;
+    }
 }

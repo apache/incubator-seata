@@ -28,6 +28,7 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
@@ -80,6 +81,11 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
         };
         visitor.visit(ast.getTableSource());
         return sb.toString();
+    }
+
+    @Override
+    public boolean insertColumnsIsEmpty() {
+        return CollectionUtils.isEmpty(ast.getColumns());
     }
 
     @Override
