@@ -166,8 +166,13 @@ public final class ColumnUtils {
             }
         }
 
-        StringBuilder result = new StringBuilder(2 * (String.valueOf(escape.value).length()) + colName.length());
-        return result.append(escape.value).append(colName).append(escape.value).toString();
+        char[] buf = new char[colName.length() + 2];
+        buf[0] = escape.value;
+        buf[buf.length - 1] = escape.value;
+
+        colName.getChars(0,colName.length(),buf,1);
+
+        return new String(buf).intern();
     }
 
     private static boolean isMysqlSeries(String dbType) {
