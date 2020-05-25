@@ -64,7 +64,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        try (Statement stmt = connection.createStatement()) {
+        try {
             DatabaseMetaData dbmd = connection.getMetaData();
             tableName = keywordChecker.checkAndReplace(tableName);
             return resultSetMetaToSchema(dbmd, tableName);
