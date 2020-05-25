@@ -20,8 +20,6 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
-import io.seata.core.rpc.processor.Pair;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.rpc.processor.server.RegRmProcessor;
 import io.seata.core.rpc.processor.server.RegTmProcessor;
 import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
@@ -30,7 +28,6 @@ import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
@@ -59,10 +56,10 @@ public class RpcServer extends AbstractRpcRemotingServer {
      */
     @Override
     public void init() {
-        super.init();
-        setChannelHandlers(new ServerHandler());
         // registry processor
         registerProcessor();
+        super.init();
+        setChannelHandlers(new ServerHandler());
     }
 
     /**
@@ -191,9 +188,9 @@ public class RpcServer extends AbstractRpcRemotingServer {
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestProcessor, messageExecutor);
-        super. registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestProcessor, messageExecutor);
-        super. registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
-        super. registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
         // 2. registry on response message processor
         ServerOnResponseProcessor onResponseProcessor =
@@ -205,9 +202,9 @@ public class RpcServer extends AbstractRpcRemotingServer {
         super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
         // 4. registry tm message processor
         RegTmProcessor regTmProcessor = new RegTmProcessor(this, null);
-        super. registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
+        super.registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
         // 5. registry heartbeat message processor
         ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
-        super. registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
     }
 }
