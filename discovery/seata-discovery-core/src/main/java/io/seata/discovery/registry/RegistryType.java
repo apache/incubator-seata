@@ -15,8 +15,6 @@
  */
 package io.seata.discovery.registry;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * The enum Registry type.
  *

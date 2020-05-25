@@ -15,8 +15,6 @@
  */
 package io.seata.metrics.registry;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * Supported metrics registry type
  *

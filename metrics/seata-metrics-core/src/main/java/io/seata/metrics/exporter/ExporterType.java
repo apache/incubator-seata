@@ -15,8 +15,6 @@
  */
 package io.seata.metrics.exporter;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * Supported metrics exporter type
  *
