@@ -15,6 +15,7 @@
  */
 package io.seata.config.nacos;
 
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +37,7 @@ import io.seata.config.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * The type Nacos configuration.
  *
@@ -48,11 +50,14 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String DEFAULT_GROUP = "SEATA_GROUP";
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+    private static final String ENDPOINT_KEY = "endpoint";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
+    private static final String ACCESS_KEY = "accessKey";
+    private static final String SECRET_KEY = "secretKey";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -176,7 +181,11 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static Properties getConfigProperties() {
         Properties properties = new Properties();
-        if (null != System.getProperty(PRO_SERVER_ADDR_KEY)) {
+        if (null != System.getProperty(ENDPOINT_KEY)) {
+            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
+            properties.put(ACCESS_KEY, Objects.toString(System.getProperty(ACCESS_KEY), ""));
+            properties.put(SECRET_KEY, Objects.toString(System.getProperty(SECRET_KEY), ""));
+        } else if (null != System.getProperty(PRO_SERVER_ADDR_KEY)) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
