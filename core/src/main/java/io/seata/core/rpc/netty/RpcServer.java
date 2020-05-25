@@ -58,8 +58,8 @@ public class RpcServer extends AbstractRpcRemotingServer {
     public void init() {
         // registry processor
         registerProcessor();
-        super.init();
         setChannelHandlers(new ServerHandler());
+        super.init();
     }
 
     /**
