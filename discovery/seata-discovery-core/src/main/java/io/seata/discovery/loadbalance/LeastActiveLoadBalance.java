@@ -22,7 +22,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.rpc.RpcStatus;
 
 /**
- * The type Random load balance.
+ * The type Least Active load balance.
  *
  * @author ph3636
  */
