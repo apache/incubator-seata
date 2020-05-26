@@ -334,7 +334,10 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(brachTable);
+        boolean updateAppData = StringUtils.isNotBlank(branchTransactionDO.getApplicationData());
+        String sql = updateAppData ?
+                LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionAppDataSQL(brachTable)
+                : LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(brachTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -342,8 +345,15 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setInt(1, branchTransactionDO.getStatus());
-            ps.setString(2, branchTransactionDO.getXid());
-            ps.setLong(3, branchTransactionDO.getBranchId());
+            if (updateAppData) {
+                ps.setString(2, branchTransactionDO.getApplicationData());
+                ps.setString(3, branchTransactionDO.getXid());
+                ps.setLong(4, branchTransactionDO.getBranchId());
+            } else {
+                ps.setString(2, branchTransactionDO.getXid());
+                ps.setLong(3, branchTransactionDO.getBranchId());
+            }
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);

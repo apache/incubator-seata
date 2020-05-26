@@ -21,7 +21,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Reflection tools
@@ -208,4 +210,89 @@ public class ReflectionUtil {
         modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
         field.set(cla, newValue);
     }
+
+
+    /**
+     * Invoke the given callback on all fields in the target class, going up the
+     * class hierarchy to get all declared fields.
+     *
+     * @param clazz the target class to analyze
+     * @param fc    the callback to invoke for each field
+     * @param ff    the filter that determines the fields to apply the callback to
+     */
+    public static void doWithFields(Class<?> clazz, FieldCallback fc, FieldFilter ff) {
+        // Keep backing up the inheritance hierarchy.
+        Class<?> targetClass = clazz;
+        do {
+            Field[] fields = getDeclaredFields(targetClass);
+            for (Field field : fields) {
+                if (ff != null && !ff.matches(field)) {
+                    continue;
+                }
+                try {
+                    fc.doWith(field);
+                } catch (IllegalAccessException ex) {
+                    throw new IllegalStateException("Not allowed to access field '" + field.getName() + "': " + ex);
+                }
+            }
+            targetClass = targetClass.getSuperclass();
+        }
+        while (targetClass != null && targetClass != Object.class);
+    }
+
+
+    private static final Field[] NO_FIELDS = {};
+
+    /**
+     * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
+     */
+    private static final Map<Class<?>, Field[]> declaredFieldsCache =
+            new ConcurrentHashMap<Class<?>, Field[]>(256);
+
+
+    /**
+     * This variant retrieves {@link Class#getDeclaredFields()} from a local cache
+     * in order to avoid the JVM's SecurityManager check and defensive array copying.
+     *
+     * @param clazz the class to introspect
+     * @return the cached array of fields
+     * @see Class#getDeclaredFields()
+     */
+    private static Field[] getDeclaredFields(Class<?> clazz) {
+        Field[] result = declaredFieldsCache.get(clazz);
+        if (result == null) {
+            result = clazz.getDeclaredFields();
+            declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
+        }
+        return result;
+    }
+
+
+    /**
+     * Callback interface invoked on each field in the hierarchy.
+     */
+    public interface FieldCallback {
+
+        /**
+         * Perform an operation using the given field.
+         *
+         * @param field the field to operate on
+         */
+        void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
+    }
+
+
+    /**
+     * Callback optionally used to filter fields to be operated on by a field callback.
+     */
+    public interface FieldFilter {
+
+        /**
+         * Determine whether the given field matches.
+         *
+         * @param field the field to check
+         */
+        boolean matches(Field field);
+    }
+
 }

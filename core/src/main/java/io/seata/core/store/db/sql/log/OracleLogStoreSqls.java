@@ -70,6 +70,14 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " = systimestamp where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
             + " = ?";
 
+    /**
+     * The constant UPDATE_BRANCH_TRANSACTION_APPDATA_ORACLE.
+     */
+    public static final String UPDATE_BRANCH_TRANSACTION_APPDATA_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
+            + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
+            + " = systimestamp where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
+            + " = ?";
+
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
         return INSERT_GLOBAL_TRANSACTION_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
@@ -99,5 +107,10 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getUpdateBranchTransactionStatusSQL(String branchTable) {
         return UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    @Override
+    public String getUpdateBranchTransactionAppDataSQL(String branchTable) {
+        return UPDATE_BRANCH_TRANSACTION_APPDATA_ORACLE.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

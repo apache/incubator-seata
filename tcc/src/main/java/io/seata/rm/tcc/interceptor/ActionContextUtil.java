@@ -21,9 +21,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
@@ -93,6 +96,27 @@ public class ActionContextUtil {
         Field[] field = interFace.getDeclaredFields();
         fields.addAll(Arrays.asList(field));
         getAllField(interFace.getSuperclass(), fields);
+    }
+
+    /**
+     * Parse action result value of ActionContext
+     *
+     * @param bizRet
+     * @param actionContext
+     */
+    public static void parseBizRet(Object bizRet, BusinessActionContext actionContext) {
+        if (Objects.isNull(bizRet)) {
+            return;
+        }
+        Class<?> retClass = bizRet.getClass();
+        if (retClass == Object.class || retClass.isPrimitive() || retClass.isArray() || retClass.getName().startsWith("java")) {
+            return;
+        }
+        ReflectionUtil.doWithFields(retClass, field -> {
+            ActionContextField actionContextField = field.getAnnotation(ActionContextField.class);
+            String key = StringUtils.isEmpty(actionContextField.value()) ? field.getName() : actionContextField.value();
+            actionContext.addActionContext(key, field.get(bizRet));
+        }, field -> field.isAnnotationPresent(ActionContextField.class));
     }
 
 }

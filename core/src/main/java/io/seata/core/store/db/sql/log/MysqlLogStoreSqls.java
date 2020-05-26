@@ -67,6 +67,13 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
             + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now(6) where "
             + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
+    /**
+     * The constant UPDATE_BRANCH_TRANSACTION_APPDATA_MYSQL.
+     */
+    public static final String UPDATE_BRANCH_TRANSACTION_APPDATA_MYSQL = "update " + BRANCH_TABLE_PLACEHOLD
+            + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now(6) where "
+            + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
         return INSERT_GLOBAL_TRANSACTION_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
@@ -96,5 +103,10 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getUpdateBranchTransactionStatusSQL(String branchTable) {
         return UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    @Override
+    public String getUpdateBranchTransactionAppDataSQL(String branchTable) {
+        return UPDATE_BRANCH_TRANSACTION_APPDATA_MYSQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

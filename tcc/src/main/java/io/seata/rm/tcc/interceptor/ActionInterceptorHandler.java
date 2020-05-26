@@ -19,7 +19,9 @@ import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -30,9 +32,11 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -59,7 +63,7 @@ public class ActionInterceptorHandler {
 
         //TCC name
         String actionName = businessAction.name();
-        BusinessActionContext actionContext = new BusinessActionContext();
+        BusinessActionContext actionContext = Objects.isNull(arguments[0]) ? new BusinessActionContext() : (BusinessActionContext) arguments[0];
         actionContext.setXid(xid);
         //set action name
         actionContext.setActionName(actionName);
@@ -82,7 +86,24 @@ public class ActionInterceptorHandler {
         ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
         //the final result
         ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+        doUpdateTccActionLogStore(actionContext, ret);
         return ret;
+    }
+
+    private void doUpdateTccActionLogStore(BusinessActionContext actionContext, Map<String, Object> ret) {
+        try {
+            //update branch record
+            Object bizRet = ret.get(Constants.TCC_METHOD_RESULT);
+            ActionContextUtil.parseBizRet(bizRet, actionContext);
+            Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, actionContext.getActionContext());
+            String applicationContextStr = JSON.toJSONString(applicationContext);
+            DefaultResourceManager.get().branchReport(BranchType.TCC, actionContext.getXid(), actionContext.getBranchId(), BranchStatus.Registered,
+                    applicationContextStr);
+        } catch (Throwable t) {
+            String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
+            LOGGER.error(msg, t);
+            throw new FrameworkException(t, msg);
+        }
     }
 
     /**
@@ -106,16 +127,18 @@ public class ActionInterceptorHandler {
         initBusinessContext(context, method, businessAction);
         //Init running environment context
         initFrameworkContext(context);
+        if (CollectionUtils.isNotEmpty(actionContext.getActionContext())) {
+            context.putAll(actionContext.getActionContext());
+        }
         actionContext.setActionContext(context);
 
         //init applicationData
-        Map<String, Object> applicationContext = new HashMap<>(4);
-        applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
+        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,
-                applicationContextStr, null);
+                    applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
             String msg = String.format("TCC branch Register error, xid: %s", xid);
@@ -181,7 +204,7 @@ public class ActionInterceptorHandler {
                     //List, get by index
                     if (index >= 0) {
                         @SuppressWarnings("unchecked")
-                        Object targetParam = ((List<Object>)paramObject).get(index);
+                        Object targetParam = ((List<Object>) paramObject).get(index);
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
                         } else {

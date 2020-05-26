@@ -95,6 +95,14 @@ public interface LogStoreSqls {
     String getUpdateBranchTransactionStatusSQL(String branchTable);
 
     /**
+     * Get update branch transaction appData sql string.
+     *
+     * @param branchTable the branch table
+     * @return the string
+     */
+    String getUpdateBranchTransactionAppDataSQL(String branchTable);
+
+    /**
      * Get delete branch transaction by branch id sql string.
      *
      * @param branchTable the branch table

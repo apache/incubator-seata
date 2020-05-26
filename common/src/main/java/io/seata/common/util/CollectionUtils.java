@@ -185,4 +185,22 @@ public class CollectionUtils {
         }
         return destList;
     }
+
+    /**
+     * Check weather the map is not empty
+     * @param map
+     * @return
+     */
+    public static boolean isNotEmpty(Map map) {
+        return !isEmpty(map);
+    }
+
+    /**
+     * Check weather the map is empty
+     * @param map
+     * @return
+     */
+    public static boolean isEmpty(Map map) {
+        return map == null || map.isEmpty();
+    }
 }

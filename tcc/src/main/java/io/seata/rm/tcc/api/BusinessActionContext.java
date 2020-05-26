@@ -16,6 +16,7 @@
 package io.seata.rm.tcc.api;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -31,7 +32,7 @@ public class BusinessActionContext implements Serializable {
 
     private String actionName;
 
-    private Map<String, Object> actionContext;
+    private Map<String, Object> actionContext = new HashMap<>(4);
 
     /**
      * Instantiates a new Business action context.
@@ -60,6 +61,17 @@ public class BusinessActionContext implements Serializable {
      */
     public Object getActionContext(String key) {
         return actionContext.get(key);
+    }
+
+    /**
+     * Add a parameter to context.
+     *
+     * @param key the key
+     * @param value
+     * @return the action context
+     */
+    public Object addActionContext(String key, Object value) {
+        return actionContext.put(key, value);
     }
 
     /**

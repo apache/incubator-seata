@@ -155,6 +155,9 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     @Override
     public abstract String getUpdateBranchTransactionStatusSQL(String branchTable);
 
+    @Override
+    public abstract String getUpdateBranchTransactionAppDataSQL(String branchTable);
+
 
     @Override
     public String getDeleteBranchTransactionByBranchIdSQL(String branchTable) {
