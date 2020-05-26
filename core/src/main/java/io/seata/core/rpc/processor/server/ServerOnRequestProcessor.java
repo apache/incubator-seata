@@ -71,7 +71,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
-    private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
+    private static BlockingQueue<String> LOG_QUEUE = new LinkedBlockingQueue<>();
 
     private RemotingServer remotingServer;
 
@@ -117,7 +117,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
         } else {
             try {
-                logQueue.put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                LOG_QUEUE.put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
                     + rpcContext.getTransactionServiceGroup());
             } catch (InterruptedException e) {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
@@ -163,8 +163,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             List<String> logList = new ArrayList<>();
             while (true) {
                 try {
-                    logList.add(logQueue.take());
-                    logQueue.drainTo(logList, MAX_LOG_TAKE_SIZE);
+                    logList.add(LOG_QUEUE.take());
+                    LOG_QUEUE.drainTo(logList, MAX_LOG_TAKE_SIZE);
                     if (LOGGER.isInfoEnabled()) {
                         for (String str : logList) {
                             LOGGER.info(str);

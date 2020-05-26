@@ -16,6 +16,8 @@
 package io.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MessageFuture;
@@ -26,8 +28,17 @@ import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * handle RM/TM response message.
@@ -42,14 +53,25 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServerOnResponseProcessor implements RemotingProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
+
     private TransactionMessageHandler transactionMessageHandler;
 
     private ConcurrentHashMap<Integer, MessageFuture> futures;
+
+    private static BlockingQueue<String> LOG_QUEUE = new LinkedBlockingQueue<>();
+
+    private static final int MAX_LOG_SEND_THREAD = 1;
+    private static final int MAX_LOG_TAKE_SIZE = 1024;
+    private static final long KEEP_ALIVE_TIME = 0L;
+    private static final String THREAD_PREFIX = "batchLoggerPrint";
+    private static final long BUSY_SLEEP_MILLS = 5L;
 
     public ServerOnResponseProcessor(TransactionMessageHandler transactionMessageHandler,
                                      ConcurrentHashMap<Integer, MessageFuture> futures) {
         this.transactionMessageHandler = transactionMessageHandler;
         this.futures = futures;
+        init();
     }
 
     @Override
@@ -61,9 +83,78 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
         if (messageFuture != null) {
             messageFuture.setResultMessage(rpcMessage.getBody());
         } else {
-            if (rpcMessage.getBody() instanceof AbstractResultMessage) {
-                RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
-                transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), rpcContext);
+            if (ChannelManager.isRegistered(ctx.channel())) {
+                onResponseMessage(ctx, rpcMessage);
+            } else {
+                try {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
+                    }
+                    ctx.disconnect();
+                    ctx.close();
+                } catch (Exception exx) {
+                    LOGGER.error(exx.getMessage());
+                }
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(String.format("close a unhandled connection! [%s]", ctx.channel().toString()));
+                }
+            }
+        }
+    }
+
+    private void onResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", rpcMessage.getBody(),
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()),
+                ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
+        } else {
+            try {
+                LOG_QUEUE.put(rpcMessage.getBody() + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                        + ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
+            } catch (InterruptedException e) {
+                LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
+            }
+        }
+        if (rpcMessage.getBody() instanceof AbstractResultMessage) {
+            RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+            transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), rpcContext);
+        }
+    }
+
+
+    /**
+     * Init.
+     */
+    private void init() {
+        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_LOG_SEND_THREAD, MAX_LOG_SEND_THREAD,
+            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
+        mergeSendExecutorService.submit(new BatchLogRunnable());
+    }
+
+    /**
+     * The type Batch log runnable.
+     */
+    static class BatchLogRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            List<String> logList = new ArrayList<>();
+            while (true) {
+                try {
+                    logList.add(LOG_QUEUE.take());
+                    LOG_QUEUE.drainTo(logList, MAX_LOG_TAKE_SIZE);
+                    if (LOGGER.isInfoEnabled()) {
+                        for (String str : logList) {
+                            LOGGER.info(str);
+                        }
+                    }
+                    logList.clear();
+                    TimeUnit.MILLISECONDS.sleep(BUSY_SLEEP_MILLS);
+                } catch (InterruptedException exx) {
+                    LOGGER.error("batch log busy sleep error:{}", exx.getMessage(), exx);
+                }
+
             }
         }
     }
