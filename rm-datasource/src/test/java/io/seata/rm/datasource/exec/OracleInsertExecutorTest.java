@@ -135,9 +135,7 @@ public class OracleInsertExecutorTest {
         doReturn(map).when(tableMeta).getPrimaryKeyMap();
 
         ResultSet rs = mock(ResultSet.class);
-        Statement statement = mock(Statement.class);
-        doReturn(statement).when(statementProxy).getTargetStatement();
-        doReturn(rs).when(statement).getGeneratedKeys();
+        doReturn(rs).when(statementProxy).getGeneratedKeys();
         doReturn(false).when(rs).next();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
@@ -156,9 +154,7 @@ public class OracleInsertExecutorTest {
     public void testGetPkValuesByAuto_NotSupportYetException() {
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            PreparedStatement preparedStatement = mock(PreparedStatement.class);
-            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-            when(preparedStatement.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
+            when(statementProxy.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
             Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
             columnMetaMap.put(ID_COLUMN, new ColumnMeta());
             columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());

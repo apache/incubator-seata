@@ -219,9 +219,7 @@ public class MySQLInsertExecutorTest {
             columnMetaMap.put(ID_COLUMN, columnMeta);
             when(columnMeta.isAutoincrement()).thenReturn(true);
             when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            PreparedStatement preparedStatement = mock(PreparedStatement.class);
-            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-            when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException());
+            when(statementProxy.getGeneratedKeys()).thenThrow(new SQLException());
             insertExecutor.getPkValuesByAuto();
         });
     }
@@ -237,7 +235,7 @@ public class MySQLInsertExecutorTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
         SQLException e = new SQLException("test warn log", MySQLInsertExecutor.ERR_SQL_STATE, 1);
-        when(preparedStatement.getGeneratedKeys()).thenThrow(e);
+        when(statementProxy.getGeneratedKeys()).thenThrow(e);
         ResultSet genKeys = mock(ResultSet.class);
         when(statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()")).thenReturn(genKeys);
         Assertions.assertTrue(insertExecutor.getPkValuesByAuto().isEmpty());
@@ -254,7 +252,7 @@ public class MySQLInsertExecutorTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
         ResultSet resultSet = mock(ResultSet.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+        when(statementProxy.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
@@ -272,7 +270,7 @@ public class MySQLInsertExecutorTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
         ResultSet resultSet = mock(ResultSet.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+        when(statementProxy.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
@@ -291,7 +289,7 @@ public class MySQLInsertExecutorTest {
         when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-        when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException("", MySQLInsertExecutor.ERR_SQL_STATE));
+        when(statementProxy.getGeneratedKeys()).thenThrow(new SQLException("", MySQLInsertExecutor.ERR_SQL_STATE));
         ResultSet resultSet = mock(ResultSet.class);
         when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
