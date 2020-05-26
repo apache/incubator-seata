@@ -17,6 +17,8 @@ package io.seata.rm.datasource.undo;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.JDBCType;
 import java.sql.PreparedStatement;
@@ -32,6 +34,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
 import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.sql.serial.SerialArray;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -105,18 +108,13 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException the sql exception
      */
     public void executeOn(Connection conn) throws SQLException {
-
         if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
             return;
         }
-
         try {
             String undoSQL = buildUndoSQL();
-
             PreparedStatement undoPST = conn.prepareStatement(undoSQL);
-
             TableRecords undoRows = getUndoRows();
-
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
                 Field pkValue = null;
@@ -127,9 +125,7 @@ public abstract class AbstractUndoExecutor {
                         undoValues.add(field);
                     }
                 }
-
                 undoPrepare(undoPST, undoValues, pkValue);
-
                 undoPST.executeUpdate();
             }
 
@@ -139,7 +135,6 @@ public abstract class AbstractUndoExecutor {
             } else {
                 throw new SQLException(ex);
             }
-
         }
 
     }
@@ -157,24 +152,42 @@ public abstract class AbstractUndoExecutor {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
-            if (undoValue.getType() == JDBCType.BLOB.getVendorTypeNumber()) {
-                SerialBlob serialBlob = (SerialBlob) undoValue.getValue();
+            int type = undoValue.getType();
+            Object value = undoValue.getValue();
+            if (type == JDBCType.BLOB.getVendorTypeNumber()) {
+                SerialBlob serialBlob = (SerialBlob) value;
                 if (serialBlob != null) {
                     undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
-            } else if (undoValue.getType() == JDBCType.CLOB.getVendorTypeNumber()) {
-                SerialClob serialClob = (SerialClob) undoValue.getValue();
+            } else if (type == JDBCType.CLOB.getVendorTypeNumber()) {
+                SerialClob serialClob = (SerialClob) value;
                 if (serialClob != null) {
                     undoPST.setClob(undoIndex, serialClob.getCharacterStream());
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
+            } else if (type == JDBCType.DATALINK.getVendorTypeNumber()) {
+                SerialDatalink dataLink = (SerialDatalink) value;
+                if (dataLink != null) {
+                    undoPST.setURL(undoIndex, dataLink.getDatalink());
+                } else {
+                    undoPST.setObject(undoIndex, null);
+                }
+            } else if (type == JDBCType.ARRAY.getVendorTypeNumber()) {
+                SerialArray array = (SerialArray) value;
+                if (array != null) {
+                    Array arrayOf = undoPST.getConnection().createArrayOf(array.getBaseTypeName(), array.getElements());
+                    undoPST.setArray(undoIndex, arrayOf);
+                } else {
+                    undoPST.setObject(undoIndex, null);
+                }
             } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
-                undoPST.setObject(undoIndex, undoValue.getValue());
+                undoPST.setObject(undoIndex, value);
             } else {
-                undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
+                // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
+                undoPST.setObject(undoIndex, value, type);
             }
         }
         // PK is at last one.
