@@ -20,7 +20,11 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.List;
+
+import com.alibaba.druid.mock.MockResultSet;
+import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
@@ -66,6 +70,10 @@ public class StatementProxyTest {
             dataSource.getConnection().getConnection());
 
         Statement statement = mockDriver.createMockStatement((MockConnection)connectionProxy.getTargetConnection());
+
+        MockResultSet mockResultSet = new MockResultSet(statement);
+        ((ResultSetMetaDataBase)mockResultSet.getMetaData()).getColumns().add(new ResultSetMetaDataBase.ColumnMetaData());
+        ((MockStatement) statement).setGeneratedKeys(mockResultSet);
 
         statementProxy = new StatementProxy(connectionProxy, statement);
     }

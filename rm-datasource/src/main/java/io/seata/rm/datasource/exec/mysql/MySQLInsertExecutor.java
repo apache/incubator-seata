@@ -81,7 +81,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
 
         ResultSet genKeys;
         try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+            genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
             // java.sql.SQLException: Generated keys not requested. You need to
             // specify Statement.RETURN_GENERATED_KEYS to
