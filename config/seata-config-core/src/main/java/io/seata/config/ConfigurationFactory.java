@@ -104,7 +104,7 @@ public final class ConfigurationFactory {
                     + ConfigurationKeys.FILE_ROOT_TYPE);
 
             if (StringUtils.isBlank(configTypeName)) {
-                throw new NotSupportYetException("can not get config type: " + configTypeName);
+                throw new NotSupportYetException("config type can not be null");
             }
 
             configType = ConfigType.getType(configTypeName);
