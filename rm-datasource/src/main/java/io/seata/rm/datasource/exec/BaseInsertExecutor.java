@@ -207,7 +207,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      */
     public List<Object> getGeneratedKeys() throws SQLException {
         // PK is just auto generated
-        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        ResultSet genKeys = statementProxy.getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
@@ -215,6 +215,11 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         }
         if (pkValues.isEmpty()) {
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }
         return pkValues;
     }
