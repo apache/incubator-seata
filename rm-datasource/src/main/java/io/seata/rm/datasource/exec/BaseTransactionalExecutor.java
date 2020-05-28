@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -246,30 +247,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
 
-        List<Row> rows = lockKeyRecords.getRows();
-        if (rows.size() > 1) {
-            ConnectionContext context = connectionProxy.getContext();
-            List<SQLUndoLog> undoItems = context.getUndoItems();
-            for (SQLUndoLog undoItem : undoItems) {
-                String tableName = lockKeyRecords.getTableName();
-                TableRecords oldLockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? undoItem.getBeforeImage() : undoItem.getAfterImage();
-                String oldTableName = oldLockKeyRecords.getTableName();
-                if (oldTableName.equals(tableName)) {
-                    List<Row> oldRows = oldLockKeyRecords.getRows();
-                    for (Row oldRow : oldRows) {
-                        for (int i = rows.size() - 1; i >= 0; i--) {
-                            if (oldRow.equals(rows.get(i))){
-                                rows.remove(i);
-                            }
-                        }
-                    }
-                }
-            }
-            lockKeyRecords.setRows(rows);
-        }
-
-        String lockKeys = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(lockKeys);
+        List<LockKey> LockKey = buildLockKey(lockKeyRecords);
+        connectionProxy.appendLockKey(LockKey);
 
         SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
         connectionProxy.appendUndoLog(sqlUndoLog);
@@ -281,24 +260,36 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param rowsIncludingPK the records
      * @return the string
      */
-    protected String buildLockKey(TableRecords rowsIncludingPK) {
+    protected List<LockKey> buildLockKey(TableRecords rowsIncludingPK) {
         if (rowsIncludingPK.size() == 0) {
             return null;
         }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(rowsIncludingPK.getTableMeta().getTableName());
-        sb.append(":");
-        int filedSequence = 0;
         List<Field> pkRows = rowsIncludingPK.pkRows();
+        List<LockKey> locks = new ArrayList<>();
         for (Field field : pkRows) {
-            sb.append(field.getValue());
-            filedSequence++;
-            if (filedSequence < pkRows.size()) {
-                sb.append(",");
+            LockKey lockKey = new LockKey();
+            lockKey.setTableName(rowsIncludingPK.getTableMeta().getTableName());
+            lockKey.setPk(field.getValue().toString());
+            locks.add(lockKey);
+        }
+        return locks;
+    }
+
+    public String buildLockKeys(List<LockKey> lockKeys) {
+        if (lockKeys.isEmpty()) {
+            return null;
+        }
+        StringBuilder appender = new StringBuilder();
+        Iterator<LockKey> iterable = lockKeys.iterator();
+        while (iterable.hasNext()) {
+            appender.append(iterable.next().getTableName());
+            appender.append(":");
+            appender.append(iterable.next().getPk());
+            if (iterable.hasNext()) {
+                appender.append(";");
             }
         }
-        return sb.toString();
+        return appender.toString();
     }
 
     /**
