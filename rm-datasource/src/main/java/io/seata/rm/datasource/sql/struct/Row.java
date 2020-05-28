@@ -16,12 +16,9 @@
 package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Row.
@@ -96,28 +93,5 @@ public class Row {
             }
         }
         return nonPkFields;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Row row = (Row) o;
-        List<Field> oFields = row.fields;
-
-        if (CollectionUtils.isNotEmpty(this.fields) && CollectionUtils.isNotEmpty(oFields)) {
-            return Arrays.equals(this.fields.toArray(),oFields.toArray());
-        } else {
-            return Objects.equals(this.fields, oFields);
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fields);
     }
 }
