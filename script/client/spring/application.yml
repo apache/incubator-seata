@@ -11,17 +11,22 @@ seata:
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: false
+      saga-branch-register-enable: false
       lock:
         retry-interval: 10
         retry-times: 30
         retry-policy-branch-rollback-on-conflict: true
     tm:
+      degrade-check: false
+      degrade-check-period: 2000
+      degrade-check-allow-times: 10
       commit-retry-count: 5
       rollback-retry-count: 5
     undo:
       data-validation: true
       log-serialization: jackson
       log-table: undo_log
+      only-care-update-columns: true
     log:
       exceptionRate: 100
   service:
@@ -62,7 +67,7 @@ seata:
       server-addr: http://localhost:2379
     nacos:
       namespace:
-      serverAddr: localhost
+      serverAddr: 127.0.0.1:8848
       group: SEATA_GROUP
       userName: ""
       password: ""
@@ -82,7 +87,8 @@ seata:
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
-      server-addr: localhost
+      application: seata-server
+      server-addr: 127.0.0.1:8848
       namespace:
       userName: ""
       password: ""
@@ -97,6 +103,7 @@ seata:
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
       addressWaitTime: 3000
+      application: default
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000

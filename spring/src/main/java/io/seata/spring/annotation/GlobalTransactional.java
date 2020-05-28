@@ -15,20 +15,19 @@
  */
 package io.seata.spring.annotation;
 
-import io.seata.tm.api.transaction.Propagation;
-import io.seata.tm.api.transaction.TransactionInfo;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import io.seata.tm.api.transaction.Propagation;
+import io.seata.tm.api.transaction.TransactionInfo;
 
 /**
  * The interface Global transactional.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD,ElementType.TYPE})
 @Inherited
 public @interface GlobalTransactional {
 
@@ -72,6 +71,7 @@ public @interface GlobalTransactional {
 
     /**
      * the propagation of the global transaction
+     * 
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;

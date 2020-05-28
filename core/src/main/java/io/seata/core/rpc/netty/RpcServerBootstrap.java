@@ -29,7 +29,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import io.seata.discovery.registry.RegistryFactory;
@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.1.0
  */
-public class RpcServerBootstrap implements RemotingServer {
+public class RpcServerBootstrap implements RemotingBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerBootstrap.class);
     private final ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -126,7 +126,7 @@ public class RpcServerBootstrap implements RemotingServer {
     @Override
     public void start() {
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
-            .channel(nettyServerConfig.SERVER_CHANNEL_CLAZZ)
+            .channel(NettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
             .option(ChannelOption.SO_REUSEADDR, true)
             .childOption(ChannelOption.SO_KEEPALIVE, true)
