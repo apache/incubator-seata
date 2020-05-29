@@ -19,8 +19,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -64,21 +62,14 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        Statement stmt = null;
         try {
-            stmt = connection.createStatement();
             DatabaseMetaData dbmd = connection.getMetaData();
             tableName = keywordChecker.checkAndReplace(tableName);
             return resultSetMetaToSchema(dbmd, tableName);
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
         }
     }
 
