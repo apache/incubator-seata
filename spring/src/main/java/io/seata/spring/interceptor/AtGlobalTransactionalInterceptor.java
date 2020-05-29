@@ -48,7 +48,7 @@ public class AtGlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        if (!GlobalTransactionalCheck.getStatus()) {
+        if (!GlobalTransactionalCheck.localDisable()) {
             return handleGlobalTransaction.runTransaction(invocation, atTransactional, failureHandler,
                 transactionalTemplate);
         }

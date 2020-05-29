@@ -66,7 +66,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
             final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
             final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-            if (!GlobalTransactionalCheck.getStatus()) {
+            if (!GlobalTransactionalCheck.localDisable()) {
                 if (globalTransactionalAnnotation != null) {
                     return handleGlobalTransaction
                         .runTransaction(methodInvocation, globalTransactionalAnnotation, failureHandler,

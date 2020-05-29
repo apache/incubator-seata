@@ -110,11 +110,11 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
         }
     }
 
-    public static boolean getStatus() {
-        if (!degradeCheck) {
-            return disable;
+    public static boolean localDisable() {
+        if (!disable) {
+            return degradeCheck && degradeNum >= degradeCheckAllowTimes;
         }
-        return disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
+        return disable;
     }
 
     @Override
