@@ -18,17 +18,16 @@ package io.seata.spring.annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.aopalliance.intercept.MethodInvocation;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.spring.util.GlobalTransactionalCheck;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author funkye
@@ -38,6 +37,7 @@ public class HandleGlobalTransaction {
 
     public Object runTransaction(final MethodInvocation methodInvocation, final Object globalTrxAnno,
         final FailureHandler failureHandler, final TransactionalTemplate transactionalTemplate) throws Throwable {
+        boolean succeed = true;
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
@@ -52,7 +52,29 @@ public class HandleGlobalTransaction {
 
             });
         } catch (TransactionalExecutor.ExecutionException e) {
-            throw switchExecutionException(e, failureHandler);
+            TransactionalExecutor.Code code = e.getCode();
+            switch (code) {
+                case RollbackDone:
+                    throw e.getOriginalException();
+                case BeginFailure:
+                    succeed = false;
+                    failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case CommitFailure:
+                    succeed = false;
+                    failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case RollbackFailure:
+                    failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case RollbackRetrying:
+                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                default:
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
+            }
+        } finally {
+            GlobalTransactionalCheck.onDegradeCheck(succeed);
         }
     }
 
@@ -81,29 +103,6 @@ public class HandleGlobalTransaction {
         }
         transactionInfo.setRollbackRules(rollbackRules);
         return transactionInfo;
-    }
-
-    private Throwable switchExecutionException(TransactionalExecutor.ExecutionException e,
-        FailureHandler failureHandler) throws Throwable {
-        TransactionalExecutor.Code code = e.getCode();
-        switch (code) {
-            case RollbackDone:
-                return e.getOriginalException();
-            case BeginFailure:
-                failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
-                return e.getCause();
-            case CommitFailure:
-                failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
-                return e.getCause();
-            case RollbackFailure:
-                failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
-                return e.getCause();
-            case RollbackRetrying:
-                failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
-                return e.getCause();
-            default:
-                return new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
-        }
     }
 
     private String formatMethod(Method method) {

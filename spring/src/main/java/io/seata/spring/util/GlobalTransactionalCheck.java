@@ -83,29 +83,31 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
     }
 
     public static synchronized void onDegradeCheck(boolean succeed) {
-        if (succeed) {
-            if (degradeNum >= degradeCheckAllowTimes) {
-                reachNum++;
-                if (reachNum >= degradeCheckAllowTimes) {
-                    reachNum = 0;
-                    degradeNum = 0;
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("the current global transaction has been restored");
-                    }
-                }
-            } else if (degradeNum != 0) {
-                degradeNum = 0;
-            }
-        } else {
-            if (degradeNum < degradeCheckAllowTimes) {
-                degradeNum++;
+        if(!degradeCheck){
+            if (succeed) {
                 if (degradeNum >= degradeCheckAllowTimes) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("the current global transaction has been automatically downgraded");
+                    reachNum++;
+                    if (reachNum >= degradeCheckAllowTimes) {
+                        reachNum = 0;
+                        degradeNum = 0;
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("the current global transaction has been restored");
+                        }
                     }
+                } else if (degradeNum != 0) {
+                    degradeNum = 0;
                 }
-            } else if (reachNum != 0) {
-                reachNum = 0;
+            } else {
+                if (degradeNum < degradeCheckAllowTimes) {
+                    degradeNum++;
+                    if (degradeNum >= degradeCheckAllowTimes) {
+                        if (LOGGER.isWarnEnabled()) {
+                            LOGGER.warn("the current global transaction has been automatically downgraded");
+                        }
+                    }
+                } else if (reachNum != 0) {
+                    reachNum = 0;
+                }
             }
         }
     }
