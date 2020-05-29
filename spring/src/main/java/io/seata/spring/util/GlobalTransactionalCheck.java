@@ -83,7 +83,7 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
     }
 
     public static synchronized void onDegradeCheck(boolean succeed) {
-        if(!degradeCheck){
+        if (!degradeCheck) {
             if (succeed) {
                 if (degradeNum >= degradeCheckAllowTimes) {
                     reachNum++;
