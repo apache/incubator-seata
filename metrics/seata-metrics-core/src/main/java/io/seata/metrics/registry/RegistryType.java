@@ -15,8 +15,6 @@
  */
 package io.seata.metrics.registry;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * Supported metrics registry type
  *
@@ -42,7 +40,7 @@ public enum RegistryType {
         if (COMPACT.name().equalsIgnoreCase(name)) {
             return COMPACT;
         } else {
-            throw new NotSupportYetException("unsupported type:" + name);
+            throw new IllegalArgumentException("not support registry type: " + name);
         }
     }
 }

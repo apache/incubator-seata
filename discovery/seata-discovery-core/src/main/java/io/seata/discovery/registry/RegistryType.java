@@ -15,8 +15,6 @@
  */
 package io.seata.discovery.registry;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * The enum Registry type.
  *
@@ -72,6 +70,6 @@ public enum RegistryType {
                 return registryType;
             }
         }
-        throw new NotSupportYetException("unsupported type:" + name);
+        throw new IllegalArgumentException("not support registry type: " + name);
     }
 }

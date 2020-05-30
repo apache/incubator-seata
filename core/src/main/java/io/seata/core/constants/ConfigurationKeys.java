@@ -268,6 +268,11 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = CLIENT_UNDO_PREFIX + "logSerialization";
 
     /**
+     * The constant TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS.
+     */
+    public static final String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
+
+    /**
      * The constant METRICS_PREFIX.
      */
     public static final String METRICS_PREFIX = "metrics.";
@@ -424,4 +429,19 @@ public class ConfigurationKeys {
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_PERIOD.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK.
+     */
+    public static final String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
 }
