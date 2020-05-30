@@ -15,18 +15,17 @@
  */
 package io.seata.saga.proctrl.process.impl;
 
-import java.util.Map;
-
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessType;
 import io.seata.saga.proctrl.handler.ProcessHandler;
 import io.seata.saga.proctrl.handler.RouterHandler;
-import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.BusinessProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * Customizable Business Processor
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CustomizeBusinessProcessor implements BusinessProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessControllerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomizeBusinessProcessor.class);
 
     private Map<String, ProcessHandler> processHandlers;
 
