@@ -15,6 +15,8 @@
  */
 package io.seata.saga.proctrl.process.impl;
 
+import java.util.Map;
+
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
@@ -24,8 +26,6 @@ import io.seata.saga.proctrl.handler.RouterHandler;
 import io.seata.saga.proctrl.process.BusinessProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Customizable Business Processor
