@@ -69,13 +69,15 @@ https://github.com/ctripcorp/apollo/wiki/Apollo%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F
 
 ## Consul
 ```bash
-sh ${SEATAPATH}/script/config-center/consul/consul-config.sh -h localhost -p 8500
+sh ${SEATAPATH}/script/config-center/consul/consul-config.sh -h localhost -p 8500 -t XXX
 ```
 Parameter Description:
 
 -h: host, the default value is localhost.
 
 -p: port, the default value is 8500.
+
+-t: ACL token.
 
 ## Etcd3
 ```bash

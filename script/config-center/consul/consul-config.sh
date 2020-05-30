@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-while getopts ":h:p:" opt
+while getopts ":h:p:t:" opt
 do
   case $opt in
   h)
@@ -22,8 +22,11 @@ do
   p)
     port=$OPTARG
     ;;
+  t)
+    acl=$OPTARG
+    ;;
   ?)
-    echo " USAGE OPTION: $0 [-h host] [-p port] "
+    echo " USAGE OPTION: $0 [-h host] [-p port] [-t acl-token] "
     exit 1
     ;;
   esac
@@ -37,13 +40,16 @@ if [[ -z ${port} ]]; then
 fi
 
 consulAddr=$host:$port
+aclToken=$acl
 contentType="content-type:application/json;charset=UTF-8"
+consulToken="X-Consul-Token:$aclToken"
 echo "Set consulAddr=$consulAddr"
+echo "Set aclToken=$aclToken"
 
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X PUT -H "${1}" -d "${2}" "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
+  curl -X PUT -H "${1}" -H "${5}" -d "${2}" "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat "${tempLog}") ]]; then
     echo " Please check the cluster status. "
     exit 1
@@ -61,7 +67,7 @@ for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
   (( count++ ))
   key=${line%%=*}
   value=${line#*=}
-  addConfig "${contentType}" "${value}" "${consulAddr}" "${key}"
+  addConfig "${contentType}" "${value}" "${consulAddr}" "${key}" "${consulToken}"
 done
 
 echo "========================================================================="

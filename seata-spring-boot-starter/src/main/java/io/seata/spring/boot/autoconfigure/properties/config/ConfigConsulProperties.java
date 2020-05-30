@@ -15,10 +15,10 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.config;
 
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -26,15 +26,28 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_
 @Component
 @ConfigurationProperties(prefix = CONFIG_CONSUL_PREFIX)
 public class ConfigConsulProperties {
-    private String serverAddr = "127.0.0.1:8500";
+	private String serverAddr = "127.0.0.1:8500";
+	/**
+	 * ACL token
+	 */
+	private String token;
 
-    public String getServerAddr() {
-        return serverAddr;
-    }
+	public String getServerAddr() {
+		return serverAddr;
+	}
 
-    public ConfigConsulProperties setServerAddr(String serverAddr) {
-        this.serverAddr = serverAddr;
-        return this;
-    }
+	public ConfigConsulProperties setServerAddr(String serverAddr) {
+		this.serverAddr = serverAddr;
+		return this;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public ConfigConsulProperties setToken(String token) {
+		this.token = token;
+		return this;
+	}
 
 }
