@@ -31,7 +31,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author funkye
- * @date 2020/4/17
  */
 public class HandleGlobalTransaction {
 

@@ -15,35 +15,25 @@
  */
 package io.seata.spring.interceptor;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Optional;
-
+import io.seata.rm.GlobalLockTemplate;
+import io.seata.spring.annotation.GlobalLock;
+import io.seata.spring.annotation.GlobalTransactional;
+import io.seata.spring.util.GlobalTransactionalCheck;
+import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
-import io.seata.rm.GlobalLockTemplate;
-import io.seata.spring.annotation.GlobalLock;
-import io.seata.spring.annotation.GlobalTransactional;
-import io.seata.spring.annotation.HandleGlobalTransaction;
-import io.seata.spring.util.GlobalTransactionalCheck;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
-import io.seata.tm.api.FailureHandler;
-import io.seata.tm.api.TransactionalTemplate;
-
 /**
  * The type Global transactional interceptor.
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements MethodInterceptor {
+public class GlobalTransactionalInterceptor extends GlobalInterceptor implements MethodInterceptor {
 
-    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
-    private final HandleGlobalTransaction handleGlobalTransaction = new HandleGlobalTransaction();
-    private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
 
@@ -89,11 +79,6 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
 
 }

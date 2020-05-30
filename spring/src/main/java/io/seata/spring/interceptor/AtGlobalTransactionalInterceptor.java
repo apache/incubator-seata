@@ -15,26 +15,26 @@
  */
 package io.seata.spring.interceptor;
 
+import java.lang.reflect.Method;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.util.ClassUtils;
 
 import io.seata.spring.annotation.AtTransactional;
-import io.seata.spring.annotation.HandleGlobalTransaction;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.spring.util.GlobalTransactionalCheck;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
-import io.seata.tm.api.TransactionalTemplate;
 
 /**
  * @author funkye
  */
-public class AtGlobalTransactionalInterceptor implements MethodInterceptor {
-    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
-    private static final AtTransactional DEFAULT_AT_TRANSACTIONAL = new AtTransactional();
-    private final HandleGlobalTransaction handleGlobalTransaction = new HandleGlobalTransaction();
-    private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
+public class AtGlobalTransactionalInterceptor extends GlobalInterceptor implements MethodInterceptor {
     private final FailureHandler failureHandler;
     private final AtTransactional atTransactional;
+    private static final AtTransactional DEFAULT_AT_TRANSACTIONAL = new AtTransactional();
 
     public AtGlobalTransactionalInterceptor(FailureHandler failureHandler, AtTransactional atTransactional) {
         this.failureHandler = null == failureHandler ? DEFAULT_FAIL_HANDLER : failureHandler;
@@ -48,9 +48,16 @@ public class AtGlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        if (!GlobalTransactionalCheck.localDisable()) {
-            return handleGlobalTransaction.runTransaction(invocation, atTransactional, failureHandler,
-                transactionalTemplate);
+        Class<?> targetClass = invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null;
+        Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
+        if (null != specificMethod) {
+            final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final GlobalTransactional globalTransactionalAnnotation =
+                getAnnotation(method, targetClass, GlobalTransactional.class);
+            if (null == globalTransactionalAnnotation && !GlobalTransactionalCheck.localDisable()) {
+                return handleGlobalTransaction.runTransaction(invocation, atTransactional, failureHandler,
+                    transactionalTemplate);
+            }
         }
         return invocation.proceed();
     }
