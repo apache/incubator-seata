@@ -278,11 +278,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 if (CollectionUtils.isNotEmpty(keys)) {
                     branchTransactionDOs = getBranchJsons(jedis, keys);
                     GlobalSession globalSession = getGlobalSession(globalTransactionDO, branchTransactionDOs);
-                    if (globalSession != null) {
-                        List<GlobalSession> globalSessions = new ArrayList<>();
-                        globalSessions.add(globalSession);
-                        return globalSessions;
-                    }
+                    List<GlobalSession> globalSessions = new ArrayList<>();
+                    globalSessions.add(globalSession);
+                    return globalSessions;
                 }
             } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
                 return readSession(sessionCondition.getStatuses());
