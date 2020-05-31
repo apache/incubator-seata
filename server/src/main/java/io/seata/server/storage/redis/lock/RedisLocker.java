@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import com.alibaba.fastjson.JSON;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
@@ -190,11 +188,16 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
+            Set<String> lockKeys=new HashSet<>();
             for (LockDO rowlock : locks) {
-                String rowlockJson = jedis.get(getLockKey(rowlock.getRowKey()));
+                lockKeys.add(getLockKey(rowlock.getRowKey()));
+            }
+            List<String> rowlockJsons = jedis.mget(lockKeys.toArray(new String[0]));
+            String xid = rowLocks.get(0).getXid();
+            for (String rowlockJson : rowlockJsons) {
                 if (!StringUtils.isEmpty(rowlockJson)) {
                     LockDO lock = JSON.parseObject(rowlockJson, LockDO.class);
-                    if (null != lock && !Objects.equals(lock.getXid(), rowlock.getXid())) {
+                    if (null != lock && !Objects.equals(lock.getXid(), xid)) {
                         return false;
                     }
                 }

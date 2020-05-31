@@ -70,12 +70,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * The query limit.
      */
-    private int logQueryLimit;
-
-    public RedisTransactionStoreManager() {
-        logQueryLimit =
-            ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
-    }
+    private int logQueryLimit =
+        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);;
 
     /**
      * Get the instance.
@@ -223,7 +219,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             ScanResult<String> scans;
             do {
                 scans = jedis.scan(cursor, params);
-                keys.addAll(scans.getResult().stream().collect(Collectors.toSet()));
+                keys.addAll(scans.getResult());
                 cursor = scans.getCursor();
             } while (!INITIAL_CURSOR.equals(cursor));
             if (CollectionUtils.isNotEmpty(keys)) {
