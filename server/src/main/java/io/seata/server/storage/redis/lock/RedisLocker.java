@@ -16,6 +16,7 @@
 package io.seata.server.storage.redis.lock;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -95,7 +96,7 @@ public class RedisLocker extends AbstractLocker {
                 }
             }
             if (status != 1) {
-                String[] rms = successList.toArray(new String[successList.size()]);
+                String[] rms = successList.toArray(new String[0]);
                 if (rms.length > 0) {
                     jedis.del(rms);
                 }
@@ -103,11 +104,8 @@ public class RedisLocker extends AbstractLocker {
             } else {
                 Transaction multi = jedis.multi();
                 try {
-                    for (LockDO lock : locks) {
-                        String xidLockKey = getXidLockKey(lock.getXid());
-                        String key = getLockKey(lock.getRowKey());
-                        multi.lpush(xidLockKey, key);
-                    }
+                    String xidLockKey = getXidLockKey(locks.get(0).getXid());
+                    multi.lpush(xidLockKey, readyKeys.toArray(new String[0]));
                 } catch (Exception e) {
                     multi.discard();
                     return false;
@@ -131,7 +129,11 @@ public class RedisLocker extends AbstractLocker {
             keys[i] = key;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            jedis.del(keys);
+            String xidLockKey = getXidLockKey(locks.get(0).getXid());
+            Pipeline pipeline = jedis.pipelined();
+            pipeline.del(keys);
+            Arrays.stream(keys).forEach(key -> pipeline.lrem(xidLockKey, 0, key));
+            pipeline.sync();
             return true;
         }
     }
@@ -146,20 +148,27 @@ public class RedisLocker extends AbstractLocker {
             String lockListKey = getXidLockKey(xid);
             Set<String> keys = lRange(jedis, lockListKey);
             if (CollectionUtils.isNotEmpty(keys)) {
+                Pipeline pipeline = null;
                 Iterator<String> it = keys.iterator();
                 while (it.hasNext()) {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
                     for (int i = 0; i < branchIds.size(); i++) {
                         if (null != lock && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
-                            jedis.del(key);
-                            jedis.lrem(lockListKey, 0, key);
+                            if (pipeline == null) {
+                                pipeline = jedis.pipelined();
+                            }
+                            pipeline.del(key);
+                            pipeline.lrem(lockListKey, 0, key);
                             it.remove();
                         }
                     }
                 }
                 if (keys.size() == 0) {
-                    jedis.del(lockListKey);
+                    pipeline.del(lockListKey);
+                }
+                if (pipeline != null) {
+                    pipeline.sync();
                 }
             }
             return true;
@@ -183,7 +192,7 @@ public class RedisLocker extends AbstractLocker {
             List<LockDO> locks = convertToLockDO(rowLocks);
             for (LockDO rowlock : locks) {
                 String rowlockJson = jedis.get(getLockKey(rowlock.getRowKey()));
-                if (StringUtils.isNotBlank(rowlockJson)) {
+                if (!StringUtils.isEmpty(rowlockJson)) {
                     LockDO lock = JSON.parseObject(rowlockJson, LockDO.class);
                     if (null != lock && !Objects.equals(lock.getXid(), rowlock.getXid())) {
                         return false;
@@ -192,32 +201,6 @@ public class RedisLocker extends AbstractLocker {
             }
         }
         return true;
-    }
-
-    /**
-     * Convert to lock do list.
-     *
-     * @param locks
-     *            the locks
-     * @return the list
-     */
-    protected List<LockDO> convertToLockDO(List<RowLock> locks) {
-        List<LockDO> lockDOs = new ArrayList<>();
-        if (CollectionUtils.isEmpty(locks)) {
-            return lockDOs;
-        }
-        for (RowLock rowLock : locks) {
-            LockDO lockDO = new LockDO();
-            lockDO.setBranchId(rowLock.getBranchId());
-            lockDO.setPk(rowLock.getPk());
-            lockDO.setResourceId(rowLock.getResourceId());
-            lockDO.setRowKey(getRowKey(rowLock.getResourceId(), rowLock.getTableName(), rowLock.getPk()));
-            lockDO.setXid(rowLock.getXid());
-            lockDO.setTransactionId(rowLock.getTransactionId());
-            lockDO.setTableName(rowLock.getTableName());
-            lockDOs.add(lockDO);
-        }
-        return lockDOs;
     }
 
     private Set<String> lRange(Jedis jedis, String key) {

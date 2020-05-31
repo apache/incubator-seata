@@ -94,7 +94,7 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
+        if (!StringUtils.isEmpty(taskName)) {
             return;
         }
         session.setStatus(status);
@@ -122,7 +122,7 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
+        if (!StringUtils.isEmpty(taskName)) {
             return;
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, session);
@@ -133,7 +133,7 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
+        if (!StringUtils.isEmpty(taskName)) {
             return;
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
@@ -144,7 +144,7 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
+        if (!StringUtils.isEmpty(taskName)) {
             return;
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, session);
@@ -195,7 +195,6 @@ public class RedisSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void reload() {
-    }
+    public void reload() {}
 
 }

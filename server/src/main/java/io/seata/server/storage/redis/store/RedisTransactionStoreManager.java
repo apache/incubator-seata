@@ -133,11 +133,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            List<String> keys = new ArrayList<>();
-            keys.add(getGlobalKeyByXid(globalTransactionDO.getXid()));
-            keys.add(getGlobalKeyByTransactionId(globalTransactionDO.getTransactionId()));
-            keys.add(getBranchListKeyByXid(globalTransactionDO.getXid()));
-            jedis.del(keys.toArray(new String[keys.size()]));
+            String[] keys = new String[3];
+            keys[0] = getGlobalKeyByXid(globalTransactionDO.getXid());
+            keys[1] = getGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+            keys[2] = getBranchListKeyByXid(globalTransactionDO.getXid());
+            jedis.del(keys);
             return true;
         }
     }
@@ -146,9 +146,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String keys = getGlobalKeyByXid(convertGlobalTransactionDO.getXid());
             Pipeline pipeline = jedis.pipelined();
-            pipeline.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
+            String json = JSON.toJSONString(convertGlobalTransactionDO);
+            pipeline.set(keys, json);
             keys = getGlobalKeyByTransactionId(convertGlobalTransactionDO.getTransactionId());
-            pipeline.set(keys, JSON.toJSONString(convertGlobalTransactionDO));
+            pipeline.set(keys, json);
             pipeline.sync();
             return true;
         }
@@ -182,13 +183,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (withBranchSessions) {
                 Set<String> keys = lRange(jedis, getBranchListKeyByXid(globalTransactionDO.getXid()));
                 if (CollectionUtils.isNotEmpty(keys)) {
-                    branchTransactionDOs = new ArrayList<>();
-                    for (String s : keys) {
-                        String branchJson = jedis.get(s);
-                        if (StringUtils.isNotBlank(branchJson)) {
-                            branchTransactionDOs.add(JSON.parseObject(branchJson, BranchTransactionDO.class));
-                        }
-                    }
+                    branchTransactionDOs = getBranchJsons(jedis, keys);
                 }
             }
             return getGlobalSession(globalTransactionDO, branchTransactionDOs);
@@ -247,12 +242,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     for (String xid : xids) {
                         Set<String> branches = lRange(jedis, getBranchListKeyByXid(xid));
                         if (CollectionUtils.isNotEmpty(branches)) {
-                            for (String branchKey : branches) {
-                                String branchJson = jedis.get(branchKey);
-                                if (StringUtils.isNotBlank(branchJson)) {
-                                    branchTransactionDOs.add(JSON.parseObject(branchJson, BranchTransactionDO.class));
-                                }
-                            }
+                            branchTransactionDOs.addAll(getBranchJsons(jedis, branches));
                         }
                     }
                     Map<String, List<BranchTransactionDO>> branchTransactionDOsMap =
@@ -270,11 +260,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        String globalSessionJson;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            if (StringUtils.isNotBlank(sessionCondition.getXid())) {
-                globalSessionJson = jedis.get(getGlobalKeyByXid(sessionCondition.getXid()));
-                if (StringUtils.isNotBlank(globalSessionJson)) {
+            if (!StringUtils.isEmpty(sessionCondition.getXid())) {
+                String globalSessionJson = jedis.get(getGlobalKeyByXid(sessionCondition.getXid()));
+                if (!StringUtils.isEmpty(globalSessionJson)) {
                     GlobalSession session =
                         convertGlobalSession(JSON.parseObject(globalSessionJson, GlobalTransactionDO.class));
                     List<GlobalSession> globalSessions = new ArrayList<>();
@@ -283,20 +272,15 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 }
             } else if (sessionCondition.getTransactionId() != null) {
                 String global = jedis.get(getGlobalKeyByTransactionId(sessionCondition.getTransactionId()));
-                if (StringUtils.isBlank(global)) {
+                if (StringUtils.isEmpty(global)) {
                     return null;
                 }
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(global, GlobalTransactionDO.class);
                 String branchKey = getBranchListKeyByXid(globalTransactionDO.getXid());
                 Set<String> keys = lRange(jedis, branchKey);
-                List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
+                List<BranchTransactionDO> branchTransactionDOs;
                 if (CollectionUtils.isNotEmpty(keys)) {
-                    for (String s : keys) {
-                        String branchJson = jedis.get(s);
-                        if (StringUtils.isNotBlank(branchJson)) {
-                            branchTransactionDOs.add(JSON.parseObject(branchJson, BranchTransactionDO.class));
-                        }
-                    }
+                    branchTransactionDOs = getBranchJsons(jedis, keys);
                     GlobalSession globalSession = getGlobalSession(globalTransactionDO, branchTransactionDOs);
                     if (globalSession != null) {
                         List<GlobalSession> globalSessions = new ArrayList<>();
@@ -309,6 +293,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
         }
         return null;
+    }
+
+    private List<BranchTransactionDO> getBranchJsons(Jedis jedis, Set<String> keys) {
+        List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
+        List<String> branchJsons = jedis.mget(keys.toArray(new String[0]));
+        for (String branchJson : branchJsons) {
+            if (!StringUtils.isEmpty(branchJson)) {
+                branchTransactionDOs.add(JSON.parseObject(branchJson, BranchTransactionDO.class));
+            }
+        }
+        return branchTransactionDOs;
     }
 
     private GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
