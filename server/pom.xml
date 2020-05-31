@@ -26,10 +26,6 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
-    <properties>
-        <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
-        <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
-    </properties>
     <dependencies>
 
         <dependency>
