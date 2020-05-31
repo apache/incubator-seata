@@ -188,7 +188,7 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> locks = convertToLockDO(rowLocks);
-            Set<String> lockKeys=new HashSet<>();
+            Set<String> lockKeys = new HashSet<>();
             for (LockDO rowlock : locks) {
                 lockKeys.add(getLockKey(rowlock.getRowKey()));
             }
