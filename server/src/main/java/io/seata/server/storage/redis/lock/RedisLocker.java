@@ -35,7 +35,6 @@ import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Transaction;
 
 /**
  * @author funkye
@@ -100,15 +99,12 @@ public class RedisLocker extends AbstractLocker {
                 }
                 return false;
             } else {
-                Transaction multi = jedis.multi();
                 try {
                     String xidLockKey = getXidLockKey(locks.get(0).getXid());
-                    multi.lpush(xidLockKey, readyKeys.toArray(new String[0]));
+                    jedis.lpush(xidLockKey, readyKeys.toArray(new String[0]));
                 } catch (Exception e) {
-                    multi.discard();
                     return false;
                 }
-                multi.exec();
                 return true;
             }
         }
