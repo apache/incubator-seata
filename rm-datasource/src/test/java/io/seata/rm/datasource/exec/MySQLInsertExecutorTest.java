@@ -28,12 +28,13 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.sqlparser.struct.Null;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -51,7 +52,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author guoyao
  */
-public class InsertExecutorTest {
+public class MySQLInsertExecutorTest {
 
     private static final String ID_COLUMN = "id";
     private static final String USER_ID_COLUMN = "user_id";
@@ -65,7 +66,7 @@ public class InsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private InsertExecutor insertExecutor;
+    private MySQLInsertExecutor insertExecutor;
 
     @BeforeEach
     public void init() {
@@ -78,7 +79,7 @@ public class InsertExecutorTest {
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new MySQLInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
     }
 
     @Test
@@ -227,9 +228,7 @@ public class InsertExecutorTest {
             columnMetaMap.put(ID_COLUMN, columnMeta);
             when(columnMeta.isAutoincrement()).thenReturn(true);
             when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            PreparedStatement preparedStatement = mock(PreparedStatement.class);
-            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-            when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException());
+            when(statementProxy.getGeneratedKeys()).thenThrow(new SQLException());
             insertExecutor.getPkValuesByAuto();
         });
     }
@@ -244,8 +243,8 @@ public class InsertExecutorTest {
         when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-        SQLException e = new SQLException("test warn log", InsertExecutor.ERR_SQL_STATE, 1);
-        when(preparedStatement.getGeneratedKeys()).thenThrow(e);
+        SQLException e = new SQLException("test warn log", MySQLInsertExecutor.ERR_SQL_STATE, 1);
+        when(statementProxy.getGeneratedKeys()).thenThrow(e);
         ResultSet genKeys = mock(ResultSet.class);
         when(statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()")).thenReturn(genKeys);
         Map<String,List<Object>> pkValueMap=insertExecutor.getPkValuesByAuto();
@@ -263,7 +262,7 @@ public class InsertExecutorTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
         ResultSet resultSet = mock(ResultSet.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+        when(statementProxy.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         Map<String,List<Object>> pkValues = insertExecutor.getPkValuesByAuto();
@@ -281,7 +280,7 @@ public class InsertExecutorTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
         ResultSet resultSet = mock(ResultSet.class);
-        when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
+        when(statementProxy.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
@@ -300,7 +299,7 @@ public class InsertExecutorTest {
         when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-        when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException("", InsertExecutor.ERR_SQL_STATE));
+        when(statementProxy.getGeneratedKeys()).thenThrow(new SQLException("", MySQLInsertExecutor.ERR_SQL_STATE));
         ResultSet resultSet = mock(ResultSet.class);
         when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
@@ -433,7 +432,7 @@ public class InsertExecutorTest {
     }
 
     private void mockParametersPkWithNull() {
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        ArrayList<Object>[] parameters = new ArrayList[4];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -442,12 +441,12 @@ public class InsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        parameters[0] = arrayList0;
+        parameters[1] = arrayList1;
+        parameters[2] = arrayList2;
+        parameters[3] = arrayList3;
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
     }
 
     private void mockParametersOfOnePk() {

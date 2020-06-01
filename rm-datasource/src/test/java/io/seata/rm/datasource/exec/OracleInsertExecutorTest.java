@@ -28,6 +28,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
@@ -65,7 +66,7 @@ public class OracleInsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private InsertExecutor insertExecutor;
+    private OracleInsertExecutor insertExecutor;
 
     @BeforeEach
     public void init() {
@@ -78,7 +79,7 @@ public class OracleInsertExecutorTest {
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
     }
 
     @Test
@@ -123,7 +124,7 @@ public class OracleInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
 
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 
@@ -132,13 +133,11 @@ public class OracleInsertExecutorTest {
         doReturn(map).when(tableMeta).getPrimaryKeyMap();
 
         ResultSet rs = mock(ResultSet.class);
-        Statement statement = mock(Statement.class);
-        doReturn(statement).when(statementProxy).getTargetStatement();
-        doReturn(rs).when(statement).getGeneratedKeys();
+        doReturn(rs).when(statementProxy).getGeneratedKeys();
         doReturn(false).when(rs).next();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
-            insertExecutor.getPkValuesByAuto();
+            insertExecutor.getGeneratedKeys();
         });
 
         doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();

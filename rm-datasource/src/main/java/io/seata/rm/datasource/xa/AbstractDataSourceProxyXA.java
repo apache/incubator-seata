@@ -31,8 +31,8 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
     protected static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT_XA";
 
     /**
-     * Get a ConnetionProxyXA instance for finishing XA branch(XA commit/XA rollback)
-     * @return ConnetionProxyXA instance
+     * Get a ConnectionProxyXA instance for finishing XA branch(XA commit/XA rollback)
+     * @return ConnectionProxyXA instance
      * @throws SQLException exception
      */
     public ConnectionProxyXA getConnectionForXAFinish(XAXid xaXid) throws SQLException {

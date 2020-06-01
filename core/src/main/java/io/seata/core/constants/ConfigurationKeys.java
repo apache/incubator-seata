@@ -429,4 +429,19 @@ public class ConfigurationKeys {
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_PERIOD.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK.
+     */
+    public static final String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
 }
