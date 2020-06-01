@@ -27,6 +27,7 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
@@ -79,6 +80,11 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
         };
         visitor.visit(ast.getTableSource());
         return sb.toString();
+    }
+
+    @Override
+    public boolean insertColumnsIsEmpty() {
+        return CollectionUtils.isEmpty(ast.getColumns());
     }
 
     @Override

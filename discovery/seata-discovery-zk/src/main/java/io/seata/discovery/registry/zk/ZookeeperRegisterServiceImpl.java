@@ -64,6 +64,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final String AUTH_PASSWORD = "password";
     private static final String SESSION_TIME_OUT_KEY = "sessionTimeout";
     private static final String CONNECT_TIME_OUT_KEY = "connectTimeout";
+    private static final int DEFAULT_SESSION_TIMEOUT = 6000;
+    private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
@@ -208,8 +210,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (null == zkClient) {
                     zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY),
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
                         FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
                         FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
                 }
@@ -221,14 +223,14 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     // visible for test.
     ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
         ZkClient zkClient = new ZkClient(address, sessionTimeout, connectTimeout);
-        if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
-            zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
-        }
         if (null != authInfo && authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
                 StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
                 zkClient.addAuthInfo("digest", auth.toString().getBytes());
             }
+        }
+        if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
+            zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
         }
         zkClient.subscribeStateChanges(new IZkStateListener() {
 
