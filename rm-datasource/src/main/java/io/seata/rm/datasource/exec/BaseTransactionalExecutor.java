@@ -250,8 +250,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
 
-        List<LockKey> LockKey = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(LockKey);
+        List<LockKey> lockKey = buildLockKey(lockKeyRecords);
+        connectionProxy.appendLockKey(lockKey);
 
         SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
         connectionProxy.appendUndoLog(sqlUndoLog);
