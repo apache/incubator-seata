@@ -274,14 +274,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(global, GlobalTransactionDO.class);
                 String branchKey = getBranchListKeyByXid(globalTransactionDO.getXid());
                 Set<String> keys = lRange(jedis, branchKey);
-                List<BranchTransactionDO> branchTransactionDOs;
+                List<BranchTransactionDO> branchTransactionDOs = null;
                 if (CollectionUtils.isNotEmpty(keys)) {
                     branchTransactionDOs = getBranchJsons(jedis, keys);
-                    GlobalSession globalSession = getGlobalSession(globalTransactionDO, branchTransactionDOs);
-                    List<GlobalSession> globalSessions = new ArrayList<>();
-                    globalSessions.add(globalSession);
-                    return globalSessions;
                 }
+                GlobalSession globalSession = getGlobalSession(globalTransactionDO, branchTransactionDOs);
+                List<GlobalSession> globalSessions = new ArrayList<>();
+                globalSessions.add(globalSession);
+                return globalSessions;
             } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
                 return readSession(sessionCondition.getStatuses());
             }
