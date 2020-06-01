@@ -380,7 +380,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private Set<String> lRange(Jedis jedis, String key) {
         Set<String> keys = new HashSet<>();
-        List<String> redisBranchJson = null;
+        List<String> redisBranchJson;
         int start = 0;
         int stop = logQueryLimit;
         do {

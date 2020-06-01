@@ -158,10 +158,7 @@ public class RedisLocker extends AbstractLocker {
                         }
                     }
                 }
-                if (keys.size() == 0) {
-                    pipeline.del(lockListKey);
-                }
-                if (pipeline != null) {
+                if (null != pipeline) {
                     pipeline.sync();
                 }
             }
