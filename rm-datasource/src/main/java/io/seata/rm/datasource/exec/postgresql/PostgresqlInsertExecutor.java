@@ -35,8 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.*;
-
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 /**
  * @author jsbxyyx
  */
@@ -68,7 +72,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
                 pkValuesMap = getPkValuesByColumn();
             }
             else if (containsColumns()) {
-                String columnName =getTableMeta().getPrimaryKeyOnlyName().get(0);
+                String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
                 pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
             }
             else {
@@ -94,7 +98,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
 
     @Override
     public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap  =parsePkValuesFromStatement();
+        Map<String,List<Object>> pkValuesMap = parsePkValuesFromStatement();
         Set<String> keySet = new HashSet<>(pkValuesMap.keySet());
         //auto increment
         for (String pkKey:keySet) {

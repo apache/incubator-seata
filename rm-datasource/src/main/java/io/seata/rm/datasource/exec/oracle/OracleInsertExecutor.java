@@ -32,7 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author jsbxyyx
@@ -65,7 +70,7 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
                 pkValuesMap = getPkValuesByColumn();
             }
             else if (containsColumns()) {
-                String columnName =getTableMeta().getPrimaryKeyOnlyName().get(0);
+                String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
                 pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
             }
             else {
