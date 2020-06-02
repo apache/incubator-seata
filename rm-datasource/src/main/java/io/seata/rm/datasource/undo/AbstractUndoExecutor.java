@@ -121,7 +121,7 @@ public abstract class AbstractUndoExecutor {
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                List<Field> pkValueList =  getOrderedPkList(undoRecords,undoRow,getDbType(conn));
+                List<Field> pkValueList =  getOrderedPkList(undoRows,undoRow,getDbType(conn));
                 for (Field field : undoRow.getFields()) {
                     if (field.getKeyType() != KeyType.PRIMARY_KEY) {
                         undoValues.add(field);

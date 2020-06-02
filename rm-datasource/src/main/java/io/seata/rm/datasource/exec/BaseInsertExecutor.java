@@ -18,14 +18,14 @@ package io.seata.rm.datasource.exec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -68,7 +68,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        List<Object> pkValues = getPkValues();
+        Map<String,List<Object>> pkValues = getPkValues();
         TableRecords afterImage = buildTableRecords(pkValues);
         if (afterImage == null) {
             throw new SQLException("Failed to build after-image for insert");
@@ -94,46 +94,46 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     }
 
     /**
-     * get primary key column index.
-     * @return -1: not found.
+     * get pk index
+     * @return the key is pk column name and the value is index of the pk column
      */
-    protected int getPkIndex() {
+    protected Map<String,Integer> getPkIndex() {
+        Map<String,Integer> pkIndexMap = new HashMap<>(8);
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
         if (CollectionUtils.isNotEmpty(insertColumns)) {
             final int insertColumnsSize = insertColumns.size();
-            int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (equalsPK(insertColumns.get(paramIdx))) {
-                    pkIndex = paramIdx;
-                    break;
+                if (containPK(insertColumns.get(paramIdx))) {
+                    pkIndexMap.put(insertColumns.get(paramIdx),paramIdx);
                 }
             }
-            return pkIndex;
+            return pkIndexMap;
         }
         int pkIndex = -1;
         Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
-            if (equalsPK(entry.getValue().getColumnName())) {
-                break;
+            if (containPK(entry.getValue().getColumnName())) {
+                pkIndexMap.put(entry.getValue().getColumnName(),pkIndex);
             }
         }
-        return pkIndex;
+        return pkIndexMap;
     }
 
     /**
      * parse primary key value from statement.
      * @return
      */
-    protected List<Object> parsePkValuesFromStatement() {
+    protected Map<String,List<Object>> parsePkValuesFromStatement() {
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        final int pkIndex = getPkIndex();
-        if (pkIndex == -1) {
-            throw new ShouldNeverHappenException(String.format("pkIndex is %d", pkIndex));
+        final Map<String, Integer> pkIndexMap = getPkIndex();
+        if (pkIndexMap.isEmpty()) {
+            throw new ShouldNeverHappenException("pkIndex is not found");
         }
-        List<Object> pkValues = null;
+        Map<String,List<Object>> pkValuesMap = new HashMap<>(3);
+
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
@@ -143,15 +143,21 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                 final int rowSize = insertRows.size();
 
                 if (rowSize == 1) {
-                    Object pkValue = insertRows.get(0).get(pkIndex);
-                    if (PLACEHOLDER.equals(pkValue)) {
-                        pkValues = parameters[pkIndex];
-                    } else {
-                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(pkIndex)).collect(Collectors.toList());
+                    for (String pkKey:pkIndexMap.keySet())
+                    {
+                        int pkIndex = pkIndexMap.get(pkKey);
+                        List<Object> pkValues = null;
+                        Object pkValue = insertRows.get(0).get(pkIndex);
+                        if (PLACEHOLDER.equals(pkValue)) {
+                            pkValues = parameters[pkIndex];
+                        } else {
+                            int finalPkIndex = pkIndex;
+                            pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                        }
+                        pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
                     }
                 } else {
                     int totalPlaceholderNum = -1;
-                    pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
                         // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
@@ -159,7 +165,6 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                         if (row.isEmpty()) {
                             continue;
                         }
-                        Object pkValue = row.get(pkIndex);
                         int currentRowPlaceholderNum = -1;
                         for (Object r : row) {
                             if (PLACEHOLDER.equals(r)) {
@@ -167,34 +172,48 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                                 currentRowPlaceholderNum += 1;
                             }
                         }
-                        if (PLACEHOLDER.equals(pkValue)) {
-                            int idx = pkIndex;
-                            if (i != 0) {
-                                idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
+                        for (String pkKey:pkIndexMap.keySet())
+                        {
+                            Object pkValue = row.get(pkIndexMap.get(pkKey));
+                            List<Object> pkValues = pkValuesMap.get(pkKey);
+                            if (Objects.isNull(pkValues))
+                            {
+                                pkValues = new ArrayList<>();
                             }
-                            ArrayList<Object> parameter = parameters[idx];
-                            pkValues.addAll(parameter);
-                        } else {
-                            pkValues.add(pkValue);
+                            if (PLACEHOLDER.equals(pkValue)) {
+                                int idx = pkIndexMap.get(pkKey);
+                                if (i != 0) {
+                                    idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndexMap.get(pkKey);
+                                }
+                                ArrayList<Object> parameter = parameters[idx];
+                                pkValues.addAll(parameter);
+                            } else {
+                                pkValues.add(pkValue);
+                            }
+                            pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
                         }
                     }
                 }
             }
         } else {
             List<List<Object>> insertRows = recognizer.getInsertRows();
-            pkValues = new ArrayList<>(insertRows.size());
             for (List<Object> row : insertRows) {
-                pkValues.add(row.get(pkIndex));
+                for (String pkKey:pkIndexMap.keySet()) {
+                    int pkIndex = pkIndexMap.get(pkKey);
+                    List<Object> pkValues = pkValuesMap.get(pkKey);
+                    if (Objects.isNull(pkValues)) {
+                        pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), Lists.newArrayList(row.get(pkIndex)));
+                    } else {
+                        pkValues.add(row.get(pkIndex));
+                    }
+                }
             }
         }
-        if (pkValues == null) {
+        if (pkValuesMap.isEmpty()) {
             throw new ShouldNeverHappenException();
         }
-        boolean b = this.checkPkValues(pkValues);
-        if (!b) {
-            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
-        }
-        return pkValues;
+
+        return pkValuesMap;
     }
 
     /**

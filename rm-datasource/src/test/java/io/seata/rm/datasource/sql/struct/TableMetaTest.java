@@ -20,10 +20,15 @@ import io.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 /**
  * @author will
  */
 public class TableMetaTest {
+
+    private final String COLUMN_ID="id";
+    private final String COLUMN_USERCODE="userCode";
 
     @Test
     public void testTableMeta() {
@@ -71,21 +76,39 @@ public class TableMetaTest {
     @Test
     public void testGetPrimaryKeyMap() {
         TableMeta tableMeta = new TableMeta();
+
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
         primary.setValues(Lists.newArrayList(new ColumnMeta()));
+
         tableMeta.getAllIndexes().put("id", primary);
+
         Assertions.assertNotNull(tableMeta.getPrimaryKeyMap());
+
+
     }
 
     @Test
     public void testGetPrimaryKeyOnlyName() {
         TableMeta tableMeta = new TableMeta();
+        ColumnMeta columnIdMeta=new ColumnMeta();
+        columnIdMeta.setColumnName(COLUMN_ID);
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
-        primary.setValues(Lists.newArrayList(new ColumnMeta()));
-        tableMeta.getAllIndexes().put("id", primary);
-        Assertions.assertTrue(tableMeta.getPrimaryKeyOnlyName().size() >= 1);
+        primary.setValues(Lists.newArrayList(columnIdMeta));
+
+        ColumnMeta columnUserCodeMeta=new ColumnMeta();
+        columnUserCodeMeta.setColumnName(COLUMN_USERCODE);
+        IndexMeta primary2 = new IndexMeta();
+        primary2.setIndextype(IndexType.PRIMARY);
+        primary2.setValues(Lists.newArrayList(columnUserCodeMeta));
+
+        tableMeta.getAllIndexes().put(COLUMN_ID, primary);
+        tableMeta.getAllIndexes().put(COLUMN_USERCODE, primary2);
+
+        List<String> pkColumnName=tableMeta.getPrimaryKeyOnlyName();
+        Assertions.assertEquals("id",pkColumnName.get(0));
+        Assertions.assertEquals("userCode",pkColumnName.get(1));
     }
 
     @Test

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec.postgresql;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
@@ -34,8 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author jsbxyyx
@@ -58,22 +58,61 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     }
 
     @Override
-    public List<Object> getPkValues() throws SQLException {
-        return containsPK() ? getPkValuesByColumn() :
-                (containsColumns() ? getGeneratedKeys() : getPkValuesByColumn());
+    public Map<String,List<Object>> getPkValues() throws SQLException {
+        Map<String,List<Object>> pkValuesMap = null;
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        Boolean isContainsPk = containsPK();
+        //when there is only one pk in the table
+        if (getTableMeta().getPrimaryKeyOnlyName().size() == 1) {
+            if (isContainsPk) {
+                pkValuesMap = getPkValuesByColumn();
+            }
+            else if (containsColumns()) {
+                String columnName =getTableMeta().getPrimaryKeyOnlyName().get(0);
+                pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
+            }
+            else {
+                pkValuesMap = getPkValuesByColumn();
+            }
+        } else {
+            //when there is multiple pk in the table
+            //1,all pk columns are filled value.
+            //2,the auto increment pk column value is null, and other pk value are not null.
+            pkValuesMap = getPkValuesByColumn();
+            for (String columnName:pkColumnNameList) {
+                if (!pkValuesMap.containsKey(columnName)) {
+                    ColumnMeta pkColumnMeta = getTableMeta().getColumnMeta(columnName);
+                    if (Objects.nonNull(pkColumnMeta)) {
+                        //3,the auto increment pk column is not exits in sql, and other pk are exits also the value is not null.
+                        pkValuesMap.put(pkColumnMeta.getColumnName(),getGeneratedKeys());
+                    }
+                }
+            }
+        }
+        return pkValuesMap;
     }
 
     @Override
-    public List<Object> getPkValuesByColumn() throws SQLException {
-        List<Object> pkValues = parsePkValuesFromStatement();
-        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValues = getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0));
-        } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValues = getGeneratedKeys();
-        } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
-            pkValues = getPkValuesByDefault();
+    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String,List<Object>> pkValuesMap  =parsePkValuesFromStatement();
+        Set<String> keySet = new HashSet<>(pkValuesMap.keySet());
+        //auto increment
+        for (String pkKey:keySet) {
+            List<Object> pkValues = pkValuesMap.get(pkKey);
+            boolean b = this.checkPkValues(pkValues);
+            if (!b) {
+                throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            }
+            if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
+                pkValuesMap.put(pkKey,getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
+            } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlMethodExpr) {
+                pkValuesMap.put(pkKey,getGeneratedKeys());
+            } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
+                pkValuesMap.put(pkKey,getPkValuesByDefault());
+            }
         }
-        return pkValues;
+
+        return pkValuesMap;
     }
 
     /**

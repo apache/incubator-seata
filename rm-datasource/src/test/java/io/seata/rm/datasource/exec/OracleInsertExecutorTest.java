@@ -105,13 +105,10 @@ public class OracleInsertExecutorTest {
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));;
-        Map<String,List<Object>> pkValuesMap =new HashMap<>();
-        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        doReturn(Arrays.asList(new Object[]{PK_VALUE})).when(insertExecutor).getGeneratedKeys();
+        Map<String,List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
 
-        doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
-        Map<String,List<Object>> pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-
-        verify(insertExecutor).getPkValuesByAuto();
+        verify(insertExecutor).getGeneratedKeys();
         Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE}));
     }
 
