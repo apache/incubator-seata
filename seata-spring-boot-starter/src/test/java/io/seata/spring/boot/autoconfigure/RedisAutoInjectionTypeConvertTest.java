@@ -39,6 +39,8 @@ import static org.mockito.Mockito.mock;
 public class RedisAutoInjectionTypeConvertTest {
     private static AnnotationConfigApplicationContext applicationContex;
 
+    private static final String SEATA_CONFIG_SPRING_BOOT = "springboot";
+    
     @BeforeAll
     public static void initContext() {
         applicationContex = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
@@ -52,7 +54,8 @@ public class RedisAutoInjectionTypeConvertTest {
     @Test
     public void testReadConfigurationItems() {
         FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration =
+            EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_SPRING_BOOT).provide(configuration);
         assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
         assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
         assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
