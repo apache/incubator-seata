@@ -42,10 +42,6 @@ public final class ConfigurationFactory {
 
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
-    private static final String SEATA_CONFIG_CACHE = "cache";
-
-    private static final String SEATA_CONFIG_SPRING_BOOT = "springboot";
-
     public static final Configuration CURRENT_FILE_INSTANCE;
 
     static {
@@ -65,8 +61,7 @@ public final class ConfigurationFactory {
                 : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
-            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_SPRING_BOOT)
-                .provide(configuration);
+            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
                     : extConfiguration.getClass().getSimpleName());
@@ -124,8 +119,7 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
             try {
-                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_SPRING_BOOT)
-                    .provide(configuration);
+                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load Configuration:{}", extConfiguration == null
                         ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
