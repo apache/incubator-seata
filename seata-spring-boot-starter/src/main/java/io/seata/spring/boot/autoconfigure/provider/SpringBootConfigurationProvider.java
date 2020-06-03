@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import io.seata.common.holder.ObjectHolder;
-import io.seata.common.loader.LoadLevel;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +40,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "springboot")
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
     private static final String INTERCEPT_METHOD_PREFIX = "get";
 
