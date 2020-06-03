@@ -102,6 +102,18 @@
             <artifactId>logback-classic</artifactId>
         </dependency>
 
+        <!-- jedis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.fppt</groupId>
+            <artifactId>jedis-mock</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
