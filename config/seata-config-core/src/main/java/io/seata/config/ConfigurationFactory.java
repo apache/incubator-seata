@@ -44,6 +44,8 @@ public final class ConfigurationFactory {
 
     private static final String SEATA_CONFIG_CACHE = "cache";
 
+    private static final String SEATA_CONFIG_SPRING_BOOT = "springboot";
+
     public static final Configuration CURRENT_FILE_INSTANCE;
 
     static {
@@ -58,11 +60,13 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
-            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
+        Configuration configuration =
+            (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX, false)
+                : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
-            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_SPRING_BOOT)
+                .provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
                     : extConfiguration.getClass().getSimpleName());
@@ -120,7 +124,8 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
             try {
-                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_SPRING_BOOT)
+                    .provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load Configuration:{}", extConfiguration == null
                         ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
