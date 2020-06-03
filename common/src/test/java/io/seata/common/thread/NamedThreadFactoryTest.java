@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
  * @author Otis.z
  */
 public class NamedThreadFactoryTest {
+    private static final int THREAD_TOTAL_SIZE = 3;
+    private static final int DEFAULT_THREAD_PREFIX_COUNTER = 1;
 
     @Test
     public void testNewThread() {
@@ -48,5 +50,16 @@ public class NamedThreadFactoryTest {
 
         assertThat(thread.getName()).startsWith("prefix");
         assertThat(thread.isDaemon()).isTrue();
+    }
+
+    @Test
+    public void testThreadNameHasCounterWithPrefixCounter() {
+        NamedThreadFactory factory = new NamedThreadFactory("prefix", THREAD_TOTAL_SIZE,true);
+        for (int i = 0; i < THREAD_TOTAL_SIZE; i ++) {
+            Thread t1 = factory.newThread(() -> {});
+
+            // the first _DEFAULT_THREAD_PREFIX_COUNTER is meaning thread counter
+            assertThat(t1.getName()).startsWith("prefix_" + DEFAULT_THREAD_PREFIX_COUNTER + "_" + (i + 1));
+        }
     }
 }
