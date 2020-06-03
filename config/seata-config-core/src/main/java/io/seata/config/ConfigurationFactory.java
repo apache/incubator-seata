@@ -42,6 +42,8 @@ public final class ConfigurationFactory {
 
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
+    private static final String SEATA_CONFIG_CACHE = "cache";
+
     public static final Configuration CURRENT_FILE_INSTANCE;
 
     static {
@@ -135,11 +137,11 @@ public final class ConfigurationFactory {
         try {
             Configuration configurationCache;
             if (null != extConfiguration) {
-                configurationCache =
-                    EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(extConfiguration);
+                configurationCache = EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_CACHE)
+                    .provide(extConfiguration);
             } else {
-                configurationCache =
-                    EnhancedServiceLoader.load(ConfigurationCacheProvider.class).provide(configuration);
+                configurationCache = EnhancedServiceLoader.load(ExtConfigurationProvider.class, SEATA_CONFIG_CACHE)
+                    .provide(configuration);
             }
             if (null != configurationCache) {
                 extConfiguration = configurationCache;

@@ -18,7 +18,7 @@ package io.seata.config;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -26,7 +26,8 @@ import net.sf.cglib.proxy.MethodInterceptor;
 /**
  * @author funkye
  */
-public class SeataConfigurationCacheProvider implements ConfigurationCacheProvider, ConfigurationChangeListener {
+@LoadLevel(name = "cache")
+public class SeataConfigurationCacheProvider implements ExtConfigurationProvider, ConfigurationChangeListener {
 
     private static final String METHOD_PREFIX = "get";
 
