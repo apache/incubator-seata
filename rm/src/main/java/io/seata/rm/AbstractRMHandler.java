@@ -101,7 +101,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
                     applicationData);
         } catch (Exception e) {
-            status = BranchStatus.PhaseTwo_CommitFailed_Retryable;
+            status = BranchStatus.PhaseTwo_CommitFailed_Unretryable;
             throw e;
         } finally {
             response.setXid(xid);
@@ -134,7 +134,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
                     applicationData);
         } catch (Exception e) {
-            status = BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+            status = BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             throw e;
         } finally {
             response.setXid(xid);
