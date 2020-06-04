@@ -57,10 +57,12 @@ public class NamedThreadFactoryTest {
     public void testThreadNameHasCounterWithPrefixCounter() {
         NamedThreadFactory factory = new NamedThreadFactory("prefix", THREAD_TOTAL_SIZE,true);
         for (int i = 0; i < THREAD_TOTAL_SIZE; i ++) {
-            Thread t1 = factory.newThread(() -> {});
+            Thread thread = factory.newThread(() -> {});
+
 
             // the first _DEFAULT_THREAD_PREFIX_COUNTER is meaning thread counter
-            assertThat(t1.getName()).startsWith("prefix_" + DEFAULT_THREAD_PREFIX_COUNTER + "_" + (i + 1));
+            assertThat("prefix_" + DEFAULT_THREAD_PREFIX_COUNTER + "_" + (i + 1) + "_" + THREAD_TOTAL_SIZE)
+                    .isEqualTo(thread.getName());
         }
     }
 }
