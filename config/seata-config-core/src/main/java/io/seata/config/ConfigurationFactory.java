@@ -136,9 +136,9 @@ public final class ConfigurationFactory {
         try {
             Configuration configurationCache;
             if (null != extConfiguration) {
-                configurationCache = SeataConfigurationCacheProvider.getInstance().provide(configuration);
+                configurationCache = ConfigurationCache.getInstance().proxy(configuration);
             } else {
-                configurationCache = SeataConfigurationCacheProvider.getInstance().provide(configuration);
+                configurationCache = ConfigurationCache.getInstance().proxy(configuration);
             }
             if (null != configurationCache) {
                 extConfiguration = configurationCache;

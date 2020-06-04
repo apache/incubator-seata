@@ -22,7 +22,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.SeataConfigurationCacheProvider;
+import io.seata.config.ConfigurationCache;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.ShutdownHook;
@@ -220,7 +220,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     if (interceptor == null) {
                         if (globalTransactionalInterceptor == null) {
                             globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                            SeataConfigurationCacheProvider.addConfigListener(
+                            ConfigurationCache.addConfigListener(
                                 ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                                 (ConfigurationChangeListener)globalTransactionalInterceptor);
                         }

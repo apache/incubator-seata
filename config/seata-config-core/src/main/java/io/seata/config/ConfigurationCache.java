@@ -25,7 +25,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 /**
  * @author funkye
  */
-public class SeataConfigurationCacheProvider implements ConfigurationChangeListener {
+public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String METHOD_PREFIX = "get";
 
@@ -35,7 +35,36 @@ public class SeataConfigurationCacheProvider implements ConfigurationChangeListe
 
     private static final Set<String> LISTENER_KEYS = new CopyOnWriteArraySet<>();
 
-    public Configuration provide(Configuration originalConfiguration) {
+    public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
+        synchronized (ConfigurationCache.class) {
+            if (StringUtils.isBlank(dataId) || LISTENER_KEYS.contains(dataId)) {
+                return;
+            }
+            ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
+            LISTENER_KEYS.add(dataId);
+        }
+        for (int i = 0; i < listeners.length; i++) {
+            ConfigurationFactory.getInstance().addConfigListener(dataId, listeners[i]);
+        }
+    }
+
+    public static ConfigurationCache getInstance() {
+        return ConfigurationCacheInstance.INSTANCE;
+    }
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        Object oldValue = CONFIG_CACHE.get(event.getDataId());
+        if (null == oldValue || !oldValue.equals(event.getNewValue())) {
+            if (StringUtils.isNotBlank(event.getNewValue())) {
+                CONFIG_CACHE.put(event.getDataId(), event.getNewValue());
+            } else {
+                CONFIG_CACHE.remove(event.getDataId());
+            }
+        }
+    }
+
+    public Configuration proxy(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class,
             (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(METHOD_PREFIX)
@@ -57,37 +86,8 @@ public class SeataConfigurationCacheProvider implements ConfigurationChangeListe
             });
     }
 
-    public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
-        synchronized (SeataConfigurationCacheProvider.class) {
-            if (StringUtils.isBlank(dataId) || LISTENER_KEYS.contains(dataId)) {
-                return;
-            }
-            ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
-            LISTENER_KEYS.add(dataId);
-        }
-        for (int i = 0; i < listeners.length; i++) {
-            ConfigurationFactory.getInstance().addConfigListener(dataId, listeners[i]);
-        }
-    }
-
-    @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {
-        Object oldValue = CONFIG_CACHE.get(event.getDataId());
-        if (null == oldValue || !oldValue.equals(event.getNewValue())) {
-            if (StringUtils.isNotBlank(event.getNewValue())) {
-                CONFIG_CACHE.put(event.getDataId(), event.getNewValue());
-            } else {
-                CONFIG_CACHE.remove(event.getDataId());
-            }
-        }
-    }
-
-    public static SeataConfigurationCacheProvider getInstance() {
-        return SeataConfigurationCacheProviderInstance.INSTANCE;
-    }
-
-    private static class SeataConfigurationCacheProviderInstance {
-        private static final SeataConfigurationCacheProvider INSTANCE = new SeataConfigurationCacheProvider();
+    private static class ConfigurationCacheInstance {
+        private static final ConfigurationCache INSTANCE = new ConfigurationCache();
     }
 
 }

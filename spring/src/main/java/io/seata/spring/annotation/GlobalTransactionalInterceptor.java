@@ -28,7 +28,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.SeataConfigurationCacheProvider;
+import io.seata.config.ConfigurationCache;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.TransactionManagerHolder;
@@ -94,7 +94,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
-                SeataConfigurationCacheProvider.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,this);
+                ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,this);
             }
         }
     }
