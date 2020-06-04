@@ -52,7 +52,7 @@ public abstract class AbstractBranchEndResponseCodec extends AbstractTransaction
             out.writeShort((short)0);
         }
         out.writeLong(branchId);
-        out.writeByte((branchStatus == null ? BranchStatus.Unknown : branchStatus).getCode());
+        out.writeByte(branchStatus.getCode());
     }
 
     @Override

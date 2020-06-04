@@ -94,17 +94,23 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         String resourceId = request.getResourceId();
         String applicationData = request.getApplicationData();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch committing: " + xid + " " + branchId + " " + resourceId + " " + applicationData);
+            LOGGER.info("Branch Committing: {} {} {} {}", xid, branchId, resourceId, applicationData);
         }
-        BranchStatus status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
-            applicationData);
-        response.setXid(xid);
-        response.setBranchId(branchId);
-        response.setBranchStatus(status);
+        BranchStatus status = null;
+        try {
+            status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
+                    applicationData);
+        } catch (Exception e) {
+            status = BranchStatus.PhaseTwo_CommitFailed_Retryable;
+            throw e;
+        } finally {
+            response.setXid(xid);
+            response.setBranchId(branchId);
+            response.setBranchStatus(status);
+        }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch commit result: " + status);
+            LOGGER.info("Branch Committed result: {}. [{} {} {}]", status.name(), xid, branchId, resourceId);
         }
-
     }
 
     /**
@@ -123,13 +129,20 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch Rollbacking: " + xid + " " + branchId + " " + resourceId);
         }
-        BranchStatus status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
-            applicationData);
-        response.setXid(xid);
-        response.setBranchId(branchId);
-        response.setBranchStatus(status);
+        BranchStatus status = null;
+        try {
+            status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
+                    applicationData);
+        } catch (Exception e) {
+            status = BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+            throw e;
+        } finally {
+            response.setXid(xid);
+            response.setBranchId(branchId);
+            response.setBranchStatus(status);
+        }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch Rollbacked result: " + status);
+            LOGGER.info("Branch Rollbacked result: {}. [{} {} {}]", status.name(), xid, branchId, resourceId);
         }
     }
 
