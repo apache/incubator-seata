@@ -62,7 +62,7 @@ public class NamedThreadFactoryTest {
 
             // the first _DEFAULT_THREAD_PREFIX_COUNTER is meaning thread counter
             assertThat("prefix_" + DEFAULT_THREAD_PREFIX_COUNTER + "_" + (i + 1) + "_" + THREAD_TOTAL_SIZE)
-                    .isEqualTo(thread.getName());
+                .isEqualTo(thread.getName());
         }
     }
 }
