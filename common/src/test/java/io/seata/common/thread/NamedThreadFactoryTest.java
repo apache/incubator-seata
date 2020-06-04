@@ -55,7 +55,7 @@ public class NamedThreadFactoryTest {
 
     @Test
     public void testThreadNameHasCounterWithPrefixCounter() {
-        NamedThreadFactory factory = new NamedThreadFactory("prefix", THREAD_TOTAL_SIZE,true);
+        NamedThreadFactory factory = new NamedThreadFactory("prefix", THREAD_TOTAL_SIZE, true);
         for (int i = 0; i < THREAD_TOTAL_SIZE; i ++) {
             Thread thread = factory.newThread(() -> {});
 
