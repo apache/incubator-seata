@@ -21,7 +21,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -144,41 +143,34 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                 ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
 
-                if (rowSize == 1) {
-                    Object pkValue = insertRows.get(0).get(pkIndex);
-                    if (PLACEHOLDER.equals(pkValue)) {
-                        pkValues = parameters[pkIndex];
-                    } else {
-                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(pkIndex)).collect(Collectors.toList());
+                int totalPlaceholderNum = -1;
+                pkValues = new ArrayList<>(rowSize);
+                for (int i = 0; i < rowSize; i++) {
+                    List<Object> row = insertRows.get(i);
+                    // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
+                    // insert parameter count will than the actual +1
+                    if (row.isEmpty()) {
+                        continue;
                     }
-                } else {
-                    int totalPlaceholderNum = -1;
-                    pkValues = new ArrayList<>(rowSize);
-                    for (int i = 0; i < rowSize; i++) {
-                        List<Object> row = insertRows.get(i);
-                        // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
-                        // insert parameter count will than the actual +1
-                        if (row.isEmpty()) {
-                            continue;
-                        }
-                        Object pkValue = row.get(pkIndex);
+                    Object pkValue = row.get(pkIndex);
+                    if (PLACEHOLDER.equals(pkValue)) {
                         int currentRowPlaceholderNum = -1;
-                        for (Object r : row) {
+                        int currentRowNotPlaceholderNumBeforePkIndex = 0;
+                        for (int n = 0, len = row.size(); n < len; n++) {
+                            Object r = row.get(n);
                             if (PLACEHOLDER.equals(r)) {
                                 totalPlaceholderNum += 1;
                                 currentRowPlaceholderNum += 1;
                             }
-                        }
-                        if (PLACEHOLDER.equals(pkValue)) {
-                            int idx = pkIndex;
-                            if (i != 0) {
-                                idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
+                            if (n < pkIndex && !PLACEHOLDER.equals(r)) {
+                                currentRowNotPlaceholderNumBeforePkIndex++;
                             }
-                            ArrayList<Object> parameter = parameters[idx];
-                            pkValues.addAll(parameter);
-                        } else {
-                            pkValues.add(pkValue);
                         }
+                        int idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex - currentRowNotPlaceholderNumBeforePkIndex;
+                        ArrayList<Object> parameter = parameters[idx];
+                        pkValues.addAll(parameter);
+                    } else {
+                        pkValues.add(pkValue);
                     }
                 }
             }
