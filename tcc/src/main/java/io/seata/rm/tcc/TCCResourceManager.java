@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSON;
 
 import io.seata.common.Constants;
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
