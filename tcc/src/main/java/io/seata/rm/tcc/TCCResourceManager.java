@@ -92,18 +92,28 @@ public class TCCResourceManager extends AbstractResourceManager {
             throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
         try {
-            boolean result = false;
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
             Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
             LOGGER.info("TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
+            boolean result = false;
             if (ret != null) {
-                if (ret instanceof TwoPhaseResult) {
+                if (ret instanceof BranchStatus) {
+                    if (ret == BranchStatus.PhaseTwo_Committed
+                            || ret == BranchStatus.PhaseTwo_CommitFailed_Retryable
+                            || ret == BranchStatus.PhaseTwo_CommitFailed_Unretryable) {
+                        return (BranchStatus)ret;
+                    } else {
+                        LOGGER.warn("TCC resource commit result error, it's not allowed to be returned this branch status: " + ret);
+                    }
+                } else if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult)ret).isSuccess();
                 } else {
                     result = (boolean)ret;
                 }
+            } else {
+                result = true;
             }
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
@@ -137,18 +147,28 @@ public class TCCResourceManager extends AbstractResourceManager {
             throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
         try {
-            boolean result = false;
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
             Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
             LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
+            boolean result = false;
             if (ret != null) {
-                if (ret instanceof TwoPhaseResult) {
+                if (ret instanceof BranchStatus) {
+                    if (ret == BranchStatus.PhaseTwo_Rollbacked
+                            || ret == BranchStatus.PhaseTwo_RollbackFailed_Retryable
+                            || ret == BranchStatus.PhaseTwo_RollbackFailed_Unretryable) {
+                        return (BranchStatus)ret;
+                    } else {
+                        LOGGER.warn("TCC resource rollback result error, it's not allowed to be returned this branch status: " + ret);
+                    }
+                } else if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult)ret).isSuccess();
                 } else {
                     result = (boolean)ret;
                 }
+            } else {
+                result = true;
             }
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
