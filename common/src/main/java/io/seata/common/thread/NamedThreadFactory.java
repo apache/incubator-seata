@@ -30,6 +30,7 @@ import io.netty.util.concurrent.FastThreadLocalThread;
  */
 public class NamedThreadFactory implements ThreadFactory {
     private final static Map<String, AtomicInteger> PREFIX_COUNTER = new ConcurrentHashMap<>();
+    private AtomicInteger counter = new AtomicInteger(0);
     private final String prefix;
     private final int totalSize;
     private final boolean makeDaemons;
@@ -71,7 +72,7 @@ public class NamedThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
-        String name = prefix;
+        String name = prefix + "_" + counter.incrementAndGet();
         if (totalSize > 1) {
             name += "_" + totalSize;
         }
