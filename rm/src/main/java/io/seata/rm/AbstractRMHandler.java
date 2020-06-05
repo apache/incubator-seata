@@ -96,20 +96,18 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Branch Committing: {} {} {} {}", xid, branchId, resourceId, applicationData);
         }
-        BranchStatus status = null;
+        response.setXid(xid);
+        response.setBranchId(branchId);
         try {
-            status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
+            BranchStatus status = getResourceManager().branchCommit(request.getBranchType(), xid, branchId, resourceId,
                     applicationData);
-        } catch (Exception e) {
-            status = BranchStatus.PhaseTwo_CommitFailed_Retryable;
-            throw e;
-        } finally {
-            response.setXid(xid);
-            response.setBranchId(branchId);
             response.setBranchStatus(status);
-        }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch Committed result: {}. [{} {} {}]", status.name(), xid, branchId, resourceId);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Branch Committed result: " + status);
+            }
+        } catch (Exception e) {
+            response.setBranchStatus(BranchStatus.Unknown);
+            throw e;
         }
     }
 
@@ -127,22 +125,20 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         String resourceId = request.getResourceId();
         String applicationData = request.getApplicationData();
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch Rollbacking: " + xid + " " + branchId + " " + resourceId);
+            LOGGER.info("Branch Rollbacking: {} {} {} {}", xid, branchId, resourceId, applicationData);
         }
-        BranchStatus status = null;
+        response.setXid(xid);
+        response.setBranchId(branchId);
         try {
-            status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
+            BranchStatus status = getResourceManager().branchRollback(request.getBranchType(), xid, branchId, resourceId,
                     applicationData);
-        } catch (Exception e) {
-            status = BranchStatus.PhaseTwo_RollbackFailed_Retryable;
-            throw e;
-        } finally {
-            response.setXid(xid);
-            response.setBranchId(branchId);
             response.setBranchStatus(status);
-        }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch Rollbacked result: {}. [{} {} {}]", status.name(), xid, branchId, resourceId);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Branch Rollbacked result: " + status);
+            }
+        } catch (Exception e) {
+            response.setBranchStatus(BranchStatus.Unknown);
+            throw e;
         }
     }
 

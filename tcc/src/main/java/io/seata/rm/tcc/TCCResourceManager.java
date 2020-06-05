@@ -109,7 +109,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, t);
-            throw new FrameworkException(t, msg);
+            return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
     }
 
@@ -154,7 +154,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, t);
-            throw new FrameworkException(t, msg);
+            return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
     }
 
