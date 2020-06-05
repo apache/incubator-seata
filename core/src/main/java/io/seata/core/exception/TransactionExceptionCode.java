@@ -46,6 +46,16 @@ public enum TransactionExceptionCode {
     IO,
 
     /**
+     * Branch commit failed retriable transaction exception code.
+     */
+    BranchCommitFailed_Retriable,
+
+    /**
+     * Branch commit failed unretriable transaction exception code.
+     */
+    BranchCommitFailed_Unretriable,
+
+    /**
      * Branch rollback failed retriable transaction exception code.
      */
     BranchRollbackFailed_Retriable,

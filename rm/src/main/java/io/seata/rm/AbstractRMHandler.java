@@ -18,6 +18,7 @@ package io.seata.rm;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
@@ -105,6 +106,15 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Branch Committed result: " + status);
             }
+        } catch (TransactionException e) {
+            if (TransactionExceptionCode.BranchCommitFailed_Retriable.equals(e.getCode())) {
+                response.setBranchStatus(BranchStatus.PhaseTwo_CommitFailed_Retryable);
+            } else if (TransactionExceptionCode.BranchCommitFailed_Unretriable.equals(e.getCode())) {
+                response.setBranchStatus(BranchStatus.PhaseTwo_CommitFailed_Unretryable);
+            } else {
+                response.setBranchStatus(BranchStatus.Unknown);
+                throw e;
+            }
         } catch (Exception e) {
             response.setBranchStatus(BranchStatus.Unknown);
             throw e;
@@ -135,6 +145,15 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             response.setBranchStatus(status);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Branch Rollbacked result: " + status);
+            }
+        } catch (TransactionException e) {
+            if (TransactionExceptionCode.BranchRollbackFailed_Retriable.equals(e.getCode())) {
+                response.setBranchStatus(BranchStatus.PhaseTwo_RollbackFailed_Retryable);
+            } else if (TransactionExceptionCode.BranchRollbackFailed_Unretriable.equals(e.getCode())) {
+                response.setBranchStatus(BranchStatus.PhaseTwo_RollbackFailed_Unretryable);
+            } else {
+                response.setBranchStatus(BranchStatus.Unknown);
+                throw e;
             }
         } catch (Exception e) {
             response.setBranchStatus(BranchStatus.Unknown);
