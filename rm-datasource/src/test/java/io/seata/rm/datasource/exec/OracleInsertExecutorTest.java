@@ -28,6 +28,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
@@ -65,7 +66,7 @@ public class OracleInsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private InsertExecutor insertExecutor;
+    private OracleInsertExecutor insertExecutor;
 
     @BeforeEach
     public void init() {
@@ -78,7 +79,7 @@ public class OracleInsertExecutorTest {
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
     }
 
     @Test
@@ -107,10 +108,10 @@ public class OracleInsertExecutorTest {
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
 
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
+        doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
+        List pkValuesByAuto = insertExecutor.getGeneratedKeys();
 
-        verify(insertExecutor).getPkValuesByAuto();
+        verify(insertExecutor).getGeneratedKeys();
         Assertions.assertEquals(pkValuesByAuto, pkValuesAuto);
     }
 
@@ -123,7 +124,7 @@ public class OracleInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
 
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 
@@ -132,13 +133,11 @@ public class OracleInsertExecutorTest {
         doReturn(map).when(tableMeta).getPrimaryKeyMap();
 
         ResultSet rs = mock(ResultSet.class);
-        Statement statement = mock(Statement.class);
-        doReturn(statement).when(statementProxy).getTargetStatement();
-        doReturn(rs).when(statement).getGeneratedKeys();
+        doReturn(rs).when(statementProxy).getGeneratedKeys();
         doReturn(false).when(rs).next();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
-            insertExecutor.getPkValuesByAuto();
+            insertExecutor.getGeneratedKeys();
         });
 
         int pkIndex = 0;
@@ -154,14 +153,12 @@ public class OracleInsertExecutorTest {
     public void testGetPkValuesByAuto_NotSupportYetException() {
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            PreparedStatement preparedStatement = mock(PreparedStatement.class);
-            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-            when(preparedStatement.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
+            when(statementProxy.getGeneratedKeys()).thenReturn(mock(ResultSet.class));
             Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
             columnMetaMap.put(ID_COLUMN, new ColumnMeta());
             columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
             when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-            insertExecutor.getPkValuesByAuto();
+            insertExecutor.getGeneratedKeys();
         });
     }
 
