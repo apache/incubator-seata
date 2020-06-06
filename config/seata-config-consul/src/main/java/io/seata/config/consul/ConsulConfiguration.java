@@ -55,7 +55,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "consul";
-	private static final String ACL_TOKEN = "token";
+    private static final String ACL_TOKEN = "token";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
@@ -63,7 +63,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private ExecutorService consulNotifierExecutor;
     private ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
         MAP_INITIAL_CAPACITY);
-	private static Optional<String> tokenOptional;
+    private static Optional<String> tokenOptional;
 
     /**
      * default watch timeout in second
@@ -75,7 +75,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
             TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
-		tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
+       tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
     }
 
     /**
@@ -91,7 +91,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                 }
             }
         }
-		getConsulClient();
+        getConsulClient();
         return instance;
     }
 
@@ -101,33 +101,32 @@ public class ConsulConfiguration extends AbstractConfiguration {
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
         }
-		ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-				timeoutMills);
-		consulNotifierExecutor.execute(() -> {
-			tokenOptional.ifPresent((token) -> complete(client.getKVValue(dataId, token), configFuture));
-			tokenOptional.orElseGet(() -> {
-				complete(client.getKVValue(dataId), configFuture);
-				return dataId;
-			});
-		});
-		return (String)configFuture.get();
+        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
+        consulNotifierExecutor.execute(() -> {
+            tokenOptional.ifPresent((token) -> complete(client.getKVValue(dataId, token), configFuture));
+            tokenOptional.orElseGet(() -> {
+                complete(client.getKVValue(dataId), configFuture);
+                return dataId;
+            });
+        });
+        return (String)configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
         consulNotifierExecutor.execute(() -> {
-			tokenOptional.ifPresent((token) -> {
-				PutParams putParams = new PutParams();
-				putParams.setCas(CAS);
-				complete(client.setKVValue(dataId, content, token, putParams), configFuture);
-			});
-			tokenOptional.orElseGet(() -> {
-				complete(client.setKVValue(dataId, content), configFuture);
-				return dataId;
-			});
-		});
-		return (Boolean)configFuture.get();
+            tokenOptional.ifPresent((token) -> {
+                PutParams putParams = new PutParams();
+                putParams.setCas(CAS);
+                complete(client.setKVValue(dataId, content, token, putParams), configFuture);
+            });
+            tokenOptional.orElseGet(() -> {
+                complete(client.setKVValue(dataId, content), configFuture);
+                return dataId;
+            });
+        });
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -138,14 +137,14 @@ public class ConsulConfiguration extends AbstractConfiguration {
             PutParams putParams = new PutParams();
             //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
             putParams.setCas(CAS);
-			tokenOptional.ifPresent((token) -> {
-				complete(client.setKVValue(dataId, content, token, putParams), configFuture);
-			});
-			tokenOptional.orElseGet(() -> {
-				complete(client.setKVValue(dataId, content, putParams), configFuture);
-				return dataId;
-			});
-		});
+            tokenOptional.ifPresent((token) -> {
+                complete(client.setKVValue(dataId, content, token, putParams), configFuture);
+            });
+            tokenOptional.orElseGet(() -> {
+                complete(client.setKVValue(dataId, content, putParams), configFuture);
+                return dataId;
+            });
+        });
         return (Boolean)configFuture.get();
     }
 
@@ -153,13 +152,13 @@ public class ConsulConfiguration extends AbstractConfiguration {
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
         tokenOptional.ifPresent((token) -> {
-			consulNotifierExecutor.execute(() -> complete(client.deleteKVValue(dataId, token), configFuture));
-		});
-		tokenOptional.orElseGet(() -> {
-			consulNotifierExecutor.execute(() -> complete(client.deleteKVValue(dataId), configFuture));
-			return dataId;
-		});
-		return (Boolean)configFuture.get();
+            consulNotifierExecutor.execute(() -> complete(client.deleteKVValue(dataId, token), configFuture));
+        });
+        tokenOptional.orElseGet(() -> {
+            consulNotifierExecutor.execute(() -> complete(client.deleteKVValue(dataId), configFuture));
+            return dataId;
+        });
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -256,42 +255,42 @@ public class ConsulConfiguration extends AbstractConfiguration {
         public ConsulListener(String dataId, ConfigurationChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
-			tokenOptional.ifPresent((token) -> {
-				this.consulIndex = client.getKVValue(dataId, token).getConsulIndex();
-			});
-			tokenOptional.orElseGet(() -> {
-				this.consulIndex = client.getKVValue(dataId).getConsulIndex();
-				return dataId;
-			});
-		}
+            tokenOptional.ifPresent((token) -> {
+                this.consulIndex = client.getKVValue(dataId, token).getConsulIndex();
+            });
+            tokenOptional.orElseGet(() -> {
+                this.consulIndex = client.getKVValue(dataId).getConsulIndex();
+                return dataId;
+            });
+        }
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
             if (null != listener) {
                 while (true) {
-					QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
-					tokenOptional.ifPresent((token) -> {
-						Response<GetValue> response = client.getKVValue(this.dataId, token, queryParams);
-						Long currentIndex = response.getConsulIndex();
-						if (currentIndex != null && currentIndex > consulIndex) {
-							GetValue getValue = response.getValue();
-							consulIndex = currentIndex;
-							event.setDataId(dataId).setNewValue(getValue.getDecodedValue());
-							listener.onChangeEvent(event);
-						}
-					});
-					tokenOptional.orElseGet(() -> {
-						Response<GetValue> response = client.getKVValue(this.dataId, queryParams);
-						Long currentIndex = response.getConsulIndex();
-						if (currentIndex != null && currentIndex > consulIndex) {
-							GetValue getValue = response.getValue();
-							consulIndex = currentIndex;
-							event.setDataId(dataId).setNewValue(getValue.getDecodedValue());
-							listener.onChangeEvent(event);
-						}
-						return dataId;
-					});
-				}
+                    QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
+                    tokenOptional.ifPresent((token) -> {
+                        Response<GetValue> response = client.getKVValue(this.dataId, token, queryParams);
+                        Long currentIndex = response.getConsulIndex();
+                        if (currentIndex != null && currentIndex > consulIndex) {
+                            GetValue getValue = response.getValue();
+                            consulIndex = currentIndex;
+                            event.setDataId(dataId).setNewValue(getValue.getDecodedValue());
+                            listener.onChangeEvent(event);
+                        }
+                    });
+                    tokenOptional.orElseGet(() -> {
+                        Response<GetValue> response = client.getKVValue(this.dataId, queryParams);
+                        Long currentIndex = response.getConsulIndex();
+                        if (currentIndex != null && currentIndex > consulIndex) {
+                            GetValue getValue = response.getValue();
+                            consulIndex = currentIndex;
+                            event.setDataId(dataId).setNewValue(getValue.getDecodedValue());
+                            listener.onChangeEvent(event);
+                        }
+                        return dataId;
+                    });
+                }
             }
         }
 

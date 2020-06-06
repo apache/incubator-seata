@@ -56,12 +56,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String REGISTRY_TYPE = "consul";
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String REGISTRY_CLUSTER = "cluster";
-	private static final String ACL_TOKEN = "token";
+    private static final String ACL_TOKEN = "token";
     private static final String DEFAULT_CLUSTER_NAME = "default";
     private static final String SERVICE_TAG = "services";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
-	private static Optional<String> tokenOptional;
-	
+    private static Optional<String> tokenOptional;
+
     private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
     private ConcurrentMap<String, Set<ConsulListener>> listenerMap;
     private ExecutorService notifierExecutor;
@@ -96,7 +96,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("services-consul-notifier", THREAD_POOL_NUM));
-		tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
+            tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
     }
 
     /**
@@ -112,32 +112,32 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
                 }
             }
         }
-		getConsulClient();
+        getConsulClient();
         return instance;
     }
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
-		tokenOptional.ifPresent((token) -> {
-			client.agentServiceRegister(createService(address), token);
-		});
-		tokenOptional.orElseGet(() -> {
-			client.agentServiceRegister(createService(address));
-			return null;
-		});
+        tokenOptional.ifPresent((token) -> {
+            client.agentServiceRegister(createService(address), token);
+        });
+        tokenOptional.orElseGet(() -> {
+            client.agentServiceRegister(createService(address));
+            return null;
+        });
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
-		tokenOptional.ifPresent((token) -> {
-			client.agentServiceRegister(createService(address), token);
-		});
-		tokenOptional.orElseGet(() -> {
-			client.agentServiceRegister(createService(address));
-			return null;
-		});
+        tokenOptional.ifPresent((token) -> {
+            client.agentServiceRegister(createService(address), token);
+        });
+        tokenOptional.orElseGet(() -> {
+            client.agentServiceRegister(createService(address));
+            return null;
+        });
     }
 
     @Override
@@ -254,12 +254,11 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return
      */
     private Response<List<HealthService>> getHealthyServices(String service, long index, long watchTimeout) {
-		Builder builder = HealthServicesRequest.newBuilder();
-		tokenOptional.ifPresent((token) -> {
-			builder.setToken(token);
-		});
-		return client.getHealthServices(service, builder.setTag(SERVICE_TAG)
-				.setQueryParams(new QueryParams(watchTimeout, index)).setPassing(true).build());
+        Builder builder = HealthServicesRequest.newBuilder();
+        tokenOptional.ifPresent((token) -> {
+            builder.setToken(token);
+        });
+        return client.getHealthServices(service, builder.setTag(SERVICE_TAG).setQueryParams(new QueryParams(watchTimeout, index)).setPassing(true).build());
 	}
 
     /**

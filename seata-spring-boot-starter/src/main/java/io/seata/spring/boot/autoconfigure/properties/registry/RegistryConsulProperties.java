@@ -28,10 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSU
 public class RegistryConsulProperties {
     private String cluster = "default";
     private String serverAddr = "127.0.0.1:8500";
-	/**
-	 * ACL token
-	 */
-	private String token;
+    private String token;
 
     public String getCluster() {
         return cluster;
@@ -51,12 +48,12 @@ public class RegistryConsulProperties {
         return this;
     }
 
-	public String getToken() {
-		return token;
-	}
+    public String getToken() {
+        return token;
+    }
 
-	public RegistryConsulProperties setToken(String token) {
-		this.token = token;
-		return this;
-	}
+    public RegistryConsulProperties setToken(String token) {
+        this.token = token;
+        return this;
+    }
 }
