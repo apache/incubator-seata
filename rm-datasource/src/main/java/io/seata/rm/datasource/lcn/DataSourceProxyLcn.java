@@ -87,7 +87,6 @@ public class DataSourceProxyLcn extends AbstractDataSourceProxyLcn implements Re
     public Connection getConnection(Connection connection) {
         if (RootContext.inGlobalTransaction()) {
             ConnectionProxyLcn connectionProxyLcn = new ConnectionProxyLcn(connection, this, RootContext.getXID());
-            LcnXidBuilder.registerConn(RootContext.getXID(), connectionProxyLcn);
             return connectionProxyLcn;
         } else {
             return connection;

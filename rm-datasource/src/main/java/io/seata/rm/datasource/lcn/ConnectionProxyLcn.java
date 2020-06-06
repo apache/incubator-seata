@@ -33,6 +33,8 @@ import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
+
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -354,6 +356,7 @@ public class ConnectionProxyLcn implements Connection {
         // 1. register branch to TC then get the branchId
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.LCN,
             getDataSourceProxyLcn().getResourceId(), null, xid, null, null);
+        LcnXidBuilder.registerConn(RootContext.getXID(), this);
         this.branchId = branchId;
     }
 
