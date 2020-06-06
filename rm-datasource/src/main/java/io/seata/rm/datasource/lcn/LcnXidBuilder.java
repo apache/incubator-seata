@@ -28,11 +28,9 @@ import io.seata.common.util.CollectionUtils;
  */
 public class LcnXidBuilder {
 
-    private static volatile Map<String, List<ConnectionProxyLcn>> concurrentHashMap=new ConcurrentHashMap<>();
+    private static volatile Map<String, List<ConnectionProxyLcn>> concurrentHashMap = new ConcurrentHashMap<>();
 
-
-    private LcnXidBuilder() {
-    }
+    private LcnXidBuilder() {}
 
     public static synchronized void registerConn(String xid, ConnectionProxyLcn conn) {
         List<ConnectionProxyLcn> connList = concurrentHashMap.get(xid);
@@ -43,11 +41,11 @@ public class LcnXidBuilder {
         concurrentHashMap.put(xid, connList);
     }
 
-    public static List<ConnectionProxyLcn> getConnectionList(String xid){
+    public static List<ConnectionProxyLcn> getConnectionList(String xid) {
         return concurrentHashMap.get(xid);
     }
 
-    public static List<ConnectionProxyLcn> remove(String xid){
+    public static List<ConnectionProxyLcn> remove(String xid) {
         return concurrentHashMap.remove(xid);
     }
 

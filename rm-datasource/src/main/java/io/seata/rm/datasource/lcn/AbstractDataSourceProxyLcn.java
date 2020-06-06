@@ -37,7 +37,8 @@ public abstract class AbstractDataSourceProxyLcn implements DataSource {
     /**
      * Instantiates a new Abstract data source proxy lcn.
      *
-     * @param targetDataSource the target data source
+     * @param targetDataSource
+     *            the target data source
      */
     public AbstractDataSourceProxyLcn(DataSource targetDataSource) {
         this.targetDataSource = targetDataSource;

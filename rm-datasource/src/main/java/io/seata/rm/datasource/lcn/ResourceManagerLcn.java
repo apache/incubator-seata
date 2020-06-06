@@ -46,18 +46,18 @@ public class ResourceManagerLcn extends AbstractDataSourceCacheResourceManager {
 
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+        String applicationData) throws TransactionException {
         return finishBranch(true, branchType, xid, branchId, resourceId, applicationData);
     }
 
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+        String applicationData) throws TransactionException {
         return finishBranch(false, branchType, xid, branchId, resourceId, applicationData);
     }
 
-    private BranchStatus finishBranch(boolean committed, BranchType branchType, String xid, long branchId, String resourceId,
-        String applicationData) throws TransactionException {
+    private BranchStatus finishBranch(boolean committed, BranchType branchType, String xid, long branchId,
+        String resourceId, String applicationData) throws TransactionException {
         List<ConnectionProxyLcn> connectionProxyLcnList = LcnXidBuilder.getConnectionList(xid);
         try {
             for (ConnectionProxyLcn conn : connectionProxyLcnList) {

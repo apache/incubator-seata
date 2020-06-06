@@ -46,7 +46,8 @@ public class DataSourceProxyLcn extends AbstractDataSourceProxyLcn implements Re
     /**
      * Instantiates a new Abstract data source proxy lcn.
      *
-     * @param targetDataSource the target data source
+     * @param targetDataSource
+     *            the target data source
      */
     public DataSourceProxyLcn(DataSource targetDataSource) {
         super(targetDataSource);
@@ -54,7 +55,7 @@ public class DataSourceProxyLcn extends AbstractDataSourceProxyLcn implements Re
     }
 
     private void init(DataSource dataSource, String resourceGroupId) {
-        if(StringUtils.isBlank(resourceGroupId)){
+        if (StringUtils.isBlank(resourceGroupId)) {
             this.resourceGroupId = DEFAULT_RESOURCE_GROUP_ID;
         } else {
             this.resourceGroupId = resourceGroupId;
@@ -111,6 +112,7 @@ public class DataSourceProxyLcn extends AbstractDataSourceProxyLcn implements Re
 
     /**
      * get the default resource id
+     * 
      * @return resource id
      */
     private String getDefaultResourceId() {
@@ -121,18 +123,16 @@ public class DataSourceProxyLcn extends AbstractDataSourceProxyLcn implements Re
         }
     }
 
-    @Override public BranchType getBranchType() {
+    @Override
+    public BranchType getBranchType() {
         return BranchType.LCN;
     }
 
     /**
-     * prevent pg sql url like
-     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
-     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata
-     * cause the duplicated resourceId
-     * it will cause the problem like
-     * 1.get file lock fail
-     * 2.error table meta cache
+     * prevent pg sql url like jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata cause the duplicated resourceId it will cause the
+     * problem like 1.get file lock fail 2.error table meta cache
+     * 
      * @return resourceId
      */
     private String getPGResourceId() {
