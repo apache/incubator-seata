@@ -15,6 +15,7 @@
  */
 package io.seata.config;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -33,7 +34,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
-    private static final Set<String> LISTENER_KEYS = new CopyOnWriteArraySet<>();
+    private static final Set<String> LISTENER_KEYS = new HashSet<>();
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         synchronized (ConfigurationCache.class) {
