@@ -79,6 +79,7 @@ public class ConnectionProxyLcn implements Connection {
         try {
             register();
         } catch (TransactionException e) {
+            connection.close();
             throw new SQLException(
                 "failed to register lcn branch " + xid + " since " + e.getCode() + ":" + e.getMessage(), e);
         }

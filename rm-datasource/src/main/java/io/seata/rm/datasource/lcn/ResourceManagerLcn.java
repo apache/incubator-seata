@@ -17,6 +17,7 @@ package io.seata.rm.datasource.lcn;
 
 import java.sql.SQLException;
 import java.util.List;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -59,16 +60,18 @@ public class ResourceManagerLcn extends AbstractDataSourceCacheResourceManager {
     private BranchStatus finishBranch(boolean committed, BranchType branchType, String xid, long branchId,
         String resourceId, String applicationData) throws TransactionException {
         List<ConnectionProxyLcn> connectionProxyLcnList = LcnXidBuilder.getConnectionList(xid);
-        try {
-            for (ConnectionProxyLcn conn : connectionProxyLcnList) {
-                conn.policy(committed);
+        if (CollectionUtils.isNotEmpty(connectionProxyLcnList)) {
+            try {
+                for (ConnectionProxyLcn conn : connectionProxyLcnList) {
+                    conn.policy(committed);
+                }
+                LcnXidBuilder.remove(xid);
+                LOGGER.info(branchId + " was {}.", committed);
+            } catch (SQLException e) {
+                LOGGER.error("branchId: {} , rollback fail: {}", branchId, e.getMessage());
+                return BranchStatus.PhaseTwo_Rollbacked;
             }
-            LcnXidBuilder.remove(xid);
-            LOGGER.info(branchId + " was {}.", committed);
-            return committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked;
-        } catch (SQLException e) {
-            LOGGER.error("branchId: {} , rollback fail: {}", branchId, e.getMessage());
-            return BranchStatus.PhaseTwo_Rollbacked;
         }
+        return committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked;
     }
 }
