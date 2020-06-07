@@ -66,10 +66,16 @@ public class ResourceManagerLcn extends AbstractDataSourceCacheResourceManager {
                     conn.policy(committed);
                 }
                 LcnXidBuilder.remove(xid);
-                LOGGER.info(branchId + " was {}.", committed);
             } catch (SQLException e) {
-                LOGGER.error("branchId: {} , rollback fail: {}", branchId, e.getMessage());
-                return BranchStatus.PhaseTwo_Rollbacked;
+                if (committed) {
+                    LOGGER.info(branchId + " commit failed since " + e.getMessage(), e);
+                    // FIXME: case of PhaseTwo_CommitFailed_Unretryable
+                    return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+                } else {
+                    LOGGER.info(branchId + " rollback failed since " + e.getMessage(), e);
+                    // FIXME: case of PhaseTwo_RollbackFailed_Unretryable
+                    return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+                }
             }
         }
         return committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked;
