@@ -94,7 +94,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
-                ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK,this);
+                ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
             }
         }
     }
@@ -109,6 +109,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                DEFAULT_DISABLE_GLOBAL_TRANSACTION);
             boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null) {
@@ -224,11 +226,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
-            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                disable, event.getNewValue());
-            disable = Boolean.parseBoolean(event.getNewValue().trim());
-        } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
+        if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
             degradeCheck = Boolean.parseBoolean(event.getNewValue());
             if (!degradeCheck) {
                 degradeNum = 0;

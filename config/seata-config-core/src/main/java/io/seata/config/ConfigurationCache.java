@@ -18,6 +18,9 @@ package io.seata.config;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -35,16 +38,36 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final Set<String> LISTENER_KEYS = new HashSet<>();
 
+    private static final ConcurrentMap<String, HashSet<ConfigurationChangeListener>> configListenersMap =
+        new ConcurrentHashMap<>();
+
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
-        synchronized (ConfigurationCache.class) {
-            if (StringUtils.isBlank(dataId) || LISTENER_KEYS.contains(dataId)) {
-                return;
-            }
-            ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
-            LISTENER_KEYS.add(dataId);
+        if (StringUtils.isBlank(dataId)) {
+            return;
         }
-        for (int i = 0; i < listeners.length; i++) {
-            ConfigurationFactory.getInstance().addConfigListener(dataId, listeners[i]);
+        synchronized (ConfigurationCache.class) {
+            if (!LISTENER_KEYS.contains(dataId)) {
+                ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
+                LISTENER_KEYS.add(dataId);
+            }
+            if (null != listeners && listeners.length > 0) {
+                HashSet<ConfigurationChangeListener> listenerHashSet = null;
+                try {
+                    listenerHashSet = configListenersMap.get(dataId);
+                    if (CollectionUtils.isEmpty(listenerHashSet)) {
+                        listenerHashSet = new HashSet<>();
+                    }
+                    for (int i = 0; i < listeners.length; i++) {
+                        ConfigurationChangeListener listener = listeners[i];
+                        if (!listenerHashSet.contains(listener)) {
+                            listenerHashSet.add(listener);
+                            ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
+                        }
+                    }
+                } finally {
+                    configListenersMap.put(dataId, listenerHashSet);
+                }
+            }
         }
     }
 
