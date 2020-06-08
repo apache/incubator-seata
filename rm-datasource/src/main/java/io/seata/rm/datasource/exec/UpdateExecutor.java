@@ -99,9 +99,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 pst.setObject(i, pkField.getValue(), pkField.getType());
             }
             rs = pst.executeQuery();
-            return TableRecords.buildRecords(tmeta, rs);
-        } finally {
+            TableRecords tableRecords = TableRecords.buildRecords(tmeta, rs);
             IOUtil.close(rs);
+            return tableRecords;
+        } finally {
+
         }
     }
 

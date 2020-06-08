@@ -302,9 +302,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 }
             }
             rs = ps.executeQuery();
-            return TableRecords.buildRecords(tableMeta, rs);
-        } finally {
+            TableRecords tableRecords = TableRecords.buildRecords(tableMeta, rs);
             IOUtil.close(rs);
+            return tableRecords;
+        } finally {
+
         }
     }
 
@@ -329,9 +331,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 ps.setObject(i, pkValues.get(i - 1));
             }
             rs = ps.executeQuery();
-            return TableRecords.buildRecords(getTableMeta(), rs);
-        } finally {
+            TableRecords tableRecords = TableRecords.buildRecords(tableMeta, rs);
             IOUtil.close(rs);
+            return tableRecords;
+        } finally {
+
         }
     }
 

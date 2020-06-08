@@ -67,6 +67,12 @@
             <artifactId>fastjson</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+            <version>2.11.4</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>

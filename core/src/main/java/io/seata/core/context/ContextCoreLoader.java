@@ -32,6 +32,7 @@ public class ContextCoreLoader {
 
     private static class ContextCoreHolder {
         private static final ContextCore INSTANCE = Optional.ofNullable(EnhancedServiceLoader.load(ContextCore.class)).orElse(new ThreadLocalContextCore());
+        private static final ContextCore INSTANCE_TRANSMITTABLE = new TransmittableThreadLocalContextCore();
     }
 
     /**
@@ -39,8 +40,11 @@ public class ContextCoreLoader {
      *
      * @return the context core
      */
+//    public static ContextCore load() {
+//        return ContextCoreHolder.INSTANCE;
+//    }
     public static ContextCore load() {
-        return ContextCoreHolder.INSTANCE;
+        return ContextCoreHolder.INSTANCE_TRANSMITTABLE;
     }
 
 }
