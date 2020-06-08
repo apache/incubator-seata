@@ -120,7 +120,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         assertXIDNotNull();
-        int retry = COMMIT_RETRY_COUNT <= 0 ? DEFAULT_TM_COMMIT_RETRY_COUNT : COMMIT_RETRY_COUNT;;
+        int retry = COMMIT_RETRY_COUNT <= 0 ? DEFAULT_TM_COMMIT_RETRY_COUNT : COMMIT_RETRY_COUNT;
         try {
             while (retry > 0) {
                 try {
