@@ -255,6 +255,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
+                    if (method.getDeclaringClass().isAssignableFrom(Object.class)) {
+                        continue;
+                    }
+
                     trxAnno = method.getAnnotation(GlobalTransactional.class);
                     if (trxAnno != null) {
                         return true;
