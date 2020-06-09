@@ -38,6 +38,7 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.Sequenceable;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import org.slf4j.Logger;
@@ -138,6 +139,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             throw new ShouldNeverHappenException("pkIndex is not found");
         }
         Map<String,List<Object>> pkValuesMap = new HashMap<>();
+        boolean ps = true;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
@@ -191,6 +193,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                 }
             }
         } else {
+            ps = false;
             List<List<Object>> insertRows = recognizer.getInsertRows();
             for (List<Object> row : insertRows) {
                 for (String pkKey:pkIndexMap.keySet()) {
@@ -207,7 +210,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         if (pkValuesMap.isEmpty()) {
             throw new ShouldNeverHappenException();
         }
-        boolean b = this.checkPkValues(pkValuesMap);
+        boolean b = this.checkPkValues(pkValuesMap, ps);
         if (!b) {
             throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
@@ -306,10 +309,10 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         return true;
     }
 
-    protected boolean checkPkValues(Map<String,List<Object>> pkValues) {
+    protected boolean checkPkValues(Map<String,List<Object>> pkValues, boolean ps) {
         Set<String> pkNames = pkValues.keySet();
         if (pkNames.size() == 1) {
-            return checkPkValuesForSinglePk(pkValues.get(pkNames.iterator().next()));
+            return checkPkValuesForSinglePk(pkValues.get(pkNames.iterator().next()),ps);
         }
         else {
             return checkPkValuesForMultiPk(pkValues);
@@ -319,25 +322,31 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     /**
      * check pk values for single pk
      * @param pkValues
+     * @param ps true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
      */
-    protected boolean checkPkValuesForSinglePk(List<Object> pkValues) {
+    protected boolean checkPkValuesForSinglePk(List<Object> pkValues, boolean ps) {
         /*
+        ps = true
         -----------------------------------------------
                   one    more
         null       O      O
         value      O      O
+        method     O      O
+        sequence   O      O
+        default    O      O
+        -----------------------------------------------
+        ps = false
+        -----------------------------------------------
+                  one    more
+        null       O      X
+        value      O      O
         method     X      X
         sequence   O      X
-        -----------------------------------------------
-                  null    value    method    sequence
-        null       O        X         X         X
-        value      X        O         X         X
-        method     X        X         X         X
-        sequence   X        X         X         X
+        default    O      X
         -----------------------------------------------
         */
-        int n = 0, v = 0, m = 0, s = 0;
+        int n = 0, v = 0, m = 0, s = 0, d = 0;
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
                 n++;
@@ -351,19 +360,45 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                 s++;
                 continue;
             }
+            if (pkValue instanceof SqlDefaultExpr) {
+                d++;
+                continue;
+            }
             v++;
         }
-        // not support sql primary key is function.
-        if (m > 0) {
+
+        if (!ps) {
+            if (m > 0) {
+                return false;
+            }
+            if (n == 1 && v == 0 && m == 0 && s == 0 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v == 0 && m == 0 && s == 1 && d == 0) {
+                return true;
+            }
+            if (n == 0 && v == 0 && m == 0 && s == 0 && d == 1) {
+                return true;
+            }
             return false;
         }
-        if (n > 0 && v == 0 && s == 0) {
+
+        if (n > 0 && v == 0 && m == 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v > 0 && s == 0) {
+        if (n == 0 && v > 0 && m == 0 && s == 0 && d == 0) {
             return true;
         }
-        if (n == 0 && v == 0 && s == 1) {
+        if (n == 0 && v == 0 && m > 0 && s == 0 && d == 0) {
+            return true;
+        }
+        if (n == 0 && v == 0 && m == 0 && s > 0 && d == 0) {
+            return true;
+        }
+        if (n == 0 && v == 0 && m == 0 && s == 0 && d > 0) {
             return true;
         }
         return false;
