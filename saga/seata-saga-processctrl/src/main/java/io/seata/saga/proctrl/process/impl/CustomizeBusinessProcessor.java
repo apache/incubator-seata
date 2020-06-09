@@ -23,7 +23,6 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessType;
 import io.seata.saga.proctrl.handler.ProcessHandler;
 import io.seata.saga.proctrl.handler.RouterHandler;
-import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.BusinessProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CustomizeBusinessProcessor implements BusinessProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessControllerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomizeBusinessProcessor.class);
 
     private Map<String, ProcessHandler> processHandlers;
 
