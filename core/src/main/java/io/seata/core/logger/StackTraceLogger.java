@@ -19,8 +19,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
-
-import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
@@ -34,11 +32,12 @@ public final class StackTraceLogger {
 
     private static final String STACK_TRACE_LOGGER_PREFIX = "[stacktrace]";
 
-    private static final int RATE = 100 / CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, DEFAULT_LOG_EXCEPTION_RATE);
+    private static final int PERCENT = 100;
 
     public static void info(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isInfoEnabled()) {
-            if (ThreadLocalRandom.current().nextInt(RATE) == 0) {
+            int rate = getRate();
+            if (ThreadLocalRandom.current().nextInt(PERCENT / rate) == 0) {
                 logger.info(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.info(format, args);
@@ -48,7 +47,8 @@ public final class StackTraceLogger {
 
     public static void warn(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isWarnEnabled()) {
-            if (ThreadLocalRandom.current().nextInt(RATE) == 0) {
+            int rate = getRate();
+            if (ThreadLocalRandom.current().nextInt(PERCENT / rate) == 0) {
                 logger.warn(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.warn(format, args);
@@ -58,12 +58,17 @@ public final class StackTraceLogger {
 
     public static void error(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isErrorEnabled()) {
-            if (ThreadLocalRandom.current().nextInt(RATE) == 0) {
+            int rate = getRate();
+            if (ThreadLocalRandom.current().nextInt(PERCENT / rate) == 0) {
                 logger.error(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.error(format, args);
             }
         }
+    }
+
+    private static int getRate() {
+        return CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, DEFAULT_LOG_EXCEPTION_RATE);
     }
 
 }
