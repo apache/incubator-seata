@@ -75,7 +75,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
             TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
-       tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
+        tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
     }
 
     /**

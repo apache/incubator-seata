@@ -96,7 +96,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("services-consul-notifier", THREAD_POOL_NUM));
-            tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
+        tokenOptional = Optional.ofNullable(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN));
     }
 
     /**
@@ -136,7 +136,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         });
         tokenOptional.orElseGet(() -> {
             client.agentServiceRegister(createService(address));
-            return null;
+            return "";
         });
     }
 
