@@ -105,13 +105,6 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             LOGGER.info("Branch commit result: " + status);
         }
 
-        for (GlobalTransactionHook hook : GlobalTransactionHookManager.popHooks(xid)) {
-            try {
-                hook.afterCommit();
-            } catch (Exception e) {
-                LOGGER.error("execute callback fail:{}",e.getMessage(),e);
-            }
-        }
     }
 
     /**
