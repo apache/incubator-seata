@@ -164,7 +164,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);;
+            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);
 
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, paramsPlaceHolder);
             ps = conn.prepareStatement(sql);
