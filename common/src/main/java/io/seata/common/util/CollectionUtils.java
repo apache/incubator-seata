@@ -17,9 +17,9 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Collection utils.
@@ -146,7 +146,7 @@ public class CollectionUtils {
         if (data == null) {
             return null;
         }
-        Map<String, String> map = new ConcurrentHashMap<>();
+        Map<String, String> map = new HashMap<>();
         if (StringUtils.isBlank(data)) {
             return map;
         }
