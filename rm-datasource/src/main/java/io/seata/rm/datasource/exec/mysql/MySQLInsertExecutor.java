@@ -155,13 +155,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         //auto increment
         for (String pkKey:keySet) {
             List<Object> pkValues = pkValuesMap.get(pkKey);
-            boolean b = this.checkPkValues(pkValues);
-            if (!b) {
-                throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
-            }
-
             // pk auto generated while single insert primary key is expression
-            else if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
+            if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
                 pkValuesMap.putAll(getPkValuesByAuto());
             }
             // pk auto generated while column exists and value is null

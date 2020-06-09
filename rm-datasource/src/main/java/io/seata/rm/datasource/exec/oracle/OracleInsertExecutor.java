@@ -78,10 +78,6 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
         Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
         String pkKey = pkValuesMap.keySet().iterator().next();
         List<Object> pkValues = pkValuesMap.get(pkKey);
-        boolean b = this.checkPkValues(pkValues);
-        if (!b) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
-        }
 
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValuesMap.put(pkKey,getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));

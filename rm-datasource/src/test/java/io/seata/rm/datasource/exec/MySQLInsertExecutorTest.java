@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -319,88 +320,125 @@ public class MySQLInsertExecutorTest {
     }
 
     @Test
-    public void test_checkPkValues() {
+    public void test_checkPkValuesForMultiPk()
+    {
+        Map<String,List<Object>> pkValues = new HashMap<>();
+        List pkValues1 = new ArrayList();
+        List pkValues2 = new ArrayList();
+        pkValues.put("id",pkValues1);
+        pkValues.put("userCode",pkValues2);
+
+        //all pk support value
+        pkValues1.add(1);
+        pkValues2.add(2);
+        Assertions.assertTrue(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+        //supporting one pk is null
+        pkValues1.clear();
+        pkValues2.clear();
+        pkValues1.add(Null.get());
+        pkValues2.add(2);
+        Assertions.assertTrue(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+        //more one pk is null is not support
+        pkValues1.clear();
+        pkValues2.clear();
+        pkValues1.add(Null.get());
+        pkValues2.add(Null.get());
+        Assertions.assertFalse(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+        //method is not support at all
+        pkValues1.clear();
+        pkValues2.clear();
+        pkValues1.add(new SqlMethodExpr());
+        pkValues2.add(2);
+        Assertions.assertFalse(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+    }
+
+    @Test
+    public void test_checkPkValuesForSinglePk() {
         // one parameters.
         // pk is null support
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is sequence support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is specify value support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // more parameters.
         // pk is specify value support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(2);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is null support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is sql sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is specify value and null not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(Null.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is specify value and sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is specify value and sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is null and sql function not support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is null and sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
 
         // pk is sql function and sequence not support.
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues));
     }
 
     private List<String> mockInsertColumns() {
