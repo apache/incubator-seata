@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -85,9 +84,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private static final int MAX_FLUSH_NUM = 10;
 
-    private static int PER_FILE_BLOCK_SIZE = 65535 * 8;
+    private static final int PER_FILE_BLOCK_SIZE = 65535 * 8;
 
-    private static long MAX_TRX_TIMEOUT_MILLS = 30 * 60 * 1000;
+    private static final long MAX_TRX_TIMEOUT_MILLS = 30 * 60 * 1000;
 
     private static volatile long trxStartTimeMills = System.currentTimeMillis();
 
@@ -148,7 +147,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         try {
             currDataFile = new File(currFullFileName);
             if (!currDataFile.exists()) {
-                //create parent dir first
+                // create parent dir first
                 if (currDataFile.getParentFile() != null && !currDataFile.getParentFile().exists()) {
                     currDataFile.getParentFile().mkdirs();
                 }
@@ -336,11 +335,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     @Override
-    public long getCurrentMaxSessionId() {
-        throw new NotSupportYetException("not support getCurrentMaxSessionId");
-    }
-
-    @Override
     public List<TransactionWriteStore> readWriteStore(int readSize, boolean isHistory) {
         File file = null;
         long currentOffset = 0;
@@ -352,7 +346,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             currentOffset = recoverCurrOffset;
         }
         if (file.exists()) {
-            return parseDataFile(file, readSize, currentOffset);
+            return parseDataFile(file, readSize, currentOffset, isHistory);
         }
         return null;
     }
@@ -380,7 +374,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         return false;
     }
 
-    private List<TransactionWriteStore> parseDataFile(File file, int readSize, long currentOffset) {
+    private List<TransactionWriteStore> parseDataFile(File file, int readSize, long currentOffset, boolean isHistory) {
         List<TransactionWriteStore> transactionWriteStores = new ArrayList<>(readSize);
         RandomAccessFile raf = null;
         FileChannel fileChannel = null;
@@ -424,7 +418,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         } finally {
             try {
                 if (null != fileChannel) {
-                    if (isHisFile(file)) {
+                    if (isHistory) {
                         recoverHisOffset = fileChannel.position();
                     } else {
                         recoverCurrOffset = fileChannel.position();
@@ -435,12 +429,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 LOGGER.error("file close error{}", exx.getMessage(), exx);
             }
         }
-
-    }
-
-    private boolean isHisFile(File file) {
-
-        return file.getName().endsWith(HIS_DATA_FILENAME_POSTFIX);
     }
 
     private void closeFile(RandomAccessFile raf) {
@@ -619,13 +607,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         }
 
         private void async(AsyncFlushRequest req) {
-            if (req.getCurFileTrxNum() < FILE_FLUSH_NUM.get()) {
-                flushOnCondition(req.getCurFileChannel());
-            }
+            flushOnCondition(req.getCurFileChannel());
         }
 
         private void syncFlush(SyncFlushRequest req) {
-            if (req.getCurFileTrxNum() < FILE_FLUSH_NUM.get()) {
+            if (req.getCurFileTrxNum() > FILE_FLUSH_NUM.get()) {
                 long diff = FILE_TRX_NUM.get() - FILE_FLUSH_NUM.get();
                 flush(req.getCurFileChannel());
                 FILE_FLUSH_NUM.addAndGet(diff);

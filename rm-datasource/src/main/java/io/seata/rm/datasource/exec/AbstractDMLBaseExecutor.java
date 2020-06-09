@@ -15,8 +15,10 @@
  */
 package io.seata.rm.datasource.exec;
 
+
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import io.seata.rm.datasource.AbstractConnectionProxy;
@@ -49,6 +51,18 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                                    SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+    }
+
+    /**
+     * Instantiates a new Base transactional executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizers     the multi sql recognizer
+     */
+    public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
+                                   List<SQLRecognizer> sqlRecognizers) {
+        super(statementProxy, statementCallback, sqlRecognizers);
     }
 
     @Override

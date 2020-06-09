@@ -20,6 +20,7 @@ import java.util.Objects;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public final class ConfigurationFactory {
         } catch (EnhancedServiceNotFoundException ignore) {
 
         } catch (Exception e) {
-            LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
+            LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
@@ -101,9 +102,14 @@ public final class ConfigurationFactory {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + ConfigurationKeys.FILE_ROOT_TYPE);
+
+            if (StringUtils.isBlank(configTypeName)) {
+                throw new NotSupportYetException("config type can not be null");
+            }
+
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
-            throw new NotSupportYetException("not support register type: " + configTypeName, e);
+            throw e;
         }
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
@@ -120,7 +126,7 @@ public final class ConfigurationFactory {
             } catch (EnhancedServiceNotFoundException ignore) {
 
             } catch (Exception e) {
-                LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
+                LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
