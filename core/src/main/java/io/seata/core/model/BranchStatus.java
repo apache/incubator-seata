@@ -15,7 +15,7 @@
  */
 package io.seata.core.model;
 
-import com.google.common.collect.Maps;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -108,7 +108,7 @@ public enum BranchStatus {
         return code;
     }
 
-    private static final Map<Integer, BranchStatus> MAP = Maps.newHashMapWithExpectedSize(values().length);
+    private static final Map<Integer, BranchStatus> MAP = new HashMap<>((int) ((float) values().length / 0.75F + 1.0F));
 
     static {
         for (BranchStatus status : values()) {
