@@ -17,6 +17,7 @@ package io.seata.spring.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.core.context.RootContext;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -34,7 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MethodDescTest {
 
     private static final GlobalTransactionScanner GLOBAL_TRANSACTION_SCANNER = new GlobalTransactionScanner(
-        "global-trans-scanner-test");
+            "global-trans-scanner-test");
+
     private static Method method = null;
     private static Class<?> targetClass = null;
     private static GlobalTransactional transactional = null;
@@ -46,7 +48,8 @@ public class MethodDescTest {
 
     @Test
     public void testGetAnnotation() throws NoSuchMethodException {
-        GlobalTransactionalInterceptor globalTransactionalInterceptor = new GlobalTransactionalInterceptor(null);
+        GlobalTransactionalSource globalTransactionalSource = GLOBAL_TRANSACTION_SCANNER.getGlobalTransactionalSource();
+        GlobalTransactionalInterceptor globalTransactionalInterceptor = new GlobalTransactionalInterceptor(null, globalTransactionalSource);
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
@@ -71,12 +74,13 @@ public class MethodDescTest {
 
     @Test
     public void testGlobalTransactional() throws NoSuchMethodException {
+        GlobalTransactionalSource globalTransactionalSource = GLOBAL_TRANSACTION_SCANNER.getGlobalTransactionalSource();
         MockClassAnnotation mockClassAnnotation = new MockClassAnnotation();
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTarget(mockClassAnnotation);
-        proxyFactory.addAdvice(new GlobalTransactionalInterceptor(null));
+        proxyFactory.addAdvice(new GlobalTransactionalInterceptor(null, globalTransactionalSource));
         Object proxy = proxyFactory.getProxy();
-        mockClassAnnotation = (MockClassAnnotation)proxy;
+        mockClassAnnotation = (MockClassAnnotation) proxy;
         mockClassAnnotation.toString();
         Assertions.assertNull(RootContext.getXID());
         mockClassAnnotation.hashCode();
@@ -92,7 +96,7 @@ public class MethodDescTest {
 
     @Test
     public void testGetTransactionAnnotation()
-        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getTransactionAnnotation()).isEqualTo(transactional);
 
@@ -106,7 +110,7 @@ public class MethodDescTest {
 
     @Test
     public void testSetTransactionAnnotation()
-        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getTransactionAnnotation()).isNotNull();
         methodDesc.setTransactionAnnotation(null);
@@ -124,9 +128,9 @@ public class MethodDescTest {
     private MethodDesc getMethodDesc() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         //call the private method
         Method m = GlobalTransactionScanner.class.getDeclaredMethod("makeMethodDesc", GlobalTransactional.class,
-            Method.class);
+                Method.class);
         m.setAccessible(true);
-        return (MethodDesc)m.invoke(GLOBAL_TRANSACTION_SCANNER, transactional, method);
+        return (MethodDesc) m.invoke(GLOBAL_TRANSACTION_SCANNER, transactional, method);
 
     }
 
