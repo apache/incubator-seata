@@ -32,12 +32,10 @@ public final class StackTraceLogger {
 
     private static final String STACK_TRACE_LOGGER_PREFIX = "[stacktrace]";
 
-    private static final int PERCENT = 100;
-
     public static void info(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isInfoEnabled()) {
             int rate = getRate();
-            if (ThreadLocalRandom.current().nextInt(PERCENT / rate) == 0) {
+            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
                 logger.info(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.info(format, args);
@@ -48,7 +46,7 @@ public final class StackTraceLogger {
     public static void warn(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isWarnEnabled()) {
             int rate = getRate();
-            if (ThreadLocalRandom.current().nextInt(PERCENT / rate) == 0) {
+            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
                 logger.warn(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.warn(format, args);
@@ -59,7 +57,7 @@ public final class StackTraceLogger {
     public static void error(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isErrorEnabled()) {
             int rate = getRate();
-            if (ThreadLocalRandom.current().nextInt(PERCENT / rate) == 0) {
+            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
                 logger.error(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.error(format, args);
