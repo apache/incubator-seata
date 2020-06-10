@@ -94,6 +94,7 @@ public class IdWorker {
      *
      * @return SnowflakeId
      */
+
     public long nextId() {
         long timestamp = timeGen();
 
