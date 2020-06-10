@@ -17,10 +17,13 @@
 
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
     <property name="LOG_HOME" value="${user.home}/logs/seata"/>
+    <property name="PATTERN" value="%date{yyyy-MM-dd HH:mm:ss.SSS} %5level --- [%15.15t] %-40.40logger{39} : %msg%n%wEx"/>
+
+    <conversionRule conversionWord="wEx" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
 
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level[%thread]%logger{56}.%method:%L -%msg%n</Pattern>
+            <Pattern>${PATTERN}</Pattern>
         </encoder>
     </appender>
 
@@ -36,7 +39,7 @@
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <encoder>
-            <Pattern>%date %level %msg%n%n</Pattern>
+            <Pattern>${PATTERN}</Pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
@@ -51,4 +54,3 @@
         <appender-ref ref="stdout"/>
     </root>
 </configuration>
-
