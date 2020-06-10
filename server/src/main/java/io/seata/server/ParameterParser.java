@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import io.seata.common.util.IdWorker;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -49,7 +50,7 @@ public class ParameterParser {
 
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final Long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
+    private static final Long SERVER_DEFAULT_NODE = IdWorker.initWorkerId();
 
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
@@ -68,7 +69,7 @@ public class ParameterParser {
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
-    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode = SERVER_DEFAULT_NODE;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
