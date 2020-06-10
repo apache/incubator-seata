@@ -15,9 +15,6 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import io.seata.common.exception.FrameworkException;
 import io.seata.core.context.RootContext;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -26,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.aop.framework.ProxyFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,24 +51,42 @@ public class MethodDescTest {
         GlobalTransactionalInterceptor globalTransactionalInterceptor = new GlobalTransactionalInterceptor(null, globalTransactionalSource);
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
-        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
         Assertions.assertEquals(transactional.timeoutMills(), 300000);
-        method = null;
-        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        method = MockBusiness.class.getDeclaredMethod("empty");
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
         Assertions.assertEquals(transactional.timeoutMills(), TransactionInfo.DEFAULT_TIME_OUT * 2);
-        targetClass = null;
-        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        targetClass = Mockito.mock(MockMethodAnnotation.class).getClass();
+        method = MockMethodAnnotation.class.getDeclaredMethod("empty");
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
         Assertions.assertNull(transactional);
         // only class has Annotation, method is not null
         targetClass = Mockito.mock(MockMethodAnnotation.class).getClass();
         method = MockMethodAnnotation.class.getDeclaredMethod("doBiz", String.class);
-        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
         Assertions.assertEquals(transactional.name(), "doBiz");
         // only method has Annotation, class is not null
         targetClass = Mockito.mock(MockClassAnnotation.class).getClass();
         method = MockClassAnnotation.class.getDeclaredMethod("doBiz", String.class);
-        transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
         Assertions.assertEquals(transactional.name(), "MockClassAnnotation");
+        targetClass = Mockito.mock(MockInterfaceAnnotationImpl.class).getClass();
+        method = MockInterfaceAnnotationImpl.class.getDeclaredMethod("empty");
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
+        Assertions.assertEquals(transactional.name(), "MockInterfaceAnnotation");
+        method = MockInterfaceAnnotationImpl.class.getDeclaredMethod("doBiz", String.class);
+        targetClass = Mockito.mock(MockInterfaceAnnotationImpl.class).getClass();
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
+        Assertions.assertEquals(transactional.timeoutMills(), 300000);
+        method = MockInterfaceMethodAnnotationImpl.class.getDeclaredMethod("doBiz", String.class);
+        targetClass = Mockito.mock(MockInterfaceMethodAnnotationImpl.class).getClass();
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
+        Assertions.assertEquals(transactional.timeoutMills(), 300000);
+        method = MockInterfaceMethodAnnotationImpl.class.getDeclaredMethod("empty");
+        targetClass = Mockito.mock(MockInterfaceMethodAnnotationImpl.class).getClass();
+        transactional = (GlobalTransactional) globalTransactionalSource.getGlobalTransactionalAnnotation(method, targetClass);
+        Assertions.assertNull(transactional);
+
     }
 
     @Test
@@ -143,7 +160,56 @@ public class MethodDescTest {
         public String doBiz(String msg) {
             return "hello " + msg;
         }
+
+        public void empty() {
+
+        }
     }
+
+    @GlobalTransactional(name = "MockInterfaceAnnotation")
+    public interface MockInterfaceAnnotation {
+        @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+        String doBiz(String msg);
+
+        void empty();
+    }
+
+
+    public static class MockInterfaceAnnotationImpl implements MockInterfaceAnnotation {
+        @Override
+        public String doBiz(String msg) {
+            return "hello " + msg;
+        }
+
+        @Override
+        public void empty() {
+
+        }
+
+    }
+
+
+    public interface MockInterfaceMethodAnnotation {
+        @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+        String doBiz(String msg);
+
+        void empty();
+    }
+
+    public static class MockInterfaceMethodAnnotationImpl implements MockInterfaceMethodAnnotation {
+        @Override
+        public String doBiz(String msg) {
+            return "hello " + msg;
+        }
+
+        @Override
+        public void empty() {
+
+        }
+
+
+    }
+
 
     /**
      * the type mock class annotation
@@ -152,6 +218,9 @@ public class MethodDescTest {
     private static class MockClassAnnotation {
         public String doBiz(String msg) {
             return "hello " + msg;
+        }
+
+        public void empty() {
         }
     }
 
@@ -162,6 +231,10 @@ public class MethodDescTest {
         @GlobalTransactional(name = "doBiz")
         public String doBiz(String msg) {
             return "hello " + msg;
+        }
+
+        public void empty() {
+
         }
     }
 
