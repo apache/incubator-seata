@@ -165,7 +165,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
             ObjectMapper objectMapper = new ObjectMapper();
             //类为空时，不要抛异常
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//            objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+//            objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL); 不输出类信息  @class
             objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
                 @Override
                 public void serialize(Object value, JsonGenerator jgen,
