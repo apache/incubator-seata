@@ -24,28 +24,28 @@ import java.lang.management.ManagementFactory;
  */
 public class ApplicationPid {
 
-	private final String pid;
+    private final String pid;
 
-	public ApplicationPid() {
-		this.pid = getPid();
-	}
+    public ApplicationPid() {
+        this.pid = getPid();
+    }
 
-	protected ApplicationPid(String pid) {
-		this.pid = pid;
-	}
+    protected ApplicationPid(String pid) {
+        this.pid = pid;
+    }
 
-	private String getPid() {
-		try {
-			String jvmName = ManagementFactory.getRuntimeMXBean().getName();
-			return jvmName.split("@")[0];
-		}
-		catch (Throwable ex) {
-			return null;
-		}
-	}
+    private String getPid() {
+        try {
+            String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+            return jvmName.split("@")[0];
+        }
+        catch (Throwable ex) {
+            return null;
+        }
+    }
 
-	@Override
-	public String toString() {
-		return (this.pid != null) ? this.pid : "???";
-	}
+    @Override
+    public String toString() {
+        return (this.pid != null) ? this.pid : "???";
+    }
 }
