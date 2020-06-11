@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * handle RM/TM response message.
@@ -49,7 +50,7 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
 
     private TransactionMessageHandler transactionMessageHandler;
 
-    private ConcurrentHashMap<Integer, MessageFuture> futures;
+    private ConcurrentMap<Integer, MessageFuture> futures;
 
     public ServerOnResponseProcessor(TransactionMessageHandler transactionMessageHandler,
                                      ConcurrentHashMap<Integer, MessageFuture> futures) {
