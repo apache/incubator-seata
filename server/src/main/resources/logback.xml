@@ -37,7 +37,7 @@
         <file>${LOG_HOME}/seata-server.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/seata-server.log.%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/seata-server.log.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>
