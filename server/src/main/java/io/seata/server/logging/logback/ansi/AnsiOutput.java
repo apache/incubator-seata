@@ -26,7 +26,7 @@ import java.util.Locale;
  * @author Phillip Webb
  * @origin Copied from spring-boot.jar by wang.liang<841369634@qq.com>
  */
-public abstract class AnsiOutput {
+public class AnsiOutput {
 
     private static final String ENCODE_JOIN = ";";
 

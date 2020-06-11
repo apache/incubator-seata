@@ -23,16 +23,34 @@ package io.seata.server.logging.logback.ansi;
  */
 public enum AnsiStyle implements AnsiElement {
 
+    /**
+     * normal
+     */
     NORMAL("0"),
 
+    /**
+     * bold
+     */
     BOLD("1"),
 
+    /**
+     * faint
+     */
     FAINT("2"),
 
+    /**
+     * italic
+     */
     ITALIC("3"),
 
+    /**
+     * underline
+     */
     UNDERLINE("4");
 
+    /**
+     * code of style
+     */
     private final String code;
 
     AnsiStyle(String code) {
