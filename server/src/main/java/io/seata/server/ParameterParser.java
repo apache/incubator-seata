@@ -46,11 +46,10 @@ public class ParameterParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
     private static final String PROGRAM_NAME
-        = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
+            = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final Long SERVER_DEFAULT_NODE = IdWorker.initWorkerId();
 
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
@@ -70,10 +69,11 @@ public class ParameterParser {
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
-    private Long serverNode = SERVER_DEFAULT_NODE;
+    private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
-        order = 5)
+            order = 5)
     private String seataEnv;
+
     /**
      * Instantiates a new Parameter parser.
      *
@@ -94,7 +94,7 @@ public class ParameterParser {
 
                 this.seataEnv = StringUtils.trimToNull(System.getenv(ENV_SYSTEM_KEY));
                 this.host = StringUtils.trimToNull(System.getenv(ENV_SEATA_IP_KEY));
-                this.serverNode = NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
+                this.serverNode = NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY));
                 this.port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
                 this.storeMode = StringUtils.trimToNull(System.getenv(ENV_STORE_MODE_KEY));
             } else {
@@ -106,12 +106,15 @@ public class ParameterParser {
                     System.exit(0);
                 }
             }
+            if (this.serverNode == null) {
+                this.serverNode = IdWorker.initWorkerId();
+            }
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
             if (StringUtils.isBlank(storeMode)) {
                 storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
-                    SERVER_DEFAULT_STORE_MODE);
+                        SERVER_DEFAULT_STORE_MODE);
             }
         } catch (ParameterException e) {
             printError(e);

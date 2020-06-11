@@ -53,4 +53,11 @@ public class NumberUtils {
             return defaultValue;
         }
     }
+
+    public static Long toLong(String str) {
+        if (str != null) {
+            return Long.valueOf(str);
+        }
+        return null;
+    }
 }

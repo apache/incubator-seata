@@ -15,7 +15,7 @@
  */
 package io.seata.common.util;
 
-import com.google.common.base.Preconditions;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -80,13 +80,12 @@ public class IdWorker {
     /**
      * Constructor
      *
-     * @param workerId
-     *            Job ID (0 ~ 1023)
+     * @param workerId Job ID (0 ~ 1023)
      */
     public IdWorker(long workerId) {
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(
-                String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+                    String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
         }
         this.workerId = workerId;
     }
@@ -102,7 +101,7 @@ public class IdWorker {
 
         if (timestamp < lastTimestamp) {
             throw new RuntimeException(String.format(
-                "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+                    "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
         synchronized (this) {
@@ -122,8 +121,7 @@ public class IdWorker {
     /**
      * Block until the next millisecond until a new timestamp is obtained
      *
-     * @param lastTimestamp
-     *            Time of last ID generation
+     * @param lastTimestamp Time of last ID generation
      * @return Current timestamp
      */
     protected long tilNextMillis(long lastTimestamp) {
@@ -153,7 +151,8 @@ public class IdWorker {
         }
         return idWorker;
     }
-    public static long initWorkerId(){
+
+    public static long initWorkerId() {
         InetAddress address;
         try {
             address = InetAddress.getLocalHost();
@@ -161,9 +160,7 @@ public class IdWorker {
             throw new IllegalStateException("Cannot get LocalHost InetAddress, please check your network!");
         }
         byte[] ipAddressByteArray = address.getAddress();
-        long workerId = (((ipAddressByteArray[ipAddressByteArray.length - 2] & 0B11) << Byte.SIZE) + (ipAddressByteArray[ipAddressByteArray.length - 1] & 0xFF));
-        Preconditions.checkArgument(workerId >= 0L && workerId < 1024L);
-        return workerId;
+        return (((ipAddressByteArray[ipAddressByteArray.length - 2] & 0B11) << Byte.SIZE) + (ipAddressByteArray[ipAddressByteArray.length - 1] & 0xFF));
     }
 
     public static void init(Long serverNodeId) {
