@@ -15,12 +15,10 @@
  */
 package io.seata.config;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -36,36 +34,26 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
-    private static final Set<String> LISTENER_KEYS = new HashSet<>();
-
-    private ConcurrentMap<String, HashSet<ConfigurationChangeListener>> configListenersMap =
-        new ConcurrentHashMap<>();
+    private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap =
+        new HashMap<>();
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         if (StringUtils.isBlank(dataId)) {
             return;
         }
         synchronized (ConfigurationCache.class) {
-            if (!LISTENER_KEYS.contains(dataId)) {
+            HashSet<ConfigurationChangeListener> listenerHashSet =
+                getInstance().configListenersMap.computeIfAbsent(dataId, k -> new HashSet<>());
+            if (!listenerHashSet.contains(getInstance())) {
                 ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
-                LISTENER_KEYS.add(dataId);
+                listenerHashSet.add(getInstance());
             }
             if (null != listeners && listeners.length > 0) {
-                HashSet<ConfigurationChangeListener> listenerHashSet = null;
-                try {
-                    listenerHashSet = getInstance().configListenersMap.get(dataId);
-                    if (CollectionUtils.isEmpty(listenerHashSet)) {
-                        listenerHashSet = new HashSet<>();
+                for (ConfigurationChangeListener listener : listeners) {
+                    if (!listenerHashSet.contains(listener)) {
+                        listenerHashSet.add(listener);
+                        ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
                     }
-                    for (int i = 0; i < listeners.length; i++) {
-                        ConfigurationChangeListener listener = listeners[i];
-                        if (!listenerHashSet.contains(listener)) {
-                            listenerHashSet.add(listener);
-                            ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
-                        }
-                    }
-                } finally {
-                    getInstance().configListenersMap.put(dataId, listenerHashSet);
                 }
             }
         }

@@ -16,9 +16,9 @@
 package io.seata.discovery.registry;
 
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.List;
-
-import io.seata.config.Configuration;
+import java.util.Set;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -42,6 +42,8 @@ public interface RegistryService<T> {
      * The constant CONFIG_SPLIT_CHAR.
      */
     String CONFIG_SPLIT_CHAR = ".";
+
+    Set<String> SERVICE_GROUP_NAME = new HashSet<>();
 
     /**
      * Register.
@@ -99,9 +101,11 @@ public interface RegistryService<T> {
      * @return the service group name
      */
     default String getServiceGroup(String key) {
-        Configuration config = ConfigurationFactory.getInstance();
         key = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        ConfigurationCache.addConfigListener(key);
-        return config.getConfig(key);
+        if (!SERVICE_GROUP_NAME.contains(key)) {
+            ConfigurationCache.addConfigListener(key);
+            SERVICE_GROUP_NAME.add(key);
+        }
+        return ConfigurationFactory.getInstance().getConfig(key);
     }
 }
