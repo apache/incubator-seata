@@ -217,7 +217,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (CollectionUtils.isEmpty(allSessions)) {
             return;
         }
-        if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check begin, size: {}", allSessions.size());
         }
         for (GlobalSession globalSession : allSessions) {
@@ -256,10 +256,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
         }
-        if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Global transaction timeout check end. ");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Global transaction timeout check end.");
         }
-
     }
 
     /**
