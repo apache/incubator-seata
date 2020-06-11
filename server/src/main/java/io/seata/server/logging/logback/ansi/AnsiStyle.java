@@ -19,7 +19,7 @@ package io.seata.server.logging.logback.ansi;
  * {@link AnsiElement Ansi} styles.
  *
  * @author Phillip Webb
- * @origin Copied from spring-boot.jar by wang.liang<841369634@qq.com>
+ * @origin Copied from spring-boot.jar by wang.liang
  */
 public enum AnsiStyle implements AnsiElement {
 

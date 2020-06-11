@@ -33,7 +33,7 @@ import java.util.Map;
  * be picked based on the logging level.
  *
  * @author Phillip Webb
- * @origin Copied from spring-boot.jar by wang.liang<841369634@qq.com>
+ * @origin Copied from spring-boot.jar by wang.liang
  */
 public class ColorConverter extends CompositeConverter<ILoggingEvent> {
 

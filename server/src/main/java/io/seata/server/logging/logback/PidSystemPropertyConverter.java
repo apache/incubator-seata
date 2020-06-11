@@ -15,21 +15,18 @@
  */
 package io.seata.server.logging.logback;
 
-import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.core.CoreConstants;
+import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
- * {@link ThrowableProxyConverter} that adds some additional whitespace around the stacktrace.
- *
- * @author Phillip Webb
- * @origin Copied from spring-boot.jar by wang.liang
+ * @author wang.liang
  */
-public class WhitespaceThrowableProxyConverter extends ThrowableProxyConverter {
+public final class PidSystemPropertyConverter extends ClassicConverter {
+
+    public static final String PID_KEY = "PID";
 
     @Override
-    protected String throwableProxyToString(IThrowableProxy tp) {
-        return "==>" + CoreConstants.LINE_SEPARATOR + super.throwableProxyToString(tp)
-                + "<==" + CoreConstants.LINE_SEPARATOR + CoreConstants.LINE_SEPARATOR;
+    public String convert(ILoggingEvent event) {
+        return System.getProperty(PID_KEY);
     }
 }

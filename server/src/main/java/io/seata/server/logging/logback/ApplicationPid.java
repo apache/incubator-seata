@@ -15,21 +15,37 @@
  */
 package io.seata.server.logging.logback;
 
-import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.core.CoreConstants;
+import java.lang.management.ManagementFactory;
 
 /**
- * {@link ThrowableProxyConverter} that adds some additional whitespace around the stacktrace.
+ * An application process ID.
  *
- * @author Phillip Webb
- * @origin Copied from spring-boot.jar by wang.liang
+ * @author wang.liang
  */
-public class WhitespaceThrowableProxyConverter extends ThrowableProxyConverter {
+public class ApplicationPid {
 
-    @Override
-    protected String throwableProxyToString(IThrowableProxy tp) {
-        return "==>" + CoreConstants.LINE_SEPARATOR + super.throwableProxyToString(tp)
-                + "<==" + CoreConstants.LINE_SEPARATOR + CoreConstants.LINE_SEPARATOR;
-    }
+	private final String pid;
+
+	public ApplicationPid() {
+		this.pid = getPid();
+	}
+
+	protected ApplicationPid(String pid) {
+		this.pid = pid;
+	}
+
+	private String getPid() {
+		try {
+			String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+			return jvmName.split("@")[0];
+		}
+		catch (Throwable ex) {
+			return null;
+		}
+	}
+
+	@Override
+	public String toString() {
+		return (this.pid != null) ? this.pid : "???";
+	}
 }

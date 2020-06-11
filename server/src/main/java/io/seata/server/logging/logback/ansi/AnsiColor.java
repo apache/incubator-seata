@@ -20,7 +20,7 @@ package io.seata.server.logging.logback.ansi;
  *
  * @author Phillip Webb
  * @author Geoffrey Chandler
- * @origin Copied from spring-boot.jar by wang.liang<841369634@qq.com>
+ * @origin Copied from spring-boot.jar by wang.liang
  */
 public enum AnsiColor implements AnsiElement {
 
