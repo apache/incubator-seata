@@ -213,7 +213,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @throws TransactionException the transaction exception
      */
     protected void timeoutCheck() throws TransactionException {
-        Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+        Collection<GlobalSession> allSessions = SessionHolder.getTimeoutCheckSessionManager().allSessions();
         if (CollectionUtils.isEmpty(allSessions)) {
             return;
         }
@@ -222,12 +222,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         for (GlobalSession globalSession : allSessions) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(
-                    globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
+                LOGGER.debug(globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
                         + globalSession.getTimeout());
             }
             boolean shouldTimeout = SessionHolder.lockAndExecute(globalSession, () -> {
-                if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+                if (globalSession.getStatus() != GlobalStatus.Begin) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Please load only the globalSession with status Begin!");
+                    }
+                    return false;
+                }
+                if (!globalSession.isTimeout()) {
                     return false;
                 }
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());

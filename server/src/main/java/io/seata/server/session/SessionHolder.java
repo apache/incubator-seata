@@ -29,8 +29,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Session holder.
@@ -38,8 +36,6 @@ import org.slf4j.LoggerFactory;
  * @author sharajava
  */
 public class SessionHolder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHolder.class);
 
     /**
      * The constant CONFIG.
@@ -61,6 +57,10 @@ public class SessionHolder {
      * The constant RETRY_ROLLBACKING_SESSION_MANAGER_NAME.
      */
     public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
+    /**
+     * The constant TIMEOUT_CHECK_SESSION_MANAGER_NAME.
+     */
+    public static final String TIMEOUT_CHECK_SESSION_MANAGER_NAME = "timeout.check.data";
 
     /**
      * The default session store dir
@@ -71,6 +71,7 @@ public class SessionHolder {
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
+    private static SessionManager TIMEOUT_CHECK_SESSION_MANAGER;
 
     /**
      * Init.
@@ -91,6 +92,8 @@ public class SessionHolder {
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+            TIMEOUT_CHECK_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
+                new Object[] {TIMEOUT_CHECK_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                 DEFAULT_SESSION_STORE_FILE_DIR);
@@ -105,6 +108,8 @@ public class SessionHolder {
                 new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+            TIMEOUT_CHECK_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
+                new Class[] {String.class, String.class}, new Object[] {TIMEOUT_CHECK_SESSION_MANAGER_NAME, null});
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -113,6 +118,8 @@ public class SessionHolder {
                 StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+            TIMEOUT_CHECK_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.REDIS.getName(), new Object[] {TIMEOUT_CHECK_SESSION_MANAGER_NAME});
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
@@ -243,6 +250,18 @@ public class SessionHolder {
     }
 
     /**
+     * Gets timeout check session manager.
+     *
+     * @return the timeout check session manager
+     */
+    public static SessionManager getTimeoutCheckSessionManager() {
+        if (TIMEOUT_CHECK_SESSION_MANAGER == null) {
+            throw new ShouldNeverHappenException("SessionManager is NOT init!");
+        }
+        return TIMEOUT_CHECK_SESSION_MANAGER;
+    }
+
+    /**
      * Find global session.
      *
      * @param xid the xid
@@ -287,6 +306,9 @@ public class SessionHolder {
         }
         if (RETRY_ROLLBACKING_SESSION_MANAGER != null) {
             RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
+        }
+        if (TIMEOUT_CHECK_SESSION_MANAGER != null) {
+            TIMEOUT_CHECK_SESSION_MANAGER.destroy();
         }
     }
 }

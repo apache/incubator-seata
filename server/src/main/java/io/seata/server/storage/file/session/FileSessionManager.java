@@ -36,6 +36,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
 import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.file.ReloadableStore;
 import io.seata.server.storage.file.TransactionWriteStore;
 import io.seata.server.storage.file.store.FileTransactionStoreManager;
@@ -113,16 +114,33 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public Collection<GlobalSession> allSessions() {
-        return sessionMap.values();
+        if (SessionHolder.TIMEOUT_CHECK_SESSION_MANAGER_NAME.equalsIgnoreCase(super.name)) {
+            return SessionHolder.getRootSessionManager()
+                .findGlobalSessions(new SessionCondition(GlobalStatus.Begin));
+        } else {
+            return sessionMap.values();
+        }
     }
 
     @Override
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
-        for (GlobalSession globalSession : sessionMap.values()) {
-            if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
-                found.add(globalSession);
+        if (condition.getOverTimeAliveMills() > 0) {
+            for (GlobalSession globalSession : sessionMap.values()) {
+                if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+                    found.add(globalSession);
+                }
             }
+        } else if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
+            for (GlobalSession globalSession : sessionMap.values()) {
+                for (GlobalStatus globalStatus : condition.getStatuses()) {
+                    if (globalSession.getStatus() == globalStatus) {
+                        found.add(globalSession);
+                    }
+                }
+            }
+        } else {
+            found.addAll(sessionMap.values());
         }
         return found;
     }
