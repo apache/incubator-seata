@@ -18,7 +18,6 @@ package io.seata.core.rpc.processor.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractResultMessage;
-import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
