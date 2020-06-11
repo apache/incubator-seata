@@ -60,10 +60,7 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        MessageFuture messageFuture = null;
-        if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
-            messageFuture = futures.remove(rpcMessage.getId());
-        }
+        MessageFuture messageFuture = futures.remove(rpcMessage.getId());
         if (messageFuture != null) {
             messageFuture.setResultMessage(rpcMessage.getBody());
         } else {
