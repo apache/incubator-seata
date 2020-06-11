@@ -13,24 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.logging.logback;
-
-import ch.qos.logback.classic.pattern.ExtendedThrowableProxyConverter;
-import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.core.CoreConstants;
+package io.seata.server.logging.logback.ansi;
 
 /**
- * {@link ExtendedThrowableProxyConverter} that adds some additional whitespace around the
- * stack trace.
+ * An ANSI encodable element.
  *
  * @author Phillip Webb
  * @origin Copied from spring-boot.jar by wang.liang<841369634@qq.com>
  */
-public class ExtendedWhitespaceThrowableProxyConverter extends ExtendedThrowableProxyConverter {
+public interface AnsiElement {
 
+    /**
+     * @return the ANSI escape code
+     */
     @Override
-    protected String throwableProxyToString(IThrowableProxy tp) {
-        return "==>" + CoreConstants.LINE_SEPARATOR + super.throwableProxyToString(tp)
-                + "<==" + CoreConstants.LINE_SEPARATOR + CoreConstants.LINE_SEPARATOR;
-    }
+    String toString();
+
 }

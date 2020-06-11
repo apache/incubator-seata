@@ -15,18 +15,17 @@
  */
 package io.seata.server.logging.logback;
 
-import ch.qos.logback.classic.pattern.ExtendedThrowableProxyConverter;
+import ch.qos.logback.classic.pattern.ThrowableProxyConverter;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.CoreConstants;
 
 /**
- * {@link ExtendedThrowableProxyConverter} that adds some additional whitespace around the
- * stack trace.
+ * {@link ThrowableProxyConverter} that adds some additional whitespace around the stacktrace.
  *
  * @author Phillip Webb
  * @origin Copied from spring-boot.jar by wang.liang<841369634@qq.com>
  */
-public class ExtendedWhitespaceThrowableProxyConverter extends ExtendedThrowableProxyConverter {
+public class WhitespaceThrowableProxyConverter extends ThrowableProxyConverter {
 
     @Override
     protected String throwableProxyToString(IThrowableProxy tp) {
