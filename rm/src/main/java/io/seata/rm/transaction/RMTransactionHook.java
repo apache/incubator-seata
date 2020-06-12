@@ -34,13 +34,19 @@ public interface RMTransactionHook {
     /**
      * after branch committed
      */
-    default void afterBranchCommitted(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
+    default void afterBranchCommitted(BranchType branchType, String xid, long branchId) {
     }
 
     /**
      * after branch commit failed
      */
-    default void afterBranchCommitFailed(BranchType branchType, String xid, long branchId, Exception e) {
+    default void afterBranchCommitFailed(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
+    }
+
+    /**
+     * after branch commit failed
+     */
+    default void afterBranchCommitException(BranchType branchType, String xid, long branchId, Exception e) {
     }
 
     /**
@@ -52,12 +58,18 @@ public interface RMTransactionHook {
     /**
      * after branch rollbacked
      */
-    default void afterBranchRollbacked(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
+    default void afterBranchRollbacked(BranchType branchType, String xid, long branchId) {
     }
 
     /**
      * after branch rollback failed
      */
-    default  void afterBranchRollbackFailed(BranchType branchType, String xid, long branchId, Exception e) {
+    default  void afterBranchRollbackFailed(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
+    }
+
+    /**
+     * after branch rollback failed
+     */
+    default  void afterBranchRollbackException(BranchType branchType, String xid, long branchId, Exception e) {
     }
 }

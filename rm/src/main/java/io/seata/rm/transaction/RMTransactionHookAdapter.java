@@ -15,41 +15,9 @@
  */
 package io.seata.rm.transaction;
 
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-
 /**
  * @author wang.liang
  */
 public class RMTransactionHookAdapter implements RMTransactionHook {
 
-    @Override
-    public void beforeBranchCommit(BranchType branchType, String xid, long branchId) {
-
-    }
-
-    @Override
-    public void afterBranchCommitted(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
-
-    }
-
-    @Override
-    public void afterBranchCommitFailed(BranchType branchType, String xid, long branchId, Exception e) {
-
-    }
-
-    @Override
-    public void beforeBranchRollback(BranchType branchType, String xid, long branchId) {
-
-    }
-
-    @Override
-    public void afterBranchRollbacked(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
-
-    }
-
-    @Override
-    public void afterBranchRollbackFailed(BranchType branchType, String xid, long branchId, Exception e) {
-
-    }
 }

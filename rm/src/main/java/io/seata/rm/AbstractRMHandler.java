@@ -116,13 +116,19 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             }
 
             //trigger after branch commit hooks
-            RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
-                hook.afterBranchCommitted(branchType, xid, branchId, status);
-            });
+            if (status == BranchStatus.PhaseTwo_Committed) {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                    hook.afterBranchCommitted(branchType, xid, branchId);
+                });
+            } else {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                    hook.afterBranchCommitFailed(branchType, xid, branchId, status);
+                });
+            }
         } catch (Exception e) {
             //trigger after branch commit failed hooks
             RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
-                hook.afterBranchCommitFailed(branchType, xid, branchId, e);
+                hook.afterBranchCommitException(branchType, xid, branchId, e);
             });
 
             // throw the exception after finished hooks
@@ -165,13 +171,19 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             }
 
             //trigger after branch rollback hooks
-            RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
-                hook.afterBranchRollbacked(branchType, xid, branchId, status);
-            });
+            if (status == BranchStatus.PhaseTwo_Committed) {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                    hook.afterBranchRollbacked(branchType, xid, branchId);
+                });
+            } else {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                    hook.afterBranchRollbackFailed(branchType, xid, branchId, status);
+                });
+            }
         } catch (Exception e) {
             //trigger after branch rollback failed hooks
             RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
-                hook.afterBranchRollbackFailed(branchType, xid, branchId, e);
+                hook.afterBranchRollbackException(branchType, xid, branchId, e);
             });
 
             // throw the exception after finished hooks
