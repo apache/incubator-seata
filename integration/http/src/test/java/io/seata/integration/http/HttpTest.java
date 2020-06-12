@@ -40,7 +40,7 @@ import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonS
  */
 class HttpTest {
 
-    private static final String host = "http://127.0.0.1:8081";
+    private static final String host = "http://127.0.0.1:8080";
     private static final String testException = "/testException";
     private static final String getPath = "/testGet";
     private static final String postPath = "/testPost";
@@ -76,7 +76,7 @@ class HttpTest {
     }
 
     public void providerStart() {
-        new MockWebServer().start(8081);
+        new MockWebServer().start(8080);
     }
 
     public static class Person {
