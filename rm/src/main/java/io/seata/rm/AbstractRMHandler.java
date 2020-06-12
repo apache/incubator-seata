@@ -171,7 +171,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             }
 
             //trigger after branch rollback hooks
-            if (status == BranchStatus.PhaseTwo_Committed) {
+            if (status == BranchStatus.PhaseTwo_Rollbacked) {
                 RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
                     hook.afterBranchRollbacked(branchType, xid, branchId);
                 });
