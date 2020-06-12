@@ -25,6 +25,8 @@ import io.seata.core.model.BranchType;
  */
 public interface RMTransactionHook {
 
+    //region branch commit
+
     /**
      * before branch commit
      */
@@ -32,7 +34,7 @@ public interface RMTransactionHook {
     }
 
     /**
-     * after branch committed
+     * after branch commit successful
      */
     default void afterBranchCommitted(BranchType branchType, String xid, long branchId) {
     }
@@ -49,6 +51,10 @@ public interface RMTransactionHook {
     default void afterBranchCommitException(BranchType branchType, String xid, long branchId, Exception e) {
     }
 
+    //endregion
+
+    //region branch rollback
+
     /**
      * before branch rollback
      */
@@ -56,7 +62,7 @@ public interface RMTransactionHook {
     }
 
     /**
-     * after branch rollbacked
+     * after branch rollback successful
      */
     default void afterBranchRollbacked(BranchType branchType, String xid, long branchId) {
     }
@@ -64,12 +70,14 @@ public interface RMTransactionHook {
     /**
      * after branch rollback failed
      */
-    default  void afterBranchRollbackFailed(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
+    default void afterBranchRollbackFailed(BranchType branchType, String xid, long branchId, BranchStatus returnBranchStatus) {
     }
 
     /**
      * after branch rollback exception
      */
-    default  void afterBranchRollbackException(BranchType branchType, String xid, long branchId, Exception e) {
+    default void afterBranchRollbackException(BranchType branchType, String xid, long branchId, Exception e) {
     }
+
+    //endregion
 }
