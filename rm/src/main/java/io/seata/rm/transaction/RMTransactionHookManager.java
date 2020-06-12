@@ -19,7 +19,6 @@ import io.seata.common.util.CollectionUtils;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,72 +29,49 @@ import java.util.function.Consumer;
  */
 public final class RMTransactionHookManager {
 
-    private static final ThreadLocal<List<RMTransactionHook>> GLOBAL_HOOKS = new ThreadLocal<>();
+	private static final List<RMTransactionHook> GLOBAL_HOOKS = new ArrayList<>();
 
-    private RMTransactionHookManager() {
-    }
+	private RMTransactionHookManager() {
+	}
 
-    /**
-     * get global hook list
-     */
-    private static synchronized List<RMTransactionHook> getGlobalHookList() {
-        List<RMTransactionHook> transactionHooks = GLOBAL_HOOKS.get();
-        if (transactionHooks == null) {
-            transactionHooks = new ArrayList<>();
-            GLOBAL_HOOKS.set(transactionHooks);
-        }
-        return transactionHooks;
-    }
+	/**
+	 * get the hooks
+	 */
+	public static List<RMTransactionHook> getHooks() {
+		return GLOBAL_HOOKS;
+	}
 
-    /**
-     * get the hooks
-     */
-    public static List<RMTransactionHook> getHooks() {
-        List<RMTransactionHook> hooks = GLOBAL_HOOKS.get();
-        if (hooks == null || hooks.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return hooks;
-    }
+	/**
+	 * add new global hook
+	 *
+	 * @param rmTransactionHook
+	 */
+	public static void registerGlobalHook(RMTransactionHook rmTransactionHook) {
+		if (rmTransactionHook == null) {
+			throw new NullPointerException("RM transactionHook must not be null");
+		}
+		List<RMTransactionHook> transactionHooks = getHooks();
+		transactionHooks.add(rmTransactionHook);
+	}
 
-    /**
-     * add new global hook
-     *
-     * @param rmTransactionHook
-     */
-    public static void registerGlobalHook(RMTransactionHook rmTransactionHook) {
-        if (rmTransactionHook == null) {
-            throw new NullPointerException("RM transactionHook must not be null");
-        }
-        List<RMTransactionHook> transactionHooks = getGlobalHookList();
-        transactionHooks.add(rmTransactionHook);
-    }
-
-    /**
-     * clear global hooks
-     */
-    public static void clearGlobalHooks() {
-        GLOBAL_HOOKS.remove();
-    }
-
-    /**
-     * trigger hooks
-     *
-     * @param logger   the logger in the trigger
-     * @param consumer the hook consumer
-     */
-    public static void triggerHooks(Logger logger, long branchId, Consumer<RMTransactionHook> consumer) {
-        List<RMTransactionHook> hooks = getHooks();
-        if (CollectionUtils.isNotEmpty(hooks)) {
-            for (RMTransactionHook hook : hooks) {
-                try {
-                    consumer.accept(hook);
-                } catch (Exception e) {
-                    if (logger != null) {
-                        logger.error("execute rm transaction hook failed: branchId=" + branchId, e);
-                    }
-                }
-            }
-        }
-    }
+	/**
+	 * trigger hooks
+	 *
+	 * @param logger   the logger in the trigger
+	 * @param consumer the hook consumer
+	 */
+	public static void triggerHooks(Logger logger, long branchId, Consumer<RMTransactionHook> consumer) {
+		List<RMTransactionHook> hooks = getHooks();
+		if (CollectionUtils.isNotEmpty(hooks)) {
+			for (RMTransactionHook hook : hooks) {
+				try {
+					consumer.accept(hook);
+				} catch (Exception e) {
+					if (logger != null) {
+						logger.error("execute rm transaction hook failed: branchId=" + branchId, e);
+					}
+				}
+			}
+		}
+	}
 }

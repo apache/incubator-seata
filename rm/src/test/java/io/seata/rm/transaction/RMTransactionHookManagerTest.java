@@ -16,7 +16,6 @@
 package io.seata.rm.transaction;
 
 import io.seata.core.model.BranchType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -28,11 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author wang.liang
  */
 public class RMTransactionHookManagerTest {
-
-    @AfterEach
-    public void clear() {
-        RMTransactionHookManager.clearGlobalHooks();
-    }
 
     @Test
     public void testGetHooks() {
@@ -48,15 +42,6 @@ public class RMTransactionHookManagerTest {
         List<RMTransactionHook> hooks = RMTransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
         assertThat(hooks.get(0)).isEqualTo(RMTransactionHookAdapter);
-    }
-
-    @Test
-    public void testClear() {
-        assertThat(RMTransactionHookManager.getHooks()).isEmpty();
-        RMTransactionHookManager.registerGlobalHook(new RMTransactionHookAdapter());
-        assertThat(RMTransactionHookManager.getHooks()).isNotEmpty();
-        RMTransactionHookManager.clearGlobalHooks();
-        assertThat(RMTransactionHookManager.getHooks()).isEmpty();
     }
 
     @Test
