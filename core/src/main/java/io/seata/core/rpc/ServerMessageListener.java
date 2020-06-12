@@ -24,6 +24,7 @@ import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
  *
  * @author slievrly
  */
+@Deprecated
 public interface ServerMessageListener {
 
     /**

@@ -16,7 +16,7 @@
 package io.seata.server.transaction.tcc;
 
 import io.seata.core.model.BranchType;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.coordinator.AbstractCore;
 
 /**
@@ -26,8 +26,8 @@ import io.seata.server.coordinator.AbstractCore;
  */
 public class TccCore extends AbstractCore {
 
-    public TccCore(ServerMessageSender messageSender) {
-        super(messageSender);
+    public TccCore(RemotingServer remotingServer) {
+        super(remotingServer);
     }
 
     @Override

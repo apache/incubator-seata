@@ -18,7 +18,7 @@ package io.seata.server.transaction.at;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.coordinator.AbstractCore;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -32,8 +32,8 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
  */
 public class ATCore extends AbstractCore {
 
-    public ATCore(ServerMessageSender messageSender) {
-        super(messageSender);
+    public ATCore(RemotingServer remotingServer) {
+        super(remotingServer);
     }
 
     @Override
