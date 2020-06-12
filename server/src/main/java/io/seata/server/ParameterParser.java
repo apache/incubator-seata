@@ -45,7 +45,7 @@ public class ParameterParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
     private static final String PROGRAM_NAME
-            = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
+        = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
@@ -70,9 +70,8 @@ public class ParameterParser {
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
-            order = 5)
+        order = 5)
     private String seataEnv;
-
     /**
      * Instantiates a new Parameter parser.
      *
@@ -113,7 +112,7 @@ public class ParameterParser {
             }
             if (StringUtils.isBlank(storeMode)) {
                 storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
-                        SERVER_DEFAULT_STORE_MODE);
+                    SERVER_DEFAULT_STORE_MODE);
             }
         } catch (ParameterException e) {
             printError(e);

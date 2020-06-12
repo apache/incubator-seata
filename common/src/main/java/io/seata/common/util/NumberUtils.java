@@ -55,7 +55,7 @@ public class NumberUtils {
     }
 
     public static Long toLong(String str) {
-        if (str != null) {
+        if (StringUtils.isNotBlank(str)) {
             return Long.valueOf(str);
         }
         return null;

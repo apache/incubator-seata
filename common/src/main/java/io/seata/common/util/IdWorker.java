@@ -14,8 +14,6 @@
  *  limitations under the License.
  */
 package io.seata.common.util;
-
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -80,12 +78,13 @@ public class IdWorker {
     /**
      * Constructor
      *
-     * @param workerId Job ID (0 ~ 1023)
+     * @param workerId
+     *            Job ID (0 ~ 1023)
      */
     public IdWorker(long workerId) {
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(
-                    String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+                String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
         }
         this.workerId = workerId;
     }
@@ -95,13 +94,12 @@ public class IdWorker {
      *
      * @return SnowflakeId
      */
-
     public long nextId() {
         long timestamp = timeGen();
 
         if (timestamp < lastTimestamp) {
             throw new RuntimeException(String.format(
-                    "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
+                "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
         synchronized (this) {
@@ -121,7 +119,8 @@ public class IdWorker {
     /**
      * Block until the next millisecond until a new timestamp is obtained
      *
-     * @param lastTimestamp Time of last ID generation
+     * @param lastTimestamp
+     *            Time of last ID generation
      * @return Current timestamp
      */
     protected long tilNextMillis(long lastTimestamp) {
