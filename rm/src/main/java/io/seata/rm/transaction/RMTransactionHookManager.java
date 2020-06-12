@@ -29,49 +29,49 @@ import java.util.function.Consumer;
  */
 public final class RMTransactionHookManager {
 
-	private static final List<RMTransactionHook> GLOBAL_HOOKS = new ArrayList<>();
+    private static final List<RMTransactionHook> GLOBAL_HOOKS = new ArrayList<>();
 
-	private RMTransactionHookManager() {
-	}
+    private RMTransactionHookManager() {
+    }
 
-	/**
-	 * get the hooks
-	 */
-	public static List<RMTransactionHook> getHooks() {
-		return GLOBAL_HOOKS;
-	}
+    /**
+     * get the hooks
+     */
+    public static List<RMTransactionHook> getHooks() {
+        return GLOBAL_HOOKS;
+    }
 
-	/**
-	 * add new global hook
-	 *
-	 * @param rmTransactionHook
-	 */
-	public static void registerGlobalHook(RMTransactionHook rmTransactionHook) {
-		if (rmTransactionHook == null) {
-			throw new NullPointerException("RM transactionHook must not be null");
-		}
-		List<RMTransactionHook> transactionHooks = getHooks();
-		transactionHooks.add(rmTransactionHook);
-	}
+    /**
+     * add new global hook
+     *
+     * @param rmTransactionHook
+     */
+    public static void registerGlobalHook(RMTransactionHook rmTransactionHook) {
+        if (rmTransactionHook == null) {
+            throw new NullPointerException("RM transactionHook must not be null");
+        }
+        List<RMTransactionHook> transactionHooks = getHooks();
+        transactionHooks.add(rmTransactionHook);
+    }
 
-	/**
-	 * trigger hooks
-	 *
-	 * @param logger   the logger in the trigger
-	 * @param consumer the hook consumer
-	 */
-	public static void triggerHooks(Logger logger, long branchId, Consumer<RMTransactionHook> consumer) {
-		List<RMTransactionHook> hooks = getHooks();
-		if (CollectionUtils.isNotEmpty(hooks)) {
-			for (RMTransactionHook hook : hooks) {
-				try {
-					consumer.accept(hook);
-				} catch (Exception e) {
-					if (logger != null) {
-						logger.error("execute rm transaction hook failed: branchId=" + branchId, e);
-					}
-				}
-			}
-		}
-	}
+    /**
+     * trigger hooks
+     *
+     * @param logger   the logger in the trigger
+     * @param consumer the hook consumer
+     */
+    public static void triggerHooks(Logger logger, long branchId, Consumer<RMTransactionHook> consumer) {
+        List<RMTransactionHook> hooks = getHooks();
+        if (CollectionUtils.isNotEmpty(hooks)) {
+            for (RMTransactionHook hook : hooks) {
+                try {
+                    consumer.accept(hook);
+                } catch (Exception e) {
+                    if (logger != null) {
+                        logger.error("execute rm transaction hook failed: branchId=" + branchId, e);
+                    }
+                }
+            }
+        }
+    }
 }
