@@ -44,7 +44,7 @@ public interface RMTransactionHook {
     }
 
     /**
-     * after branch commit failed
+     * after branch commit exception
      */
     default void afterBranchCommitException(BranchType branchType, String xid, long branchId, Exception e) {
     }
@@ -68,7 +68,7 @@ public interface RMTransactionHook {
     }
 
     /**
-     * after branch rollback failed
+     * after branch rollback exception
      */
     default  void afterBranchRollbackException(BranchType branchType, String xid, long branchId, Exception e) {
     }
