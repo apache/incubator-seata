@@ -46,10 +46,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author slievrly
  */
+@Deprecated
 public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerMessageListenerImpl.class);
     private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
-    private ServerMessageSender serverMessageSender;
+    private RemotingServer remotingServer;
     private final TransactionMessageHandler transactionMessageHandler;
     private static final int MAX_LOG_SEND_THREAD = 1;
     private static final int MAX_LOG_TAKE_SIZE = 1024;
@@ -181,20 +182,20 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
      *
      * @return the server message sender
      */
-    public ServerMessageSender getServerMessageSender() {
-        if (serverMessageSender == null) {
+    public RemotingServer getServerMessageSender() {
+        if (remotingServer == null) {
             throw new IllegalArgumentException("serverMessageSender must not be null");
         }
-        return serverMessageSender;
+        return remotingServer;
     }
 
     /**
      * Sets server message sender.
      *
-     * @param serverMessageSender the server message sender
+     * @param remotingServer the remoting server
      */
-    public void setServerMessageSender(ServerMessageSender serverMessageSender) {
-        this.serverMessageSender = serverMessageSender;
+    public void setServerMessageSender(RemotingServer remotingServer) {
+        this.remotingServer = remotingServer;
     }
 
     /**
