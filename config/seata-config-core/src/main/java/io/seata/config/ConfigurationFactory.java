@@ -136,7 +136,7 @@ public final class ConfigurationFactory {
         try {
             Configuration configurationCache;
             if (null != extConfiguration) {
-                configurationCache = ConfigurationCache.getInstance().proxy(configuration);
+                configurationCache = ConfigurationCache.getInstance().proxy(extConfiguration);
             } else {
                 configurationCache = ConfigurationCache.getInstance().proxy(configuration);
             }
