@@ -21,12 +21,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * @author wang.liang
  */
-public final class PidSystemPropertyConverter extends ClassicConverter {
+public final class PidConverter extends ClassicConverter {
 
-    public static final String PID_KEY = "PID";
+    private static final String PID = new ApplicationPid().toString();
 
     @Override
     public String convert(ILoggingEvent event) {
-        return System.getProperty(PID_KEY);
+        return PID;
     }
 }

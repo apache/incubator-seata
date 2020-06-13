@@ -26,7 +26,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.logging.logback.ApplicationPid;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
@@ -57,9 +56,6 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
-        //Set the application pid to system property. Use to logger.
-        System.setProperty("PID", new ApplicationPid().toString());
-
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
