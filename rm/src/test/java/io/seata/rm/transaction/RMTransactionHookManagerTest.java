@@ -37,17 +37,17 @@ public class RMTransactionHookManagerTest {
     @Test
     public void testGetHooks() {
         assertThat(RMTransactionHookManager.getHooks()).isEmpty();
-        RMTransactionHookManager.registerGlobalHook(new RMTransactionHookAdapter());
+        RMTransactionHookManager.registerGlobalHook(new RMTransactionHook() {});
         assertThat(RMTransactionHookManager.getHooks()).isNotEmpty();
     }
 
     @Test
     public void testRegisterGlobalHook() {
-        RMTransactionHookAdapter rmTransactionHookAdapter = new RMTransactionHookAdapter();
-        RMTransactionHookManager.registerGlobalHook(rmTransactionHookAdapter);
+        RMTransactionHook rmTransactionHook = new RMTransactionHook() {};
+        RMTransactionHookManager.registerGlobalHook(rmTransactionHook);
         List<RMTransactionHook> hooks = RMTransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
-        assertThat(hooks.get(0)).isEqualTo(rmTransactionHookAdapter);
+        assertThat(hooks.get(0)).isEqualTo(rmTransactionHook);
     }
 
     @Test
