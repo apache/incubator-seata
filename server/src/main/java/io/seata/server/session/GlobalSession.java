@@ -146,6 +146,25 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Is suspended boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isSuspended() {
+        return (suspendedEndTime != null ? suspendedEndTime > System.currentTimeMillis() : false);
+    }
+
+    /**
+     * Is stopped boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isStopped() {
+        return GlobalStatus.CommitRetrying_Stopped == this.status
+            || GlobalStatus.RollbackRetrying_Stopped == this.status;
+    }
+
+    /**
      * prevent could not handle rollbacking transaction
      * @return if true force roll back
      */
