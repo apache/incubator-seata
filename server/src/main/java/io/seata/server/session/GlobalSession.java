@@ -33,6 +33,7 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.store.SessionStorable;
@@ -59,6 +60,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private long transactionId;
 
     private volatile GlobalStatus status;
+
+    private Long suspendedEndTime;
+
+    private GlobalStoppedReason stoppedReason;
 
     private String applicationId;
 
@@ -353,6 +358,42 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Gets suspended end time.
+     *
+     * @return the suspended end time
+     */
+    public Long getSuspendedEndTime() {
+        return suspendedEndTime;
+    }
+
+    /**
+     * Sets suspended end time.
+     *
+     * @param suspendedEndTime the suspended end time
+     */
+    public void setSuspendedEndTime(Long suspendedEndTime) {
+        this.suspendedEndTime = suspendedEndTime;
+    }
+
+    /**
+     * Gets stopped reason.
+     *
+     * @return the stopped reason
+     */
+    public GlobalStoppedReason getStoppedReason() {
+        return stoppedReason;
+    }
+
+    /**
+     * Sets stopped reason.
+     *
+     * @param stoppedReason the stopped reason
+     */
+    public void setStoppedReason(GlobalStoppedReason stoppedReason) {
+        this.stoppedReason = stoppedReason;
+    }
+
+    /**
      * Gets xid.
      *
      * @return the xid
@@ -525,6 +566,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
+        byteBuffer.putLong(suspendedEndTime == null ? 0L : suspendedEndTime);
+        byteBuffer.put((byte)(stoppedReason == null ? 0 : stoppedReason.getCode()));
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -546,7 +589,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
             + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
-            + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
+            + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
+            + 8 // suspendedEndTime
+            + 1; // stoppedReason
         return size;
     }
 
@@ -588,6 +633,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
+        long suspendedEndTime = byteBuffer.getLong();
+        if (suspendedEndTime > 0) {
+            this.suspendedEndTime = suspendedEndTime;
+        }
+        this.stoppedReason = GlobalStoppedReason.get(byteBuffer.get());
     }
 
     /**

@@ -62,6 +62,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
+    private String retryStrategy;
+
+    private int retryCount;
+
     private String clientId;
 
     private String applicationData;
@@ -196,6 +200,42 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     /**
+     * Gets retry strategy.
+     *
+     * @return the retry strategy
+     */
+    public String getRetryStrategy() {
+        return retryStrategy;
+    }
+
+    /**
+     * Sets retry strategy.
+     *
+     * @param retryStrategy the retry strategy
+     */
+    public void setRetryStrategy(String retryStrategy) {
+        this.retryStrategy = retryStrategy;
+    }
+
+    /**
+     * Gets retry count.
+     *
+     * @return the retry count
+     */
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    /**
+     * Sets retry count.
+     *
+     * @param retryCount the retry count
+     */
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    /**
      * Gets transaction id.
      *
      * @return the transaction id
@@ -286,7 +326,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public byte[] encode() {
-
         byte[] resourceIdBytes = resourceId != null ? resourceId.getBytes() : null;
 
         byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
@@ -299,7 +338,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte branchTypeByte = branchType != null ? (byte) branchType.ordinal() : -1;
 
-        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
+        byte[] retryStrategyBytes = retryStrategy != null ? retryStrategy.getBytes() : null;
+
+        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes,
+                applicationDataBytes, xidBytes, retryStrategyBytes);
 
         if (size > MAX_BRANCH_SESSION_SIZE) {
             if (lockKeyBytes == null) {
@@ -358,7 +400,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.putInt(0);
         }
 
-        if (xidBytes != null) {
+        if (null != xidBytes) {
             byteBuffer.putInt(xidBytes.length);
             byteBuffer.put(xidBytes);
         } else {
@@ -366,8 +408,17 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
 
         byteBuffer.put(branchTypeByte);
-
         byteBuffer.put((byte)status.getCode());
+
+        if (null != retryStrategyBytes) {
+            byteBuffer.putInt(retryStrategyBytes.length);
+            byteBuffer.put(retryStrategyBytes);
+        } else {
+            byteBuffer.putInt(0);
+        }
+
+        byteBuffer.putInt(retryCount);
+
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -375,7 +426,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     private int calBranchSessionSize(byte[] resourceIdBytes, byte[] lockKeyBytes, byte[] clientIdBytes,
-                                     byte[] applicationDataBytes, byte[] xidBytes) {
+                                     byte[] applicationDataBytes, byte[] xidBytes, byte[] retryStrategyBytes) {
         final int size = 8 // trascationId
             + 8 // branchId
             + 4 // resourceIdBytes.length
@@ -389,7 +440,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + (clientIdBytes == null ? 0 : clientIdBytes.length)
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
-            + 1; //branchType
+            + 1 //branchType
+            + (retryStrategyBytes == null ? 0 : retryStrategyBytes.length)
+            + 4; // retryCount
         return size;
     }
 
@@ -443,6 +496,13 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
         this.status = BranchStatus.get(byteBuffer.get());
 
+        int retryStrategyLen = byteBuffer.getInt();
+        if (retryStrategyLen > 0) {
+            byte[] retryStrategyBytes = new byte[retryStrategyLen];
+            byteBuffer.get(retryStrategyBytes);
+            this.retryStrategy = new String(retryStrategyBytes);
+        }
+        this.retryCount = byteBuffer.getInt();
     }
 
 }
