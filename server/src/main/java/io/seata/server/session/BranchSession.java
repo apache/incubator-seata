@@ -15,22 +15,24 @@
  */
 package io.seata.server.session;
 
+import io.seata.common.util.CompressUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.RetryStrategyInfo;
+import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.storage.file.lock.FileLocker;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.StoreConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import io.seata.server.storage.file.lock.FileLocker;
-import io.seata.common.util.CompressUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.store.SessionStorable;
-import io.seata.server.store.StoreConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Branch session.
@@ -63,6 +65,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private BranchStatus status = BranchStatus.Unknown;
 
     private String retryStrategy;
+    private RetryStrategyInfo retryStrategyInfo;
 
     private int retryCount;
 
@@ -215,6 +218,30 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      */
     public void setRetryStrategy(String retryStrategy) {
         this.retryStrategy = retryStrategy;
+    }
+
+    /**
+     * Gets retry strategy info.
+     *
+     * @return the retry strategy info
+     */
+    public RetryStrategyInfo getRetryStrategyInfo() {
+        if (retryStrategyInfo == null && StringUtils.isNotBlank(retryStrategy)) {
+            retryStrategyInfo = new RetryStrategyInfo(retryStrategy);
+        }
+        return retryStrategyInfo;
+    }
+
+    /**
+     * Sets retry strategy info.
+     *
+     * @param retryStrategyInfo the retry strategy info
+     */
+    public void setRetryStrategyInfo(RetryStrategyInfo retryStrategyInfo) {
+        this.retryStrategyInfo = retryStrategyInfo;
+        if (retryStrategyInfo != null) {
+            this.retryStrategy = retryStrategyInfo.toString();
+        }
     }
 
     /**
