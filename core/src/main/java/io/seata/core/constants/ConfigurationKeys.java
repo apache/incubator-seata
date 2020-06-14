@@ -254,6 +254,11 @@ public class ConfigurationKeys {
     public static final String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
 
     /**
+     * The constant STATUS_CHANGE_RETRY_PERIOD.
+     */
+    public static final String STATUS_CHANGE_RETRY_PERIOD = RECOVERY_PREFIX + "statusChangeRetryPeriod";
+
+    /**
      * The constant TIMEOUT_RETRY_PERIOD.
      */
     public static final String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";

@@ -76,6 +76,8 @@ server {
     asynCommittingRetryPeriod = 1000
     #schedule rollbacking retry period in milliseconds
     rollbackingRetryPeriod = 1000
+    #schedule status change retry period in milliseconds
+    statusChangeRetryPeriod = 1000
     #schedule timeout retry period in milliseconds
     timeoutRetryPeriod = 1000
   }

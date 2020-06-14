@@ -55,6 +55,7 @@ import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +92,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
         1000L);
+
+    /**
+     * The constant STATUS_CHANGE_RETRY_PERIOD.
+     */
+    protected static final long STATUS_CHANGE_RETRY_PERIOD = CONFIG.getLong(
+            ConfigurationKeys.STATUS_CHANGE_RETRY_PERIOD,1000L);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -130,6 +137,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
+
+    private ScheduledThreadPoolExecutor statusChange = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("StatusChange", 1));
 
     private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("UndoLogDelete", 1));
@@ -255,6 +265,34 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             LOGGER.debug("Global transaction timeout check end. ");
         }
 
+    }
+
+    /**
+     * Handle status change.
+     *
+     * @throws TransactionException the transaction exception
+     */
+    protected void handleStatusChange() throws TransactionException {
+        Collection<GlobalSession> suspendedSessions = SessionHolder.getRootSessionManager().findGlobalSessions(
+                new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying_Suspended, GlobalStatus.RollbackRetrying_Suspended}));
+        if (CollectionUtils.isEmpty(suspendedSessions)) {
+            return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Global transaction status change begin, size: {}", suspendedSessions.size());
+        }
+        for (GlobalSession globalSession : suspendedSessions) {
+            if (!globalSession.isSuspended()) {
+                if (GlobalStatus.CommitRetrying_Stopped == globalSession.getStatus()) {
+                    globalSession.changeStatus(GlobalStatus.CommitRetrying);
+                } else if (GlobalStatus.RollbackRetrying_Stopped == globalSession.getStatus()) {
+                    globalSession.changeStatus(GlobalStatus.RollbackRetrying);
+                }
+            }
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Global transaction status change end.");
+        }
     }
 
     /**
@@ -398,6 +436,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 LOGGER.info("Exception async committing ... ", e);
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+
+        statusChange.scheduleAtFixedRate(() -> {
+            try {
+                handleStatusChange();
+            } catch (Exception e) {
+                LOGGER.info("Exception handle status change ... ", e);
+            }
+        }, 0, STATUS_CHANGE_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
             try {
