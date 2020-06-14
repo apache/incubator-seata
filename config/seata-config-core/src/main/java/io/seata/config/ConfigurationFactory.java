@@ -47,17 +47,17 @@ public final class ConfigurationFactory {
 
     static {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
-        if (null == seataConfigName) {
+        if (seataConfigName == null) {
             seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
         }
-        if (null == seataConfigName) {
+        if (seataConfigName == null) {
             seataConfigName = REGISTRY_CONF_PREFIX;
         }
         String envValue = System.getProperty(ENV_PROPERTY_KEY);
-        if (null == envValue) {
+        if (envValue == null) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
+        Configuration configuration = (envValue == null) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
             false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
@@ -71,7 +71,7 @@ public final class ConfigurationFactory {
         } catch (Exception e) {
             LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
         }
-        CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
+        CURRENT_FILE_INSTANCE = extConfiguration == null ? configuration : extConfiguration;
     }
 
     private static final String NAME_KEY = "name";
@@ -128,7 +128,7 @@ public final class ConfigurationFactory {
             } catch (Exception e) {
                 LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
-            return null == extConfiguration ? configuration : extConfiguration;
+            return extConfiguration == null ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
                 .provide();

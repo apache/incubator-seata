@@ -57,7 +57,7 @@ public class MockWebServer {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                if (null != serverSocket) {
+                if (serverSocket != null) {
                     try {
                         serverSocket.close();
                     } catch (IOException e) {

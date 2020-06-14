@@ -94,7 +94,7 @@ public class DefaultCoreTest {
      */
     @AfterEach
     public void clean() throws TransactionException {
-        if (null != globalSession) {
+        if (globalSession != null) {
             globalSession.end();
             globalSession = null;
         }

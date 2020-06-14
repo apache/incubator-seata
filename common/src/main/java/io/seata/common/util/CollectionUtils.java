@@ -177,7 +177,7 @@ public class CollectionUtils {
         if (isEmpty(sourceList)) { return sourceList; }
         List<String> destList = new ArrayList<>(sourceList.size());
         for (String element : sourceList) {
-            if (null != element) {
+            if (element != null) {
                 destList.add(element.toUpperCase());
             } else {
                 destList.add(null);
