@@ -44,6 +44,10 @@ public class GlobalTransactionDO {
 
     private String applicationData;
 
+    private Long suspendedEndTime;
+
+    private Integer stoppedReason;
+
     private Date gmtCreate;
 
     private Date gmtModified;
@@ -208,6 +212,42 @@ public class GlobalTransactionDO {
      */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
+    }
+
+    /**
+     * Gets suspended end time.
+     *
+     * @return the suspended end time
+     */
+    public Long getSuspendedEndTime() {
+        return suspendedEndTime;
+    }
+
+    /**
+     * Sets suspended end time.
+     *
+     * @param suspendedEndTime the suspended end time
+     */
+    public void setSuspendedEndTime(Long suspendedEndTime) {
+        this.suspendedEndTime = suspendedEndTime;
+    }
+
+    /**
+     * Gets stopped reason.
+     *
+     * @return the stopped reason
+     */
+    public Integer getStoppedReason() {
+        return stoppedReason;
+    }
+
+    /**
+     * Sets stopped reason.
+     *
+     * @param stoppedReason the stopped reason
+     */
+    public void setStoppedReason(Integer stoppedReason) {
+        this.stoppedReason = stoppedReason;
     }
 
     /**

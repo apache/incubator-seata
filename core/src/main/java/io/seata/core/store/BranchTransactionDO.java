@@ -45,6 +45,10 @@ public class BranchTransactionDO {
 
     private String applicationData;
 
+    private String retryStrategy;
+
+    private int retryCount;
+
     private Date gmtCreate;
 
     private Date gmtModified;
@@ -209,6 +213,42 @@ public class BranchTransactionDO {
      */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
+    }
+
+    /**
+     * Gets retry strategy.
+     *
+     * @return the retry strategy
+     */
+    public String getRetryStrategy() {
+        return retryStrategy;
+    }
+
+    /**
+     * Sets retry strategy.
+     *
+     * @param retryStrategy the retry strategy
+     */
+    public void setRetryStrategy(String retryStrategy) {
+        this.retryStrategy = retryStrategy;
+    }
+
+    /**
+     * Gets retry count.
+     *
+     * @return the retry count
+     */
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    /**
+     * Sets retry count.
+     *
+     * @param retryCount the retry count
+     */
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
     }
 
     /**
