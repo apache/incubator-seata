@@ -25,143 +25,160 @@ import org.junit.jupiter.api.Test;
  */
 public class RetryStrategyInfoTest {
 
-    @Test
-    public void testIsExpired() {
-        // global transaction begin 10 seconds ago
-        long globalTransactionBeginTime = System.currentTimeMillis() - 10 * 1000;
+	@Test
+	public void testIsExpired() {
+		// global transaction begin 10 seconds ago
+		long globalTransactionBeginTime = System.currentTimeMillis() - 10 * 1000;
 
-        // retryExpire is null, no expired, false
-        RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
-        Assertions.assertFalse(retryStrategy.isExpired(globalTransactionBeginTime));
+		// retryExpire is null, no expired, false
+		RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
+		Assertions.assertFalse(retryStrategy.isExpired(globalTransactionBeginTime));
 
-        // retryExpire is 0, no expired, false
-        retryStrategy.setRetryExpire(0);
-        Assertions.assertFalse(retryStrategy.isExpired(globalTransactionBeginTime));
+		// retryExpire is 0, no expired, false
+		retryStrategy.setRetryExpire(0);
+		Assertions.assertFalse(retryStrategy.isExpired(globalTransactionBeginTime));
 
-        // retryExpire is 10, true
-        retryStrategy.setRetryExpire(5);
-        Assertions.assertTrue(retryStrategy.isExpired(globalTransactionBeginTime));
+		// retryExpire is 10, true
+		retryStrategy.setRetryExpire(5);
+		Assertions.assertTrue(retryStrategy.isExpired(globalTransactionBeginTime));
 
-        // retryExpire is 20, false
-        retryStrategy.setRetryExpire(15);
-        Assertions.assertFalse(retryStrategy.isExpired(globalTransactionBeginTime));
-    }
+		// retryExpire is 20, false
+		retryStrategy.setRetryExpire(15);
+		Assertions.assertFalse(retryStrategy.isExpired(globalTransactionBeginTime));
+	}
 
-    @Test
-    public void testIsReachedMaxRetryCount() {
-        // maxRetryCount is null, un limit, false
-        RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
-        Assertions.assertFalse(retryStrategy.isReachedMaxRetryCount(100));
+	@Test
+	public void testIsReachedMaxRetryCount() {
+		// maxRetryCount is null, un limit, false
+		RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
+		Assertions.assertFalse(retryStrategy.isReachedMaxRetryCount(100));
 
-        // maxRetryCount is 0, un limit, false
-        retryStrategy.setMaxRetryCount(0);
-        Assertions.assertFalse(retryStrategy.isReachedMaxRetryCount(100));
+		// maxRetryCount is 0, un limit, false
+		retryStrategy.setMaxRetryCount(0);
+		Assertions.assertFalse(retryStrategy.isReachedMaxRetryCount(100));
 
-        retryStrategy.setMaxRetryCount(3);
+		retryStrategy.setMaxRetryCount(3);
 
-        // maxRetryCount is 3, branchRetryCount is 2, false
-        Assertions.assertFalse(retryStrategy.isReachedMaxRetryCount(2));
+		// maxRetryCount is 3, branchRetryCount is 2, false
+		Assertions.assertFalse(retryStrategy.isReachedMaxRetryCount(2));
 
-        // maxRetryCount is 3, branchRetryCount is 3, true
-        Assertions.assertTrue(retryStrategy.isReachedMaxRetryCount(3));
+		// maxRetryCount is 3, branchRetryCount is 3, true
+		Assertions.assertTrue(retryStrategy.isReachedMaxRetryCount(3));
 
-        // maxRetryCount is 3, branchRetryCount is 4, true
-        Assertions.assertTrue(retryStrategy.isReachedMaxRetryCount(4));
-    }
+		// maxRetryCount is 3, branchRetryCount is 4, true
+		Assertions.assertTrue(retryStrategy.isReachedMaxRetryCount(4));
+	}
 
-    @Test
-    public void testNextRetryInterval() {
-        int retryInterval = 10;
-        int maxRetryInterval = 45;
-        int[] retryIntervalPlan = new int[]{1, 10, 30, 50, 100};
+	@Test
+	public void testNextRetryInterval() {
+		int retryInterval = 10;
+		int maxRetryInterval = 45;
+		int[] retryIntervalPlan = new int[]{1, 10, 30, 50, 100};
 
-        //mode S
-        RetryStrategyInfo retryStrategy = new RetryStrategyInfo(null, null, retryInterval);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(3), retryInterval * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(4), retryInterval * 1000);
+		//mode S
+		RetryStrategyInfo retryStrategy = new RetryStrategyInfo(retryInterval);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(3), retryInterval * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(4), retryInterval * 1000);
 
-        //mode I, has max retry interval
-        retryStrategy = new RetryStrategyInfo(null, null, retryInterval, maxRetryInterval);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(3), 3 * retryInterval * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(4), 4 * retryInterval * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(5), maxRetryInterval * 1000);
+		//mode I, has max retry interval
+		retryStrategy = new RetryStrategyInfo(retryInterval, maxRetryInterval);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(3), 3 * retryInterval * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(4), 4 * retryInterval * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(5), maxRetryInterval * 1000);
 
-        //mode I, no max retry interval
-        retryStrategy = new RetryStrategyInfo(null, null, retryInterval, null);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(3), 3 * retryInterval * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(4), 4 * retryInterval * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(100), 100 * retryInterval * 1000);
+		//mode I, no max retry interval
+		retryStrategy = new RetryStrategyInfo(retryInterval, null);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(3), 3 * retryInterval * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(4), 4 * retryInterval * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(100), 100 * retryInterval * 1000);
 
-        //mode P
-        retryStrategy = new RetryStrategyInfo(null, null, retryIntervalPlan);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(1), retryIntervalPlan[1 - 1] * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(4), retryIntervalPlan[4 - 1] * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(5), retryIntervalPlan[5 - 1] * 1000);
-        Assertions.assertEquals(retryStrategy.nextRetryInterval(6), retryIntervalPlan[retryIntervalPlan.length - 1] * 1000);
-    }
+		//mode P
+		retryStrategy = new RetryStrategyInfo(retryIntervalPlan);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(1), retryIntervalPlan[1 - 1] * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(4), retryIntervalPlan[4 - 1] * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(5), retryIntervalPlan[5 - 1] * 1000);
+		Assertions.assertEquals(retryStrategy.nextRetryInterval(6), retryIntervalPlan[retryIntervalPlan.length - 1] * 1000);
+	}
 
-    @Test
-    public void testToString() {
-        RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
-        Assertions.assertEquals(retryStrategy.toString(), "");
+	@Test
+	public void testToString() {
+		//empty
+		RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
+		Assertions.assertEquals(retryStrategy.toString(), "");
 
-        //mode S
-        retryStrategy = new RetryStrategyInfo(1, null, 10);
-        Assertions.assertEquals(retryStrategy.toString(), "S,1,0|10");
+		//no mode
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.setMaxRetryCount(1);
+		Assertions.assertEquals(retryStrategy.toString(), "-|1,-");
 
-        //mode I, has max retry interval
-        retryStrategy = new RetryStrategyInfo(1, 2, 3, 4);
-        Assertions.assertEquals(retryStrategy.toString(), "I,1,2|3,4");
+		//no mode
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.setRetryExpire(2);
+		Assertions.assertEquals(retryStrategy.toString(), "-|-,2s");
 
-        //mode I, no max retry interval
-        retryStrategy = new RetryStrategyInfo(null, 2, 3, null);
-        Assertions.assertEquals(retryStrategy.toString(), "I,0,2|3");
+		//no mode
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.setMaxRetryCount(1);
+		retryStrategy.setRetryExpire(2);
+		Assertions.assertEquals(retryStrategy.toString(), "-|1,2s");
 
-        //mode P
-        retryStrategy = new RetryStrategyInfo(null, null, new int[]{1, 10, 30, 50, 100});
-        Assertions.assertEquals(retryStrategy.toString(), "P,0,0|1,10,30,50,100");
-    }
+		//mode S
+		retryStrategy = new RetryStrategyInfo(30, 60, null);
+		Assertions.assertEquals(retryStrategy.toString(), "S,30s|60,-");
 
-    @Test
-    public void testValueOf() {
-        String retryStrategyStr = "";
-        RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
-        retryStrategy.valueOf(retryStrategyStr);
-        Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
+		//mode I, has max retry interval
+		retryStrategy = new RetryStrategyInfo(20, 120, 0, 3600);
+		Assertions.assertEquals(retryStrategy.toString(), "I,20s,2m|-,1h");
+
+		//mode I, no max retry interval, no limit
+		retryStrategy = new RetryStrategyInfo(1, null);
+		Assertions.assertEquals(retryStrategy.toString(), "I,1s");
+
+		//mode P, no limit
+		retryStrategy = new RetryStrategyInfo(new int[]{1, 10, 30, 50, 100});
+		Assertions.assertEquals(retryStrategy.toString(), "P,1s,10s,30s,50s,100s");
+	}
+
+	@Test
+	public void testValueOf() {
+		String retryStrategyStr = "";
+		RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
+		retryStrategy.valueOf(retryStrategyStr);
+		Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
 
 
-        retryStrategyStr = "S,1,0|10";
-        retryStrategy = new RetryStrategyInfo();
-        retryStrategy.valueOf(retryStrategyStr);
-        Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
+		retryStrategyStr = "S,10s|1,-";
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.valueOf(retryStrategyStr);
+		Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
 
-        retryStrategyStr = "I,1,2|3,4";
-        retryStrategy = new RetryStrategyInfo();
-        retryStrategy.valueOf(retryStrategyStr);
-        Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
+		retryStrategyStr = "I,1s,2s|3,4s";
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.valueOf(retryStrategyStr);
+		Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
 
-        retryStrategyStr = "I,0,2|3";
-        retryStrategy = new RetryStrategyInfo();
-        retryStrategy.valueOf(retryStrategyStr);
-        Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
+		retryStrategyStr = "I,1s|-,2s";
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.valueOf(retryStrategyStr);
+		Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
 
-        retryStrategyStr = "P,0,0|1,10,30,50,100";
-        retryStrategy = new RetryStrategyInfo();
-        retryStrategy.valueOf(retryStrategyStr);
-        Assertions.assertEquals(retryStrategy.toString(), retryStrategyStr);
+		retryStrategyStr = "P,1s,10s,30s,50s,100s|0,-";
+		retryStrategy = new RetryStrategyInfo();
+		retryStrategy.valueOf(retryStrategyStr);
+		Assertions.assertEquals(retryStrategy.toString(), "P,1s,10s,30s,50s,100s");
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RetryStrategyInfo retryStrategy2 = new RetryStrategyInfo();
-            retryStrategy2.valueOf("a,0,0|1,10,30,50,100");
-        });
-    }
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			RetryStrategyInfo retryStrategy2 = new RetryStrategyInfo();
+			retryStrategy2.valueOf("S,1,10,30,50,100|0,0");
+		});
+	}
 
-    @Test
-    public void testIsEmpty() {
-        RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
-        Assertions.assertTrue(retryStrategy.isEmpty());
+	@Test
+	public void testIsEmpty() {
+		RetryStrategyInfo retryStrategy = new RetryStrategyInfo();
+		Assertions.assertTrue(retryStrategy.isEmpty());
 
-        retryStrategy.setMode("I");
-        Assertions.assertFalse(retryStrategy.isEmpty());
-    }
+		retryStrategy.setMode("I");
+		Assertions.assertFalse(retryStrategy.isEmpty());
+	}
 }
