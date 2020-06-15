@@ -103,6 +103,10 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
+        if (status != null && status.getCode() > 0) session.setStatus(status);
+        if (suspendedEndTime > 0) session.setSuspendedEndTime(suspendedEndTime);
+        if (stoppedReason != null && stoppedReason.getCode() > 0) session.setStoppedReason(stoppedReason);
+
         //new global session
         GlobalSession updateSession = new GlobalSession();
         updateSession.setXid(session.getXid());
@@ -113,10 +117,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, updateSession);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
-        } else {
-            if (status != null && status.getCode() > 0) session.setStatus(status);
-            if (suspendedEndTime > 0) session.setSuspendedEndTime(suspendedEndTime);
-            if (stoppedReason != null && stoppedReason.getCode() > 0) session.setStoppedReason(stoppedReason);
         }
     }
 
@@ -153,6 +153,9 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
+        if (status != null && status.getCode() > 0) session.setStatus(status);
+        if (retryCount > 0) session.setRetryCount(retryCount);
+
         //new branch session
         BranchSession updateSession = new BranchSession();
         updateSession.setXid(session.getXid());
@@ -164,11 +167,9 @@ public class DataBaseSessionManager extends AbstractSessionManager
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, updateSession);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
-        } else {
-            if (status != null && status.getCode() > 0) session.setStatus(status);
-            session.setApplicationData(null); //clear data, un used
-            if (retryCount > 0) session.setRetryCount(retryCount);
         }
+
+        session.setApplicationData(null); //clear data, un used
     }
 
     @Override

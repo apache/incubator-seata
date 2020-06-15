@@ -147,9 +147,8 @@ public class RedisSessionManager extends AbstractSessionManager
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
-        } else {
-            session.setApplicationData(null);//clear data, un used
         }
+        session.setApplicationData(null);//clear data, un used
     }
 
     @Override

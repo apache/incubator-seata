@@ -33,7 +33,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
-     * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE.
+     * The constant UPDATE_GLOBAL_TRANSACTION_ORACLE.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_ORACLE = "update " + GLOBAL_TABLE_PLACEHOLD
             + " set " + SETS_PLACEHOLD + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = sysdate"
@@ -69,7 +69,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, systimestamp, systimestamp)";
 
     /**
-     * The constant UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE.
+     * The constant UPDATE_BRANCH_TRANSACTION_ORACLE.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
             + " set " + SETS_PLACEHOLD + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = systimestamp"

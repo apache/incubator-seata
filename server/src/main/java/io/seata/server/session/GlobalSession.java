@@ -185,9 +185,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void update(GlobalStatus status, long suspendedEndTime, GlobalStoppedReason stoppedReason) throws TransactionException {
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            if (status != null && status != GlobalStatus.UnKnown) {
-                lifecycleListener.onUpdate(this, status, suspendedEndTime, stoppedReason);
-            }
+            lifecycleListener.onUpdate(this, status, suspendedEndTime, stoppedReason);
         }
     }
 
@@ -586,7 +584,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
         byteBuffer.putLong(suspendedEndTime > beginTime ? suspendedEndTime : 0L);
-        byteBuffer.put((byte)(stoppedReason == null ? 0 : stoppedReason.getCode()));
+        byteBuffer.put((byte)stoppedReason.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);

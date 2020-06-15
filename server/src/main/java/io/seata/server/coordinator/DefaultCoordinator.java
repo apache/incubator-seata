@@ -97,7 +97,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * The constant STATUS_CHANGE_RETRY_PERIOD.
      */
     protected static final long STATUS_CHANGE_RETRY_PERIOD = CONFIG.getLong(
-            ConfigurationKeys.STATUS_CHANGE_RETRY_PERIOD,1000L);
+            ConfigurationKeys.STATUS_CHANGE_RETRY_PERIOD, 1000L);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.

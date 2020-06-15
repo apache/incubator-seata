@@ -57,7 +57,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     GlobalSession findGlobalSession(String xid, boolean withBranchSessions);
 
     /**
-     * Update global session status.
+     * Update global session.
      *
      * @param session the session
      * @param status  the status
@@ -86,7 +86,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException;
 
     /**
-     * Add branch session.
+     * Update branch session.
      *
      * @param session         the session
      * @param status          the status
@@ -94,8 +94,8 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param retryCount      the retry count
      * @throws TransactionException the transaction exception
      */
-    void updateBranchSession(BranchSession session, BranchStatus status,
-                             String applicationData, int retryCount) throws TransactionException;
+    void updateBranchSession(BranchSession session, BranchStatus status, String applicationData,
+                             int retryCount) throws TransactionException;
 
     /**
      * Remove branch session.

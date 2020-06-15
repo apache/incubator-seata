@@ -493,6 +493,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
 
         byteBuffer.put(branchTypeByte);
+
         byteBuffer.put((byte)status.getCode());
 
         if (null != retryStrategyBytes) {

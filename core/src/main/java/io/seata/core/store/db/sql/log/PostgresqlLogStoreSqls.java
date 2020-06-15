@@ -33,7 +33,7 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
             + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
-     * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_POSTGRESQL.
+     * The constant UPDATE_GLOBAL_TRANSACTION_POSTGRESQL.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_POSTGRESQL = "update " + GLOBAL_TABLE_PLACEHOLD
             + " set " + SETS_PLACEHOLD + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = now()"
@@ -63,7 +63,7 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
             + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
-     * The constant UPDATE_BRANCH_TRANSACTION_STATUS_POSTGRESQL.
+     * The constant UPDATE_BRANCH_TRANSACTION_POSTGRESQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_POSTGRESQL = "update " + BRANCH_TABLE_PLACEHOLD
             + " set " + SETS_PLACEHOLD + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now()"

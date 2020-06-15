@@ -36,19 +36,19 @@ public interface SessionLifecycleListener {
     void onBegin(GlobalSession globalSession) throws TransactionException;
 
     /**
-     * On status change.
+     * On update.
      *
-     * @param globalSession the global session
-     * @param status        the status
+     * @param globalSession    the global session
+     * @param status           the status
      * @param suspendedEndTime the suspended end time
-     * @param stoppedReason the stopped reason
+     * @param stoppedReason    the stopped reason
      * @throws TransactionException the transaction exception
      */
     void onUpdate(GlobalSession globalSession, GlobalStatus status,
                   long suspendedEndTime, GlobalStoppedReason stoppedReason) throws TransactionException;
 
     /**
-     * On branch status change.
+     * On branch update.
      *
      * @param globalSession   the global session
      * @param branchSession   the branch session
