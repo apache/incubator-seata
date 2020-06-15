@@ -314,7 +314,8 @@ public class RetryStrategyInfo implements RetryStrategy {
 		if (StringUtils.isNotEmpty(durationStr)) {
 			char unit = durationStr.charAt(durationStr.length() - 1);
 			if (unit >= '1' && unit <= '9') {
-				throw new NotSupportYetException("Not support the time unit: millisecond");
+				//Too small a unit causes the generated string to be too long. Therefore, milliseconds are not recommended.
+				throw new NotSupportYetException("Not support the time unit: millisecond. It causes the generated string to be too long.");
 			}
 
 			Duration duration = DurationUtils.toDuration(durationStr);
