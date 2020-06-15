@@ -194,7 +194,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
         }
 
-        if (System.getProperty(PRO_NAMESPACE_KEY)!= null) {
+        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
             properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
         } else {
             String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
