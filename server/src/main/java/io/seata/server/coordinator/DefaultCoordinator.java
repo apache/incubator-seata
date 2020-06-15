@@ -283,9 +283,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         for (GlobalSession globalSession : suspendedSessions) {
             if (!globalSession.isSuspended()) {
-                if (GlobalStatus.CommitRetrying_Stopped == globalSession.getStatus()) {
+                if (GlobalStatus.CommitRetrying_Suspended == globalSession.getStatus()) {
                     globalSession.changeStatus(GlobalStatus.CommitRetrying);
-                } else if (GlobalStatus.RollbackRetrying_Stopped == globalSession.getStatus()) {
+                } else if (GlobalStatus.RollbackRetrying_Suspended == globalSession.getStatus()) {
                     globalSession.changeStatus(GlobalStatus.RollbackRetrying);
                 }
             }
