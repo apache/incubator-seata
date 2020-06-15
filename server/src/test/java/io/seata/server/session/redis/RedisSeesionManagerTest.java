@@ -80,7 +80,7 @@ public class RedisSeesionManagerTest {
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
         session.setStatus(GlobalStatus.Committing);
-        sessionManager.updateGlobalSessionStatus(session,GlobalStatus.Committing);
+        sessionManager.updateGlobalSession(session, GlobalStatus.Committing, -1L, null);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class RedisSeesionManagerTest {
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
         sessionManager.addBranchSession(globalSession, branchSession);
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
-        sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
+        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, null, -1);
     }
 
     @AfterAll

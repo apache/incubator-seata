@@ -21,6 +21,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -71,7 +72,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
+    public void updateGlobalSession(GlobalSession session, GlobalStatus status, long suspendedEndTime, GlobalStoppedReason stoppedReason) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
         }
@@ -95,7 +96,8 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateBranchSessionStatus(BranchSession branchSession, BranchStatus status)
+    public void updateBranchSession(BranchSession branchSession, BranchStatus status,
+                                    String applicationData, int retryCount)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
@@ -118,14 +120,15 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException {
-        updateGlobalSessionStatus(globalSession, status);
+    public void onUpdate(GlobalSession globalSession, GlobalStatus status, long suspendedEndTime,
+                         GlobalStoppedReason stoppedReason) throws TransactionException {
+        updateGlobalSession(globalSession, status, suspendedEndTime, stoppedReason);
     }
 
     @Override
-    public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
-        throws TransactionException {
-        updateBranchSessionStatus(branchSession, status);
+    public void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                               String applicationData, int retryCount) throws TransactionException {
+        updateBranchSession(branchSession, status, applicationData, retryCount);
     }
 
     @Override

@@ -25,6 +25,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -96,14 +97,26 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
+    public void updateGlobalSession(GlobalSession session, GlobalStatus status, long suspendedEndTime,
+                                    GlobalStoppedReason stoppedReason) throws TransactionException {
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
-        session.setStatus(status);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+
+        //new global session
+        GlobalSession updateSession = new GlobalSession();
+        updateSession.setXid(session.getXid());
+        updateSession.setStatus(status);
+        updateSession.setSuspendedEndTime(suspendedEndTime);
+        updateSession.setStoppedReason(stoppedReason);
+
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, updateSession);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
+        } else {
+            if (status != null && status.getCode() > 0) session.setStatus(status);
+            if (suspendedEndTime > 0) session.setSuspendedEndTime(suspendedEndTime);
+            if (stoppedReason != null && stoppedReason.getCode() > 0) session.setStoppedReason(stoppedReason);
         }
     }
 
@@ -134,13 +147,27 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
+    public void updateBranchSession(BranchSession session, BranchStatus status,
+                                    String applicationData, int retryCount) throws TransactionException {
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
+
+        //new branch session
+        BranchSession updateSession = new BranchSession();
+        updateSession.setXid(session.getXid());
+        updateSession.setBranchId(session.getBranchId());
+        updateSession.setStatus(status);
+        updateSession.setApplicationData(applicationData);
+        updateSession.setRetryCount(retryCount);
+
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, updateSession);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
+        } else {
+            if (status != null && status.getCode() > 0) session.setStatus(status);
+            session.setApplicationData(null); //clear data, un used
+            if (retryCount > 0) session.setRetryCount(retryCount);
         }
     }
 

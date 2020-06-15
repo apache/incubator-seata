@@ -156,7 +156,7 @@ public class DataBaseSessionManagerTest {
         sessionManager.addGlobalSession(session);
 
         session.setStatus(GlobalStatus.Committing);
-        sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
+        sessionManager.updateGlobalSession(session, GlobalStatus.Committing, -1L, null);
 
         String sql = "select * from global_table where xid= '"+xid+"'";
         String delSql = "delete from global_table where xid= '"+xid+"'";
@@ -334,7 +334,7 @@ public class DataBaseSessionManagerTest {
         sessionManager.addBranchSession(globalSession, branchSession);
 
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
-        sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
+        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, null, -1);
 
         String sql = "select * from branch_table where xid= '"+xid+"'";
         String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";

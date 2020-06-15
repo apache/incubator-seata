@@ -21,6 +21,7 @@ import java.util.List;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 import io.seata.core.rpc.Disposable;
 
 /**
@@ -60,9 +61,12 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      *
      * @param session the session
      * @param status  the status
+     * @param suspendedEndTime the suspended end time
+     * @param stoppedReason the stopped reason
      * @throws TransactionException the transaction exception
      */
-    void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException;
+    void updateGlobalSession(GlobalSession session, GlobalStatus status, long suspendedEndTime,
+                             GlobalStoppedReason stoppedReason) throws TransactionException;
 
     /**
      * Remove global session.
@@ -82,13 +86,16 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException;
 
     /**
-     * Update branch session status.
+     * Add branch session.
      *
-     * @param session the session
-     * @param status  the status
+     * @param session         the session
+     * @param status          the status
+     * @param applicationData the application data
+     * @param retryCount      the retry count
      * @throws TransactionException the transaction exception
      */
-    void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException;
+    void updateBranchSession(BranchSession session, BranchStatus status,
+                             String applicationData, int retryCount) throws TransactionException;
 
     /**
      * Remove branch session.

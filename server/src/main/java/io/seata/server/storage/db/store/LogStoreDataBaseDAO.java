@@ -36,6 +36,7 @@ import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
+import io.seata.core.store.db.sql.log.AbstractLogStoreSqls;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,6 +214,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
             ps.setString(9, globalTransactionDO.getApplicationData());
+            ps.setLong(10, globalTransactionDO.getSuspendedEndTime());
+            ps.setInt(11, globalTransactionDO.getStoppedReason());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -223,15 +226,46 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusSQL(globalTable);
+        if (globalTransactionDO.getStatus() <= 0
+            && globalTransactionDO.getSuspendedEndTime() <= 0
+            && globalTransactionDO.getStoppedReason() <= 0) {
+            return true;
+        }
+
+        // build sql
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable);
+        StringBuilder setsSQL = new StringBuilder();
+        if (globalTransactionDO.getStatus() > 0) {
+            setsSQL.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
+        }
+        if (globalTransactionDO.getSuspendedEndTime() > 0) {
+            setsSQL.append(ServerTableColumnsName.GLOBAL_TABLE_SUSPENDED_END_TIME).append(" = ?, ");
+        }
+        if (globalTransactionDO.getStoppedReason() > 0) {
+            setsSQL.append(ServerTableColumnsName.GLOBAL_TABLE_STOPPED_REASON).append(" = ?, ");
+        }
+        sql = sql.replace(AbstractLogStoreSqls.SETS_PLACEHOLD, setsSQL.toString());
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, globalTransactionDO.getStatus());
-            ps.setString(2, globalTransactionDO.getXid());
+
+            //sets
+            int i = 1;
+            if (globalTransactionDO.getStatus() > 0) {
+                ps.setInt(i++, globalTransactionDO.getStatus());
+            }
+            if (globalTransactionDO.getSuspendedEndTime() > 0) {
+                ps.setLong(i++, globalTransactionDO.getSuspendedEndTime());
+            }
+            if (globalTransactionDO.getStoppedReason() > 0) {
+                ps.setInt(i++, globalTransactionDO.getStoppedReason());
+            }
+            ps.setString(i, globalTransactionDO.getXid());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -333,6 +367,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setInt(7, branchTransactionDO.getStatus());
             ps.setString(8, branchTransactionDO.getClientId());
             ps.setString(9, branchTransactionDO.getApplicationData());
+            ps.setString(10, branchTransactionDO.getRetryStrategy());
+            ps.setInt(11, branchTransactionDO.getRetryCount());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -343,16 +379,45 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(brachTable);
+        if (branchTransactionDO.getStatus() <= 0
+                && StringUtils.isEmpty(branchTransactionDO.getApplicationData())
+                && branchTransactionDO.getRetryCount() <= 0) {
+            return true;
+        }
+
+        // build sql
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(brachTable);
+        StringBuilder setsSQL = new StringBuilder();
+        if (branchTransactionDO.getStatus() > 0) {
+            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
+        }
+        if (StringUtils.isNotEmpty(branchTransactionDO.getApplicationData())) {
+            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
+        }
+        if (branchTransactionDO.getRetryCount() > 0) {
+            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" = ")
+                .append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" + 1");
+        }
+        sql = sql.replace(AbstractLogStoreSqls.SETS_PLACEHOLD, setsSQL.toString());
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, branchTransactionDO.getStatus());
-            ps.setString(2, branchTransactionDO.getXid());
-            ps.setLong(3, branchTransactionDO.getBranchId());
+
+            //sets
+            int i = 1;
+            if (branchTransactionDO.getStatus() > 0) {
+                ps.setInt(i++, branchTransactionDO.getStatus());
+            }
+            if (StringUtils.isNotEmpty(branchTransactionDO.getApplicationData())) {
+                ps.setString(i++, branchTransactionDO.getApplicationData());
+            }
+            ps.setString(i++, branchTransactionDO.getXid());
+            ps.setLong(i, branchTransactionDO.getBranchId());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -426,6 +491,8 @@ public class LogStoreDataBaseDAO implements LogStore {
         globalTransactionDO.setTransactionServiceGroup(
             rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
+        globalTransactionDO.setSuspendedEndTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_SUSPENDED_END_TIME));
+        globalTransactionDO.setStoppedReason(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STOPPED_REASON));
         globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalTransactionDO;
@@ -442,6 +509,8 @@ public class LogStoreDataBaseDAO implements LogStore {
         branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
         branchTransactionDO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
         branchTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
+        branchTransactionDO.setRetryStrategy(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RETRY_STRATEGY));
+        branchTransactionDO.setRetryCount(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT));
         branchTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
         branchTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
         return branchTransactionDO;

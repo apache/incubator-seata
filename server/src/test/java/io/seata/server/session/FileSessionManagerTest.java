@@ -102,7 +102,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             globalSession.setStatus(GlobalStatus.Finished);
-            sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
+            sessionManager.updateGlobalSession(globalSession, GlobalStatus.Finished, -1L, null);
             GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
             Assertions.assertNotNull(expected);
             Assertions.assertEquals(GlobalStatus.Finished, expected.getStatus());
@@ -159,7 +159,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             sessionManager.addBranchSession(globalSession, branchSession);
-            sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseTwo_Committed);
+            sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseTwo_Committed, null, -1);
             sessionManager.removeBranchSession(globalSession, branchSession);
             sessionManager.removeGlobalSession(globalSession);
         }
@@ -254,7 +254,7 @@ public class FileSessionManagerTest {
     public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
+            sessionManager.onUpdate(globalSession, GlobalStatus.Finished, -1L, null);
             sessionManager.onEnd(globalSession);
         }
     }
@@ -272,7 +272,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
-            sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
+            sessionManager.onBranchUpdate(globalSession, branchSession, BranchStatus.PhaseTwo_Committed, null, -1);
             sessionManager.onEnd(globalSession);
         }
     }

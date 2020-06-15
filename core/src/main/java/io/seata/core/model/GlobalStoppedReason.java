@@ -26,6 +26,11 @@ import java.util.Map;
 public enum GlobalStoppedReason {
 
     /**
+     * empty
+     */
+    Empty(0),
+
+    /**
      * Branch phase two commit failed un retryable
      */
     Branch_CommitFailed_Unretryable(10),

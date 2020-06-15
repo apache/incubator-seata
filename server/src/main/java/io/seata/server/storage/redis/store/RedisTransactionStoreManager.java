@@ -31,6 +31,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
@@ -317,6 +318,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         globalTransactionDO.setTransactionName(globalSession.getTransactionName());
         globalTransactionDO.setTransactionServiceGroup(globalSession.getTransactionServiceGroup());
         globalTransactionDO.setApplicationData(globalSession.getApplicationData());
+        globalTransactionDO.setSuspendedEndTime(globalSession.getSuspendedEndTime());
+        globalTransactionDO.setStoppedReason(globalSession.getStoppedReason().getCode());
         return globalTransactionDO;
     }
 
@@ -337,6 +340,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
         branchTransactionDO.setResourceId(branchSession.getResourceId());
         branchTransactionDO.setStatus(branchSession.getStatus().getCode());
+        branchTransactionDO.setRetryStrategy(branchSession.getRetryStrategy());
+        branchTransactionDO.setRetryCount(branchSession.getRetryCount());
         return branchTransactionDO;
     }
 
@@ -349,6 +354,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
+        session.setSuspendedEndTime(globalTransactionDO.getSuspendedEndTime());
+        session.setStoppedReason(GlobalStoppedReason.get(globalTransactionDO.getStoppedReason()));
         return session;
     }
 
@@ -363,6 +370,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
         branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
+        branchSession.setRetryStrategy(branchTransactionDO.getRetryStrategy());
+        branchSession.setRetryCount(branchTransactionDO.getRetryCount());
         return branchSession;
     }
 

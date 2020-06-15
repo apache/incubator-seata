@@ -18,6 +18,7 @@ package io.seata.server.session;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 
 /**
  * The interface Session lifecycle listener.
@@ -39,20 +40,25 @@ public interface SessionLifecycleListener {
      *
      * @param globalSession the global session
      * @param status        the status
+     * @param suspendedEndTime the suspended end time
+     * @param stoppedReason the stopped reason
      * @throws TransactionException the transaction exception
      */
-    void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException;
+    void onUpdate(GlobalSession globalSession, GlobalStatus status,
+                  long suspendedEndTime, GlobalStoppedReason stoppedReason) throws TransactionException;
 
     /**
      * On branch status change.
      *
-     * @param globalSession the global session
-     * @param branchSession the branch session
-     * @param status        the status
+     * @param globalSession   the global session
+     * @param branchSession   the branch session
+     * @param status          the status
+     * @param applicationData the application data
+     * @param retryCount      the retry count
      * @throws TransactionException the transaction exception
      */
-    void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
-        throws TransactionException;
+    void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                        String applicationData, int retryCount) throws TransactionException;
 
     /**
      * On add branch.
