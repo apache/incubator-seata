@@ -69,7 +69,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
-    private String retryStrategy = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RETRY_STRATEGY, DEFAULT_RETRY_STRATEGY);
+    private String retryStrategy = ConfigurationFactory.getInstance().getConfig(
+        ConfigurationKeys.SERVER_RETRY_STRATEGY, DEFAULT_RETRY_STRATEGY);
 
     private RetryStrategyInfo retryStrategyInfo;
 
