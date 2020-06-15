@@ -42,7 +42,7 @@ public interface RetryStrategy {
      * next retry interval
      *
      * @param branchRetryCount the count of the branch retries so far
-     * @return the retry interval（unit is milliseconds）
+     * @return the retry interval, the unit is milliseconds
      */
     long nextRetryInterval(int branchRetryCount);
 

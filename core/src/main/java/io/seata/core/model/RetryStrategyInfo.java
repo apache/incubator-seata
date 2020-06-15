@@ -149,7 +149,7 @@ public class RetryStrategyInfo implements RetryStrategy {
      * next retry interval
      *
      * @param branchRetryCount the count of the branch retries so far
-     * @return the retry interval（unit is milliseconds）
+     * @return the retry interval, the unit is milliseconds
      */
     @Override
     public long nextRetryInterval(int branchRetryCount) {
@@ -253,7 +253,7 @@ public class RetryStrategyInfo implements RetryStrategy {
         try {
             String[] arr = retryStrategyStr.replaceAll("[-\\s]", "").split("\\|");
             String[] arr1 = arr[0].split(",");
-            String[] arr2 = (arr.length > 1 ? arr[1].split(",") : null);
+            String[] arr2 = arr.length > 1 ? arr[1].split(",") : null;
 
             //mode fields
             mode = arr1[0].toUpperCase();
