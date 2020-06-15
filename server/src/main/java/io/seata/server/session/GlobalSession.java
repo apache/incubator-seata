@@ -151,7 +151,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean isSuspended() {
-        return (suspendedEndTime > beginTime ? suspendedEndTime > System.currentTimeMillis() : false);
+        return suspendedEndTime > beginTime ? suspendedEndTime > System.currentTimeMillis() : false;
     }
 
     /**

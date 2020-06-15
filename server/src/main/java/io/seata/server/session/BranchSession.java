@@ -380,7 +380,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      * next retry interval
      *
      * @param branchRetryCount the count of the branch retries so far
-     * @return the retry interval（unit is milliseconds）
+     * @return the retry interval, the unit is milliseconds
      */
     @Override
     public long nextRetryInterval(int branchRetryCount) {
