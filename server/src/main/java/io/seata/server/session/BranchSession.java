@@ -17,9 +17,12 @@ package io.seata.server.session;
 
 import io.seata.common.util.CompressUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.RetryStrategy;
 import io.seata.core.model.RetryStrategyInfo;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.storage.file.lock.FileLocker;
@@ -39,11 +42,13 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author sharajava
  */
-public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
+public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable, RetryStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
     private static final int MAX_BRANCH_SESSION_SIZE = StoreConfig.getMaxBranchSessionSize();
+
+    private static final String DEFAULT_RETRY_STRATEGY = "P,5s,15s,30s,1m,5m,10m";
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_BRANCH_SESSION_SIZE));
@@ -64,7 +69,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
-    private String retryStrategy;
+    private String retryStrategy = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RETRY_STRATEGY, DEFAULT_RETRY_STRATEGY);
+
     private RetryStrategyInfo retryStrategyInfo;
 
     private int retryCount;
@@ -333,6 +339,57 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      */
     public ConcurrentMap<FileLocker.BucketLockMap, Set<String>> getLockHolder() {
         return lockHolder;
+    }
+
+    /**
+     * is expired
+     *
+     * @param globalTransactionBeginTime the global transaction begin time
+     * @return the boolean
+     */
+    @Override
+    public boolean isExpired(long globalTransactionBeginTime) {
+        try {
+            RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
+            return retryStrategy != null ? retryStrategy.isExpired(globalTransactionBeginTime) : false;
+        } catch (Exception e) {
+            LOGGER.error("isExpired error", e);
+            return false;
+        }
+    }
+
+    /**
+     * is reached max retry count
+     *
+     * @param branchRetryCount
+     * @return the boolean
+     */
+    @Override
+    public boolean isReachedMaxRetryCount(int branchRetryCount) {
+        try {
+            RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
+            return retryStrategy != null ? retryStrategy.isReachedMaxRetryCount(branchRetryCount) : false;
+        } catch (Exception e) {
+            LOGGER.error("isReachedMaxRetryCount error", e);
+            return false;
+        }
+    }
+
+    /**
+     * next retry interval
+     *
+     * @param branchRetryCount the count of the branch retries so far
+     * @return the retry interval（unit is milliseconds）
+     */
+    @Override
+    public long nextRetryInterval(int branchRetryCount) {
+        try {
+            RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
+            return retryStrategy != null ? retryStrategy.nextRetryInterval(branchRetryCount) : 0L;
+        } catch (Exception e) {
+            LOGGER.error("nextRetryInterval error", e);
+            return 0L;
+        }
     }
 
     @Override

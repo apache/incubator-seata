@@ -160,8 +160,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean isStopped() {
-        return GlobalStatus.CommitRetrying_Stopped == this.status
-            || GlobalStatus.RollbackRetrying_Stopped == this.status;
+        return GlobalStatus.Stopped == this.status;
     }
 
     /**

@@ -351,6 +351,11 @@ public class ConfigurationKeys {
     public static final String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
     /**
+     * The constant SERVER_RETRY_STRATEGY.
+     */
+    public static final String SERVER_RETRY_STRATEGY = SERVER_PREFIX + "retryStrategy";
+
+    /**
      * The constant TRANSPORT_TYPE
      */
     public static final String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";

@@ -134,16 +134,10 @@ public enum GlobalStatus {
     RollbackRetrying_Suspended(25),
 
     /**
-     * The Commit Retrying Stopped.
+     * The Stopped.
      */
     // Stopped and processing it manually
-    CommitRetrying_Stopped(33),
-
-    /**
-     * The Rollback Retrying Stopped.
-     */
-    // Stopped and processing it manually
-    RollbackRetrying_Stopped(35);
+    Stopped(30);
 
     private int code;
 
