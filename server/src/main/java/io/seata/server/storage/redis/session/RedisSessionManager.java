@@ -110,7 +110,7 @@ public class RedisSessionManager extends AbstractSessionManager
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
-            throw new StoreException("updateGlobalSessionStatus failed.");
+            throw new StoreException("updateGlobalSession failed.");
         }
     }
 
@@ -158,7 +158,7 @@ public class RedisSessionManager extends AbstractSessionManager
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
-            throw new StoreException("updateBranchSessionStatus failed.");
+            throw new StoreException("updateBranchSession failed.");
         }
         session.setApplicationData(null);//clear data, un used
     }

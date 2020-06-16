@@ -133,7 +133,7 @@ public class RedisSeesionManagerTest {
     }
 
     @Test
-    public void test_updateBranchSessionStatus() throws Exception {
+    public void test_updateBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         sessionManager.addGlobalSession(globalSession);
 
