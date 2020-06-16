@@ -16,33 +16,25 @@
 package io.seata.core.rpc.processor;
 
 /**
- * Currently used to associate object1 and object2
+ * Currently used to associate first and second object.
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class Pair<T1, T2> {
-    private T1 object1;
-    private T2 object2;
+public final class Pair<T1, T2> {
+    private final T1 first;
+    private final T2 second;
 
-    public Pair(T1 object1, T2 object2) {
-        this.object1 = object1;
-        this.object2 = object2;
+    public Pair(T1 first, T2 second) {
+        this.first = first;
+        this.second = second;
     }
 
-    public T1 getObject1() {
-        return object1;
+    public T1 getFirst() {
+        return first;
     }
 
-    public void setObject1(T1 object1) {
-        this.object1 = object1;
-    }
-
-    public T2 getObject2() {
-        return object2;
-    }
-
-    public void setObject2(T2 object2) {
-        this.object2 = object2;
+    public T2 getSecond() {
+        return second;
     }
 }

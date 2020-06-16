@@ -57,23 +57,19 @@ public class RmBranchCommitProcessor implements RemotingProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm client handle branch commit process:" + msg);
         }
-        doBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
+        handleBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
     }
 
-    private void doBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
-
-        BranchCommitResponse resultMessage = null;
+    private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
+        BranchCommitResponse resultMessage;
+        resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("branch commit result:" + resultMessage);
+        }
         try {
-            resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
-            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
-        } catch (Exception e) {
-            LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
-            if (resultMessage == null) {
-                resultMessage = new BranchCommitResponse();
-            }
-            resultMessage.setResultCode(ResultCode.Failed);
-            resultMessage.setMsg(e.getMessage());
-            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
+            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+        } catch (Throwable throwable) {
+            LOGGER.error("branch commit error: {}", throwable.getMessage(), throwable);
         }
     }
 }

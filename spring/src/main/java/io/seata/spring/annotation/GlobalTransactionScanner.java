@@ -72,6 +72,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final Set<String> PROXYED_SET = new HashSet<>();
 
     private MethodInterceptor interceptor;
+    private MethodInterceptor globalTransactionalInterceptor;
 
     private final String applicationId;
     private final String txServiceGroup;
@@ -216,8 +217,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
 
                     if (interceptor == null) {
-                        interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) interceptor);
+                        if (globalTransactionalInterceptor == null) {
+                            globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) globalTransactionalInterceptor);
+                        }
+                        interceptor = globalTransactionalInterceptor;
                     }
                 }
 
@@ -245,9 +249,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (clazz == null) {
                     continue;
                 }
+                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
+                if (trxAnno != null) {
+                    return true;
+                }
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
-                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
+                    trxAnno = method.getAnnotation(GlobalTransactional.class);
                     if (trxAnno != null) {
                         return true;
                     }

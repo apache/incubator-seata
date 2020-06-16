@@ -15,22 +15,23 @@
  */
 package io.seata.server.store;
 
-import javax.sql.DataSource;
-
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.store.db.AbstractDataSourceGenerator;
+import io.seata.core.store.db.AbstractDataSourceProvider;
+
+import javax.sql.DataSource;
 
 /**
- * The type Druid data source generator.
- *
+ * The druid datasource provider
  * @author zhangsen
  * @author ggndnn
+ * @author will
  */
 @LoadLevel(name = "druid")
-public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
+public class DruidDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public DataSource generateDataSource() {
+    public DataSource generate() {
         DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
         ds.setDriverClassLoader(getDriverClassLoader());

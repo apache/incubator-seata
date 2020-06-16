@@ -57,6 +57,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
+
 import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
@@ -290,6 +301,11 @@ public class DefaultCoordinatorTest {
 
         @Override
         public void sendAsyncResponse(RpcMessage request, Channel channel, Object msg) {
+
+        }
+
+        @Override
+        public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
 
         }
     }

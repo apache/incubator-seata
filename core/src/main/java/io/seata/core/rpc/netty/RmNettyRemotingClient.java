@@ -206,6 +206,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             } else {
                 LOGGER.error("register resource failed, channel:{},resourceId:{}", channel, resourceId, e);
             }
+        } catch (TimeoutException e) {
+            LOGGER.error(e.getMessage());
         }
     }
 

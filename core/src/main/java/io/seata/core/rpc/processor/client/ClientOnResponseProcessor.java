@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * process TC response message.
@@ -72,7 +73,7 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     /**
      * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
-    private ConcurrentHashMap<Integer, MessageFuture> futures;
+    private ConcurrentMap<Integer, MessageFuture> futures;
 
     /**
      * To handle the received RPC message on upper level.
@@ -104,10 +105,7 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 }
             }
         } else {
-            MessageFuture messageFuture = null;
-            if (!(rpcMessage.getBody() instanceof MergeResultMessage)) {
-                messageFuture = futures.remove(rpcMessage.getId());
-            }
+            MessageFuture messageFuture = futures.remove(rpcMessage.getId());
             if (messageFuture != null) {
                 messageFuture.setResultMessage(rpcMessage.getBody());
             } else {
