@@ -100,8 +100,8 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public void updateBranchSession(BranchSession session, BranchStatus status, String applicationData,
-                                                int retryCount) throws TransactionException {
+                public void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData,
+												int retryCount) throws TransactionException {
 
                 }
 

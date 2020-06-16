@@ -36,6 +36,7 @@ public interface SessionLifecycle {
 
     /**
      * Update.
+     * It's not recommended to use this method directly. Please use other update methods for the specified properties.
      *
      * @param status           the status
      * @param suspendedEndTime the suspended end time
@@ -73,6 +74,7 @@ public interface SessionLifecycle {
 
     /**
      * Update branch.
+     * It's not recommended to use this method directly. Please use other update methods for the specified properties.
      *
      * @param branchSession   the branch session
      * @param status          the status
@@ -92,6 +94,27 @@ public interface SessionLifecycle {
      */
     default void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
         updateBranch(branchSession, status, null, -1);
+    }
+
+    /**
+     * Change branch status.
+     *
+     * @param branchSession the branch session
+     * @param status        the status
+     * @throws TransactionException the transaction exception
+     */
+    default void changeBranchStatusAndIncRetryCount(BranchSession branchSession, BranchStatus status) throws TransactionException {
+        updateBranch(branchSession, status, null, branchSession.getRetryCount() + 1);
+    }
+
+    /**
+     * Increase branch retry count.
+     *
+     * @param branchSession the branch session
+     * @throws TransactionException the transaction exception
+     */
+    default void incBranchRetryCount(BranchSession branchSession) throws TransactionException {
+        this.updateBranch(branchSession, null, null, branchSession.getRetryCount() + 1);
     }
 
     /**

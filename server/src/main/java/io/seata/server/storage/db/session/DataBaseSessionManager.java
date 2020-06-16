@@ -153,34 +153,35 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateBranchSession(BranchSession session, BranchStatus status,
+    public void updateBranchSession(BranchSession branchSession, BranchStatus status,
                                     String applicationData, int retryCount) throws TransactionException {
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
 
         if (status != null && status.getCode() > 0) {
-            session.setStatus(status);
+            branchSession.setStatus(status);
+        }
+        if (StringUtils.isNotEmpty(applicationData)) {
+            branchSession.setApplicationData(applicationData);
         }
         if (retryCount > 0) {
-            session.setRetryCount(retryCount);
+            branchSession.setRetryCount(retryCount);
         }
 
         //new branch session
-        BranchSession updateSession = new BranchSession();
-        updateSession.setXid(session.getXid());
-        updateSession.setBranchId(session.getBranchId());
-        updateSession.setBranchType(session.getBranchType());
-        updateSession.setStatus(status);
-        updateSession.setApplicationData(applicationData);
-        updateSession.setRetryCount(retryCount);
+        BranchSession updateBranchSession = new BranchSession();
+        updateBranchSession.setXid(branchSession.getXid());
+        updateBranchSession.setBranchId(branchSession.getBranchId());
+        updateBranchSession.setBranchType(branchSession.getBranchType());
+        updateBranchSession.setStatus(status);
+        updateBranchSession.setApplicationData(applicationData);
+        updateBranchSession.setRetryCount(retryCount);
 
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, updateSession);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, updateBranchSession);
         if (!ret) {
             throw new StoreException("updateBranchSession failed.");
         }
-
-        session.setApplicationData(null); //clear data, un used
     }
 
     @Override

@@ -142,25 +142,24 @@ public class RedisSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateBranchSession(BranchSession session, BranchStatus status,
+    public void updateBranchSession(BranchSession branchSession, BranchStatus status,
                                     String applicationData, int retryCount) throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
         if (status != null && status.getCode() > 0) {
-            session.setStatus(status);
+            branchSession.setStatus(status);
         }
         if (StringUtils.isNotEmpty(applicationData)) {
-            session.setApplicationData(applicationData);
+            branchSession.setApplicationData(applicationData);
         }
         if (retryCount > 0) {
-            session.setRetryCount(retryCount);
+            branchSession.setRetryCount(retryCount);
         }
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession);
         if (!ret) {
             throw new StoreException("updateBranchSession failed.");
         }
-        session.setApplicationData(null);//clear data, un used
     }
 
     @Override

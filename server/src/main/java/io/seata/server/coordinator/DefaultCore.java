@@ -198,8 +198,11 @@ public class DefaultCore implements Core {
                                 continue;
                             } else {
                                 // update branch status and retryCount
-                                globalSession.updateBranch(branchSession, branchStatus, null,
-                                    retrying ? branchSession.getRetryCount() + 1 : 0);
+                                if (retrying) {
+                                    globalSession.changeBranchStatusAndIncRetryCount(branchSession, branchStatus);
+                                } else {
+                                    globalSession.changeBranchStatus(branchSession, branchStatus);
+                                }
                                 // end global session
                                 SessionHelper.endCommitFailed(globalSession);
                                 LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
@@ -211,7 +214,7 @@ public class DefaultCore implements Core {
                                 return false;
                             }
                             // retryCount + 1
-                            globalSession.updateBranch(branchSession, null, null, branchSession.getRetryCount() + 1);
+                            globalSession.incBranchRetryCount(branchSession);
                             if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
                                     branchSession.getBranchId(), branchStatus);
@@ -300,8 +303,11 @@ public class DefaultCore implements Core {
                             continue;
                         case PhaseTwo_RollbackFailed_Unretryable:
                             // update branch status and retryCount
-                            globalSession.updateBranch(branchSession, branchStatus, null,
-                                retrying ? branchSession.getRetryCount() + 1 : 0);
+                            if (retrying) {
+                                globalSession.changeBranchStatusAndIncRetryCount(branchSession, branchStatus);
+                            } else {
+                                globalSession.changeBranchStatus(branchSession, branchStatus);
+                            }
                             // end global session
                             SessionHelper.endRollbackFailed(globalSession);
                             LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
@@ -312,7 +318,7 @@ public class DefaultCore implements Core {
                                 globalSession.queueToRetryRollback();
                             } else {
                                 // retryCount + 1
-                                globalSession.updateBranch(branchSession, null, null, branchSession.getRetryCount() + 1);
+                                globalSession.incBranchRetryCount(branchSession);
                                 // do retry strategy
                                 this.doRetryStrategy(globalSession, branchSession);
                             }

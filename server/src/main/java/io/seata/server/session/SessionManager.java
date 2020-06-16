@@ -88,13 +88,13 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     /**
      * Update branch session.
      *
-     * @param session         the session
+     * @param branchSession   the session
      * @param status          the status
      * @param applicationData the application data
      * @param retryCount      the retry count
      * @throws TransactionException the transaction exception
      */
-    void updateBranchSession(BranchSession session, BranchStatus status, String applicationData,
+    void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData,
                              int retryCount) throws TransactionException;
 
     /**
