@@ -309,6 +309,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
+                // skip stopped and suspended
+                if (rollbackingSession.isStopped() || rollbackingSession.isSuspended()) {
+                    continue;
+                }
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
                     continue;
@@ -343,6 +347,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         for (GlobalSession committingSession : committingSessions) {
             try {
+                // skip stopped and suspended
+                if (committingSession.isStopped() || committingSession.isSuspended()) {
+                    continue;
+                }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**
                      * Prevent thread safety issues
