@@ -80,6 +80,6 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
-    public static final String DEFAULT_RETRY_STRATEGY = "P,5s,15s,30s,1m,5m";
+    public static final String DEFAULT_RETRY_STRATEGY = "I,5s,5m|-,7d";
 
 }
