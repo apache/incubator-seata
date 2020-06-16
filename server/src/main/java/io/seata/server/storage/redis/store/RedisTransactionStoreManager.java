@@ -333,13 +333,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
         branchTransactionDO.setXid(branchSession.getXid());
         branchTransactionDO.setBranchId(branchSession.getBranchId());
-        branchTransactionDO.setBranchType(branchSession.getBranchType().name());
+        branchTransactionDO.setBranchType(branchSession.getBranchType() == null ? null : branchSession.getBranchType().name());
         branchTransactionDO.setClientId(branchSession.getClientId());
         branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
         branchTransactionDO.setTransactionId(branchSession.getTransactionId());
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
         branchTransactionDO.setResourceId(branchSession.getResourceId());
-        branchTransactionDO.setStatus(branchSession.getStatus().getCode());
+        branchTransactionDO.setStatus(branchSession.getStatus() == null ? 0 : branchSession.getStatus().getCode());
         branchTransactionDO.setRetryStrategy(branchSession.getRetryStrategy());
         branchTransactionDO.setRetryCount(branchSession.getRetryCount());
         return branchTransactionDO;
