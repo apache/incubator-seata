@@ -381,14 +381,14 @@ public class DefaultCore implements Core {
             // check expire
             if (branchSession.isExpired(globalSession.getBeginTime())) {
                 globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
-                LOGGER.error("Global transaction is stopped：" + GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
+                LOGGER.error("Global transaction is stopped: " + GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
                 return;
             }
 
             // check retry count
             if (branchSession.isReachedMaxRetryCount(branchSession.getRetryCount())) {
                 globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
-                LOGGER.error("Global transaction is stopped：" + GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
+                LOGGER.error("Global transaction is stopped: " + GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
                 return;
             }
 
