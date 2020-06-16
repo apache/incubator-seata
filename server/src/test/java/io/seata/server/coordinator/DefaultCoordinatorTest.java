@@ -149,7 +149,7 @@ public class DefaultCoordinatorTest {
 
         Assertions.assertNotNull(branchId);
 
-        Thread.sleep(100);
+        Thread.sleep(101);
         defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();
 

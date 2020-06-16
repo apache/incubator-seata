@@ -162,9 +162,9 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             sessionManager.addBranchSession(globalSession, branchSession);
-            sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseTwo_Committed, "P,1s,2s", 4);
+            sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseTwo_Committed, "{\"a\":1}", 4);
             Assertions.assertEquals(BranchStatus.PhaseTwo_Committed, branchSession.getStatus());
-            Assertions.assertEquals("P,1s,2s", branchSession.getRetryStrategy());
+            Assertions.assertEquals("{\"a\":1}", branchSession.getApplicationData());
             Assertions.assertEquals(4, branchSession.getRetryCount());
             sessionManager.removeBranchSession(globalSession, branchSession);
             sessionManager.removeGlobalSession(globalSession);
