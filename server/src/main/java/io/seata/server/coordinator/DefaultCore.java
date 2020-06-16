@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.core.model.GlobalStoppedReason;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,9 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.DurationUtils;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStoppedReason;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.BranchSession;
@@ -396,7 +397,7 @@ public class DefaultCore implements Core {
             long retryInterval = branchSession.nextRetryInterval(branchSession.getRetryCount());
             if (retryInterval > 0) {
                 globalSession.suspend(retryInterval);
-                LOGGER.info("Global transaction is suspended, sleep time: " + retryInterval + " ms");
+                LOGGER.info("Global transaction is suspended about " + DurationUtils.millisToString(retryInterval) + " times.");
             }
         } catch (Exception e) {
             String errorMsg = String.format("do retry strategy error: xid=%s, branchId=%s", branchSession.getXid(), branchSession.getBranchId());
