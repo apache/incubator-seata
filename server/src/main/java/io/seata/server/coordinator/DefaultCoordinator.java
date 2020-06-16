@@ -282,11 +282,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             LOGGER.debug("Global transaction status change begin, size: {}", suspendedSessions.size());
         }
         for (GlobalSession globalSession : suspendedSessions) {
+            // suspended to retrying
             if (!globalSession.isSuspended()) {
                 if (GlobalStatus.CommitRetrying_Suspended == globalSession.getStatus()) {
                     globalSession.changeStatus(GlobalStatus.CommitRetrying);
+                    LOGGER.info("Suspended to CommitRetrying: xid=" + globalSession.getXid());
                 } else if (GlobalStatus.RollbackRetrying_Suspended == globalSession.getStatus()) {
                     globalSession.changeStatus(GlobalStatus.RollbackRetrying);
+                    LOGGER.info("Suspended to RollbackRetrying: xid=" + globalSession.getXid());
                 }
             }
         }
