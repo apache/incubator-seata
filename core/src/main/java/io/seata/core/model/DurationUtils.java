@@ -133,4 +133,70 @@ public final class DurationUtils {
     public static String daysToString(long days) {
         return days + "d";
     }
+
+    /**
+     * milliseconds to duration string
+     *
+     * @param millis milliseconds
+     * @return duration string
+     */
+    public static String millisToString2(long millis) {
+        if (millis % 1000 != 0) {
+            return millis + " milliseconds";
+        } else {
+            return secondsToString2(millis / 1000);
+        }
+    }
+
+    /**
+     * seconds to duration string
+     *
+     * @param seconds seconds
+     * @return duration string
+     */
+    public static String secondsToString2(long seconds) {
+        if (seconds % 60 != 0) {
+            return seconds + " seconds";
+        } else {
+            return minutesToString2(seconds / 60);
+        }
+    }
+
+    /**
+     * minutes to duration string
+     *
+     * @param minutes minutes
+     * @return duration string
+     */
+    public static String minutesToString2(long minutes) {
+        if (minutes % 60 != 0) {
+            return minutes + " minutes";
+        } else {
+            return hoursToString2(minutes / 60);
+        }
+    }
+
+    /**
+     * hours to duration string
+     *
+     * @param hours hours
+     * @return duration string
+     */
+    public static String hoursToString2(long hours) {
+        if (hours % 60 != 0) {
+            return hours + " hours";
+        } else {
+            return daysToString2(hours / 24);
+        }
+    }
+
+    /**
+     * days to duration string
+     *
+     * @param days days
+     * @return duration string
+     */
+    public static String daysToString2(long days) {
+        return days + " days";
+    }
 }

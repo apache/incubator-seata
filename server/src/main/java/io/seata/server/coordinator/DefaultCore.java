@@ -397,7 +397,7 @@ public class DefaultCore implements Core {
             long retryInterval = branchSession.nextRetryInterval(branchSession.getRetryCount());
             if (retryInterval > 0) {
                 globalSession.suspend(retryInterval);
-                LOGGER.info("Global transaction is suspended about " + DurationUtils.millisToString(retryInterval) + " times.");
+                LOGGER.info("Global transaction is suspended about " + DurationUtils.millisToString2(retryInterval) + " .");
             }
         } catch (Exception e) {
             String errorMsg = String.format("do retry strategy error: xid=%s, branchId=%s", branchSession.getXid(), branchSession.getBranchId());
