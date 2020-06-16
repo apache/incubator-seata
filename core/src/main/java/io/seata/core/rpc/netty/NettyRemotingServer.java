@@ -64,10 +64,10 @@ public class NettyRemotingServer extends AbstractNettyRemoting implements Remoti
 
     @Override
     public void init() {
-        super.init();
         // registry processor
         registerProcessor();
         setChannelHandlers(new ServerHandler());
+        super.init();
         serverBootstrap.start();
     }
 

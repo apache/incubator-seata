@@ -123,7 +123,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), result);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
     }
