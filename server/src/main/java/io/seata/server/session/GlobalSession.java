@@ -202,7 +202,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void updateBranch(BranchSession branchSession, BranchStatus status,
                              String applicationData, int retryCount) throws TransactionException {
-        branchSession.setStatus(status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchUpdate(this, branchSession, status, applicationData, retryCount);
         }
