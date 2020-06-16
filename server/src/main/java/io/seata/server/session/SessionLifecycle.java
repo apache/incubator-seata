@@ -37,9 +37,10 @@ public interface SessionLifecycle {
     /**
      * Update.
      *
-     * @param status the status
+     * @param status           the status
      * @param suspendedEndTime the suspended end time
-     * @param stoppedReason the stopped reason
+     * @param stoppedReason    the stopped reason
+     * @throws TransactionException the transaction exception
      */
     void update(GlobalStatus status, long suspendedEndTime, GlobalStoppedReason stoppedReason) throws TransactionException;
 
@@ -54,13 +55,30 @@ public interface SessionLifecycle {
     }
 
     /**
+     * Suspend.
+     *
+     * @throws TransactionException the transaction exception
+     */
+    void suspend(long retryInterval) throws TransactionException;
+
+    /**
+     * Stop, manual intervention is required.
+     *
+     * @param globalStoppedReason the global stopped reason
+     * @throws TransactionException the transaction exception
+     */
+    default void stop(GlobalStoppedReason globalStoppedReason) throws TransactionException {
+        this.update(GlobalStatus.Stopped, -1L, globalStoppedReason);
+    }
+
+    /**
      * Update branch.
      *
      * @param branchSession   the branch session
      * @param status          the status
      * @param applicationData the application data
      * @param retryCount      the retry count
-     * @throws TransactionException
+     * @throws TransactionException the transaction exception
      */
     void updateBranch(BranchSession branchSession, BranchStatus status,
                       String applicationData, int retryCount) throws TransactionException;

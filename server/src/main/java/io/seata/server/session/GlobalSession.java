@@ -190,6 +190,16 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
+    public void suspend(long retryInterval) throws TransactionException {
+        long suspendedEndTime = System.currentTimeMillis() + retryInterval;
+        if (this.status.name().contains("Commit")) {
+            this.update(GlobalStatus.CommitRetrying_Suspended, suspendedEndTime, null);
+        } else {
+            this.update(GlobalStatus.RollbackRetrying_Suspended, suspendedEndTime, null);
+        }
+    }
+
+    @Override
     public void updateBranch(BranchSession branchSession, BranchStatus status,
                              String applicationData, int retryCount) throws TransactionException {
         branchSession.setStatus(status);

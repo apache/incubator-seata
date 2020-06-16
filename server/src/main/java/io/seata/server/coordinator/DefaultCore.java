@@ -364,25 +364,20 @@ public class DefaultCore implements Core {
         try {
             // check expire
             if (branchSession.isExpired(globalSession.getBeginTime())) {
-                globalSession.update(GlobalStatus.Stopped, -1L, GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
+                globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
                 return;
             }
 
             // check retry count
             if (branchSession.isReachedMaxRetryCount(branchSession.getRetryCount())) {
-                globalSession.update(GlobalStatus.Stopped, -1L, GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
+                globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
                 return;
             }
 
             // get next retry interval and suspended
             long retryInterval = branchSession.nextRetryInterval(branchSession.getRetryCount());
             if (retryInterval > 0) {
-                long suspendedEndTime = System.currentTimeMillis() + retryInterval;
-                if (globalSession.getStatus().name().contains("Commit")) {
-                    globalSession.update(GlobalStatus.CommitRetrying_Suspended, suspendedEndTime, null);
-                } else {
-                    globalSession.update(GlobalStatus.RollbackRetrying_Suspended, suspendedEndTime, null);
-                }
+                globalSession.suspend(retryInterval);
             }
         } catch (Exception e) {
             String errorMsg = String.format("do retry strategy error: xid=%s, branchId=%s", branchSession.getXid(), branchSession.getBranchId());
