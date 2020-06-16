@@ -24,6 +24,7 @@ import io.netty.channel.Channel;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -53,7 +54,7 @@ public class TmNettyClientTest {
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
                 nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
-                UUIDGenerator.init(1);
+                UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
         });
@@ -88,7 +89,7 @@ public class TmNettyClientTest {
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
                 nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
-                UUIDGenerator.init(1);
+                UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
         });
@@ -114,7 +115,7 @@ public class TmNettyClientTest {
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
                 nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
-                UUIDGenerator.init(1);
+                UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
         });
