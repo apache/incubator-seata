@@ -142,7 +142,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public abstract String getInsertGlobalTransactionSQL(String globalTable);
 
     @Override
-    public abstract String getUpdateGlobalTransactionSQL(String globalTable);
+    public abstract String getUpdateGlobalTransactionSQL(String globalTable, String setsPlaceHolder);
 
     @Override
     public String getDeleteGlobalTransactionSQL(String globalTable) {
@@ -165,12 +165,12 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
 
+
     @Override
     public abstract String getInsertBranchTransactionSQL(String branchTable);
 
     @Override
-    public abstract String getUpdateBranchTransactionSQL(String branchTable);
-
+    public abstract String getUpdateBranchTransactionSQL(String branchTable, String setsPlaceHolder);
 
     @Override
     public String getDeleteBranchTransactionByBranchIdSQL(String branchTable) {
@@ -192,6 +192,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
         return QUERY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
+
 
     @Override
     public String getQueryGlobalMax(String globalTable) {

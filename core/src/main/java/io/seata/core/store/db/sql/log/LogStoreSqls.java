@@ -32,10 +32,11 @@ public interface LogStoreSqls {
     /**
      * Get update global transaction sql string.
      *
-     * @param globalTable the global table
+     * @param globalTable     the global table
+     * @param setsPlaceHolder the sets place holder
      * @return the string
      */
-    String getUpdateGlobalTransactionSQL(String globalTable);
+    String getUpdateGlobalTransactionSQL(String globalTable, String setsPlaceHolder);
 
     /**
      * Get delete global transaction sql string.
@@ -89,10 +90,11 @@ public interface LogStoreSqls {
     /**
      * Get update branch transaction sql string.
      *
-     * @param branchTable the branch table
+     * @param branchTable     the branch table
+     * @param setsPlaceHolder the sets place holder
      * @return the string
      */
-    String getUpdateBranchTransactionSQL(String branchTable);
+    String getUpdateBranchTransactionSQL(String branchTable, String setsPlaceHolder);
 
     /**
      * Get delete branch transaction by branch id sql string.

@@ -232,19 +232,20 @@ public class LogStoreDataBaseDAO implements LogStore {
             return true;
         }
 
-        // build sql
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable);
-        StringBuilder setsSQL = new StringBuilder();
+        // sets place holder
+        StringBuilder sb = new StringBuilder();
         if (globalTransactionDO.getStatus() > 0) {
-            setsSQL.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
+            sb.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
         }
         if (globalTransactionDO.getSuspendedEndTime() > 0) {
-            setsSQL.append(ServerTableColumnsName.GLOBAL_TABLE_SUSPENDED_END_TIME).append(" = ?, ");
+            sb.append(ServerTableColumnsName.GLOBAL_TABLE_SUSPENDED_END_TIME).append(" = ?, ");
         }
         if (globalTransactionDO.getStoppedReason() > 0) {
-            setsSQL.append(ServerTableColumnsName.GLOBAL_TABLE_STOPPED_REASON).append(" = ?, ");
+            sb.append(ServerTableColumnsName.GLOBAL_TABLE_STOPPED_REASON).append(" = ?, ");
         }
-        sql = sql.replace(AbstractLogStoreSqls.SETS_PLACEHOLD, setsSQL.toString());
+
+        // get update sql
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable, sb.toString());
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -385,19 +386,20 @@ public class LogStoreDataBaseDAO implements LogStore {
             return true;
         }
 
-        // build sql
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(brachTable);
-        StringBuilder setsSQL = new StringBuilder();
+        // sets place holder
+        StringBuilder sb = new StringBuilder();
         if (branchTransactionDO.getStatus() > 0) {
-            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
+            sb.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
         }
         if (StringUtils.isNotEmpty(branchTransactionDO.getApplicationData())) {
-            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
+            sb.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
         }
         if (branchTransactionDO.getRetryCount() > 0) {
-            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" = ?, ");
+            sb.append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" = ?, ");
         }
-        sql = sql.replace(AbstractLogStoreSqls.SETS_PLACEHOLD, setsSQL.toString());
+
+        // get update branch sql
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(brachTable, sb.toString());
 
         Connection conn = null;
         PreparedStatement ps = null;
