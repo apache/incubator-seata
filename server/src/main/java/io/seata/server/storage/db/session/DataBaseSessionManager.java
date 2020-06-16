@@ -103,9 +103,15 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
-        if (status != null && status.getCode() > 0) session.setStatus(status);
-        if (suspendedEndTime > 0) session.setSuspendedEndTime(suspendedEndTime);
-        if (stoppedReason != null && stoppedReason.getCode() > 0) session.setStoppedReason(stoppedReason);
+        if (status != null && status.getCode() > 0) {
+            session.setStatus(status);
+        }
+        if (suspendedEndTime > 0) {
+            session.setSuspendedEndTime(suspendedEndTime);
+        }
+        if (stoppedReason != null && stoppedReason.getCode() > 0) {
+            session.setStoppedReason(stoppedReason);
+        }
 
         //new global session
         GlobalSession updateSession = new GlobalSession();
@@ -153,8 +159,12 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
-        if (status != null && status.getCode() > 0) session.setStatus(status);
-        if (retryCount > 0) session.setRetryCount(retryCount);
+        if (status != null && status.getCode() > 0) {
+            session.setStatus(status);
+        }
+        if (retryCount > 0) {
+            session.setRetryCount(retryCount);
+        }
 
         //new branch session
         BranchSession updateSession = new BranchSession();

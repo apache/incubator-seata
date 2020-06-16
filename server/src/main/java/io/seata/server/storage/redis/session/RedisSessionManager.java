@@ -99,9 +99,15 @@ public class RedisSessionManager extends AbstractSessionManager
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        if (status != null && status.getCode() > 0) session.setStatus(status);
-        if (suspendedEndTime > 0) session.setSuspendedEndTime(suspendedEndTime);
-        if (stoppedReason != null && stoppedReason.getCode() > 0) session.setStoppedReason(stoppedReason);
+        if (status != null && status.getCode() > 0) {
+            session.setStatus(status);
+        }
+        if (suspendedEndTime > 0) {
+            session.setSuspendedEndTime(suspendedEndTime);
+        }
+        if (stoppedReason != null && stoppedReason.getCode() > 0) {
+            session.setStoppedReason(stoppedReason);
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
@@ -141,9 +147,15 @@ public class RedisSessionManager extends AbstractSessionManager
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        if (status != null && status.getCode() > 0) session.setStatus(status);
-        if (StringUtils.isNotEmpty(applicationData)) session.setApplicationData(applicationData);
-        if (retryCount > 0) session.setRetryCount(retryCount);
+        if (status != null && status.getCode() > 0) {
+            session.setStatus(status);
+        }
+        if (StringUtils.isNotEmpty(applicationData)) {
+            session.setApplicationData(applicationData);
+        }
+        if (retryCount > 0) {
+            session.setRetryCount(retryCount);
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");

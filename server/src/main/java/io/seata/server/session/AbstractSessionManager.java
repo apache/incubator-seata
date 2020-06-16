@@ -77,9 +77,15 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
         }
-        if (status != null && status.getCode() > 0) session.setStatus(status);
-        if (suspendedEndTime > 0) session.setSuspendedEndTime(suspendedEndTime);
-        if (stoppedReason != null && stoppedReason.getCode() > 0) session.setStoppedReason(stoppedReason);
+        if (status != null && status.getCode() > 0) {
+            session.setStatus(status);
+        }
+        if (suspendedEndTime > 0) {
+            session.setSuspendedEndTime(suspendedEndTime);
+        }
+        if (stoppedReason != null && stoppedReason.getCode() > 0) {
+            session.setStoppedReason(stoppedReason);
+        }
         writeSession(LogOperation.GLOBAL_UPDATE, session);
     }
 
@@ -106,9 +112,15 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
         }
-        if (status != null && status.getCode() > 0) branchSession.setStatus(status);
-        if (StringUtils.isNotBlank(applicationData)) branchSession.setApplicationData(applicationData);
-        if (retryCount > 0) branchSession.setRetryCount(retryCount);
+        if (status != null && status.getCode() > 0) {
+            branchSession.setStatus(status);
+        }
+        if (StringUtils.isNotBlank(applicationData)) {
+            branchSession.setApplicationData(applicationData);
+        }
+        if (retryCount > 0) {
+            branchSession.setRetryCount(retryCount);
+        }
         writeSession(LogOperation.BRANCH_UPDATE, branchSession);
     }
 
