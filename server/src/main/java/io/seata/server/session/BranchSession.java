@@ -356,7 +356,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
             return retryStrategy != null ? retryStrategy.isExpired(globalTransactionBeginTime) : false;
         } catch (Exception e) {
-            LOGGER.error("isExpired error", e);
+            LOGGER.error("isExpired error: xid=" + xid + " branchId=" + branchId, e);
             return false;
         }
     }
@@ -373,7 +373,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
             return retryStrategy != null ? retryStrategy.isReachedMaxRetryCount(branchRetryCount) : false;
         } catch (Exception e) {
-            LOGGER.error("isReachedMaxRetryCount error", e);
+            LOGGER.error("isReachedMaxRetryCount error: xid=" + xid + " branchId=" + branchId, e);
             return false;
         }
     }
@@ -390,7 +390,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
             return retryStrategy != null ? retryStrategy.nextRetryInterval(branchRetryCount) : 0L;
         } catch (Exception e) {
-            LOGGER.error("nextRetryInterval error", e);
+            LOGGER.error("nextRetryInterval error: xid=" + xid + " branchId=" + branchId, e);
             return 0L;
         }
     }

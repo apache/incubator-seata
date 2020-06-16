@@ -382,14 +382,14 @@ public class DefaultCore implements Core {
             // check expire
             if (branchSession.isExpired(globalSession.getBeginTime())) {
                 globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
-                LOGGER.error("Global transaction is stopped: " + GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
+                LOGGER.error("[{}] Global transaction is stopped, reason is {} .", globalSession.getXid(), GlobalStoppedReason.Triggered_Retry_Strategy_Expire.name());
                 return;
             }
 
             // check retry count
             if (branchSession.isReachedMaxRetryCount(branchSession.getRetryCount())) {
                 globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
-                LOGGER.error("Global transaction is stopped: " + GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
+                LOGGER.error("[{}] Global transaction is stopped, reason is {} .", globalSession.getXid(), GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount.name());
                 return;
             }
 
@@ -397,7 +397,7 @@ public class DefaultCore implements Core {
             long retryInterval = branchSession.nextRetryInterval(branchSession.getRetryCount());
             if (retryInterval > 0) {
                 globalSession.suspend(retryInterval);
-                LOGGER.info("Global transaction is suspended about " + DurationUtils.millisToString2(retryInterval) + " .");
+                LOGGER.info("[{}] Global transaction is suspended about {} .", globalSession.getXid(), DurationUtils.millisToString2(retryInterval));
             }
         } catch (Exception e) {
             String errorMsg = String.format("do retry strategy error: xid=%s, branchId=%s", branchSession.getXid(), branchSession.getBranchId());
