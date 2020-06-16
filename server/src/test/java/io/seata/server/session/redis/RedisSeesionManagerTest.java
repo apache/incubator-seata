@@ -31,6 +31,7 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import redis.clients.jedis.JedisPool;
@@ -134,6 +135,8 @@ public class RedisSeesionManagerTest {
     @Test
     public void test_updateBranchSessionStatus() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
+        sessionManager.addGlobalSession(globalSession);
+
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -153,7 +156,13 @@ public class RedisSeesionManagerTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
         sessionManager.addBranchSession(globalSession, branchSession);
-        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, null, -1);
+        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, "{\"data\":\"test2\"}", 2);
+
+        globalSession = sessionManager.findGlobalSession(globalSession.getXid());
+        branchSession = globalSession.getBranch(branchSession.getBranchId());
+        Assertions.assertEquals(BranchStatus.PhaseOne_Timeout, branchSession.getStatus());
+        Assertions.assertEquals("{\"data\":\"test2\"}", branchSession.getApplicationData());
+        Assertions.assertEquals(2, branchSession.getRetryCount());
     }
 
     @AfterAll

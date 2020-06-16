@@ -37,6 +37,8 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_RETRY_STRATEGY;
+
 /**
  * The type Branch session.
  *
@@ -48,10 +50,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private static final int MAX_BRANCH_SESSION_SIZE = StoreConfig.getMaxBranchSessionSize();
 
-    private static final String DEFAULT_RETRY_STRATEGY = "P,5s,15s,30s,1m,5m,10m";
-
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_BRANCH_SESSION_SIZE));
+
+    public static final String RETRY_STRATEGY = ConfigurationFactory.getInstance().getConfig(
+            ConfigurationKeys.SERVER_RETRY_STRATEGY, DEFAULT_RETRY_STRATEGY);
 
     private String xid;
 
@@ -69,8 +72,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
-    private String retryStrategy = ConfigurationFactory.getInstance().getConfig(
-        ConfigurationKeys.SERVER_RETRY_STRATEGY, DEFAULT_RETRY_STRATEGY);
+    private String retryStrategy = RETRY_STRATEGY;
 
     private RetryStrategyInfo retryStrategyInfo;
 
@@ -519,7 +521,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + 4 // lockKeyBytes.length
             + 2 // clientIdBytes.length
             + 4 // applicationDataBytes.length
-            + 4 // xidBytes.size
+            + 4 // xidBytes.length
+            + 4 // retryStrategyBytes.length
             + 1 // statusCode
             + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
             + (lockKeyBytes == null ? 0 : lockKeyBytes.length)

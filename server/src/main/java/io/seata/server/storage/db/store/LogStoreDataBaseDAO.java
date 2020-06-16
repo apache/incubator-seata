@@ -395,8 +395,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
         }
         if (branchTransactionDO.getRetryCount() > 0) {
-            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" = ")
-                .append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" + 1");
+            setsSQL.append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" = ?, ");
         }
         sql = sql.replace(AbstractLogStoreSqls.SETS_PLACEHOLD, setsSQL.toString());
 
@@ -414,6 +413,9 @@ public class LogStoreDataBaseDAO implements LogStore {
             }
             if (StringUtils.isNotEmpty(branchTransactionDO.getApplicationData())) {
                 ps.setString(i++, branchTransactionDO.getApplicationData());
+            }
+            if (branchTransactionDO.getRetryCount() > 0) {
+                ps.setInt(i++, branchTransactionDO.getRetryCount());
             }
             ps.setString(i++, branchTransactionDO.getXid());
             ps.setLong(i, branchTransactionDO.getBranchId());

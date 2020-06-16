@@ -170,6 +170,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
         BranchSession updateSession = new BranchSession();
         updateSession.setXid(session.getXid());
         updateSession.setBranchId(session.getBranchId());
+        updateSession.setBranchType(session.getBranchType());
         updateSession.setStatus(status);
         updateSession.setApplicationData(applicationData);
         updateSession.setRetryCount(retryCount);

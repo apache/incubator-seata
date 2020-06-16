@@ -90,7 +90,7 @@ server {
   maxCommitRetryTimeout = "-1"
   maxRollbackRetryTimeout = "-1"
   rollbackRetryTimeoutUnlockEnable = false
-  retryStrategy = "P,5s,15s,30s,1m,5m,10m"
+  retryStrategy = "P,5s,15s,30s,1m,5m"
 }
 
 ## metrics configuration, only used in server side

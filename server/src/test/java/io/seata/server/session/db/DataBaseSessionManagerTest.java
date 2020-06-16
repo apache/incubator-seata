@@ -341,7 +341,7 @@ public class DataBaseSessionManagerTest {
         sessionManager.addBranchSession(globalSession, branchSession);
 
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
-        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, "S,10s", 3);
+        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, "{\"b\":1}", 3);
 
         String sql = "select * from branch_table where xid= '"+xid+"'";
         String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
@@ -353,8 +353,8 @@ public class DataBaseSessionManagerTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS),
                     BranchStatus.PhaseOne_Timeout.getCode());
-                Assertions.assertEquals(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RETRY_STRATEGY),
-                    "S,10s");
+                Assertions.assertEquals(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA),
+                    "{\"b\":1}");
                 Assertions.assertEquals(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT),
                     3);
             }else{

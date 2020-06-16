@@ -137,15 +137,26 @@ public class FileTransactionStoreManagerTest {
                 + 4 // lockKeyBytes.length
                 + 2 // clientIdBytes.length
                 + 4 // applicationDataBytes.length
-                + 4 // xidBytes.size
+                + 4 // xidBytes.length
+                + 4 // retryStrategyBytes.length
                 + 1 // statusCode
-                + 1; //branchType
+                + 1 // branchType
+                + 4;// retryCount
+
         String xid = global.getXid();
         byte[] xidBytes = null;
         if (xid != null) {
             xidBytes = xid.getBytes();
             bufferSize += xidBytes.length;
         }
+
+        String retryStrategy = BranchSession.RETRY_STRATEGY;
+        byte[] retryStrategyBytes = null;
+        if (retryStrategy != null) {
+            retryStrategyBytes = retryStrategy.getBytes();
+            bufferSize += retryStrategyBytes.length;
+        }
+
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         byteBuffer.putLong(global.getTransactionId());
         byteBuffer.putLong(UUIDGenerator.generateUUID());
@@ -163,6 +174,13 @@ public class FileTransactionStoreManagerTest {
         }
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
+        if (retryStrategyBytes != null) {
+            byteBuffer.putInt(retryStrategyBytes.length);
+            byteBuffer.put(retryStrategyBytes);
+        } else {
+            byteBuffer.putInt(0);
+        }
+        byteBuffer.putInt(0);
         byteBuffer.flip();
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
