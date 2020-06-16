@@ -179,6 +179,10 @@ public class DefaultCore implements Core {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
+                if (retrying) {
+                    LOGGER.info("retry commit: xid={}, branchId={}, retryCount={}",
+                            branchSession.getXid(), branchSession.getBranchId(), branchSession.getRetryCount() + 1);
+                }
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
@@ -193,8 +197,12 @@ public class DefaultCore implements Core {
                             continue;
                         case PhaseTwo_CommitFailed_Unretryable:
                             if (globalSession.canBeCommittedAsync()) {
-                                LOGGER.error(
-                                    "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
+                                if (retrying) {
+                                    // retryCount + 1
+                                    globalSession.incBranchRetryCount(branchSession);
+                                }
+                                LOGGER.error("Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.",
+                                    branchSession.getBranchId());
                                 continue;
                             } else {
                                 // update branch status and retryCount
@@ -205,26 +213,29 @@ public class DefaultCore implements Core {
                                 }
                                 // end global session
                                 SessionHelper.endCommitFailed(globalSession);
-                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
+                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.",
+                                    globalSession.getXid(), branchSession.getBranchId());
                                 return false;
                             }
                         default:
                             if (!retrying) {
+                                LOGGER.info("Commit branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                                 globalSession.queueToRetryCommit();
                                 return false;
-                            }
-                            // retryCount + 1
-                            globalSession.incBranchRetryCount(branchSession);
-                            if (globalSession.canBeCommittedAsync()) {
-                                LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
-                                    branchSession.getBranchId(), branchStatus);
-                                continue;
                             } else {
-                                // do retry strategy
-                                this.doRetryStrategy(globalSession, branchSession);
-                                LOGGER.error(
-                                    "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.", globalSession.getXid(), branchSession.getBranchId());
-                                return false;
+                                // retryCount + 1
+                                globalSession.incBranchRetryCount(branchSession);
+                                if (globalSession.canBeCommittedAsync()) {
+                                    LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
+                                        branchSession.getBranchId(), branchStatus);
+                                    continue;
+                                } else {
+                                    // do retry strategy
+                                    this.doRetryStrategy(globalSession, branchSession);
+                                    LOGGER.error("Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.",
+                                        globalSession.getXid(), branchSession.getBranchId());
+                                    return false;
+                                }
                             }
                     }
                 } catch (Exception ex) {
@@ -289,6 +300,10 @@ public class DefaultCore implements Core {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
             for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
+                if (retrying) {
+                    LOGGER.info("retry rollback: xid={}, branchId={}, retryCount={}",
+                        branchSession.getXid(), branchSession.getBranchId(), branchSession.getRetryCount() + 1);
+                }
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
@@ -360,23 +375,20 @@ public class DefaultCore implements Core {
         return success;
     }
 
-    /**
-     * do retry strategy
-     *
-     * @param globalSession
-     * @param branchSession
-     */
-    private void doRetryStrategy(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+    @Override
+    public void doRetryStrategy(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         try {
             // check expire
             if (branchSession.isExpired(globalSession.getBeginTime())) {
                 globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
+                LOGGER.error("Global transaction is stopped：" + GlobalStoppedReason.Triggered_Retry_Strategy_Expire);
                 return;
             }
 
             // check retry count
             if (branchSession.isReachedMaxRetryCount(branchSession.getRetryCount())) {
                 globalSession.stop(GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
+                LOGGER.error("Global transaction is stopped：" + GlobalStoppedReason.Triggered_Retry_Strategy_MaxCount);
                 return;
             }
 
@@ -384,6 +396,7 @@ public class DefaultCore implements Core {
             long retryInterval = branchSession.nextRetryInterval(branchSession.getRetryCount());
             if (retryInterval > 0) {
                 globalSession.suspend(retryInterval);
+                LOGGER.info("Global transaction is suspended, sleep time: " + retryInterval + " ms");
             }
         } catch (Exception e) {
             String errorMsg = String.format("do retry strategy error: xid=%s, branchId=%s", branchSession.getXid(), branchSession.getBranchId());
