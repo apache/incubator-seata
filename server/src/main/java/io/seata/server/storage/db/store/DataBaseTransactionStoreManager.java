@@ -269,7 +269,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
 
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(globalSession.getXid());
-        globalTransactionDO.setStatus(globalSession.getStatus().getCode());
+        globalTransactionDO.setStatus(globalSession.getStatus() == null ? 0 : globalSession.getStatus().getCode());
         globalTransactionDO.setApplicationId(globalSession.getApplicationId());
         globalTransactionDO.setBeginTime(globalSession.getBeginTime());
         globalTransactionDO.setTimeout(globalSession.getTimeout());
@@ -278,7 +278,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         globalTransactionDO.setTransactionServiceGroup(globalSession.getTransactionServiceGroup());
         globalTransactionDO.setApplicationData(globalSession.getApplicationData());
         globalTransactionDO.setSuspendedEndTime(globalSession.getSuspendedEndTime());
-        globalTransactionDO.setStoppedReason(globalSession.getStoppedReason().getCode());
+        globalTransactionDO.setStoppedReason(globalSession.getStoppedReason() == null ? 0 : globalSession.getStoppedReason().getCode());
         return globalTransactionDO;
     }
 

@@ -491,8 +491,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         globalTransactionDO.setTimeout(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
         globalTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
         globalTransactionDO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
-        globalTransactionDO.setTransactionServiceGroup(
-            rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+        globalTransactionDO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
         globalTransactionDO.setSuspendedEndTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_SUSPENDED_END_TIME));
         globalTransactionDO.setStoppedReason(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STOPPED_REASON));
