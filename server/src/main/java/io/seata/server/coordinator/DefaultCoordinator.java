@@ -285,9 +285,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             // suspended to retrying
             if (!globalSession.isSuspended()) {
                 if (GlobalStatus.CommitRetrying_Suspended == globalSession.getStatus()) {
+                    globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                     globalSession.changeStatus(GlobalStatus.CommitRetrying);
                     LOGGER.info("Suspended to CommitRetrying: xid=" + globalSession.getXid());
                 } else if (GlobalStatus.RollbackRetrying_Suspended == globalSession.getStatus()) {
+                    globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                     globalSession.changeStatus(GlobalStatus.RollbackRetrying);
                     LOGGER.info("Suspended to RollbackRetrying: xid=" + globalSession.getXid());
                 }
