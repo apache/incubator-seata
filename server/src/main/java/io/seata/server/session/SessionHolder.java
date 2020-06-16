@@ -162,6 +162,7 @@ public class SessionHolder {
                             switch (globalStatus) {
                                 case Committing:
                                 case CommitRetrying:
+                                case CommitRetrying_Suspended:
                                     try {
                                         globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
                                         getRetryCommittingSessionManager().addGlobalSession(globalSession);
@@ -171,6 +172,7 @@ public class SessionHolder {
                                     break;
                                 case Rollbacking:
                                 case RollbackRetrying:
+                                case RollbackRetrying_Suspended:
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
                                     try {
@@ -182,6 +184,9 @@ public class SessionHolder {
                                     break;
                                 case Begin:
                                     globalSession.setActive(true);
+                                    break;
+                                case Stopped:
+                                    globalSession.setActive(false);
                                     break;
                                 default:
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
