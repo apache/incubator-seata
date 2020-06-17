@@ -225,21 +225,21 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        if (globalTransactionDO.getStatus() <= 0
-            && globalTransactionDO.getSuspendedEndTime() <= 0
-            && globalTransactionDO.getStoppedReason() <= 0) {
+        if (globalTransactionDO.getStatus() < 0
+            && globalTransactionDO.getSuspendedEndTime() < 0
+            && globalTransactionDO.getStoppedReason() < 0) {
             return true;
         }
 
         // sets place holder
         StringBuilder sb = new StringBuilder();
-        if (globalTransactionDO.getStatus() > 0) {
+        if (globalTransactionDO.getStatus() >= 0) {
             sb.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
         }
-        if (globalTransactionDO.getSuspendedEndTime() > 0) {
+        if (globalTransactionDO.getSuspendedEndTime() >= 0) {
             sb.append(ServerTableColumnsName.GLOBAL_TABLE_SUSPENDED_END_TIME).append(" = ?, ");
         }
-        if (globalTransactionDO.getStoppedReason() > 0) {
+        if (globalTransactionDO.getStoppedReason() >= 0) {
             sb.append(ServerTableColumnsName.GLOBAL_TABLE_STOPPED_REASON).append(" = ?, ");
         }
 
@@ -379,21 +379,21 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        if (branchTransactionDO.getStatus() <= 0
-                && StringUtils.isEmpty(branchTransactionDO.getApplicationData())
-                && branchTransactionDO.getRetryCount() <= 0) {
+        if (branchTransactionDO.getStatus() < 0
+                && StringUtils.isBlank(branchTransactionDO.getApplicationData())
+                && branchTransactionDO.getRetryCount() < 0) {
             return true;
         }
 
         // sets place holder
         StringBuilder sb = new StringBuilder();
-        if (branchTransactionDO.getStatus() > 0) {
+        if (branchTransactionDO.getStatus() >= 0) {
             sb.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
         }
-        if (StringUtils.isNotEmpty(branchTransactionDO.getApplicationData())) {
+        if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
             sb.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
         }
-        if (branchTransactionDO.getRetryCount() > 0) {
+        if (branchTransactionDO.getRetryCount() >= 0) {
             sb.append(ServerTableColumnsName.BRANCH_TABLE_RETRY_COUNT).append(" = ?, ");
         }
 

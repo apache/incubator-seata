@@ -103,17 +103,17 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
-        if (status != null && status.getCode() > 0) {
+        if (status != null) {
             session.setStatus(status);
         }
-        if (suspendedEndTime > 0) {
+        if (suspendedEndTime >= 0) {
             session.setSuspendedEndTime(suspendedEndTime);
         }
-        if (stoppedReason != null && stoppedReason.getCode() > 0) {
+        if (stoppedReason != null) {
             session.setStoppedReason(stoppedReason);
         }
 
-        //new global session
+        //new global session for update
         GlobalSession updateSession = new GlobalSession();
         updateSession.setXid(session.getXid());
         updateSession.setStatus(status);
@@ -159,17 +159,17 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
-        if (status != null && status.getCode() > 0) {
+        if (status != null) {
             branchSession.setStatus(status);
         }
-        if (StringUtils.isNotEmpty(applicationData)) {
+        if (StringUtils.isNotBlank(applicationData)) {
             branchSession.setApplicationData(applicationData);
         }
-        if (retryCount > 0) {
+        if (retryCount >= 0) {
             branchSession.setRetryCount(retryCount);
         }
 
-        //new branch session
+        //new branch session for update
         BranchSession updateBranchSession = new BranchSession();
         updateBranchSession.setXid(branchSession.getXid());
         updateBranchSession.setBranchId(branchSession.getBranchId());

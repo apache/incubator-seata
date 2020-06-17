@@ -183,6 +183,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void update(GlobalStatus status, long suspendedEndTime, GlobalStoppedReason stoppedReason) throws TransactionException {
+        if (status != null) {
+            this.setStatus(status);
+        }
+        if (suspendedEndTime >= 0) {
+            this.setSuspendedEndTime(suspendedEndTime);
+        }
+        if (stoppedReason != null) {
+            this.setStoppedReason(stoppedReason);
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onUpdate(this, status, suspendedEndTime, stoppedReason);
         }
@@ -201,6 +210,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void updateBranch(BranchSession branchSession, BranchStatus status,
                              String applicationData, int retryCount) throws TransactionException {
+        if (status != null) {
+            branchSession.setStatus(status);
+        }
+        if (StringUtils.isNotBlank(applicationData)) {
+            branchSession.setApplicationData(applicationData);
+        }
+        if (retryCount >= 0) {
+            branchSession.setRetryCount(retryCount);
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchUpdate(this, branchSession, status, applicationData, retryCount);
         }
@@ -658,10 +676,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
-        long suspendedEndTime = byteBuffer.getLong();
-        if (suspendedEndTime > 0) {
-            this.suspendedEndTime = suspendedEndTime;
-        }
+        this.suspendedEndTime = byteBuffer.getLong();
         this.stoppedReason = GlobalStoppedReason.get(byteBuffer.get());
     }
 
