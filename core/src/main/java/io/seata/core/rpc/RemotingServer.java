@@ -15,10 +15,99 @@
  */
 package io.seata.core.rpc;
 
+import io.netty.channel.Channel;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.processor.RemotingProcessor;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
+
 /**
  * The interface Remoting server.
  *
  * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-public interface RemotingServer extends RemotingService {
+public interface RemotingServer {
+
+    /**
+     * Send response.
+     *
+     * @param request the request
+     * @param channel the channel
+     * @param msg     the msg
+     */
+    void sendResponse(RpcMessage request, Channel channel, Object msg);
+
+    /**
+     * Sync call to RM with timeout.
+     *
+     * @param resourceId Resource ID
+     * @param clientId   Client ID
+     * @param message    Request message
+     * @param timeout    timeout of the call
+     * @return Response message
+     * @throws IOException      .
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout)
+        throws IOException, TimeoutException;
+
+    /**
+     * Sync call to RM
+     *
+     * @param resourceId Resource ID
+     * @param clientId   Client ID
+     * @param message    Request message
+     * @return Response message
+     * @throws IOException      .
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException;
+
+    /**
+     * Send request with response object.
+     * send syn request for rm
+     *
+     * @param clientChannel the client channel
+     * @param message       the message
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException;
+
+    /**
+     * Send request with response object.
+     * send syn request for rm
+     *
+     * @param clientChannel the client channel
+     * @param message       the message
+     * @param timeout       the timeout
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException;
+
+    /**
+     * ASync call to RM
+     *
+     * @param channel channel
+     * @param message Request message
+     * @return Response message
+     * @throws IOException      .
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException;
+
+    /**
+     * register processor
+     *
+     * @param messageType {@link io.seata.core.protocol.MessageType}
+     * @param processor   {@link io.seata.core.rpc.processor.RemotingProcessor}
+     * @param executor    thread pool
+     */
+    void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
+
 }
