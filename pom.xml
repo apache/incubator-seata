@@ -124,6 +124,7 @@
         <!-- for jdbc driver when package  -->
         <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
         <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
+        <jackson.version>2.9.9</jackson.version>
     </properties>
 
     <!--test-->

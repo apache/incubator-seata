@@ -22,6 +22,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
@@ -60,5 +64,60 @@ public class StateParserTests {
 
         String outputJson = JSON.toJSONString(parsedObj, SerializerFeature.PrettyFormat);
         System.out.println(outputJson);
+    }
+
+    @Test
+    public void testJackson() throws Exception {
+
+        User user = new User();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.enableDefaultTypingAsProperty(ObjectMapper.DefaultTyping.NON_FINAL, "@type");
+        objectMapper.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
+        String json = objectMapper.writeValueAsString(user);
+        System.out.println(json);
+    }
+
+    public class User {
+
+        private int id=0;
+
+        private String passwd="123456";
+
+        private String name = "name";
+
+        private int age = 100;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getPasswd() {
+            return passwd;
+        }
+
+        public void setPasswd(String passwd) {
+            this.passwd = passwd;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
     }
 }
