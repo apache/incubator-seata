@@ -80,5 +80,7 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
+    public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
+
 
 }
