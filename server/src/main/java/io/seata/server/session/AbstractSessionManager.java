@@ -15,7 +15,6 @@
  */
 package io.seata.server.session;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
