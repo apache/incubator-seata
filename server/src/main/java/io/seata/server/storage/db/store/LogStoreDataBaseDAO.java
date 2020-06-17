@@ -255,13 +255,13 @@ public class LogStoreDataBaseDAO implements LogStore {
 
             //sets
             int i = 1;
-            if (globalTransactionDO.getStatus() > 0) {
+            if (globalTransactionDO.getStatus() >= 0) {
                 ps.setInt(i++, globalTransactionDO.getStatus());
             }
-            if (globalTransactionDO.getSuspendedEndTime() > 0) {
+            if (globalTransactionDO.getSuspendedEndTime() >= 0) {
                 ps.setLong(i++, globalTransactionDO.getSuspendedEndTime());
             }
-            if (globalTransactionDO.getStoppedReason() > 0) {
+            if (globalTransactionDO.getStoppedReason() >= 0) {
                 ps.setInt(i++, globalTransactionDO.getStoppedReason());
             }
             ps.setString(i, globalTransactionDO.getXid());
@@ -409,13 +409,13 @@ public class LogStoreDataBaseDAO implements LogStore {
 
             //sets
             int i = 1;
-            if (branchTransactionDO.getStatus() > 0) {
+            if (branchTransactionDO.getStatus() >= 0) {
                 ps.setInt(i++, branchTransactionDO.getStatus());
             }
-            if (StringUtils.isNotEmpty(branchTransactionDO.getApplicationData())) {
+            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
                 ps.setString(i++, branchTransactionDO.getApplicationData());
             }
-            if (branchTransactionDO.getRetryCount() > 0) {
+            if (branchTransactionDO.getRetryCount() >= 0) {
                 ps.setInt(i++, branchTransactionDO.getRetryCount());
             }
             ps.setString(i++, branchTransactionDO.getXid());
