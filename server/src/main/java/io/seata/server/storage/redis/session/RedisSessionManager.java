@@ -99,15 +99,6 @@ public class RedisSessionManager extends AbstractSessionManager
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        if (status != null) {
-            session.setStatus(status);
-        }
-        if (suspendedEndTime >= 0) {
-            session.setSuspendedEndTime(suspendedEndTime);
-        }
-        if (stoppedReason != null) {
-            session.setStoppedReason(stoppedReason);
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSession failed: xid=" + session.getXid());
@@ -146,15 +137,6 @@ public class RedisSessionManager extends AbstractSessionManager
                                     String applicationData, int retryCount) throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
-        }
-        if (status != null) {
-            branchSession.setStatus(status);
-        }
-        if (StringUtils.isNotBlank(applicationData)) {
-            branchSession.setApplicationData(applicationData);
-        }
-        if (retryCount >= 0) {
-            branchSession.setRetryCount(retryCount);
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession);
         if (!ret) {

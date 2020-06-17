@@ -103,16 +103,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return;
         }
 
-        if (status != null) {
-            session.setStatus(status);
-        }
-        if (suspendedEndTime >= 0) {
-            session.setSuspendedEndTime(suspendedEndTime);
-        }
-        if (stoppedReason != null) {
-            session.setStoppedReason(stoppedReason);
-        }
-
         //new global session for update
         GlobalSession updateSession = new GlobalSession();
         updateSession.setXid(session.getXid());
@@ -157,16 +147,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
                                     String applicationData, int retryCount) throws TransactionException {
         if (StringUtils.isNotBlank(taskName)) {
             return;
-        }
-
-        if (status != null) {
-            branchSession.setStatus(status);
-        }
-        if (StringUtils.isNotBlank(applicationData)) {
-            branchSession.setApplicationData(applicationData);
-        }
-        if (retryCount >= 0) {
-            branchSession.setRetryCount(retryCount);
         }
 
         //new branch session for update
