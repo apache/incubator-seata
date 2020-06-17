@@ -75,6 +75,7 @@
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <commons-pool.version>1.6</commons-pool.version>
         <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
+        <hikari.version>3.4.3</hikari.version>
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
@@ -83,7 +84,8 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <apollo-client.version>1.1.0</apollo-client.version>
-        <redis-clients.version>2.9.0</redis-clients.version>
+        <redis-clients.version>3.2.0</redis-clients.version>
+        <mock-jedis.version>0.1.16</mock-jedis.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.2.0</nacos-client.version>
@@ -304,6 +306,12 @@
                 <version>${redis-clients.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.fppt</groupId>
+                <artifactId>jedis-mock</artifactId>
+                <version>${mock-jedis.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.netflix.eureka</groupId>
                 <artifactId>eureka-client</artifactId>
                 <version>${eureka-clients.version}</version>
@@ -465,6 +473,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-dbcp2</artifactId>
                 <version>${commons-dbcp2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.h2database</groupId>
