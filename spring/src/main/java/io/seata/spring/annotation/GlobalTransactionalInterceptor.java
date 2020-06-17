@@ -46,8 +46,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
-
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.core.constants.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
@@ -73,6 +73,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static volatile Integer reachNum = 0;
     private static ScheduledThreadPoolExecutor executor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
+
+    private static final int GLOBAL_TRANSACTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(
+        ConfigurationKeys.GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
 
     /**
      * Instantiates a new Global transactional interceptor.
@@ -152,7 +155,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 @Override
                 public TransactionInfo getTransactionInfo() {
                     TransactionInfo transactionInfo = new TransactionInfo();
-                    transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
+                    transactionInfo.setTimeOut(globalTrxAnno.timeoutMills() > 0 ?
+                            globalTrxAnno.timeoutMills() : GLOBAL_TRANSACTION_TIMEOUT);
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
