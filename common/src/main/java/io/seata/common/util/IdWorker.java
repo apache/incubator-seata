@@ -156,7 +156,7 @@ public class IdWorker {
         try {
             address = InetAddress.getLocalHost();
         } catch (final UnknownHostException e) {
-            throw new IllegalStateException("Cannot get LocalHost InetAddress, please check your network!");
+            throw new IllegalStateException("Cannot get LocalHost InetAddress, please check your network!",e);
         }
         byte[] ipAddressByteArray = address.getAddress();
         return ((ipAddressByteArray[ipAddressByteArray.length - 2] & 0B11) << Byte.SIZE) + (ipAddressByteArray[ipAddressByteArray.length - 1] & 0xFF);
