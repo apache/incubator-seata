@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.loader.LoadLevel;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.evaluation.EvaluatorFactory;
@@ -32,8 +33,11 @@ import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.seq.SequenceExpression;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
+import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
+import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.utils.ExceptionUtils;
@@ -50,13 +54,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * ServiceTaskHandler Interceptor
+ * StateInterceptor for ServiceTask, SubStateMachine, CompensateState
  *
  * @author lorne.cl
  */
+@LoadLevel(name = "ServiceTask", order = 100)
 public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskHandlerInterceptor.class);
+
+    @Override
+    public boolean match(Class<? extends InterceptableStateHandler> clazz) {
+        return clazz != null &&
+                (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
+                || SubStateMachineHandler.class.isAssignableFrom(clazz));
+    }
 
     private static List<Object> createInputParams(ExpressionFactoryManager expressionFactoryManager,
                                                   StateInstanceImpl stateInstance,

@@ -17,9 +17,11 @@ package io.seata.saga.engine.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.evaluation.exception.ExceptionMatchEvaluatorFactory;
@@ -29,8 +31,14 @@ import io.seata.saga.engine.expression.seq.SequenceExpressionFactory;
 import io.seata.saga.engine.expression.spel.SpringELExpressionFactory;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
 import io.seata.saga.engine.invoker.impl.SpringBeanServiceInvoker;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
+import io.seata.saga.engine.pcext.InterceptableStateRouter;
+import io.seata.saga.engine.pcext.StateHandler;
+import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateMachineProcessHandler;
 import io.seata.saga.engine.pcext.StateMachineProcessRouter;
+import io.seata.saga.engine.pcext.StateRouter;
+import io.seata.saga.engine.pcext.StateRouterInterceptor;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.repo.impl.StateLogRepositoryImpl;
@@ -194,13 +202,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         }
     }
 
-    private ProcessControllerImpl createProcessorController(ProcessCtrlEventPublisher eventPublisher) throws Exception {
+    protected ProcessControllerImpl createProcessorController(ProcessCtrlEventPublisher eventPublisher) throws Exception {
 
         StateMachineProcessRouter stateMachineProcessRouter = new StateMachineProcessRouter();
         stateMachineProcessRouter.initDefaultStateRouters();
+        loadStateRouterInterceptors(stateMachineProcessRouter.getStateRouters());
 
         StateMachineProcessHandler stateMachineProcessHandler = new StateMachineProcessHandler();
         stateMachineProcessHandler.initDefaultHandlers();
+        loadStateHandlerInterceptors(stateMachineProcessHandler.getStateHandlers());
 
         DefaultRouterHandler defaultRouterHandler = new DefaultRouterHandler();
         defaultRouterHandler.setEventPublisher(eventPublisher);
@@ -223,6 +233,42 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         processorController.setBusinessProcessor(customizeBusinessProcessor);
 
         return processorController;
+    }
+
+    protected void loadStateHandlerInterceptors(Map<String, StateHandler> stateHandlerMap) {
+        for (StateHandler stateHandler : stateHandlerMap.values()) {
+            if (stateHandler instanceof InterceptableStateHandler) {
+                InterceptableStateHandler interceptableStateHandler = (InterceptableStateHandler) stateHandler;
+                List<StateHandlerInterceptor> interceptorList = EnhancedServiceLoader.loadAll(StateHandlerInterceptor.class);
+                for (StateHandlerInterceptor interceptor : interceptorList) {
+                    if (interceptor.match(interceptableStateHandler.getClass())) {
+                        interceptableStateHandler.addInterceptor(interceptor);
+                    }
+
+                    if (interceptor instanceof ApplicationContextAware) {
+                        ((ApplicationContextAware) interceptor).setApplicationContext(getApplicationContext());
+                    }
+                }
+            }
+        }
+    }
+
+    protected void loadStateRouterInterceptors(Map<String, StateRouter> stateRouterMap) {
+        for (StateRouter stateRouter : stateRouterMap.values()) {
+            if (stateRouter instanceof InterceptableStateRouter) {
+                InterceptableStateRouter interceptableStateRouter = (InterceptableStateRouter) stateRouter;
+                List<StateRouterInterceptor> interceptorList = EnhancedServiceLoader.loadAll(StateRouterInterceptor.class);
+                for (StateRouterInterceptor interceptor : interceptorList) {
+                    if (interceptor.match(interceptableStateRouter.getClass())) {
+                        interceptableStateRouter.addInterceptor(interceptor);
+                    }
+
+                    if (interceptor instanceof ApplicationContextAware) {
+                        ((ApplicationContextAware) interceptor).setApplicationContext(getApplicationContext());
+                    }
+                }
+            }
+        }
     }
 
     @Override

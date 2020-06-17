@@ -28,4 +28,6 @@ public interface StateHandlerInterceptor {
     void preProcess(ProcessContext context) throws EngineExecutionException;
 
     void postProcess(ProcessContext context, Exception e) throws EngineExecutionException;
+
+    boolean match(Class<? extends InterceptableStateHandler> clazz);
 }
