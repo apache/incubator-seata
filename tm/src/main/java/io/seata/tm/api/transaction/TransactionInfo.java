@@ -16,7 +16,6 @@
 package io.seata.tm.api.transaction;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.constants.DefaultValues;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -25,8 +24,6 @@ import java.util.Set;
  * @author guoyao
  */
 public final class TransactionInfo implements Serializable {
-
-    public static final int DEFAULT_TIME_OUT = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 
     private int timeOut;
 
