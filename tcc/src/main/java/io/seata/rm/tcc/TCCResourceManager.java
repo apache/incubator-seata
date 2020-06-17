@@ -96,17 +96,9 @@ public class TCCResourceManager extends AbstractResourceManager {
                 applicationData);
             Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
             LOGGER.info("TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
-            boolean result = false;
+            boolean result;
             if (ret != null) {
-                if (ret instanceof BranchStatus) {
-                    if (ret == BranchStatus.PhaseTwo_Committed
-                            || ret == BranchStatus.PhaseTwo_CommitFailed_Retryable
-                            || ret == BranchStatus.PhaseTwo_CommitFailed_Unretryable) {
-                        return (BranchStatus)ret;
-                    } else {
-                        LOGGER.warn("TCC resource commit result error, it's not allowed to be returned this branch status: " + ret);
-                    }
-                } else if (ret instanceof TwoPhaseResult) {
+                if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult)ret).isSuccess();
                 } else {
                     result = (boolean)ret;
@@ -151,17 +143,9 @@ public class TCCResourceManager extends AbstractResourceManager {
                 applicationData);
             Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
             LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
-            boolean result = false;
+            boolean result;
             if (ret != null) {
-                if (ret instanceof BranchStatus) {
-                    if (ret == BranchStatus.PhaseTwo_Rollbacked
-                            || ret == BranchStatus.PhaseTwo_RollbackFailed_Retryable
-                            || ret == BranchStatus.PhaseTwo_RollbackFailed_Unretryable) {
-                        return (BranchStatus)ret;
-                    } else {
-                        LOGGER.warn("TCC resource rollback result error, it's not allowed to be returned this branch status: " + ret);
-                    }
-                } else if (ret instanceof TwoPhaseResult) {
+                if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult)ret).isSuccess();
                 } else {
                     result = (boolean)ret;
