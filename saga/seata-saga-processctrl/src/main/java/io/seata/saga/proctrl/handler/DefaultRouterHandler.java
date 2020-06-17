@@ -68,9 +68,7 @@ public class DefaultRouterHandler implements RouterHandler {
 
             Instruction instruction = processRouter.route(context);
             if (instruction == null) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("route instruction is null, process end");
-                }
+                LOGGER.info("route instruction is null, process end");
             } else {
                 context.setInstruction(instruction);
 
