@@ -20,7 +20,10 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
+import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
+import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -34,10 +37,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-@LoadLevel(name = "InSagaBranch", order = 90)
+@LoadLevel(name = "InSagaBranch", order = 50)
 public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InSagaBranchHandlerInterceptor.class);
+
+    @Override
+    public boolean match(Class<? extends InterceptableStateHandler> clazz) {
+        return clazz != null &&
+                (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
+                        || SubStateMachineHandler.class.isAssignableFrom(clazz));
+    }
 
     @Override
     public void preProcess(ProcessContext context) throws EngineExecutionException {
