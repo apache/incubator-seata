@@ -22,7 +22,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -45,7 +45,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class DefaultCoreTest {
 
     private static DefaultCore core;
-    private static ServerMessageSender serverMessageSender;
+    private static RemotingServer remotingServer;
 
     private static final String applicationId = "demo-child-app";
 
@@ -75,8 +75,8 @@ public class DefaultCoreTest {
     @BeforeAll
     public static void initSessionManager() throws Exception {
         SessionHolder.init(null);
-        serverMessageSender = new DefaultCoordinatorTest.MockServerMessageSender();
-        core = new DefaultCore(serverMessageSender);
+        remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
+        core = new DefaultCore(remotingServer);
     }
 
     /**
