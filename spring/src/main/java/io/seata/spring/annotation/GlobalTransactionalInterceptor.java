@@ -74,8 +74,32 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static ScheduledThreadPoolExecutor executor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
 
-    private static final int GLOBAL_TRANSACTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+    //region GLOBAL_TRANSACTION_TIMEOUT
+
+    private static int GLOBAL_TRANSACTION_TIMEOUT;
+    private static int MIN_GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT / 2;
+
+    static {
+        try {
+            GLOBAL_TRANSACTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(
+                    ConfigurationKeys.GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+        } catch (Exception e) {
+            LOGGER.error("Illegal global transaction timeout value: " + e.getMessage());
+            GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+        }
+
+        if (GLOBAL_TRANSACTION_TIMEOUT <= 0) {
+            LOGGER.warn("Global transaction timeout value '{}' is illegal, and has been reset to the default value '{}'",
+                GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+            GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+        } else if (GLOBAL_TRANSACTION_TIMEOUT < MIN_GLOBAL_TRANSACTION_TIMEOUT) {
+            LOGGER.warn("Global transaction timeout value '{}' is too small, and has been reset to the min value '{}'",
+                    GLOBAL_TRANSACTION_TIMEOUT, MIN_GLOBAL_TRANSACTION_TIMEOUT);
+            GLOBAL_TRANSACTION_TIMEOUT = MIN_GLOBAL_TRANSACTION_TIMEOUT;
+        }
+    }
+
+    //endregion
 
     /**
      * Instantiates a new Global transactional interceptor.
@@ -154,9 +178,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
                 @Override
                 public TransactionInfo getTransactionInfo() {
+                    //normalization the value of timeout
                     int timeout = globalTrxAnno.timeoutMills();
                     if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
                         timeout = GLOBAL_TRANSACTION_TIMEOUT;
+                    } else {
+                        timeout = Math.max(timeout, MIN_GLOBAL_TRANSACTION_TIMEOUT);
                     }
 
                     TransactionInfo transactionInfo = new TransactionInfo();
