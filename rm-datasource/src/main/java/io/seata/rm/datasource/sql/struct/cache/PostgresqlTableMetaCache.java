@@ -125,10 +125,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setColumnDef(rsColumns.getString("COLUMN_DEF"));
                 col.setSqlDataType(rsColumns.getInt("SQL_DATA_TYPE"));
                 col.setSqlDatetimeSub(rsColumns.getInt("SQL_DATETIME_SUB"));
-                /*
-                 * For Seata's compatibility with charoctetlength of PostgreSQL, change columnmeta to generic
-                 * Solve the driver compatibility problem of PostgreSQL
-                 */
                 col.setCharOctetLength(rsColumns.getString("CHAR_OCTET_LENGTH"));
                 col.setCharOctetLength(rsColumns.getString("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
@@ -182,5 +178,4 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
         return tm;
     }
-
 }
