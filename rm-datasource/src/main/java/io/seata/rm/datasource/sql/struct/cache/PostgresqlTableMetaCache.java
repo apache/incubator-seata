@@ -110,7 +110,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
-                ColumnMeta<String> col = new ColumnMeta<>();
+                ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
                 col.setTableSchemaName(rsColumns.getString("TABLE_SCHEM"));
                 col.setTableName(rsColumns.getString("TABLE_NAME"));

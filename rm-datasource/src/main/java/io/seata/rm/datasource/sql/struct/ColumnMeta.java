@@ -22,7 +22,7 @@ import java.util.Objects;
  *
  * @author sharajava
  */
-public class ColumnMeta<T> {
+public class ColumnMeta {
     private String tableCat;
     private String tableSchemaName;
     private String tableName;
@@ -37,7 +37,7 @@ public class ColumnMeta<T> {
     private String columnDef;
     private int sqlDataType;
     private int sqlDatetimeSub;
-    private T charOctetLength;
+    private Object charOctetLength;
     private int ordinalPosition;
     private String isNullAble;
     private String isAutoincrement;
@@ -337,7 +337,7 @@ public class ColumnMeta<T> {
      *
      * @return the char octet length
      */
-    public T getCharOctetLength() {
+    public Object getCharOctetLength() {
         return charOctetLength;
     }
 
@@ -346,7 +346,7 @@ public class ColumnMeta<T> {
      *
      * @param charOctetLength the char octet length
      */
-    public void setCharOctetLength(T charOctetLength) {
+    public void setCharOctetLength(Object charOctetLength) {
         this.charOctetLength = charOctetLength;
     }
 
