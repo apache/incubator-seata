@@ -33,8 +33,9 @@ public class SystemPropertyLoggerContextListener extends ContextAwareBase implem
 
     @Override
     public void start() {
-        if (started)
+        if (started) {
             return;
+        }
 
         Context context = getContext();
         context.putProperty("PORT", System.getProperty(ConfigurationKeys.SERVER_PORT));
