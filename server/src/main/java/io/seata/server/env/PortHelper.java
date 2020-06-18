@@ -17,7 +17,7 @@ package io.seata.server.env;
 
 import io.seata.common.util.NumberUtils;
 
-import static io.seata.server.ParameterParser.SERVER_DEFAULT_PORT;
+import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
  * @author wang.liang
