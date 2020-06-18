@@ -37,7 +37,7 @@ public class ColumnMeta {
     private String columnDef;
     private int sqlDataType;
     private int sqlDatetimeSub;
-    private String charOctetLength;
+    private Object charOctetLength;
     private int ordinalPosition;
     private String isNullAble;
     private String isAutoincrement;
@@ -337,7 +337,7 @@ public class ColumnMeta {
      *
      * @return the char octet length
      */
-    public String getCharOctetLength() {
+    public Object getCharOctetLength() {
         return charOctetLength;
     }
 
@@ -346,7 +346,7 @@ public class ColumnMeta {
      *
      * @param charOctetLength the char octet length
      */
-    public void setCharOctetLength(String charOctetLength) {
+    public void setCharOctetLength(Object charOctetLength) {
         this.charOctetLength = charOctetLength;
     }
 
