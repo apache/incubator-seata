@@ -18,11 +18,13 @@ package io.seata.saga.engine.pcext;
 import java.util.List;
 
 /**
- * Interceptible State Router
+ * Interceptible State Handler
  *
  * @author lorne.cl
  */
-public interface InterceptibleStateRouter extends StateRouter {
+public interface InterceptableStateHandler extends StateHandler {
 
-    List<StateRouterInterceptor> getInterceptors();
+    List<StateHandlerInterceptor> getInterceptors();
+
+    void addInterceptor(StateHandlerInterceptor interceptor);
 }
