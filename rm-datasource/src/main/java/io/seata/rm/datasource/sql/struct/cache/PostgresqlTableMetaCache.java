@@ -110,7 +110,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
-                ColumnMetaForPostgresql col = new ColumnMetaForPostgresql();
+                ColumnMeta<String> col = new ColumnMeta<>();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
                 col.setTableSchemaName(rsColumns.getString("TABLE_SCHEM"));
                 col.setTableName(rsColumns.getString("TABLE_NAME"));
@@ -128,9 +128,10 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 /**
                  * @author yanyujie
                  * @date 2020年6月18日09:24:191
-                 * 将charOctetLength这个字段int改为String  解决postgresql的驱动兼容性问题
+                 * 为了seata兼容postgresql的charOctetLength这个字段将ColumnMeta改为泛型
+                 * 解决postgresql的驱动兼容性问题
                  */
-                col.setCharOctetLengthTopg(rsColumns.getString("CHAR_OCTET_LENGTH"));
+                col.setCharOctetLength(rsColumns.getString("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
@@ -182,4 +183,5 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
         return tm;
     }
+
 }
