@@ -128,8 +128,8 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 /**
                  * @author yanyujie
                  * @date 2020年6月18日09:24:191
-                 * 为了seata兼容postgresql的charOctetLength这个字段将ColumnMeta改为泛型
-                 * 解决postgresql的驱动兼容性问题
+                 * For Seata's compatibility with charoctetlength of PostgreSQL, change columnmeta to generic
+                 * Solve the driver compatibility problem of PostgreSQL
                  */
                 col.setCharOctetLength(rsColumns.getString("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
