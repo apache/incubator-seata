@@ -22,10 +22,7 @@ import java.sql.SQLException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.*;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -113,7 +110,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
-                ColumnMeta col = new ColumnMeta();
+                ColumnMetaForPostgresql col = new ColumnMetaForPostgresql();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
                 col.setTableSchemaName(rsColumns.getString("TABLE_SCHEM"));
                 col.setTableName(rsColumns.getString("TABLE_NAME"));
@@ -128,7 +125,12 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setColumnDef(rsColumns.getString("COLUMN_DEF"));
                 col.setSqlDataType(rsColumns.getInt("SQL_DATA_TYPE"));
                 col.setSqlDatetimeSub(rsColumns.getInt("SQL_DATETIME_SUB"));
-                col.setCharOctetLength(rsColumns.getInt("CHAR_OCTET_LENGTH"));
+                /**
+                 * @author yanyujie
+                 * @date 2020年6月18日09:24:191
+                 * 将charOctetLength这个字段int改为String  解决postgresql的驱动兼容性问题
+                 */
+                col.setCharOctetLengthTopg(rsColumns.getString("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
