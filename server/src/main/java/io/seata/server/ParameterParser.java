@@ -23,9 +23,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
+import static io.seata.core.constants.DefaultValues.*;
 
 /**
  * The type Parameter parser.
@@ -36,10 +35,6 @@ public class ParameterParser {
 
     private static final String PROGRAM_NAME
         = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
-
-    public static final int SERVER_DEFAULT_PORT = 8091;
-    public static final String SERVER_DEFAULT_STORE_MODE = "file";
-    public static final Long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
     @Parameter(names = "--help", help = true)
     private boolean help;
