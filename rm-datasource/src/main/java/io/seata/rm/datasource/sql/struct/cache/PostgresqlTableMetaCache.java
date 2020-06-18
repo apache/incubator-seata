@@ -126,8 +126,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setSqlDataType(rsColumns.getInt("SQL_DATA_TYPE"));
                 col.setSqlDatetimeSub(rsColumns.getInt("SQL_DATETIME_SUB"));
                 /**
-                 * @author yanyujie
-                 * @date 2020年6月18日09:24:191
                  * For Seata's compatibility with charoctetlength of PostgreSQL, change columnmeta to generic
                  * Solve the driver compatibility problem of PostgreSQL
                  */
