@@ -87,6 +87,7 @@ public class ParameterParser {
         } catch (ParameterException e) {
             printError(e);
         }
+
     }
 
     private void printError(ParameterException e) {
