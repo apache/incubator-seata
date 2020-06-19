@@ -137,7 +137,7 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
 
             context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
-            ServiceTaskStateHandler.handleException(context, subStateMachine, e);
+            EngineUtils.handleException(context, subStateMachine, e);
         }
     }
 

@@ -196,7 +196,9 @@ public class DesignerJsonTransformer {
 
         for (Object node : nodes) {
             JSONObject nodeObj = (JSONObject) node;
-            if (catchNode != nodeObj && "ServiceTask".equals(nodeObj.get("stateType"))) {
+            if (catchNode != nodeObj &&
+                    ("ServiceTask".equals(nodeObj.get("stateType"))
+                            || "ScriptTask".equals(nodeObj.get("stateType")))) {
 
                 int nodeX = nodeObj.getInteger("x");
                 int nodeY = nodeObj.getInteger("y");
