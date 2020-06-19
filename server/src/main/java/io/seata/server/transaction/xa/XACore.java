@@ -18,7 +18,7 @@ package io.seata.server.transaction.xa;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.coordinator.AbstractCore;
 
 /**
@@ -28,8 +28,8 @@ import io.seata.server.coordinator.AbstractCore;
  */
 public class XACore extends AbstractCore {
 
-    public XACore(ServerMessageSender messageSender) {
-        super(messageSender);
+    public XACore(RemotingServer remotingServer) {
+        super(remotingServer);
     }
 
     @Override
