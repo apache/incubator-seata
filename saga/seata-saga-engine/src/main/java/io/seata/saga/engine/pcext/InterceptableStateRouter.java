@@ -15,19 +15,16 @@
  */
 package io.seata.saga.engine.pcext;
 
-import io.seata.saga.engine.exception.EngineExecutionException;
-import io.seata.saga.proctrl.ProcessContext;
+import java.util.List;
 
 /**
- * StateHandler Interceptor
+ * Interceptable State Router
  *
  * @author lorne.cl
  */
-public interface StateHandlerInterceptor {
+public interface InterceptableStateRouter extends StateRouter {
 
-    void preProcess(ProcessContext context) throws EngineExecutionException;
+    List<StateRouterInterceptor> getInterceptors();
 
-    void postProcess(ProcessContext context, Exception e) throws EngineExecutionException;
-
-    boolean match(Class<? extends InterceptableStateHandler> clazz);
+    void addInterceptor(StateRouterInterceptor interceptor);
 }
