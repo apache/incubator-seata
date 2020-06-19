@@ -39,33 +39,33 @@ public class TransactionHookManagerTest {
 
     @Test
     public void testRegisterHook() {
-        TransactionHookAdapter transactionHookAdapter = new TransactionHookAdapter();
-        TransactionHookAdapter transactionHookAdapter2 = new TransactionHookAdapter();
-        TransactionHookManager.registerLocalHook(transactionHookAdapter);
-        TransactionHookManager.registerGlobalHook(transactionHookAdapter2);
+        TransactionHook transactionHook = new TransactionHook() {};
+        TransactionHook transactionHook2 = new TransactionHook() {};
+        TransactionHookManager.registerLocalHook(transactionHook);
+        TransactionHookManager.registerGlobalHook(transactionHook2);
         List<TransactionHook> hooks = TransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
-        assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter2);
-        assertThat(hooks.get(1)).isEqualTo(transactionHookAdapter);
+        assertThat(hooks.get(0)).isEqualTo(transactionHook2);
+        assertThat(hooks.get(1)).isEqualTo(transactionHook);
     }
 
     @Test
     public void testGetGlobalHooks() {
         assertThat(TransactionHookManager.getGlobalHooks()).isEmpty();
-        TransactionHookManager.registerGlobalHook(new TransactionHookAdapter());
+        TransactionHookManager.registerGlobalHook(new TransactionHook() {});
         assertThat(TransactionHookManager.getGlobalHooks()).isNotEmpty();
     }
 
     @Test
     public void testGetHooks() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
-        TransactionHookManager.registerLocalHook(new TransactionHookAdapter());
+        TransactionHookManager.registerLocalHook(new TransactionHook() {});
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
     }
 
     @Test
     public void testTriggerHooks() {
-        TransactionHook transactionHook = new TransactionHookAdapter();
+        TransactionHook transactionHook = new TransactionHook() {};
         TransactionHookManager.registerLocalHook(transactionHook);
 
         RootContext.bind(DEFAULT_XID);
@@ -86,7 +86,7 @@ public class TransactionHookManagerTest {
     @Test
     public void testClear() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
-        TransactionHookManager.registerLocalHook(new TransactionHookAdapter());
+        TransactionHookManager.registerLocalHook(new TransactionHook() {});
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
