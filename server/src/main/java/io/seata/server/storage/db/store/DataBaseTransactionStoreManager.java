@@ -35,8 +35,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
-import io.seata.core.store.db.DataSourceGenerator;
-import io.seata.server.UUIDGenerator;
+import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -95,8 +94,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
-        DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
-        DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
+        DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         logStore = new LogStoreDataBaseDAO(logStoreDataSource);
     }
 
@@ -216,12 +214,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             return readSession(sessionCondition.getStatuses());
         }
         return null;
-    }
-
-    @Override
-    public long getCurrentMaxSessionId() {
-        //check max transId or branchId
-        return logStore.getCurrentMaxSessionId(UUIDGenerator.getMaxUUID(), UUIDGenerator.getInitUUID());
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,

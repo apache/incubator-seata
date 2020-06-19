@@ -17,7 +17,6 @@ package io.seata.server.coordinator;
 
 import io.netty.channel.Channel;
 import io.seata.common.XID;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
@@ -32,19 +31,11 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -56,6 +47,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
+
 import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
@@ -64,7 +66,7 @@ import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_D
  * @author leizhiyuan
  */
 public class DefaultCoordinatorTest {
-    private static ServerMessageSender serverMessageSender;
+    private static RemotingServer remotingServer;
     private static DefaultCoordinator defaultCoordinator;
 
     private static final String applicationId = "demo-child-app";
@@ -95,9 +97,9 @@ public class DefaultCoordinatorTest {
     @BeforeAll
     public static void beforeClass() throws Exception {
         XID.setIpAddress(NetUtil.getLocalIp());
-        serverMessageSender = new MockServerMessageSender();
-        defaultCoordinator = new DefaultCoordinator(serverMessageSender);
-        core = new DefaultCore(serverMessageSender);
+        RemotingServer remotingServer = new MockServerMessageSender();
+        defaultCoordinator = new DefaultCoordinator(remotingServer);
+        core = new DefaultCore(remotingServer);
     }
 
     @BeforeEach
@@ -158,7 +160,7 @@ public class DefaultCoordinatorTest {
 
     @Test
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
-        defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
@@ -185,7 +187,7 @@ public class DefaultCoordinatorTest {
     @Test
     public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
         NoSuchFieldException, IllegalAccessException {
-        defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
@@ -255,7 +257,7 @@ public class DefaultCoordinatorTest {
     }
 
 
-    public static class MockServerMessageSender implements ServerMessageSender {
+    public static class MockServerMessageSender implements RemotingServer {
 
         @Override
         public void sendResponse(RpcMessage request, Channel channel, Object msg) {
@@ -297,6 +299,11 @@ public class DefaultCoordinatorTest {
         @Override
         public Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException {
             return null;
+        }
+
+        @Override
+        public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
+
         }
     }
 }
