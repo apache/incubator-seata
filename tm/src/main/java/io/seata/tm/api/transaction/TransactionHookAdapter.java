@@ -18,40 +18,40 @@ package io.seata.tm.api.transaction;
 /**
  * @author guoyao
  */
-public interface TransactionHook {
+public class TransactionHookAdapter implements TransactionHook {
 
-    /**
-     * before tx begin
-     */
-    void beforeBegin();
+    @Override
+    public void beforeBegin() {
 
-    /**
-     * after tx begin
-     */
-    void afterBegin();
+    }
 
-    /**
-     * before tx commit
-     */
-    void beforeCommit();
+    @Override
+    public void afterBegin() {
 
-    /**
-     * after tx commit
-     */
-    void afterCommit();
+    }
 
-    /**
-     * before tx rollback
-     */
-    void beforeRollback();
+    @Override
+    public void beforeCommit() {
 
-    /**
-     * after tx rollback
-     */
-    void afterRollback();
+    }
 
-    /**
-     * after tx all Completed
-     */
-    void afterCompletion();
+    @Override
+    public void afterCommit() {
+
+    }
+
+    @Override
+    public void beforeRollback() {
+
+    }
+
+    @Override
+    public void afterRollback() {
+
+    }
+
+    @Override
+    public void afterCompletion() {
+
+    }
 }
