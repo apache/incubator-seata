@@ -235,6 +235,11 @@ public class ConfigurationKeys {
     public static final String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
+     * The constant SERVER_PORT.
+     */
+    public static final String SERVER_PORT = SERVER_PREFIX + "port";
+
+    /**
      * The constant RECOVERY_PREFIX.
      */
     public static final String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";

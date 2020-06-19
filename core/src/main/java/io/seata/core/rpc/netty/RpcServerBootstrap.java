@@ -152,7 +152,7 @@ public class RpcServerBootstrap implements RemotingBootstrap {
 
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
-            LOGGER.info("Server started ... ");
+            LOGGER.info("Server started, listen port: {}", listenPort);
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
             future.channel().closeFuture().sync();
