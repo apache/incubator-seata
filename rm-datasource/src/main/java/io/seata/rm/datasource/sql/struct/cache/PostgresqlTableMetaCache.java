@@ -128,7 +128,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setColumnDef(rsColumns.getString("COLUMN_DEF"));
                 col.setSqlDataType(rsColumns.getInt("SQL_DATA_TYPE"));
                 col.setSqlDatetimeSub(rsColumns.getInt("SQL_DATETIME_SUB"));
-                col.setCharOctetLength(rsColumns.getString("CHAR_OCTET_LENGTH"));
+                col.setCharOctetLength(rsColumns.getObject("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
