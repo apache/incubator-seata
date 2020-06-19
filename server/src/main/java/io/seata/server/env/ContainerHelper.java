@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_NODE;
 import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
