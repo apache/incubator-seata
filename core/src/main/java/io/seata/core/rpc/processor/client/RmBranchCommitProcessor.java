@@ -16,9 +16,7 @@
 package io.seata.core.rpc.processor.client;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
