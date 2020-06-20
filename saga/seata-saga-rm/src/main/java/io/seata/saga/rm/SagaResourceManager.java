@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SagaResourceManager extends AbstractResourceManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SagaResourceManager.cla【ss);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SagaResourceManager.class);
 
     /**
      * Saga resource cache
