@@ -76,27 +76,28 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     //region GLOBAL_TRANSACTION_TIMEOUT
 
-    private static int GLOBAL_TRANSACTION_TIMEOUT;
-    private static int MIN_GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT / 2;
+    private static final int GLOBAL_TRANSACTION_TIMEOUT;
+    private static final int MIN_GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT / 2;
 
     static {
+        int globalTransactionTimeout;
         try {
-            GLOBAL_TRANSACTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(
+            globalTransactionTimeout = ConfigurationFactory.getInstance().getInt(
                     ConfigurationKeys.GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
         } catch (Exception e) {
             LOGGER.error("Illegal global transaction timeout value: " + e.getMessage());
-            GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+            globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
         }
-
-        if (GLOBAL_TRANSACTION_TIMEOUT <= 0) {
+        if (globalTransactionTimeout <= 0) {
             LOGGER.warn("Global transaction timeout value '{}' is illegal, and has been reset to the default value '{}'",
-                GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
-            GLOBAL_TRANSACTION_TIMEOUT = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
-        } else if (GLOBAL_TRANSACTION_TIMEOUT < MIN_GLOBAL_TRANSACTION_TIMEOUT) {
+                globalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+            globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+        } else if (globalTransactionTimeout < MIN_GLOBAL_TRANSACTION_TIMEOUT) {
             LOGGER.warn("Global transaction timeout value '{}' is too small, and has been reset to the min value '{}'",
-                    GLOBAL_TRANSACTION_TIMEOUT, MIN_GLOBAL_TRANSACTION_TIMEOUT);
-            GLOBAL_TRANSACTION_TIMEOUT = MIN_GLOBAL_TRANSACTION_TIMEOUT;
+                    globalTransactionTimeout, MIN_GLOBAL_TRANSACTION_TIMEOUT);
+            globalTransactionTimeout = MIN_GLOBAL_TRANSACTION_TIMEOUT;
         }
+        GLOBAL_TRANSACTION_TIMEOUT = globalTransactionTimeout;
     }
 
     //endregion
