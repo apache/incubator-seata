@@ -24,10 +24,10 @@ import io.seata.core.model.GlobalStatus;
  */
 public class SessionCondition {
     private Long transactionId;
-    private String xid;
-    private GlobalStatus status;
     private GlobalStatus[] statuses;
-    private long overTimeAliveMills;
+    private Long overTimeAliveMills;
+    private GlobalTableSortField sortField;
+    private SortOrder sortOrder;
 
     /**
      * Instantiates a new Session condition.
@@ -38,19 +38,9 @@ public class SessionCondition {
     /**
      * Instantiates a new Session condition.
      *
-     * @param xid the xid
-     */
-    public SessionCondition(String xid) {
-        this.xid = xid;
-    }
-
-    /**
-     * Instantiates a new Session condition.
-     *
      * @param status the status
      */
     public SessionCondition(GlobalStatus status) {
-        this.status = status;
         statuses = new GlobalStatus[] {status};
     }
 
@@ -72,42 +62,6 @@ public class SessionCondition {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
-    /**
-     * Gets status.
-     *
-     * @return the status
-     */
-    public GlobalStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Sets status.
-     *
-     * @param status the status
-     */
-    public void setStatus(GlobalStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * Gets over time alive mills.
-     *
-     * @return the over time alive mills
-     */
-    public long getOverTimeAliveMills() {
-        return overTimeAliveMills;
-    }
-
-    /**
-     * Sets over time alive mills.
-     *
-     * @param overTimeAliveMills the over time alive mills
-     */
-    public void setOverTimeAliveMills(long overTimeAliveMills) {
-        this.overTimeAliveMills = overTimeAliveMills;
-    }
-
     public Long getTransactionId() {
         return transactionId;
     }
@@ -116,19 +70,35 @@ public class SessionCondition {
         this.transactionId = transactionId;
     }
 
-    public String getXid() {
-        return xid;
-    }
-
-    public void setXid(String xid) {
-        this.xid = xid;
-    }
-
     public GlobalStatus[] getStatuses() {
         return statuses;
     }
 
     public void setStatuses(GlobalStatus[] statuses) {
         this.statuses = statuses;
+    }
+
+    public Long getOverTimeAliveMills() {
+        return overTimeAliveMills;
+    }
+
+    public void setOverTimeAliveMills(Long overTimeAliveMills) {
+        this.overTimeAliveMills = overTimeAliveMills;
+    }
+
+    public GlobalTableSortField getSortField() {
+        return sortField;
+    }
+
+    public void setSortField(GlobalTableSortField sortField) {
+        this.sortField = sortField;
+    }
+
+    public SortOrder getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(SortOrder sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }

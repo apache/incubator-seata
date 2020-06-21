@@ -39,21 +39,23 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     void addGlobalSession(GlobalSession session) throws TransactionException;
 
     /**
-     * Find global session global session.
+     * Get global session global session.
      *
      * @param xid the xid
      * @return the global session
      */
-    GlobalSession findGlobalSession(String xid) ;
+    default GlobalSession getGlobalSession(String xid) {
+        return getGlobalSession(xid, true);
+    }
 
     /**
-     * Find global session global session.
+     * Get global session global session.
      *
      * @param xid the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
-    GlobalSession findGlobalSession(String xid, boolean withBranchSessions);
+    GlobalSession getGlobalSession(String xid, boolean withBranchSessions);
 
     /**
      * Update global session.

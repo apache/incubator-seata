@@ -78,7 +78,7 @@ public class FileSessionManagerTest {
     public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
-            GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
+            GlobalSession expected = sessionManager.getGlobalSession(globalSession.getXid());
             Assertions.assertNotNull(expected);
             Assertions.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
             Assertions.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
@@ -102,7 +102,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             sessionManager.updateGlobalSession(globalSession, GlobalStatus.Finished);
-            GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
+            GlobalSession expected = sessionManager.getGlobalSession(globalSession.getXid());
             Assertions.assertNotNull(expected);
             Assertions.assertEquals(GlobalStatus.Finished, expected.getStatus());
             sessionManager.removeGlobalSession(globalSession);
@@ -121,7 +121,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             sessionManager.removeGlobalSession(globalSession);
-            GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
+            GlobalSession expected = sessionManager.getGlobalSession(globalSession.getXid());
             Assertions.assertNull(expected);
         }
     }

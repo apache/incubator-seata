@@ -260,7 +260,7 @@ public class SessionHolder {
      * @return the global session
      */
     public static GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
-        return getRootSessionManager().findGlobalSession(xid, withBranchSessions);
+        return getRootSessionManager().getGlobalSession(xid, withBranchSessions);
     }
 
     /**

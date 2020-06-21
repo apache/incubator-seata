@@ -193,7 +193,7 @@ public class SessionStoreTest {
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
             GlobalSession sessionInAsyncCommittingQueue = SessionHolder.getAsyncCommittingSessionManager()
-                    .findGlobalSession(globalSession.getXid());
+                    .getGlobalSession(globalSession.getXid());
             Assertions.assertTrue(reloadSession == sessionInAsyncCommittingQueue);
 
             // No locking for session in AsyncCommitting status
@@ -251,7 +251,7 @@ public class SessionStoreTest {
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.CommitRetrying);
 
             GlobalSession sessionInRetryCommittingQueue = SessionHolder.getRetryCommittingSessionManager()
-                    .findGlobalSession(globalSession.getXid());
+                    .getGlobalSession(globalSession.getXid());
             Assertions.assertTrue(reloadSession == sessionInRetryCommittingQueue);
             BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
             Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
@@ -312,7 +312,7 @@ public class SessionStoreTest {
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.RollbackRetrying);
 
             GlobalSession sessionInRetryRollbackingQueue = SessionHolder.getRetryRollbackingSessionManager()
-                    .findGlobalSession(globalSession.getXid());
+                    .getGlobalSession(globalSession.getXid());
             Assertions.assertTrue(reloadSession == sessionInRetryRollbackingQueue);
             BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
             Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_RollbackFailed_Retryable);

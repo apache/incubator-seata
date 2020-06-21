@@ -238,7 +238,7 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        GlobalSession globalSession_db = sessionManager.findGlobalSession(session.getXid());
+        GlobalSession globalSession_db = sessionManager.getGlobalSession(session.getXid());
         Assertions.assertNotNull(globalSession_db);
 
         Assertions.assertEquals(globalSession_db.getTransactionId(), session.getTransactionId());
@@ -582,7 +582,7 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        GlobalSession globalSession_db = sessionManager.findGlobalSession(session.getXid());
+        GlobalSession globalSession_db = sessionManager.getGlobalSession(session.getXid());
         Assertions.assertNotNull(globalSession_db);
 
         Assertions.assertEquals(globalSession_db.getTransactionName(), finalTxName);
