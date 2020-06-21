@@ -16,6 +16,7 @@
 package io.seata.core.store;
 
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.GlobalStatus;
 
 import java.util.Date;
 
@@ -30,7 +31,7 @@ public class GlobalTransactionDO {
 
     private long transactionId;
 
-    private int status;
+    private int status = GlobalStatus.UnKnown.getCode();
 
     private String applicationId;
 
