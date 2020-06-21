@@ -121,21 +121,16 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return methodInvocation.proceed();
     }
 
-    /**
-     * auto upgrade service detection
-     */
-    private static void startDegradeCheck() {
-        executor.scheduleAtFixedRate(() -> {
-            if (degradeCheck) {
-                try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
-                    TransactionManagerHolder.get().commit(xid);
-                    onDegradeCheck(true);
-                } catch (Exception e) {
-                    onDegradeCheck(false);
-                }
+    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
+        return globalLockTemplate.execute(() -> {
+            try {
+                return methodInvocation.proceed();
+            } catch (Exception e) {
+                throw e;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
-        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
+        });
     }
 
     private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
@@ -241,16 +236,21 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
-        return globalLockTemplate.execute(() -> {
-            try {
-                return methodInvocation.proceed();
-            } catch (Exception e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
+    /**
+     * auto upgrade service detection
+     */
+    private static void startDegradeCheck() {
+        executor.scheduleAtFixedRate(() -> {
+            if (degradeCheck) {
+                try {
+                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
+                    TransactionManagerHolder.get().commit(xid);
+                    onDegradeCheck(true);
+                } catch (Exception e) {
+                    onDegradeCheck(false);
+                }
             }
-        });
+        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
 
     private static synchronized void onDegradeCheck(boolean succeed) {
