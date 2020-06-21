@@ -13,16 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.pcext;
-
-import java.util.List;
+package io.seata.server.logging.logback.ansi;
 
 /**
- * Interceptible State Handler
+ * An ANSI encodable element.
  *
- * @author lorne.cl
+ * @author Phillip Webb
+ * @origin Copied from spring-boot.jar by wang.liang
  */
-public interface InterceptibleStateHandler extends StateHandler {
+public interface AnsiElement {
 
-    List<StateHandlerInterceptor> getInterceptors();
+    /**
+     * @return the ANSI escape code
+     */
+    @Override
+    String toString();
+
 }
