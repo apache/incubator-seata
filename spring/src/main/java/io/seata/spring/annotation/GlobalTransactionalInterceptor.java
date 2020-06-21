@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationCache;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.TransactionManagerHolder;
@@ -66,7 +66,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
+    private static volatile boolean degradeCheck;
     private static int degradeCheckPeriod;
+    private volatile boolean disable;
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
@@ -81,7 +83,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
-        boolean degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+        this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+            DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        this.degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
             this.degradeCheckPeriod = ConfigurationFactory.getInstance()
@@ -89,41 +93,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             this.degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
-                startDegradeCheck();
                 ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
+                startDegradeCheck();
             }
         }
-    }
-
-    /**
-     * auto upgrade service detection
-     */
-    private static void startDegradeCheck() {
-        executor.scheduleAtFixedRate(() -> {
-            final boolean degradeCheck = ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK, DEFAULT_TM_DEGRADE_CHECK);
-            if (degradeCheck) {
-                try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
-                    TransactionManagerHolder.get().commit(xid);
-                    onDegradeCheck(true);
-                } catch (Exception e) {
-                    onDegradeCheck(false);
-                }
-            }
-        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
-    }
-
-    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
-        return globalLockTemplate.execute(() -> {
-            try {
-                return methodInvocation.proceed();
-            } catch (Exception e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     @Override
@@ -136,10 +109,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-            final boolean disable = ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-            final boolean degradeCheck = ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK, DEFAULT_TM_DEGRADE_CHECK);
             boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null) {
@@ -152,23 +121,21 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return methodInvocation.proceed();
     }
 
-    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
-    }
-
-    private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder(method.getName()).append("(");
-
-        Class<?>[] params = method.getParameterTypes();
-        int in = 0;
-        for (Class<?> clazz : params) {
-            sb.append(clazz.getName());
-            if (++in < params.length) {
-                sb.append(", ");
+    /**
+     * auto upgrade service detection
+     */
+    private static void startDegradeCheck() {
+        executor.scheduleAtFixedRate(() -> {
+            if (degradeCheck) {
+                try {
+                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
+                    TransactionManagerHolder.get().commit(xid);
+                    onDegradeCheck(true);
+                } catch (Exception e) {
+                    onDegradeCheck(false);
+                }
             }
-        }
-        return sb.append(")").toString();
+        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
 
     private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
@@ -235,18 +202,52 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            final boolean degradeCheck = ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK, DEFAULT_TM_DEGRADE_CHECK);
             if (degradeCheck) {
                 onDegradeCheck(succeed);
             }
         }
     }
 
+    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
+        return globalLockTemplate.execute(() -> {
+            try {
+                return methodInvocation.proceed();
+            } catch (Exception e) {
+                throw e;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
+    }
+
+    private String formatMethod(Method method) {
+        StringBuilder sb = new StringBuilder(method.getName()).append("(");
+
+        Class<?>[] params = method.getParameterTypes();
+        int in = 0;
+        for (Class<?> clazz : params) {
+            sb.append(clazz.getName());
+            if (++in < params.length) {
+                sb.append(", ");
+            }
+        }
+        return sb.append(")").toString();
+    }
+
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
-            if (!Boolean.parseBoolean(event.getNewValue())) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                disable, event.getNewValue());
+            disable = Boolean.parseBoolean(event.getNewValue().trim());
+        } else if (ConfigurationKeys.CLIENT_DEGRADE_CHECK.equals(event.getDataId())) {
+            degradeCheck = Boolean.parseBoolean(event.getNewValue());
+            if (!degradeCheck) {
                 degradeNum = 0;
             }
         }
