@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -71,9 +72,12 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
+    public void updateGlobalSession(GlobalSession session, GlobalStatus status) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
+        }
+        if (status != null) {
+            session.setStatus(status);
         }
         writeSession(LogOperation.GLOBAL_UPDATE, session);
     }
@@ -95,10 +99,17 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateBranchSessionStatus(BranchSession branchSession, BranchStatus status)
+    public void updateBranchSession(BranchSession branchSession, BranchStatus status,
+                                    String applicationData)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
+        }
+        if (status != null) {
+            branchSession.setStatus(status);
+        }
+        if (StringUtils.isNotBlank(applicationData)) {
+            branchSession.setApplicationData(applicationData);
         }
         writeSession(LogOperation.BRANCH_UPDATE, branchSession);
     }
@@ -118,14 +129,14 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException {
-        updateGlobalSessionStatus(globalSession, status);
+    public void onUpdate(GlobalSession globalSession, GlobalStatus status) throws TransactionException {
+        updateGlobalSession(globalSession, status);
     }
 
     @Override
-    public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
-        throws TransactionException {
-        updateBranchSessionStatus(branchSession, status);
+    public void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                               String applicationData) throws TransactionException {
+        updateBranchSession(branchSession, status, applicationData);
     }
 
     @Override

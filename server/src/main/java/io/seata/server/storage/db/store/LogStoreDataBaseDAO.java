@@ -223,15 +223,33 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusSQL(globalTable);
+        if (globalTransactionDO.getStatus() < 0) {
+            return true;
+        }
+
+        // sets place holder
+        StringBuilder sb = new StringBuilder();
+        if (globalTransactionDO.getStatus() >= 0) {
+            sb.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
+        }
+
+        // get update sql
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable, sb.toString());
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, globalTransactionDO.getStatus());
-            ps.setString(2, globalTransactionDO.getXid());
+
+            //sets
+            int i = 1;
+            if (globalTransactionDO.getStatus() >= 0) {
+                ps.setInt(i++, globalTransactionDO.getStatus());
+            }
+            ps.setString(i, globalTransactionDO.getXid());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -343,16 +361,41 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(brachTable);
+        if (branchTransactionDO.getStatus() < 0
+                && StringUtils.isBlank(branchTransactionDO.getApplicationData())) {
+            return true;
+        }
+
+        // sets place holder
+        StringBuilder sb = new StringBuilder();
+        if (branchTransactionDO.getStatus() >= 0) {
+            sb.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
+        }
+        if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
+            sb.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
+        }
+
+        // get update branch sql
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(brachTable, sb.toString());
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, branchTransactionDO.getStatus());
-            ps.setString(2, branchTransactionDO.getXid());
-            ps.setLong(3, branchTransactionDO.getBranchId());
+
+            //sets
+            int i = 1;
+            if (branchTransactionDO.getStatus() >= 0) {
+                ps.setInt(i++, branchTransactionDO.getStatus());
+            }
+            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
+                ps.setString(i++, branchTransactionDO.getApplicationData());
+            }
+            ps.setString(i++, branchTransactionDO.getXid());
+            ps.setLong(i, branchTransactionDO.getBranchId());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);

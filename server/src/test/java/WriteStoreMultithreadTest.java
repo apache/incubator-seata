@@ -66,8 +66,7 @@ public class WriteStoreMultithreadTest {
 
 
                     @Override
-                    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status)
-                            throws TransactionException {
+                    public void updateGlobalSession(GlobalSession session, GlobalStatus status) throws TransactionException {
 
                     }
 
@@ -83,8 +82,7 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public void updateBranchSessionStatus(BranchSession session, BranchStatus status)
-                            throws TransactionException {
+                    public void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData) throws TransactionException {
 
                     }
 
@@ -138,14 +136,13 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public void onStatusChange(GlobalSession globalSession, GlobalStatus status)
-                            throws TransactionException {
+                    public void onUpdate(GlobalSession globalSession, GlobalStatus status) throws TransactionException {
 
                     }
 
                     @Override
-                    public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession,
-                                                     BranchStatus status) throws TransactionException {
+                    public void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                                               String applicationData) throws TransactionException {
 
                     }
 

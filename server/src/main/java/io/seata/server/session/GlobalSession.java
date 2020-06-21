@@ -159,20 +159,26 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void changeStatus(GlobalStatus status) throws TransactionException {
-        this.status = status;
-        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onStatusChange(this, status);
+    public void update(GlobalStatus status) throws TransactionException {
+        if (status != null) {
+            this.setStatus(status);
         }
-
+        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            lifecycleListener.onUpdate(this, status);
+        }
     }
 
     @Override
-    public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
-        throws TransactionException {
-        branchSession.setStatus(status);
+    public void updateBranch(BranchSession branchSession, BranchStatus status,
+                             String applicationData) throws TransactionException {
+        if (status != null) {
+            branchSession.setStatus(status);
+        }
+        if (StringUtils.isNotBlank(applicationData)) {
+            branchSession.setApplicationData(applicationData);
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onBranchStatusChange(this, branchSession, status);
+            lifecycleListener.onBranchUpdate(this, branchSession, status, applicationData);
         }
     }
 
@@ -511,10 +517,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             byteBuffer.putShort((short)0);
         }
         if (xidBytes != null) {
-            byteBuffer.putInt(xidBytes.length);
+            byteBuffer.putShort((short)xidBytes.length);
             byteBuffer.put(xidBytes);
         } else {
-            byteBuffer.putInt(0);
+            byteBuffer.putShort((short)0);
         }
         if (applicationDataBytes != null) {
             byteBuffer.putInt(applicationDataBytes.length);
@@ -538,7 +544,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + 2 // byApplicationIdBytes.length
             + 2 // byServiceGroupBytes.length
             + 2 // byTxNameBytes.length
-            + 4 // xidBytes.length
+            + 2 // xidBytes.length
             + 4 // applicationDataBytes.length
             + 8 // beginTime
             + 1 // statusCode
@@ -573,7 +579,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             byteBuffer.get(byTxName);
             this.transactionName = new String(byTxName);
         }
-        int xidLen = byteBuffer.getInt();
+        short xidLen = byteBuffer.getShort();
         if (xidLen > 0) {
             byte[] xidBytes = new byte[xidLen];
             byteBuffer.get(xidBytes);

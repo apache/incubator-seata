@@ -17,6 +17,7 @@ package io.seata.server.session.db;
 
 import io.seata.common.XID;
 import io.seata.common.util.IOUtil;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -143,7 +144,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
+    public void test_updateGlobalSession() throws TransactionException, SQLException {
         GlobalSession session = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -155,8 +156,7 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        session.setStatus(GlobalStatus.Committing);
-        sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
+        sessionManager.updateGlobalSession(session, GlobalStatus.Committing);
 
         String sql = "select * from global_table where xid= '"+xid+"'";
         String delSql = "delete from global_table where xid= '"+xid+"'";
@@ -166,7 +166,8 @@ public class DataBaseSessionManagerTest {
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
                 Assertions.assertTrue(true);
-                Assertions.assertEquals(rs.getInt("status"), GlobalStatus.Committing.getCode());
+                Assertions.assertEquals(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS),
+                    GlobalStatus.Committing.getCode());
             }else{
                 Assertions.assertTrue(false);
             }
@@ -309,7 +310,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_updateBranchSessionStatus() throws Exception {
+    public void test_updateBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
@@ -334,7 +335,7 @@ public class DataBaseSessionManagerTest {
         sessionManager.addBranchSession(globalSession, branchSession);
 
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
-        sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
+        sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseOne_Timeout, "{\"b\":1}");
 
         String sql = "select * from branch_table where xid= '"+xid+"'";
         String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
@@ -344,7 +345,10 @@ public class DataBaseSessionManagerTest {
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
                 Assertions.assertTrue(true);
-                Assertions.assertEquals(rs.getInt("status"), BranchStatus.PhaseOne_Timeout.getCode());
+                Assertions.assertEquals(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS),
+                    BranchStatus.PhaseOne_Timeout.getCode());
+                Assertions.assertEquals(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA),
+                    "{\"b\":1}");
             }else{
                 Assertions.assertTrue(false);
             }

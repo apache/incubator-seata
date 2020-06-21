@@ -130,16 +130,16 @@ public class FileTransactionStoreManagerTest {
     }
 
     private byte[] createBigBranchSessionData(GlobalSession global, byte c) {
-        int bufferSize = StoreConfig.getFileWriteBufferCacheSize() // applicationDataBytes
+        int bufferSize = StoreConfig.getFileWriteBufferCacheSize()
                 + 8 // trascationId
                 + 8 // branchId
-                + 4 // resourceIdBytes.length
-                + 4 // lockKeyBytes.length
+                + 2 // resourceIdBytes.length
+                + 2 // lockKeyBytes.length
                 + 2 // clientIdBytes.length
                 + 4 // applicationDataBytes.length
-                + 4 // xidBytes.size
+                + 2 // xidBytes.length
                 + 1 // statusCode
-                + 1; //branchType
+                + 1;// branchType
         String xid = global.getXid();
         byte[] xidBytes = null;
         if (xid != null) {
@@ -147,22 +147,22 @@ public class FileTransactionStoreManagerTest {
             bufferSize += xidBytes.length;
         }
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-        byteBuffer.putLong(global.getTransactionId());
-        byteBuffer.putLong(UUIDGenerator.generateUUID());
-        byteBuffer.putInt(0);
-        byteBuffer.putInt(0);
-        byteBuffer.putShort((short) 0);
+        byteBuffer.putLong(global.getTransactionId()); // trascationId 8
+        byteBuffer.putLong(UUIDGenerator.generateUUID()); // branchId 8
+        byteBuffer.putShort((short)0); // resourceIdBytes.length 2
+        byteBuffer.putShort((short)0); // lockKeyBytes.length 2
+        byteBuffer.putShort((short)0); // clientIdBytes.length 2
         byte[] applicationDataBytes = createBigApplicationData(c);
-        byteBuffer.putInt(applicationDataBytes.length);
-        byteBuffer.put(applicationDataBytes);
+        byteBuffer.putInt(applicationDataBytes.length); // applicationDataBytes.length 4
+        byteBuffer.put(applicationDataBytes); // applicationDataBytes
         if (xidBytes != null) {
-            byteBuffer.putInt(xidBytes.length);
-            byteBuffer.put(xidBytes);
+            byteBuffer.putShort((short)xidBytes.length); // xidBytes.length 2
+            byteBuffer.put(xidBytes); // xidBytes
         } else {
-            byteBuffer.putInt(0);
+            byteBuffer.putShort((short)0); // xidBytes.length 2
         }
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 0);
+        byteBuffer.put((byte)0); // statusCode 1
+        byteBuffer.put((byte)0); // branchType 1
         byteBuffer.flip();
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);

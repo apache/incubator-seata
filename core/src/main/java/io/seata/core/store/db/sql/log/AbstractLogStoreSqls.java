@@ -35,7 +35,14 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String BRANCH_TABLE_PLACEHOLD = " #branch_table# ";
 
     /**
+     * The constant SETS_PLACEHOLD.
+     * format: xxx = ?, yyy = ?, zzz = ?,
+     */
+    public static final String SETS_PLACEHOLD = " #SETS_PLACEHOLD# ";
+
+    /**
      * The constant PRAMETER_PLACEHOLD.
+     * format: ?, ?, ?
      */
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
 
@@ -48,8 +55,8 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + ServerTableColumnsName.GLOBAL_TABLE_STATUS + ", " + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID + ", "
             + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP + ", " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME + ", "
             + ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT + ", " + ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME + ", "
-            + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", "
-            + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
+            + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", "
+            + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
 
     /**
      * The constant ALL_BRANCH_COLUMNS.
@@ -66,26 +73,29 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     /**
      * The constant DELETE_GLOBAL_TRANSACTION.
      */
-    public static final String DELETE_GLOBAL_TRANSACTION = "delete from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
+    public static final String DELETE_GLOBAL_TRANSACTION = "delete from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION.
      */
-    public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS + " from "
-            + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
+    public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS
+            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_ID.
      */
-    public static final String QUERY_GLOBAL_TRANSACTION_BY_ID = "select " + ALL_GLOBAL_COLUMNS + " from "
-            + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_ID = "select " + ALL_GLOBAL_COLUMNS
+            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.
      */
     public static final String DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID = "delete from " + BRANCH_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
-            + " = ?";
+            + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
+            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_XID.
@@ -97,36 +107,40 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     /**
      * The constant QUERY_BRANCH_TRANSACTION.
      */
-    public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
-            + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? order by "
-            + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
+    public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS
+            + " from " + BRANCH_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
+            + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
     /**
      * The constant QUERY_BRANCH_TRANSACTION_XIDS.
      */
-    public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS + " from "
-            + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ") order by "
-            + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
+    public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS
+            + " from " + BRANCH_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
     /**
      * The constant CHECK_MAX_TRANS_ID.
      */
-    public static final String QUERY_MAX_TRANS_ID = "select max(" + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID
-            + ") from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID
-            + " < ? and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
+    public static final String QUERY_MAX_TRANS_ID = "select max(" + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + ")"
+            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " < ?"
+            + " and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
 
     /**
      * The constant CHECK_MAX_BTANCH_ID.
      */
-    public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
-            + ") from " + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " < ? and "
-            + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
+    public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + ")"
+            + " from " + BRANCH_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " < ?"
+            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     @Override
     public abstract String getInsertGlobalTransactionSQL(String globalTable);
 
     @Override
-    public abstract String getUpdateGlobalTransactionStatusSQL(String globalTable);
+    public abstract String getUpdateGlobalTransactionSQL(String globalTable, String setsPlaceHolder);
 
     @Override
     public String getDeleteGlobalTransactionSQL(String globalTable) {
@@ -149,12 +163,12 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
 
+
     @Override
     public abstract String getInsertBranchTransactionSQL(String branchTable);
 
     @Override
-    public abstract String getUpdateBranchTransactionStatusSQL(String branchTable);
-
+    public abstract String getUpdateBranchTransactionSQL(String branchTable, String setsPlaceHolder);
 
     @Override
     public String getDeleteBranchTransactionByBranchIdSQL(String branchTable) {
@@ -176,6 +190,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
         return QUERY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
+
 
     @Override
     public String getQueryGlobalMax(String globalTable) {

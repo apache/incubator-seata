@@ -93,14 +93,13 @@ public class RedisSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
+    public void updateGlobalSession(GlobalSession session, GlobalStatus status) throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        session.setStatus(status);
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
-            throw new StoreException("updateGlobalSessionStatus failed.");
+            throw new StoreException("updateGlobalSession failed: xid=" + session.getXid());
         }
     }
 
@@ -116,7 +115,7 @@ public class RedisSessionManager extends AbstractSessionManager
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
-            throw new StoreException("removeGlobalSession failed.");
+            throw new StoreException("removeGlobalSession failed: xid=" + session.getXid());
         }
     }
 
@@ -127,18 +126,19 @@ public class RedisSessionManager extends AbstractSessionManager
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, session);
         if (!ret) {
-            throw new StoreException("addBranchSession failed.");
+            throw new StoreException("addBranchSession failed: xid=" + session.getXid() + " branchId=" + session.getBranchId());
         }
     }
 
     @Override
-    public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
+    public void updateBranchSession(BranchSession branchSession, BranchStatus status,
+                                    String applicationData) throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession);
         if (!ret) {
-            throw new StoreException("updateBranchSessionStatus failed.");
+            throw new StoreException("updateBranchSession failed: xid=" + branchSession.getXid() + " branchId=" + branchSession.getBranchId());
         }
     }
 
@@ -149,7 +149,7 @@ public class RedisSessionManager extends AbstractSessionManager
         }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, session);
         if (!ret) {
-            throw new StoreException("removeBranchSession failed.");
+            throw new StoreException("removeBranchSession failed: xid=" + session.getXid() + " branchId=" + session.getBranchId());
         }
     }
 

@@ -56,13 +56,13 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     GlobalSession findGlobalSession(String xid, boolean withBranchSessions);
 
     /**
-     * Update global session status.
+     * Update global session.
      *
      * @param session the session
      * @param status  the status
      * @throws TransactionException the transaction exception
      */
-    void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException;
+    void updateGlobalSession(GlobalSession session, GlobalStatus status) throws TransactionException;
 
     /**
      * Remove global session.
@@ -82,13 +82,14 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException;
 
     /**
-     * Update branch session status.
+     * Update branch session.
      *
-     * @param session the session
-     * @param status  the status
+     * @param branchSession   the session
+     * @param status          the status
+     * @param applicationData the application data
      * @throws TransactionException the transaction exception
      */
-    void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException;
+    void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData) throws TransactionException;
 
     /**
      * Remove branch session.

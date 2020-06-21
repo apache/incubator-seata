@@ -91,18 +91,17 @@ public class FileSessionManagerTest {
     }
 
     /**
-     * Update global session status test.
+     * Update global session test.
      *
      * @param globalSession the global session
      * @throws Exception the exception
      */
     @ParameterizedTest
     @MethodSource("globalSessionProvider")
-    public void updateGlobalSessionStatusTest(GlobalSession globalSession) throws Exception {
+    public void updateGlobalSessionTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
-            globalSession.setStatus(GlobalStatus.Finished);
-            sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
+            sessionManager.updateGlobalSession(globalSession, GlobalStatus.Finished);
             GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
             Assertions.assertNotNull(expected);
             Assertions.assertEquals(GlobalStatus.Finished, expected.getStatus());
@@ -146,7 +145,7 @@ public class FileSessionManagerTest {
     }
 
     /**
-     * Update branch session status test.
+     * Update branch session test.
      *
      * @param globalSession the global session
      * @param branchSession the branch session
@@ -154,12 +153,14 @@ public class FileSessionManagerTest {
      */
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
-    public void updateBranchSessionStatusTest(GlobalSession globalSession, BranchSession branchSession)
+    public void updateBranchSessionTest(GlobalSession globalSession, BranchSession branchSession)
             throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             sessionManager.addBranchSession(globalSession, branchSession);
-            sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseTwo_Committed);
+            sessionManager.updateBranchSession(branchSession, BranchStatus.PhaseTwo_Committed, "{\"a\":1}");
+            Assertions.assertEquals(BranchStatus.PhaseTwo_Committed, branchSession.getStatus());
+            Assertions.assertEquals("{\"a\":1}", branchSession.getApplicationData());
             sessionManager.removeBranchSession(globalSession, branchSession);
             sessionManager.removeGlobalSession(globalSession);
         }
@@ -244,23 +245,23 @@ public class FileSessionManagerTest {
     }
 
     /**
-     * On status change test.
+     * On update test.
      *
      * @param globalSession the global session
      * @throws Exception the exception
      */
     @ParameterizedTest
     @MethodSource("globalSessionProvider")
-    public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
+    public void onUpdateTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
-            sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
+            sessionManager.onUpdate(globalSession, GlobalStatus.Finished);
             sessionManager.onEnd(globalSession);
         }
     }
 
     /**
-     * On branch status change test.
+     * On branch update test.
      *
      * @param globalSession the global session
      * @param branchSession the branch session
@@ -268,11 +269,11 @@ public class FileSessionManagerTest {
      */
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
-    public void onBranchStatusChangeTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
+    public void onBranchUpdateTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
-            sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
+            sessionManager.onBranchUpdate(globalSession, branchSession, BranchStatus.PhaseTwo_Committed, null);
             sessionManager.onEnd(globalSession);
         }
     }

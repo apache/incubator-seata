@@ -264,7 +264,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
 
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(globalSession.getXid());
-        globalTransactionDO.setStatus(globalSession.getStatus().getCode());
+        globalTransactionDO.setStatus(globalSession.getStatus() == null ? -1 : globalSession.getStatus().getCode());
         globalTransactionDO.setApplicationId(globalSession.getApplicationId());
         globalTransactionDO.setBeginTime(globalSession.getBeginTime());
         globalTransactionDO.setTimeout(globalSession.getTimeout());
@@ -285,13 +285,13 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
         branchTransactionDO.setXid(branchSession.getXid());
         branchTransactionDO.setBranchId(branchSession.getBranchId());
-        branchTransactionDO.setBranchType(branchSession.getBranchType().name());
+        branchTransactionDO.setBranchType(branchSession.getBranchType() == null ? null : branchSession.getBranchType().name());
         branchTransactionDO.setClientId(branchSession.getClientId());
         branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
         branchTransactionDO.setTransactionId(branchSession.getTransactionId());
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
         branchTransactionDO.setResourceId(branchSession.getResourceId());
-        branchTransactionDO.setStatus(branchSession.getStatus().getCode());
+        branchTransactionDO.setStatus(branchSession.getStatus() == null ? -1 : branchSession.getStatus().getCode());
         return branchTransactionDO;
     }
 
