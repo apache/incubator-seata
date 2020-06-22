@@ -15,6 +15,8 @@
  */
 package io.seata.core.store;
 
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 
 /**
  * The type Abstract log store.
@@ -22,6 +24,11 @@ package io.seata.core.store;
  * @author wang.liang
  */
 public abstract class AbstractLogStore implements LogStore {
+
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Override
     public long getCurrentMaxSessionId(long high, long low) {

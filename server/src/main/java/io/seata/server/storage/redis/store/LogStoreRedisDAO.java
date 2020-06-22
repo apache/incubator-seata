@@ -55,9 +55,19 @@ public class LogStoreRedisDAO extends AbstractLogStore {
     private static final String INITIAL_CURSOR = "0";
 
 
+    //region fields
+
+    /**
+     * The jedis.
+     */
     private final Jedis jedis;
 
+    /**
+     * The log query limit.
+     */
     private final int logQueryLimit;
+
+    //endregion
 
 
     public LogStoreRedisDAO(Jedis jedis, int logQueryLimit) {
@@ -101,7 +111,6 @@ public class LogStoreRedisDAO extends AbstractLogStore {
 
         if (CollectionUtils.isNotEmpty(keys)) {
             List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>();
-
             // where
             for (String globalKey : keys) {
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(jedis.get(globalKey), GlobalTransactionDO.class);
@@ -109,10 +118,10 @@ public class LogStoreRedisDAO extends AbstractLogStore {
                     globalTransactionDOs.add(globalTransactionDO);
                 }
             }
-
             // order by
-            globalTransactionDOs = condition.sort(globalTransactionDOs);
-
+            if (!globalTransactionDOs.isEmpty()) {
+                globalTransactionDOs = condition.sort(globalTransactionDOs);
+            }
             return globalTransactionDOs;
         } else {
             return null;

@@ -19,8 +19,6 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.AbstractLogStore;
@@ -63,10 +61,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
      */
     private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
 
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    //region fields
 
     /**
      * The Log store data source.
@@ -79,13 +74,21 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
     protected String globalTable;
 
     /**
-     * The Brach table.
+     * The Branch table.
      */
-    protected String brachTable;
+    protected String branchTable;
 
+    /**
+     * The db type.
+     */
     private String dbType;
 
+    /**
+     * The transaction name column size.
+     */
     private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
+
+    //endregion
 
     /**
      * Instantiates a new Log store data base dao.
@@ -96,7 +99,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
         this.logStoreDataSource = logStoreDataSource;
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
                 DEFAULT_STORE_DB_GLOBAL_TABLE);
-        brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
+        branchTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
                 DEFAULT_STORE_DB_BRANCH_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
@@ -315,7 +318,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
     @Override
     public List<BranchTransactionDO> findBranchTransactionDO(String xid) {
         List<BranchTransactionDO> rets = new ArrayList<>();
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(branchTable);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -345,7 +348,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
         List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
         StringJoiner sj = new StringJoiner(",");
         xids.stream().forEach(xid -> sj.add("?"));
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable, sj.toString());
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(branchTable, sj.toString());
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -370,7 +373,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     @Override
     public boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertBranchTransactionSQL(brachTable);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertBranchTransactionSQL(branchTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -411,7 +414,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
         }
 
         // get update branch sql
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(brachTable, sb.toString());
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(branchTable, sb.toString());
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -441,7 +444,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     @Override
     public boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteBranchTransactionByBranchIdSQL(brachTable);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -462,13 +465,15 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
     @Override
     public long getCurrentMaxSessionId(long high, long low) {
         String transMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalMax(globalTable);
-        String branchMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchMax(brachTable);
+        String branchMaxSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchMax(branchTable);
         long maxTransId = getCurrentMaxSessionId(transMaxSql, high, low);
         long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
         return maxBranchId > maxTransId ? maxBranchId : maxTransId;
     }
 
     //endregion
+
+    //region private
 
     private long getCurrentMaxSessionId(String sql, long high, long low) {
         long max = 0;
@@ -585,6 +590,10 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
         return conn.getMetaData().getUserName();
     }
 
+    //endregion
+
+    //region Gets and Sets
+
     /**
      * Sets log store data source.
      *
@@ -604,12 +613,12 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
     }
 
     /**
-     * Sets brach table.
+     * Sets branch table.
      *
-     * @param brachTable the brach table
+     * @param branchTable the branch table
      */
-    public void setBrachTable(String brachTable) {
-        this.brachTable = brachTable;
+    public void setBranchTable(String branchTable) {
+        this.branchTable = branchTable;
     }
 
     /**
@@ -621,9 +630,17 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
         this.dbType = dbType;
     }
 
+    /**
+     * Gets transaction name column size.
+     *
+     * @return the transaction name column size
+     */
     public int getTransactionNameColumnSize() {
         return transactionNameColumnSize;
     }
+
+    //endregion
+
 
     /**
      * column info

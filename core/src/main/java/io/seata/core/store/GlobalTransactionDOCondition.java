@@ -27,11 +27,17 @@ import java.util.List;
  * @author wang.liang
  */
 public class GlobalTransactionDOCondition {
+    //region fields
+
     protected GlobalStatus[] statuses;
     protected Long overTimeAliveMills;
     protected GlobalTableSortField sortField;
     protected SortOrder sortOrder;
     protected int limit;
+
+    //endregion
+
+    //region constructor
 
     /**
      * Instantiates a new Session condition.
@@ -79,6 +85,10 @@ public class GlobalTransactionDOCondition {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
+    //endregion
+
+    //region functions
+
     /**
      * Match data.
      *
@@ -109,9 +119,9 @@ public class GlobalTransactionDOCondition {
 
     public List<GlobalTransactionDO> filter(List<GlobalTransactionDO> globalTransactionDOs) {
         List<GlobalTransactionDO> found = new ArrayList<>();
-        if (globalTransactionDOs != null) {
+        if (CollectionUtils.isNotEmpty(globalTransactionDOs)) {
             for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
-                if (isMatch(globalTransactionDO)) {
+                if (this.isMatch(globalTransactionDO)) {
                     found.add(globalTransactionDO);
                 }
             }
@@ -158,6 +168,10 @@ public class GlobalTransactionDOCondition {
         return globalTransactionDOs;
     }
 
+    //endregion
+
+    //region private
+
     private int compareTo(Comparable a, Comparable b) {
         int ret;
         if (a == null) {
@@ -171,11 +185,10 @@ public class GlobalTransactionDOCondition {
                 ret = 1;
             } else {
                 ret = a.compareTo(b);
+                if (ret == 0) {
+                    return 0;
+                }
             }
-        }
-
-        if (ret == 0) {
-            return ret;
         }
 
         if (sortOrder == SortOrder.DESC) {
@@ -186,7 +199,7 @@ public class GlobalTransactionDOCondition {
         return ret;
     }
 
-    public boolean hasStatus(int statusCode) {
+    private boolean hasStatus(int statusCode) {
         for (GlobalStatus status : statuses) {
             if (status.getCode() == statusCode) {
                 return true;
@@ -194,6 +207,10 @@ public class GlobalTransactionDOCondition {
         }
         return false;
     }
+
+    //endregion
+
+    //region Gets and Sets
 
     public GlobalStatus[] getStatuses() {
         return statuses;
@@ -234,4 +251,6 @@ public class GlobalTransactionDOCondition {
     public void setLimit(int limit) {
         this.limit = limit;
     }
+
+    //endregion
 }
