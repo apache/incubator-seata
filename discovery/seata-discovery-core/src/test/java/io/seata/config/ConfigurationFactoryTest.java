@@ -27,6 +27,6 @@ class ConfigurationFactoryTest {
     void getInstance() {
         Configuration configuration = ConfigurationFactory.getInstance();
         // check singleton
-        Assertions.assertEquals(configuration, ConfigurationFactory.getInstance());
+        Assertions.assertEquals(configuration.getClass().getName(), ConfigurationFactory.getInstance().getClass().getName());
     }
 }

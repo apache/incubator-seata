@@ -16,7 +16,6 @@
 package io.seata.config;
 
 import java.util.Objects;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
@@ -57,8 +56,9 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
-            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
+        Configuration configuration =
+            (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX, false)
+                : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
@@ -97,7 +97,7 @@ public final class ConfigurationFactory {
 
     private static Configuration buildConfiguration() {
         ConfigType configType;
-        String configTypeName = null;
+        String configTypeName;
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
@@ -111,27 +111,43 @@ public final class ConfigurationFactory {
         } catch (Exception e) {
             throw e;
         }
+        Configuration extConfiguration = null;
+        Configuration configuration;
         if (ConfigType.File == configType) {
-            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
+            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            Configuration configuration = new FileConfiguration(name);
-            Configuration extConfiguration = null;
+            configuration = new FileConfiguration(name);
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load Configuration:{}",
-                        extConfiguration == null ? configuration.getClass().getSimpleName()
-                            : extConfiguration.getClass().getSimpleName());
+                    LOGGER.info("load Configuration:{}", extConfiguration == null
+                        ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 
             } catch (Exception e) {
                 LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
-            return null == extConfiguration ? configuration : extConfiguration;
         } else {
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
-                .provide();
+            configuration = EnhancedServiceLoader
+                .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
         }
+        try {
+            Configuration configurationCache;
+            if (null != extConfiguration) {
+                configurationCache = ConfigurationCache.getInstance().proxy(extConfiguration);
+            } else {
+                configurationCache = ConfigurationCache.getInstance().proxy(configuration);
+            }
+            if (null != configurationCache) {
+                extConfiguration = configurationCache;
+            }
+        } catch (EnhancedServiceNotFoundException ignore) {
+
+        } catch (Exception e) {
+            LOGGER.error("failed to load configurationCacheProvider:{}", e.getMessage(), e);
+        }
+        return null == extConfiguration ? configuration : extConfiguration;
     }
 }

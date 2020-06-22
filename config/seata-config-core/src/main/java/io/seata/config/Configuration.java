@@ -207,6 +207,15 @@ public interface Configuration {
     boolean putConfig(String dataId, String content, long timeoutMills);
 
     /**
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the Latest config
+     */
+    String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
+
+    /**
      * Put config boolean.
      *
      * @param dataId  the data id
