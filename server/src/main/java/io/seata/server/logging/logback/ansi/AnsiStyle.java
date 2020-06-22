@@ -13,33 +13,53 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
+package io.seata.server.logging.logback.ansi;
 
 /**
- * The type Configuration keys.
+ * {@link AnsiElement Ansi} styles.
  *
- * @author slievrly
+ * @author Phillip Webb
+ * @origin Copied from spring-boot.jar by wang.liang
  */
-public final class ConfigurationKeys {
+public enum AnsiStyle implements AnsiElement {
+
     /**
-     * The constant FILE_ROOT_REGISTRY.
+     * normal
      */
-    public static final String FILE_ROOT_REGISTRY = "registry";
+    NORMAL("0"),
+
     /**
-     * The constant FILE_ROOT_CONFIG.
+     * bold
      */
-    public static final String FILE_ROOT_CONFIG = "config";
+    BOLD("1"),
+
     /**
-     * The constant SEATA_FILE_ROOT_CONFIG
+     * faint
      */
-    public static final String SEATA_FILE_ROOT_CONFIG = "seata";
+    FAINT("2"),
+
     /**
-     * The constant FILE_CONFIG_SPLIT_CHAR.
+     * italic
      */
-    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    ITALIC("3"),
+
     /**
-     * The constant FILE_ROOT_TYPE.
+     * underline
      */
-    public static final String FILE_ROOT_TYPE = "type";
+    UNDERLINE("4");
+
+    /**
+     * code of style
+     */
+    private final String code;
+
+    AnsiStyle(String code) {
+        this.code = code;
+    }
+
+    @Override
+    public String toString() {
+        return this.code;
+    }
 
 }
