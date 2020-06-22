@@ -63,8 +63,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param logQueryLimit the log query limit
      */
     private RedisTransactionStoreManager(LogStore logStore, int logQueryLimit) {
-        super.logQueryLimit = logQueryLimit;
         super.logStore = logStore;
+        super.logQueryLimit = logQueryLimit;
     }
 
 

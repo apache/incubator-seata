@@ -51,13 +51,13 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * Instantiates a new Database transaction store manager.
      */
     private DataBaseTransactionStoreManager() {
-        //init logQueryLimit
-        super.initLogQueryLimit(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT);
-
         //create dataSource
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         //init logStore
         super.logStore = new LogStoreDataBaseDAO(logStoreDataSource);
+
+        //init logQueryLimit
+        super.initLogQueryLimit(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT);
     }
 }

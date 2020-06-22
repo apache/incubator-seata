@@ -44,7 +44,6 @@ import io.seata.server.storage.file.FlushDiskMode;
 import io.seata.server.storage.file.ReloadableStore;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
-import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.file.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  */
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager
-    implements TransactionStoreManager, ReloadableStore {
+        implements ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
 
     private static final int MAX_THREAD_WRITE = 1;
