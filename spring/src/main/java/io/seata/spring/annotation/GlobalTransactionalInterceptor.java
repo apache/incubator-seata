@@ -77,7 +77,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     //region GLOBAL_TRANSACTION_TIMEOUT
 
     private static int globalTransactionTimeout = 0;
-    private static int minGlobalTransactionTimeout = 0;
 
     private static void initGlobalTransactionTimeout() {
         if (GlobalTransactionalInterceptor.globalTransactionTimeout <= 0) {
@@ -93,13 +92,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 LOGGER.warn("Global transaction timeout value '{}' is illegal, and has been reset to the default value '{}'",
                         globalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
                 globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
-            } else if (globalTransactionTimeout < DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
-                LOGGER.warn("Global transaction timeout value '{}' is too small, and has been reset to the default value '{}'",
-                        globalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
-                globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
             }
             GlobalTransactionalInterceptor.globalTransactionTimeout = globalTransactionTimeout;
-            GlobalTransactionalInterceptor.minGlobalTransactionTimeout = globalTransactionTimeout / 2;
         }
     }
 
@@ -187,8 +181,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     int timeout = globalTrxAnno.timeoutMills();
                     if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
                         timeout = globalTransactionTimeout;
-                    } else {
-                        timeout = Math.max(timeout, minGlobalTransactionTimeout);
                     }
 
                     TransactionInfo transactionInfo = new TransactionInfo();
