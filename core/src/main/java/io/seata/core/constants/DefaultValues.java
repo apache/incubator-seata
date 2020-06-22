@@ -15,6 +15,8 @@
  */
 package io.seata.core.constants;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -82,5 +84,7 @@ public class DefaultValues {
 
     public static final String DEFAULT_CONTEXT_TYPE = "FastThreadLocalContextCore";
 
-
+    public static final int SERVER_DEFAULT_PORT = 8091;
+    public static final String SERVER_DEFAULT_STORE_MODE = "file";
+    public static final long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 }

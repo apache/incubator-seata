@@ -18,12 +18,14 @@ package io.seata.spring.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
@@ -86,6 +88,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
+            ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
             this.degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
             this.degradeCheckAllowTimes = ConfigurationFactory.getInstance()
@@ -101,16 +104,18 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         Class<?> targetClass =
             methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
-        final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
-        final GlobalTransactional globalTransactionalAnnotation =
-            getAnnotation(method, targetClass, GlobalTransactional.class);
-        final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
-        boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
-        if (!localDisable) {
-            if (globalTransactionalAnnotation != null) {
-                return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
-            } else if (globalLockAnnotation != null) {
-                return handleGlobalLock(methodInvocation);
+        if (null != specificMethod && !specificMethod.getDeclaringClass().equals(Object.class)) {
+            final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final GlobalTransactional globalTransactionalAnnotation =
+                getAnnotation(method, targetClass, GlobalTransactional.class);
+            final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
+            if (!localDisable) {
+                if (globalTransactionalAnnotation != null) {
+                    return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+                } else if (globalLockAnnotation != null) {
+                    return handleGlobalLock(methodInvocation);
+                }
             }
         }
         return methodInvocation.proceed();
@@ -198,9 +203,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
-    private <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return method == null ? targetClass == null ? null : targetClass.getAnnotation(annotationClass)
-            : method.getAnnotation(annotationClass);
+    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
 
     private String formatMethod(Method method) {
