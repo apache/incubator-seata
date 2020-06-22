@@ -125,12 +125,12 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      */
     public GlobalSession readSession(Long transactionId) {
         //global transaction
-        GlobalTransactionDO globalTransactionDO = logStore.queryGlobalTransactionDO(transactionId);
+        GlobalTransactionDO globalTransactionDO = logStore.getGlobalTransactionDO(transactionId);
         if (globalTransactionDO == null) {
             return null;
         }
         //branch transactions
-        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(
+        List<BranchTransactionDO> branchTransactionDOs = logStore.findBranchTransactionDO(
             globalTransactionDO.getXid());
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
@@ -156,7 +156,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     @Override
     public GlobalSession readSession(String xid, boolean withBranchSessions) {
         //global transaction
-        GlobalTransactionDO globalTransactionDO = logStore.queryGlobalTransactionDO(xid);
+        GlobalTransactionDO globalTransactionDO = logStore.getGlobalTransactionDO(xid);
         if (globalTransactionDO == null) {
             return null;
         }
@@ -164,56 +164,38 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         List<BranchTransactionDO> branchTransactionDOs = null;
         //reduce rpc with db when branchRegister and getGlobalStatus
         if (withBranchSessions) {
-            branchTransactionDOs = logStore.queryBranchTransactionDO(globalTransactionDO.getXid());
+            branchTransactionDOs = logStore.findBranchTransactionDO(globalTransactionDO.getXid());
         }
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
 
-    /**
-     * Read session list.
-     *
-     * @param statuses the statuses
-     * @return the list
-     */
-    public List<GlobalSession> readSession(GlobalStatus[] statuses) {
-        int[] states = new int[statuses.length];
-        for (int i = 0; i < statuses.length; i++) {
-            states[i] = statuses[i].getCode();
-        }
-        //global transaction
-        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(states, logQueryLimit);
-        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
-            return null;
-        }
-        List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
-        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
-        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
-            .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
-        return globalTransactionDOs.stream().map(globalTransactionDO ->
-            getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
-            .collect(Collectors.toList());
-    }
-
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        if (StringUtils.isNotBlank(sessionCondition.getXid())) {
-            GlobalSession globalSession = readSession(sessionCondition.getXid());
-            if (globalSession != null) {
-                List<GlobalSession> globalSessions = new ArrayList<>();
-                globalSessions.add(globalSession);
-                return globalSessions;
-            }
-        } else if (sessionCondition.getTransactionId() != null) {
-            GlobalSession globalSession = readSession(sessionCondition.getTransactionId());
-            if (globalSession != null) {
-                List<GlobalSession> globalSessions = new ArrayList<>();
-                globalSessions.add(globalSession);
-                return globalSessions;
-            }
-        } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            return readSession(sessionCondition.getStatuses());
+        if (sessionCondition.getLimit() <= 0) {
+           sessionCondition.setLimit(logQueryLimit);
         }
-        return null;
+
+        //global transactions
+        List<GlobalTransactionDO> globalTransactionDOs = logStore.findGlobalTransactionDO(sessionCondition);
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return new ArrayList<>();
+        }
+
+        //branch transactions
+        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap;
+        if (sessionCondition.getWithBranchSessions() == null || sessionCondition.getWithBranchSessions()) {
+            List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
+            List<BranchTransactionDO> branchTransactionDOs = logStore.findBranchTransactionDO(xids);
+            branchTransactionDOsMap = branchTransactionDOs.stream()
+                    .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
+        } else {
+            branchTransactionDOsMap = null;
+        }
+
+        return globalTransactionDOs.stream().map(globalTransactionDO ->
+                getGlobalSession(globalTransactionDO, branchTransactionDOsMap == null ? null
+                    : branchTransactionDOsMap.get(globalTransactionDO.getXid())))
+                .collect(Collectors.toList());
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,

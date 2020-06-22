@@ -16,18 +16,16 @@
 package io.seata.server.session;
 
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.GlobalTransactionDOCondition;
 
 /**
  * The type Session condition.
  *
  * @author slievrly
  */
-public class SessionCondition {
-    private Long transactionId;
-    private GlobalStatus[] statuses;
-    private Long overTimeAliveMills;
-    private GlobalTableSortField sortField;
-    private SortOrder sortOrder;
+public class SessionCondition extends GlobalTransactionDOCondition {
+
+    private Boolean withBranchSessions;
 
     /**
      * Instantiates a new Session condition.
@@ -38,19 +36,30 @@ public class SessionCondition {
     /**
      * Instantiates a new Session condition.
      *
-     * @param status the status
+     * @param statuses the statuses
      */
-    public SessionCondition(GlobalStatus status) {
-        statuses = new GlobalStatus[] {status};
+    public SessionCondition(GlobalStatus... statuses) {
+        super(statuses);
+    }
+
+    /**
+     * Instantiates a new Session condition.
+     *
+     * @param status the status
+     * @param limit  the limit
+     */
+    public SessionCondition(GlobalStatus status, int limit) {
+        super(status, limit);
     }
 
     /**
      * Instantiates a new Session condition.
      *
      * @param statuses the statuses
+     * @param limit    the limit
      */
-    public SessionCondition(GlobalStatus[] statuses) {
-        this.statuses = statuses;
+    public SessionCondition(GlobalStatus[] statuses, int limit) {
+        super(statuses, limit);
     }
 
     /**
@@ -59,46 +68,15 @@ public class SessionCondition {
      * @param overTimeAliveMills the over time alive mills
      */
     public SessionCondition(long overTimeAliveMills) {
-        this.overTimeAliveMills = overTimeAliveMills;
+        super(overTimeAliveMills);
     }
 
-    public Long getTransactionId() {
-        return transactionId;
+
+    public Boolean getWithBranchSessions() {
+        return withBranchSessions;
     }
 
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public GlobalStatus[] getStatuses() {
-        return statuses;
-    }
-
-    public void setStatuses(GlobalStatus[] statuses) {
-        this.statuses = statuses;
-    }
-
-    public Long getOverTimeAliveMills() {
-        return overTimeAliveMills;
-    }
-
-    public void setOverTimeAliveMills(Long overTimeAliveMills) {
-        this.overTimeAliveMills = overTimeAliveMills;
-    }
-
-    public GlobalTableSortField getSortField() {
-        return sortField;
-    }
-
-    public void setSortField(GlobalTableSortField sortField) {
-        this.sortField = sortField;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(SortOrder sortOrder) {
-        this.sortOrder = sortOrder;
+    public void setWithBranchSessions(Boolean withBranchSessions) {
+        this.withBranchSessions = withBranchSessions;
     }
 }

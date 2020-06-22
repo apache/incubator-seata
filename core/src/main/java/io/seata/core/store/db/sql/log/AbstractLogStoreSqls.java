@@ -47,6 +47,18 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
 
     /**
+     * The constant WHERE_PLACEHOLD.
+     * format: where xxx = ? and yyy > ? and zzz < ?
+     */
+    public static final String WHERE_PLACEHOLD = " #WHERE_PLACEHOLD# ";
+
+    /**
+     * The constant SORT_PLACEHOLD.
+     * format: order by xxx [ASC|DESC]
+     */
+    public static final String SORT_PLACEHOLD = " #SORT_PLACEHOLD# ";
+
+    /**
      * The constant ALL_GLOBAL_COLUMNS.
      * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
@@ -158,7 +170,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
+    public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
 
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);

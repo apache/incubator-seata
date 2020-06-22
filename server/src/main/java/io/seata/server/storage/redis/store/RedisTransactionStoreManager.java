@@ -257,16 +257,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            if (!StringUtils.isEmpty(sessionCondition.getXid())) {
-                String globalSessionJson = jedis.get(getGlobalKeyByXid(sessionCondition.getXid()));
-                if (!StringUtils.isEmpty(globalSessionJson)) {
-                    GlobalSession session =
-                        convertGlobalSession(JSON.parseObject(globalSessionJson, GlobalTransactionDO.class));
-                    List<GlobalSession> globalSessions = new ArrayList<>();
-                    globalSessions.add(session);
-                    return globalSessions;
-                }
-            } else if (sessionCondition.getTransactionId() != null) {
+            if (sessionCondition.getTransactionId() != null) {
                 String global = jedis.get(getGlobalKeyByTransactionId(sessionCondition.getTransactionId()));
                 if (StringUtils.isEmpty(global)) {
                     return null;

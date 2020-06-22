@@ -44,8 +44,9 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL = "select " + ALL_GLOBAL_COLUMNS
             + " from " + GLOBAL_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+            + WHERE_PLACEHOLD
+            + SORT_PLACEHOLD
+            + " limit ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL.
@@ -53,7 +54,8 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL = "select " + ALL_GLOBAL_COLUMNS
             + " from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14)"
-            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " limit ?";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_MYSQL.
@@ -82,9 +84,9 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
+    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String wherePlaceHolder, String sortPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
-            .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+            .replace(WHERE_PLACEHOLD, wherePlaceHolder).replace(SORT_PLACEHOLD, sortPlaceHolder);
     }
 
     @Override

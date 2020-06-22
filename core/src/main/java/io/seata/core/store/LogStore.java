@@ -26,29 +26,28 @@ import java.util.List;
 public interface LogStore {
 
     /**
-     * Query global transaction do global transaction do.
+     * Get global transaction do global transaction do.
      *
      * @param xid the xid
      * @return the global transaction do
      */
-    GlobalTransactionDO queryGlobalTransactionDO(String xid);
+    GlobalTransactionDO getGlobalTransactionDO(String xid);
 
     /**
-     * Query global transaction do global transaction do.
+     * Get global transaction do global transaction do.
      *
      * @param transactionId the transaction id
      * @return the global transaction do
      */
-    GlobalTransactionDO queryGlobalTransactionDO(long transactionId);
+    GlobalTransactionDO getGlobalTransactionDO(long transactionId);
 
     /**
-     * Query global transaction do list.
+     * Find global transaction do list.
      *
-     * @param status the status
-     * @param limit  the limit
+     * @param condition the condition
      * @return the list
      */
-    List<GlobalTransactionDO> queryGlobalTransactionDO(int[] status, int limit);
+    List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionDOCondition condition);
 
     /**
      * Insert global transaction do boolean.
@@ -75,20 +74,20 @@ public interface LogStore {
     boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
 
     /**
-     * Query branch transaction do list.
+     * Find branch transaction do list.
      *
      * @param xid the xid
      * @return the BranchTransactionDO list
      */
-    List<BranchTransactionDO> queryBranchTransactionDO(String xid);
+    List<BranchTransactionDO> findBranchTransactionDO(String xid);
 
     /**
-     * Query branch transaction do list.
+     * Find branch transaction do list.
      *
      * @param xids the xid list
      * @return the BranchTransactionDO list
      */
-    List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids);
+    List<BranchTransactionDO> findBranchTransactionDO(List<String> xids);
 
     /**
      * Insert branch transaction do boolean.

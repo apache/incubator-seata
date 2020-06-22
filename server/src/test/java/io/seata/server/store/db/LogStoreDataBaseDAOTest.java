@@ -17,8 +17,10 @@ package io.seata.server.store.db;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
 
@@ -105,7 +107,7 @@ public class LogStoreDataBaseDAOTest {
         Assertions.assertTrue(ret);
 
 
-        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.queryGlobalTransactionDO("abc-123:978786");
+        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.getGlobalTransactionDO("abc-123:978786");
         Assertions.assertNotNull(globalTransactionDO_db);
 
         Assertions.assertEquals(globalTransactionDO_db.getBeginTime(), globalTransactionDO_db.getBeginTime());
@@ -147,7 +149,7 @@ public class LogStoreDataBaseDAOTest {
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
 
-        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.queryGlobalTransactionDO(867978970L);
+        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.getGlobalTransactionDO(867978970L);
         Assertions.assertNotNull(globalTransactionDO_db);
 
         Assertions.assertEquals(globalTransactionDO_db.getXid(), globalTransactionDO_db.getXid());
@@ -220,7 +222,7 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[]{1}, 10);
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.findGlobalTransactionDO(new SessionCondition(GlobalStatus.Begin, 10));
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(2, globalTransactionDOs.size());
 
@@ -289,7 +291,7 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[]{1}, 1);
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.findGlobalTransactionDO(new SessionCondition(GlobalStatus.Begin, 1));
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(1, globalTransactionDOs.size());
 
@@ -473,7 +475,7 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<BranchTransactionDO> rets = logStoreDataBaseDAO.queryBranchTransactionDO("abc-123:6789");
+        List<BranchTransactionDO> rets = logStoreDataBaseDAO.findBranchTransactionDO("abc-123:6789");
         Assertions.assertTrue(CollectionUtils.isNotEmpty(rets));
         Assertions.assertEquals(2, rets.size());
 

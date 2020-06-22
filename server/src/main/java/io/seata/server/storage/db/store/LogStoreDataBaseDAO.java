@@ -35,7 +35,9 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.core.store.GlobalTransactionDOCondition;
 import io.seata.core.store.LogStore;
+import io.seata.core.store.SortOrder;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +110,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public GlobalTransactionDO queryGlobalTransactionDO(String xid) {
+    public GlobalTransactionDO getGlobalTransactionDO(String xid) {
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
@@ -132,7 +134,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public GlobalTransactionDO queryGlobalTransactionDO(long transactionId) {
+    public GlobalTransactionDO getGlobalTransactionDO(long transactionId) {
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
@@ -156,7 +158,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public List<GlobalTransactionDO> queryGlobalTransactionDO(int[] statuses, int limit) {
+    public List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionDOCondition condition) {
         List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -165,21 +167,61 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < statuses.length; i++) {
-                sb.append("?");
-                if (i != (statuses.length - 1)) {
-                    sb.append(", ");
+            // where
+            StringBuilder wherePlaceHolder = new StringBuilder();
+            // transaction_id = ?
+            if (condition.getTransactionId() != null && condition.getTransactionId() > 0) {
+                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID).append(" = ?");
+            }
+            // status in (?, ?, ?)
+            if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
+                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" in (");
+                for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
+                    if (j > 0) {
+                        wherePlaceHolder.append(", ");
+                    }
+                    wherePlaceHolder.append("?");
+                }
+                wherePlaceHolder.append(")");
+            }
+            // begin < System.currentTimeMillis() - ?
+            if (condition.getOverTimeAliveMills() != null && condition.getOverTimeAliveMills() > 0) {
+                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ?");
+            }
+            // order by xxx [asc|desc]
+            StringBuilder sortPlaceHolder = new StringBuilder();
+            if (condition.getSortField() != null) {
+                sortPlaceHolder.append(" order by ").append(condition.getSortField().fieldName());
+                if (SortOrder.DESC == condition.getSortOrder()) {
+                   sortPlaceHolder.append(" desc");
                 }
             }
+            // build sql
+            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable,
+                wherePlaceHolder.toString(), sortPlaceHolder.toString());
 
-            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, sb.toString());
             ps = conn.prepareStatement(sql);
-            for (int i = 0; i < statuses.length; i++) {
-                int status = statuses[i];
-                ps.setInt(i + 1, status);
+            int i = 1;
+            // transaction_id = ?
+            if (condition.getTransactionId() != null && condition.getTransactionId() > 0) {
+                ps.setLong(i++, condition.getTransactionId());
             }
-            ps.setInt(statuses.length + 1, limit);
+            // status in (?, ?, ?)
+            if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
+                for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
+                    ps.setInt(i++, condition.getStatuses()[j].getCode());
+                }
+            }
+            // begin < System.currentTimeMillis() - ?
+            if (condition.getOverTimeAliveMills() != null && condition.getOverTimeAliveMills() > 0) {
+                ps.setLong(i++, System.currentTimeMillis() - condition.getOverTimeAliveMills());
+            }
+            // limit
+            ps.setInt(i, condition.getLimit());
+
             rs = ps.executeQuery();
             while (rs.next()) {
                 ret.add(convertGlobalTransactionDO(rs));
@@ -278,7 +320,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public List<BranchTransactionDO> queryBranchTransactionDO(String xid) {
+    public List<BranchTransactionDO> findBranchTransactionDO(String xid) {
         List<BranchTransactionDO> rets = new ArrayList<>();
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable);
         Connection conn = null;
@@ -304,7 +346,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
+    public List<BranchTransactionDO> findBranchTransactionDO(List<String> xids) {
         int length = xids.size();
         int retsSize = length * 3;
         List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
