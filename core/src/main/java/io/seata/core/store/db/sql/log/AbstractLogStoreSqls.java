@@ -170,11 +170,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
-
-    @Override
-    public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
-
+    public abstract String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
 
     @Override
     public abstract String getInsertBranchTransactionSQL(String branchTable);

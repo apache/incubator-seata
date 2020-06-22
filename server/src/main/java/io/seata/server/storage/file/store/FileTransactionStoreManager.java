@@ -300,12 +300,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     @Override
-    public GlobalSession readSession(String xid) {
-        throw new StoreException("unsupport for read from file, xid:" + xid);
-    }
-
-    @Override
-    public List<GlobalSession> readSession(SessionCondition sessionCondition) {
+    public List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions) {
         throw new StoreException("unsupport for read from file");
     }
 

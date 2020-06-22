@@ -104,12 +104,12 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public Collection<GlobalSession> allSessions() {
+                public Collection<GlobalSession> allSessions(boolean withBranchSessions) {
                     return null;
                 }
 
                 @Override
-                public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+                public List<GlobalSession> findGlobalSessions(SessionCondition condition, boolean withBranchSessions) {
                     List<GlobalSession> globalSessions = new ArrayList<>();
                     int begin = 10000;
                     int num = 1000;
@@ -152,7 +152,7 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                public void onUpdateBranch(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
                                            String applicationData) throws TransactionException {
 
                 }

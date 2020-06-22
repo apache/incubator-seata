@@ -25,8 +25,6 @@ import io.seata.core.store.GlobalTransactionDOCondition;
  */
 public class SessionCondition extends GlobalTransactionDOCondition {
 
-    private Boolean withBranchSessions;
-
     /**
      * Instantiates a new Session condition.
      */
@@ -69,14 +67,5 @@ public class SessionCondition extends GlobalTransactionDOCondition {
      */
     public SessionCondition(long overTimeAliveMills) {
         super(overTimeAliveMills);
-    }
-
-
-    public Boolean getWithBranchSessions() {
-        return withBranchSessions;
-    }
-
-    public void setWithBranchSessions(Boolean withBranchSessions) {
-        this.withBranchSessions = withBranchSessions;
     }
 }

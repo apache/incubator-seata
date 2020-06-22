@@ -44,18 +44,6 @@ public interface SessionLifecycleListener {
     void onUpdate(GlobalSession globalSession, GlobalStatus status) throws TransactionException;
 
     /**
-     * On branch update.
-     *
-     * @param globalSession   the global session
-     * @param branchSession   the branch session
-     * @param status          the status
-     * @param applicationData the application data
-     * @throws TransactionException the transaction exception
-     */
-    void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
-                        String applicationData) throws TransactionException;
-
-    /**
      * On add branch.
      *
      * @param globalSession the global session
@@ -63,6 +51,18 @@ public interface SessionLifecycleListener {
      * @throws TransactionException the transaction exception
      */
     void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
+
+    /**
+     * On update branch.
+     *
+     * @param globalSession   the global session
+     * @param branchSession   the branch session
+     * @param status          the status
+     * @param applicationData the application data
+     * @throws TransactionException the transaction exception
+     */
+    void onUpdateBranch(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                        String applicationData) throws TransactionException;
 
     /**
      * On remove branch.

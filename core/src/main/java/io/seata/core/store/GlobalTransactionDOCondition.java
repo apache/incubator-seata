@@ -15,7 +15,11 @@
  */
 package io.seata.core.store;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.model.GlobalStatus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type GlobalTransactionDO condition.
@@ -23,12 +27,11 @@ import io.seata.core.model.GlobalStatus;
  * @author wang.liang
  */
 public class GlobalTransactionDOCondition {
-    protected Long transactionId;
     protected GlobalStatus[] statuses;
     protected Long overTimeAliveMills;
     protected GlobalTableSortField sortField;
     protected SortOrder sortOrder;
-    protected int limit = 100;
+    protected int limit;
 
     /**
      * Instantiates a new Session condition.
@@ -49,7 +52,7 @@ public class GlobalTransactionDOCondition {
      * Instantiates a new Session condition.
      *
      * @param status the status
-     * @param limit    the limit
+     * @param limit  the limit
      */
     public GlobalTransactionDOCondition(GlobalStatus status, int limit) {
         this.statuses = new GlobalStatus[]{status};
@@ -76,13 +79,120 @@ public class GlobalTransactionDOCondition {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
+    /**
+     * Match data.
+     *
+     * @param globalTransactionDO the global transaction do
+     * @return the boolean
+     */
+    public boolean isMatch(GlobalTransactionDO globalTransactionDO) {
+        if (globalTransactionDO == null) {
+            return false;
+        }
 
-    public Long getTransactionId() {
-        return transactionId;
+        // where
+        // status in (?, ?, ?)
+        if (statuses != null && statuses.length > 0) {
+            if (!this.hasStatus(globalTransactionDO.getStatus())) {
+                return false; // un match
+            }
+        }
+        // begin < System.currentTimeMillis() - ?
+        if (overTimeAliveMills != null && overTimeAliveMills > 0) {
+            if (globalTransactionDO.getBeginTime() >= System.currentTimeMillis() - overTimeAliveMills) {
+                return false; // un match
+            }
+        }
+
+        return true;
     }
 
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
+    public List<GlobalTransactionDO> filter(List<GlobalTransactionDO> globalTransactionDOs) {
+        List<GlobalTransactionDO> found = new ArrayList<>();
+        if (globalTransactionDOs != null) {
+            for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+                if (isMatch(globalTransactionDO)) {
+                    found.add(globalTransactionDO);
+                }
+            }
+        }
+        return found;
+    }
+
+    public List<GlobalTransactionDO> sort(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return new ArrayList<>();
+        }
+
+        if (sortField == null) {
+            return globalTransactionDOs;
+        }
+
+        globalTransactionDOs.sort((a, b) -> {
+            switch (sortField) {
+                case XID:
+                    return this.compareTo(a.getXid(), b.getXid());
+                case TRANSACTION_ID:
+                    return this.compareTo(a.getTransactionId(), b.getTransactionId());
+                case STATUS:
+                    return this.compareTo(a.getStatus(), b.getStatus());
+                case APPLICATION_ID:
+                    return this.compareTo(a.getApplicationId(), b.getApplicationId());
+                case TRANSACTION_SERVICE_GROUP:
+                    return this.compareTo(a.getTransactionServiceGroup(), b.getTransactionServiceGroup());
+                case TRANSACTION_NAME:
+                    return this.compareTo(a.getTransactionName(), b.getTransactionName());
+                case TIMEOUT:
+                    return this.compareTo(a.getTimeout(), b.getTimeout());
+                case BEGIN_TIME:
+                    return this.compareTo(a.getBeginTime(), b.getBeginTime());
+                //case APPLICATION_DATA:
+                //    return this.compareTo(a.getApplicationData(), b.getApplicationData());
+                case GMT_CREATE:
+                    return this.compareTo(a.getGmtCreate(), b.getGmtCreate());
+                case GMT_MODIFIED:
+                    return this.compareTo(a.getGmtModified(), b.getGmtModified());
+            }
+            return 0;
+        });
+        return globalTransactionDOs;
+    }
+
+    private int compareTo(Comparable a, Comparable b) {
+        int ret;
+        if (a == null) {
+            if (b == null) {
+                return 0;
+            } else {
+                ret = -1;
+            }
+        } else {
+            if (b == null) {
+                ret = 1;
+            } else {
+                ret = a.compareTo(b);
+            }
+        }
+
+        if (ret == 0) {
+            return ret;
+        }
+
+        if (sortOrder == SortOrder.DESC) {
+            if (ret > 0) return -1;
+            else return 1;
+        }
+
+        return ret;
+    }
+
+    public boolean hasStatus(int statusCode) {
+        for (GlobalStatus status : statuses) {
+            if (status.getCode() == statusCode) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public GlobalStatus[] getStatuses() {

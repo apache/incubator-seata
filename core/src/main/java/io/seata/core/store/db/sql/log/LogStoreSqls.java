@@ -70,15 +70,7 @@ public interface LogStoreSqls {
      * @param sortPlaceHolder  the sort place holder
      * @return the string
      */
-    String getQueryGlobalTransactionSQLByStatus(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
-
-    /**
-     * Get query global transaction for recovery sql string.
-     *
-     * @param globalTable the global table
-     * @return the string
-     */
-    String getQueryGlobalTransactionForRecoverySQL(String globalTable);
+    String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
 
     /**
      * Get insert branch transaction sql string.

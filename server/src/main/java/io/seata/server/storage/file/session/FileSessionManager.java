@@ -107,12 +107,13 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     }
 
     @Override
-    public Collection<GlobalSession> allSessions() {
+    public Collection<GlobalSession> allSessions(boolean withBranchSessions) {
         return sessionMap.values();
     }
 
     @Override
-    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+    public List<GlobalSession> findGlobalSessions(SessionCondition condition, boolean withBranchSessions) {
+        // withBranchSessions without process in memory
         List<GlobalSession> found = new ArrayList<>();
         for (GlobalSession globalSession : sessionMap.values()) {
             if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {

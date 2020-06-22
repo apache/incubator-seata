@@ -42,23 +42,12 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.
      */
-    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE = "select A.* from ("
+    public static final String QUERY_GLOBAL_TRANSACTION_ORACLE = "select A.* from ("
             + " select " + ALL_GLOBAL_COLUMNS
             + "   from " + GLOBAL_TABLE_PLACEHOLD
             + WHERE_PLACEHOLD
             + SORT_PLACEHOLD
             + ") A"
-            + " where ROWNUM <= ?";
-
-    /**
-     * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE.
-     */
-    public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE = "select A.* from ("
-            + " select " + ALL_GLOBAL_COLUMNS
-            + "   from " + GLOBAL_TABLE_PLACEHOLD
-            + "  where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14)"
-            + "  order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
-            + " ) A"
             + " where ROWNUM <= ?";
 
     /**
@@ -88,14 +77,9 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String wherePlaceHolder, String sortPlaceHolder) {
-        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+    public String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
             .replace(WHERE_PLACEHOLD, wherePlaceHolder).replace(SORT_PLACEHOLD, sortPlaceHolder);
-    }
-
-    @Override
-    public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
-        return QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override

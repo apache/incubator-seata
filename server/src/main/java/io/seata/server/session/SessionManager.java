@@ -107,7 +107,17 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      *
      * @return the collection
      */
-    Collection<GlobalSession> allSessions();
+    default Collection<GlobalSession> allSessions() {
+        return allSessions(true);
+    }
+
+    /**
+     * All sessions collection.
+     *
+     * @param withBranchSessions the with branch sessions
+     * @return the collection
+     */
+    Collection<GlobalSession> allSessions(boolean withBranchSessions);
 
     /**
      * Find global sessions list.
@@ -115,7 +125,17 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param condition the condition
      * @return the list
      */
-    List<GlobalSession> findGlobalSessions(SessionCondition condition);
+    default List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+        return findGlobalSessions(condition, true);
+    }
+
+    /**
+     * Find global sessions list.
+     *
+     * @param condition the condition
+     * @return the list
+     */
+    List<GlobalSession> findGlobalSessions(SessionCondition condition, boolean withBranchSessions);
 
     /**
      * lock and execute

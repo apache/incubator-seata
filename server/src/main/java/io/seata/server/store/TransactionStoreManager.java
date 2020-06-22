@@ -15,6 +15,7 @@
  */
 package io.seata.server.store;
 
+import io.seata.core.store.LogStore;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 
@@ -36,37 +37,34 @@ public interface TransactionStoreManager {
      */
     boolean writeSession(LogOperation logOperation, SessionStorable session);
 
-
     /**
-     * Read global session global session.
+     * Get global session.
      *
-     * @param xid the xid
-     * @return the global session
-     */
-    GlobalSession readSession(String xid);
-
-    /**
-     * Read session global session.
-     *
-     * @param xid the xid
+     * @param xid                the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
-    GlobalSession readSession(String xid, boolean withBranchSessions);
+    GlobalSession getSession(String xid, boolean withBranchSessions);
 
     /**
-     * Read session by status list.
+     * Find global session by condition.
      *
      * @param sessionCondition the session condition
      * @return the list
      */
-    List<GlobalSession> readSession(SessionCondition sessionCondition);
+    List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions);
 
     /**
      * Shutdown.
      */
     void shutdown();
 
+    /**
+     * Sets log store.
+     *
+     * @param logStore the log store
+     */
+    void setLogStore(LogStore logStore);
 
     /**
      * The enum Log operation.

@@ -15,8 +15,6 @@
  */
 package io.seata.server.storage.redis.session;
 
-import java.util.Collection;
-import java.util.List;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -38,12 +36,16 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * @author funkye
  */
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager
-    implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
+        implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
+
     /**
      * The constant LOGGER.
      */
@@ -64,8 +66,7 @@ public class RedisSessionManager extends AbstractSessionManager
     /**
      * Instantiates a new Data base session manager.
      *
-     * @param name
-     *            the name
+     * @param name the name
      */
     public RedisSessionManager(String name) {
         super();
@@ -106,9 +107,8 @@ public class RedisSessionManager extends AbstractSessionManager
     /**
      * remove globalSession 1. rootSessionManager remove normal globalSession 2. retryCommitSessionManager and
      * retryRollbackSessionManager remove retry expired globalSession
-     * 
-     * @param session
-     *            the session
+     *
+     * @param session the session
      * @throws TransactionException
      */
     @Override
@@ -155,41 +155,41 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public GlobalSession getGlobalSession(String xid, boolean withBranchSessions) {
-        return transactionStoreManager.readSession(xid, withBranchSessions);
+        return transactionStoreManager.getSession(xid, withBranchSessions);
     }
 
     @Override
-    public Collection<GlobalSession> allSessions() {
+    public Collection<GlobalSession> allSessions(boolean withBranchSessions) {
         // get by taskName
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
-                GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying,
+                    GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             // all data
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.UnKnown, GlobalStatus.Begin,
-                GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
-                GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
-                GlobalStatus.AsyncCommitting}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Begin,
+                    GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
+                    GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
+                    GlobalStatus.AsyncCommitting}));
         }
     }
 
     @Override
-    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+    public List<GlobalSession> findGlobalSessions(SessionCondition condition, boolean withBranchSessions) {
         // nothing need to do
-        return transactionStoreManager.readSession(condition);
+        return transactionStoreManager.findSession(condition, withBranchSessions);
     }
 
     @Override
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-        throws TransactionException {
+            throws TransactionException {
         return lockCallable.call();
     }
 
     @Override
-    public void reload() {}
-
+    public void reload() {
+    }
 }

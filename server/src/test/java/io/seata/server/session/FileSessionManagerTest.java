@@ -273,7 +273,7 @@ public class FileSessionManagerTest {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.onBegin(globalSession);
             sessionManager.onAddBranch(globalSession, branchSession);
-            sessionManager.onBranchUpdate(globalSession, branchSession, BranchStatus.PhaseTwo_Committed, null);
+            sessionManager.onUpdateBranch(globalSession, branchSession, BranchStatus.PhaseTwo_Committed, null);
             sessionManager.onEnd(globalSession);
         }
     }

@@ -42,19 +42,11 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     /**
      * This constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL.
      */
-    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
+    public static final String QUERY_GLOBAL_TRANSACTION_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
             + " from " + GLOBAL_TABLE_PLACEHOLD
             + WHERE_PLACEHOLD
             + SORT_PLACEHOLD
             + " limit ?";
-
-    /**
-     * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.
-     */
-    public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14)"
-            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_POSTGRESQL.
@@ -83,14 +75,9 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     }
 
     @Override
-    public String getQueryGlobalTransactionSQLByStatus(String globalTable, String wherePlaceHolder, String sortPlaceHolder) {
-        return QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+    public String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
                 .replace(WHERE_PLACEHOLD, wherePlaceHolder).replace(SORT_PLACEHOLD, sortPlaceHolder);
-    }
-
-    @Override
-    public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
-        return QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override

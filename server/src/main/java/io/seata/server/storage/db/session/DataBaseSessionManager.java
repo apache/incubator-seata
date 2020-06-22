@@ -172,11 +172,11 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public GlobalSession getGlobalSession(String xid, boolean withBranchSessions) {
-        return transactionStoreManager.readSession(xid, withBranchSessions);
+        return transactionStoreManager.getSession(xid, withBranchSessions);
     }
 
     @Override
-    public Collection<GlobalSession> allSessions() {
+    public Collection<GlobalSession> allSessions(boolean withBranchSessions) {
         // get by taskName
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
@@ -196,9 +196,9 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+    public List<GlobalSession> findGlobalSessions(SessionCondition condition, boolean withBranchSessions) {
         // nothing need to do
-        return transactionStoreManager.readSession(condition);
+        return transactionStoreManager.findSession(condition, withBranchSessions);
     }
 
     @Override

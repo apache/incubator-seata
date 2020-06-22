@@ -178,7 +178,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             branchSession.setApplicationData(applicationData);
         }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onBranchUpdate(this, branchSession, status, applicationData);
+            lifecycleListener.onUpdateBranch(this, branchSession, status, applicationData);
         }
     }
 

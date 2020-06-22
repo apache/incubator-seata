@@ -99,8 +99,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void updateBranchSession(BranchSession branchSession, BranchStatus status,
-                                    String applicationData)
+    public void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
@@ -134,14 +133,14 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void onBranchUpdate(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
-                               String applicationData) throws TransactionException {
-        updateBranchSession(branchSession, status, applicationData);
+    public void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        addBranchSession(globalSession, branchSession);
     }
 
     @Override
-    public void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
-        addBranchSession(globalSession, branchSession);
+    public void onUpdateBranch(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
+                               String applicationData) throws TransactionException {
+        updateBranchSession(branchSession, status, applicationData);
     }
 
     @Override
