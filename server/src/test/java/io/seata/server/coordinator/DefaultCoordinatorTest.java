@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
+import static io.seata.server.storage.file.session.FileSessionManager.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
  * The type DefaultCoordinator test.
@@ -115,13 +115,13 @@ public class DefaultCoordinatorTest {
         try {
             xid = core.begin(applicationId, txServiceGroup, txName, timeout);
             Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
-            globalSession = SessionHolder.findGlobalSession(xid);
+            globalSession = SessionHolder.getGlobalSession(xid);
             result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
-        globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession = SessionHolder.getGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
@@ -131,7 +131,7 @@ public class DefaultCoordinatorTest {
     @MethodSource("xidAndBranchIdProviderForRollback")
     public void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.getGlobalSession(xid);
         try {
             result = core.branchRollback(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
@@ -153,7 +153,7 @@ public class DefaultCoordinatorTest {
         defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();
 
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.getGlobalSession(xid);
         Assertions.assertNull(globalSession);
 
     }
@@ -164,7 +164,7 @@ public class DefaultCoordinatorTest {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.getGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
@@ -191,7 +191,7 @@ public class DefaultCoordinatorTest {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.getGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
@@ -215,12 +215,7 @@ public class DefaultCoordinatorTest {
 
     @AfterAll
     public static void afterClass() throws Exception {
-
-        Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
-        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
-        for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
-            asyncGlobalSession.closeAndClean();
-        }
+        Collection<GlobalSession> globalSessions = SessionHolder.getSessionManager().allSessions();
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }

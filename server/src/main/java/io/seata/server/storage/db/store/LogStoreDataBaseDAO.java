@@ -21,6 +21,9 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -48,7 +51,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABL
  *
  * @author zhangsen
  */
-public class LogStoreDataBaseDAO extends AbstractLogStore {
+public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, BranchTransactionDO> {
 
     //region Constants
 
@@ -182,22 +185,37 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
             // where
             StringBuilder wherePlaceHolder = new StringBuilder();
+            long now = System.currentTimeMillis();
             // status in (?, ?, ?)
             if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
-                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
-                        .append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" in (");
-                for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
-                    if (j > 0) {
-                        wherePlaceHolder.append(", ");
+                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ");
+                if (condition.getStatuses().length > 1) {
+                    wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" in (");
+                    for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
+                        if (j > 0) {
+                            wherePlaceHolder.append(", ");
+                        }
+                        wherePlaceHolder.append("?");
                     }
-                    wherePlaceHolder.append("?");
+                    wherePlaceHolder.append(")");
+                } else {
+                    wherePlaceHolder.append(" = ?");
                 }
-                wherePlaceHolder.append(")");
             }
-            // begin < System.currentTimeMillis() - ?
-            if (condition.getOverTimeAliveMills() != null && condition.getOverTimeAliveMills() > 0) {
+            // begin_time < System.currentTimeMillis() - ?
+            if (condition.getOverTimeAliveMills() > 0) {
                 wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
                         .append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ?");
+            }
+            //  true: begin_time  < System.currentTimeMillis() - timeout
+            // false: begin_time >= System.currentTimeMillis() - timeout
+            if (condition.getTimeoutData() != null) {
+                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ");
+                if (condition.getTimeoutData()) {
+                    wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ? - timeout");
+                } else {
+                    wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" >= ? - timeout");
+                }
             }
             // order by xxx [asc|desc]
             StringBuilder sortPlaceHolder = new StringBuilder();
@@ -219,9 +237,14 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
                     ps.setInt(i++, condition.getStatuses()[j].getCode());
                 }
             }
-            // begin < System.currentTimeMillis() - ?
-            if (condition.getOverTimeAliveMills() != null && condition.getOverTimeAliveMills() > 0) {
-                ps.setLong(i++, System.currentTimeMillis() - condition.getOverTimeAliveMills());
+            // begin_time < System.currentTimeMillis() - ?
+            if (condition.getOverTimeAliveMills() > 0) {
+                ps.setLong(i++, now - condition.getOverTimeAliveMills());
+            }
+            //  true: begin_time  < System.currentTimeMillis() - timeout
+            // false: begin_time >= System.currentTimeMillis() - timeout
+            if (condition.getTimeoutData() != null) {
+                ps.setLong(i++, now);
             }
             // limit
             ps.setInt(i, condition.getLimit());
@@ -249,7 +272,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
             ps = conn.prepareStatement(sql);
             ps.setString(1, globalTransactionDO.getXid());
             ps.setLong(2, globalTransactionDO.getTransactionId());
-            ps.setInt(3, globalTransactionDO.getStatus());
+            ps.setInt(3, globalTransactionDO.getStatus().getCode());
             ps.setString(4, globalTransactionDO.getApplicationId());
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
@@ -269,13 +292,13 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        if (globalTransactionDO.getStatus() < 0) {
+        if (globalTransactionDO.getStatus() == null) {
             return true;
         }
 
         // sets place holder
         StringBuilder sb = new StringBuilder();
-        if (globalTransactionDO.getStatus() >= 0) {
+        if (globalTransactionDO.getStatus() != null) {
             sb.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
         }
 
@@ -291,8 +314,8 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
             //sets
             int i = 1;
-            if (globalTransactionDO.getStatus() >= 0) {
-                ps.setInt(i++, globalTransactionDO.getStatus());
+            if (globalTransactionDO.getStatus() != null) {
+                ps.setInt(i++, globalTransactionDO.getStatus().getCode());
             }
             ps.setString(i, globalTransactionDO.getXid());
 
@@ -393,8 +416,8 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
             ps.setLong(3, branchTransactionDO.getBranchId());
             ps.setString(4, branchTransactionDO.getResourceGroupId());
             ps.setString(5, branchTransactionDO.getResourceId());
-            ps.setString(6, branchTransactionDO.getBranchType());
-            ps.setInt(7, branchTransactionDO.getStatus());
+            ps.setString(6, branchTransactionDO.getBranchType().name());
+            ps.setInt(7, branchTransactionDO.getStatus().getCode());
             ps.setString(8, branchTransactionDO.getClientId());
             ps.setString(9, branchTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
@@ -407,14 +430,14 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        if (branchTransactionDO.getStatus() < 0
+        if (branchTransactionDO.getStatus() == null
                 && StringUtils.isBlank(branchTransactionDO.getApplicationData())) {
             return true;
         }
 
         // sets place holder
         StringBuilder sb = new StringBuilder();
-        if (branchTransactionDO.getStatus() >= 0) {
+        if (branchTransactionDO.getStatus() != null) {
             sb.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
         }
         if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
@@ -433,8 +456,8 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
             //sets
             int i = 1;
-            if (branchTransactionDO.getStatus() >= 0) {
-                ps.setInt(i++, branchTransactionDO.getStatus());
+            if (branchTransactionDO.getStatus() != null) {
+                ps.setInt(i++, branchTransactionDO.getStatus().getCode());
             }
             if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
                 ps.setString(i++, branchTransactionDO.getApplicationData());
@@ -510,7 +533,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
-        globalTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
+        globalTransactionDO.setStatus(GlobalStatus.get(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS)));
         globalTransactionDO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
         globalTransactionDO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
         globalTransactionDO.setTimeout(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
@@ -527,13 +550,13 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
     private BranchTransactionDO convertBranchTransactionDO(ResultSet rs) throws SQLException {
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
         branchTransactionDO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
-        branchTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
+        branchTransactionDO.setStatus(BranchStatus.get(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS)));
         branchTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
         branchTransactionDO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
         branchTransactionDO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
         branchTransactionDO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
         branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
-        branchTransactionDO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
+        branchTransactionDO.setBranchType(BranchType.valueOf(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE)));
         branchTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
         branchTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
         branchTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));

@@ -25,29 +25,29 @@ import java.util.Date;
  *
  * @author zhangsen
  */
-public class GlobalTransactionDO {
+public class GlobalTransactionDO implements GlobalTransactionModel {
 
-    private String xid;
+    protected String xid;
 
-    private long transactionId;
+    protected long transactionId;
 
-    private int status = GlobalStatus.UnKnown.getCode();
+    protected volatile GlobalStatus status = GlobalStatus.UnKnown;
 
-    private String applicationId;
+    protected String applicationId;
 
-    private String transactionServiceGroup;
+    protected String transactionServiceGroup;
 
-    private String transactionName;
+    protected String transactionName;
 
-    private int timeout;
+    protected int timeout;
 
-    private long beginTime;
+    protected long beginTime;
 
-    private String applicationData;
+    protected String applicationData;
 
-    private Date gmtCreate;
+    protected Date gmtCreate;
 
-    private Date gmtModified;
+    protected Date gmtModified;
 
     /**
      * Gets xid.
@@ -72,7 +72,7 @@ public class GlobalTransactionDO {
      *
      * @return the status
      */
-    public int getStatus() {
+    public GlobalStatus getStatus() {
         return status;
     }
 
@@ -81,9 +81,10 @@ public class GlobalTransactionDO {
      *
      * @param status the status
      */
-    public void setStatus(int status) {
+    public void setStatus(GlobalStatus status) {
         this.status = status;
     }
+
 
     /**
      * Gets application id.

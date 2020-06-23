@@ -26,7 +26,6 @@ import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -47,50 +46,46 @@ public abstract class AbstractServerTest {
         (new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    File file = new File("sessionStore/root.data");
-                    if(file.exists()){
-                        file.delete();
-                    }
-
-                    ParameterParser parameterParser = new ParameterParser(new String[]{});
-
-                    //initialize the metrics
-                    MetricsManager.get().init();
-
-                    System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
-                    rpcServer = new RpcServer(workingThreads);
-                    //server port
-                    rpcServer.setListenPort(parameterParser.getPort());
-                    //log store mode : file、db
-                    SessionHolder.init(parameterParser.getStoreMode());
-
-                    DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
-                    coordinator.init();
-                    rpcServer.setHandler(coordinator);
-                    // register ShutdownHook
-                    ShutdownHook.getInstance().addDisposable(coordinator);
-
-                    //127.0.0.1 and 0.0.0.0 are not valid here.
-                    if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-                        XID.setIpAddress(parameterParser.getHost());
-                    } else {
-                        XID.setIpAddress(NetUtil.getLocalIp());
-                    }
-                    XID.setPort(rpcServer.getListenPort());
-
-                    rpcServer.init();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                File file = new File("sessionStore/root.data");
+                if (file.exists()) {
+                    file.delete();
                 }
+
+                ParameterParser parameterParser = new ParameterParser(new String[]{});
+
+                //initialize the metrics
+                MetricsManager.get().init();
+
+                System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
+
+                rpcServer = new RpcServer(workingThreads);
+                //server port
+                rpcServer.setListenPort(parameterParser.getPort());
+                //log store mode : file、db
+                SessionHolder.init(parameterParser.getStoreMode());
+
+                DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+                coordinator.init();
+                rpcServer.setHandler(coordinator);
+                // register ShutdownHook
+                ShutdownHook.getInstance().addDisposable(coordinator);
+
+                //127.0.0.1 and 0.0.0.0 are not valid here.
+                if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+                    XID.setIpAddress(parameterParser.getHost());
+                } else {
+                    XID.setIpAddress(NetUtil.getLocalIp());
+                }
+                XID.setPort(rpcServer.getListenPort());
+
+                rpcServer.init();
             }
         })).start();
         Thread.sleep(5000);
     }
 
     protected static final void stopSeataServer() throws InterruptedException {
-        if(rpcServer != null){
+        if (rpcServer != null) {
             rpcServer.destroy();
             Thread.sleep(5000);
         }

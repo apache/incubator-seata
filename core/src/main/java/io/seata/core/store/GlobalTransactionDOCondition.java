@@ -30,11 +30,27 @@ public class GlobalTransactionDOCondition {
 
     //region Fields
 
+    /**
+     * condition: in status
+     */
     protected GlobalStatus[] statuses;
-    protected Long overTimeAliveMills;
+
+    /**
+     * condition: begin_time < currentTimeMillis() - overTimeAliveMills
+     */
+    protected long overTimeAliveMills = 0;
+    /**
+     * condition: filter is timeout or not timeout
+     * null: all
+     * true: timeout data
+     * false: not timeout data
+     */
+    protected Boolean timeoutData;
+
     protected GlobalTableSortField sortField;
     protected SortOrder sortOrder;
-    protected int limit;
+
+    protected int limit = 0;
 
     //endregion
 
@@ -108,20 +124,26 @@ public class GlobalTransactionDOCondition {
                 return false; // un match
             }
         }
-        // begin < System.currentTimeMillis() - ?
-        if (overTimeAliveMills != null && overTimeAliveMills > 0) {
+        // begin_time < System.currentTimeMillis() - ?
+        if (overTimeAliveMills > 0) {
             if (globalTransactionDO.getBeginTime() >= System.currentTimeMillis() - overTimeAliveMills) {
                 return false; // un match
             }
+        }
+        //  true: begin_time  < System.currentTimeMillis() - timeout
+        // false: begin_time >= System.currentTimeMillis() - timeout
+        if (timeoutData != null) {
+            boolean isTimeout = globalTransactionDO.getBeginTime() < System.currentTimeMillis() - globalTransactionDO.getTimeout();
+            return timeoutData ? isTimeout : !isTimeout;
         }
 
         return true;
     }
 
-    public List<GlobalTransactionDO> filter(List<GlobalTransactionDO> globalTransactionDOs) {
-        List<GlobalTransactionDO> found = new ArrayList<>();
+    public <T extends GlobalTransactionDO> List<T> filter(List<T> globalTransactionDOs) {
+        List<T> found = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(globalTransactionDOs)) {
-            for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            for (T globalTransactionDO : globalTransactionDOs) {
                 if (this.isMatch(globalTransactionDO)) {
                     found.add(globalTransactionDO);
                 }
@@ -130,7 +152,7 @@ public class GlobalTransactionDOCondition {
         return found;
     }
 
-    public List<GlobalTransactionDO> sort(List<GlobalTransactionDO> globalTransactionDOs) {
+    public <T extends GlobalTransactionDO> List<T> sort(List<T> globalTransactionDOs) {
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
             return new ArrayList<>();
         }
@@ -200,9 +222,9 @@ public class GlobalTransactionDOCondition {
         return ret;
     }
 
-    private boolean hasStatus(int statusCode) {
+    private boolean hasStatus(GlobalStatus status0) {
         for (GlobalStatus status : statuses) {
-            if (status.getCode() == statusCode) {
+            if (status == status0) {
                 return true;
             }
         }
@@ -221,12 +243,20 @@ public class GlobalTransactionDOCondition {
         this.statuses = statuses;
     }
 
-    public Long getOverTimeAliveMills() {
+    public long getOverTimeAliveMills() {
         return overTimeAliveMills;
     }
 
-    public void setOverTimeAliveMills(Long overTimeAliveMills) {
+    public void setOverTimeAliveMills(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
+    }
+
+    public Boolean getTimeoutData() {
+        return timeoutData;
+    }
+
+    public void setTimeoutData(Boolean timeoutData) {
+        this.timeoutData = timeoutData;
     }
 
     public GlobalTableSortField getSortField() {

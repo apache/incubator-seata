@@ -37,7 +37,7 @@ import java.util.Set;
  *
  * @author wang.liang
  */
-public class LogStoreRedisDAO extends AbstractLogStore {
+public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, BranchTransactionDO> {
 
     //region Constants
 
@@ -106,7 +106,7 @@ public class LogStoreRedisDAO extends AbstractLogStore {
         Set<String> keys = new HashSet<>();
         String cursor = INITIAL_CURSOR;
         ScanParams params = new ScanParams();
-        params.count(logQueryLimit);
+        params.count(logQueryLimit); // limit
         params.match(getGlobalKeyByXid("*"));
         ScanResult<String> scans;
         do {

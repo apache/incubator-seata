@@ -15,24 +15,20 @@
  */
 package io.seata.core.store;
 
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
+import java.util.Date;
 
 /**
- * The type Abstract log store.
+ * The type Base model.
  *
  * @author wang.liang
  */
-public abstract class AbstractLogStore<G extends GlobalTransactionDO, B extends BranchTransactionDO>
-        implements LogStore<G, B> {
+public interface BaseModel {
 
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    Date getGmtCreate();
 
-    @Override
-    public long getCurrentMaxSessionId(long high, long low) {
-        return 0;
-    }
+    void setGmtCreate(Date gmtCreate);
+
+    Date getGmtModified();
+
+    void setGmtModified(Date gmtModified);
 }

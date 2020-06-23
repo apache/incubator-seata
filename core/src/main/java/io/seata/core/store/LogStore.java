@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author zhangsen
  */
-public interface LogStore {
+public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransactionDO> {
 
     /**
      * Get global transaction do global transaction do.
@@ -31,7 +31,7 @@ public interface LogStore {
      * @param xid the xid
      * @return the global transaction do
      */
-    GlobalTransactionDO getGlobalTransactionDO(String xid);
+    G getGlobalTransactionDO(String xid);
 
     /**
      * Get global transaction do global transaction do.
@@ -39,7 +39,7 @@ public interface LogStore {
      * @param transactionId the transaction id
      * @return the global transaction do
      */
-    GlobalTransactionDO getGlobalTransactionDO(long transactionId);
+    G getGlobalTransactionDO(long transactionId);
 
     /**
      * Find global transaction do list.
@@ -47,7 +47,7 @@ public interface LogStore {
      * @param condition the condition
      * @return the list
      */
-    List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionDOCondition condition);
+    List<G> findGlobalTransactionDO(GlobalTransactionDOCondition condition);
 
     /**
      * Insert global transaction do boolean.
@@ -55,7 +55,7 @@ public interface LogStore {
      * @param globalTransactionDO the global transaction do
      * @return the boolean
      */
-    boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+    boolean insertGlobalTransactionDO(G globalTransactionDO);
 
     /**
      * Update global transaction do boolean.
@@ -63,7 +63,7 @@ public interface LogStore {
      * @param globalTransactionDO the global transaction do
      * @return the boolean
      */
-    boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+    boolean updateGlobalTransactionDO(G globalTransactionDO);
 
     /**
      * Delete global transaction do boolean.
@@ -71,23 +71,23 @@ public interface LogStore {
      * @param globalTransactionDO the global transaction do
      * @return the boolean
      */
-    boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+    boolean deleteGlobalTransactionDO(G globalTransactionDO);
 
     /**
      * Find branch transaction do list.
      *
      * @param xid the xid
-     * @return the BranchTransactionDO list
+     * @return the list
      */
-    List<BranchTransactionDO> findBranchTransactionDO(String xid);
+    List<B> findBranchTransactionDO(String xid);
 
     /**
      * Find branch transaction do list.
      *
      * @param xids the xid list
-     * @return the BranchTransactionDO list
+     * @return the list
      */
-    List<BranchTransactionDO> findBranchTransactionDO(List<String> xids);
+    List<B> findBranchTransactionDO(List<String> xids);
 
     /**
      * Insert branch transaction do boolean.
@@ -95,7 +95,7 @@ public interface LogStore {
      * @param branchTransactionDO the branch transaction do
      * @return the boolean
      */
-    boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+    boolean insertBranchTransactionDO(B branchTransactionDO);
 
     /**
      * Update branch transaction do boolean.
@@ -103,7 +103,7 @@ public interface LogStore {
      * @param branchTransactionDO the branch transaction do
      * @return the boolean
      */
-    boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+    boolean updateBranchTransactionDO(B branchTransactionDO);
 
     /**
      * Delete branch transaction do boolean.
@@ -111,7 +111,7 @@ public interface LogStore {
      * @param branchTransactionDO the branch transaction do
      * @return the boolean
      */
-    boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+    boolean deleteBranchTransactionDO(B branchTransactionDO);
 
     /**
      * Gets current max session id.

@@ -18,12 +18,11 @@ package io.seata.server.store.file;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionManager;
 import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.storage.file.store.LogStoreFileDAO;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.file.TransactionWriteStore;
-import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,13 +38,16 @@ import java.util.List;
 /**
  * @author ggndnn
  */
-public class FileTransactionStoreManagerTest {
+public class LogStoreFileDAOTest {
     @Test
     public void testBigDataWrite() throws Exception {
         File seataFile = Files.newTemporaryFile();
-        FileTransactionStoreManager fileTransactionStoreManager = null;
+        LogStoreFileDAO fileDAO = null;
         try {
-            fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
+            Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession");
+            writeSessionMethod.setAccessible(true);
+
+            fileDAO = new LogStoreFileDAO(seataFile.getAbsolutePath());
             BranchSession branchSessionA = Mockito.mock(BranchSession.class);
             GlobalSession global = new GlobalSession();
             Mockito.when(branchSessionA.encode())
@@ -57,9 +59,9 @@ public class FileTransactionStoreManagerTest {
                     .thenReturn(createBigBranchSessionData(global, (byte) 'B'));
             Mockito.when(branchSessionB.getApplicationData())
                     .thenReturn(new String(createBigApplicationData((byte) 'B')));
-            Assertions.assertTrue(fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
-            Assertions.assertTrue(fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
-            List<TransactionWriteStore> list = fileTransactionStoreManager.readWriteStore(2000, false);
+            Assertions.assertTrue((boolean)writeSessionMethod.invoke(fileDAO, TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
+            Assertions.assertTrue((boolean)writeSessionMethod.invoke(fileDAO, TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
+            List<TransactionWriteStore> list = fileDAO.readWriteStore(2000, false);
             Assertions.assertNotNull(list);
             Assertions.assertEquals(2, list.size());
             BranchSession loadedBranchSessionA = (BranchSession) list.get(0).getSessionRequest();
@@ -67,8 +69,8 @@ public class FileTransactionStoreManagerTest {
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
         } finally {
-            if (null != fileTransactionStoreManager) {
-                fileTransactionStoreManager.shutdown();
+            if (null != fileDAO) {
+                fileDAO.shutdown();
             }
             Assertions.assertTrue(seataFile.delete());
         }
@@ -77,10 +79,10 @@ public class FileTransactionStoreManagerTest {
     @Test
     public void testFindTimeoutAndSave() throws Exception {
         File seataFile = Files.newTemporaryFile();
-        Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
+        Method findTimeoutAndSaveMethod = LogStoreFileDAO.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
         FileSessionManager sessionManager = null;
-        FileTransactionStoreManager fileTransactionStoreManager = null;
+        LogStoreFileDAO fileDAO = null;
         try {
             List<GlobalSession> timeoutSessions = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
@@ -99,12 +101,8 @@ public class FileTransactionStoreManagerTest {
                 globalSession.addBranch(branchSessionB);
                 timeoutSessions.add(globalSession);
             }
-            SessionManager sessionManagerMock = Mockito.mock(SessionManager.class);
-            Mockito.when(sessionManagerMock.findGlobalSessions(Mockito.any()))
-                    .thenReturn(timeoutSessions);
-            fileTransactionStoreManager = new FileTransactionStoreManager(
-                seataFile.getAbsolutePath(), sessionManagerMock);
-            Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileTransactionStoreManager));
+            fileDAO = new LogStoreFileDAO(seataFile.getAbsolutePath());
+            Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileDAO));
 
             sessionManager = new FileSessionManager(seataFile.getName(), seataFile.getParent());
             sessionManager.reload();
@@ -119,8 +117,8 @@ public class FileTransactionStoreManagerTest {
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
-            if (null != fileTransactionStoreManager) {
-                fileTransactionStoreManager.shutdown();
+            if (null != fileDAO) {
+                fileDAO.shutdown();
             }
             if (null != sessionManager) {
                 sessionManager.destroy();

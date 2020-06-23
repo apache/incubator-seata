@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
@@ -37,7 +38,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
+public class BranchSession extends BranchTransactionDO
+        implements Lockable, Comparable<BranchSession>, SessionStorable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
@@ -46,100 +48,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_BRANCH_SESSION_SIZE));
 
-    private String xid;
-
-    private long transactionId;
-
-    private long branchId;
-
-    private String resourceGroupId;
-
-    private String resourceId;
-
     private String lockKey;
-
-    private BranchType branchType;
-
-    private BranchStatus status = BranchStatus.Unknown;
-
-    private String clientId;
-
-    private String applicationData;
 
     private ConcurrentMap<FileLocker.BucketLockMap, Set<String>> lockHolder
         = new ConcurrentHashMap<>();
-
-    /**
-     * Gets application data.
-     *
-     * @return the application data
-     */
-    public String getApplicationData() {
-        return applicationData;
-    }
-
-    /**
-     * Sets application data.
-     *
-     * @param applicationData the application data
-     */
-    public void setApplicationData(String applicationData) {
-        this.applicationData = applicationData;
-    }
-
-    /**
-     * Gets resource group id.
-     *
-     * @return the resource group id
-     */
-    public String getResourceGroupId() {
-        return resourceGroupId;
-    }
-
-    /**
-     * Sets resource group id.
-     *
-     * @param resourceGroupId the resource group id
-     */
-    public void setResourceGroupId(String resourceGroupId) {
-        this.resourceGroupId = resourceGroupId;
-    }
-
-    /**
-     * Gets client id.
-     *
-     * @return the client id
-     */
-    public String getClientId() {
-        return clientId;
-    }
-
-    /**
-     * Sets client id.
-     *
-     * @param clientId the client id
-     */
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    /**
-     * Gets resource id.
-     *
-     * @return the resource id
-     */
-    public String getResourceId() {
-        return resourceId;
-    }
-
-    /**
-     * Sets resource id.
-     *
-     * @param resourceId the resource id
-     */
-    public void setResourceId(String resourceId) {
-        this.resourceId = resourceId;
-    }
 
     /**
      * Gets lock key.
@@ -157,96 +69,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      */
     public void setLockKey(String lockKey) {
         this.lockKey = lockKey;
-    }
-
-    /**
-     * Gets branch type.
-     *
-     * @return the branch type
-     */
-    public BranchType getBranchType() {
-        return branchType;
-    }
-
-    /**
-     * Sets branch type.
-     *
-     * @param branchType the branch type
-     */
-    public void setBranchType(BranchType branchType) {
-        this.branchType = branchType;
-    }
-
-    /**
-     * Gets status.
-     *
-     * @return the status
-     */
-    public BranchStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Sets status.
-     *
-     * @param status the status
-     */
-    public void setStatus(BranchStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * Gets transaction id.
-     *
-     * @return the transaction id
-     */
-    public long getTransactionId() {
-        return transactionId;
-    }
-
-    /**
-     * Sets transaction id.
-     *
-     * @param transactionId the transaction id
-     */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    /**
-     * Gets branch id.
-     *
-     * @return the branch id
-     */
-    public long getBranchId() {
-        return branchId;
-    }
-
-    /**
-     * Sets branch id.
-     *
-     * @param branchId the branch id
-     */
-    public void setBranchId(long branchId) {
-        this.branchId = branchId;
-    }
-
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public String getXid() {
-        return xid;
-    }
-
-    /**
-     * Sets xid.
-     *
-     * @param xid the xid
-     */
-    public void setXid(String xid) {
-        this.xid = xid;
     }
 
     @Override

@@ -17,6 +17,8 @@ package io.seata.server.storage.db.store;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager;
@@ -28,8 +30,10 @@ import javax.sql.DataSource;
  *
  * @author zhangsen
  */
-public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager
-        implements TransactionStoreManager {
+public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager<GlobalTransactionDO
+        , BranchTransactionDO> {
+
+    //region Instance
 
     private static volatile DataBaseTransactionStoreManager instance;
 
@@ -47,6 +51,10 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         return instance;
     }
 
+    //endregion
+
+    //region Constructor
+
     /**
      * Instantiates a new Database transaction store manager.
      */
@@ -60,4 +68,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         //init logQueryLimit
         super.initLogQueryLimit(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT);
     }
+
+    //endregion
 }

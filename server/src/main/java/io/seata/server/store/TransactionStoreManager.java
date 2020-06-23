@@ -47,6 +47,15 @@ public interface TransactionStoreManager {
     GlobalSession getSession(String xid, boolean withBranchSessions);
 
     /**
+     * Get global session.
+     *
+     * @param transactionId      the transaction id
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    GlobalSession getSession(long transactionId, boolean withBranchSessions);
+
+    /**
      * Find global session by condition.
      *
      * @param sessionCondition the session condition

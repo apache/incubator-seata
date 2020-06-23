@@ -14,26 +14,18 @@
  *  limitations under the License.
  */
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
-import io.seata.server.session.SessionManager;
-import io.seata.server.storage.file.ReloadableStore;
-import io.seata.server.store.SessionStorable;
-import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionStoreManager.LogOperation;
 import io.seata.server.storage.file.TransactionWriteStore;
-import io.seata.server.storage.file.store.FileTransactionStoreManager;
-
+import io.seata.server.storage.file.store.LogStoreFileDAO;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager.LogOperation;
 
 /**
  * The type Write store test.
@@ -55,136 +47,50 @@ public class WriteStoreTest {
      *
      * @param args the input arguments
      * @throws InterruptedException the interrupted exception
-     * @throws IOException the io exception
+     * @throws IOException          the io exception
      */
-    public static void main(String[] args) throws InterruptedException, IOException {
-        TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
-        "~/Documents/test/data",
-            new SessionManager() {
-                @Override
-                public void destroy() {
+    public static void main(String[] args) throws IOException, NoSuchMethodException, InterruptedException {
+        LogStoreFileDAO fileDAO = new LogStoreFileDAO("~/Documents/test/data");
 
-                }
+        // add test data
+        int begin = 10000;
+        int num = 1000;
+        Method insertToSessionMapMethod = LogStoreFileDAO.class.getDeclaredMethod("insertToSessionMap");
+        insertToSessionMapMethod.setAccessible(true);
+        for (int i = begin; i < begin + num; i++) {
+            BranchSession branchSession1 = new BranchSession();
+            branchSession1.setTransactionId(i);
+            branchSession1.setBranchId(begin + num + (i - begin) * 2);
+            branchSession1.setResourceId("mockDbkeY1");
 
-                @Override
-                public void addGlobalSession(GlobalSession session) throws TransactionException {
+            BranchSession branchSession2 = new BranchSession();
+            branchSession2.setTransactionId(i);
+            branchSession2.setBranchId(begin + num + (i - begin) * 2 + 1);
+            branchSession2.setResourceId("mockDbkeY2");
 
-                }
+            GlobalSession globalSession = new GlobalSession(appname, vgroup, instname, 60000);
+            try {
+                globalSession.add(branchSession1);
+                globalSession.add(branchSession2);
+                insertToSessionMapMethod.invoke(fileDAO, globalSession);
+            } catch (Exception exx) {
+            }
+        }
 
-                @Override
-                public GlobalSession getGlobalSession(String xid, boolean withBranchSessions) {
-                    return null;
-                }
-
-                @Override
-                public void updateGlobalSession(GlobalSession session, GlobalStatus status) throws TransactionException {
-
-                }
-
-                @Override
-                public void removeGlobalSession(GlobalSession session) throws TransactionException {
-
-                }
-
-                @Override
-                public void addBranchSession(GlobalSession globalSession, BranchSession session)
-                    throws TransactionException {
-
-                }
-
-                @Override
-                public void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData) throws TransactionException {
-
-                }
-
-                @Override
-                public void removeBranchSession(GlobalSession globalSession, BranchSession session)
-                    throws TransactionException {
-
-                }
-
-                @Override
-                public Collection<GlobalSession> allSessions(boolean withBranchSessions) {
-                    return null;
-                }
-
-                @Override
-                public List<GlobalSession> findGlobalSessions(SessionCondition condition, boolean withBranchSessions) {
-                    List<GlobalSession> globalSessions = new ArrayList<>();
-                    int begin = 10000;
-                    int num = 1000;
-                    for (int i = begin; i < begin + num; i++) {
-                        BranchSession branchSession1 = new BranchSession();
-                        branchSession1.setTransactionId(i);
-                        branchSession1.setBranchId(begin + num + (i - begin) * 2);
-                        branchSession1.setResourceId("mockDbkeY1");
-
-                        BranchSession branchSession2 = new BranchSession();
-                        branchSession2.setTransactionId(i);
-                        branchSession2.setBranchId(begin + num + (i - begin) * 2 + 1);
-                        branchSession2.setResourceId("mockDbkeY2");
-
-                        GlobalSession globalSession = new GlobalSession(appname, vgroup, instname, 60000);
-                        try {
-                            globalSession.add(branchSession1);
-                            globalSession.add(branchSession2);
-                            globalSessions.add(globalSession);
-                        } catch (Exception exx) {}
-                    }
-                    return globalSessions;
-
-                }
-
-                @Override
-                public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-                        throws TransactionException {
-                    return null;
-                }
-
-                @Override
-                public void onBegin(GlobalSession globalSession) throws TransactionException {
-
-                }
-
-                @Override
-                public void onUpdate(GlobalSession globalSession, GlobalStatus status) throws TransactionException {
-
-                }
-
-                @Override
-                public void onUpdateBranch(GlobalSession globalSession, BranchSession branchSession, BranchStatus status,
-                                           String applicationData) throws TransactionException {
-
-                }
-
-                @Override
-                public void onAddBranch(GlobalSession globalSession, BranchSession branchSession)
-                    throws TransactionException {
-
-                }
-
-                @Override
-                public void onRemoveBranch(GlobalSession globalSession, BranchSession branchSession)
-                    throws TransactionException {
-
-                }
-
-                @Override
-                public void onClose(GlobalSession globalSession) throws TransactionException {
-
-                }
-
-                @Override
-                public void onEnd(GlobalSession globalSession) throws TransactionException {
-
-                }
-            });
         long beginWriteMills = System.currentTimeMillis();
-        write(transactionStoreManager);
+        try {
+            write(fileDAO);
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
         long endWriteMills = System.currentTimeMillis();
         Thread.sleep(10 * 1000);
         long beginReadMills = System.currentTimeMillis();
-        Map<SessionStorable, LogOperation> resultMap = readAll(transactionStoreManager);
+        Map<SessionStorable, LogOperation> resultMap = readAll(fileDAO);
         long endReadMills = System.currentTimeMillis();
         if ((resultMap.size() % (65535)) % 3000 == 0) {
             System.out.print("check success");
@@ -192,41 +98,44 @@ public class WriteStoreTest {
             System.out.print("check failed");
         }
         System.out.print(
-            "write cost:" + (endWriteMills - beginWriteMills) + ",read cost:" + (endReadMills - beginReadMills));
+                "write cost:" + (endWriteMills - beginWriteMills) + ",read cost:" + (endReadMills - beginReadMills));
 
     }
 
-    private static void write(TransactionStoreManager transactionStoreManager) {
+    private static void write(LogStoreFileDAO fileDAO) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession");
+        writeSessionMethod.setAccessible(true);
+
         for (int i = trx_begin; i < trx_begin + trx_num; i++) {
             GlobalSession globalSession = new GlobalSession(appname, vgroup, instname, 60000);
-            transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, globalSession);
+            writeSessionMethod.invoke(fileDAO, LogOperation.GLOBAL_ADD, globalSession);
 
             BranchSession branchSession1 = new BranchSession();
             branchSession1.setTransactionId(globalSession.getTransactionId());
             branchSession1.setBranchId(trx_begin + trx_num + (i - trx_begin) * 2);
             branchSession1.setResourceId("mockDbkeY1");
-            transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, branchSession1);
-            transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession1);
-            transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, branchSession1);
+            writeSessionMethod.invoke(fileDAO, LogOperation.BRANCH_ADD, branchSession1);
+            writeSessionMethod.invoke(fileDAO, LogOperation.BRANCH_UPDATE, branchSession1);
+            writeSessionMethod.invoke(fileDAO, LogOperation.BRANCH_REMOVE, branchSession1);
 
             BranchSession branchSession2 = new BranchSession();
             branchSession2.setTransactionId(globalSession.getTransactionId());
             branchSession2.setBranchId(trx_begin + (i - trx_begin) + i * 2 + 1);
             branchSession2.setResourceId("mockDbkeY2");
-            transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, branchSession2);
-            transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession2);
-            transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, branchSession2);
+            writeSessionMethod.invoke(fileDAO, LogOperation.BRANCH_ADD, branchSession2);
+            writeSessionMethod.invoke(fileDAO, LogOperation.BRANCH_UPDATE, branchSession2);
+            writeSessionMethod.invoke(fileDAO, LogOperation.BRANCH_REMOVE, branchSession2);
 
-            transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, globalSession);
-            transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, globalSession);
+            writeSessionMethod.invoke(fileDAO, LogOperation.GLOBAL_UPDATE, globalSession);
+            writeSessionMethod.invoke(fileDAO, LogOperation.GLOBAL_REMOVE, globalSession);
         }
     }
 
-    private static Map<SessionStorable, LogOperation> readAll(TransactionStoreManager transactionStoreManager) {
+    private static Map<SessionStorable, LogOperation> readAll(LogStoreFileDAO fileDAO) {
         Map<SessionStorable, LogOperation> resultMap = new HashMap<>(65535 * 5 * 9);
-        while (((ReloadableStore)transactionStoreManager).hasRemaining(true)) {
-            List<TransactionWriteStore> transactionWriteStores = ((ReloadableStore)transactionStoreManager).readWriteStore(2000,
-                true);
+        while (fileDAO.hasRemaining(true)) {
+            List<TransactionWriteStore> transactionWriteStores = fileDAO.readWriteStore(2000,
+                    true);
             if (null != transactionWriteStores) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
                     printLog(transactionWriteStore);
@@ -234,9 +143,9 @@ public class WriteStoreTest {
                 }
             }
         }
-        while (((ReloadableStore)transactionStoreManager).hasRemaining(false)) {
-            List<TransactionWriteStore> transactionWriteStores = ((ReloadableStore)transactionStoreManager).readWriteStore(2000,
-                false);
+        while (fileDAO.hasRemaining(false)) {
+            List<TransactionWriteStore> transactionWriteStores = fileDAO.readWriteStore(2000,
+                    false);
             if (null != transactionWriteStores) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
                     printLog(transactionWriteStore);
@@ -249,16 +158,16 @@ public class WriteStoreTest {
 
     private static void printLog(TransactionWriteStore transactionWriteStore) {
         if (transactionWriteStore.getSessionRequest() instanceof GlobalSession) {
-            GlobalSession globalSession = (GlobalSession)transactionWriteStore.getSessionRequest();
+            GlobalSession globalSession = (GlobalSession) transactionWriteStore.getSessionRequest();
             System.out.print(
-                "xid:" + globalSession.getTransactionId() + "," + globalSession.getApplicationId() + "," + globalSession
-                    .getTransactionServiceGroup() + "," + globalSession.getTransactionName() + "," + globalSession
-                    .getTimeout());
+                    "xid:" + globalSession.getTransactionId() + "," + globalSession.getApplicationId() + "," + globalSession
+                            .getTransactionServiceGroup() + "," + globalSession.getTransactionName() + "," + globalSession
+                            .getTimeout());
         } else {
-            BranchSession branchSession = (BranchSession)transactionWriteStore.getSessionRequest();
+            BranchSession branchSession = (BranchSession) transactionWriteStore.getSessionRequest();
             System.out.print(
-                "xid:" + branchSession.getTransactionId() + ",branchId:" + branchSession.getBranchId() + ","
-                    + branchSession.getResourceId());
+                    "xid:" + branchSession.getTransactionId() + ",branchId:" + branchSession.getBranchId() + ","
+                            + branchSession.getResourceId());
         }
         System.out.println(",op:" + transactionWriteStore.getOperate().name());
     }

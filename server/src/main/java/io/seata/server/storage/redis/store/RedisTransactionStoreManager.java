@@ -16,13 +16,14 @@
 package io.seata.server.storage.redis.store;
 
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
-import io.seata.server.store.TransactionStoreManager;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
@@ -30,7 +31,8 @@ import java.util.List;
 /**
  * @author funkye
  */
-public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
+public class RedisTransactionStoreManager extends AbstractTransactionStoreManager<GlobalTransactionDO
+        , BranchTransactionDO> {
 
     //region Instance
 
