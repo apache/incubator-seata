@@ -15,6 +15,9 @@
  */
 package io.seata.server.storage.file.store;
 
+import java.io.IOException;
+import java.util.List;
+
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.LogStore;
@@ -23,9 +26,6 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * The type File transaction store manager.

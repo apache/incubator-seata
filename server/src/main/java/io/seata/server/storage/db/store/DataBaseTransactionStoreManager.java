@@ -15,15 +15,14 @@
  */
 package io.seata.server.storage.db.store;
 
+import javax.sql.DataSource;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.store.AbstractTransactionStoreManager;
-import io.seata.server.store.TransactionStoreManager;
-
-import javax.sql.DataSource;
 
 /**
  * The type Database transaction store manager.

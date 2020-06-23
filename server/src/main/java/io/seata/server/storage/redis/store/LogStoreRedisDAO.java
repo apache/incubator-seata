@@ -35,7 +35,7 @@ import java.util.Set;
 /**
  * The type Log store redis dao.
  *
- * @author wang.liang
+ * @author funkye
  */
 public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, BranchTransactionDO> {
 

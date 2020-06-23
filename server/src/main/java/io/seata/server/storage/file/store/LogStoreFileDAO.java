@@ -64,7 +64,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * The type Log store file dao.
  *
- * @author wang.liang
+ * @author slievrly
  */
 public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSession>
         implements Reloadable, ReloadableStore, Destroyable {
