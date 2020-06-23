@@ -259,7 +259,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
         found = condition.sort(found);
 
         // limit
-        if (condition.getLimit() > 0) {
+        if (condition.getLimit() > 0 && found.size() > condition.getLimit()) {
             found = found.subList(0, condition.getLimit());
         }
 
