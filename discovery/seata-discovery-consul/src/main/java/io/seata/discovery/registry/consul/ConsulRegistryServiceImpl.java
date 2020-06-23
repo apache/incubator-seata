@@ -259,7 +259,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             builder.setToken(token);
         });
         return client.getHealthServices(service, builder.setTag(SERVICE_TAG).setQueryParams(new QueryParams(watchTimeout, index)).setPassing(true).build());
-	}
+    }
 
     /**
      * refresh cluster
