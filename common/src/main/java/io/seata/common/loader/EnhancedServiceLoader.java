@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -525,7 +526,7 @@ public class EnhancedServiceLoader {
                 if (!entry.getKey().getName().equals(className)) {
                     continue;
                 }
-                if (entry.getValue().getServiceClass().getClassLoader().equals(loader)) {
+                if (Objects.equals(entry.getValue().getServiceClass().getClassLoader(), loader)) {
                     return true;
                 }
             }
