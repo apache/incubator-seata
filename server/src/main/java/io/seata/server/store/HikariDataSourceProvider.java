@@ -15,12 +15,13 @@
  */
 package io.seata.server.store;
 
-import java.util.Properties;
-import javax.sql.DataSource;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
+
+import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
  * The hikari datasource provider
