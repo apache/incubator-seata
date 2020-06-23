@@ -50,6 +50,8 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABL
  */
 public class LogStoreDataBaseDAO extends AbstractLogStore {
 
+    //region Constants
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);
 
     /**
@@ -61,7 +63,9 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
      */
     private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
 
-    //region fields
+    //endregion
+
+    //region Fields
 
     /**
      * The Log store data source.
@@ -90,6 +94,8 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     //endregion
 
+    //region Constructor
+
     /**
      * Instantiates a new Log store data base dao.
      *
@@ -112,7 +118,9 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
         initTransactionNameSize();
     }
 
-    //region LogStore
+    //endregion
+
+    //region Override LogStore
 
     @Override
     public GlobalTransactionDO getGlobalTransactionDO(String xid) {
@@ -473,7 +481,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     //endregion
 
-    //region private
+    //region Private
 
     private long getCurrentMaxSessionId(String sql, long high, long low) {
         long max = 0;
@@ -643,7 +651,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore {
 
 
     /**
-     * column info
+     * Column info
      */
     private static class ColumnInfo {
         private String columnName;

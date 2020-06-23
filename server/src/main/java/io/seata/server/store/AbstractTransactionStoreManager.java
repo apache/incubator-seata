@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractTransactionStoreManager implements TransactionStoreManager {
 
-    //region fields
+    //region Fields
 
     /**
      * The constant DEFAULT_LOG_QUERY_LIMIT.
@@ -67,7 +67,7 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
 
     //endregion
 
-    //region init
+    //region Init
 
     protected void initLogQueryLimit(String logQueryLimitConfigKey) {
         this.logQueryLimit = CONFIG.getInt(logQueryLimitConfigKey, DEFAULT_LOG_QUERY_LIMIT);
@@ -75,7 +75,7 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
 
     //endregion
 
-    //region TransactionStoreManager
+    //region Override TransactionStoreManager
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
@@ -122,7 +122,7 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
 
     //endregion
 
-    //region load branch list
+    //region Load branch list
 
     protected GlobalSession loadBranchs(GlobalTransactionDO globalTransactionDO, boolean withBranchSessions) {
         if (globalTransactionDO == null) {
@@ -158,7 +158,7 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
 
     //endregion
 
-    //region Convert
+    //region Converter
 
     protected GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
         if (session == null || !(session instanceof GlobalSession)) {

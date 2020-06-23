@@ -32,6 +32,8 @@ import java.util.List;
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
+    //region Instance
+
     private static volatile RedisTransactionStoreManager instance;
 
     /**
@@ -47,6 +49,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         return instance;
     }
+
+    //endregion
+
+    //region Constructor
 
     /**
      * Instantiates a new redis transaction store manager.
@@ -67,8 +73,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         super.logQueryLimit = logQueryLimit;
     }
 
+    //endregion
 
-    //region TransactionStoreManager
+    //region Override TransactionStoreManager
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
@@ -105,8 +112,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     //endregion
 
-
-    //region private
+    //region Private
 
     /**
      * Create store manager.

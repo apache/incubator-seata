@@ -39,6 +39,8 @@ import java.util.Set;
  */
 public class LogStoreRedisDAO extends AbstractLogStore {
 
+    //region Constants
+
     // global transaction prefix
     private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
 
@@ -54,8 +56,9 @@ public class LogStoreRedisDAO extends AbstractLogStore {
     // initial cursor
     private static final String INITIAL_CURSOR = "0";
 
+    //endregion
 
-    //region fields
+    //region Fields
 
     /**
      * The jedis.
@@ -69,13 +72,16 @@ public class LogStoreRedisDAO extends AbstractLogStore {
 
     //endregion
 
+    //region Constructor
 
     public LogStoreRedisDAO(Jedis jedis, int logQueryLimit) {
         this.jedis = jedis;
         this.logQueryLimit = logQueryLimit;
     }
 
-    //region LogStore
+    //endregion
+
+    //region Override LogStore
 
     @Override
     public GlobalTransactionDO getGlobalTransactionDO(String xid) {
@@ -203,7 +209,7 @@ public class LogStoreRedisDAO extends AbstractLogStore {
 
     //endregion
 
-    //region private
+    //region Private
 
     private List<BranchTransactionDO> getBranchJsons(Jedis jedis, Set<String> keys) {
         List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();

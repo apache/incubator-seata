@@ -27,7 +27,8 @@ import java.util.List;
  * @author wang.liang
  */
 public class GlobalTransactionDOCondition {
-    //region fields
+
+    //region Fields
 
     protected GlobalStatus[] statuses;
     protected Long overTimeAliveMills;
@@ -37,7 +38,7 @@ public class GlobalTransactionDOCondition {
 
     //endregion
 
-    //region constructor
+    //region Constructor
 
     /**
      * Instantiates a new Session condition.
@@ -87,7 +88,7 @@ public class GlobalTransactionDOCondition {
 
     //endregion
 
-    //region functions
+    //region Public
 
     /**
      * Match data.
@@ -170,7 +171,7 @@ public class GlobalTransactionDOCondition {
 
     //endregion
 
-    //region private
+    //region Private
 
     private int compareTo(Comparable a, Comparable b) {
         int ret;
