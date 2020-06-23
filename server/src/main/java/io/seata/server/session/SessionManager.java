@@ -84,7 +84,9 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @return the collection
      */
     default Collection<GlobalSession> allSessions(boolean withBranchSessions) {
-        return findGlobalSessions(new SessionCondition(), withBranchSessions);
+        SessionCondition condition = new SessionCondition();
+        condition.setLimit(Integer.MAX_VALUE);
+        return findGlobalSessions(condition, withBranchSessions);
     }
 
     /**

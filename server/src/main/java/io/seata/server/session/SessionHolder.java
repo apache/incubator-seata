@@ -100,15 +100,19 @@ public class SessionHolder {
                                 throw new ShouldNeverHappenException(e);
                             }
                             break;
+                        case AsyncCommitting: // 8
+                            break;
                         default: {
                             switch (globalStatus) {
-                                case Begin: // 1
                                 case Committing: // 2
                                 case CommitRetrying: // 3
                                 case Rollbacking: // 4
                                 case RollbackRetrying: // 5
                                 case TimeoutRollbacking: // 6
                                 case TimeoutRollbackRetrying: // 7
+                                    break;
+                                case Begin: // 1
+                                    globalSession.setActive(true);
                                     break;
                                 default:
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
