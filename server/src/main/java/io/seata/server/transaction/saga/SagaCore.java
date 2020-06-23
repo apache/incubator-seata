@@ -36,7 +36,6 @@ import io.seata.server.coordinator.AbstractCore;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
-import io.seata.server.session.SessionHolder;
 
 /**
  * The type saga core.
