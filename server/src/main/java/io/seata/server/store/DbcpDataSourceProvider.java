@@ -16,21 +16,21 @@
 package io.seata.server.store;
 
 import javax.sql.DataSource;
-
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.store.db.AbstractDataSourceGenerator;
+import io.seata.core.store.db.AbstractDataSourceProvider;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 /**
- * The type Dbcp data source generator.
- *
+ * The dbcp datasource provider
  * @author zhangsen
  * @author ggndnn
+ * @author will
  */
 @LoadLevel(name = "dbcp")
-public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
+public class DbcpDataSourceProvider extends AbstractDataSourceProvider {
+
     @Override
-    public DataSource generateDataSource() {
+    public DataSource generate() {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(getDriverClassName());
         // DriverClassLoader works if upgrade commons-dbcp to at least 1.3.1.

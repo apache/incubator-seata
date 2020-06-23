@@ -13,16 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.pcext;
+package io.seata.core.store.db;
 
-import java.util.List;
+import javax.sql.DataSource;
 
 /**
- * Interceptible State Router
- *
- * @author lorne.cl
+ * The datasource provider
+ * @author will
  */
-public interface InterceptibleStateRouter extends StateRouter {
+public interface DataSourceProvider {
 
-    List<StateRouterInterceptor> getInterceptors();
+    /**
+     * provide the datasource
+     * @return datasource
+     */
+    DataSource provide();
 }
