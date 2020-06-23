@@ -23,6 +23,11 @@ package io.seata.core.constants;
 public class ConfigurationKeys {
 
     /**
+     * The constant SEATA_PREFIX.
+     */
+    public static final String SEATA_PREFIX = "seata.";
+
+    /**
      * The constant SERVICE_PREFIX.
      */
     public static final String SERVICE_PREFIX = "service.";
@@ -488,5 +493,24 @@ public class ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant SEATA_ACCESS_KEY.
+     */
+    public static final String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+
+    /**
+     * The constant SEATA_SECRET_KEY.
+     */
+    public static final String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+
+    /**
+     * The constant EXTRA_DATA_SPLIT_CHAR.
+     */
+    public static final String EXTRA_DATA_SPLIT_CHAR = "\n";
+    /**
+     * The constant EXTRA_DATA_KV_CHAR.
+     */
+    public static final String EXTRA_DATA_KV_CHAR = "=";
 
 }

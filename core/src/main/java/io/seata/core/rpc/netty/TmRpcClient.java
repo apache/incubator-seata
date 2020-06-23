@@ -15,14 +15,23 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
+import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.auth.AuthSigner;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
@@ -30,14 +39,14 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+import static io.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
+import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
 
 /**
  * The type Rpc client.
@@ -55,6 +64,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
+    private final AuthSigner signer;
+    private String accessKey;
+    private String secretKey;
 
     /**
      * The constant enableDegrade.
@@ -65,6 +77,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+        this.signer = EnhancedServiceLoader.load(AuthSigner.class);
     }
 
     /**
@@ -75,9 +88,24 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      * @return the instance
      */
     public static TmRpcClient getInstance(String applicationId, String transactionServiceGroup) {
+        return getInstance(applicationId, transactionServiceGroup, null, null);
+    }
+
+    /**
+     * Gets instance.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param accessKey               the access key
+     * @param secretKey               the secret key
+     * @return the instance
+     */
+    public static TmRpcClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
         TmRpcClient tmRpcClient = getInstance();
         tmRpcClient.setApplicationId(applicationId);
         tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
+        tmRpcClient.setAccessKey(accessKey);
+        tmRpcClient.setSecretKey(secretKey);
         return tmRpcClient;
     }
 
@@ -123,6 +151,32 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         this.transactionServiceGroup = transactionServiceGroup;
     }
 
+    /**
+     * Sets access key.
+     *
+     * @param accessKey the access key
+     */
+    protected void setAccessKey(String accessKey) {
+        if (null != accessKey) {
+            this.accessKey = accessKey;
+            return;
+        }
+        this.accessKey = System.getProperty(SEATA_ACCESS_KEY);
+    }
+
+    /**
+     * Sets secret key.
+     *
+     * @param secretKey the secret key
+     */
+    protected void setSecretKey(String secretKey) {
+        if (null != secretKey) {
+            this.secretKey = secretKey;
+            return;
+        }
+        this.secretKey = System.getProperty(SEATA_SECRET_KEY);
+    }
+
     @Override
     public void init() {
         // registry processor
@@ -142,10 +196,27 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (severAddress) -> {
-            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
+        return severAddress -> {
+            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup, getExtraData());
             return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
+    }
+
+    private String getExtraData() {
+        String ip = NetUtil.getLocalIp();
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String digestSource;
+        if (StringUtils.isEmpty(ip)) {
+            digestSource = transactionServiceGroup + ",127.0.0.1," + timestamp;
+        } else {
+            digestSource = transactionServiceGroup + "," + ip + "," + timestamp;
+        }
+        String digest = signer.sign(digestSource, secretKey);
+        StringBuilder sb = new StringBuilder();
+        sb.append(RegisterTMRequest.UDATA_AK).append(EXTRA_DATA_KV_CHAR).append(accessKey).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_DIGEST).append(EXTRA_DATA_KV_CHAR).append(digest).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
+        return sb.toString();
     }
 
     @Override
