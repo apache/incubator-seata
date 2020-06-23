@@ -13,20 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+package io.seata.server.logging.logback.ansi;
 
 /**
- * @author Geng Zhang
+ * An ANSI encodable element.
+ *
+ * @author Phillip Webb
+ * @origin Copied from spring-boot.jar by wang.liang
  */
-class ConfigurationFactoryTest {
+public interface AnsiElement {
 
-    @Test
-    void getInstance() {
-        Configuration configuration = ConfigurationFactory.getInstance();
-        // check singleton
-        Assertions.assertEquals(configuration.getClass().getName(), ConfigurationFactory.getInstance().getClass().getName());
-    }
+    /**
+     * @return the ANSI escape code
+     */
+    @Override
+    String toString();
+
 }
