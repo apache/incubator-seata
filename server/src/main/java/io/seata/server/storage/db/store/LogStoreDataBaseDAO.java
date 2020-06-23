@@ -36,6 +36,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTableSortField;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.GlobalTransactionDOCondition;
 import io.seata.core.store.SortOrder;
@@ -220,11 +221,13 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
             }
             // order by xxx [asc|desc]
             StringBuilder sortPlaceHolder = new StringBuilder();
-            if (condition.getSortField() != null) {
-                sortPlaceHolder.append(" order by ").append(condition.getSortField().fieldName());
-                if (SortOrder.DESC == condition.getSortOrder()) {
-                    sortPlaceHolder.append(" desc");
-                }
+            if (condition.getSortField() == null) {
+                // db mode: default sort field is gmt_create
+                condition.setSortField(GlobalTableSortField.GMT_CREATE);
+            }
+            sortPlaceHolder.append(" order by ").append(condition.getSortField().fieldName());
+            if (SortOrder.DESC == condition.getSortOrder()) {
+                sortPlaceHolder.append(" desc");
             }
             // build sql
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQL(globalTable,
