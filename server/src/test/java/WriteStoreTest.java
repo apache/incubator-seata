@@ -20,11 +20,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.core.store.BaseModel;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.file.TransactionWriteStore;
 import io.seata.server.storage.file.store.LogStoreFileDAO;
 import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 
 /**
@@ -103,7 +105,8 @@ public class WriteStoreTest {
     }
 
     private static void write(LogStoreFileDAO fileDAO) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession");
+        Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession",
+                TransactionStoreManager.LogOperation.class, BaseModel.class);
         writeSessionMethod.setAccessible(true);
 
         for (int i = trx_begin; i < trx_begin + trx_num; i++) {

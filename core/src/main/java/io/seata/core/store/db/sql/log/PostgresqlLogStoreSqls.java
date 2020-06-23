@@ -30,7 +30,7 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_GLOBAL_TRANSACTION_POSTGRESQL = "insert into " + GLOBAL_TABLE_PLACEHOLD
             + "(" + ALL_GLOBAL_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_POSTGRESQL.
@@ -53,7 +53,7 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_POSTGRESQL = "insert into " + BRANCH_TABLE_PLACEHOLD
             + "(" + ALL_BRANCH_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_POSTGRESQL.

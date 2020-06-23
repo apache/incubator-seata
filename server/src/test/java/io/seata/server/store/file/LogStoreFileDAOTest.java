@@ -15,14 +15,15 @@
  */
 package io.seata.server.store.file;
 
+import io.seata.core.store.BaseModel;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.storage.file.TransactionWriteStore;
 import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.file.store.LogStoreFileDAO;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.file.TransactionWriteStore;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,8 @@ public class LogStoreFileDAOTest {
         File seataFile = Files.newTemporaryFile();
         LogStoreFileDAO fileDAO = null;
         try {
-            Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession");
+            Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession",
+                    TransactionStoreManager.LogOperation.class, BaseModel.class);
             writeSessionMethod.setAccessible(true);
 
             fileDAO = new LogStoreFileDAO(seataFile.getAbsolutePath());
@@ -59,8 +61,8 @@ public class LogStoreFileDAOTest {
                     .thenReturn(createBigBranchSessionData(global, (byte) 'B'));
             Mockito.when(branchSessionB.getApplicationData())
                     .thenReturn(new String(createBigApplicationData((byte) 'B')));
-            Assertions.assertTrue((boolean)writeSessionMethod.invoke(fileDAO, TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
-            Assertions.assertTrue((boolean)writeSessionMethod.invoke(fileDAO, TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
+            Assertions.assertTrue((boolean) writeSessionMethod.invoke(fileDAO, TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
+            Assertions.assertTrue((boolean) writeSessionMethod.invoke(fileDAO, TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
             List<TransactionWriteStore> list = fileDAO.readWriteStore(2000, false);
             Assertions.assertNotNull(list);
             Assertions.assertEquals(2, list.size());
@@ -147,20 +149,20 @@ public class LogStoreFileDAOTest {
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
         byteBuffer.putLong(global.getTransactionId()); // trascationId 8
         byteBuffer.putLong(UUIDGenerator.generateUUID()); // branchId 8
-        byteBuffer.putShort((short)0); // resourceIdBytes.length 2
-        byteBuffer.putShort((short)0); // lockKeyBytes.length 2
-        byteBuffer.putShort((short)0); // clientIdBytes.length 2
+        byteBuffer.putShort((short) 0); // resourceIdBytes.length 2
+        byteBuffer.putShort((short) 0); // lockKeyBytes.length 2
+        byteBuffer.putShort((short) 0); // clientIdBytes.length 2
         byte[] applicationDataBytes = createBigApplicationData(c);
         byteBuffer.putInt(applicationDataBytes.length); // applicationDataBytes.length 4
         byteBuffer.put(applicationDataBytes); // applicationDataBytes
         if (xidBytes != null) {
-            byteBuffer.putShort((short)xidBytes.length); // xidBytes.length 2
+            byteBuffer.putShort((short) xidBytes.length); // xidBytes.length 2
             byteBuffer.put(xidBytes); // xidBytes
         } else {
-            byteBuffer.putShort((short)0); // xidBytes.length 2
+            byteBuffer.putShort((short) 0); // xidBytes.length 2
         }
-        byteBuffer.put((byte)0); // statusCode 1
-        byteBuffer.put((byte)0); // branchType 1
+        byteBuffer.put((byte) 0); // statusCode 1
+        byteBuffer.put((byte) 0); // branchType 1
         byteBuffer.flip();
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);

@@ -17,7 +17,6 @@ package io.seata.server.storage.file.session;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -25,8 +24,6 @@ import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
 import io.seata.server.storage.file.store.FileTransactionStoreManager;
-import io.seata.server.store.AbstractTransactionStoreManager;
-import io.seata.server.store.SessionStorable;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,17 +76,7 @@ public class FileSessionManager extends AbstractSessionManager
      * @throws IOException the io exception
      */
     public FileSessionManager(String fileName, String sessionStoreFilePath) throws IOException {
-        if (StringUtils.isNotBlank(sessionStoreFilePath)) {
-            super.transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + File.separator + fileName);
-        } else {
-            LOGGER.info("The file store mode without file.");
-            super.transactionStoreManager = new AbstractTransactionStoreManager() {
-                @Override
-                public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-                    return true;
-                }
-            };
-        }
+        super.transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + File.separator + fileName);
     }
 
     //endregion

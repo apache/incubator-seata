@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+import io.seata.core.store.BaseModel;
 import io.seata.core.store.LogStore;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -86,7 +87,8 @@ public class WriteStoreMultithreadTest {
     }
 
     private static void write(LogStore logStore, int threadNo) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession");
+        Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession",
+                TransactionStoreManager.LogOperation.class, BaseModel.class);
         writeSessionMethod.setAccessible(true);
 
         int trx_begin = threadNo * per_thread_trx_num;

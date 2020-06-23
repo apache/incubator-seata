@@ -45,8 +45,7 @@ public class FileSessionManagerTest {
 
     static {
         try {
-            sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."),
-                        new FileSessionManager("test", null));
+            sessionManagerList = Arrays.asList(new FileSessionManager("root.data", "."));
         } catch (IOException e) {
             e.printStackTrace();
         }

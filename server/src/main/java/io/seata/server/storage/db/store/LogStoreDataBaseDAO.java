@@ -188,9 +188,10 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
             long now = System.currentTimeMillis();
             // status in (?, ?, ?)
             if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
-                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ");
+                wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                        .append(ServerTableColumnsName.GLOBAL_TABLE_STATUS);
                 if (condition.getStatuses().length > 1) {
-                    wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" in (");
+                    wherePlaceHolder.append(" in (");
                     for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
                         if (j > 0) {
                             wherePlaceHolder.append(", ");

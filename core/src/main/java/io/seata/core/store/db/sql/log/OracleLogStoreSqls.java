@@ -30,7 +30,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_GLOBAL_TRANSACTION_ORACLE = "insert into " + GLOBAL_TABLE_PLACEHOLD
             + "(" + ALL_GLOBAL_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_ORACLE.
@@ -55,7 +55,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_ORACLE = "insert into " + BRANCH_TABLE_PLACEHOLD
             + "(" + ALL_BRANCH_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, systimestamp, systimestamp)";
+            + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, systimestamp, systimestamp)";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_ORACLE.
