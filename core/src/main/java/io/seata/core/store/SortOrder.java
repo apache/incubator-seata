@@ -19,6 +19,13 @@ package io.seata.core.store;
  * @author wang.liang
  */
 public enum SortOrder {
+    /**
+     * asc
+     */
     ASC,
+
+    /**
+     * desc
+     */
     DESC
 }

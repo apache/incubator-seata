@@ -185,8 +185,9 @@ public class GlobalTransactionDOCondition {
                     return this.compareTo(a.getGmtCreate(), b.getGmtCreate());
                 case GMT_MODIFIED:
                     return this.compareTo(a.getGmtModified(), b.getGmtModified());
+                default:
+                    return 0;
             }
-            return 0;
         });
         return globalTransactionDOs;
     }
@@ -215,8 +216,11 @@ public class GlobalTransactionDOCondition {
         }
 
         if (sortOrder == SortOrder.DESC) {
-            if (ret > 0) return -1;
-            else return 1;
+            if (ret > 0) {
+                return -1;
+            } else {
+                return 1;
+            }
         }
 
         return ret;
