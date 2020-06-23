@@ -106,7 +106,7 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
         Set<String> keys = new HashSet<>();
         String cursor = INITIAL_CURSOR;
         ScanParams params = new ScanParams();
-        params.count(logQueryLimit); // limit
+        params.count(condition.getLimit()); // limit
         params.match(getGlobalKeyByXid("*"));
         ScanResult<String> scans;
         do {
