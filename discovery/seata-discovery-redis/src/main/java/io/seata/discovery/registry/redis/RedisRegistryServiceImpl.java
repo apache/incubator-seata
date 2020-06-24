@@ -127,9 +127,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
      * @return the instance
      */
     static RedisRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RedisRegistryServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new RedisRegistryServiceImpl();
                 }
             }
@@ -180,7 +180,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     @Override
     public List<InetSocketAddress> lookup(String key) {
         String clusterName = getServiceGroup(key);
-        if (null == clusterName) {
+        if (clusterName == null) {
             return null;
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
@@ -189,7 +189,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             try (Jedis jedis = jedisPool.getResource()) {
                 instances = jedis.hgetAll(redisRegistryKey);
             }
-            if (null != instances && !instances.isEmpty()) {
+            if (instances != null && !instances.isEmpty()) {
                 Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
                         .map(NetUtil::toInetSocketAddress)
                         .collect(Collectors.toSet());
