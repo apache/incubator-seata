@@ -29,7 +29,7 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
@@ -57,10 +57,10 @@ public abstract class AbstractCore implements Core {
 
     protected LockManager lockManager = LockerManagerFactory.getLockManager();
 
-    protected ServerMessageSender messageSender;
+    protected RemotingServer remotingServer;
 
-    public AbstractCore(ServerMessageSender messageSender) {
-        this.messageSender = messageSender;
+    public AbstractCore(RemotingServer remotingServer) {
+        this.remotingServer = remotingServer;
     }
 
     public abstract BranchType getHandleBranchType();
@@ -165,7 +165,7 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
                                             BranchSession branchSession) throws IOException, TimeoutException {
-        BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(
+        BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }
@@ -189,7 +189,7 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                               BranchSession branchSession) throws IOException, TimeoutException {
-        BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(
+        BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }
