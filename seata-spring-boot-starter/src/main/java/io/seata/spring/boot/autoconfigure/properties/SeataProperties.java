@@ -65,7 +65,7 @@ public class SeataProperties {
     }
 
     public String getApplicationId() {
-        if (null == applicationId) {
+        if (applicationId == null) {
             applicationId = springCloudAlibabaConfiguration.getApplicationId();
         }
         return applicationId;
@@ -77,7 +77,7 @@ public class SeataProperties {
     }
 
     public String getTxServiceGroup() {
-        if (null == txServiceGroup) {
+        if (txServiceGroup == null) {
             txServiceGroup = springCloudAlibabaConfiguration.getTxServiceGroup();
         }
         return txServiceGroup;

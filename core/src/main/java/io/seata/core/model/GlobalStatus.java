@@ -166,7 +166,7 @@ public enum GlobalStatus {
     public static GlobalStatus get(int code) {
         GlobalStatus status = MAP.get(code);
 
-        if (null == status) {
+        if (status == null) {
             throw new IllegalArgumentException("Unknown GlobalStatus[" + code + "]");
         }
 

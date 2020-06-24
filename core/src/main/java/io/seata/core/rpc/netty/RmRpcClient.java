@@ -91,9 +91,9 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @return the instance
      */
     public static RmRpcClient getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RmRpcClient.class) {
-                if (null == instance) {
+                if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
@@ -154,7 +154,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (serverAddress) -> {
             String resourceIds = getMergedResourceKeys();
-            if (null != resourceIds && LOGGER.isInfoEnabled()) {
+            if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);

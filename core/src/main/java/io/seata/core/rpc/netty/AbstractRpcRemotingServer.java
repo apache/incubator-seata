@@ -202,7 +202,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(ipAndPort + " to server channel inactive.");
             }
-            if (null != rpcContext && null != rpcContext.getClientRole()) {
+            if (rpcContext != null && rpcContext.getClientRole() != null) {
                 rpcContext.release();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);
