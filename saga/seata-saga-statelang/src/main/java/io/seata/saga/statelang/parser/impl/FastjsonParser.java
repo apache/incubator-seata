@@ -26,16 +26,19 @@ import io.seata.saga.statelang.parser.JsonParser;
  *
  * @author lorne.cl
  */
-@LoadLevel( name = FastjsonParser.NAME )
+@LoadLevel(name = FastjsonParser.NAME)
 public class FastjsonParser implements JsonParser {
 
     private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
-            SerializerFeature.DisableCircularReferenceDetect, SerializerFeature.WriteDateUseDateFormat,
-            SerializerFeature.WriteClassName};
+        SerializerFeature.DisableCircularReferenceDetect,
+        SerializerFeature.WriteDateUseDateFormat,
+        SerializerFeature.WriteClassName };
 
     private static final SerializerFeature[] SERIALIZER_FEATURES_PRETTY = new SerializerFeature[] {
-            SerializerFeature.DisableCircularReferenceDetect, SerializerFeature.WriteDateUseDateFormat,
-            SerializerFeature.WriteClassName, SerializerFeature.PrettyFormat};
+        SerializerFeature.DisableCircularReferenceDetect,
+        SerializerFeature.WriteDateUseDateFormat,
+        SerializerFeature.WriteClassName,
+        SerializerFeature.PrettyFormat };
 
     public static final String NAME = "fastjson";
 

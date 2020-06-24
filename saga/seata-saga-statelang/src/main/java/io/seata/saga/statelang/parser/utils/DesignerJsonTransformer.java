@@ -23,7 +23,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.parser.JsonParser;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;

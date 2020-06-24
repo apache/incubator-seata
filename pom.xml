@@ -119,8 +119,8 @@
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
 
-        <checkstyle.skip>true</checkstyle.skip>
-        <license.skip>true</license.skip>
+        <checkstyle.skip>false</checkstyle.skip>
+        <license.skip>false</license.skip>
         <!-- for jdbc driver when package  -->
         <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
         <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>

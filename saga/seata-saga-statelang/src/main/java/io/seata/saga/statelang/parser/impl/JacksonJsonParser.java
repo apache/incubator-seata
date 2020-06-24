@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author lorne.cl
  */
-@LoadLevel( name = JacksonJsonParser.NAME )
+@LoadLevel(name = JacksonJsonParser.NAME)
 public class JacksonJsonParser implements JsonParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
