@@ -22,13 +22,13 @@ import io.seata.core.event.Event;
  * @author slievrly
  */
 public class DegradeCheckEvent implements Event {
-    private boolean isRequestSuccess;
+    private boolean requestSuccess;
 
-    public DegradeCheckEvent(boolean isRequestSuccess) {
-        this.isRequestSuccess = isRequestSuccess;
+    public DegradeCheckEvent(boolean requestSuccess) {
+        this.requestSuccess = requestSuccess;
     }
 
     public boolean isRequestSuccess() {
-        return isRequestSuccess;
+        return requestSuccess;
     }
 }
