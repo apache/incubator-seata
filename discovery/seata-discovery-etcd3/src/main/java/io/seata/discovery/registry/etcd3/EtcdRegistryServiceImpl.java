@@ -111,9 +111,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @return instance
      */
     static EtcdRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (EtcdRegistryServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new EtcdRegistryServiceImpl();
                 }
             }
@@ -166,7 +166,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     @Override
     public void unsubscribe(String cluster, Watch.Listener listener) throws Exception {
         Set<Watch.Listener> subscribeSet = listenerMap.get(cluster);
-        if (null != subscribeSet) {
+        if (subscribeSet != null) {
             Set<Watch.Listener> newSubscribeSet = subscribeSet.stream()
                     .filter(eventListener -> !eventListener.equals(listener))
                     .collect(Collectors.toSet());
@@ -178,7 +178,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         final String cluster = getServiceGroup(key);
-        if (null == cluster) {
+        if (cluster == null) {
             return null;
         }
         if (!listenerMap.containsKey(cluster)) {
@@ -214,9 +214,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
     @Override
     public void close() throws Exception {
-        if (null != lifeKeeper) {
+        if (lifeKeeper != null) {
             lifeKeeper.stop();
-            if (null != lifeKeeperFuture) {
+            if (lifeKeeperFuture != null) {
                 lifeKeeperFuture.get(3, TimeUnit.SECONDS);
             }
         }
@@ -230,7 +230,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @throws Exception
      */
     private void refreshCluster(String cluster) throws Exception {
-        if (null == cluster) {
+        if (cluster == null) {
             return;
         }
         //1.get all available registries
@@ -250,9 +250,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @return client
      */
     private Client getClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (EtcdRegistryServiceImpl.class) {
-                if (null == client) {
+                if (client == null) {
                     String testEndpoint = System.getProperty(TEST_ENDPONT);
                     if (StringUtils.isNotBlank(testEndpoint)) {
                         client = Client.builder().endpoints(testEndpoint).build();

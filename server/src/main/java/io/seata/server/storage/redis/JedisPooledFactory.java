@@ -58,7 +58,7 @@ public class JedisPooledFactory {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
                 if (jedisPool == null) {
-                    if (null != jedisPools && jedisPools.length > 0) {
+                    if (jedisPools != null && jedisPools.length > 0) {
                         jedisPool = jedisPools[0];
                     } else {
                         String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);

@@ -148,7 +148,7 @@ public class RedisLocker extends AbstractLocker {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
                     for (int i = 0; i < branchIds.size(); i++) {
-                        if (null != lock && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
+                        if (lock != null && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
                             if (pipeline == null) {
                                 pipeline = jedis.pipelined();
                             }
@@ -158,7 +158,7 @@ public class RedisLocker extends AbstractLocker {
                         }
                     }
                 }
-                if (null != pipeline) {
+                if (pipeline != null) {
                     pipeline.sync();
                 }
             }
@@ -190,7 +190,7 @@ public class RedisLocker extends AbstractLocker {
             for (String rowlockJson : rowlockJsons) {
                 if (!StringUtils.isEmpty(rowlockJson)) {
                     LockDO lock = JSON.parseObject(rowlockJson, LockDO.class);
-                    if (null != lock && !Objects.equals(lock.getXid(), xid)) {
+                    if (lock != null && !Objects.equals(lock.getXid(), xid)) {
                         return false;
                     }
                 }

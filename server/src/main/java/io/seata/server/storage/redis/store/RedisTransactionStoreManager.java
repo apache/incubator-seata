@@ -77,9 +77,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * Get the instance.
      */
     public static RedisTransactionStoreManager getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RedisTransactionStoreManager.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new RedisTransactionStoreManager();
                 }
             }
@@ -227,7 +227,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 for (String globalKey : keys) {
                     GlobalTransactionDO globalTransactionDO =
                         JSON.parseObject(jedis.get(globalKey), GlobalTransactionDO.class);
-                    if (null != globalTransactionDO && states.contains(globalTransactionDO.getStatus())) {
+                    if (globalTransactionDO != null && states.contains(globalTransactionDO.getStatus())) {
                         globalTransactionDOs.add(globalTransactionDO);
                     }
                 }

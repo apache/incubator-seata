@@ -114,7 +114,7 @@ public class NettyBaseConfig {
         String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
-        } else if (null != WorkThreadMode.getModeByName(workerThreadSize)) {
+        } else if (WorkThreadMode.getModeByName(workerThreadSize) != null) {
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();

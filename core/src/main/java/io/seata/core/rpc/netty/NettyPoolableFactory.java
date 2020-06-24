@@ -59,7 +59,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         long start = System.currentTimeMillis();
         Object response;
         Channel channelToServer = null;
-        if (null == key.getMessage()) {
+        if (key.getMessage() == null) {
             throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }
         try {
@@ -86,7 +86,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     }
 
     private boolean isResponseSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
-        if (null == response) {
+        if (response == null) {
             return false;
         }
         if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
@@ -113,7 +113,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     @Override
     public void destroyObject(NettyPoolKey key, Channel channel) throws Exception {
-        if (null != channel) {
+        if (channel != null) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("will destroy channel:" + channel);
             }
@@ -124,7 +124,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     @Override
     public boolean validateObject(NettyPoolKey key, Channel obj) {
-        if (null != obj && obj.isActive()) {
+        if (obj != null && obj.isActive()) {
             return true;
         }
         if (LOGGER.isInfoEnabled()) {

@@ -82,9 +82,9 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     static ZookeeperRegisterServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ZookeeperRegisterServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new ZookeeperRegisterServiceImpl();
                 }
             }
@@ -135,7 +135,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     @Override
     public void subscribe(String cluster, IZkChildListener listener) throws Exception {
-        if (null == cluster) {
+        if (cluster == null) {
             return;
         }
 
@@ -150,7 +150,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     @Override
     public void unsubscribe(String cluster, IZkChildListener listener) throws Exception {
-        if (null == cluster) {
+        if (cluster == null) {
             return;
         }
         String path = ROOT_PATH + cluster;
@@ -158,7 +158,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             getClientInstance().unsubscribeChildChanges(path, listener);
 
             List<IZkChildListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
-            if (null != subscribeList) {
+            if (subscribeList != null) {
                 List<IZkChildListener> newSubscribeList = subscribeList.stream()
                         .filter(eventListener -> !eventListener.equals(listener))
                         .collect(Collectors.toList());
@@ -177,7 +177,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
 
-        if (null == clusterName) {
+        if (clusterName == null) {
             return null;
         }
 
@@ -208,7 +208,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private ZkClient getClientInstance() {
         if (zkClient == null) {
             synchronized (ZookeeperRegisterServiceImpl.class) {
-                if (null == zkClient) {
+                if (zkClient == null) {
                     zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
@@ -223,7 +223,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     // visible for test.
     ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
         ZkClient zkClient = new ZkClient(address, sessionTimeout, connectTimeout);
-        if (null != authInfo && authInfo.length == 2) {
+        if (authInfo != null && authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
                 StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
                 zkClient.addAuthInfo("digest", auth.toString().getBytes());

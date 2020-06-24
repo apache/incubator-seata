@@ -32,9 +32,9 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
     private static final String PREFIX = "seata.";
 
     public static SpringCloudConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (SpringCloudConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new SpringCloudConfiguration();
                 }
             }
@@ -54,7 +54,7 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         ApplicationContext applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
-        if (null == applicationContext || null == applicationContext.getEnvironment()) {
+        if (applicationContext == null || applicationContext.getEnvironment() == null) {
             return defaultValue;
         }
         String conf = applicationContext.getEnvironment().getProperty(PREFIX + dataId);

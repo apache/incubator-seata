@@ -173,7 +173,7 @@ public class ActionInterceptorHandler {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
-                    if (null == arguments[i]) {
+                    if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
                     Object paramObject = arguments[i];

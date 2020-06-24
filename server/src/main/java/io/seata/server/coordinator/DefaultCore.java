@@ -339,7 +339,7 @@ public class DefaultCore implements Core {
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid, false);
-        if (null == globalSession) {
+        if (globalSession == null) {
             return GlobalStatus.Finished;
         } else {
             return globalSession.getStatus();

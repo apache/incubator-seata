@@ -110,7 +110,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         try {
-            if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
+            if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
@@ -136,7 +136,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
         try {
-            if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
+            if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;

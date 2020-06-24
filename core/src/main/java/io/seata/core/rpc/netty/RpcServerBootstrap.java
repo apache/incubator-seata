@@ -84,7 +84,7 @@ public class RpcServerBootstrap implements RemotingBootstrap {
      * @param handlers the handlers
      */
     protected void setChannelHandlers(final ChannelHandler... handlers) {
-        if (null != handlers) {
+        if (handlers != null) {
             channelHandlers = handlers;
         }
     }
@@ -96,7 +96,7 @@ public class RpcServerBootstrap implements RemotingBootstrap {
      * @param handlers the handlers
      */
     private void addChannelPipelineLast(Channel channel, ChannelHandler... handlers) {
-        if (null != channel && null != handlers) {
+        if (channel != null && handlers != null) {
             channel.pipeline().addLast(handlers);
         }
     }
@@ -143,7 +143,7 @@ public class RpcServerBootstrap implements RemotingBootstrap {
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
                         .addLast(new ProtocolV1Decoder())
                         .addLast(new ProtocolV1Encoder());
-                    if (null != channelHandlers) {
+                    if (channelHandlers != null) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
 

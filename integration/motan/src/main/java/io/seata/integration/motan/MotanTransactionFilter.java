@@ -46,7 +46,7 @@ public class MotanTransactionFilter implements Filter {
         boolean bind = false;
         if (currentXid != null) {
             request.getAttachments().put(RootContext.KEY_XID, currentXid);
-        } else if (null != requestXid) {
+        } else if (requestXid != null) {
             RootContext.bind(requestXid);
             bind = true;
             if (LOGGER.isDebugEnabled()) {

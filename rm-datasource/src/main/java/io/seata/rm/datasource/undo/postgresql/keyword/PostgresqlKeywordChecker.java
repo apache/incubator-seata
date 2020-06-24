@@ -361,7 +361,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
-        if (null != fieldOrTableName) {
+        if (fieldOrTableName != null) {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);

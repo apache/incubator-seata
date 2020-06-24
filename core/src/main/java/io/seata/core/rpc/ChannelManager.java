@@ -157,7 +157,7 @@ public class ChannelManager {
             rpcContext = IDENTIFIED_CHANNELS.get(channel);
             rpcContext.addResources(dbkeySet);
         }
-        if (null == dbkeySet || dbkeySet.isEmpty()) { return; }
+        if (dbkeySet == null || dbkeySet.isEmpty()) { return; }
         for (String resourceId : dbkeySet) {
             String clientIp;
             ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, resourceIdKey -> new ConcurrentHashMap<>())
@@ -223,7 +223,7 @@ public class ChannelManager {
             return channel;
         }
         RpcContext rpcContext = getContextFromIdentified(channel);
-        if (null == rpcContext) {
+        if (rpcContext == null) {
             LOGGER.error("rpcContext is null,channel:{},active:{}", channel, channel.isActive());
             return null;
         }
@@ -244,7 +244,7 @@ public class ChannelManager {
         } else if (clientRole == NettyPoolKey.TransactionRole.RMROLE) {
             for (Map<Integer, RpcContext> clientRmMap : rpcContext.getClientRMHolderMap().values()) {
                 Channel sameClientChannel = getChannelFromSameClientMap(clientRmMap, clientPort);
-                if (null != sameClientChannel) {
+                if (sameClientChannel != null) {
                     return sameClientChannel;
                 }
             }
@@ -254,7 +254,7 @@ public class ChannelManager {
     }
 
     private static Channel getChannelFromSameClientMap(Map<Integer, RpcContext> clientChannelMap, int exclusivePort) {
-        if (null != clientChannelMap && !clientChannelMap.isEmpty()) {
+        if (clientChannelMap != null && !clientChannelMap.isEmpty()) {
             for (ConcurrentMap.Entry<Integer, RpcContext> entry : clientChannelMap.entrySet()) {
                 if (entry.getKey() == exclusivePort) {
                     clientChannelMap.remove(entry.getKey());
@@ -300,7 +300,7 @@ public class ChannelManager {
 
         ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap = applicationIdMap.get(targetApplicationId);
 
-        if (null != ipMap && !ipMap.isEmpty()) {
+        if (ipMap != null && !ipMap.isEmpty()) {
 
             // Firstly, try to find the original channel through which the branch was registered.
             ConcurrentMap<Integer, RpcContext> portMapOnTargetIP = ipMap.get(targetIP);
