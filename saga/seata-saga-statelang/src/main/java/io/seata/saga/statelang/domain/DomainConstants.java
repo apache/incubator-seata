@@ -89,4 +89,6 @@ public class DomainConstants {
 
     public static final String SEPERATOR_PARENT_ID      = ":";
 
+    public static final String DEFAULT_JSON_PARSER      = "fastjson";
+
 }

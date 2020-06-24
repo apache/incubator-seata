@@ -80,5 +80,5 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
-
+    public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 }

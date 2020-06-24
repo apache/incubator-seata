@@ -21,6 +21,8 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.parser.JsonParser;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -317,7 +319,8 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson);
         System.out.println(graphJson);
 
@@ -331,7 +334,7 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
 
-        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson2);
         System.out.println(graphJson2);
     }
@@ -384,7 +387,8 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson);
         System.out.println(graphJson);
 
@@ -397,7 +401,7 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
 
-        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson2);
         System.out.println(graphJson2);
     }
