@@ -67,6 +67,11 @@
             <artifactId>fastjson</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>

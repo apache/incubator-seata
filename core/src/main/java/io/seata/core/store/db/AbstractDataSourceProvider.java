@@ -15,15 +15,6 @@
  */
 package io.seata.core.store.db;
 
-import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DBType;
-
-import javax.sql.DataSource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,6 +23,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
+import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.druid.filter.config.ConfigTools;
+
+import io.seata.common.exception.StoreException;
+import io.seata.common.executor.Initialize;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 
 /**
  * The abstract datasource provider
@@ -40,6 +45,8 @@ import java.util.stream.Stream;
  * @author will
  */
 public abstract class AbstractDataSourceProvider implements DataSourceProvider, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSourceProvider.class);
 
     private DataSource dataSource;
 
@@ -195,6 +202,18 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      */
     protected String getPassword() {
         String password = CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
+        String publicKey = getPublicKey();
+        if (StringUtils.isNotBlank(publicKey)) {
+            try {
+                password = ConfigTools.decrypt(publicKey, password);
+            } catch (Exception e) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(
+                        "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: ",
+                        e.getMessage());
+                }
+            }
+        }
         return password;
     }
 
