@@ -67,9 +67,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     private ApolloConfiguration() {
         readyApolloConfig();
-        if (null == config) {
+        if (config == null) {
             synchronized (ApolloConfiguration.class) {
-                if (null == config) {
+                if (config == null) {
                     config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
                         MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
@@ -97,9 +97,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
      * @return the instance
      */
     public static ApolloConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ApolloConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new ApolloConfiguration();
                 }
             }
@@ -108,7 +108,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -139,7 +139,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
