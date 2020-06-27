@@ -137,7 +137,7 @@ public class MessageCodecFactory {
                 break;
         }
 
-        if (null != msgCodec) {
+        if (msgCodec != null) {
             return msgCodec;
         }
 
@@ -146,7 +146,7 @@ public class MessageCodecFactory {
         } catch (Exception exx) {
         }
 
-        if (null != msgCodec) {
+        if (msgCodec != null) {
             return msgCodec;
         }
 
@@ -265,7 +265,7 @@ public class MessageCodecFactory {
                 break;
         }
 
-        if (null != abstractMessage) {
+        if (abstractMessage != null) {
             return abstractMessage;
         }
 
@@ -274,7 +274,7 @@ public class MessageCodecFactory {
         } catch (Exception exx) {
         }
 
-        if (null != abstractMessage) {
+        if (abstractMessage != null) {
             return abstractMessage;
         }
 
