@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_NODE;
 import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
@@ -93,7 +92,7 @@ public class ContainerHelper {
      * @return the env
      */
     public static Long getServerNode() {
-        return NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
+        return NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY));
     }
 
     /**

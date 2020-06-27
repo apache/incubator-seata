@@ -84,9 +84,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return instance
      */
     public static ConsulConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ConsulConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new ConsulConfiguration();
                 }
             }
@@ -163,7 +163,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
@@ -205,9 +205,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return client
      */
     private static ConsulClient getConsulClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (ConsulConfiguration.class) {
-                if (null == client) {
+                if (client == null) {
                     String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
@@ -266,7 +266,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            if (null != listener) {
+            if (listener != null) {
                 while (true) {
                     QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
                     tokenOptional.ifPresent((token) -> {
