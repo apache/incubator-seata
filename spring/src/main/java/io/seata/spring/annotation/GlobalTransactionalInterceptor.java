@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
@@ -87,6 +88,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
+            ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
             this.degradeCheckPeriod = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
             this.degradeCheckAllowTimes = ConfigurationFactory.getInstance()
@@ -102,7 +104,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         Class<?> targetClass =
             methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
-        if (null != specificMethod && !specificMethod.getDeclaringClass().equals(Object.class)) {
+        if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
             final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
@@ -186,11 +188,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 case RollbackFailure:
-                    failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
+                    failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
+                    throw e.getOriginalException();
                 case RollbackRetrying:
-                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getCause());
-                    throw e.getCause();
+                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
+                    throw e.getOriginalException();
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
