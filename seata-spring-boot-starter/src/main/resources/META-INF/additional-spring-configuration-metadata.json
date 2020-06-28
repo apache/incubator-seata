@@ -71,7 +71,7 @@
       "type": "java.util.List<java.lang.String>",
       "description": "State lang resources.",
       "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
-      "defaultValue": "classpath*:saga/statelang/*.json"
+      "defaultValue": "classpath*:seata/saga/statelang/*.json"
     },
     {
       "name": "seata.saga.state-machine.service-invoke-timeout",
