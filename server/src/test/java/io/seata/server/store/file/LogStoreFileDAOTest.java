@@ -71,7 +71,7 @@ public class LogStoreFileDAOTest {
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
         } finally {
-            if (null != fileDAO) {
+            if (fileDAO != null) {
                 fileDAO.shutdown();
             }
             Assertions.assertTrue(seataFile.delete());
@@ -119,10 +119,10 @@ public class LogStoreFileDAOTest {
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
-            if (null != fileDAO) {
+            if (fileDAO != null) {
                 fileDAO.shutdown();
             }
-            if (null != sessionManager) {
+            if (sessionManager != null) {
                 sessionManager.destroy();
             }
             Assertions.assertTrue(seataFile.delete());

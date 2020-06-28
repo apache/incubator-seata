@@ -489,4 +489,9 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
 
+    /**
+     * The constant SERVER_ENABLE_CHECK_AUTH.
+     */
+    public static final String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
+
 }
