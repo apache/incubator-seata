@@ -160,7 +160,7 @@ public class TransactionalTemplate {
     }
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
-        triggerBeforeRollback();
+        triggerBeforeRollback(tx);
         tx.rollback();
         triggerAfterRollback(tx);
         // 3.1 Successfully rolled back
