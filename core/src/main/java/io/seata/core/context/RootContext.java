@@ -16,7 +16,6 @@
 package io.seata.core.context;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
@@ -201,41 +200,4 @@ public class RootContext {
     public static Map<String, String> entries() {
         return CONTEXT_HOLDER.entries();
     }
-
-    /**
-     * Run without global transaction.
-     *
-     * @param runnable
-     * @return
-     * @throws Throwable
-     */
-    public static void withoutGlobalTransaction(Runnable runnable) {
-        String unbindXid = RootContext.unbind();
-        try {
-            runnable.run();
-        } finally {
-            if (StringUtils.isNotBlank(unbindXid)) {
-                RootContext.bind(unbindXid);
-            }
-        }
-    }
-
-    /**
-     * Run without global transaction.
-     *
-     * @param supplier
-     * @return
-     * @throws Throwable
-     */
-    public static <R> R withoutGlobalTransaction(Supplier<R> supplier) {
-        String unbindXid = RootContext.unbind();
-        try {
-            return supplier.get();
-        } finally {
-            if (StringUtils.isNotBlank(unbindXid)) {
-                RootContext.bind(unbindXid);
-            }
-        }
-    }
-
 }

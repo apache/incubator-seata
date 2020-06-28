@@ -59,10 +59,6 @@ public class DefaultValues {
      */
     public static final String DEFAULT_TRANSACTION_UNDO_LOG_TABLE = "undo_log";
     /**
-     * The constant  DEFAULT_STATE_MACHINE_TABLE_PREFIX.
-     */
-    public static final String DEFAULT_STATE_MACHINE_TABLE_PREFIX = "seata_";
-    /**
      * The constant DEFAULT_STORE_DB_GLOBAL_TABLE.
      */
     public static final String DEFAULT_STORE_DB_GLOBAL_TABLE = "global_table";

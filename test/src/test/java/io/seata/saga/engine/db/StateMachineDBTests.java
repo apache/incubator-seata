@@ -536,7 +536,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
-        Assertions.assertEquals(GlobalStatus.CommitRetrying.name(), globalTransaction.getStatus().name());
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
     }
 
     @Test

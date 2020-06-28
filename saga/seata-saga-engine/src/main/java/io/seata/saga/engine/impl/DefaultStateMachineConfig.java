@@ -101,7 +101,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ServiceInvokerManager serviceInvokerManager;
 
     private boolean autoRegisterResources = true;
-    private String[] resources = new String[]{"classpath*:statelang/*.json"};
+    private String[] resources = new String[]{"classpath*:seata/saga/statelang/*.json"};
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
 
@@ -146,12 +146,12 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             try {
                 Resource[] resources = ResourceUtil.getResources(this.resources);
                 stateMachineRepository.registryByResources(resources, defaultTenantId);
+                // clear resources
+                this.resources = null;
             } catch (IOException e) {
                 LOGGER.error("Load State Language Resources failed.", e);
             }
         }
-        // clear resources
-        this.resources = null;
 
         if (stateLogRepository == null) {
             StateLogRepositoryImpl stateLogRepositoryImpl = new StateLogRepositoryImpl();

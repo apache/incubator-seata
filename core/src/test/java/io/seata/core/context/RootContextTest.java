@@ -96,7 +96,7 @@ public class RootContextTest {
         RootContext.assertNotInGlobalTransaction();
         assertThat(RootContext.getXID()).isNull();
     }
-  
+
     @Test
     public void testBindBranchType_And_UnbindBranchType(){
         assertThat(RootContext.getBranchType()).isNull();
@@ -106,30 +106,6 @@ public class RootContextTest {
         RootContext.unbindBranchType();
         assertThat(RootContext.getBranchType()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
-    }
-  
-    /**
-     * Test without global transaction.
-     */
-    @Test
-    public void testWithoutGlobalTransaction() {
-        RootContext.bind(DEFAULT_XID);
-
-        // test runnable
-        RootContext.withoutGlobalTransaction(() -> {
-            assertThat(RootContext.inGlobalTransaction()).isFalse();
-        });
-        assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-
-        // test supplier
-        int x = RootContext.withoutGlobalTransaction(() -> {
-            assertThat(RootContext.inGlobalTransaction()).isFalse();
-            return 1;
-        });
-        assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-        assertThat(x).isEqualTo(1);
-
-        RootContext.unbind();
     }
 
 }

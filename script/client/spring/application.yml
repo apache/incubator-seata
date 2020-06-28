@@ -127,6 +127,6 @@ seata:
       service-invoke-timeout: 300000
       auto-register-resources: true
       resources:
-        - classpath*:statelang/*.json
+        - classpath*:seata/saga/statelang/*.json
       default-tenant-id: 000001
       charset: UTF-8
