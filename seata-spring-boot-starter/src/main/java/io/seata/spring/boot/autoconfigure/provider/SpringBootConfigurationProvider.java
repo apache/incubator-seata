@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
@@ -30,12 +29,13 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.context.ApplicationContext;
 
+
+import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
-import static io.seata.common.util.StringFormatUtils.DOT;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -59,7 +59,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                     } else if (args.length == 3) {
                         result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
                     }
-                    if (null != result) {
+                    if (result != null) {
                         //If the return type is String,need to convert the object to string
                         if (method.getReturnType().equals(String.class)) {
                             return String.valueOf(result);
@@ -80,7 +80,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     private Object get(String dataId, Object defaultValue) throws IllegalAccessException {
         Object result = get(dataId);
-        if (null == result) {
+        if (result == null) {
             return defaultValue;
         }
         return result;
@@ -89,7 +89,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     private Object get(String dataId) throws IllegalAccessException {
         String propertySuffix = getPropertySuffix(dataId);
         Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
-        if (null != propertyClass) {
+        if (propertyClass != null) {
             Object propertyObject = ObjectHolder.INSTANCE.getObject(ApplicationContext.class).getBean(propertyClass);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
