@@ -42,9 +42,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * Get the instance.
      */
     public static RedisTransactionStoreManager getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RedisTransactionStoreManager.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new RedisTransactionStoreManager();
                 }
             }

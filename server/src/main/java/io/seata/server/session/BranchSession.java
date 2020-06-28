@@ -151,35 +151,35 @@ public class BranchSession extends BranchTransactionDO
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
 
-        if (null != resourceIdBytes) {
+        if (resourceIdBytes != null) {
             byteBuffer.putShort((short)resourceIdBytes.length);
             byteBuffer.put(resourceIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
 
-        if (null != lockKeyBytes) {
+        if (lockKeyBytes != null) {
             byteBuffer.putShort((short)lockKeyBytes.length);
             byteBuffer.put(lockKeyBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
 
-        if (null != clientIdBytes) {
+        if (clientIdBytes != null) {
             byteBuffer.putShort((short)clientIdBytes.length);
             byteBuffer.put(clientIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
 
-        if (null != applicationDataBytes) {
+        if (applicationDataBytes != null) {
             byteBuffer.putInt(applicationDataBytes.length);
             byteBuffer.put(applicationDataBytes);
         } else {
             byteBuffer.putInt(0);
         }
 
-        if (null != xidBytes) {
+        if (xidBytes != null) {
             byteBuffer.putShort((short)xidBytes.length);
             byteBuffer.put(xidBytes);
         } else {

@@ -53,7 +53,7 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
     private static final int MAX_GLOBAL_SESSION_SIZE = StoreConfig.getMaxGlobalSessionSize();
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-            MAX_GLOBAL_SESSION_SIZE));
+        MAX_GLOBAL_SESSION_SIZE));
 
     private volatile boolean active = true;
     protected Set<GlobalStatus> statusBakSet = Collections.synchronizedSet(new HashSet<>());
@@ -107,7 +107,8 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
     public boolean isSaga() {
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
-        } else if (StringUtils.isNotBlank(transactionName)
+        }
+        else if (StringUtils.isNotBlank(transactionName)
                 && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX)) {
             return true;
         }
@@ -125,7 +126,6 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
 
     /**
      * prevent could not handle rollbacking transaction
-     *
      * @return if true force roll back
      */
     public boolean isRollbackingDead() {
@@ -193,6 +193,7 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
 
     public void clean() throws TransactionException {
         LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
+
     }
 
     /**
@@ -203,6 +204,7 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
     public void closeAndClean() throws TransactionException {
         close();
         clean();
+
     }
 
     /**
@@ -283,8 +285,7 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
     /**
      * Instantiates a new Global session.
      */
-    public GlobalSession() {
-    }
+    public GlobalSession() {}
 
     /**
      * Instantiates a new Global session.
@@ -373,11 +374,11 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
         byte[] applicationDataBytes = applicationData != null ? applicationData.getBytes() : null;
 
         int size = calGlobalSessionSize(byApplicationIdBytes, byServiceGroupBytes, byTxNameBytes, xidBytes,
-                applicationDataBytes);
+            applicationDataBytes);
 
         if (size > MAX_GLOBAL_SESSION_SIZE) {
             throw new RuntimeException("global session size exceeded, size : " + size + " maxBranchSessionSize : " +
-                    MAX_GLOBAL_SESSION_SIZE);
+                MAX_GLOBAL_SESSION_SIZE);
         }
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
@@ -385,19 +386,19 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != byApplicationIdBytes) {
+        if (byApplicationIdBytes != null) {
             byteBuffer.putShort((short) byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short) 0);
         }
-        if (null != byServiceGroupBytes) {
+        if (byServiceGroupBytes != null) {
             byteBuffer.putShort((short) byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short) 0);
         }
-        if (null != byTxNameBytes) {
+        if (byTxNameBytes != null) {
             byteBuffer.putShort((short) byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {
@@ -427,19 +428,19 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes,
                                      byte[] xidBytes, byte[] applicationDataBytes) {
         final int size = 8 // transactionId
-                + 4 // timeout
-                + 2 // byApplicationIdBytes.length
-                + 2 // byServiceGroupBytes.length
-                + 2 // byTxNameBytes.length
-                + 2 // xidBytes.length
-                + 4 // applicationDataBytes.length
-                + 8 // beginTime
-                + 1 // statusCode
-                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-                + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
-                + (xidBytes == null ? 0 : xidBytes.length)
-                + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
+            + 4 // timeout
+            + 2 // byApplicationIdBytes.length
+            + 2 // byServiceGroupBytes.length
+            + 2 // byTxNameBytes.length
+            + 2 // xidBytes.length
+            + 4 // applicationDataBytes.length
+            + 8 // beginTime
+            + 1 // statusCode
+            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+            + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
+            + (xidBytes == null ? 0 : xidBytes.length)
+            + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
         return size;
     }
 
@@ -548,7 +549,8 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
     }
 
     public void queueToRetryRollback() throws TransactionException {
-        if (SessionHelper.isTimeoutGlobalStatus(this.getStatus())) {
+        GlobalStatus currentStatus = this.getStatus();
+        if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
             this.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
         } else {
             this.changeStatus(GlobalStatus.RollbackRetrying);

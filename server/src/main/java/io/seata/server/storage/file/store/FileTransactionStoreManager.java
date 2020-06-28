@@ -33,7 +33,7 @@ import io.seata.server.store.AbstractTransactionStoreManager;
  * @author slievrly
  */
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager<GlobalSession, BranchSession>
-        implements Reloadable {
+    implements Reloadable {
 
     //region Constructor
 

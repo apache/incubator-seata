@@ -82,11 +82,7 @@ public class WriteStoreTest {
         long beginWriteMills = System.currentTimeMillis();
         try {
             write(fileDAO);
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         long endWriteMills = System.currentTimeMillis();
@@ -100,13 +96,13 @@ public class WriteStoreTest {
             System.out.print("check failed");
         }
         System.out.print(
-                "write cost:" + (endWriteMills - beginWriteMills) + ",read cost:" + (endReadMills - beginReadMills));
+            "write cost:" + (endWriteMills - beginWriteMills) + ",read cost:" + (endReadMills - beginReadMills));
 
     }
 
     private static void write(LogStoreFileDAO fileDAO) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         Method writeSessionMethod = LogStoreFileDAO.class.getDeclaredMethod("writeSession",
-                TransactionStoreManager.LogOperation.class, BaseModel.class);
+            TransactionStoreManager.LogOperation.class, BaseModel.class);
         writeSessionMethod.setAccessible(true);
 
         for (int i = trx_begin; i < trx_begin + trx_num; i++) {
@@ -138,8 +134,8 @@ public class WriteStoreTest {
         Map<SessionStorable, LogOperation> resultMap = new HashMap<>(65535 * 5 * 9);
         while (fileDAO.hasRemaining(true)) {
             List<TransactionWriteStore> transactionWriteStores = fileDAO.readWriteStore(2000,
-                    true);
-            if (null != transactionWriteStores) {
+                true);
+            if (transactionWriteStores != null) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
                     printLog(transactionWriteStore);
                     resultMap.put(transactionWriteStore.getSessionRequest(), transactionWriteStore.getOperate());
@@ -148,8 +144,8 @@ public class WriteStoreTest {
         }
         while (fileDAO.hasRemaining(false)) {
             List<TransactionWriteStore> transactionWriteStores = fileDAO.readWriteStore(2000,
-                    false);
-            if (null != transactionWriteStores) {
+                false);
+            if (transactionWriteStores != null) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
                     printLog(transactionWriteStore);
                     resultMap.put(transactionWriteStore.getSessionRequest(), transactionWriteStore.getOperate());
@@ -161,16 +157,16 @@ public class WriteStoreTest {
 
     private static void printLog(TransactionWriteStore transactionWriteStore) {
         if (transactionWriteStore.getSessionRequest() instanceof GlobalSession) {
-            GlobalSession globalSession = (GlobalSession) transactionWriteStore.getSessionRequest();
+            GlobalSession globalSession = (GlobalSession)transactionWriteStore.getSessionRequest();
             System.out.print(
-                    "xid:" + globalSession.getTransactionId() + "," + globalSession.getApplicationId() + "," + globalSession
-                            .getTransactionServiceGroup() + "," + globalSession.getTransactionName() + "," + globalSession
-                            .getTimeout());
+                "xid:" + globalSession.getTransactionId() + "," + globalSession.getApplicationId() + "," + globalSession
+                    .getTransactionServiceGroup() + "," + globalSession.getTransactionName() + "," + globalSession
+                    .getTimeout());
         } else {
-            BranchSession branchSession = (BranchSession) transactionWriteStore.getSessionRequest();
+            BranchSession branchSession = (BranchSession)transactionWriteStore.getSessionRequest();
             System.out.print(
-                    "xid:" + branchSession.getTransactionId() + ",branchId:" + branchSession.getBranchId() + ","
-                            + branchSession.getResourceId());
+                "xid:" + branchSession.getTransactionId() + ",branchId:" + branchSession.getBranchId() + ","
+                    + branchSession.getResourceId());
         }
         System.out.println(",op:" + transactionWriteStore.getOperate().name());
     }
