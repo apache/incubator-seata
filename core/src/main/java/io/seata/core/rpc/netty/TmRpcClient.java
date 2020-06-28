@@ -87,9 +87,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      * @return the instance
      */
     public static TmRpcClient getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (TmRpcClient.class) {
-                if (null == instance) {
+                if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
