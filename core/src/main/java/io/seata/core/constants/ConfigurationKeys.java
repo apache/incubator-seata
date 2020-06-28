@@ -232,7 +232,7 @@ public class ConfigurationKeys {
     /**
      * The constant STORE_DB_PUBLIC_KER.
      */
-    public static final String STORE_DB_PUBLIC_KER = STORE_DB_PREFIX + "publicKey";
+    public static final String STORE_DB_PUBLIC_KEY = STORE_DB_PREFIX + "publicKey";
 
     /**
      * The constant LOCK_DB_TABLE.
