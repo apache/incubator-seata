@@ -61,7 +61,6 @@ import io.seata.saga.proctrl.handler.RouterHandler;
 import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.parser.utils.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -97,11 +96,10 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
-    private boolean enableAsync = false;
+    private boolean enableAsync;
     private ServiceInvokerManager serviceInvokerManager;
 
-    private boolean autoRegisterResources = true;
-    private String[] resources = new String[]{"classpath*:seata/saga/statelang/*.json"};
+    private Resource[] resources = new Resource[0];
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
 
@@ -140,17 +138,14 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             stateMachineRepository.setSeqGenerator(seqGenerator);
             stateMachineRepository.setStateLangStore(stateLangStore);
             stateMachineRepository.setDefaultTenantId(defaultTenantId);
-            this.stateMachineRepository = stateMachineRepository;
-        }
-        if (this.autoRegisterResources && this.resources != null && this.resources.length > 0) {
-            try {
-                Resource[] resources = ResourceUtil.getResources(this.resources);
-                stateMachineRepository.registryByResources(resources, defaultTenantId);
-                // clear resources
-                this.resources = null;
-            } catch (IOException e) {
-                LOGGER.error("Load State Language Resources failed.", e);
+            if (resources != null) {
+                try {
+                    stateMachineRepository.registryByResources(resources, defaultTenantId);
+                } catch (IOException e) {
+                    LOGGER.error("Load State Language Resources failed.", e);
+                }
             }
+            this.stateMachineRepository = stateMachineRepository;
         }
 
         if (stateLogRepository == null) {
@@ -415,11 +410,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.syncProcessCtrlEventPublisher = syncProcessCtrlEventPublisher;
     }
 
-    public void setAutoRegisterResources(boolean autoRegisterResources) {
-        this.autoRegisterResources = autoRegisterResources;
-    }
-
-    public void setResources(String[] resources) {
+    public void setResources(Resource[] resources) {
         this.resources = resources;
     }
 

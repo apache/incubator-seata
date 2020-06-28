@@ -84,7 +84,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     @Override
     public void recordStateMachineStarted(StateMachineInstance machineInstance, ProcessContext context) {
-
         if (machineInstance != null) {
             //if parentId is not null, machineInstance is a SubStateMachine, do not start a new global transaction,
             //use parent transaction instead.
@@ -102,10 +101,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
             }
 
-            // bind branchType to SAGA
-            if (RootContext.inGlobalTransaction()) {
-                RootContext.bindBranchType(BranchType.SAGA);
-            }
+            RootContext.bindBranchType(BranchType.SAGA);
 
             // save to db
             machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
@@ -159,11 +155,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             Map<String, Object> endParams = machineInstance.getEndParams();
             if (endParams != null) {
                 endParams.remove(DomainConstants.VAR_NAME_GLOBAL_TX);
-            }
-
-            // if success, clear exception
-            if (ExecutionStatus.SU.equals(machineInstance.getStatus()) && machineInstance.getException() != null) {
-                machineInstance.setException(null);
             }
 
             machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));

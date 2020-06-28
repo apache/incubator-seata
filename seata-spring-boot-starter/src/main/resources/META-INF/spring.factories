@@ -1,4 +1,2 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.seata.spring.boot.autoconfigure.SeataAutoConfiguration,\
-io.seata.spring.boot.autoconfigure.SeataSagaAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.seata.spring.boot.autoconfigure.SeataAutoConfiguration

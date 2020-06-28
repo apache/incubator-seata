@@ -100,7 +100,7 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
                 stateInstance, subStateMachine);
 
             Map<String, Object> outputParams = subStateMachineInstance.getEndParams();
-            boolean isForward = DomainConstants.OPERATION_NAME_FORWARD.equals(
+            boolean isForward = DomainConstants.VAR_NAME_OPERATION_NAME.equals(
                 context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME));
             ExecutionStatus callSubMachineStatus = decideStatus(subStateMachineInstance, isForward);
             stateInstance.setStatus(callSubMachineStatus);

@@ -137,21 +137,21 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     }
 
     @Override
-    public Object removeVariable(String name) {
+    public void removeVariable(String name) {
         if (variables.containsKey(name)) {
-            return variables.remove(name);
+            variables.remove(name);
+            return;
         }
 
         if (parent != null) {
-            return parent.removeVariable(name);
+            parent.removeVariable(name);
+            return;
         }
-
-        return null;
     }
 
     @Override
-    public Object removeVariableLocally(String name) {
-        return variables.remove(name);
+    public void removeVariableLocally(String name) {
+        variables.remove(name);
     }
 
     @Override
