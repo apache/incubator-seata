@@ -13,20 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+package io.seata.server.auth;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterTMRequest;
 
 /**
- * @author Geng Zhang
+ * @author slievrly
  */
-class ConfigurationFactoryTest {
+@LoadLevel(name = "defaultCheckAuthHandler", order = 100)
+public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
-    @Test
-    void getInstance() {
-        Configuration configuration = ConfigurationFactory.getInstance();
-        // check singleton
-        Assertions.assertEquals(configuration.getClass().getName(), ConfigurationFactory.getInstance().getClass().getName());
+    @Override
+    public boolean doRegTransactionManagerCheck(RegisterTMRequest request) {
+        return true;
+    }
+
+    @Override
+    public boolean doRegResourceManagerCheck(RegisterRMRequest request) {
+        return true;
     }
 }

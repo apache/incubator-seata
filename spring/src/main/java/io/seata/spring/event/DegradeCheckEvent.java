@@ -13,20 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+package io.seata.spring.event;
+
+import io.seata.core.event.Event;
 
 /**
- * @author Geng Zhang
+ * @author slievrly
  */
-class ConfigurationFactoryTest {
+public class DegradeCheckEvent implements Event {
+    private boolean requestSuccess;
 
-    @Test
-    void getInstance() {
-        Configuration configuration = ConfigurationFactory.getInstance();
-        // check singleton
-        Assertions.assertEquals(configuration.getClass().getName(), ConfigurationFactory.getInstance().getClass().getName());
+    public DegradeCheckEvent(boolean requestSuccess) {
+        this.requestSuccess = requestSuccess;
+    }
+
+    public boolean isRequestSuccess() {
+        return requestSuccess;
     }
 }

@@ -236,7 +236,7 @@ public class WriteStoreTest {
         while (((ReloadableStore)transactionStoreManager).hasRemaining(true)) {
             List<TransactionWriteStore> transactionWriteStores = ((ReloadableStore)transactionStoreManager).readWriteStore(2000,
                 true);
-            if (null != transactionWriteStores) {
+            if (transactionWriteStores != null) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
                     printLog(transactionWriteStore);
                     resultMap.put(transactionWriteStore.getSessionRequest(), transactionWriteStore.getOperate());
@@ -246,7 +246,7 @@ public class WriteStoreTest {
         while (((ReloadableStore)transactionStoreManager).hasRemaining(false)) {
             List<TransactionWriteStore> transactionWriteStores = ((ReloadableStore)transactionStoreManager).readWriteStore(2000,
                 false);
-            if (null != transactionWriteStores) {
+            if (transactionWriteStores != null) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
                     printLog(transactionWriteStore);
                     resultMap.put(transactionWriteStore.getSessionRequest(), transactionWriteStore.getOperate());

@@ -67,7 +67,7 @@ public class FileTransactionStoreManagerTest {
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
         } finally {
-            if (null != fileTransactionStoreManager) {
+            if (fileTransactionStoreManager != null) {
                 fileTransactionStoreManager.shutdown();
             }
             Assertions.assertTrue(seataFile.delete());
@@ -119,10 +119,10 @@ public class FileTransactionStoreManagerTest {
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
-            if (null != fileTransactionStoreManager) {
+            if (fileTransactionStoreManager != null) {
                 fileTransactionStoreManager.shutdown();
             }
-            if (null != sessionManager) {
+            if (sessionManager != null) {
                 sessionManager.destroy();
             }
             Assertions.assertTrue(seataFile.delete());
