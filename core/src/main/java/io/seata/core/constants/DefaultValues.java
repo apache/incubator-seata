@@ -85,4 +85,7 @@ public class DefaultValues {
     public static final int SERVER_DEFAULT_PORT = 8091;
     public static final String SERVER_DEFAULT_STORE_MODE = "file";
     public static final long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
+    public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
+
+
 }
