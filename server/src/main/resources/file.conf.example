@@ -84,6 +84,8 @@ server {
     #schedule delete expired undo_log in milliseconds
     logDeletePeriod = 86400000
   }
+  #check auth
+  enableCheckAuth = true
   #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
   maxCommitRetryTimeout = "-1"
   maxRollbackRetryTimeout = "-1"

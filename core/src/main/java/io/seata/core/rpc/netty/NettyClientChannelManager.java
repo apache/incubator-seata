@@ -91,7 +91,7 @@ class NettyClientChannelManager {
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null) {
             channelToServer = getExistAliveChannel(channelToServer, serverAddress);
-            if (null != channelToServer) {
+            if (channelToServer != null) {
                 return channelToServer;
             }
         }
@@ -111,11 +111,11 @@ class NettyClientChannelManager {
      * @param serverAddress server address
      */
     void releaseChannel(Channel channel, String serverAddress) {
-        if (null == channel || null == serverAddress) { return; }
+        if (channel == null || serverAddress == null) { return; }
         try {
             synchronized (channelLocks.get(serverAddress)) {
                 Channel ch = channels.get(serverAddress);
-                if (null == ch) {
+                if (ch == null) {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
                     return;
                 }
@@ -140,7 +140,7 @@ class NettyClientChannelManager {
      * @param channel channel
      */
     void destroyChannel(String serverAddress, Channel channel) {
-        if (null == channel) { return; }
+        if (channel == null) { return; }
         try {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
@@ -184,7 +184,7 @@ class NettyClientChannelManager {
     }
     
     void registerChannel(final String serverAddress, final Channel channel) {
-        if (null != channels.get(serverAddress) && channels.get(serverAddress).isActive()) {
+        if (channels.get(serverAddress) != null && channels.get(serverAddress).isActive()) {
             return;
         }
         channels.put(serverAddress, channel);
@@ -199,7 +199,7 @@ class NettyClientChannelManager {
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
             NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-            if (null != previousPoolKey && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
+            if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
                 RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
                 ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
             }
@@ -236,7 +236,7 @@ class NettyClientChannelManager {
                     LOGGER.error(exx.getMessage());
                 }
                 rmChannel = channels.get(serverAddress);
-                if (null != rmChannel && rmChannel.isActive()) {
+                if (rmChannel != null && rmChannel.isActive()) {
                     return rmChannel;
                 }
             }
