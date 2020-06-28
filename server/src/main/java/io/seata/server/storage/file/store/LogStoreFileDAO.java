@@ -515,7 +515,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
                 return false;
             }
             List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
-            if (null != branchSessIonsOverMaXTimeout) {
+            if (branchSessIonsOverMaXTimeout != null) {
                 for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
                     TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
                             TransactionStoreManager.LogOperation.BRANCH_ADD);
@@ -576,7 +576,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
             return null;
         } finally {
             try {
-                if (null != fileChannel) {
+                if (fileChannel != null) {
                     if (isHistory) {
                         recoverHisOffset = fileChannel.position();
                     } else {
@@ -592,7 +592,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
 
     private void closeFile(RandomAccessFile raf) {
         try {
-            if (null != raf) {
+            if (raf != null) {
                 raf.close();
                 raf = null;
             }
@@ -789,7 +789,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     //region Shutdown
 
     public void shutdown() {
-        if (null != fileWriteExecutor) {
+        if (fileWriteExecutor != null) {
             fileWriteExecutor.shutdown();
             stopping = true;
             int retry = 0;
