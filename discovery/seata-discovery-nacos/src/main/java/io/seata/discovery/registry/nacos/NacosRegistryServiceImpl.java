@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
     private static final String DEFAULT_NAMESPACE = "";
     private static final String DEFAULT_CLUSTER = "default";
-    private static final String DEFAULT_GROUP = "SEATA_GROUP";
+    private static final String DEFAULT_GROUP = "DEFAULT_GROUP";
     private static final String DEFAULT_APPLICATION = "seata-server";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String PRO_NAMESPACE_KEY = "namespace";
