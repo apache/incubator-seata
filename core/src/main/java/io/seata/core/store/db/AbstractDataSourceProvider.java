@@ -204,11 +204,9 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
             try {
                 password = ConfigTools.publicDecrypt(password, publicKey);
             } catch (Exception e) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(
-                        "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: ",
-                        e.getMessage());
-                }
+                LOGGER.error(
+                    "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: ",
+                    e.getMessage());
             }
         }
         return password;
