@@ -487,7 +487,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.putInt(0);
         }
 
-        if (null != xidBytes) {
+        if (xidBytes != null) {
             byteBuffer.putShort((short)xidBytes.length);
             byteBuffer.put(xidBytes);
         } else {
@@ -498,7 +498,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put((byte)status.getCode());
 
-        if (null != retryStrategyBytes) {
+        if (retryStrategyBytes != null) {
             byteBuffer.putShort((short)retryStrategyBytes.length);
             byteBuffer.put(retryStrategyBytes);
         } else {
