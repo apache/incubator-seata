@@ -79,7 +79,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     private static int globalTransactionTimeout = 0;
 
-    private static void initGlobalTransactionTimeout() {
+    private void initGlobalTransactionTimeout() {
         if (GlobalTransactionalInterceptor.globalTransactionTimeout <= 0) {
             int globalTransactionTimeout;
             try {
