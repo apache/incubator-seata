@@ -9,6 +9,12 @@
       "defaultValue": false
     },
     {
+      "name": "seata.client.rm.saga-json-parser",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
+      "defaultValue": "fastjson"
+    },
+    {
       "name": "seata.saga.state-machine.application-id",
       "type": "java.lang.String",
       "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig"
@@ -150,6 +156,28 @@
         {
           "value": "etcd3",
           "description": "Use etcd3 config center, Configure the center info at 'seata.config.etcd3' ."
+        }
+      ]
+    },
+    {
+      "name": "seata.client.rm.saga-json-parser",
+      "values": [
+        {
+          "value": "fastjson"
+        },
+        {
+          "value": "jackson"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.undo.log-serialization",
+      "values": [
+        {
+          "value": "fastjson"
+        },
+        {
+          "value": "jackson"
         }
       ]
     },
