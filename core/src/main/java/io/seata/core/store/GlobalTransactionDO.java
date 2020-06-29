@@ -28,9 +28,9 @@ public class GlobalTransactionDO {
 
     private String xid;
 
-    private Long transactionId;
+    private long transactionId;
 
-    private Integer status;
+    private int status;
 
     private String applicationId;
 
@@ -38,9 +38,9 @@ public class GlobalTransactionDO {
 
     private String transactionName;
 
-    private Integer timeout;
+    private int timeout;
 
-    private Long beginTime;
+    private long beginTime;
 
     private String applicationData;
 
