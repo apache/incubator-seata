@@ -23,6 +23,7 @@ import io.seata.saga.rm.StateMachineEngineHolder;
 import io.seata.spring.boot.autoconfigure.properties.SeataSagaAsyncThreadPoolProperties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
@@ -56,10 +57,11 @@ public class SeataSagaAutoConfiguration {
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
     @ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine")
-    public StateMachineConfig dbStateMachineConfig(DataSource dataSource,
-        @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
-        @Value("${spring.application.name:}") String applicationId,
-        @Value("${seata.tx-service-group:}") String txServiceGroup) {
+    public StateMachineConfig dbStateMachineConfig(
+            DataSource dataSource,
+            @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
+            @Value("${spring.application.name:}") String applicationId,
+            @Value("${seata.tx-service-group:}") String txServiceGroup) {
         DbStateMachineConfig config = new DbStateMachineConfig();
         config.setDataSource(dataSource);
         config.setApplicationId(applicationId);
@@ -90,12 +92,22 @@ public class SeataSagaAutoConfiguration {
     static class SagaAsyncThreadPoolExecutorConfiguration {
 
         /**
+         * Create rejected execution handler bean.
+         */
+        @Bean
+        @ConditionalOnMissingBean
+        public RejectedExecutionHandler rejectedExecutionHandler() {
+            return new ThreadPoolExecutor.CallerRunsPolicy();
+        }
+
+        /**
          * Create state machine async thread pool executor bean.
          */
         @Bean
         @ConditionalOnMissingBean
         public ThreadPoolExecutor sagaStateMachineAsyncThreadPoolExecutor(
-            SeataSagaAsyncThreadPoolProperties properties) {
+                SeataSagaAsyncThreadPoolProperties properties,
+                RejectedExecutionHandler rejectedExecutionHandler) {
             ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
             threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
             threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
@@ -106,16 +118,17 @@ public class SeataSagaAutoConfiguration {
             BlockingQueue<Runnable> queue = new LinkedBlockingQueue();
 
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-                properties.getCorePoolSize(),
-                properties.getMaxPoolSize(),
-                properties.getKeepAliveTime(),
-                TimeUnit.SECONDS,
-                queue,
-                threadFactory
+                    properties.getCorePoolSize(),
+                    properties.getMaxPoolSize(),
+                    properties.getKeepAliveTime(),
+                    TimeUnit.SECONDS,
+                    queue,
+                    threadFactory,
+                    rejectedExecutionHandler
             );
 
             return threadPoolExecutor;
         }
-
     }
+
 }
