@@ -109,7 +109,7 @@ public class FileConfiguration extends AbstractConfiguration {
          * For seata-server side the conf file should always exists.
          * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
          */
-        if (null == targetFilePath) {
+        if (targetFilePath == null) {
             fileConfig = FileConfigFactory.load();
             this.allowDynamicRefresh = false;
         } else {
@@ -178,7 +178,7 @@ public class FileConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -211,7 +211,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
@@ -265,7 +265,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void run() {
-            if (null != configFuture) {
+            if (configFuture != null) {
                 if (configFuture.isTimeout()) {
                     setFailResult(configFuture);
                     return;
@@ -275,7 +275,7 @@ public class FileConfiguration extends AbstractConfiguration {
                         long tempLastModified = new File(targetFilePath).lastModified();
                         if (tempLastModified > targetFileLastModified) {
                             FileConfig tempConfig = FileConfigFactory.load(new File(targetFilePath), name);
-                            if (null != tempConfig) {
+                            if (tempConfig != null) {
                                 fileConfig = tempConfig;
                                 targetFileLastModified = tempLastModified;
                             }
@@ -341,7 +341,8 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
+                    String currentConfig =
+                        ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);

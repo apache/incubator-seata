@@ -27,6 +27,7 @@ import io.seata.core.protocol.RpcMessage;
  *
  * @author slievrly
  */
+@Deprecated
 public interface ServerMessageSender {
 
     /**
