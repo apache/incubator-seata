@@ -73,24 +73,15 @@ public class LoadBalanceTest {
     @ParameterizedTest
     @MethodSource("addressProvider")
     public void testConsistentHashLoadBalance_select(List<InetSocketAddress> addresses) {
-        {
-            int runs = 10000;
-            Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new ConsistentHashLoadBalance());
-            for (InetSocketAddress address : counter.keySet()) {
-                Long count = counter.get(address).get();
-                Assertions.assertTrue(count > 0, "count is at least greater than 0");
+        int runs = 10000;
+        int selected = 0;
+        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new ConsistentHashLoadBalance());
+        for (InetSocketAddress address : counter.keySet()) {
+            if (counter.get(address).get() > 0) {
+                selected++;
             }
         }
-
-        {
-            int runs = 1;
-            Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, Collections.singletonList(addresses.get(0)), new ConsistentHashLoadBalance());
-            for (InetSocketAddress address : counter.keySet()) {
-                Long count = counter.get(address).get();
-                Assertions.assertEquals(addresses.get(0), address, "select must be equal to address");
-                Assertions.assertEquals(1, count, "count must be equal to 1");
-            }
-        }
+        Assertions.assertEquals(1, selected, "selected must be equal to 1");
     }
 
     /**
@@ -110,7 +101,7 @@ public class LoadBalanceTest {
         }
         try {
             for (int i = 0; i < runs; i++) {
-                InetSocketAddress selectAddress = loadBalance.select(addresses);
+                InetSocketAddress selectAddress = loadBalance.select(addresses, "XID");
                 counter.get(selectAddress).incrementAndGet();
             }
         } catch (Exception e) {
