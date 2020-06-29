@@ -36,7 +36,7 @@ public class LoadBalanceFactory {
     /**
      * The load balance.
      */
-    private static final LoadBalance loadBalance = EnhancedServiceLoader.load(LoadBalance.class,
+    private static final LoadBalance LOAD_BALANCE_INSTANCE = EnhancedServiceLoader.load(LoadBalance.class,
             ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE));
 
     /**
@@ -45,6 +45,6 @@ public class LoadBalanceFactory {
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        return loadBalance;
+        return LOAD_BALANCE_INSTANCE;
     }
 }
