@@ -340,7 +340,7 @@
                                     <consoleOutput>true</consoleOutput>
                                     <failsOnError>true</failsOnError>
                                     <excludes>**/generated/**/*</excludes>
-                                    <excludes>io.seata.common.util.ConfigTools</excludes>
+                                    <excludes>io/seata/common/util/ConfigTools</excludes>
                                     <excludes>io/seata/integration/grpc/interceptor/</excludes>
                                 </configuration>
                                 <goals>
