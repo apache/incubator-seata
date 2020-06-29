@@ -123,7 +123,6 @@ public class ConfigTools {
         return decoder.decodeBuffer(base64Key);
     }
 
-    //CHECKSTYLE:OFF
     public static void main(String[] args) throws Exception {
         Scanner scan = new Scanner(System.in);
         KeyPair keyPair = getKeyPair();
