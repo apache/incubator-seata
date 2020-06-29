@@ -50,7 +50,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
         }
 
         int fromIndex = this.getFromIndex();
-        int toIndex = fromIndex + getPageSize();
+        int toIndex = this.getToIndex(fromIndex);
 
         if (fromIndex >= list.size()) {
             return new ArrayList<>();
@@ -65,6 +65,10 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
 
     public int getFromIndex() {
         return (pageIndex - FIRST_PAGE_INDEX) * pageSize;
+    }
+
+    public int getToIndex(int fromIndex) {
+        return fromIndex + pageSize;
     }
 
     /**
