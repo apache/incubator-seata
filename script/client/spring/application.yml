@@ -69,7 +69,7 @@ seata:
       namespace:
       serverAddr: 127.0.0.1:8848
       group: SEATA_GROUP
-      userName: ""
+      username: ""
       password: ""
     zk:
       server-addr: 127.0.0.1:2181
@@ -89,8 +89,9 @@ seata:
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
+      group : "SEATA_GROUP"
       namespace:
-      userName: ""
+      username: ""
       password: ""
     redis:
       server-addr: localhost:6379
