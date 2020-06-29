@@ -35,6 +35,15 @@ public interface RemotingClient {
     /**
      * Send msg with response object.
      *
+     * @param msg the msg
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendMsgWithResponse(Object msg) throws TimeoutException;
+
+    /**
+     * Send msg with response object.
+     *
      * @param msg     the msg
      * @param timeout the timeout
      * @return the object
@@ -52,15 +61,6 @@ public interface RemotingClient {
      * @throws TimeoutException the timeout exception
      */
     Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException;
-
-    /**
-     * Send msg with response object.
-     *
-     * @param msg the msg
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendMsgWithResponse(Object msg) throws TimeoutException;
 
     /**
      * Send response.

@@ -36,7 +36,8 @@ public class LoadBalanceFactory {
     /**
      * The load balance.
      */
-    private static volatile LoadBalance loadBalance;
+    private static final LoadBalance loadBalance = EnhancedServiceLoader.load(LoadBalance.class,
+            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE));
 
     /**
      * Gets instance.
@@ -44,14 +45,6 @@ public class LoadBalanceFactory {
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        if (loadBalance == null) {
-            synchronized (LoadBalanceFactory.class) {
-                if (loadBalance == null) {
-                    loadBalance = EnhancedServiceLoader.load(LoadBalance.class,
-                            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE));
-                }
-            }
-        }
         return loadBalance;
     }
 }

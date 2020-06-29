@@ -32,6 +32,10 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchReportRequest;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
@@ -41,6 +45,7 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -147,16 +152,14 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
     }
 
     @Override
-    public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        String validAddress = loadBalance(getTransactionServiceGroup());
-        Channel channel = clientChannelManager.acquireChannel(validAddress);
-        Object result = super.sendAsyncRequestWithResponse(validAddress, channel, msg, timeout);
-        return result;
+    public Object sendMsgWithResponse(Object msg) throws TimeoutException {
+        return sendMsgWithResponse(msg, NettyClientConfig.getRpcRequestTimeout());
     }
 
     @Override
-    public Object sendMsgWithResponse(Object msg) throws TimeoutException {
-        return sendMsgWithResponse(msg, NettyClientConfig.getRpcRequestTimeout());
+    public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
+        String validAddress = loadBalance(getTransactionServiceGroup(), msg);
+        return sendMsgWithResponse(validAddress, msg, timeout);
     }
 
     @Override
@@ -181,11 +184,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
         clientChannelManager.destroyChannel(serverAddress, channel);
     }
 
-    private String loadBalance(String transactionServiceGroup) {
+    @SuppressWarnings("unchecked")
+    private String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -193,6 +197,27 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting impl
             throw new FrameworkException(NoAvailableService);
         }
         return NetUtil.toStringAddress(address);
+    }
+
+    private String getXid(Object msg) {
+        String xid = "";
+        if (msg instanceof AbstractGlobalEndRequest) {
+            xid = ((AbstractGlobalEndRequest) msg).getXid();
+        } else if (msg instanceof GlobalBeginRequest) {
+            xid = ((GlobalBeginRequest) msg).getTransactionName();
+        } else if (msg instanceof BranchRegisterRequest) {
+            xid = ((BranchRegisterRequest) msg).getXid();
+        } else if (msg instanceof BranchReportRequest) {
+            xid = ((BranchReportRequest) msg).getXid();
+        } else {
+            try {
+                Field field = msg.getClass().getDeclaredField("xid");
+                xid = String.valueOf(field.get(msg));
+            } catch (Exception ignore) {
+
+            }
+        }
+        return xid;
     }
 
     private String getThreadPrefix() {

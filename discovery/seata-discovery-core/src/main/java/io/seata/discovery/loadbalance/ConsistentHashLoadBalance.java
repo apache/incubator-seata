@@ -17,11 +17,8 @@ package io.seata.discovery.loadbalance;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.StringJoiner;
 import java.util.TreeMap;
 
 import io.seata.common.loader.LoadLevel;
@@ -38,30 +35,18 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
 @LoadLevel(name = "ConsistentHashLoadBalance", order = 3)
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
-    /**
-     * The constant VIRTUAL_NODES.
-     */
     private static final String VIRTUAL_NODES = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalanceVirtualNodes";
+    private static final int VIRTUAL_NODES_DEFAULT = 10;
+    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(VIRTUAL_NODES, VIRTUAL_NODES_DEFAULT);
 
     @Override
-    protected <T> T doSelect(List<T> invokers) {
-        List<T> temp = new ArrayList<>(invokers);
-        Collections.shuffle(temp);
-        return new ConsistentHashSelector<>(invokers, ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(
-                VIRTUAL_NODES, 10)).select(getObjectKey(temp));
-    }
-
-    private <T> String getObjectKey(List<T> invokers) {
-        StringJoiner sb = new StringJoiner(",", "[", "]");
-        for (Object obj : invokers) {
-            sb.add(obj.toString());
-        }
-        return sb.toString();
+    protected <T> T doSelect(List<T> invokers, String xid) {
+        return new ConsistentHashSelector<>(invokers, VIRTUAL_NODES_NUM).select(xid);
     }
 
     private static final class ConsistentHashSelector<T> {
 
-        private final SortedMap<Long, T> virtualInvokers = new TreeMap<Long, T>();
+        private final SortedMap<Long, T> virtualInvokers = new TreeMap<>();
         private final HashFunction hashFunction = new MD5Hash();
 
         ConsistentHashSelector(List<T> invokers, int virtualNodes) {
