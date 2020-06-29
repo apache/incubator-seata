@@ -18,6 +18,8 @@ package io.seata.core.store;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
+
 /**
  * @author wang.liang
  */
@@ -28,7 +30,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
     protected SortOrder sortOrder;
 
     // page fields
-    protected int pageIndex = 1;
+    protected int pageIndex = FIRST_PAGE_INDEX;
     protected int pageSize = 0;
 
     /**
@@ -47,11 +49,8 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
             return list;
         }
 
-        int pageIndex = getPageIndex();
-        int pageSize = getPageSize();
-
-        int fromIndex = (pageIndex - 1) * pageSize;
-        int toIndex = fromIndex + pageSize;
+        int fromIndex = this.getFromIndex();
+        int toIndex = fromIndex + getPageSize();
 
         if (fromIndex >= list.size()) {
             return new ArrayList<>();
@@ -62,6 +61,10 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
         }
 
         return list.subList(fromIndex, toIndex);
+    }
+
+    public int getFromIndex() {
+        return (pageIndex - FIRST_PAGE_INDEX) * pageSize;
     }
 
     /**

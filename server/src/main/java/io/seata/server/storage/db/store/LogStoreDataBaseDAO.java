@@ -33,8 +33,11 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTableField;
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
+import io.seata.core.store.SortOrder;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,7 +158,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public List<GlobalTransactionDO> queryGlobalTransactionDO(int[] statuses, int limit) {
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
         List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -164,18 +167,65 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);
-
-            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, paramsPlaceHolder);
-            ps = conn.prepareStatement(sql);
-            for (int i = 0; i < statuses.length; i++) {
-                int status = statuses[i];
-                ps.setInt(i + 1, status);
+            // where
+            String wherePlaceHolder = this.buildWherePlaceHolder(condition);
+            // order by xxx [asc|desc]
+            StringBuilder orderByPlaceHolder = new StringBuilder();
+            if (condition.getSortField() == null) {
+                // db mode: default sort field is gmt_create
+                condition.setSortField(GlobalTableField.GMT_CREATE);
             }
-            ps.setInt(statuses.length + 1, limit);
+            orderByPlaceHolder.append(" order by ").append(condition.getSortField().getFieldName());
+            if (SortOrder.DESC == condition.getSortOrder()) {
+                orderByPlaceHolder.append(" desc");
+            }
+            // build sql
+            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByCondition(globalTable,
+                    wherePlaceHolder, orderByPlaceHolder.toString(), condition);
+
+            ps = conn.prepareStatement(sql);
+
+            // set condition parameters
+            int i = this.setConditionParameters(ps, condition);
+            // set paging parameters
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).setQueryGlobalTransactionSQLPagingParameters(ps, condition, i);
+
             rs = ps.executeQuery();
             while (rs.next()) {
                 ret.add(convertGlobalTransactionDO(rs));
+            }
+            return ret;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps, conn);
+        }
+    }
+
+    @Override
+    public int countGlobalTransactionDO(GlobalTransactionCondition condition) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+
+            // where
+            String wherePlaceHolder = this.buildWherePlaceHolder(condition);
+            // build sql
+            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getCountGlobalTransactionSQLByCondition(globalTable,
+                    wherePlaceHolder);
+
+            ps = conn.prepareStatement(sql);
+
+            // set condition parameters
+            this.setConditionParameters(ps, condition);
+
+            rs = ps.executeQuery();
+            int ret = 0;
+            if (rs.next()) {
+                ret = rs.getInt(1);
             }
             return ret;
         } catch (SQLException e) {
@@ -403,6 +453,63 @@ public class LogStoreDataBaseDAO implements LogStore {
             IOUtil.close(rs, ps, conn);
         }
         return max;
+    }
+
+    private String buildWherePlaceHolder(GlobalTransactionCondition condition) {
+        // where
+        StringBuilder wherePlaceHolder = new StringBuilder();
+        // status in (?, ?, ?)
+        if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
+            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_STATUS);
+            if (condition.getStatuses().length > 1) {
+                wherePlaceHolder.append(" in (");
+                String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", condition.getStatuses().length);
+                wherePlaceHolder.append(paramsPlaceHolder);
+                wherePlaceHolder.append(")");
+            } else {
+                wherePlaceHolder.append(" = ?");
+            }
+        }
+        // begin_time < System.currentTimeMillis() - ?
+        if (condition.getOverTimeAliveMills() > 0) {
+            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ?");
+        }
+        //  true: begin_time  < System.currentTimeMillis() - timeout
+        // false: begin_time >= System.currentTimeMillis() - timeout
+        if (condition.getTimeoutData() != null) {
+            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ");
+            if (condition.getTimeoutData()) {
+                wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ? - timeout");
+            } else {
+                wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" >= ? - timeout");
+            }
+        }
+
+        return wherePlaceHolder.toString();
+    }
+
+    private int setConditionParameters(PreparedStatement ps, GlobalTransactionCondition condition) throws SQLException {
+        int i = 1;
+        long now = System.currentTimeMillis();
+        // status in (?, ?, ?)
+        if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
+            for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
+                ps.setInt(i++, condition.getStatuses()[j].getCode());
+            }
+        }
+        // begin_time < System.currentTimeMillis() - ?
+        if (condition.getOverTimeAliveMills() > 0) {
+            ps.setLong(i++, now - condition.getOverTimeAliveMills());
+        }
+        //  true: begin_time  < System.currentTimeMillis() - timeout
+        // false: begin_time >= System.currentTimeMillis() - timeout
+        if (condition.getTimeoutData() != null) {
+            ps.setLong(i++, now);
+        }
+
+        return i;
     }
 
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {

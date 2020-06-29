@@ -16,6 +16,12 @@
 package io.seata.core.store.db.sql.log;
 
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.Pageable;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
 
 
 /**
@@ -33,6 +39,28 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant BRANCH_TABLE_PLACEHOLD.
      */
     public static final String BRANCH_TABLE_PLACEHOLD = " #branch_table# ";
+
+    /**
+     * The constant SQL_PLACEHOLD.
+     */
+    public static final String SQL_PLACEHOLD = " #SQL_PLACEHOLD# ";
+
+    /**
+     * The constant WHERE_PLACEHOLD.
+     * format: where xxx = ? and yyy > ? and zzz < ?
+     */
+    public static final String WHERE_PLACEHOLD = " #WHERE_PLACEHOLD# ";
+
+    /**
+     * The constant ORDERBY_PLACEHOLD.
+     * format: order by xxx [asc|desc]
+     */
+    public static final String ORDERBY_PLACEHOLD = " #ORDERBY_PLACEHOLD# ";
+
+    /**
+     * The constant LIMIT_PLACEHOLD.
+     */
+    public static final String LIMIT_PLACEHOLD = " #LIMIT_PLACEHOLD# ";
 
     /**
      * The constant PRAMETER_PLACEHOLD.
@@ -83,6 +111,13 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String QUERY_GLOBAL_TRANSACTION_BY_ID = "select " + ALL_GLOBAL_COLUMNS
             + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
+
+    /**
+     * The constant COUNT_GLOBAL_TRANSACTION.
+     */
+    public static final String COUNT_GLOBAL_TRANSACTION_BY_CONDITION = "select count(*)"
+            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + WHERE_PLACEHOLD;
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.
@@ -152,7 +187,28 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
+    public abstract String getQueryGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder,
+                                                                   String orderByPlaceHolder, Pageable pageable);
+
+    @Override
+    public void setQueryGlobalTransactionSQLPagingParameters(PreparedStatement ps, Pageable pageable,
+                                                             int currentParamIndex) throws SQLException {
+        if (pageable.getPageSize() > 0) {
+            if (pageable.getPageIndex() > FIRST_PAGE_INDEX) {
+                int fromIndex = (pageable.getPageIndex() - FIRST_PAGE_INDEX) * pageable.getPageSize();
+                int toIndex = fromIndex + pageable.getPageSize();
+                ps.setInt(currentParamIndex++, fromIndex);
+                ps.setInt(currentParamIndex, toIndex);
+            } else {
+                ps.setInt(currentParamIndex, pageable.getPageSize());
+            }
+        }
+    }
+
+    @Override
+    public String getCountGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder) {
+        return COUNT_GLOBAL_TRANSACTION_BY_CONDITION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(WHERE_PLACEHOLD, wherePlaceHolder);
+    }
 
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);

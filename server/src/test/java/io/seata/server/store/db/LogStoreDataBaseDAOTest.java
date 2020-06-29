@@ -17,6 +17,7 @@ package io.seata.server.store.db;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
@@ -33,6 +34,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
+import static io.seata.core.model.GlobalStatus.Begin;
 
 
 /**
@@ -220,7 +223,10 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[]{1}, 10);
+        int count = logStoreDataBaseDAO.countGlobalTransactionDO(new GlobalStatus[]{Begin});
+        Assertions.assertEquals(2, count);
+
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new GlobalStatus[]{Begin}, 10);
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(2, globalTransactionDOs.size());
 
@@ -289,7 +295,10 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[]{1}, 1);
+        int count = logStoreDataBaseDAO.countGlobalTransactionDO(new GlobalStatus[]{Begin});
+        Assertions.assertEquals(2, count);
+
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new GlobalStatus[]{Begin}, 1);
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(1, globalTransactionDOs.size());
 

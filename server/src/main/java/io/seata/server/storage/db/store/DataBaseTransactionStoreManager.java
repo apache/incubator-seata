@@ -176,12 +176,8 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * @return the list
      */
     public List<GlobalSession> readSession(GlobalStatus[] statuses) {
-        int[] states = new int[statuses.length];
-        for (int i = 0; i < statuses.length; i++) {
-            states[i] = statuses[i].getCode();
-        }
         //global transaction
-        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(states, logQueryLimit);
+        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(statuses, logQueryLimit);
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
             return null;
         }
