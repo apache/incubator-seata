@@ -31,7 +31,7 @@ public interface Querier<T> {
      * @param data
      * @return
      */
-    boolean isMatch(T data);
+    <D extends T> boolean isMatch(D data);
 
     /**
      * Do filter.
@@ -39,10 +39,10 @@ public interface Querier<T> {
      * @param list the list
      * @return the list after filter
      */
-    default List<T> doFilter(List<T> list) {
-        List<T> found = new ArrayList<>();
+    default <D extends T> List<D> doFilter(List<D> list) {
+        List<D> found = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(list)) {
-            for (T t : list) {
+            for (D t : list) {
                 if (this.isMatch(t)) {
                     found.add(t);
                 }
@@ -57,7 +57,7 @@ public interface Querier<T> {
      * @param list the list
      * @return the list after sort
      */
-    List<T> doSort(List<T> list);
+    <D extends T> List<D> doSort(List<D> list);
 
     /**
      * Do paging.
@@ -65,7 +65,7 @@ public interface Querier<T> {
      * @param list the list
      * @return the list after paging
      */
-    List<T> doPaging(List<T> list);
+    <D extends T> List<D> doPaging(List<D> list);
 
     /**
      * Do query.
@@ -73,7 +73,7 @@ public interface Querier<T> {
      * @param list the list
      * @return the list after query
      */
-    default List<T> doQuery(List<T> list) {
+    default <D extends T> List<D> doQuery(List<D> list) {
         if (list == null) {
             return new ArrayList<>();
         }

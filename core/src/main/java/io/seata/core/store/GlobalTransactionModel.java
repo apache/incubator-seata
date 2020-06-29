@@ -15,240 +15,166 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.StringUtils;
-
 import java.util.Date;
 
 /**
- * Global Transaction data object
+ * Global Transaction model
  *
- * @author zhangsen
+ * @author wang.liang
  */
-public class GlobalTransactionDO implements GlobalTransactionModel {
-
-    private String xid;
-
-    private long transactionId;
-
-    private int status;
-
-    private String applicationId;
-
-    private String transactionServiceGroup;
-
-    private String transactionName;
-
-    private int timeout;
-
-    private long beginTime;
-
-    private String applicationData;
-
-    private Date gmtCreate;
-
-    private Date gmtModified;
+interface GlobalTransactionModel {
 
     /**
      * Gets xid.
      *
      * @return the xid
      */
-    public String getXid() {
-        return xid;
-    }
+    String getXid();
 
     /**
      * Sets xid.
      *
      * @param xid the xid
      */
-    public void setXid(String xid) {
-        this.xid = xid;
-    }
+    void setXid(String xid);
 
     /**
      * Gets status.
      *
      * @return the status
      */
-    public int getStatus() {
-        return status;
-    }
+    int getStatus();
 
     /**
      * Sets status.
      *
      * @param status the status
      */
-    public void setStatus(int status) {
-        this.status = status;
-    }
+    void setStatus(int status);
 
     /**
      * Gets application id.
      *
      * @return the application id
      */
-    public String getApplicationId() {
-        return applicationId;
-    }
+    String getApplicationId();
 
     /**
      * Sets application id.
      *
      * @param applicationId the application id
      */
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
+    void setApplicationId(String applicationId);
 
     /**
      * Gets transaction service group.
      *
      * @return the transaction service group
      */
-    public String getTransactionServiceGroup() {
-        return transactionServiceGroup;
-    }
+    String getTransactionServiceGroup();
 
     /**
      * Sets transaction service group.
      *
      * @param transactionServiceGroup the transaction service group
      */
-    public void setTransactionServiceGroup(String transactionServiceGroup) {
-        this.transactionServiceGroup = transactionServiceGroup;
-    }
+    void setTransactionServiceGroup(String transactionServiceGroup);
 
     /**
      * Gets transaction name.
      *
      * @return the transaction name
      */
-    public String getTransactionName() {
-        return transactionName;
-    }
+    String getTransactionName();
 
     /**
      * Sets transaction name.
      *
      * @param transactionName the transaction name
      */
-    public void setTransactionName(String transactionName) {
-        this.transactionName = transactionName;
-    }
+    void setTransactionName(String transactionName);
 
     /**
      * Gets timeout.
      *
      * @return the timeout
      */
-    public int getTimeout() {
-        return timeout;
-    }
+    int getTimeout();
 
     /**
      * Sets timeout.
      *
      * @param timeout the timeout
      */
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
-    }
+    void setTimeout(int timeout);
 
     /**
      * Gets begin time.
      *
      * @return the begin time
      */
-    public long getBeginTime() {
-        return beginTime;
-    }
+    long getBeginTime();
 
     /**
      * Sets begin time.
      *
      * @param beginTime the begin time
      */
-    public void setBeginTime(long beginTime) {
-        this.beginTime = beginTime;
-    }
+    void setBeginTime(long beginTime);
 
     /**
      * Gets transaction id.
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
-        return transactionId;
-    }
+    long getTransactionId();
 
     /**
      * Sets transaction id.
      *
      * @param transactionId the transaction id
      */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
-    }
+    void setTransactionId(long transactionId);
 
     /**
      * Gets application data.
      *
      * @return the application data
      */
-    public String getApplicationData() {
-        return applicationData;
-    }
+    String getApplicationData();
 
     /**
      * Sets application data.
      *
      * @param applicationData the application data
      */
-    public void setApplicationData(String applicationData) {
-        this.applicationData = applicationData;
-    }
+    void setApplicationData(String applicationData);
 
     /**
      * Gets gmt create.
      *
      * @return the gmt create
      */
-    public Date getGmtCreate() {
-        return gmtCreate;
-    }
+    Date getGmtCreate();
 
     /**
      * Sets gmt create.
      *
      * @param gmtCreate the gmt create
      */
-    public void setGmtCreate(Date gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
+    void setGmtCreate(Date gmtCreate);
 
     /**
      * Gets gmt modified.
      *
      * @return the gmt modified
      */
-    public Date getGmtModified() {
-        return gmtModified;
-    }
+    Date getGmtModified();
 
     /**
      * Sets gmt modified.
      *
      * @param gmtModified the gmt modified
      */
-    public void setGmtModified(Date gmtModified) {
-        this.gmtModified = gmtModified;
-    }
-
-    @Override
-    public String toString() {
-        return StringUtils.toString(this);
-    }
-
+    void setGmtModified(Date gmtModified);
 }

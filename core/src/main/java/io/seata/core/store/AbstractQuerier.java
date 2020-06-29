@@ -37,7 +37,8 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
      * @param list the list
      * @return the list after paging
      */
-    public List<T> doPaging(List<T> list) {
+    @Override
+    public <D extends T> List<D> doPaging(List<D> list) {
         if (list == null) {
             return new ArrayList<>();
         }
