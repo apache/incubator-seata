@@ -16,6 +16,7 @@
 package io.seata.config;
 
 import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
@@ -66,7 +67,7 @@ public final class ConfigurationFactory {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
-                    : extConfiguration.getClass().getSimpleName());
+                        : extConfiguration.getClass().getSimpleName());
             }
         } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -116,14 +117,14 @@ public final class ConfigurationFactory {
         Configuration configuration;
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
-                ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
+                    ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load Configuration:{}", extConfiguration == null
-                        ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
+                            ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -132,8 +133,8 @@ public final class ConfigurationFactory {
             }
         } else {
             configuration = EnhancedServiceLoader
-                .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
-                    }
+                    .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+        }
         try {
             Configuration configurationCache;
             if (null != extConfiguration) {
