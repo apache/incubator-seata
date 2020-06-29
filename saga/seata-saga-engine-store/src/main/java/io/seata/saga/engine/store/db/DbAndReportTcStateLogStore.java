@@ -101,6 +101,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
             }
 
+            // bind SAGA branch type
             RootContext.bindBranchType(BranchType.SAGA);
 
             // save to db
