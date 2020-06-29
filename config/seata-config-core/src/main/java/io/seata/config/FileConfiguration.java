@@ -132,7 +132,6 @@ public class FileConfiguration extends AbstractConfiguration {
         if (filePathCustom) {
             filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
         } else {
-            // projectDir first
             filePath = this.getClass().getClassLoader().getResource("").getPath() + name;
         }
 
@@ -153,27 +152,6 @@ public class FileConfiguration extends AbstractConfiguration {
             }
             return targetFile;
         }
-
-        if (!filePathCustom) {
-            URL resource = this.getClass().getClassLoader().getResource(name);
-            if (resource == null) {
-                for (String s : FileConfigFactory.getSuffixSet()) {
-                    resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                    if (resource != null) {
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("The configuration file used is {}", resource.getPath());
-                        }
-                        return new File(resource.getPath());
-                    }
-                }
-            } else {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("The configuration file used is {}", name);
-                }
-                return new File(resource.getPath());
-            }
-        }
-
         return null;
     }
 
@@ -342,7 +320,7 @@ public class FileConfiguration extends AbstractConfiguration {
             while (true) {
                 try {
                     String currentConfig =
-                        ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+                            ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);
