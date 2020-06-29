@@ -82,9 +82,18 @@ public interface Querier<T> {
             return list;
         }
 
+        // do filter
         list = doFilter(list);
+        if (list.isEmpty()) {
+            return list;
+        }
+
+        // do sort
         list = doSort(list);
+
+        // do paging
         list = doPaging(list);
+
         return list;
     }
 }
