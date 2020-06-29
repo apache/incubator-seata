@@ -124,7 +124,7 @@ public class FileConfiguration extends AbstractConfiguration {
     }
 
     private File getConfigFile(String name) {
-        if (null == name) {
+        if (name == null) {
             throw new IllegalArgumentException("name can't be null");
         }
         String filePath = null;
