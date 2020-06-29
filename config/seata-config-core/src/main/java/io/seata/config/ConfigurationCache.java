@@ -103,6 +103,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public void clear() {
+        //clear
         CONFIG_CACHE.clear();
     }
 }
