@@ -129,7 +129,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 startDegradeCheck();
             }
         }
-        initGlobalTransactionTimeout();
+        this.initGlobalTransactionTimeout();
     }
 
     @Override
@@ -186,7 +186,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
                 @Override
                 public TransactionInfo getTransactionInfo() {
-                    //normalization the value of timeout
+                    // reset the value of timeout
                     int timeout = globalTrxAnno.timeoutMills();
                     if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
                         timeout = globalTransactionTimeout;
