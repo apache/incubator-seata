@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -406,7 +408,6 @@ public class EnhancedServiceLoader {
         }
 
         private List<Class> loadAllExtensionClass(ClassLoader loader) {
-            List<Class> result;
             List<ExtensionDefinition> definitions = definitionsHolder.get();
             if (definitions == null) {
                 synchronized (definitionsHolder) {
@@ -467,7 +468,7 @@ public class EnhancedServiceLoader {
                 while (urls.hasMoreElements()) {
                     java.net.URL url = urls.nextElement();
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET))) {
-                        String line = null;
+                        String line;
                         while ((line = reader.readLine()) != null) {
                             final int ci = line.indexOf('#');
                             if (ci >= 0) {
@@ -476,10 +477,11 @@ public class EnhancedServiceLoader {
                             line = line.trim();
                             if (line.length() > 0) {
                                 try {
-                                    Class<?> clazz = Class.forName(line, true, loader);
-                                    ExtensionDefinition extensionDefinition = getUnloadedExtensionDefinition(clazz);
+                                    ExtensionDefinition extensionDefinition = getUnloadedExtensionDefinition(line, loader);
                                     if (extensionDefinition == null) {
-                                        LOGGER.warn("The same extension {} has already been loaded, skipped", line);
+                                        if (LOGGER.isDebugEnabled()) {
+                                            LOGGER.debug("The same extension {} has already been loaded, skipped", line);
+                                        }
                                         continue;
                                     }
                                     extensions.add(extensionDefinition);
@@ -489,24 +491,26 @@ public class EnhancedServiceLoader {
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn(e.getMessage());
+                        LOGGER.warn("load clazz instance error: {}", e.getMessage());
                     }
                 }
             }
         }
 
-        private ExtensionDefinition getUnloadedExtensionDefinition(Class<?> clazz) {
-            String serviceName = null;
-            Integer priority = 0;
-            Scope scope = Scope.SINGLETON;
-            LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
-            if (loadLevel != null) {
-                serviceName = loadLevel.name();
-                priority = loadLevel.order();
-                scope = loadLevel.scope();
-            }
+        private ExtensionDefinition getUnloadedExtensionDefinition(String className, ClassLoader loader)
+            throws ClassNotFoundException {
             //Check whether the definition has been loaded
-            if (!classToDefinitionMap.containsKey(clazz)) {
+            if (!isDefinitionContainsClazz(className, loader)) {
+                Class<?> clazz = Class.forName(className, true, loader);
+                String serviceName = null;
+                Integer priority = 0;
+                Scope scope = Scope.SINGLETON;
+                LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
+                if (loadLevel != null) {
+                    serviceName = loadLevel.name();
+                    priority = loadLevel.order();
+                    scope = loadLevel.scope();
+                }
                 ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
@@ -515,6 +519,18 @@ public class EnhancedServiceLoader {
                 return result;
             }
             return null;
+        }
+
+        private boolean isDefinitionContainsClazz(String className, ClassLoader loader) {
+            for (Map.Entry<Class<?>, ExtensionDefinition> entry : classToDefinitionMap.entrySet()) {
+                if (!entry.getKey().getName().equals(className)) {
+                    continue;
+                }
+                if (Objects.equals(entry.getValue().getServiceClass().getClassLoader(), loader)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private ExtensionDefinition getDefaultExtensionDefinition() {

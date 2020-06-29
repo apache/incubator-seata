@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource;
 
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,6 +41,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * The Target statement.
      */
     protected T targetStatement;
+
+    /**
+     * The generated keys cached row set.
+     */
+    private CachedRowSet generatedKeysRowSet;
 
     /**
      * The Target sql.
@@ -222,7 +229,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void clearBatch() throws SQLException {
         targetStatement.clearBatch();
-
+        targetSQL = null;
     }
 
     @Override
@@ -242,7 +249,13 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        return targetStatement.getGeneratedKeys();
+        if (generatedKeysRowSet != null) {
+            return generatedKeysRowSet;
+        }
+        ResultSet rs = targetStatement.getGeneratedKeys();
+        generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
+        generatedKeysRowSet.populate(rs);
+        return generatedKeysRowSet;
     }
 
     @Override
