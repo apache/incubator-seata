@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author wang.liang
  */
-public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactionDO> {
+public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     //region Fields
 
@@ -107,32 +107,32 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     /**
      * Match data.
      *
-     * @param globalTransactionDO the global transaction do
+     * @param globalTransaction the global transaction
      * @return the boolean
      */
     @Override
-    public boolean isMatch(GlobalTransactionDO globalTransactionDO) {
-        if (globalTransactionDO == null) {
+    public <D extends GlobalTransactionModel> boolean isMatch(D globalTransaction) {
+        if (globalTransaction == null) {
             return false;
         }
 
         // where
         // status in (?, ?, ?)
         if (statuses != null && statuses.length > 0) {
-            if (!this.hasStatus(globalTransactionDO.getStatus())) {
+            if (!this.hasStatus(globalTransaction.getStatus())) {
                 return false; // un match
             }
         }
         // begin_time < System.currentTimeMillis() - ?
         if (overTimeAliveMills > 0) {
-            if (globalTransactionDO.getBeginTime() >= System.currentTimeMillis() - overTimeAliveMills) {
+            if (globalTransaction.getBeginTime() >= System.currentTimeMillis() - overTimeAliveMills) {
                 return false; // un match
             }
         }
         //  true: begin_time  < System.currentTimeMillis() - timeout
         // false: begin_time >= System.currentTimeMillis() - timeout
         if (timeoutData != null) {
-            boolean isTimeout = globalTransactionDO.getBeginTime() < System.currentTimeMillis() - globalTransactionDO.getTimeout();
+            boolean isTimeout = globalTransaction.getBeginTime() < System.currentTimeMillis() - globalTransaction.getTimeout();
             return timeoutData ? isTimeout : !isTimeout;
         }
 
@@ -146,7 +146,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      * @return the after sort list
      */
     @Override
-    public List<GlobalTransactionDO> doSort(List<GlobalTransactionDO> globalTransactionDOs) {
+    public <D extends GlobalTransactionModel> List<D> doSort(List<D> globalTransactionDOs) {
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
             return new ArrayList<>();
         }
