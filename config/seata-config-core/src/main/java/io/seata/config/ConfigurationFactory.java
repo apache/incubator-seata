@@ -153,6 +153,7 @@ public final class ConfigurationFactory {
     }
 
     protected static void reload() {
+        ConfigurationCache.getInstance().clear();
         load();
         instance = null;
         getInstance();
