@@ -51,8 +51,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     private TransactionMessageHandler transactionMessageHandler;
 
-    private RegisterCheckAuthHandler checkAuthHandler;
-
     /**
      * Instantiates a new Rpc remoting server.
      *
@@ -70,21 +68,13 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      * @param transactionMessageHandler the transactionMessageHandler
      */
     public void setHandler(TransactionMessageHandler transactionMessageHandler) {
-        setHandler(transactionMessageHandler, null);
-    }
-
-    private void setHandler(TransactionMessageHandler transactionMessageHandler, RegisterCheckAuthHandler checkAuthHandler) {
         this.transactionMessageHandler = transactionMessageHandler;
-        this.checkAuthHandler = checkAuthHandler;
     }
 
     public TransactionMessageHandler getTransactionMessageHandler() {
         return transactionMessageHandler;
     }
 
-    public RegisterCheckAuthHandler getCheckAuthHandler() {
-        return checkAuthHandler;
-    }
 
     /**
      * Sets channel handlers.
