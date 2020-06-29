@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -36,7 +35,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap =
-            new HashMap<>();
+        new HashMap<>();
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         if (StringUtils.isBlank(dataId)) {
@@ -44,7 +43,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
         synchronized (ConfigurationCache.class) {
             HashSet<ConfigurationChangeListener> listenerHashSet =
-                    getInstance().configListenersMap.computeIfAbsent(dataId, k -> new HashSet<>());
+                getInstance().configListenersMap.computeIfAbsent(dataId, k -> new HashSet<>());
             if (!listenerHashSet.contains(getInstance())) {
                 ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
                 listenerHashSet.add(getInstance());
@@ -77,25 +76,25 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public Configuration proxy(Configuration originalConfiguration) {
-        return (Configuration) Enhancer.create(Configuration.class,
-                (MethodInterceptor) (proxy, method, args, methodProxy) -> {
-                    if (method.getName().startsWith(METHOD_PREFIX)
-                            && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
-                        String rawDataId = (String) args[0];
-                        Object result = CONFIG_CACHE.get(rawDataId);
-                        if (null == result) {
-                            result = method.invoke(originalConfiguration, args);
-                            if (result != null) {
-                                CONFIG_CACHE.put(rawDataId, result);
-                            }
+        return (Configuration)Enhancer.create(Configuration.class,
+            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+                if (method.getName().startsWith(METHOD_PREFIX)
+                    && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                    String rawDataId = (String)args[0];
+                    Object result = CONFIG_CACHE.get(rawDataId);
+                    if (null == result) {
+                        result = method.invoke(originalConfiguration, args);
+                        if (result != null) {
+                            CONFIG_CACHE.put(rawDataId, result);
                         }
-                        if (method.getReturnType().equals(String.class)) {
-                            return String.valueOf(result);
-                        }
-                        return result;
                     }
-                    return method.invoke(originalConfiguration, args);
-                });
+                    if (method.getReturnType().equals(String.class)) {
+                        return String.valueOf(result);
+                    }
+                    return result;
+                }
+                return method.invoke(originalConfiguration, args);
+            });
     }
 
     private static class ConfigurationCacheInstance {
@@ -103,7 +102,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public void clear() {
-        //clear
         CONFIG_CACHE.clear();
     }
 }
