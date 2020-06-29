@@ -79,9 +79,9 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     static EurekaRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (EurekaRegistryServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instanceConfig = new CustomEurekaInstanceConfig();
                     instance = new EurekaRegistryServiceImpl();
@@ -125,7 +125,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
-        if (null == clusterName) {
+        if (clusterName == null) {
             return null;
         }
         if (!subscribeListener) {
@@ -207,17 +207,17 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
     private String getApplicationName() {
         String application = FILE_CONFIG.getConfig(getEurekaApplicationFileKey());
-        if (null == application) {
+        if (application == null) {
             application = DEFAULT_APPLICATION;
         }
         return application;
     }
 
     private EurekaClient getEurekaClient(boolean needRegister) throws EurekaRegistryException {
-        if (null == eurekaClient) {
+        if (eurekaClient == null) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 try {
-                    if (null == eurekaClient) {
+                    if (eurekaClient == null) {
                         if (!needRegister) {
                             instanceConfig = new CustomEurekaInstanceConfig();
                         }

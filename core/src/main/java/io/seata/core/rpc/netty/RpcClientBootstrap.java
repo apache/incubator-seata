@@ -63,7 +63,7 @@ public class RpcClientBootstrap implements RemotingBootstrap {
 
     public RpcClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
                               NettyPoolKey.TransactionRole transactionRole) {
-        if (null == nettyClientConfig) {
+        if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("use default netty client config.");
@@ -84,7 +84,7 @@ public class RpcClientBootstrap implements RemotingBootstrap {
      * @param handlers the handlers
      */
     protected void setChannelHandlers(final ChannelHandler... handlers) {
-        if (null != handlers) {
+        if (handlers != null) {
             channelHandlers = handlers;
         }
     }
@@ -96,7 +96,7 @@ public class RpcClientBootstrap implements RemotingBootstrap {
      * @param handlers the handlers
      */
     private void addChannelPipelineLast(Channel channel, ChannelHandler... handlers) {
-        if (null != channel && null != handlers) {
+        if (channel != null && handlers != null) {
             channel.pipeline().addLast(handlers);
         }
     }
@@ -137,7 +137,7 @@ public class RpcClientBootstrap implements RemotingBootstrap {
                             nettyClientConfig.getChannelMaxAllIdleSeconds()))
                         .addLast(new ProtocolV1Decoder())
                         .addLast(new ProtocolV1Encoder());
-                    if (null != channelHandlers) {
+                    if (channelHandlers != null) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
                 }

@@ -25,7 +25,7 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.invoker.ServiceInvoker;
-import io.seata.saga.engine.pcext.InterceptibleStateHandler;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -50,11 +50,11 @@ import org.springframework.util.StringUtils;
  *
  * @author lorne.cl
  */
-public class ServiceTaskStateHandler implements StateHandler, InterceptibleStateHandler {
+public class ServiceTaskStateHandler implements StateHandler, InterceptableStateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskStateHandler.class);
 
-    private List<StateHandlerInterceptor> interceptors;
+    private List<StateHandlerInterceptor> interceptors = new ArrayList<>();
 
     public static void handleException(ProcessContext context, AbstractTaskState state, Throwable e) {
         List<TaskState.ExceptionMatch> catches = state.getCatches();
@@ -237,6 +237,13 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
     @Override
     public List<StateHandlerInterceptor> getInterceptors() {
         return interceptors;
+    }
+
+    @Override
+    public void addInterceptor(StateHandlerInterceptor interceptor) {
+        if (interceptors != null && !interceptors.contains(interceptor)) {
+            interceptors.add(interceptor);
+        }
     }
 
     public void setInterceptors(List<StateHandlerInterceptor> interceptors) {

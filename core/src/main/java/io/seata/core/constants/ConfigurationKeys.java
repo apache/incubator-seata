@@ -235,6 +235,11 @@ public class ConfigurationKeys {
     public static final String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
+     * The constant SERVER_PORT.
+     */
+    public static final String SERVER_PORT = SERVER_PREFIX + "port";
+
+    /**
      * The constant RECOVERY_PREFIX.
      */
     public static final String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
@@ -483,5 +488,10 @@ public class ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant SERVER_ENABLE_CHECK_AUTH.
+     */
+    public static final String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
 
 }
