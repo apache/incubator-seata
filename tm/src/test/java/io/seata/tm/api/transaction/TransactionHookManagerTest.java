@@ -50,7 +50,7 @@ public class TransactionHookManagerTest {
     }
 
     @Test
-    public void testGetGlobalHooks() {
+    public void test_registerLocalHook_getGlobalHooks() {
         assertThat(TransactionHookManager.getGlobalHooks()).isEmpty();
         TransactionHookManager.registerGlobalHook(new TransactionHook() {});
         assertThat(TransactionHookManager.getGlobalHooks()).isNotEmpty();
