@@ -20,6 +20,8 @@ import io.seata.core.model.GlobalStatus;
 
 import java.util.List;
 
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
+
 /**
  * the transaction log store
  *
@@ -69,7 +71,7 @@ public interface LogStore {
      * @return the list
      */
     default List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalStatus[] statuses, int limit) {
-        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses, 1, limit));
+        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses, FIRST_PAGE_INDEX, limit));
     }
 
     /**
