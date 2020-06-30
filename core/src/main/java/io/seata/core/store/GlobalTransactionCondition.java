@@ -16,10 +16,23 @@
 package io.seata.core.store;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.model.GlobalStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_STATUS;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP;
+import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_XID;
 
 /**
  * The type GlobalTransaction condition.
@@ -151,33 +164,33 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
             return new ArrayList<>();
         }
 
-        if (sortField == null) {
+        if (StringUtils.isBlank(sortFieldName)) {
             return globalTransactionDOs;
         }
 
         globalTransactionDOs.sort((a, b) -> {
-            switch (sortField) {
-                case XID:
+            switch (sortFieldName) {
+                case GLOBAL_TABLE_XID:
                     return this.compareTo(a.getXid(), b.getXid());
-                case TRANSACTION_ID:
+                case GLOBAL_TABLE_TRANSACTION_ID:
                     return this.compareTo(a.getTransactionId(), b.getTransactionId());
-                case STATUS:
+                case GLOBAL_TABLE_STATUS:
                     return this.compareTo(a.getStatus(), b.getStatus());
-                case APPLICATION_ID:
+                case GLOBAL_TABLE_APPLICATION_ID:
                     return this.compareTo(a.getApplicationId(), b.getApplicationId());
-                case TRANSACTION_SERVICE_GROUP:
+                case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
                     return this.compareTo(a.getTransactionServiceGroup(), b.getTransactionServiceGroup());
-                case TRANSACTION_NAME:
+                case GLOBAL_TABLE_TRANSACTION_NAME:
                     return this.compareTo(a.getTransactionName(), b.getTransactionName());
-                case TIMEOUT:
+                case GLOBAL_TABLE_TIMEOUT:
                     return this.compareTo(a.getTimeout(), b.getTimeout());
-                case BEGIN_TIME:
+                case GLOBAL_TABLE_BEGIN_TIME:
                     return this.compareTo(a.getBeginTime(), b.getBeginTime());
-                case APPLICATION_DATA:
+                case GLOBAL_TABLE_APPLICATION_DATA:
                     return this.compareTo(a.getApplicationData(), b.getApplicationData());
-                case GMT_CREATE:
+                case GLOBAL_TABLE_GMT_CREATE:
                     return this.compareTo(a.getGmtCreate(), b.getGmtCreate());
-                case GMT_MODIFIED:
+                case GLOBAL_TABLE_GMT_MODIFIED:
                     return this.compareTo(a.getGmtModified(), b.getGmtModified());
                 default:
                     return 0;

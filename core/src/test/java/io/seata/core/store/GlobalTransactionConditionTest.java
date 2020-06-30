@@ -76,7 +76,7 @@ public class GlobalTransactionConditionTest {
 
 
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
-        condition.setSortField(GlobalTableField.STATUS);
+        condition.setSortFieldName(GlobalTableField.STATUS.getFieldName());
 
         List<GlobalTransactionDO> list1 = condition.doSort(list0);
 

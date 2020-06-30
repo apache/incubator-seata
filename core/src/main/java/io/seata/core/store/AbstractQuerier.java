@@ -23,10 +23,10 @@ import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
 /**
  * @author wang.liang
  */
-public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
+public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageable {
 
     // sort fields
-    protected GlobalTableField sortField;
+    protected String sortFieldName;
     protected SortOrder sortOrder;
 
     // page fields
@@ -109,18 +109,25 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Pageable {
     }
 
 
-    public GlobalTableField getSortField() {
-        return sortField;
+    @Override
+    public String getSortFieldName() {
+        return sortFieldName;
     }
 
-    public void setSortField(GlobalTableField sortField) {
-        this.sortField = sortField;
+    @Override
+    public void setSortFieldName(String sortFieldName) {
+        if (sortFieldName != null) {
+            sortFieldName = sortFieldName.trim().toLowerCase();
+        }
+        this.sortFieldName = sortFieldName;
     }
 
+    @Override
     public SortOrder getSortOrder() {
         return sortOrder;
     }
 
+    @Override
     public void setSortOrder(SortOrder sortOrder) {
         this.sortOrder = sortOrder;
     }
