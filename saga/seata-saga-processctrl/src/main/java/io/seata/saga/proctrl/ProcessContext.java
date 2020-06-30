@@ -61,8 +61,9 @@ public interface ProcessContext {
      * Remove variable.
      *
      * @param name the name
+     * @return the removed variable or null
      */
-    void removeVariable(String name);
+    Object removeVariable(String name);
 
     /**
      * Has variable boolean.
