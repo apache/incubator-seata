@@ -515,6 +515,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled("https://github.com/seata/seata/issues/2414#issuecomment-651526068")
     public void testCompensationAndSubStateMachineAsync() throws Exception {
 
         long start = System.currentTimeMillis();
