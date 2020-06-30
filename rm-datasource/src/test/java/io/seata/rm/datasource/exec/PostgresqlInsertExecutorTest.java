@@ -100,7 +100,7 @@ public class PostgresqlInsertExecutorTest {
     }
 
     private void mockParametersPkWithDefault() {
-        ArrayList<Object>[] parameters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(SqlDefaultExpr.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -109,10 +109,10 @@ public class PostgresqlInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        parameters[0] = arrayList0;
-        parameters[1] = arrayList1;
-        parameters[2] = arrayList2;
-        parameters[3] = arrayList3;
+        parameters.put(1,arrayList0);
+        parameters.put(2,arrayList1);
+        parameters.put(3,arrayList2);
+        parameters.put(4,arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(parameters);
     }
