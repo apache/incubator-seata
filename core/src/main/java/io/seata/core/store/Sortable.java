@@ -15,36 +15,49 @@
  */
 package io.seata.core.store;
 
+import org.apache.commons.lang.ArrayUtils;
+
 /**
  * @author wang.liang
  */
 public interface Sortable {
 
     /**
-     * Gets sort field name.
+     * Gets sort params.
      *
-     * @return the sort field name
+     * @return the sort params
      */
-    String getSortFieldName();
+    SortParam[] getSortParams();
 
     /**
-     * Sets sort field name.
+     * Sets sort params.
      *
-     * @param sortFieldName the sort field name
+     * @param sortParams the sort params
      */
-    void setSortFieldName(String sortFieldName);
+    void setSortParams(SortParam... sortParams);
 
     /**
-     * Gets sort order.
+     * Sets sort fields, and all fields use SortOrder.ASC
      *
-     * @return the sort order
+     * @param sortFieldNames the sort field names
      */
-    SortOrder getSortOrder();
+    default void setSortFieldNames(String... sortFieldNames) {
+        if (sortFieldNames.length == 0) {
+            return;
+        }
+        SortParam[] sortParams = new SortParam[sortFieldNames.length];
+        for (int i = 0, l = sortFieldNames.length; i < l; ++i) {
+            sortParams[i] = new SortParam(sortFieldNames[i]);
+        }
+        this.setSortParams(sortParams);
+    }
 
     /**
-     * Sets sort order.
+     * Is need sort boolean
      *
-     * @param sortOrder the sort order
+     * @return the boolean
      */
-    void setSortOrder(SortOrder sortOrder);
+    default boolean isNeedSort() {
+        return ArrayUtils.isNotEmpty(getSortParams());
+    }
 }
