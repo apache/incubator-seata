@@ -164,37 +164,55 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
             return new ArrayList<>();
         }
 
-        if (StringUtils.isBlank(sortFieldName)) {
+        if (!super.isNeedSort()) {
             return globalTransactionDOs;
         }
 
         globalTransactionDOs.sort((a, b) -> {
-            switch (sortFieldName) {
-                case GLOBAL_TABLE_XID:
-                    return this.compareTo(a.getXid(), b.getXid());
-                case GLOBAL_TABLE_TRANSACTION_ID:
-                    return this.compareTo(a.getTransactionId(), b.getTransactionId());
-                case GLOBAL_TABLE_STATUS:
-                    return this.compareTo(a.getStatus(), b.getStatus());
-                case GLOBAL_TABLE_APPLICATION_ID:
-                    return this.compareTo(a.getApplicationId(), b.getApplicationId());
-                case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
-                    return this.compareTo(a.getTransactionServiceGroup(), b.getTransactionServiceGroup());
-                case GLOBAL_TABLE_TRANSACTION_NAME:
-                    return this.compareTo(a.getTransactionName(), b.getTransactionName());
-                case GLOBAL_TABLE_TIMEOUT:
-                    return this.compareTo(a.getTimeout(), b.getTimeout());
-                case GLOBAL_TABLE_BEGIN_TIME:
-                    return this.compareTo(a.getBeginTime(), b.getBeginTime());
-                case GLOBAL_TABLE_APPLICATION_DATA:
-                    return this.compareTo(a.getApplicationData(), b.getApplicationData());
-                case GLOBAL_TABLE_GMT_CREATE:
-                    return this.compareTo(a.getGmtCreate(), b.getGmtCreate());
-                case GLOBAL_TABLE_GMT_MODIFIED:
-                    return this.compareTo(a.getGmtModified(), b.getGmtModified());
-                default:
-                    return 0;
+            int ret = 0;
+            for (SortParam sortParam : super.getSortParams()) {
+                switch (sortParam.getSortFieldName()) {
+                    case GLOBAL_TABLE_XID:
+                        ret = this.compareTo(a.getXid(), b.getXid(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_TRANSACTION_ID:
+                        ret = this.compareTo(a.getTransactionId(), b.getTransactionId(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_STATUS:
+                        ret = this.compareTo(a.getStatus(), b.getStatus(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_APPLICATION_ID:
+                        ret = this.compareTo(a.getApplicationId(), b.getApplicationId(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
+                        ret = this.compareTo(a.getTransactionServiceGroup(), b.getTransactionServiceGroup(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_TRANSACTION_NAME:
+                        ret = this.compareTo(a.getTransactionName(), b.getTransactionName(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_TIMEOUT:
+                        ret = this.compareTo(a.getTimeout(), b.getTimeout(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_BEGIN_TIME:
+                        ret = this.compareTo(a.getBeginTime(), b.getBeginTime(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_APPLICATION_DATA:
+                        ret = this.compareTo(a.getApplicationData(), b.getApplicationData(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_GMT_CREATE:
+                        ret = this.compareTo(a.getGmtCreate(), b.getGmtCreate(), sortParam.getSortOrder());
+                        break;
+                    case GLOBAL_TABLE_GMT_MODIFIED:
+                        ret = this.compareTo(a.getGmtModified(), b.getGmtModified(), sortParam.getSortOrder());
+                        break;
+                    default:
+                        break;
+                }
+                if (ret != 0) {
+                    return ret;
+                }
             }
+            return ret;
         });
         return globalTransactionDOs;
     }
@@ -238,6 +256,22 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
 
     public void setTimeoutData(Boolean timeoutData) {
         this.timeoutData = timeoutData;
+    }
+
+    /**
+     * Sets sort fields, and all fields use SortOrder.ASC
+     *
+     * @param sortFieldNames the sort field names
+     */
+    public void setSortFieldNames(GlobalTableField... sortFieldNames) {
+        if (sortFieldNames.length == 0) {
+            return;
+        }
+        SortParam[] sortParams = new SortParam[sortFieldNames.length];
+        for (int i = 0, l = sortFieldNames.length; i < l; ++i) {
+            sortParams[i] = new SortParam(sortFieldNames[i].getFieldName());
+        }
+        super.setSortParams(sortParams);
     }
 
     //endregion

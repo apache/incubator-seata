@@ -22,6 +22,10 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.seata.core.store.GlobalTableField.BEGIN_TIME;
+import static io.seata.core.store.GlobalTableField.STATUS;
+import static io.seata.core.store.GlobalTableField.TIMEOUT;
+
 /**
  * @author wang.liang
  */
@@ -56,35 +60,45 @@ public class GlobalTransactionConditionTest {
     public void doSortTest() {
         List<GlobalTransactionDO> list0 = new ArrayList<>();
 
-        GlobalTransactionDO obj1 = new GlobalTransactionDO();
-        obj1.setStatus(GlobalStatus.Begin.getCode());
-        list0.add(obj1);
+        GlobalTransactionDO obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Finished.getCode());
+        obj.setTimeout(0);
+        obj.setBeginTime(0);
+        list0.add(obj);
 
-        GlobalTransactionDO obj2 = new GlobalTransactionDO();
-        obj2.setStatus(GlobalStatus.UnKnown.getCode());
-        list0.add(obj2);
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
+        obj.setTimeout(1);
+        obj.setBeginTime(0);
+        list0.add(obj);
 
-        GlobalTransactionDO obj3 = new GlobalTransactionDO();
-        obj3.setStatus(GlobalStatus.Finished.getCode());
-        list0.add(obj3);
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setTimeout(0);
+        obj.setBeginTime(0);
+        list0.add(obj);
 
-        GlobalTransactionDO obj4 = new GlobalTransactionDO();
-        obj4.setStatus(GlobalStatus.AsyncCommitting.getCode());
-        list0.add(obj4);
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.UnKnown.getCode());
+        obj.setTimeout(1);
+        obj.setBeginTime(1);
+        list0.add(obj);
 
         int size = list0.size();
 
-
+        // set sort fields
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
-        condition.setSortFieldName(GlobalTableField.STATUS.getFieldName());
+        condition.setSortFieldNames(TIMEOUT, BEGIN_TIME, STATUS); // sort by multi fields
 
+        // do sort
         List<GlobalTransactionDO> list1 = condition.doSort(list0);
 
+        // check
         Assertions.assertEquals(list1.size(), size);
-        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.UnKnown.getCode());
-        Assertions.assertEquals(list1.get(1).getStatus(), GlobalStatus.Begin.getCode());
+        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Begin.getCode());
+        Assertions.assertEquals(list1.get(1).getStatus(), GlobalStatus.Finished.getCode());
         Assertions.assertEquals(list1.get(2).getStatus(), GlobalStatus.AsyncCommitting.getCode());
-        Assertions.assertEquals(list1.get(3).getStatus(), GlobalStatus.Finished.getCode());
+        Assertions.assertEquals(list1.get(3).getStatus(), GlobalStatus.UnKnown.getCode());
     }
 
     @Test

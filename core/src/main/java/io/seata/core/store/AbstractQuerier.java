@@ -25,11 +25,10 @@ import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
  */
 public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageable {
 
-    // sort fields
-    protected String sortFieldName;
-    protected SortOrder sortOrder;
+    // sort params
+    protected SortParam[] sortParams;
 
-    // page fields
+    // page params
     protected int pageIndex = FIRST_PAGE_INDEX;
     protected int pageSize = 0;
 
@@ -74,11 +73,12 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     /**
      * Compare to
      *
-     * @param a the object a
-     * @param b the object b
+     * @param a         the object a
+     * @param b         the object b
+     * @param sortOrder the sort order
      * @return a negative integer. 0: equals ; -1: a < b ; 1: a > b
      */
-    protected int compareTo(Comparable a, Comparable b) {
+    protected int compareTo(Comparable a, Comparable b, SortOrder sortOrder) {
         int ret;
         if (a == null) {
             if (b == null) {
@@ -108,28 +108,14 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
         return ret;
     }
 
-
     @Override
-    public String getSortFieldName() {
-        return sortFieldName;
+    public SortParam[] getSortParams() {
+        return sortParams;
     }
 
     @Override
-    public void setSortFieldName(String sortFieldName) {
-        if (sortFieldName != null) {
-            sortFieldName = sortFieldName.trim().toLowerCase();
-        }
-        this.sortFieldName = sortFieldName;
-    }
-
-    @Override
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    @Override
-    public void setSortOrder(SortOrder sortOrder) {
-        this.sortOrder = sortOrder;
+    public void setSortParams(SortParam[] sortParams) {
+        this.sortParams = sortParams;
     }
 
     @Override
