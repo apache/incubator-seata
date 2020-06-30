@@ -88,7 +88,7 @@ public class GlobalTransactionConditionTest {
 
         // set sort fields
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
-        condition.setSortFieldNames(TIMEOUT, BEGIN_TIME, STATUS); // sort by multi fields
+        condition.setSortFields(TIMEOUT, BEGIN_TIME, STATUS); // sort by multi fields
 
         // do sort
         List<GlobalTransactionDO> list1 = condition.doSort(list0);
