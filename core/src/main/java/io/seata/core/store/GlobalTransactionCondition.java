@@ -83,11 +83,32 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      * Instantiates a new condition.
      *
      * @param status    the status
+     * @param pageSize  the page size
+     */
+    public GlobalTransactionCondition(GlobalStatus status, int pageSize) {
+        this(new GlobalStatus[]{status}, pageSize);
+    }
+
+    /**
+     * Instantiates a new condition.
+     *
+     * @param status    the status
      * @param pageIndex the page index
      * @param pageSize  the page size
      */
     public GlobalTransactionCondition(GlobalStatus status, int pageIndex, int pageSize) {
         this(new GlobalStatus[]{status}, pageIndex, pageSize);
+    }
+
+    /**
+     * Instantiates a new condition.
+     *
+     * @param statuses  the statuses
+     * @param pageSize  the page size
+     */
+    public GlobalTransactionCondition(GlobalStatus[] statuses, int pageSize) {
+        this.statuses = statuses;
+        this.pageSize = pageSize;
     }
 
     /**
