@@ -53,9 +53,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String tablePrefix = "seata_";
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private boolean rmReportSuccessEnable;
-    private boolean sagaBranchRegisterEnable;
-    private String sagaJsonParser;
+    private boolean rmReportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+    private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+    private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
 
 
     public DbStateMachineConfig() {
