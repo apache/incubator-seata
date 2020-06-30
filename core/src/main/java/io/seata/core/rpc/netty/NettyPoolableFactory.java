@@ -86,7 +86,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     }
 
     private boolean isRegisterSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
-        if (null == response) {
+        if (response == null) {
             return false;
         }
         if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
