@@ -38,6 +38,7 @@ import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.SortOrder;
+import io.seata.core.store.SortParam;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,15 +170,27 @@ public class LogStoreDataBaseDAO implements LogStore {
 
             // where
             String wherePlaceHolder = this.buildWherePlaceHolder(condition);
-            // order by xxx [asc|desc]
+            // order by xxx [asc|desc], yyy [asc|desc]
             StringBuilder orderByPlaceHolder = new StringBuilder();
-            if (StringUtils.isBlank(condition.getSortFieldName())) {
-                // db mode: default sort field is begin_time
-                condition.setSortFieldName(GlobalTableField.BEGIN_TIME.getFieldName());
-            }
-            orderByPlaceHolder.append(" order by ").append(condition.getSortFieldName());
-            if (SortOrder.DESC == condition.getSortOrder()) {
-                orderByPlaceHolder.append(" desc");
+            if (condition.isNeedSort()) {
+                orderByPlaceHolder.append(" order by ");
+
+                SortParam[] sortParams = condition.getSortParams();
+                SortParam sortParam;
+                for (int i = 0, l = sortParams.length; i < l; ++i) {
+                    sortParam = sortParams[i];
+                    if (i > 0) {
+                        orderByPlaceHolder.append(", ");
+                    }
+                    orderByPlaceHolder.append(sortParam.getSortFieldName());
+                    if (SortOrder.DESC == sortParam.getSortOrder()) {
+                        orderByPlaceHolder.append(" desc");
+                    }
+                }
+            } else {
+                // db mode: default sort is: order by gmt_modified asc
+                condition.setSortFields(GlobalTableField.GMT_MODIFIED);
+                orderByPlaceHolder.append(" order by " + GlobalTableField.GMT_MODIFIED.getFieldName());
             }
             // build sql
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByCondition(globalTable,

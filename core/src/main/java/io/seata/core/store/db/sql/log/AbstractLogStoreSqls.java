@@ -53,7 +53,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     /**
      * The constant ORDERBY_PLACEHOLD.
-     * format: order by xxx [asc|desc]
+     * format: order by xxx [asc|desc], yyy [asc|desc]
      */
     public static final String ORDERBY_PLACEHOLD = " #ORDERBY_PLACEHOLD# ";
 
