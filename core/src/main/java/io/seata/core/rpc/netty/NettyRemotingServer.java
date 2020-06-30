@@ -74,7 +74,6 @@ public class NettyRemotingServer extends AbstractNettyRemoting implements Remoti
      * Instantiates a new Rpc remoting server.
      *
      * @param messageExecutor   the message executor
-     * @param nettyServerConfig the netty server config
      */
     public NettyRemotingServer(ThreadPoolExecutor messageExecutor) {
         super(messageExecutor);
@@ -217,10 +216,10 @@ public class NettyRemotingServer extends AbstractNettyRemoting implements Remoti
         registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
         registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
         // 3. registry rm message processor
-        RegRmProcessor regRmProcessor = new RegRmProcessor(this, null);
+        RegRmProcessor regRmProcessor = new RegRmProcessor(this);
         registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
         // 4. registry tm message processor
-        RegTmProcessor regTmProcessor = new RegTmProcessor(this, null);
+        RegTmProcessor regTmProcessor = new RegTmProcessor(this);
         registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
         // 5. registry heartbeat message processor
         ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
