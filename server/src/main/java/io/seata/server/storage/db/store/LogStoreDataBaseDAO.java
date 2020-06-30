@@ -171,11 +171,11 @@ public class LogStoreDataBaseDAO implements LogStore {
             String wherePlaceHolder = this.buildWherePlaceHolder(condition);
             // order by xxx [asc|desc]
             StringBuilder orderByPlaceHolder = new StringBuilder();
-            if (condition.getSortField() == null) {
-                // db mode: default sort field is gmt_create
-                condition.setSortField(GlobalTableField.GMT_CREATE);
+            if (StringUtils.isBlank(condition.getSortFieldName())) {
+                // db mode: default sort field is begin_time
+                condition.setSortFieldName(GlobalTableField.BEGIN_TIME.getFieldName());
             }
-            orderByPlaceHolder.append(" order by ").append(condition.getSortField().getFieldName());
+            orderByPlaceHolder.append(" order by ").append(condition.getSortFieldName());
             if (SortOrder.DESC == condition.getSortOrder()) {
                 orderByPlaceHolder.append(" desc");
             }
