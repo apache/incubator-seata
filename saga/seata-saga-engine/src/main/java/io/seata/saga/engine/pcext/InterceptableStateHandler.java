@@ -22,7 +22,9 @@ import java.util.List;
  *
  * @author lorne.cl
  */
-public interface InterceptibleStateHandler extends StateHandler {
+public interface InterceptableStateHandler extends StateHandler {
 
     List<StateHandlerInterceptor> getInterceptors();
+
+    void addInterceptor(StateHandlerInterceptor interceptor);
 }

@@ -13,22 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db;
 
-import javax.sql.DataSource;
+package io.seata.spring.event;
+
+import io.seata.core.event.Event;
 
 /**
- * The interface Data source generator.
- *
- * @author zhangsen
+ * @author slievrly
  */
-public interface DataSourceGenerator {
+public class DegradeCheckEvent implements Event {
+    private boolean requestSuccess;
 
-    /**
-     * create DataSource from config
-     *
-     * @return data source
-     */
-    DataSource generateDataSource();
+    public DegradeCheckEvent(boolean requestSuccess) {
+        this.requestSuccess = requestSuccess;
+    }
 
+    public boolean isRequestSuccess() {
+        return requestSuccess;
+    }
 }

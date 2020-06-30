@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.DataAccessException;
@@ -165,15 +164,9 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < statuses.length; i++) {
-                sb.append("?");
-                if (i != (statuses.length - 1)) {
-                    sb.append(", ");
-                }
-            }
+            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);
 
-            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, sb.toString());
+            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByStatus(globalTable, paramsPlaceHolder);
             ps = conn.prepareStatement(sql);
             for (int i = 0; i < statuses.length; i++) {
                 int status = statuses[i];
@@ -288,11 +281,9 @@ public class LogStoreDataBaseDAO implements LogStore {
     @Override
     public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
         int length = xids.size();
-        int retsSize = length * 3;
-        List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
-        StringJoiner sj = new StringJoiner(",");
-        xids.stream().forEach(xid -> sj.add("?"));
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable, sj.toString());
+        List<BranchTransactionDO> rets = new ArrayList<>(length * 3);
+        String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", length);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(brachTable, paramsPlaceHolder);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
