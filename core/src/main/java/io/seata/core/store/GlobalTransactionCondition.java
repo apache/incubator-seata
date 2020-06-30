@@ -16,7 +16,6 @@
 package io.seata.core.store;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.core.model.GlobalStatus;
 
 import java.util.ArrayList;
@@ -261,15 +260,15 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     /**
      * Sets sort fields, and all fields use SortOrder.ASC
      *
-     * @param sortFieldNames the sort field names
+     * @param sortFields the sort fields
      */
-    public void setSortFieldNames(GlobalTableField... sortFieldNames) {
-        if (sortFieldNames.length == 0) {
+    public void setSortFields(GlobalTableField... sortFields) {
+        if (sortFields.length == 0) {
             return;
         }
-        SortParam[] sortParams = new SortParam[sortFieldNames.length];
-        for (int i = 0, l = sortFieldNames.length; i < l; ++i) {
-            sortParams[i] = new SortParam(sortFieldNames[i].getFieldName());
+        SortParam[] sortParams = new SortParam[sortFields.length];
+        for (int i = 0, l = sortFields.length; i < l; ++i) {
+            sortParams[i] = new SortParam(sortFields[i].getFieldName());
         }
         super.setSortParams(sortParams);
     }
