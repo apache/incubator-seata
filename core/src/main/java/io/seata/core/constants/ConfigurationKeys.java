@@ -165,6 +165,11 @@ public class ConfigurationKeys {
     public static final String STORE_DB_PREFIX = "store.db.";
 
     /**
+     * The constant STORE_REDIS_PREFIX.
+     */
+    public static final String STORE_REDIS_PREFIX = "store.redis.";
+
+    /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
     public static final String STORE_DB_GLOBAL_TABLE = STORE_DB_PREFIX + "globalTable";
@@ -230,6 +235,11 @@ public class ConfigurationKeys {
     public static final String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
+     * The constant SERVER_PORT.
+     */
+    public static final String SERVER_PORT = SERVER_PREFIX + "port";
+
+    /**
      * The constant RECOVERY_PREFIX.
      */
     public static final String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
@@ -266,6 +276,11 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = CLIENT_UNDO_PREFIX + "logSerialization";
+
+    /**
+     * The constant TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS.
+     */
+    public static final String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
 
     /**
      * The constant METRICS_PREFIX.
@@ -424,4 +439,59 @@ public class ConfigurationKeys {
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+
+    /**
+     * The constant STORE_REDIS_HOST.
+     */
+    public static final String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+
+    /**
+     * The constant STORE_MIN_Conn.
+     */
+    public static final String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
+
+    /**
+     * The constant STORE_REDIS_PORT.
+     */
+    public static final String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+
+    /**
+     * The constant STORE_REDIS_MAX_CONN.
+     */
+    public static final String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
+
+    /**
+     * The constant STORE_REDIS_DATABASE.
+     */
+    public static final String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
+
+    /**
+     * The constant STORE_REDIS_PASSWORD.
+     */
+    public static final String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
+
+    /**
+     * The constant STORE_REDIS_QUERY_LIMIT.
+     */
+    public static final String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_PERIOD.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
+
+    /**
+     * The constant CLIENT_DEGRADE_CHECK.
+     */
+    public static final String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
+    /**
+     * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
+     */
+    public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant SERVER_ENABLE_CHECK_AUTH.
+     */
+    public static final String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
+
 }

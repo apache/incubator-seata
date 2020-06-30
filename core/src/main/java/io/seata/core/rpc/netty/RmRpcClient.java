@@ -15,15 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -33,11 +24,26 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
+import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
+import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
+import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
+import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
+import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -46,6 +52,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  *
  * @author slievrly
  * @author zhaojun
+ * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
 public final class RmRpcClient extends AbstractRpcRemotingClient {
@@ -58,7 +65,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final int MAX_QUEUE_SIZE = 20000;
     private String applicationId;
     private String transactionServiceGroup;
-    
+
     private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
@@ -84,9 +91,9 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @return the instance
      */
     public static RmRpcClient getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RmRpcClient.class) {
-                if (null == instance) {
+                if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
@@ -99,7 +106,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
         return instance;
     }
-    
+
     /**
      * Sets application id.
      *
@@ -108,7 +115,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
-    
+
     /**
      * Sets transaction service group.
      *
@@ -117,7 +124,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
     }
-    
+
     /**
      * Sets resource manager.
      *
@@ -129,23 +136,25 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public void init() {
+        // registry processor
+        registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
         }
     }
-    
+
     @Override
     public void destroy() {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
     }
-    
+
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (serverAddress) -> {
             String resourceIds = getMergedResourceKeys();
-            if (null != resourceIds && LOGGER.isInfoEnabled()) {
+            if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
@@ -159,7 +168,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     protected String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
-    
+
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
@@ -247,5 +256,28 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             return sb.toString();
         }
         return null;
+    }
+
+    private void registerProcessor() {
+        // 1.registry rm client handle branch commit processor
+        RmBranchCommitProcessor rmBranchCommitProcessor = new RmBranchCommitProcessor(getTransactionMessageHandler(), this);
+        super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT, rmBranchCommitProcessor, messageExecutor);
+        // 2.registry rm client handle branch commit processor
+        RmBranchRollbackProcessor rmBranchRollbackProcessor = new RmBranchRollbackProcessor(getTransactionMessageHandler(), this);
+        super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK, rmBranchRollbackProcessor, messageExecutor);
+        // 3.registry rm handler undo log processor
+        RmUndoLogProcessor rmUndoLogProcessor = new RmUndoLogProcessor(getTransactionMessageHandler());
+        super.registerProcessor(MessageType.TYPE_RM_DELETE_UNDOLOG, rmUndoLogProcessor, messageExecutor);
+        // 4.registry TC response processor
+        ClientOnResponseProcessor onResponseProcessor =
+            new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+        super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
+        // 5.registry heartbeat message processor
+        ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
     }
 }

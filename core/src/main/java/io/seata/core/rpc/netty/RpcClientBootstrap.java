@@ -33,7 +33,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author slievrly
  * @author zhaojun
  */
-public class RpcClientBootstrap implements RemotingClient {
+public class RpcClientBootstrap implements RemotingBootstrap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
     private final NettyClientConfig nettyClientConfig;
@@ -63,7 +63,7 @@ public class RpcClientBootstrap implements RemotingClient {
 
     public RpcClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
                               NettyPoolKey.TransactionRole transactionRole) {
-        if (null == nettyClientConfig) {
+        if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("use default netty client config.");
@@ -84,7 +84,7 @@ public class RpcClientBootstrap implements RemotingClient {
      * @param handlers the handlers
      */
     protected void setChannelHandlers(final ChannelHandler... handlers) {
-        if (null != handlers) {
+        if (handlers != null) {
             channelHandlers = handlers;
         }
     }
@@ -96,7 +96,7 @@ public class RpcClientBootstrap implements RemotingClient {
      * @param handlers the handlers
      */
     private void addChannelPipelineLast(Channel channel, ChannelHandler... handlers) {
-        if (null != channel && null != handlers) {
+        if (channel != null && handlers != null) {
             channel.pipeline().addLast(handlers);
         }
     }
@@ -137,7 +137,7 @@ public class RpcClientBootstrap implements RemotingClient {
                             nettyClientConfig.getChannelMaxAllIdleSeconds()))
                         .addLast(new ProtocolV1Decoder())
                         .addLast(new ProtocolV1Encoder());
-                    if (null != channelHandlers) {
+                    if (channelHandlers != null) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
                 }
