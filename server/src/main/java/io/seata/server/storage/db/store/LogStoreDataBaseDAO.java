@@ -189,7 +189,6 @@ public class LogStoreDataBaseDAO implements LogStore {
                 }
             } else {
                 // db mode: default sort is: order by gmt_modified asc
-                condition.setSortFields(GlobalTableField.GMT_MODIFIED);
                 orderByPlaceHolder.append(" order by " + GlobalTableField.GMT_MODIFIED.getFieldName());
             }
             // build sql
