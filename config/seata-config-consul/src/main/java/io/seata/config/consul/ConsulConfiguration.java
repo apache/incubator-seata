@@ -80,9 +80,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return instance
      */
     public static ConsulConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ConsulConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new ConsulConfiguration();
                 }
             }
@@ -91,7 +91,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -131,7 +131,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
@@ -173,9 +173,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return client
      */
     private static ConsulClient getConsulClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (ConsulConfiguration.class) {
-                if (null == client) {
+                if (client == null) {
                     String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
@@ -192,7 +192,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @param configFuture
      */
     private void complete(Response response, ConfigFuture configFuture) {
-        if (null != response && null != response.getValue()) {
+        if (response != null && response.getValue() != null) {
             Object value = response.getValue();
             if (value instanceof GetValue) {
                 configFuture.setResult(((GetValue)value).getDecodedValue());
@@ -228,7 +228,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            if (null != listener) {
+            if (listener != null) {
                 while (true) {
                     QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
                     Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);

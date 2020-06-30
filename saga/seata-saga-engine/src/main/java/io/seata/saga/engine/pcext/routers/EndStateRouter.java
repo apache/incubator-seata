@@ -15,10 +15,11 @@
  */
 package io.seata.saga.engine.pcext.routers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.seata.saga.engine.exception.EngineExecutionException;
-import io.seata.saga.engine.pcext.InterceptibleStateRouter;
+import io.seata.saga.engine.pcext.InterceptableStateRouter;
 import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.StateRouterInterceptor;
 import io.seata.saga.proctrl.Instruction;
@@ -30,9 +31,9 @@ import io.seata.saga.statelang.domain.State;
  *
  * @author lorne.cl
  */
-public class EndStateRouter implements StateRouter, InterceptibleStateRouter {
+public class EndStateRouter implements StateRouter, InterceptableStateRouter {
 
-    private List<StateRouterInterceptor> interceptors;
+    private List<StateRouterInterceptor> interceptors = new ArrayList<>();
 
     @Override
     public Instruction route(ProcessContext context, State state) throws EngineExecutionException {
@@ -42,6 +43,13 @@ public class EndStateRouter implements StateRouter, InterceptibleStateRouter {
     @Override
     public List<StateRouterInterceptor> getInterceptors() {
         return interceptors;
+    }
+
+    @Override
+    public void addInterceptor(StateRouterInterceptor interceptor) {
+        if (interceptors != null && !interceptors.contains(interceptor)) {
+            interceptors.add(interceptor);
+        }
     }
 
     public void setInterceptors(List<StateRouterInterceptor> interceptors) {

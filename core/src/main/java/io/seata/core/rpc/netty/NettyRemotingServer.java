@@ -70,7 +70,12 @@ public class NettyRemotingServer extends AbstractNettyRemoting implements Remoti
         super.init();
         serverBootstrap.start();
     }
-
+    /**
+     * Instantiates a new Rpc remoting server.
+     *
+     * @param messageExecutor   the message executor
+     * @param nettyServerConfig the netty server config
+     */
     public NettyRemotingServer(ThreadPoolExecutor messageExecutor) {
         super(messageExecutor);
         serverBootstrap = new NettyServerBootstrap(new NettyServerConfig());
@@ -126,21 +131,13 @@ public class NettyRemotingServer extends AbstractNettyRemoting implements Remoti
      * @param transactionMessageHandler the transactionMessageHandler
      */
     public void setHandler(TransactionMessageHandler transactionMessageHandler) {
-        setHandler(transactionMessageHandler, null);
-    }
-
-    private void setHandler(TransactionMessageHandler transactionMessageHandler, RegisterCheckAuthHandler checkAuthHandler) {
         this.transactionMessageHandler = transactionMessageHandler;
-        this.checkAuthHandler = checkAuthHandler;
     }
 
     public TransactionMessageHandler getTransactionMessageHandler() {
         return transactionMessageHandler;
     }
 
-    public RegisterCheckAuthHandler getCheckAuthHandler() {
-        return checkAuthHandler;
-    }
 
     /**
      * Sets channel handlers.
@@ -291,7 +288,7 @@ public class NettyRemotingServer extends AbstractNettyRemoting implements Remoti
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(ipAndPort + " to server channel inactive.");
             }
-            if (null != rpcContext && null != rpcContext.getClientRole()) {
+            if (rpcContext != null && rpcContext.getClientRole() != null) {
                 rpcContext.release();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);

@@ -99,9 +99,9 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @return the instance
      */
     public static RmNettyRemotingClient getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RmNettyRemotingClient.class) {
-                if (null == instance) {
+                if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
@@ -239,7 +239,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (serverAddress) -> {
             String resourceIds = getMergedResourceKeys();
-            if (null != resourceIds && LOGGER.isInfoEnabled()) {
+            if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
@@ -270,7 +270,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor, null);
-        super. registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
         // 5.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);

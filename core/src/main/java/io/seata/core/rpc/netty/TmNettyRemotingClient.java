@@ -98,9 +98,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @return the instance
      */
     public static TmNettyRemotingClient getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (TmNettyRemotingClient.class) {
-                if (null == instance) {
+                if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
@@ -181,7 +181,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_REPORT_RESULT, onResponseProcessor, null);
-        super. registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_STATUS_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_REG_CLT_RESULT, onResponseProcessor, null);
         // 2.registry heartbeat message processor

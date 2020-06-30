@@ -16,6 +16,7 @@
 package io.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
@@ -45,9 +46,9 @@ public class RegRmProcessor implements RemotingProcessor {
 
     private RegisterCheckAuthHandler checkAuthHandler;
 
-    public RegRmProcessor(RemotingServer remotingServer, RegisterCheckAuthHandler checkAuthHandler) {
+    public RegRmProcessor(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
-        this.checkAuthHandler = checkAuthHandler;
+        this.checkAuthHandler = EnhancedServiceLoader.load(RegisterCheckAuthHandler.class);
     }
 
     @Override

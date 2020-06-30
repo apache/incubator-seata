@@ -84,7 +84,7 @@ public class RpcContext {
             }
             clientRMHolderMap = null;
         }
-        if (null != resourceSets) {
+        if (resourceSets != null) {
             resourceSets.clear();
         }
     }
@@ -123,7 +123,7 @@ public class RpcContext {
      * @param portMap    the client rm holder map
      */
     public void holdInResourceManagerChannels(String resourceId, ConcurrentMap<Integer, RpcContext> portMap) {
-        if (null == this.clientRMHolderMap) {
+        if (this.clientRMHolderMap == null) {
             this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
         }
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
@@ -138,7 +138,7 @@ public class RpcContext {
      * @param clientPort the client port
      */
     public void holdInResourceManagerChannels(String resourceId, Integer clientPort) {
-        if (null == this.clientRMHolderMap) {
+        if (this.clientRMHolderMap == null) {
             this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
         }
         clientRMHolderMap.putIfAbsent(resourceId, new ConcurrentHashMap<Integer, RpcContext>());
@@ -291,7 +291,7 @@ public class RpcContext {
         if (StringUtils.isBlank(resource)) {
             return;
         }
-        if (null == resourceSets) {
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.add(resource);
@@ -303,8 +303,8 @@ public class RpcContext {
      * @param resources the resources
      */
     public void addResources(Set<String> resources) {
-        if (null == resources) { return; }
-        if (null == resourceSets) {
+        if (resources == null) { return; }
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.addAll(resources);

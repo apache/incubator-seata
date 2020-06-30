@@ -13,16 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.pcext;
 
-import java.util.List;
+package io.seata.spring.event;
+
+import io.seata.core.event.Event;
 
 /**
- * Interceptible State Handler
- *
- * @author lorne.cl
+ * @author slievrly
  */
-public interface InterceptibleStateHandler extends StateHandler {
+public class DegradeCheckEvent implements Event {
+    private boolean requestSuccess;
 
-    List<StateHandlerInterceptor> getInterceptors();
+    public DegradeCheckEvent(boolean requestSuccess) {
+        this.requestSuccess = requestSuccess;
+    }
+
+    public boolean isRequestSuccess() {
+        return requestSuccess;
+    }
 }

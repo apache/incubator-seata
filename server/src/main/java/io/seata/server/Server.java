@@ -26,6 +26,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.env.ContainerHelper;
+import io.seata.server.env.PortHelper;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
@@ -37,8 +39,6 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  */
 public class Server {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     private static final int MIN_SERVER_POOL_SIZE = 50;
     private static final int MAX_SERVER_POOL_SIZE = 500;
@@ -56,6 +56,16 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        // get port first, use to logback.xml
+        int port = PortHelper.getPort(args);
+        System.setProperty(ConfigurationKeys.SERVER_PORT, Integer.toString(port));
+
+        // create logger
+        final Logger logger = LoggerFactory.getLogger(Server.class);
+        if (ContainerHelper.isRunningInContainer()) {
+            logger.info("The server is running in container.");
+        }
+
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
@@ -91,7 +101,7 @@ public class Server {
         try {
             nettyRemotingServer.init();
         } catch (Throwable e) {
-            LOGGER.error("nettyServer init error:{}", e.getMessage(), e);
+            logger.error("nettyServer init error:{}", e.getMessage(), e);
             System.exit(-1);
         }
 
