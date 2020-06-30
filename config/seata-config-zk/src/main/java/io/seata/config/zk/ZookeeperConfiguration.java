@@ -82,7 +82,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     public ZookeeperConfiguration() {
         if (zkClient == null) {
             synchronized (ZookeeperConfiguration.class) {
-                if (null == zkClient) {
+                if (zkClient == null) {
                     ZkSerializer zkSerializer = getZkSerializer();
                     String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     int sessionTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT);
@@ -108,7 +108,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -172,7 +172,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
@@ -199,7 +199,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                         zkListener = configListenersMap.get(dataId).get(listener);
                         configListenersMap.get(dataId).remove(entry);
                     }
-                    if (null != zkListener) {
+                    if (zkListener != null) {
                         zkClient.unsubscribeDataChanges(path, zkListener);
                     }
                     break;

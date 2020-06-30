@@ -15,21 +15,27 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
-
 import io.netty.channel.Channel;
 import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ChannelManager;
-import io.seata.core.rpc.DefaultServerMessageListenerImpl;
+import io.seata.core.rpc.processor.server.RegRmProcessor;
+import io.seata.core.rpc.processor.server.RegTmProcessor;
+import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
+import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
+import io.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Abstract rpc server.
  *
  * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
  */
 public class RpcServer extends AbstractRpcRemotingServer {
 
@@ -50,12 +56,9 @@ public class RpcServer extends AbstractRpcRemotingServer {
      */
     @Override
     public void init() {
-        DefaultServerMessageListenerImpl defaultServerMessageListenerImpl =
-            new DefaultServerMessageListenerImpl(getTransactionMessageHandler());
-        defaultServerMessageListenerImpl.init();
-        defaultServerMessageListenerImpl.setServerMessageSender(this);
-        super.setServerMessageListener(defaultServerMessageListenerImpl);
-        super.setChannelHandlers(new ServerHandler());
+        // registry processor
+        registerProcessor();
+        setChannelHandlers(new ServerHandler());
         super.init();
     }
 
@@ -69,7 +72,6 @@ public class RpcServer extends AbstractRpcRemotingServer {
             LOGGER.info("destroyed rpcServer");
         }
     }
-
 
 
     /**
@@ -106,7 +108,7 @@ public class RpcServer extends AbstractRpcRemotingServer {
      */
     @Override
     public Object sendSyncRequest(String resourceId, String clientId, Object message,
-        long timeout) throws TimeoutException {
+                                  long timeout) throws TimeoutException {
         Channel clientChannel = ChannelManager.getChannel(resourceId, clientId);
         if (clientChannel == null) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId
@@ -167,13 +169,42 @@ public class RpcServer extends AbstractRpcRemotingServer {
     /**
      * Send request with response object.
      *
-     * @param channel   the channel
-     * @param message    the msg
+     * @param channel the channel
+     * @param message the msg
      * @return the object
      * @throws TimeoutException the timeout exception
      */
     @Override
     public Object sendASyncRequest(Channel channel, Object message) throws TimeoutException {
         return sendAsyncRequestWithoutResponse(channel, message);
+    }
+
+    private void registerProcessor() {
+        // 1. registry on request message processor
+        ServerOnRequestProcessor onRequestProcessor =
+            new ServerOnRequestProcessor(this, getTransactionMessageHandler());
+        super.registerProcessor(MessageType.TYPE_BRANCH_REGISTER, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_REPORT, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_ROLLBACK, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_GLOBAL_STATUS, onRequestProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
+        // 2. registry on response message processor
+        ServerOnResponseProcessor onResponseProcessor =
+            new ServerOnResponseProcessor(getTransactionMessageHandler(), getFutures());
+        super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
+        // 3. registry rm message processor
+        RegRmProcessor regRmProcessor = new RegRmProcessor(this);
+        super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
+        // 4. registry tm message processor
+        RegTmProcessor regTmProcessor = new RegTmProcessor(this);
+        super.registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
+        // 5. registry heartbeat message processor
+        ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
+        super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
     }
 }
