@@ -44,7 +44,7 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
-     * The constant QUERY_GLOBAL_TRANSACTION_MYSQL.
+     * The constant QUERY_GLOBAL_TRANSACTION_BY_CONDITION_MYSQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_CONDITION_MYSQL = "select " + ALL_GLOBAL_COLUMNS
             + " from " + GLOBAL_TABLE_PLACEHOLD

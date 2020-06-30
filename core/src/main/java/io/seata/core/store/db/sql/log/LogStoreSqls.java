@@ -88,7 +88,7 @@ public interface LogStoreSqls {
     void setQueryGlobalTransactionSQLPagingParameters(PreparedStatement ps, Pageable pageable, int currentParamIndex) throws SQLException;
 
     /**
-     * Get count global transaction sql string.
+     * Get count global transaction sql by condition string.
      *
      * @param globalTable      the global table
      * @param wherePlaceHolder the params place holder
