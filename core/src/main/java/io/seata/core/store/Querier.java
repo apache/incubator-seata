@@ -84,7 +84,7 @@ public interface Querier<T> {
 
         // do filter
         list = doFilter(list);
-        if (list.isEmpty()) {
+        if (CollectionUtils.isEmpty(list)) {
             return list;
         }
 
