@@ -71,7 +71,8 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_BRANCH_TRANSACTION_APPDATA_MYSQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_APPDATA_MYSQL = "update " + BRANCH_TABLE_PLACEHOLD
-            + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now(6) where "
+            + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?, "
+            + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now(6) where "
             + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     @Override

@@ -74,9 +74,9 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_BRANCH_TRANSACTION_APPDATA_ORACLE.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_APPDATA_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
-            + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
-            + " = systimestamp where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
-            + " = ?";
+            + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?, "
+            + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = systimestamp where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and "
+            + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
