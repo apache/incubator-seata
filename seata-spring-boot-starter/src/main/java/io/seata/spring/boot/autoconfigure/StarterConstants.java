@@ -17,6 +17,8 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
+import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import io.seata.spring.boot.autoconfigure.properties.SeataSagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
@@ -55,11 +57,13 @@ public class StarterConstants {
     public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
     public static final String SERVICE_PREFIX = SEATA_PREFIX + ".service";
     public static final String CLIENT_PREFIX = SEATA_PREFIX + ".client";
+    public static final String SAGA_PREFIX = SEATA_PREFIX + ".saga";
     public static final String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
     public static final String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     public static final String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
+    public static final String STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
 
     public static final String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     public static final String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -78,10 +82,14 @@ public class StarterConstants {
     public static final String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
 
+    public static final String ASYNC_THREAD_POOL = STATE_MACHINE_PREFIX + ".async-thread-pool";
+
     public static final HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
         private static final long serialVersionUID = -8902807645596274597L;
 
         {
+            put(SEATA_PREFIX, SeataProperties.class);
+
             put(CLIENT_RM_PREFIX, RmProperties.class);
             put(CLIENT_TM_PREFIX, TmProperties.class);
             put(LOCK_PREFIX, LockProperties.class);
@@ -94,6 +102,7 @@ public class StarterConstants {
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
+            put(ASYNC_THREAD_POOL, SeataSagaAsyncThreadPoolProperties.class);
 
             put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);

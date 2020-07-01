@@ -23,7 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author wang.liang
  */
-@ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine.async-thread-pool")
+@ConfigurationProperties(StarterConstants.ASYNC_THREAD_POOL)
 public class SeataSagaAsyncThreadPoolProperties {
 
     /**
