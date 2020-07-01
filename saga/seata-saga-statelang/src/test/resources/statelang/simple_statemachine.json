@@ -9,6 +9,20 @@
       "ServiceName": "is.seata.saga.DemoService",
       "ServiceMethod": "foo",
       "IsPersist": false,
+      "Next": "ScriptState"
+    },
+    "ScriptState": {
+      "Type": "ScriptTask",
+      "ScriptType": "groovy",
+      "ScriptContent": "return 'hello ' + inputA",
+      "Input": [
+        {
+          "inputA": "$.data1"
+        }
+      ],
+      "Output": {
+        "scriptStateResult": "$.#root"
+      },
       "Next": "ChoiceState"
     },
     "ChoiceState": {

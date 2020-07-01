@@ -15,17 +15,24 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.StateInstruction;
+import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
 import io.seata.saga.engine.utils.ExceptionUtils;
+import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.TaskState;
+import io.seata.saga.statelang.domain.TaskState.ExceptionMatch;
+import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,5 +148,73 @@ public class EngineUtils {
             return false;
         }
         return System.currentTimeMillis() - gmtUpdated.getTime() > timeoutMillis;
+    }
+
+    /**
+     * Handle exceptions while ServiceTask or ScriptTask Executing
+     *
+     * @param context
+     * @param state
+     * @param e
+     */
+    public static void handleException(ProcessContext context, AbstractTaskState state, Throwable e) {
+        List<ExceptionMatch> catches = state.getCatches();
+        if (catches != null && catches.size() > 0) {
+            for (TaskState.ExceptionMatch exceptionMatch : catches) {
+
+                List<String> exceptions = exceptionMatch.getExceptions();
+                List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
+                if (exceptions != null && exceptions.size() > 0) {
+
+                    if (exceptionClasses == null) {
+                        synchronized (exceptionMatch) {
+                            exceptionClasses = exceptionMatch.getExceptionClasses();
+                            if (exceptionClasses == null) {
+
+                                exceptionClasses = new ArrayList<>(exceptions.size());
+                                for (String expStr : exceptions) {
+
+                                    Class<? extends Exception> expClass = null;
+                                    try {
+                                        expClass = (Class<? extends Exception>) ScriptTaskStateHandler.class
+                                                .getClassLoader().loadClass(expStr);
+                                    } catch (Exception e1) {
+
+                                        LOGGER.warn("Cannot Load Exception Class by getClass().getClassLoader()", e1);
+
+                                        try {
+                                            expClass = (Class<? extends Exception>) Thread.currentThread()
+                                                    .getContextClassLoader().loadClass(expStr);
+                                        } catch (Exception e2) {
+                                            LOGGER.warn(
+                                                    "Cannot Load Exception Class by Thread.currentThread()"
+                                                            + ".getContextClassLoader()",
+                                                    e2);
+                                        }
+                                    }
+
+                                    if (expClass != null) {
+                                        exceptionClasses.add(expClass);
+                                    }
+                                }
+                                exceptionMatch.setExceptionClasses(exceptionClasses);
+                            }
+                        }
+                    }
+
+                    for (Class<? extends Exception> expClass : exceptionClasses) {
+                        if (expClass.isAssignableFrom(e.getClass())) {
+                            ((HierarchicalProcessContext) context).setVariableLocally(
+                                    DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, exceptionMatch.getNext());
+                            return;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        LOGGER.error("Task execution failed and no catches configured");
+        ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH, true);
     }
 }

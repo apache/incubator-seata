@@ -108,6 +108,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
         if (this.stateRouters.size() == 0) {
             TaskStateRouter taskStateRouter = new TaskStateRouter();
             this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
+            this.stateRouters.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_CHOICE, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, taskStateRouter);

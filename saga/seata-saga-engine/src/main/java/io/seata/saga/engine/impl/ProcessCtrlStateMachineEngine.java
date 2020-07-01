@@ -28,8 +28,8 @@ import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateInstruction;
-import io.seata.saga.engine.pcext.interceptors.ServiceTaskHandlerInterceptor;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ProcessContextBuilder;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessType;
@@ -350,7 +350,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
                 if (state.getOutput() != null && state.getOutput().size() > 0) {
                     try {
-                        Map<String, Object> outputVariablesToContext = ServiceTaskHandlerInterceptor
+                        Map<String, Object> outputVariablesToContext = ParameterUtils
                                 .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
                                         serviceOutputParams);
                         if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
