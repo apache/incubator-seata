@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
 public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
 
     /**
-     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 in (?) pk2 in (?)
+     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 = ? and pk2 = ?
      */
-    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
+    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s ";
 
     @Override
     protected String buildUndoSQL() {
