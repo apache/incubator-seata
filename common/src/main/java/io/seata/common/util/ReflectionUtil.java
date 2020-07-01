@@ -262,7 +262,7 @@ public class ReflectionUtil {
         Field[] result = DECLARED_FIELDS_CACHE.get(clazz);
         if (result == null) {
             result = clazz.getDeclaredFields();
-            DECLARED_FIELDS_CACHE.put(clazz, (result.length == 0 ? NO_FIELDS : result));
+            DECLARED_FIELDS_CACHE.put(clazz, result.length == 0 ? NO_FIELDS : result);
         }
         return result;
     }
