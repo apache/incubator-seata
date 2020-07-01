@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static io.seata.core.store.GlobalTableField.BEGIN_TIME;
@@ -32,32 +33,79 @@ import static io.seata.core.store.GlobalTableField.TIMEOUT;
 public class GlobalTransactionConditionTest {
 
     @Test
-    public void isMatchTest() throws InterruptedException {
+    public void test_isMatch() throws InterruptedException {
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
+
+        condition.filterIsTimeoutData();
+
+        GlobalTransactionDO obj = new GlobalTransactionDO();
+
+        // condition1: statuses
+        condition.setStatuses(GlobalStatus.Finished);
+        obj.setStatus(GlobalStatus.Begin.getCode());
+        Assertions.assertFalse(condition.isMatch(obj));
         condition.setStatuses(GlobalStatus.Begin);
+        Assertions.assertTrue(condition.isMatch(obj));
+
+        // condition2: isTimeoutData
+        condition.filterNotTimeoutData();
+        obj.setBeginTime(System.currentTimeMillis());
+        obj.setTimeout(10);
+        Assertions.assertTrue(condition.isMatch(obj));
+        Thread.sleep(11);
+        Assertions.assertFalse(condition.isMatch(obj));
+        condition.filterIsTimeoutData();
+        Assertions.assertTrue(condition.isMatch(obj));
+
+        // condition3: overTimeAliveMills
         condition.setOverTimeAliveMills(10);
-        condition.setTimeoutData(true);
+        obj.setBeginTime(System.currentTimeMillis());
+        Assertions.assertFalse(condition.isMatch(obj));
+        Thread.sleep(11);
+        Assertions.assertTrue(condition.isMatch(obj));
+
+        // condition4: minGmtModified
+        condition.setMinGmtModified(new Date());
+        obj.setGmtModified(null);
+        Assertions.assertFalse(condition.isMatch(obj));
+        obj.setGmtModified(new Date(condition.getMinGmtModified().getTime() - 1));
+        Assertions.assertFalse(condition.isMatch(obj));
+        obj.setGmtModified(condition.getMinGmtModified());
+        Assertions.assertTrue(condition.isMatch(obj));
+        obj.setGmtModified(new Date(condition.getMinGmtModified().getTime() + 1));
+        Assertions.assertTrue(condition.isMatch(obj));
+    }
+
+    @Test
+    public void test_doFilter() throws InterruptedException {
+        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        condition.setStatuses(GlobalStatus.Finished);
+        condition.setOverTimeAliveMills(10);
+        condition.filterIsTimeoutData();
+
+        List<GlobalTransactionDO> list = new ArrayList<>();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
         obj.setStatus(GlobalStatus.Begin.getCode());
         obj.setBeginTime(System.currentTimeMillis());
         obj.setTimeout(100);
+        list.add(obj);
 
-        Assertions.assertFalse(condition.isMatch(obj));
+        // do filter
+        List<GlobalTransactionDO> list1 = condition.doFilter(list);
+        Assertions.assertEquals(list1.size(), 0);
+
         Thread.sleep(101);
-        Assertions.assertTrue(condition.isMatch(obj));
+        list1 = condition.doFilter(list);
+        Assertions.assertEquals(list1.size(), 0);
 
-        condition.setTimeoutData(false);
-        Assertions.assertFalse(condition.isMatch(obj));
-        condition.setTimeoutData(true);
-
-        condition.setOverTimeAliveMills(2000);
-        Assertions.assertFalse(condition.isMatch(obj));
-        condition.setOverTimeAliveMills(10);
+        condition.setStatuses(GlobalStatus.Begin);
+        list1 = condition.doFilter(list);
+        Assertions.assertEquals(list1.size(), 1);
     }
 
     @Test
-    public void doSortTest() {
+    public void test_doSort() {
         List<GlobalTransactionDO> list0 = new ArrayList<>();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
@@ -102,24 +150,24 @@ public class GlobalTransactionConditionTest {
     }
 
     @Test
-    public void doPagingTest() {
+    public void test_doPaging() {
         List<GlobalTransactionDO> list0 = new ArrayList<>();
 
-        GlobalTransactionDO obj1 = new GlobalTransactionDO();
-        obj1.setStatus(GlobalStatus.Begin.getCode());
-        list0.add(obj1);
+        GlobalTransactionDO obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Begin.getCode());
+        list0.add(obj);
 
-        GlobalTransactionDO obj2 = new GlobalTransactionDO();
-        obj2.setStatus(GlobalStatus.UnKnown.getCode());
-        list0.add(obj2);
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.UnKnown.getCode());
+        list0.add(obj);
 
-        GlobalTransactionDO obj3 = new GlobalTransactionDO();
-        obj3.setStatus(GlobalStatus.Finished.getCode());
-        list0.add(obj3);
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Finished.getCode());
+        list0.add(obj);
 
-        GlobalTransactionDO obj4 = new GlobalTransactionDO();
-        obj4.setStatus(GlobalStatus.AsyncCommitting.getCode());
-        list0.add(obj4);
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
+        list0.add(obj);
 
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
         condition.setPageIndex(2);
@@ -143,4 +191,71 @@ public class GlobalTransactionConditionTest {
         Assertions.assertEquals(list1.get(3).getStatus(), GlobalStatus.AsyncCommitting.getCode());
     }
 
+    @Test
+    public void test_doQuery() {
+        List<GlobalTransactionDO> list0 = new ArrayList<>();
+
+        GlobalTransactionDO obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setTimeout(1);
+        list0.add(obj);
+
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setTimeout(0);
+        list0.add(obj);
+
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.Finished.getCode());
+        obj.setTimeout(0);
+        list0.add(obj);
+
+        obj = new GlobalTransactionDO();
+        obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
+        obj.setTimeout(0);
+        list0.add(obj);
+
+        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        // condition
+        condition.setStatuses(GlobalStatus.Begin);
+        // sort params
+        condition.setSortFields(STATUS, TIMEOUT);
+        // paging params
+        condition.setPageIndex(1);
+        condition.setPageSize(2);
+
+        // do query
+        List<GlobalTransactionDO> list1 = condition.doQuery(list0);
+        Assertions.assertEquals(list1.size(), 2);
+        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Begin.getCode());
+        Assertions.assertEquals(list1.get(0).getTimeout(), 0);
+        Assertions.assertEquals(list1.get(1).getTimeout(), 1);
+
+        // change condition
+        condition.setStatuses(GlobalStatus.Finished);
+        // do query
+        list1 = condition.doQuery(list0);
+        Assertions.assertEquals(list1.size(), 1);
+        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Finished.getCode());
+
+        // change condition
+        condition.setStatuses(GlobalStatus.Committed);
+        // do query
+        list1 = condition.doQuery(list0);
+        Assertions.assertEquals(list1.size(), 0);
+    }
+
+
+    @Test
+    public void test_getFromIndex_getToIndex() {
+        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        condition.setPageIndex(2);
+        condition.setPageSize(2);
+
+        int fromIndex = condition.getFromIndex();
+        int toIndex = condition.getToIndex(fromIndex);
+
+        Assertions.assertEquals(fromIndex, 2);
+        Assertions.assertEquals(toIndex, 4);
+    }
 }
