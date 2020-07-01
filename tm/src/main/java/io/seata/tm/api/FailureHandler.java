@@ -41,16 +41,16 @@ public interface FailureHandler {
     /**
      * On rollback failure.
      *
-     * @param tx    the tx
-     * @param cause the cause
+     * @param tx                the tx
+     * @param originalException the originalException
      */
-    void onRollbackFailure(GlobalTransaction tx, Throwable cause);
+    void onRollbackFailure(GlobalTransaction tx, Throwable originalException);
 
     /**
      * On rollback retrying
      *
-     * @param tx    the tx
-     * @param cause the cause
+     * @param tx                the tx
+     * @param originalException the originalException
      */
-    void onRollbackRetrying(GlobalTransaction tx, Throwable cause);
+    void onRollbackRetrying(GlobalTransaction tx, Throwable originalException);
 }

@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.engine.StateMachineConfig;
-import io.seata.saga.engine.pcext.interceptors.EndStateRouterInterceptor;
 import io.seata.saga.engine.pcext.routers.EndStateRouter;
 import io.seata.saga.engine.pcext.routers.TaskStateRouter;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
@@ -67,8 +66,8 @@ public class StateMachineProcessRouter implements ProcessRouter {
         Instruction instruction = null;
 
         List<StateRouterInterceptor> interceptors = null;
-        if (router instanceof InterceptibleStateRouter) {
-            interceptors = ((InterceptibleStateRouter)router).getInterceptors();
+        if (router instanceof InterceptableStateRouter) {
+            interceptors = ((InterceptableStateRouter)router).getInterceptors();
         }
 
         List<StateRouterInterceptor> executedInterceptors = null;
@@ -109,18 +108,14 @@ public class StateMachineProcessRouter implements ProcessRouter {
         if (this.stateRouters.size() == 0) {
             TaskStateRouter taskStateRouter = new TaskStateRouter();
             this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
+            this.stateRouters.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_CHOICE, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, taskStateRouter);
 
-            EndStateRouter endStateRouter = new EndStateRouter();
-            List<StateRouterInterceptor> stateRouterInterceptors = new ArrayList<>(1);
-            stateRouterInterceptors.add(new EndStateRouterInterceptor());
-            endStateRouter.setInterceptors(stateRouterInterceptors);
-
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUCCEED, endStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_FAIL, endStateRouter);
+            this.stateRouters.put(DomainConstants.STATE_TYPE_SUCCEED, new EndStateRouter());
+            this.stateRouters.put(DomainConstants.STATE_TYPE_FAIL, new EndStateRouter());
         }
     }
 

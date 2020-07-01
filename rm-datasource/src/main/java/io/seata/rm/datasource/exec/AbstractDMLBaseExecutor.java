@@ -58,7 +58,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      *
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the multi sql recognizer
+     * @param sqlRecognizers     the multi sql recognizer
      */
     public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                                    List<SQLRecognizer> sqlRecognizers) {

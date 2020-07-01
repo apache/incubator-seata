@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
@@ -36,7 +37,7 @@ import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.serializer.Serializer;
 import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
-import io.seata.saga.engine.serializer.impl.ParamsFastjsonSerializer;
+import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -74,7 +75,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                                                                                                = new StateInstanceToStatementForUpdate();
     private static final ResultSetToStateInstance                 RESULT_SET_TO_STATE_INSTANCE = new ResultSetToStateInstance();
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private Serializer<Object, String>    paramsSerializer    = new ParamsFastjsonSerializer();
+    private Serializer<Object, String>    paramsSerializer    = new ParamsSerializer();
     private Serializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
     private StateLogStoreSqls stateLogStoreSqls;
     private String            defaultTenantId;
@@ -115,7 +116,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             TransactionInfo transactionInfo = new TransactionInfo();
             transactionInfo.setTimeOut(stateMachineConfig.getTransOperationTimeout());
-            transactionInfo.setName(machineInstance.getStateMachine().getName());
+            transactionInfo.setName(Constants.SAGA_TRANS_NAME_PREFIX + machineInstance.getStateMachine().getName());
             try {
                 GlobalTransaction globalTransaction = sagaTransactionalTemplate.beginTransaction(transactionInfo);
                 machineInstance.setId(globalTransaction.getXid());
@@ -152,6 +153,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             Map<String, Object> endParams = machineInstance.getEndParams();
             if (endParams != null) {
                 endParams.remove(DomainConstants.VAR_NAME_GLOBAL_TX);
+            }
+
+            // if success, clear exception
+            if (ExecutionStatus.SU.equals(machineInstance.getStatus()) && machineInstance.getException() != null) {
+                machineInstance.setException(null);
             }
 
             machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));
@@ -272,6 +278,17 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     protected void branchRegister(StateInstance stateInstance, ProcessContext context) {
 
         if (sagaTransactionalTemplate != null) {
+
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+
+            if (stateMachineConfig instanceof DbStateMachineConfig
+                    && !((DbStateMachineConfig)stateMachineConfig).isSagaBranchRegisterEnable()) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("sagaBranchRegisterEnable = false, skip register branch. state[" + stateInstance.getName() + "]");
+                }
+                return;
+            }
 
             //Register branch
             try {
@@ -405,6 +422,17 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     protected void branchReport(StateInstance stateInstance, ProcessContext context) {
 
         if (sagaTransactionalTemplate != null) {
+
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+
+            if (stateMachineConfig instanceof DbStateMachineConfig
+                    && !((DbStateMachineConfig)stateMachineConfig).isSagaBranchRegisterEnable()) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("sagaBranchRegisterEnable = false, skip branch report. state[" + stateInstance.getName() + "]");
+                }
+                return;
+            }
 
             BranchStatus branchStatus = null;
             //find out the original state instance, only the original state instance is registered on the server, and its status should

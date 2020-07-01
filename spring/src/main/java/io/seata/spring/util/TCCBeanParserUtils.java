@@ -15,14 +15,16 @@
  */
 package io.seata.spring.util;
 
-import java.lang.reflect.Method;
-
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
 import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
+import io.seata.spring.tcc.TccActionInterceptor;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.lang.reflect.Method;
 
 /**
  * parser TCC bean
@@ -103,7 +105,7 @@ public class TCCBeanParserUtils {
      * @param remotingDesc the remoting desc
      * @return boolean boolean
      */
-    protected static boolean isTccProxyTargetBean(RemotingDesc remotingDesc) {
+    public static boolean isTccProxyTargetBean(RemotingDesc remotingDesc) {
         if (remotingDesc == null) {
             return false;
         }
@@ -155,5 +157,22 @@ public class TCCBeanParserUtils {
      */
     public static RemotingDesc getRemotingDesc(String beanName) {
         return DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+    }
+
+    /**
+     * Create a proxy bean for tcc service
+     *
+     * @param interfaceClass
+     * @param fieldValue
+     * @param actionInterceptor
+     * @return
+     */
+    public static <T> T createProxy(Class<T> interfaceClass, Object fieldValue, TccActionInterceptor actionInterceptor) {
+        ProxyFactory factory = new ProxyFactory();
+        factory.setTarget(fieldValue);
+        factory.setInterfaces(interfaceClass);
+        factory.addAdvice(actionInterceptor);
+
+        return (T) factory.getProxy();
     }
 }

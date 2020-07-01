@@ -143,7 +143,7 @@ public class FrameworkExceptionTest {
     }
 
     private static void exceptionAsserts(FrameworkException exception, String expectMessage) {
-        if (null == expectMessage) {
+        if (expectMessage == null) {
             expectMessage = FrameworkErrorCode.UnknownAppError.getErrMessage();
         }
         assertThat(exception).isInstanceOf(FrameworkException.class).hasMessage(expectMessage);

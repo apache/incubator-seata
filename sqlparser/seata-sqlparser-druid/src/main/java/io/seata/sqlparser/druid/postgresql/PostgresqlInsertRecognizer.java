@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLDefaultExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
@@ -27,10 +28,13 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import java.util.ArrayList;
@@ -80,6 +84,11 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public boolean insertColumnsIsEmpty() {
+        return CollectionUtils.isEmpty(ast.getColumns());
+    }
+
+    @Override
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
         if (columnSQLExprs.size() == 0) {
@@ -113,12 +122,21 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
-                    row.add(new SqlMethodExpr());
+                    SQLMethodInvokeExpr sqlMethodInvokeExpr = (SQLMethodInvokeExpr) expr;
+                    String function = sqlMethodInvokeExpr.getMethodName();
+                    if (StringUtils.equalsIgnoreCase(function, "nextval")) {
+                        String sequence = sqlMethodInvokeExpr.getParameters().get(0).toString();
+                        row.add(new SqlSequenceExpr(sequence, function));
+                    } else {
+                        row.add(new SqlMethodExpr());
+                    }
                 } else if (expr instanceof SQLSequenceExpr) {
                     SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
                     String sequence = sequenceExpr.getSequence().getSimpleName();
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));
+                } else if (expr instanceof SQLDefaultExpr) {
+                    row.add(SqlDefaultExpr.get());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }
