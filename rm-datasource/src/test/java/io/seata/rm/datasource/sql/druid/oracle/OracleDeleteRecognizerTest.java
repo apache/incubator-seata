@@ -89,7 +89,7 @@ public class OracleDeleteRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 Map result = new HashMap();
-                result.put(0, idParam);
+                result.put(1, idParam);
                 return result;
             }
         }, new ArrayList<>());
@@ -106,7 +106,7 @@ public class OracleDeleteRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 Map result = new HashMap();
-                result.put(0, idParam);
+                result.put(1, idParam);
                 return result;
             }
         }, new ArrayList<>());
@@ -125,8 +125,8 @@ public class OracleDeleteRecognizerTest {
                 ArrayList<Object> idParam2 = new ArrayList<>();
                 idParam.add(2);
                 Map result = new HashMap();
-                result.put(0, idParam);
-                result.put(1, idParam2);
+                result.put(1, idParam);
+                result.put(2, idParam2);
                 return result;
             }
         }, new ArrayList<>());

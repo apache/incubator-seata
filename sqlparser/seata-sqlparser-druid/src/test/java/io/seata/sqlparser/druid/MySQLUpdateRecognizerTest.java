@@ -109,7 +109,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
                 Map result = new HashMap();
-                result.put(0, idParam);
+                result.put(1, idParam);
                 return result;
             }
         }, paramAppenderList);
@@ -148,8 +148,8 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 Map result = new HashMap();
-                result.put(0, id1Param);
-                result.put(1, id2Param);
+                result.put(1, id1Param);
+                result.put(2, id2Param);
                 return result;
             }
         }, paramAppenderList);
@@ -190,9 +190,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> name1Param = new ArrayList<>();
                 name1Param.add("name");
                 Map result = new HashMap();
-                result.put(0, id1Param);
-                result.put(1, id2Param);
-                result.put(2, name1Param);
+                result.put(1, id1Param);
+                result.put(2, id2Param);
+                result.put(3, name1Param);
                 return result;
             }
         }, paramAppenderList);
@@ -231,8 +231,8 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 Map result = new HashMap();
-                result.put(0, id1Param);
-                result.put(1, id2Param);
+                result.put(1, id1Param);
+                result.put(2, id2Param);
                 return result;
             }
         }, paramAppenderList);
