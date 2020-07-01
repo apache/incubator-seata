@@ -246,7 +246,7 @@ public class ReflectionUtil {
     /**
      * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
      */
-    private static final Map<Class<?>, Field[]> declaredFieldsCache =
+    private static final Map<Class<?>, Field[]> DECLARED_FIELDS_CACHE =
             new ConcurrentHashMap<Class<?>, Field[]>(256);
 
 
@@ -259,10 +259,10 @@ public class ReflectionUtil {
      * @see Class#getDeclaredFields()
      */
     private static Field[] getDeclaredFields(Class<?> clazz) {
-        Field[] result = declaredFieldsCache.get(clazz);
+        Field[] result = DECLARED_FIELDS_CACHE.get(clazz);
         if (result == null) {
             result = clazz.getDeclaredFields();
-            declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
+            DECLARED_FIELDS_CACHE.put(clazz, (result.length == 0 ? NO_FIELDS : result));
         }
         return result;
     }

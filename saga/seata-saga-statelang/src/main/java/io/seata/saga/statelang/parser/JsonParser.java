@@ -13,26 +13,39 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.interceptor;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package io.seata.saga.statelang.parser;
 
 /**
- * TCC action One stage custom return value
+ *
+ * Json Parser
+ *
+ * @author lorne.cl
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
-@Inherited
-public @interface ActionContextField {
+public interface JsonParser {
+
     /**
-     * Give the field a custom key.
-     * If it is not set, the name of the field will be used.
+     * get Name
      *
      * @return
      */
-    String value() default "";
+    String getName();
+
+    /**
+     * Object to Json string
+     *
+     * @param o
+     * @param prettyPrint
+     * @return
+     */
+    String toJsonString(Object o, boolean prettyPrint);
+
+    /**
+     * parse json string to Object
+     *
+     * @param json
+     * @param type
+     * @param <T>
+     * @return
+     */
+    <T> T parse(String json, Class<T> type, boolean ignoreAutoType);
 }
