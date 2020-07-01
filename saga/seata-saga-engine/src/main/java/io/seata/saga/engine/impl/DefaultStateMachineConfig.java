@@ -102,7 +102,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ServiceInvokerManager serviceInvokerManager;
 
     private boolean autoRegisterResources = true;
-    private String[] resources = new String[]{"classpath*:seata/saga/statelang/*.json"};
+    private String[] resources = new String[]{"classpath*:seata/saga/statelang/**/*.json"};
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
 
