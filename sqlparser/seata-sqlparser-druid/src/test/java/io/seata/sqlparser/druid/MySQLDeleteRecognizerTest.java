@@ -15,13 +15,6 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
@@ -30,6 +23,12 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -119,8 +118,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 Map result = new HashMap();
-                result.put(0,idParam);
-                result.put(1,id2Param);
+                result.put(0, idParam);
+                result.put(1, id2Param);
                 return result;
             }
         }, paramAppenderList);
@@ -154,8 +153,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 Map result = new HashMap();
-                result.put(0,idParam);
-                result.put(1,id2Param);
+                result.put(0, idParam);
+                result.put(1, id2Param);
                 return result;
             }
         }, paramAppenderList);
@@ -208,7 +207,7 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 Map result = new HashMap();
-                result.put(0,idParam);
+                result.put(0, idParam);
                 return result;
             }
         }, new ArrayList<>());
@@ -225,7 +224,7 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 Map result = new HashMap();
-                result.put(0,idParam);
+                result.put(0, idParam);
                 return result;
             }
         }, new ArrayList<>());
@@ -244,8 +243,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> idParam2 = new ArrayList<>();
                 idParam.add(2);
                 Map result = new HashMap();
-                result.put(0,idParam);
-                result.put(1,idParam2);
+                result.put(0, idParam);
+                result.put(1, idParam2);
                 return result;
             }
         }, new ArrayList<>());

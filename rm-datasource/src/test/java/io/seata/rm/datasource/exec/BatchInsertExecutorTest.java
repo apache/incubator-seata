@@ -23,17 +23,16 @@ import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -195,11 +194,11 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userId2");
         ArrayList arrayList4 = new ArrayList<>();
         arrayList4.add("userName2");
-        paramters.put(1,arrayList0);
-        paramters.put(2,arrayList1);
-        paramters.put(3,arrayList2);
-        paramters.put(4,arrayList3);
-        paramters.put(5,arrayList4);
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
+        paramters.put(5, arrayList4);
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
@@ -220,11 +219,11 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userId2");
         ArrayList arrayList4 = new ArrayList<>();
         arrayList4.add("userName2");
-        paramters.put(1,arrayList0);
-        paramters.put(2,arrayList1);
-        paramters.put(3,arrayList2);
-        paramters.put(4,arrayList3);
-        paramters.put(5,arrayList4);
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
+        paramters.put(5, arrayList4);
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
@@ -271,10 +270,10 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userStatus4");
         arrayList3.add("userStatus5");
 
-        paramters.put(1,arrayList0);
-        paramters.put(2,arrayList1);
-        paramters.put(3,arrayList2);
-        paramters.put(4,arrayList3);
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));

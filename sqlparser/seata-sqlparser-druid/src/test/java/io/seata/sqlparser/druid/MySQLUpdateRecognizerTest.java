@@ -15,13 +15,6 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
@@ -33,6 +26,12 @@ import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -110,7 +109,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
                 Map result = new HashMap();
-                result.put(0,idParam);
+                result.put(0, idParam);
                 return result;
             }
         }, paramAppenderList);
@@ -149,8 +148,8 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 Map result = new HashMap();
-                result.put(0,id1Param);
-                result.put(1,id2Param);
+                result.put(0, id1Param);
+                result.put(1, id2Param);
                 return result;
             }
         }, paramAppenderList);
@@ -191,9 +190,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> name1Param = new ArrayList<>();
                 name1Param.add("name");
                 Map result = new HashMap();
-                result.put(0,id1Param);
-                result.put(1,id2Param);
-                result.put(2,name1Param);
+                result.put(0, id1Param);
+                result.put(1, id2Param);
+                result.put(2, name1Param);
                 return result;
             }
         }, paramAppenderList);
@@ -232,8 +231,8 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
                 Map result = new HashMap();
-                result.put(0,id1Param);
-                result.put(1,id2Param);
+                result.put(0, id1Param);
+                result.put(1, id2Param);
                 return result;
             }
         }, paramAppenderList);

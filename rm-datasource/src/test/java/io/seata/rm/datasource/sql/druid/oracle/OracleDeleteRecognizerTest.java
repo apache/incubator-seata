@@ -22,13 +22,12 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
-import java.util.HashMap;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author will
@@ -90,7 +89,7 @@ public class OracleDeleteRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 Map result = new HashMap();
-                result.put(0,idParam);
+                result.put(0, idParam);
                 return result;
             }
         }, new ArrayList<>());
@@ -107,7 +106,7 @@ public class OracleDeleteRecognizerTest {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 Map result = new HashMap();
-                result.put(0,idParam);
+                result.put(0, idParam);
                 return result;
             }
         }, new ArrayList<>());
@@ -126,8 +125,8 @@ public class OracleDeleteRecognizerTest {
                 ArrayList<Object> idParam2 = new ArrayList<>();
                 idParam.add(2);
                 Map result = new HashMap();
-                result.put(0,idParam);
-                result.put(1,idParam2);
+                result.put(0, idParam);
+                result.put(1, idParam2);
                 return result;
             }
         }, new ArrayList<>());
