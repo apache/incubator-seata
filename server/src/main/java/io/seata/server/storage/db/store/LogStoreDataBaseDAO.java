@@ -17,6 +17,7 @@ package io.seata.server.storage.db.store;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -483,20 +484,25 @@ public class LogStoreDataBaseDAO implements LogStore {
                 wherePlaceHolder.append(" = ?");
             }
         }
-        // begin_time < System.currentTimeMillis() - ?
-        if (condition.getOverTimeAliveMills() > 0) {
-            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
-                    .append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ?");
-        }
         //  true: begin_time  < System.currentTimeMillis() - timeout
         // false: begin_time >= System.currentTimeMillis() - timeout
-        if (condition.getTimeoutData() != null) {
+        if (condition.getIsTimeoutData() != null) {
             wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ");
-            if (condition.getTimeoutData()) {
+            if (condition.getIsTimeoutData()) {
                 wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ? - timeout");
             } else {
                 wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" >= ? - timeout");
             }
+        }
+        // begin_time < System.currentTimeMillis() - :overTimeAliveMills
+        if (condition.getOverTimeAliveMills() > 0) {
+            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ?");
+        }
+        // gmt_modified >= :minGmtModified
+        if (condition.getMinGmtModified() != null) {
+            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED).append(" >= ?");
         }
 
         return wherePlaceHolder.toString();
@@ -511,14 +517,18 @@ public class LogStoreDataBaseDAO implements LogStore {
                 ps.setInt(i++, condition.getStatuses()[j].getCode());
             }
         }
-        // begin_time < System.currentTimeMillis() - ?
+        //  true: begin_time  < System.currentTimeMillis() - timeout
+        // false: begin_time >= System.currentTimeMillis() - timeout
+        if (condition.getIsTimeoutData() != null) {
+            ps.setLong(i++, now);
+        }
+        // begin_time < System.currentTimeMillis() - :overTimeAliveMills
         if (condition.getOverTimeAliveMills() > 0) {
             ps.setLong(i++, now - condition.getOverTimeAliveMills());
         }
-        //  true: begin_time  < System.currentTimeMillis() - timeout
-        // false: begin_time >= System.currentTimeMillis() - timeout
-        if (condition.getTimeoutData() != null) {
-            ps.setLong(i++, now);
+        // gmt_modified >= :minGmtModified
+        if (condition.getMinGmtModified() != null) {
+            ps.setDate(i++, new Date(condition.getMinGmtModified().getTime()));
         }
 
         return i;
