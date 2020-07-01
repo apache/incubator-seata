@@ -19,6 +19,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.model.GlobalStatus;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA;
@@ -48,17 +49,22 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     protected GlobalStatus[] statuses;
 
     /**
-     * condition: begin_time < currentTimeMillis() - overTimeAliveMills
+     * filter is timeout or not timeout
+     * -  null: all..............   no condition
+     * -  true: timeout data.....   condition: begin_time  < System.currentTimeMillis() - timeout
+     * - false: not timeout data.   condition: begin_time >= System.currentTimeMillis() - timeout
+     */
+    protected Boolean isTimeoutData;
+
+    /**
+     * condition: begin_time < System.currentTimeMillis() - :overTimeAliveMills
      */
     protected long overTimeAliveMills = 0;
 
     /**
-     * condition: filter is timeout or not timeout
-     * -  null: all
-     * -  true: timeout data.     begin_time  < System.currentTimeMillis() - timeout
-     * - false: not timeout data. begin_time >= System.currentTimeMillis() - timeout
+     * condition: gmt_modified >= :minGmtModified
      */
-    protected Boolean timeoutData;
+    protected Date minGmtModified;
 
     //endregion
 
@@ -82,8 +88,8 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     /**
      * Instantiates a new condition.
      *
-     * @param status    the status
-     * @param pageSize  the page size
+     * @param status   the status
+     * @param pageSize the page size
      */
     public GlobalTransactionCondition(GlobalStatus status, int pageSize) {
         this(new GlobalStatus[]{status}, pageSize);
@@ -103,8 +109,8 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     /**
      * Instantiates a new condition.
      *
-     * @param statuses  the statuses
-     * @param pageSize  the page size
+     * @param statuses the statuses
+     * @param pageSize the page size
      */
     public GlobalTransactionCondition(GlobalStatus[] statuses, int pageSize) {
         this.statuses = statuses;
@@ -156,17 +162,26 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
                 return false; // un match
             }
         }
+        //  true: begin_time  < System.currentTimeMillis() - timeout
+        // false: begin_time >= System.currentTimeMillis() - timeout
+        if (isTimeoutData != null) {
+            boolean isTimeout = globalTransaction.getBeginTime() < System.currentTimeMillis() - globalTransaction.getTimeout();
+            if (isTimeoutData != isTimeout) {
+                return false; // un match
+            }
+        }
         // begin_time < System.currentTimeMillis() - ?
         if (overTimeAliveMills > 0) {
             if (globalTransaction.getBeginTime() >= System.currentTimeMillis() - overTimeAliveMills) {
                 return false; // un match
             }
         }
-        //  true: begin_time  < System.currentTimeMillis() - timeout
-        // false: begin_time >= System.currentTimeMillis() - timeout
-        if (timeoutData != null) {
-            boolean isTimeout = globalTransaction.getBeginTime() < System.currentTimeMillis() - globalTransaction.getTimeout();
-            return timeoutData ? isTimeout : !isTimeout;
+        // gmt_modified >= :minGmtModified
+        if (minGmtModified != null) {
+            if (globalTransaction.getGmtModified() == null
+                    || globalTransaction.getGmtModified().getTime() < minGmtModified.getTime()) {
+                return false; // un match
+            }
         }
 
         return true;
@@ -262,6 +277,22 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
         this.statuses = statuses;
     }
 
+    public Boolean getIsTimeoutData() {
+        return isTimeoutData;
+    }
+
+    public void filterIsTimeoutData() {
+        this.isTimeoutData = true;
+    }
+
+    public void filterNotTimeoutData() {
+        this.isTimeoutData = false;
+    }
+
+    public void clearTimeoutDataCondition() {
+        this.isTimeoutData = null;
+    }
+
     public long getOverTimeAliveMills() {
         return overTimeAliveMills;
     }
@@ -270,13 +301,15 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
-    public Boolean getTimeoutData() {
-        return timeoutData;
+    public Date getMinGmtModified() {
+        return minGmtModified;
     }
 
-    public void setTimeoutData(Boolean timeoutData) {
-        this.timeoutData = timeoutData;
+    public void setMinGmtModified(Date minGmtModified) {
+        this.minGmtModified = minGmtModified;
     }
+
+    //region Special Gets and Sets
 
     /**
      * Sets sort fields, and all fields use SortOrder.ASC
@@ -293,6 +326,8 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
         }
         super.setSortParams(sortParams);
     }
+
+    //endregion
 
     //endregion
 }

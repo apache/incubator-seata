@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static io.seata.core.store.GlobalTableField.BEGIN_TIME;
@@ -34,26 +35,45 @@ public class GlobalTransactionConditionTest {
     @Test
     public void test_isMatch() throws InterruptedException {
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
-        condition.setStatuses(GlobalStatus.Begin);
-        condition.setOverTimeAliveMills(10);
-        condition.setTimeoutData(true);
+
+        condition.filterIsTimeoutData();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Begin.getCode());
-        obj.setBeginTime(System.currentTimeMillis());
-        obj.setTimeout(100);
 
+        // condition1: statuses
+        condition.setStatuses(GlobalStatus.Finished);
+        obj.setStatus(GlobalStatus.Begin.getCode());
         Assertions.assertFalse(condition.isMatch(obj));
-        Thread.sleep(101);
+        condition.setStatuses(GlobalStatus.Begin);
         Assertions.assertTrue(condition.isMatch(obj));
 
-        condition.setTimeoutData(false);
+        // condition2: isTimeoutData
+        condition.filterNotTimeoutData();
+        obj.setBeginTime(System.currentTimeMillis());
+        obj.setTimeout(10);
+        Assertions.assertTrue(condition.isMatch(obj));
+        Thread.sleep(11);
         Assertions.assertFalse(condition.isMatch(obj));
-        condition.setTimeoutData(true);
+        condition.filterIsTimeoutData();
+        Assertions.assertTrue(condition.isMatch(obj));
 
-        condition.setOverTimeAliveMills(2000);
-        Assertions.assertFalse(condition.isMatch(obj));
+        // condition3: overTimeAliveMills
         condition.setOverTimeAliveMills(10);
+        obj.setBeginTime(System.currentTimeMillis());
+        Assertions.assertFalse(condition.isMatch(obj));
+        Thread.sleep(11);
+        Assertions.assertTrue(condition.isMatch(obj));
+
+        // condition4: minGmtModified
+        condition.setMinGmtModified(new Date());
+        obj.setGmtModified(null);
+        Assertions.assertFalse(condition.isMatch(obj));
+        obj.setGmtModified(new Date(condition.getMinGmtModified().getTime() - 1));
+        Assertions.assertFalse(condition.isMatch(obj));
+        obj.setGmtModified(condition.getMinGmtModified());
+        Assertions.assertTrue(condition.isMatch(obj));
+        obj.setGmtModified(new Date(condition.getMinGmtModified().getTime() + 1));
+        Assertions.assertTrue(condition.isMatch(obj));
     }
 
     @Test
@@ -61,7 +81,7 @@ public class GlobalTransactionConditionTest {
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
-        condition.setTimeoutData(true);
+        condition.filterIsTimeoutData();
 
         List<GlobalTransactionDO> list = new ArrayList<>();
 
