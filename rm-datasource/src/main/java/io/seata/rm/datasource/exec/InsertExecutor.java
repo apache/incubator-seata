@@ -27,16 +27,18 @@ public interface InsertExecutor<T> extends Executor<T> {
 
     /**
      * get primary key values.
+     *
      * @return The primary key value.
      * @throws SQLException
      */
-    Map<String,List<Object>> getPkValues() throws SQLException;
+    Map<String, List<Object>> getPkValues() throws SQLException;
 
     /**
      * get primary key values by insert column.
+     *
      * @return
      * @throws SQLException
      */
-    Map<String,List<Object>> getPkValuesByColumn() throws SQLException;
+    Map<String, List<Object>> getPkValuesByColumn() throws SQLException;
 
 }
