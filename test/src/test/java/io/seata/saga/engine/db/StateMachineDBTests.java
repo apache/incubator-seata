@@ -378,10 +378,6 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
-
-        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assertions.assertNotNull(globalTransaction);
-        Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
     }
 
     @Test

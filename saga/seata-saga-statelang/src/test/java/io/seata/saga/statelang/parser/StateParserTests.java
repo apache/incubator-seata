@@ -16,11 +16,8 @@
 package io.seata.saga.statelang.parser;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
@@ -41,10 +38,17 @@ public class StateParserTests {
         ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
         StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser().parse(json);
+        stateMachine.setGmtCreate(new Date());
         Assertions.assertNotNull(stateMachine);
 
-        String outputJson = JSON.toJSONString(stateMachine, SerializerFeature.PrettyFormat);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        String outputJson = jsonParser.toJsonString(stateMachine, true);
         System.out.println(outputJson);
+
+
+        JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
+        String fastjsonOutputJson = fastjsonParser.toJsonString(stateMachine, true);
+        System.out.println(fastjsonOutputJson);
 
         Assertions.assertEquals(stateMachine.getName(), "simpleTestStateMachine");
         Assertions.assertTrue(stateMachine.getStates().size() > 0);
@@ -55,10 +59,19 @@ public class StateParserTests {
 
         ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_layout.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
-        Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(JSON.parseObject(json, Feature.OrderedField));
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
 
-        String outputJson = JSON.toJSONString(parsedObj, SerializerFeature.PrettyFormat);
+        String outputJson = jsonParser.toJsonString(parsedObj, true);
         System.out.println(outputJson);
+
+
+        JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
+        Map<String, Object> fastjsonParsedObj = DesignerJsonTransformer.toStandardJson(fastjsonParser.parse(json, Map.class, true));
+        Assertions.assertNotNull(fastjsonParsedObj);
+
+        String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true);
+        System.out.println(fastjsonOutputJson);
     }
 }
