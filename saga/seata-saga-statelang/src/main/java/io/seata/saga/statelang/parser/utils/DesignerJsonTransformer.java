@@ -135,7 +135,7 @@ public class DesignerJsonTransformer {
                 } else if ("Catch".equals(sourceType)) {
                     Map<String, Object> catchAttachedNode = getCatchAttachedNode(sourceNode, nodes);
                     if (catchAttachedNode == null) {
-                        throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask'");
+                        throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask' or 'ScriptTask'");
                     }
                     Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
                     List<Object> catches = (List<Object>) catchAttachedState.get("Catch");
@@ -192,7 +192,9 @@ public class DesignerJsonTransformer {
 
         for (Object node : nodes) {
             Map<String, Object> nodeObj = (Map<String, Object>) node;
-            if (catchNode != nodeObj && "ServiceTask".equals(nodeObj.get("stateType"))) {
+            if (catchNode != nodeObj &&
+                    ("ServiceTask".equals(nodeObj.get("stateType"))
+                            || "ScriptTask".equals(nodeObj.get("stateType")))) {
 
                 Number nodeX = (Number) nodeObj.get("x");
                 Number nodeY = (Number) nodeObj.get("y");
