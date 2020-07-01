@@ -37,10 +37,6 @@ public class KeywordCheckerFactory {
      * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
-        if (JdbcConstants.H2.equalsIgnoreCase(dbType)) {
-            //otherwise it can't get a H2 KeywordChecker
-            dbType = JdbcConstants.MYSQL;
-        }
         if (KEYWORD_CHECKER_MAP.get(dbType) != null) {
             return KEYWORD_CHECKER_MAP.get(dbType);
         }

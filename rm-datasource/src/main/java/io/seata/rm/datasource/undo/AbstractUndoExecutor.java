@@ -35,6 +35,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -73,7 +74,7 @@ public abstract class AbstractUndoExecutor {
      * Switch of undo data validation
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
-        .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
+            .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
 
     /**
      * The Sql undo log.
@@ -121,7 +122,7 @@ public abstract class AbstractUndoExecutor {
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                List<Field> pkValueList =  getOrderedPkList(undoRows,undoRow,getDbType(conn));
+                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, getDbType(conn));
                 for (Field field : undoRow.getFields()) {
                     if (field.getKeyType() != KeyType.PRIMARY_KEY) {
                         undoValues.add(field);
@@ -146,13 +147,13 @@ public abstract class AbstractUndoExecutor {
     /**
      * Undo prepare.
      *
-     * @param undoPST    the undo pst
-     * @param undoValues the undo values
-     * @param pkValueList    the pk value
+     * @param undoPST     the undo pst
+     * @param undoValues  the undo values
+     * @param pkValueList the pk value
      * @throws SQLException the sql exception
      */
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
-        throws SQLException {
+            throws SQLException {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
@@ -198,7 +199,7 @@ public abstract class AbstractUndoExecutor {
         // INSERT INTO a (x, y, z, pk1,pk2) VALUES (?, ?, ?, ? ,?)
         // UPDATE a SET x=?, y=?, z=? WHERE pk1 in (?) and pk2 in (?)
         // DELETE FROM a WHERE pk1 in (?) and pk2 in (?)
-        for (Field pkField:pkValueList) {
+        for (Field pkField : pkValueList) {
             undoIndex++;
             undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
         }
@@ -230,7 +231,7 @@ public abstract class AbstractUndoExecutor {
         if (beforeEqualsAfterResult.getResult()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop rollback because there is no data change " +
-                    "between the before data snapshot and the after data snapshot.");
+                        "between the before data snapshot and the after data snapshot.");
             }
             // no need continue undo.
             return false;
@@ -248,7 +249,7 @@ public abstract class AbstractUndoExecutor {
             if (beforeEqualsCurrentResult.getResult()) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Stop rollback because there is no data change " +
-                        "between the before data snapshot and the current data snapshot.");
+                            "between the before data snapshot and the current data snapshot.");
                 }
                 // no need continue undo.
                 return false;
@@ -260,9 +261,9 @@ public abstract class AbstractUndoExecutor {
                 }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("check dirty datas failed, old and new data are not equal," +
-                        "tableName:[" + sqlUndoLog.getTableName() + "]," +
-                        "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
-                        "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
+                            "tableName:[" + sqlUndoLog.getTableName() + "]," +
+                            "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
+                            "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
                 }
                 throw new SQLException("Has dirty records when undo.");
             }
@@ -284,14 +285,15 @@ public abstract class AbstractUndoExecutor {
         List<String> pkNameList = tableMeta.getPrimaryKeyOnlyName();
 
         // pares pk values
-        Map<String,List<Field>> pkRowValues = parsePkValues(getUndoRows());
+        Map<String, List<Field>> pkRowValues = parsePkValues(getUndoRows());
         if (pkRowValues.size() == 0) {
             return TableRecords.empty(tableMeta);
         }
         // build check sql
-        String dbType = getDbType(conn);
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
-                buildWhereConditionByPKs(pkNameList,pkRowValues,conn));
+        String firstKey = pkRowValues.keySet().stream().findFirst().get();
+        int pkRowSize = pkRowValues.get(firstKey).size();
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
+                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
@@ -299,15 +301,17 @@ public abstract class AbstractUndoExecutor {
         try {
             statement = conn.prepareStatement(checkSQL);
             int paramIndex = 1;
-            for (String key:pkNameList) {
-                List<Field> fieldList = pkRowValues.get(key);
-                for (int i = 0; i < fieldList.size(); i++) {
-                    Field field = fieldList.get(i);
+            int rowSize = pkRowValues.get(pkNameList.get(0)).size();
+            for (int r = 0; r < rowSize; r++) {
+                for (int c = 0; c < pkNameList.size(); c++) {
+                    List<Field> pkColumnValueList = pkRowValues.get(pkNameList.get(c));
+                    Field field = pkColumnValueList.get(r);
                     int dataType = tableMeta.getColumnMeta(field.getName()).getDataType();
-                    statement.setObject(paramIndex,field.getValue(),dataType);
+                    statement.setObject(paramIndex, field.getValue(), dataType);
                     paramIndex++;
                 }
             }
+
             checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
         } finally {
@@ -316,13 +320,13 @@ public abstract class AbstractUndoExecutor {
         return currentRecords;
     }
 
-    protected List<Field> getOrderedPkList(TableRecords image,Row row,String dbType) {
+    protected List<Field> getOrderedPkList(TableRecords image, Row row, String dbType) {
         List<Field> pkFields = new ArrayList<>();
         // To ensure the order of the pk, the order should based on getPrimaryKeyOnlyName.
         List<String> pkColumnNameListByOrder = image.getTableMeta().getPrimaryKeyOnlyName();
         List<String> pkColumnNameListNoOrder = row.primaryKeys()
                 .stream()
-                .map(e -> ColumnUtils.delEscape(e.getName(),dbType))
+                .map(e -> ColumnUtils.delEscape(e.getName(), dbType))
                 .collect(Collectors.toList());
         pkColumnNameListByOrder.forEach(pkName -> {
             int pkIndex = pkColumnNameListNoOrder.indexOf(pkName);
@@ -334,87 +338,37 @@ public abstract class AbstractUndoExecutor {
         return pkFields;
     }
 
-    /**
-     * each pk is a condition.the result will like :" id =? and userCode =?"
-     * @param pkNameList
-     * @return return where condition sql string.the sql can just search one related record.
-     */
-    protected String buildWhereConditionByPKs(List<String> pkNameList,KeywordChecker keywordChecker) {
-        StringBuilder whereStr = new StringBuilder();
-        //we must consider the situation of composite primary key
-        for (int i = 0;i < pkNameList.size(); i++) {
-            if (i > 0) {
-                whereStr.append(" and ");
-            }
-            String pkName = pkNameList.get(i);
-            whereStr.append(keywordChecker.checkAndReplace(pkName));
-            whereStr.append(" = ? ");
-        }
-        return whereStr.toString();
-
-    }
-    /**
-     * each pk is a condition.the result will like :" id in (?,?,?) and userCode in (?,?,?)"
-     * @param pkNameList
-     * @param pkRowValues  the kye of map is pk name ,and value of map is pk's value
-     * @return return where condition sql string.the sql can search all related records not just one.
-     */
-    protected String buildWhereConditionByPKs(List<String> pkNameList,Map<String,List<Field>> pkRowValues,Connection conn) throws SQLException {
-        StringBuilder whereStr = new StringBuilder();
-        //we must consider the situation of composite primary key
-        for (int i = 0;i < pkNameList.size(); i++) {
-            if (i > 0) {
-                whereStr.append(" and ");
-            }
-            String pkName = pkNameList.get(i);
-            whereStr.append(ColumnUtils.addEscape(pkName,getDbType(conn)));
-            whereStr.append(" in ( ");
-            List<Field> valueList = pkRowValues.get(pkName);
-            StringBuffer pkValueStr = new StringBuffer();
-            for (int r = 0;r < valueList.size(); r++) {
-                if (r > 0) {
-                    pkValueStr.append(",");
-                }
-                pkValueStr.append("?");
-            }
-            whereStr.append(pkValueStr);
-            whereStr.append(" )");
-        }
-
-        return whereStr.toString();
-
-    }
 
     /**
      * Parse pk values Field List.
      *
      * @param records the records
-     * @return List<List<Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     * @return List<List < Field>>   each element represents a row. And inside a row list contains pk columns(Field).
      */
-    protected Map<String,List<Field>> parsePkValues(TableRecords records) {
-        return parsePkValues(records.getRows(),records.getTableMeta().getPrimaryKeyOnlyName());
+    protected Map<String, List<Field>> parsePkValues(TableRecords records) {
+        return parsePkValues(records.getRows(), records.getTableMeta().getPrimaryKeyOnlyName());
     }
 
     /**
      * Parse pk values Field List.
      *
-     * @param rows  pk rows
-     * @param pkNameList  pk column name
-     * @return List<List<Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     * @param rows       pk rows
+     * @param pkNameList pk column name
+     * @return List<List   <   Field>>   each element represents a row. And inside a row list contains pk columns(Field).
      */
-    protected Map<String,List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
+    protected Map<String, List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
         List<Field> pkFieldList = new ArrayList<>();
         for (int i = 0; i < rows.size(); i++) {
             List<Field> fields = rows.get(i).getFields();
             if (fields != null) {
                 for (Field field : fields) {
-                    if (pkNameList.stream().anyMatch(e -> field.getName().equals(e))) {
+                    if (pkNameList.stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {
                         pkFieldList.add(field);
                     }
                 }
             }
         }
-        Map<String,List<Field>> pkValueMap = pkFieldList.stream().collect(Collectors.groupingBy(Field::getName));
+        Map<String, List<Field>> pkValueMap = pkFieldList.stream().collect(Collectors.groupingBy(Field::getName));
         return pkValueMap;
     }
 

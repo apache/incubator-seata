@@ -138,13 +138,13 @@ public class TableRecords {
      * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
      */
     public List<Map<String,Field>> pkRows() {
-        final List<String> pkNameList = getTableMeta().getPrimaryKeyOnlyName();
+        final Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
         List<Map<String,Field>> pkRows = new ArrayList<>();
         for (Row row : rows) {
             List<Field> fields = row.getFields();
             Map<String,Field> rowMap = new HashMap<>(3);
             for (Field field : fields) {
-                if (pkNameList.stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {
+                if (primaryKeyMap.containsKey(field.getName())) {
                     rowMap.put(field.getName(),field);
                 }
             }
@@ -193,7 +193,7 @@ public class TableRecords {
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPrimaryKeyOnlyName().stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {
+                if (tmeta.getPrimaryKeyMap().containsKey(colName)) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(dataType);

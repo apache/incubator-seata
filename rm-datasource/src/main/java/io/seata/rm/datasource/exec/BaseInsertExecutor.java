@@ -109,8 +109,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         if (CollectionUtils.isNotEmpty(insertColumns)) {
             final int insertColumnsSize = insertColumns.size();
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (containPK(insertColumns.get(paramIdx))) {
-                    pkIndexMap.put(ColumnUtils.delEscape(insertColumns.get(paramIdx),getDbType()),paramIdx);
+                String sqlColumnName = insertColumns.get(paramIdx);
+                if (containPK(sqlColumnName)) {
+                    pkIndexMap.put(getStandardColumnName(sqlColumnName),paramIdx);
                 }
             }
             return pkIndexMap;

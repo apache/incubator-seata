@@ -113,6 +113,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             if (pkMetaMap.get(pkColumnName).isAutoincrement())
             {
                 autoColumnName = pkColumnName;
+                break;
             }
         }
         if (StringUtils.isBlank(autoColumnName))

@@ -61,7 +61,7 @@ public class DataCompareUtils {
                 return Result.build(false);
             } else {
                 if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
-                    && f0.getType() == f1.getType()) {
+                        && f0.getType() == f1.getType()) {
                     if (f0.getValue() == null) {
                         return Result.build(f1.getValue() == null);
                     } else {
@@ -125,7 +125,7 @@ public class DataCompareUtils {
                 return Result.build(false, null);
             }
             if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
-                && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
+                    && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
                 //when image is EmptyTableRecords, getTableMeta will throw an exception
                 if (CollectionUtils.isEmpty(beforeImage.getRows())) {
                     return Result.ok();
@@ -182,7 +182,7 @@ public class DataCompareUtils {
         return Result.ok();
     }
 
-    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeyList) {
+    public static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeyList) {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
@@ -192,21 +192,23 @@ public class DataCompareUtils {
                     .collect(Collectors.toList());
             // {uppercase fieldName : field}
             Map<String, Field> colsMap = new HashMap<>();
-            String rowKey = new String();
+            StringBuilder rowKey = new StringBuilder();
+            boolean firstUnderline = false;
             for (int j = 0; j < rowFieldList.size(); j++) {
                 Field field = rowFieldList.get(j);
                 if (primaryKeyList.stream().anyMatch(e -> field.getName().equals(e))) {
-                    rowKey = rowKey + String.valueOf(field.getValue()) + "_";
+                    if (firstUnderline && j > 0) {
+                        rowKey.append("_");
+                    }
+                    rowKey.append(String.valueOf(field.getValue()));
+                    firstUnderline = true;
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
             }
-            if (rowKey.lastIndexOf("_") != -1)
-            {
-                rowKey = rowKey.substring(0,rowKey.lastIndexOf("_"));
-            }
-            rowMap.put(rowKey, colsMap);
+            rowMap.put(rowKey.toString(), colsMap);
         }
         return rowMap;
     }
+
 
 }
