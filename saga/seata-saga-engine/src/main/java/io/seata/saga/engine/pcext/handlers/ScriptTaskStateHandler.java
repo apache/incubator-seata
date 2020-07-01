@@ -91,7 +91,7 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
                 if (inputExpMap.size() > 0) {
                     bindings = new SimpleBindings();
                     for (String property : inputExpMap.keySet()) {
-                        if (inputMap.containsKey(property)) {
+                        if (inputMap != null && inputMap.containsKey(property)) {
                             bindings.put(property, inputMap.get(property));
                         }
                         else {
