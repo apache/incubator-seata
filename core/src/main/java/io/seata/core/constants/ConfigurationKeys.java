@@ -124,6 +124,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_SAGA_BRANCH_REGISTER_ENABLE = CLIENT_RM_PREFIX + "sagaBranchRegisterEnable";
 
     /**
+     * The constant CLIENT_SAGA_JSON_PARSER.
+     */
+    public static final String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
@@ -494,4 +499,13 @@ public class ConfigurationKeys {
      */
     public static final String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
 
+    /**
+     * The constant APPLICATION_ID.
+     */
+    public static final String APPLICATION_ID = "applicationId";
+
+    /**
+     * The constant TX_SERVICE_GROUP.
+     */
+    public static final String TX_SERVICE_GROUP = "txServiceGroup";
 }
