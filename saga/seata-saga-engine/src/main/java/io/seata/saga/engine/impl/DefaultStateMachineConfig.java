@@ -70,6 +70,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 
+import javax.script.ScriptEngineManager;
+
 /**
  * Default state machine configuration
  *
@@ -105,6 +107,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private String[] resources = new String[]{"classpath*:seata/saga/statelang/**/*.json"};
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
+    private ScriptEngineManager scriptEngineManager;
 
     protected void init() throws Exception {
 
@@ -204,6 +207,10 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             springBeanServiceInvoker.setThreadPoolExecutor(threadPoolExecutor);
             this.serviceInvokerManager.putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN,
                 springBeanServiceInvoker);
+        }
+
+        if (this.scriptEngineManager == null) {
+            this.scriptEngineManager = new ScriptEngineManager();
         }
     }
 
@@ -457,5 +464,14 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     public void setServiceInvokeTimeout(int serviceInvokeTimeout) {
         this.serviceInvokeTimeout = serviceInvokeTimeout;
+    }
+
+    @Override
+    public ScriptEngineManager getScriptEngineManager() {
+        return scriptEngineManager;
+    }
+
+    public void setScriptEngineManager(ScriptEngineManager scriptEngineManager) {
+        this.scriptEngineManager = scriptEngineManager;
     }
 }
