@@ -1,1 +1,2 @@
 io.seata.saga.engine.pcext.interceptors.ServiceTaskHandlerInterceptor
+io.seata.saga.engine.pcext.interceptors.ScriptTaskHandlerInterceptor
