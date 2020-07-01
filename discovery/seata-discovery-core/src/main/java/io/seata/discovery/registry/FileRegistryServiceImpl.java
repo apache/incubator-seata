@@ -46,9 +46,9 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
      * @return the instance
      */
     static FileRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (FileRegistryServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new FileRegistryServiceImpl();
                 }
             }
@@ -79,7 +79,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
-        if (null == clusterName) {
+        if (clusterName == null) {
             return null;
         }
         String endpointStr = CONFIG.getConfig(
