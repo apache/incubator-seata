@@ -1,0 +1,2 @@
+io.seata.saga.statelang.parser.impl.FastjsonParser
+io.seata.saga.statelang.parser.impl.JacksonJsonParser
