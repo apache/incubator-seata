@@ -86,8 +86,8 @@ public class Version {
     }
 
     private static long convertVersion(String version) throws IncompatibleVersionException {
-        String parts[] = StringUtils.split(version, '.');
-        Long result = 0L;
+        String[] parts = StringUtils.split(version, '.');
+        long result = 0L;
         int i = 1;
         int size = parts.length;
         if (size > MAX_VERSION_DOT + 1) {
@@ -96,16 +96,20 @@ public class Version {
         size = MAX_VERSION_DOT + 1;
         for (String part : parts) {
             if (StringUtils.isNumeric(part)) {
-                result += Long.valueOf(part) * Double.valueOf(Math.pow(100, size - i)).longValue();
+                result += calculatePartValue(part, size, i);
             } else {
-                String subParts[] = StringUtils.split(part, '-');
+                String[] subParts = StringUtils.split(part, '-');
                 if (StringUtils.isNumeric(subParts[0])) {
-                    result += Long.valueOf(subParts[0]) * Double.valueOf(Math.pow(100, size - i)).longValue();
+                    result += calculatePartValue(part, size, i);
                 }
             }
 
             i++;
         }
         return result;
+    }
+
+    private static long calculatePartValue(String partNumeric, int size, int index) {
+        return Long.parseLong(partNumeric) * Double.valueOf(Math.pow(100, size - index)).longValue();
     }
 }
