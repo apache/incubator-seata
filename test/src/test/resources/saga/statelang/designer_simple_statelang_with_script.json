@@ -1,0 +1,260 @@
+{
+    "nodes": [
+        {
+            "type": "node",
+            "size": "72*72",
+            "shape": "flow-circle",
+            "color": "#FA8C16",
+            "label": "Start",
+            "stateId": "Start1",
+            "stateType": "Start",
+            "stateProps": {
+                "StateMachine": {
+                    "Name": "designerSimpleScriptTaskStateMachine",
+                    "Comment": "带ScriptTask的测试状态机定义",
+                    "Version": "0.0.1"
+                }
+            },
+            "x": 318.875,
+            "y": 102,
+            "id": "9e56dbe7"
+        },
+        {
+            "type": "node",
+            "size": "110*48",
+            "shape": "flow-rect",
+            "color": "#1890FF",
+            "label": "FirstState",
+            "stateId": "FirstState",
+            "stateType": "ServiceTask",
+            "stateProps": {
+                "ServiceName": "demoService",
+                "ServiceMethod": "foo",
+                "Input": [
+                    {
+                        "fooInput": "$.[a]"
+                    }
+                ],
+                "Output": {
+                    "fooResult": "$.#root"
+                }
+            },
+            "x": 318.875,
+            "y": 202,
+            "id": "d1d71346"
+        },
+        {
+            "type": "node",
+            "size": "110*48",
+            "shape": "flow-rect",
+            "color": "#13C2C2",
+            "label": "ScriptState",
+            "stateId": "ScriptState",
+            "stateType": "ScriptTask",
+            "stateProps": {
+                "ScriptType": "groovy",
+                "ScriptContent": "if(throwException){ throw new RuntimeException(\"test\") } else { 'hello ' + inputA }",
+                "Input": [
+                    {
+                        "inputA": "$.[a]",
+                        "throwException": "$.[scriptThrowException]"
+                    }
+                ],
+                "Output": {
+                    "scriptStateResult": "$.#root"
+                }
+            },
+            "x": 319.375,
+            "y": 290.5,
+            "id": "898649d3"
+        },
+        {
+            "type": "node",
+            "size": "80*72",
+            "shape": "flow-rhombus",
+            "color": "#13C2C2",
+            "label": "Choice",
+            "stateId": "Choice1",
+            "stateType": "Choice",
+            "x": 318.875,
+            "y": 394.5,
+            "id": "39859d0b"
+        },
+        {
+            "type": "node",
+            "size": "110*48",
+            "shape": "flow-rect",
+            "color": "#1890FF",
+            "label": "SecondState",
+            "stateId": "SecondState",
+            "stateType": "ServiceTask",
+            "stateProps": {
+                "ServiceName": "demoService",
+                "ServiceMethod": "bar",
+                "Input": [
+                    {
+                        "barInput": "$.[fooResult]"
+                    }
+                ],
+                "Output": {
+                    "barResult": "$.#root"
+                }
+            },
+            "x": 173.375,
+            "y": 493.49999999999994,
+            "id": "c65f1c20"
+        },
+        {
+            "type": "node",
+            "size": "110*48",
+            "shape": "flow-rect",
+            "color": "#1890FF",
+            "label": "ThirdState",
+            "stateId": "ThirdState",
+            "stateType": "ServiceTask",
+            "stateProps": {
+                "ServiceName": "demoService",
+                "ServiceMethod": "foo",
+                "Input": [
+                    {
+                        "fooInput": "$.[fooResult]"
+                    }
+                ],
+                "Output": {
+                    "fooResult": "$.#root"
+                }
+            },
+            "x": 318.875,
+            "y": 492.99999999999994,
+            "id": "5857047e"
+        },
+        {
+            "type": "node",
+            "size": "72*72",
+            "shape": "flow-circle",
+            "color": "#05A465",
+            "label": "Succeed",
+            "stateId": "Succeed1",
+            "stateType": "Succeed",
+            "x": 318.875,
+            "y": 592,
+            "id": "18bba9a0"
+        },
+        {
+            "type": "node",
+            "size": "72*72",
+            "shape": "flow-circle",
+            "color": "red",
+            "label": "Fail",
+            "stateId": "Fail1",
+            "stateType": "Fail",
+            "stateProps": {
+                "ErrorCode": "",
+                "Message": ""
+            },
+            "x": 474.57499999999993,
+            "y": 499.99999999999994,
+            "id": "95def921"
+        },
+        {
+            "type": "node",
+            "size": "39*39",
+            "shape": "flow-circle",
+            "color": "red",
+            "label": "Catch",
+            "stateId": "Catch1",
+            "stateType": "Catch",
+            "x": 374.375,
+            "y": 315,
+            "id": "e264be2d"
+        }
+    ],
+    "edges": [
+        {
+            "source": "9e56dbe7",
+            "sourceAnchor": 2,
+            "target": "d1d71346",
+            "targetAnchor": 0,
+            "id": "594d5078"
+        },
+        {
+            "source": "d1d71346",
+            "sourceAnchor": 2,
+            "target": "898649d3",
+            "targetAnchor": 0,
+            "id": "e1f56d5c"
+        },
+        {
+            "source": "898649d3",
+            "sourceAnchor": 2,
+            "target": "39859d0b",
+            "targetAnchor": 0,
+            "id": "d25b97b3"
+        },
+        {
+            "source": "39859d0b",
+            "sourceAnchor": 3,
+            "target": "c65f1c20",
+            "targetAnchor": 0,
+            "id": "d957fcff",
+            "stateProps": {
+                "Expression": "[a] == 1",
+                "Default": false
+            },
+            "label": "",
+            "shape": "flow-smooth"
+        },
+        {
+            "source": "39859d0b",
+            "sourceAnchor": 2,
+            "target": "5857047e",
+            "targetAnchor": 0,
+            "id": "d7053595",
+            "stateProps": {
+                "Expression": "[a] == 2",
+                "Default": false
+            },
+            "label": "",
+            "shape": "flow-smooth"
+        },
+        {
+            "source": "e264be2d",
+            "sourceAnchor": 1,
+            "target": "95def921",
+            "targetAnchor": 0,
+            "id": "39925f4b",
+            "stateProps": {
+                "Exceptions": [
+                    "java.lang.Throwable"
+                ]
+            }
+        },
+        {
+            "source": "39859d0b",
+            "sourceAnchor": 1,
+            "target": "95def921",
+            "targetAnchor": 0,
+            "id": "5500c8da",
+            "stateProps": {
+                "Expression": "",
+                "Default": true
+            },
+            "label": "",
+            "shape": "flow-smooth"
+        },
+        {
+            "source": "c65f1c20",
+            "sourceAnchor": 2,
+            "target": "18bba9a0",
+            "targetAnchor": 3,
+            "id": "33832e0d"
+        },
+        {
+            "source": "5857047e",
+            "sourceAnchor": 2,
+            "target": "18bba9a0",
+            "targetAnchor": 0,
+            "id": "1191f8f0"
+        }
+    ]
+}
