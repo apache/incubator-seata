@@ -38,7 +38,7 @@ import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.serializer.Serializer;
 import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
-import io.seata.saga.engine.serializer.impl.ParamsFastjsonSerializer;
+import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -76,7 +76,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                                                                                                = new StateInstanceToStatementForUpdate();
     private static final ResultSetToStateInstance                 RESULT_SET_TO_STATE_INSTANCE = new ResultSetToStateInstance();
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private Serializer<Object, String>    paramsSerializer    = new ParamsFastjsonSerializer();
+    private Serializer<Object, String>    paramsSerializer    = new ParamsSerializer();
     private Serializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
     private StateLogStoreSqls stateLogStoreSqls;
     private String            defaultTenantId;
@@ -156,6 +156,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             Map<String, Object> endParams = machineInstance.getEndParams();
             if (endParams != null) {
                 endParams.remove(DomainConstants.VAR_NAME_GLOBAL_TX);
+            }
+
+            // if success, clear exception
+            if (ExecutionStatus.SU.equals(machineInstance.getStatus()) && machineInstance.getException() != null) {
+                machineInstance.setException(null);
             }
 
             machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));
