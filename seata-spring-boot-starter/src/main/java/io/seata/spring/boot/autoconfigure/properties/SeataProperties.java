@@ -51,6 +51,10 @@ public class SeataProperties {
      * Specifies which datasource bean are not eligible for auto-proxying
      */
     private String[] excludesForAutoProxying = {};
+    /**
+     * Specifies which bean do not scanner in the GlobalTransactionScanner
+     */
+    private String[] excludesForScanner = {};
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
@@ -112,6 +116,15 @@ public class SeataProperties {
 
     public SeataProperties setExcludesForAutoProxying(String[] excludesForAutoProxying) {
         this.excludesForAutoProxying = excludesForAutoProxying;
+        return this;
+    }
+
+    public String[] getExcludesForScanner() {
+        return excludesForScanner;
+    }
+
+    public SeataProperties setExcludesForScanner(String[] excludesForScanner) {
+        this.excludesForScanner = excludesForScanner;
         return this;
     }
 }

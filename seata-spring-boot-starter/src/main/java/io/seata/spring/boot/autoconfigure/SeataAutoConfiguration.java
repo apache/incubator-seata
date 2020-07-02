@@ -64,6 +64,7 @@ public class SeataAutoConfiguration {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Automatically configure Seata");
         }
+        GlobalTransactionScanner.addScannerExcludes(seataProperties.getExcludesForScanner());
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
 

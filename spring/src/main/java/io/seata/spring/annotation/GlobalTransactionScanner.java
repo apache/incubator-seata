@@ -16,6 +16,7 @@
 package io.seata.spring.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import io.seata.common.util.CollectionUtils;
@@ -34,6 +35,7 @@ import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
@@ -71,6 +73,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
+    private static final Set<String> EXCLUDES = new HashSet<>();
 
     private MethodInterceptor interceptor;
     private MethodInterceptor globalTransactionalInterceptor;
@@ -200,7 +203,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         try {
             synchronized (PROXYED_SET) {
-                if (PROXYED_SET.contains(beanName)) {
+                if (PROXYED_SET.contains(beanName) || EXCLUDES.contains(beanName)) {
                     return bean;
                 }
                 interceptor = null;
@@ -298,5 +301,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.setBeanFactory(applicationContext);
+    }
+
+    public static void addScannerExcludes(String... beanNames) {
+        if (ArrayUtils.isNotEmpty(beanNames)) {
+            EXCLUDES.addAll(Arrays.asList(beanNames));
+        }
     }
 }
