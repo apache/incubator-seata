@@ -26,6 +26,7 @@ import java.util.Objects;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.tcc.api.ActionContextField;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 

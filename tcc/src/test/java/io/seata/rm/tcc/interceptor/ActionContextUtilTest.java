@@ -18,6 +18,7 @@ package io.seata.rm.tcc.interceptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import io.seata.rm.tcc.api.ActionContextField;
 import io.seata.rm.tcc.api.BusinessActionContext;
 
 
