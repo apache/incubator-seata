@@ -15,7 +15,6 @@
  */
 package io.seata.core.context;
 
-import com.sun.corba.se.impl.encoding.CodeSetConversion;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 import io.seata.core.model.BranchType;
