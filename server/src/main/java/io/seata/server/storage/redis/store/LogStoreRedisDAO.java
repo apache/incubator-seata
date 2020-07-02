@@ -20,8 +20,8 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.core.store.GlobalTransactionDOCondition;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.ScanParams;
@@ -102,11 +102,11 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
     }
 
     @Override
-    public List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionDOCondition condition) {
+    public List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionCondition condition) {
         Set<String> keys = new HashSet<>();
         String cursor = INITIAL_CURSOR;
         ScanParams params = new ScanParams();
-        params.count(condition.getLimit()); // limit
+        params.count(condition.getPageSize()); // limit
         params.match(getGlobalKeyByXid("*"));
         ScanResult<String> scans;
         do {
@@ -126,12 +126,18 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
             }
             // order by
             if (!globalTransactionDOs.isEmpty()) {
-                globalTransactionDOs = condition.sort(globalTransactionDOs);
+                globalTransactionDOs = condition.doSort(globalTransactionDOs);
             }
             return globalTransactionDOs;
         } else {
             return null;
         }
+    }
+
+    @Override
+    public int countGlobalTransactionDO(GlobalTransactionCondition condition) {
+        // TODO:
+        return 0;
     }
 
     @Override

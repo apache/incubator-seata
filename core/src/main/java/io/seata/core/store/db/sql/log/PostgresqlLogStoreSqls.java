@@ -17,6 +17,9 @@ package io.seata.core.store.db.sql.log;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.Pageable;
+
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * Database log store postgresql sql
@@ -36,16 +39,26 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_GLOBAL_TRANSACTION_POSTGRESQL.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_POSTGRESQL = "update " + GLOBAL_TABLE_PLACEHOLD
-            + " set " + SETS_PLACEHOLD + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = now()"
+            + "   set " + SETS_PLACEHOLD
+            + "       " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = now()"
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
-     * This constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL.
+     * This constant QUERY_GLOBAL_TRANSACTION_BY_CONDITION_POSTGRESQL.
      */
-    public static final String QUERY_GLOBAL_TRANSACTION_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_CONDITION_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
             + " from " + GLOBAL_TABLE_PLACEHOLD
             + WHERE_PLACEHOLD
-            + SORT_PLACEHOLD
+            + ORDERBY_PLACEHOLD
+            + LIMIT_PLACEHOLD;
+
+    /**
+     * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14)"
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
             + " limit ?";
 
     /**
@@ -59,9 +72,10 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_BRANCH_TRANSACTION_POSTGRESQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_POSTGRESQL = "update " + BRANCH_TABLE_PLACEHOLD
-            + " set " + SETS_PLACEHOLD + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now()"
+            + "   set " + SETS_PLACEHOLD
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now()"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
@@ -75,9 +89,24 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     }
 
     @Override
-    public String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder) {
-        return QUERY_GLOBAL_TRANSACTION_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
-                .replace(WHERE_PLACEHOLD, wherePlaceHolder).replace(SORT_PLACEHOLD, sortPlaceHolder);
+    public String getQueryGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder,
+                                                          String orderByPlaceHolder, Pageable pageable) {
+        // build limit place holder
+        String limitPlaceHolder;
+        if (pageable != null && pageable.getPageSize() > 0) {
+            if (pageable.getPageIndex() > FIRST_PAGE_INDEX) {
+                limitPlaceHolder = " limit ?,?";
+            } else {
+                limitPlaceHolder = " limit ?";
+            }
+        } else {
+            limitPlaceHolder = "";
+        }
+
+        return QUERY_GLOBAL_TRANSACTION_BY_CONDITION_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+            .replace(WHERE_PLACEHOLD, wherePlaceHolder)
+            .replace(ORDERBY_PLACEHOLD, orderByPlaceHolder)
+            .replace(LIMIT_PLACEHOLD, limitPlaceHolder);
     }
 
     @Override

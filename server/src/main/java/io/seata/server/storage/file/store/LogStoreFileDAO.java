@@ -25,7 +25,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BaseModel;
-import io.seata.core.store.GlobalTransactionDOCondition;
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
@@ -60,6 +60,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * The type Log store file dao.
@@ -239,7 +241,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     }
 
     @Override
-    public List<GlobalSession> findGlobalTransactionDO(GlobalTransactionDOCondition condition) {
+    public List<GlobalSession> findGlobalTransactionDO(GlobalTransactionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
 
         // where
@@ -253,17 +255,26 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
         }
         condition.setStatuses(null);
         // other where
-        found = condition.filter(found);
-
-        // order by
-        found = condition.sort(found);
-
-        // limit
-        if (condition.getLimit() > 0 && found.size() > condition.getLimit()) {
-            found = found.subList(0, condition.getLimit());
-        }
+        found = condition.doQuery(found);
 
         return found;
+    }
+
+    @Override
+    public int countGlobalTransactionDO(GlobalTransactionCondition condition) {
+        // TODO:
+        int pageIndexBak = condition.getPageIndex();
+        int pageSizeBak = condition.getPageSize();
+
+        condition.setPageIndex(FIRST_PAGE_INDEX);
+        condition.setPageSize(0);
+
+        try {
+            return findGlobalTransactionDO(condition).size();
+        } finally {
+            condition.setPageIndex(pageIndexBak);
+            condition.setPageSize(pageSizeBak);
+        }
     }
 
     @Override
@@ -504,7 +515,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
 
     private boolean findTimeoutAndSave() throws IOException {
         List<GlobalSession> globalSessionsOverMaxTimeout = this.findGlobalTransactionDO(
-                new GlobalTransactionDOCondition(MAX_TRX_TIMEOUT_MILLS));
+                new GlobalTransactionCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;
         }

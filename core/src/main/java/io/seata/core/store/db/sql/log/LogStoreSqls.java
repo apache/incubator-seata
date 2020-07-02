@@ -15,6 +15,11 @@
  */
 package io.seata.core.store.db.sql.log;
 
+import io.seata.core.store.Pageable;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Database log store sql
  * @author will
@@ -63,14 +68,34 @@ public interface LogStoreSqls {
     String getQueryGlobalTransactionSQLByTransactionId(String globalTable);
 
     /**
-     * Get query global transaction sql by status string.
+     * Get query global transaction sql by condition string.
      *
-     * @param globalTable      the global table
-     * @param wherePlaceHolder the where place holder
-     * @param sortPlaceHolder  the sort place holder
+     * @param globalTable        the global table
+     * @param wherePlaceHolder   the params place holder
+     * @param orderByPlaceHolder the order by  place holder
+     * @param pageable           the pageable
      * @return the string
      */
-    String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
+    String getQueryGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder,
+                                                   String orderByPlaceHolder, Pageable pageable);
+
+    /**
+     * Set query global transaction sql paging parameters.
+     *
+     * @param ps                the prepared statement
+     * @param pageable          the pageable
+     * @param currentParamIndex the current param index
+     */
+    void setQueryGlobalTransactionSQLPagingParameters(PreparedStatement ps, Pageable pageable, int currentParamIndex) throws SQLException;
+
+    /**
+     * Get count global transaction sql by condition string.
+     *
+     * @param globalTable      the global table
+     * @param wherePlaceHolder the params place holder
+     * @return the string
+     */
+    String getCountGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder);
 
     /**
      * Get insert branch transaction sql string.

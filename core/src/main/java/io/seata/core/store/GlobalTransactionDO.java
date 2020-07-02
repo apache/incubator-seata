@@ -85,7 +85,6 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
         this.status = status;
     }
 
-
     /**
      * Gets application id.
      *

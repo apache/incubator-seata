@@ -16,6 +16,12 @@
 package io.seata.core.store.db.sql.log;
 
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.Pageable;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
 
 
 /**
@@ -35,6 +41,28 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String BRANCH_TABLE_PLACEHOLD = " #branch_table# ";
 
     /**
+     * The constant SQL_PLACEHOLD.
+     */
+    public static final String SQL_PLACEHOLD = " #SQL_PLACEHOLD# ";
+
+    /**
+     * The constant WHERE_PLACEHOLD.
+     * format: where xxx = ? and yyy > ? and zzz < ?
+     */
+    public static final String WHERE_PLACEHOLD = " #WHERE_PLACEHOLD# ";
+
+    /**
+     * The constant ORDERBY_PLACEHOLD.
+     * format: order by xxx [asc|desc], yyy [asc|desc]
+     */
+    public static final String ORDERBY_PLACEHOLD = " #ORDERBY_PLACEHOLD# ";
+
+    /**
+     * The constant LIMIT_PLACEHOLD.
+     */
+    public static final String LIMIT_PLACEHOLD = " #LIMIT_PLACEHOLD# ";
+
+    /**
      * The constant SETS_PLACEHOLD.
      * format: xxx = ?, yyy = ?, zzz = ?,
      */
@@ -45,18 +73,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * format: ?, ?, ?
      */
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
-
-    /**
-     * The constant WHERE_PLACEHOLD.
-     * format: where xxx = ? and yyy > ? and zzz < ?
-     */
-    public static final String WHERE_PLACEHOLD = " #WHERE_PLACEHOLD# ";
-
-    /**
-     * The constant SORT_PLACEHOLD.
-     * format: order by xxx [ASC|DESC]
-     */
-    public static final String SORT_PLACEHOLD = " #SORT_PLACEHOLD# ";
 
     /**
      * The constant ALL_GLOBAL_COLUMNS.
@@ -92,22 +108,29 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_GLOBAL_TRANSACTION.
      */
     public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_ID.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_ID = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
+
+    /**
+     * The constant COUNT_GLOBAL_TRANSACTION_BY_CONDITION.
+     */
+    public static final String COUNT_GLOBAL_TRANSACTION_BY_CONDITION = "select count(*)"
+            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + WHERE_PLACEHOLD;
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.
      */
     public static final String DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID = "delete from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_XID.
@@ -120,7 +143,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_BRANCH_TRANSACTION.
      */
     public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS
-            + " from " + BRANCH_TABLE_PLACEHOLD
+            + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
@@ -128,7 +151,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_BRANCH_TRANSACTION_XIDS.
      */
     public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS
-            + " from " + BRANCH_TABLE_PLACEHOLD
+            + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ")"
             + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
@@ -136,17 +159,17 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant CHECK_MAX_TRANS_ID.
      */
     public static final String QUERY_MAX_TRANS_ID = "select max(" + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + ")"
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " < ?"
-            + " and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
+            + "   and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
 
     /**
      * The constant CHECK_MAX_BTANCH_ID.
      */
     public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + ")"
-            + " from " + BRANCH_TABLE_PLACEHOLD
+            + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " < ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     @Override
     public abstract String getInsertGlobalTransactionSQL(String globalTable);
@@ -170,7 +193,29 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public abstract String getQueryGlobalTransactionSQL(String globalTable, String wherePlaceHolder, String sortPlaceHolder);
+    public abstract String getQueryGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder,
+                                                                   String orderByPlaceHolder, Pageable pageable);
+
+    @Override
+    public void setQueryGlobalTransactionSQLPagingParameters(PreparedStatement ps, Pageable pageable,
+                                                             int currentParamIndex) throws SQLException {
+        if (pageable.getPageSize() > 0) {
+            if (pageable.getPageIndex() > FIRST_PAGE_INDEX) {
+                int fromIndex = (pageable.getPageIndex() - FIRST_PAGE_INDEX) * pageable.getPageSize();
+                int toIndex = fromIndex + pageable.getPageSize();
+                ps.setInt(currentParamIndex++, fromIndex);
+                ps.setInt(currentParamIndex, toIndex);
+            } else {
+                ps.setInt(currentParamIndex, pageable.getPageSize());
+            }
+        }
+    }
+
+    @Override
+    public String getCountGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder) {
+        return COUNT_GLOBAL_TRANSACTION_BY_CONDITION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+            .replace(WHERE_PLACEHOLD, wherePlaceHolder);
+    }
 
     @Override
     public abstract String getInsertBranchTransactionSQL(String branchTable);

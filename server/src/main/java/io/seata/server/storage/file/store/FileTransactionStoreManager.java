@@ -80,8 +80,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions) {
-        if (sessionCondition.getLimit() <= 0) {
-            sessionCondition.setLimit(logQueryLimit <= 0 ? DEFAULT_LOG_QUERY_LIMIT : logQueryLimit);
+        if (sessionCondition.getPageSize() <= 0) {
+            sessionCondition.setPageSize(logQueryLimit <= 0 ? DEFAULT_LOG_QUERY_LIMIT : logQueryLimit);
         }
 
         //global transactions

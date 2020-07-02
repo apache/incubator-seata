@@ -73,6 +73,8 @@ public class DefaultValues {
      */
     public static final String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
+    public static final int FIRST_PAGE_INDEX = 1;
+
     public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
 

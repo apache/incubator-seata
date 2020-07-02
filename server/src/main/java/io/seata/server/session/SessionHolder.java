@@ -137,22 +137,13 @@ public class SessionHolder {
     /**
      * Gets session manager.
      *
-     * @return the root session manager
+     * @return the session manager
      */
     public static SessionManager getSessionManager() {
         if (SESSION_MANAGER == null) {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
         }
         return SESSION_MANAGER;
-    }
-
-    /**
-     * Destroy session manager
-     */
-    public static void destroy() {
-        if (SESSION_MANAGER != null) {
-            SESSION_MANAGER.destroy();
-        }
     }
 
     /**
@@ -173,7 +164,7 @@ public class SessionHolder {
      * @return the global session
      */
     public static GlobalSession getGlobalSession(String xid, boolean withBranchSessions) {
-        return getSessionManager().getGlobalSession(xid, withBranchSessions);
+        return SESSION_MANAGER.getGlobalSession(xid, withBranchSessions);
     }
 
     /**
@@ -185,6 +176,15 @@ public class SessionHolder {
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException {
-        return getSessionManager().lockAndExecute(globalSession, lockCallable);
+        return SESSION_MANAGER.lockAndExecute(globalSession, lockCallable);
+    }
+
+    /**
+     * Destroy session manager
+     */
+    public static void destroy() {
+        if (SESSION_MANAGER != null) {
+            SESSION_MANAGER.destroy();
+        }
     }
 }

@@ -192,14 +192,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     //endregion
 
-    //region Override Disposable
-
-    @Override
-    public void destroy() {
-    }
-
-    //endregion
-
     //region Private
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
@@ -227,6 +219,14 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
                         "Unknown LogOperation:" + logOperation.name());
             }
         }
+    }
+
+    //endregion
+
+    //region Override Disposable
+
+    @Override
+    public void destroy() {
     }
 
     //endregion

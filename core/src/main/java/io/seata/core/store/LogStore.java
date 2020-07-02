@@ -16,7 +16,11 @@
 package io.seata.core.store;
 
 
+import io.seata.core.model.GlobalStatus;
+
 import java.util.List;
+
+import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * the transaction log store
@@ -47,7 +51,46 @@ public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransac
      * @param condition the condition
      * @return the list
      */
-    List<G> findGlobalTransactionDO(GlobalTransactionDOCondition condition);
+    List<G> findGlobalTransactionDO(GlobalTransactionCondition condition);
+
+    /**
+     * Find global transaction do list.
+     *
+     * @param statuses the statuses
+     * @return the list
+     */
+    default List<G> findGlobalTransactionDO(GlobalStatus... statuses) {
+        return this.findGlobalTransactionDO(new GlobalTransactionCondition(statuses));
+    }
+
+    /**
+     * Find global transaction do list.
+     *
+     * @param statuses the statuses
+     * @param limit    the limit
+     * @return the list
+     */
+    default List<G> findGlobalTransactionDO(GlobalStatus[] statuses, int limit) {
+        return this.findGlobalTransactionDO(new GlobalTransactionCondition(statuses, FIRST_PAGE_INDEX, limit));
+    }
+
+    /**
+     * Count global transaction do.
+     *
+     * @param condition the condition
+     * @return the count
+     */
+    int countGlobalTransactionDO(GlobalTransactionCondition condition);
+
+    /**
+     * Count global transaction do.
+     *
+     * @param statuses the statuses
+     * @return the list
+     */
+    default int countGlobalTransactionDO(GlobalStatus... statuses) {
+        return this.countGlobalTransactionDO(new GlobalTransactionCondition(statuses));
+    }
 
     /**
      * Insert global transaction do boolean.
@@ -77,7 +120,7 @@ public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransac
      * Find branch transaction do list.
      *
      * @param xid the xid
-     * @return the list
+     * @return the BranchTransactionDO list
      */
     List<B> findBranchTransactionDO(String xid);
 
@@ -85,7 +128,7 @@ public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransac
      * Find branch transaction do list.
      *
      * @param xids the xid list
-     * @return the list
+     * @return the BranchTransactionDO list
      */
     List<B> findBranchTransactionDO(List<String> xids);
 

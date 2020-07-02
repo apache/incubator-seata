@@ -16,14 +16,14 @@
 package io.seata.server.session;
 
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalTransactionDOCondition;
+import io.seata.core.store.GlobalTransactionCondition;
 
 /**
  * The type Session condition.
  *
  * @author slievrly
  */
-public class SessionCondition extends GlobalTransactionDOCondition {
+public class SessionCondition extends GlobalTransactionCondition {
 
     /**
      * Instantiates a new Session condition.
