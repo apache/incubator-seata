@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.ScannerExcluder;
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
@@ -71,6 +72,7 @@ public class SeataAutoConfiguration {
         }
         // add excluders and excludeBeanNames
         GlobalTransactionScanner.addScannerExcluders(scannerExcluders);
+        GlobalTransactionScanner.addScannerExcluders(EnhancedServiceLoader.loadAll(ScannerExcluder.class));
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanner());
         // create globa transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);

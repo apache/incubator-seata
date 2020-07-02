@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
@@ -81,9 +80,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDES = new HashSet<>();
-    private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new HashSet<>(
-            EnhancedServiceLoader.loadAll(ScannerExcluder.class) // load from `/META-INF/services`
-    );
+    private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new HashSet<>();
 
     private MethodInterceptor interceptor;
     private MethodInterceptor globalTransactionalInterceptor;
@@ -336,7 +333,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     public static void addScannerExcluders(Collection<ScannerExcluder> scannerExcluders) {
-        SCANNER_EXCLUDER_SET.addAll(scannerExcluders);
+        if (CollectionUtils.isNotEmpty(scannerExcluders)) {
+            SCANNER_EXCLUDER_SET.addAll(scannerExcluders);
+        }
     }
 
     public static void addScannerExcluders(ScannerExcluder... scannerExcluders) {
