@@ -127,4 +127,8 @@ public class SeataProperties {
         this.excludesForScanner = excludesForScanner;
         return this;
     }
+
+    public void setSpringCloudAlibabaConfiguration(SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration) {
+        this.springCloudAlibabaConfiguration = springCloudAlibabaConfiguration;
+    }
 }

@@ -48,7 +48,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -63,7 +62,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware, BeanFactoryPostProcessor,
+    implements InitializingBean, ApplicationContextAware,
     DisposableBean {
 
     private static final long serialVersionUID = 1L;
@@ -327,9 +326,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.setBeanFactory(applicationContext);
     }
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
+    public static void setBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        GlobalTransactionScanner.beanFactory = beanFactory;
     }
 
     public static void addScannerExcluders(Collection<ScannerExcluder> scannerExcluders) {
