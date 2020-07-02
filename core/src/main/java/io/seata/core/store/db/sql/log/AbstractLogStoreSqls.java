@@ -113,7 +113,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
 
     /**
-     * The constant COUNT_GLOBAL_TRANSACTION.
+     * The constant COUNT_GLOBAL_TRANSACTION_BY_CONDITION.
      */
     public static final String COUNT_GLOBAL_TRANSACTION_BY_CONDITION = "select count(*)"
             + " from " + GLOBAL_TABLE_PLACEHOLD
