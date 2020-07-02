@@ -64,7 +64,7 @@ public class StarterConstants {
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
     public static final String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
-    public static final String SAGA_ASYNC_THREAD_POOL = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
+    public static final String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 
     public static final String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     public static final String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -101,7 +101,7 @@ public class StarterConstants {
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
-            put(SAGA_ASYNC_THREAD_POOL, SeataSagaAsyncThreadPoolProperties.class);
+            put(SAGA_ASYNC_THREAD_POOL_PREFIX, SeataSagaAsyncThreadPoolProperties.class);
 
             put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
