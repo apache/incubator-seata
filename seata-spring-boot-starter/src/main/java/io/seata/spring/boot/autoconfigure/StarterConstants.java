@@ -63,7 +63,8 @@ public class StarterConstants {
     public static final String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
-    public static final String STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
+    public static final String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
+    public static final String SAGA_ASYNC_THREAD_POOL = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 
     public static final String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     public static final String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -81,8 +82,6 @@ public class StarterConstants {
     public static final String CONFIG_APOLLO_PREFIX = CONFIG_PREFIX + ".apollo";
     public static final String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
-
-    public static final String ASYNC_THREAD_POOL = STATE_MACHINE_PREFIX + ".async-thread-pool";
 
     public static final HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
         private static final long serialVersionUID = -8902807645596274597L;
@@ -102,7 +101,7 @@ public class StarterConstants {
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
-            put(ASYNC_THREAD_POOL, SeataSagaAsyncThreadPoolProperties.class);
+            put(SAGA_ASYNC_THREAD_POOL, SeataSagaAsyncThreadPoolProperties.class);
 
             put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);

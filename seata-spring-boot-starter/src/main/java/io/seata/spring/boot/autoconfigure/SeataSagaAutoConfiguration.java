@@ -21,12 +21,6 @@ import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine;
 import io.seata.saga.rm.StateMachineEngineHolder;
 import io.seata.spring.boot.autoconfigure.properties.SeataSagaAsyncThreadPoolProperties;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -39,6 +33,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
+
+import javax.sql.DataSource;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Saga auto configuration.
@@ -56,7 +57,7 @@ public class SeataSagaAutoConfiguration {
     @Bean
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnMissingBean
-    @ConfigurationProperties(StarterConstants.SEATA_PREFIX + ".saga.state-machine")
+    @ConfigurationProperties(StarterConstants.SAGA_STATE_MACHINE_PREFIX)
     public StateMachineConfig dbStateMachineConfig(
             DataSource dataSource,
             @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
@@ -87,7 +88,7 @@ public class SeataSagaAutoConfiguration {
     }
 
     @Configuration
-    @ConditionalOnProperty(name = StarterConstants.SEATA_PREFIX + ".saga.state-machine.enable-async", havingValue = "true")
+    @ConditionalOnProperty(name = StarterConstants.SAGA_STATE_MACHINE_PREFIX + ".enable-async", havingValue = "true")
     @EnableConfigurationProperties({SeataSagaAsyncThreadPoolProperties.class})
     static class SagaAsyncThreadPoolExecutorConfiguration {
 
