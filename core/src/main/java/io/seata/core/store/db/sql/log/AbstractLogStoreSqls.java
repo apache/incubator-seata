@@ -59,6 +59,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     /**
      * The constant LIMIT_PLACEHOLD.
+     * format: limit ?,?
      */
     public static final String LIMIT_PLACEHOLD = " #LIMIT_PLACEHOLD# ";
 
