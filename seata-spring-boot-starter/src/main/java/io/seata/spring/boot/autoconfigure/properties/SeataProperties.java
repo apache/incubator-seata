@@ -48,13 +48,13 @@ public class SeataProperties {
      */
     private boolean useJdkProxy = false;
     /**
-     * Specifies which datasource bean are not eligible for auto-proxying
-     */
-    private String[] excludesForAutoProxying = {};
-    /**
      * Specifies which bean do not scanner in the GlobalTransactionScanner
      */
     private String[] excludesForScanner = {};
+    /**
+     * Specifies which datasource bean are not eligible for auto-proxying
+     */
+    private String[] excludesForAutoProxying = {};
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
