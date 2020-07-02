@@ -214,7 +214,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
 
                 if (!SCANNER_EXCLUDER_SET.isEmpty()) {
-                    SCANNER_EXCLUDER_SET.remove(null);
                     BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
                     for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
                         try {
@@ -332,6 +331,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     public static void addScannerExcluders(Collection<ScannerExcluder> scannerExcluders) {
         if (CollectionUtils.isNotEmpty(scannerExcluders)) {
+            scannerExcluders.remove(null);
             SCANNER_EXCLUDER_SET.addAll(scannerExcluders);
         }
     }
