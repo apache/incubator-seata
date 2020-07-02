@@ -100,7 +100,7 @@ public class Version {
             } else {
                 String[] subParts = StringUtils.split(part, '-');
                 if (StringUtils.isNumeric(subParts[0])) {
-                    result += calculatePartValue(part, size, i);
+                    result += calculatePartValue(subParts[0], size, i);
                 }
             }
 
