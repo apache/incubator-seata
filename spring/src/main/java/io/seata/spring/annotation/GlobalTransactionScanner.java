@@ -17,8 +17,10 @@ package io.seata.spring.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
@@ -46,6 +48,9 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -59,7 +64,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware,
+    implements InitializingBean, ApplicationContextAware, BeanFactoryPostProcessor,
     DisposableBean {
 
     private static final long serialVersionUID = 1L;
@@ -72,8 +77,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
+    private static ConfigurableListableBeanFactory beanFactory;
+
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDES = new HashSet<>();
+    private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new HashSet<>(
+            EnhancedServiceLoader.loadAll(ScannerExcluder.class) // load from `/META-INF/services`
+    );
 
     private MethodInterceptor interceptor;
     private MethodInterceptor globalTransactionalInterceptor;
@@ -206,6 +216,23 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (PROXYED_SET.contains(beanName) || EXCLUDES.contains(beanName)) {
                     return bean;
                 }
+
+                if (!SCANNER_EXCLUDER_SET.isEmpty()) {
+                    SCANNER_EXCLUDER_SET.remove(null);
+                    BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+                    for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
+                        try {
+                            if (excluder.needExclude(bean, beanName, beanDefinition)) {
+                                return bean;
+                            }
+                        } catch (Throwable e) {
+                            String errorMsg = String.format("Do check need exclude failed: beanName=%s, excluder=%s",
+                                    beanName, excluder.getClass().getSimpleName());
+                            LOGGER.error(errorMsg, e);
+                        }
+                    }
+                }
+
                 interceptor = null;
                 //check TCC proxy
                 if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
@@ -303,7 +330,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.setBeanFactory(applicationContext);
     }
 
-    public static void addScannerExcludes(String... beanNames) {
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
+    public static void addScannerExcluders(Collection<ScannerExcluder> scannerExcluders) {
+        SCANNER_EXCLUDER_SET.addAll(scannerExcluders);
+    }
+
+    public static void addScannerExcluders(ScannerExcluder... scannerExcluders) {
+        if (ArrayUtils.isNotEmpty(scannerExcluders)) {
+            addScannerExcluders(Arrays.asList(scannerExcluders));
+        }
+    }
+
+    public static void addScannerExcludeBeanNames(String... beanNames) {
         if (ArrayUtils.isNotEmpty(beanNames)) {
             EXCLUDES.addAll(Arrays.asList(beanNames));
         }

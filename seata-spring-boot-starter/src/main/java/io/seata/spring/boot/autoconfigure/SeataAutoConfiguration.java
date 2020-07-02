@@ -16,6 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.annotation.GlobalTransactionScanner;
+import io.seata.spring.annotation.ScannerExcluder;
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
@@ -23,6 +24,7 @@ import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,6 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+
+import java.util.List;
 
 import static io.seata.common.Constants.BEAN_NAME_FAILURE_HANDLER;
 import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
@@ -60,11 +64,15 @@ public class SeataAutoConfiguration {
     @Bean
     @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
-    public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler) {
+    public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
+                                                             @Autowired(required = false) List<ScannerExcluder> scannerExcluders) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Automatically configure Seata");
         }
-        GlobalTransactionScanner.addScannerExcludes(seataProperties.getExcludesForScanner());
+        // add excluders and excludeBeanNames
+        GlobalTransactionScanner.addScannerExcluders(scannerExcluders);
+        GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanner());
+        // create globa transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
 
