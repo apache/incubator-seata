@@ -29,13 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -84,10 +81,12 @@ public class BatchInsertExecutorTest {
         mockInsertColumns();
         mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        List<Object> pkValues = new ArrayList<>();
+        pkValues.addAll(PK_VALUES);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValuesMap.keySet(), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertIterableEquals(pkValuesMap.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -95,10 +94,10 @@ public class BatchInsertExecutorTest {
         mockInsertColumns();
         mockParametersWithAllRefOfJDBC();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(ID_COLUMN));
         List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValues,pkValuesMap.get(ID_COLUMN) );
     }
 
     @Test
@@ -106,10 +105,12 @@ public class BatchInsertExecutorTest {
         mockInsertColumns();
         mockParametersWithPkRefOfJDBC();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        List<Object> pkValues = new ArrayList<>();
+        pkValues.addAll(PK_VALUES);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValuesMap.keySet(), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertIterableEquals(pkValuesMap.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -118,11 +119,12 @@ public class BatchInsertExecutorTest {
         int pkId = PK_VALUES.get(0);
         mockParametersWithPkUnRefOfJDBC(pkId);
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(pkId);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValuesMap.keySet(), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertIterableEquals(pkValuesMap.get(ID_COLUMN), pkValues);
     }
 
     //----------------mysql batch values (),(),()------------------------
@@ -132,10 +134,12 @@ public class BatchInsertExecutorTest {
         mockInsertColumns();
         mockParametersAllRefOfMysql();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        List<Object> pkValues = new ArrayList<>();
+        pkValues.addAll(PK_VALUES);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValuesMap.keySet(), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertIterableEquals(pkValuesMap.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -143,11 +147,12 @@ public class BatchInsertExecutorTest {
         mockInsertColumns();
         mockParametersWithPkRefOfMysql();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValues = new ArrayList<>();
         pkValues.addAll(PK_VALUES);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValuesMap.keySet(), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertIterableEquals(pkValuesMap.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -155,10 +160,12 @@ public class BatchInsertExecutorTest {
         mockInsertColumns();
         mockParametersWithPkUnRefOfMysql();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValues = new ArrayList<>(PK_VALUES);
-        List<Object> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        List<Object> pkValues = new ArrayList<>();
+        pkValues.addAll(PK_VALUES);
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
+        Assertions.assertIterableEquals(pkValuesMap.keySet(), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertIterableEquals(pkValuesMap.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -167,24 +174,13 @@ public class BatchInsertExecutorTest {
             mockInsertColumns();
             mockParameters_with_number_and_insertRows_with_placeholde_null();
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+            Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
             insertExecutor.getPkValuesByColumn();
         });
     }
 
-    @Test
-    public void testGetPkValues_not_NotSupportYetException() throws SQLException {
-        mockInsertColumns();
-        mockParameters_with_null_and_insertRows_with_placeholder_null();
-        doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByAuto();
-        insertExecutor.getPkValuesByColumn();
-        verify(insertExecutor).getPkValuesByAuto();
-    }
-
     private void mockParameters_with_null_and_insertRows_with_placeholder_null() {
-        ArrayList<Object>[] paramters = new ArrayList[5];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(5);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
@@ -195,11 +191,11 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userId2");
         ArrayList arrayList4 = new ArrayList<>();
         arrayList4.add("userName2");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
-        paramters[4] = arrayList4;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
+        paramters.put(5, arrayList4);
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
@@ -209,7 +205,7 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters_with_number_and_insertRows_with_placeholde_null() {
-        ArrayList<Object>[] paramters = new ArrayList[5];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(5);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
@@ -220,11 +216,11 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userId2");
         ArrayList arrayList4 = new ArrayList<>();
         arrayList4.add("userName2");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
-        paramters[4] = arrayList4;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
+        paramters.put(5, arrayList4);
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
@@ -244,6 +240,7 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters() {
+        int PK_INDEX = 1;
         ArrayList<Object>[] paramters = new ArrayList[4];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
@@ -270,22 +267,22 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userStatus4");
         arrayList3.add("userStatus5");
 
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
 
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(insertRows);
-        when(statementProxy.getParamsByIndex(pkIndex)).thenReturn(paramters[pkIndex]);
+        when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
+        when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters.get(PK_INDEX + 1));
     }
 
     private void mockParametersAllRefOfMysql() {
 
-        ArrayList<Object>[] paramters = new ArrayList[20];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap(20);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
         ArrayList arrayList2 = new ArrayList<>();
@@ -332,26 +329,26 @@ public class BatchInsertExecutorTest {
         arrayList20.add("userStatus5");
 
 
-        paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
-        paramters[3] = arrayList4;
-        paramters[4] = arrayList5;
-        paramters[5] = arrayList6;
-        paramters[6] = arrayList7;
-        paramters[7] = arrayList8;
-        paramters[8] = arrayList9;
-        paramters[9] = arrayList10;
-        paramters[10] = arrayList11;
-        paramters[11] = arrayList12;
-        paramters[12] = arrayList13;
-        paramters[13] = arrayList14;
-        paramters[14] = arrayList15;
-        paramters[15] = arrayList16;
-        paramters[16] = arrayList17;
-        paramters[17] = arrayList18;
-        paramters[18] = arrayList19;
-        paramters[19] = arrayList20;
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
+        paramters.put(4,arrayList4);
+        paramters.put(5,arrayList5);
+        paramters.put(6,arrayList6);
+        paramters.put(7,arrayList7);
+        paramters.put(8,arrayList8);
+        paramters.put(9,arrayList9);
+        paramters.put(10,arrayList10);
+        paramters.put(11,arrayList11);
+        paramters.put(12,arrayList12);
+        paramters.put(13,arrayList13);
+        paramters.put(14,arrayList14);
+        paramters.put(15,arrayList15);
+        paramters.put(16,arrayList16);
+        paramters.put(17,arrayList17);
+        paramters.put(18,arrayList18);
+        paramters.put(19,arrayList19);
+        paramters.put(20,arrayList20);
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
@@ -365,7 +362,7 @@ public class BatchInsertExecutorTest {
 
     private void mockParametersWithPkRefOfMysql() {
 
-        ArrayList<Object>[] paramters = new ArrayList[10];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(10);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
         ArrayList arrayList2 = new ArrayList<>();
@@ -386,16 +383,16 @@ public class BatchInsertExecutorTest {
         arrayList9.add("userId5");
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(100000005);
-        paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
-        paramters[3] = arrayList4;
-        paramters[4] = arrayList5;
-        paramters[5] = arrayList6;
-        paramters[6] = arrayList7;
-        paramters[7] = arrayList8;
-        paramters[8] = arrayList9;
-        paramters[9] = arrayList10;
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
+        paramters.put(4,arrayList4);
+        paramters.put(5,arrayList5);
+        paramters.put(6,arrayList6);
+        paramters.put(7,arrayList7);
+        paramters.put(8,arrayList8);
+        paramters.put(9,arrayList9);
+        paramters.put(10,arrayList10);
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "1", "11"));
         insertRows.add(Arrays.asList("?", "?", "2", "22"));
@@ -409,7 +406,7 @@ public class BatchInsertExecutorTest {
 
     private void mockParametersWithPkUnRefOfMysql() {
 
-        ArrayList<Object>[] paramters = new ArrayList[10];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(10);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
         ArrayList arrayList2 = new ArrayList<>();
@@ -430,16 +427,16 @@ public class BatchInsertExecutorTest {
         arrayList9.add("userId5");
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(100000005);
-        paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
-        paramters[3] = arrayList4;
-        paramters[4] = arrayList5;
-        paramters[5] = arrayList6;
-        paramters[6] = arrayList7;
-        paramters[7] = arrayList8;
-        paramters[8] = arrayList9;
-        paramters[9] = arrayList10;
+        paramters.put(1,arrayList1);
+        paramters.put(2,arrayList2);
+        paramters.put(3,arrayList3);
+        paramters.put(4,arrayList4);
+        paramters.put(5,arrayList5);
+        paramters.put(6,arrayList6);
+        paramters.put(7,arrayList7);
+        paramters.put(8,arrayList8);
+        paramters.put(9,arrayList9);
+        paramters.put(10,arrayList10);
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", 100000001, "?", "1"));
         insertRows.add(Arrays.asList("?", 100000002, "?", "2"));
@@ -453,7 +450,7 @@ public class BatchInsertExecutorTest {
 
     private void mockParametersWithAllRefOfJDBC() {
         int PK_INDEX = 1;
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         arrayList0.add("userId2");
@@ -478,21 +475,22 @@ public class BatchInsertExecutorTest {
         arrayList3.add("userStatus3");
         arrayList3.add("userStatus4");
         arrayList3.add("userStatus5");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(1,arrayList0);
+        paramters.put(2,arrayList1);
+        paramters.put(3,arrayList2);
+        paramters.put(4,arrayList3);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(insertRows);
-        when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters[PK_INDEX]);
+        when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters.get(PK_INDEX + 1));
     }
+
 
     private void mockParametersWithPkRefOfJDBC() {
         int PK_INDEX = 1;
-        ArrayList<Object>[] paramters = new ArrayList[2];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(2);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         arrayList0.add("userId2");
@@ -505,25 +503,25 @@ public class BatchInsertExecutorTest {
         arrayList1.add(PK_VALUES.get(2));
         arrayList1.add(PK_VALUES.get(3));
         arrayList1.add(PK_VALUES.get(4));
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "userName1", "userStatus1"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(insertRows);
-        when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters[PK_INDEX]);
+        when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters.get(PK_INDEX + 1));
     }
 
 
     private void mockParametersWithPkUnRefOfJDBC(int pkId) {
-        ArrayList<Object>[] paramters = new ArrayList[2];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(2);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userName1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
 
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", pkId, "?", "userStatus"));
