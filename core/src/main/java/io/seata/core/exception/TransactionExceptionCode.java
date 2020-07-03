@@ -148,7 +148,7 @@ public enum TransactionExceptionCode {
     public static TransactionExceptionCode get(int ordinal) {
         TransactionExceptionCode code = MAP.get(ordinal);
 
-        if (null == code) {
+        if (code == null) {
             throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
         }
 

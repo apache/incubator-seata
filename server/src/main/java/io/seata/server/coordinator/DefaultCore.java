@@ -32,7 +32,7 @@ import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -55,11 +55,11 @@ public class DefaultCore implements Core {
     /**
      * get the Default core.
      *
-     * @param messageSender the message sender
+     * @param remotingServer the remoting server
      */
-    public DefaultCore(ServerMessageSender messageSender) {
+    public DefaultCore(RemotingServer remotingServer) {
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
-                new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
+                new Class[] {RemotingServer.class}, new Object[] {remotingServer});
         if (CollectionUtils.isNotEmpty(allCore)) {
             for (AbstractCore core : allCore) {
                 coreMap.put(core.getHandleBranchType(), core);
@@ -287,7 +287,7 @@ public class DefaultCore implements Core {
                     switch (branchStatus) {
                         case PhaseTwo_Rollbacked:
                             globalSession.removeBranch(branchSession);
-                            LOGGER.info("Rollback branch transaction  successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                            LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             continue;
                         case PhaseTwo_RollbackFailed_Unretryable:
                             SessionHelper.endRollbackFailed(globalSession);
@@ -339,7 +339,7 @@ public class DefaultCore implements Core {
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid, false);
-        if (null == globalSession) {
+        if (globalSession == null) {
             return GlobalStatus.Finished;
         } else {
             return globalSession.getStatus();
