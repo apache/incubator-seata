@@ -25,7 +25,8 @@
           "@common": "./ggeditor/common",
           "@components": "./ggeditor/components",
           "@helpers": "./ggeditor/helpers",
-          "@utils": "./ggeditor/utils"
+          "@utils": "./ggeditor/utils",
+          "@gg-editor-core": "./ggeditor/gg-editor-core"
         }
       }
     ],
