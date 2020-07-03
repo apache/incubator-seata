@@ -153,9 +153,9 @@ public class ConfigurationKeys {
     public static final String CLIENT_TM_ROLLBACK_RETRY_COUNT = CLIENT_TM_PREFIX + "rollbackRetryCount";
 
     /**
-     * The constant GLOBAL_TRANSACTION_TIMEOUT.
+     * The constant DEFAULT_GLOBAL_TRANSACTION_TIMEOUT.
      */
-    public static final String GLOBAL_TRANSACTION_TIMEOUT = CLIENT_TM_PREFIX + "globalTransactionTimeout";
+    public static final String DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = CLIENT_TM_PREFIX + "defaultGlobalTransactionTimeout";
 
     /**
      * The constant SERIALIZE_FOR_RPC.

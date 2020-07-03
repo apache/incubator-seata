@@ -34,7 +34,7 @@ public @interface GlobalTransactional {
 
     /**
      * Global transaction timeoutMills in MILLISECONDS.
-     * If client.tm.global-transaction-timeout is configured, It will replace the DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT.
+     * If client.tm.default-global-transaction-timeout is configured, It will replace the DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT.
      *
      * @return timeoutMills in MILLISECONDS.
      */

@@ -34,7 +34,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREF
 public class TmProperties {
     private int commitRetryCount = DEFAULT_TM_COMMIT_RETRY_COUNT;
     private int rollbackRetryCount = DEFAULT_TM_ROLLBACK_RETRY_COUNT;
-    private int globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+    private int defaultGlobalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
     private boolean degradeCheck = DEFAULT_TM_DEGRADE_CHECK;
     private int degradeCheckAllowTimes = DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
     private int degradeCheckPeriod = DEFAULT_TM_DEGRADE_CHECK_PERIOD;
@@ -57,12 +57,12 @@ public class TmProperties {
         return this;
     }
 
-    public int getGlobalTransactionTimeout() {
-        return globalTransactionTimeout;
+    public int getDefaultGlobalTransactionTimeout() {
+        return defaultGlobalTransactionTimeout;
     }
 
-    public TmProperties setGlobalTransactionTimeout(int globalTransactionTimeout) {
-        this.globalTransactionTimeout = globalTransactionTimeout;
+    public TmProperties setDefaultGlobalTransactionTimeout(int defaultGlobalTransactionTimeout) {
+        this.defaultGlobalTransactionTimeout = defaultGlobalTransactionTimeout;
         return this;
     }
 

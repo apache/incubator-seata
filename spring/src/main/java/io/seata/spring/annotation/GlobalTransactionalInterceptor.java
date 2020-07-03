@@ -81,26 +81,26 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static ScheduledThreadPoolExecutor executor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
 
-    //region GLOBAL_TRANSACTION_TIMEOUT
+    //region DEFAULT_GLOBAL_TRANSACTION_TIMEOUT
 
-    private static int globalTransactionTimeout = 0;
+    private static int defaultGlobalTransactionTimeout = 0;
 
-    private void initGlobalTransactionTimeout() {
-        if (GlobalTransactionalInterceptor.globalTransactionTimeout <= 0) {
-            int globalTransactionTimeout;
+    private void initDefaultGlobalTransactionTimeout() {
+        if (GlobalTransactionalInterceptor.defaultGlobalTransactionTimeout <= 0) {
+            int defaultGlobalTransactionTimeout;
             try {
-                globalTransactionTimeout = ConfigurationFactory.getInstance().getInt(
-                        ConfigurationKeys.GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+                defaultGlobalTransactionTimeout = ConfigurationFactory.getInstance().getInt(
+                        ConfigurationKeys.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
             } catch (Exception e) {
                 LOGGER.error("Illegal global transaction timeout value: " + e.getMessage());
-                globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+                defaultGlobalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
             }
-            if (globalTransactionTimeout <= 0) {
+            if (defaultGlobalTransactionTimeout <= 0) {
                 LOGGER.warn("Global transaction timeout value '{}' is illegal, and has been reset to the default value '{}'",
-                        globalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
-                globalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+                        defaultGlobalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+                defaultGlobalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
             }
-            GlobalTransactionalInterceptor.globalTransactionTimeout = globalTransactionTimeout;
+            GlobalTransactionalInterceptor.defaultGlobalTransactionTimeout = defaultGlobalTransactionTimeout;
         }
     }
 
@@ -129,7 +129,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 startDegradeCheck();
             }
         }
-        this.initGlobalTransactionTimeout();
+        this.initDefaultGlobalTransactionTimeout();
     }
 
     @Override
@@ -189,7 +189,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     // reset the value of timeout
                     int timeout = globalTrxAnno.timeoutMills();
                     if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
-                        timeout = globalTransactionTimeout;
+                        timeout = defaultGlobalTransactionTimeout;
                     }
 
                     TransactionInfo transactionInfo = new TransactionInfo();
