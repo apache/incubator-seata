@@ -15,7 +15,6 @@
  */
 package io.seata.common.util;
 
-import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -23,12 +22,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Scanner;
-
 import javax.crypto.Cipher;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * @author funkye
@@ -44,14 +40,14 @@ public class ConfigTools {
     }
 
     // obtain the public key (Base64 encoding)
-    public static String getPublicKey(KeyPair keyPair) {
+    public static String getPublicKey(KeyPair keyPair) throws Exception {
         PublicKey publicKey = keyPair.getPublic();
         byte[] bytes = publicKey.getEncoded();
         return byte2Base64(bytes);
     }
 
     // obtain the private key (Base64 encoding)
-    public static String getPrivateKey(KeyPair keyPair) {
+    public static String getPrivateKey(KeyPair keyPair) throws Exception {
         PrivateKey privateKey = keyPair.getPrivate();
         byte[] bytes = privateKey.getEncoded();
         return byte2Base64(bytes);
@@ -112,15 +108,13 @@ public class ConfigTools {
     }
 
     // byte array to Base64 encoding
-    public static String byte2Base64(byte[] bytes) {
-        BASE64Encoder encoder = new BASE64Encoder();
-        return encoder.encode(bytes);
+    public static String byte2Base64(byte[] bytes) throws Exception {
+        return new String(Base64.getEncoder().encode(bytes), "utf-8");
     }
 
     // Base64 encoding to byte array
-    public static byte[] base642Byte(String base64Key) throws IOException {
-        BASE64Decoder decoder = new BASE64Decoder();
-        return decoder.decodeBuffer(base64Key);
+    public static byte[] base642Byte(String base64Key) {
+        return Base64.getDecoder().decode(base64Key);
     }
 
     public static void main(String[] args) throws Exception {
@@ -135,7 +129,7 @@ public class ConfigTools {
         System.out.println("input 'q' exit");
         while (scan.hasNextLine()) {
             String password = scan.nextLine();
-            if (StringUtils.isNotBlank(password) && !password.equalsIgnoreCase("q")) {
+            if (StringUtils.isNotBlank(password) && !"q".equalsIgnoreCase(password)) {
                 String byte2Base64 = ConfigTools.privateEncrypt(password, privateKeyStr);
                 System.out.println("encryption completed：\n" + byte2Base64);
             }
