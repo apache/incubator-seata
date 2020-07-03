@@ -15,6 +15,7 @@
  */
 package io.seata.sqlparser;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -43,5 +44,5 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @param primaryKeyIndex insert sql primary key index.
      * @return the insert rows
      */
-    List<List<Object>> getInsertRows(int primaryKeyIndex);
+    List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex);
 }

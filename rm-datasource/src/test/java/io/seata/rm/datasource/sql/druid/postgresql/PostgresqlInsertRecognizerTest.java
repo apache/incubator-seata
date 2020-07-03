@@ -21,6 +21,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.postgresql.PostgresqlInsertRecognizer;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.alibaba.druid.sql.SQLUtils;
@@ -102,7 +103,7 @@ public class PostgresqlInsertRecognizerTest {
         String sql = "insert into t(id, no, name, age, time) values (nextval('id_seq'), null, 'a', ?, now())";
 
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
-        List<List<Object>> insertRows = recognizer.getInsertRows(pkIndex);
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertTrue(insertRows.size() == 1);
 
         //test for exception
@@ -113,7 +114,7 @@ public class PostgresqlInsertRecognizerTest {
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new SQLBetweenExpr());
 
             PostgresqlInsertRecognizer postgresqlInsertRecognizer = new PostgresqlInsertRecognizer(s, sqlInsertStatement);
-            postgresqlInsertRecognizer.getInsertRows(pkIndex);
+            postgresqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
     }
 }

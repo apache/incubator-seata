@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql.druid.oracle;
 
+import java.util.Collections;
 import java.util.List;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -100,7 +101,7 @@ public class OracleInsertRecognizerTest {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleInsertRecognizer recognizer = new OracleInsertRecognizer(sql, asts.get(0));
-        List<List<Object>> insertRows = recognizer.getInsertRows(pkIndex);
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
@@ -111,7 +112,7 @@ public class OracleInsertRecognizerTest {
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new OracleBinaryDoubleExpr());
 
             OracleInsertRecognizer oracleInsertRecognizer = new OracleInsertRecognizer(s, sqlInsertStatement);
-            oracleInsertRecognizer.getInsertRows(pkIndex);
+            oracleInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
     }
 
@@ -121,7 +122,7 @@ public class OracleInsertRecognizerTest {
         List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DB_TYPE);;
 
         OracleInsertRecognizer oracle = new OracleInsertRecognizer(sql, sqlStatements.get(0));
-        List<List<Object>> insertRows = oracle.getInsertRows(-1);
+        List<List<Object>> insertRows = oracle.getInsertRows(Collections.singletonList(-1));
         Assertions.assertTrue(insertRows.get(0).get(0) instanceof NotPlaceholderExpr);
     }
 }

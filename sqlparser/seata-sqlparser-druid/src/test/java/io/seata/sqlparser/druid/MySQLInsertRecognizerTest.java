@@ -55,8 +55,8 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
         Assertions.assertEquals(Collections.singletonList("name"), mySQLInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows(pkIndex).size());
-        Assertions.assertEquals(Collections.singletonList("name1"), mySQLInsertRecognizer.getInsertRows(pkIndex).get(0));
+        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Collections.singletonList("name1"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
     }
 
     /**
@@ -74,8 +74,8 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
         Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows(pkIndex).size());
-        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows(pkIndex).get(0));
+        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
     }
 
     /**
@@ -93,10 +93,10 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
         Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(3, mySQLInsertRecognizer.getInsertRows(pkIndex).size());
-        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows(pkIndex).get(0));
-        Assertions.assertEquals(Arrays.asList("name3", "name4"), mySQLInsertRecognizer.getInsertRows(pkIndex).get(1));
-        Assertions.assertEquals(Arrays.asList("name5", "name6"), mySQLInsertRecognizer.getInsertRows(pkIndex).get(2));
+        Assertions.assertEquals(3, mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+        Assertions.assertEquals(Arrays.asList("name3", "name4"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(1));
+        Assertions.assertEquals(Arrays.asList("name5", "name6"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(2));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
 
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
-        List<List<Object>> insertRows = recognizer.getInsertRows(pkIndex);
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
@@ -166,7 +166,7 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new MySqlOrderingExpr());
 
             MySQLInsertRecognizer mysqlInsertRecognizer = new MySQLInsertRecognizer(s, sqlInsertStatement);
-            mysqlInsertRecognizer.getInsertRows(pkIndex);
+            mysqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
     }
 

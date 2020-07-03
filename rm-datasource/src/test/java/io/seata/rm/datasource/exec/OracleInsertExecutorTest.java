@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -29,6 +30,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,7 +178,7 @@ public class OracleInsertExecutorTest {
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
 
         return expr;
     }
@@ -200,13 +202,13 @@ public class OracleInsertExecutorTest {
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
     }
 
     private void mockStatementInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
-        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
     }
 
 

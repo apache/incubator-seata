@@ -36,6 +36,7 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -107,7 +108,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     }
 
     @Override
-    public List<List<Object>> getInsertRows(int primaryKeyIndex) {
+    public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
@@ -125,7 +126,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(SqlMethodExpr.get());
                 } else {
-                    if (i == primaryKeyIndex) {
+                    if (primaryKeyIndex.contains(i)) {
                         throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                     }
                     row.add(NotPlaceholderExpr.get());

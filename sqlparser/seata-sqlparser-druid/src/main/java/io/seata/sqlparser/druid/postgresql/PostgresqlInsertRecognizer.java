@@ -39,6 +39,7 @@ import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -108,7 +109,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
-    public List<List<Object>> getInsertRows(int primaryKeyIndex) {
+    public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
@@ -140,7 +141,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                 } else if (expr instanceof SQLDefaultExpr) {
                     row.add(SqlDefaultExpr.get());
                 } else {
-                    if (i == primaryKeyIndex) {
+                    if (primaryKeyIndex.contains(i)) {
                         throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                     }
                     row.add(NotPlaceholderExpr.get());

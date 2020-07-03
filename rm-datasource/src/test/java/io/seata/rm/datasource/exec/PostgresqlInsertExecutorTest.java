@@ -117,7 +117,7 @@ public class PostgresqlInsertExecutorTest {
     private void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows(pkIndex)).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
     }
 
     private List<String> mockInsertColumns() {

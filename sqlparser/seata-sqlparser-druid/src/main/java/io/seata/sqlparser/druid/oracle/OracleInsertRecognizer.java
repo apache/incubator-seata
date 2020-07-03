@@ -16,6 +16,7 @@
 package io.seata.sqlparser.druid.oracle;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -108,7 +109,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     }
 
     @Override
-    public List<List<Object>> getInsertRows(int primaryKeyIndex) {
+    public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
@@ -131,7 +132,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));
                 } else {
-                    if (i == primaryKeyIndex) {
+                    if (primaryKeyIndex.contains(i)) {
                         throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                     }
                     row.add(NotPlaceholderExpr.get());
