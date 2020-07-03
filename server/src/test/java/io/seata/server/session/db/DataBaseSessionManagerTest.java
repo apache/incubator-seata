@@ -68,7 +68,7 @@ public class DataBaseSessionManagerTest {
         logStoreDataBaseDAO = new LogStoreDataBaseDAO(dataSource);
         logStoreDataBaseDAO.setDbType("h2");
         logStoreDataBaseDAO.setGlobalTable("global_table");
-        logStoreDataBaseDAO.setBrachTable("branch_table");
+        logStoreDataBaseDAO.setBranchTable("branch_table");
 
         transactionStoreManager.setLogQueryLimit(100);
         transactionStoreManager.setLogStore(logStoreDataBaseDAO);
