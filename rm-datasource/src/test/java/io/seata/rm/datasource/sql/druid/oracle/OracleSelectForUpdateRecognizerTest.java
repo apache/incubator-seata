@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author will
@@ -53,7 +54,7 @@ public class OracleSelectForUpdateRecognizerTest {
         OracleSelectForUpdateRecognizer recognizer = new OracleSelectForUpdateRecognizer(sql, asts.get(0));
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 return null;
             }
         }, new ArrayList<>());

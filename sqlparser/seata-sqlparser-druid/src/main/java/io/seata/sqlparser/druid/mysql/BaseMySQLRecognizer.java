@@ -18,12 +18,10 @@ package io.seata.sqlparser.druid.mysql;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +48,7 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
+                    ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.isEmpty()) {
                         oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
