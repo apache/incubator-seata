@@ -15,6 +15,12 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -32,12 +38,6 @@ import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 /**
  * The type Rpc client.
@@ -156,8 +156,10 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
+        RegisterTMRequest registerTMRequest = (RegisterTMRequest)requestMessage;
+        RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register TM success. server version:{},channel:{}", ((RegisterTMResponse) response).getVersion(), channel);
+            LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
     }
@@ -165,11 +167,11 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void onRegisterMsgFail(String serverAddress, Channel channel, Object response,
                                   AbstractMessage requestMessage) {
-        if (response instanceof RegisterTMResponse && LOGGER.isInfoEnabled()) {
-            LOGGER.info("register client failed, server version:"
-                + ((RegisterTMResponse) response).getVersion());
-        }
-        throw new FrameworkException("register client app failed.");
+        RegisterTMRequest registerTMRequest = (RegisterTMRequest)requestMessage;
+        RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
+        String errMsg = String.format(
+            "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
+        throw new FrameworkException(errMsg);
     }
 
     private void registerProcessor() {

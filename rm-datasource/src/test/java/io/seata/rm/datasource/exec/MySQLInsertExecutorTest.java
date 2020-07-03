@@ -15,6 +15,15 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -30,14 +39,6 @@ import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,11 +103,13 @@ public class MySQLInsertExecutorTest {
     @Test
     public void testAfterImage_ByColumn() throws SQLException {
         doReturn(true).when(insertExecutor).containsPK();
-        List<Object> pkValues = new ArrayList<>();
-        pkValues.add(PK_VALUE);
-        doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
+        Map<String,List<Object>> pkValuesMap =new HashMap<>();
+        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        doReturn(pkValuesMap).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValuesMap);
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -115,11 +118,13 @@ public class MySQLInsertExecutorTest {
     public void testAfterImage_ByAuto() throws SQLException {
         doReturn(false).when(insertExecutor).containsPK();
         doReturn(true).when(insertExecutor).containsColumns();
-        List<Object> pkValues = new ArrayList<>();
-        pkValues.add(PK_VALUE);
-        doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
+        Map<String,List<Object>> pkValuesMap =new HashMap<>();
+        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValuesMap);
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -129,10 +134,12 @@ public class MySQLInsertExecutorTest {
         Assertions.assertThrows(SQLException.class, () -> {
             doReturn(false).when(insertExecutor).containsPK();
             doReturn(true).when(insertExecutor).containsColumns();
-            List<Object> pkValues = new ArrayList<>();
-            pkValues.add(PK_VALUE);
-            doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
-            doReturn(null).when(insertExecutor).buildTableRecords(pkValues);
+            Map<String,List<Object>> pkValuesMap =new HashMap<>();
+            pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+            doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
+            doReturn(null).when(insertExecutor).buildTableRecords(pkValuesMap);
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
             insertExecutor.afterImage(new TableRecords());
         });
     }
@@ -155,12 +162,12 @@ public class MySQLInsertExecutorTest {
         mockInsertRows();
         mockParametersOfOnePk();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        doReturn(0).when(insertExecutor).getPkIndex();
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertEquals(pkValuesByColumn, pkValues);
+        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();
+        Map<String,List<Object>> pkValuesList  = insertExecutor.getPkValuesByColumn();
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -169,7 +176,7 @@ public class MySQLInsertExecutorTest {
             mockInsertColumns();
             mockParameters();
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
-            when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+            when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
             insertExecutor.getPkValuesByColumn();
         });
     }
@@ -180,17 +187,22 @@ public class MySQLInsertExecutorTest {
         mockInsertRows();
         mockParametersPkWithNull();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        ColumnMeta cm = new ColumnMeta();
+        cm.setColumnName(ID_COLUMN);
+        cm.setIsAutoincrement("YES");
+        when(tableMeta.getPrimaryKeyMap()).thenReturn(new HashMap<String, ColumnMeta>(){{put(ID_COLUMN,cm);}});
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        doReturn(0).when(insertExecutor).getPkIndex();
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        doReturn(new HashMap<String,List<Object>>(){{put(ID_COLUMN,pkValuesAuto);}}).when(insertExecutor).getPkValuesByAuto();
+        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN,0);}}).when(insertExecutor).getPkIndex();
+        Map<String,List<Object>> pkValuesList  = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValuesAuto);
     }
+
 
     @Test
     public void testGetPkValuesByAuto_ShouldNeverHappenException() {
@@ -236,7 +248,8 @@ public class MySQLInsertExecutorTest {
         when(statementProxy.getGeneratedKeys()).thenThrow(e);
         ResultSet genKeys = mock(ResultSet.class);
         when(statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()")).thenReturn(genKeys);
-        Assertions.assertTrue(insertExecutor.getPkValuesByAuto().isEmpty());
+        Map<String,List<Object>> pkValueMap=insertExecutor.getPkValuesByAuto();
+        Assertions.assertTrue(pkValueMap.get(ID_COLUMN).isEmpty());
     }
 
     @Test
@@ -253,8 +266,8 @@ public class MySQLInsertExecutorTest {
         when(statementProxy.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto.size(),0);
+        Map<String,List<Object>> pkValues = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValues.get(ID_COLUMN).size(),0);
     }
 
     @Test
@@ -273,8 +286,8 @@ public class MySQLInsertExecutorTest {
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto, pkValues);
+        Map<String,List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
     @Test
@@ -294,16 +307,54 @@ public class MySQLInsertExecutorTest {
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto, pkValues);
+        Map<String,List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
     @Test
     public void test_getPkIndex() {
         mockInsertColumns();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        Assertions.assertEquals(0, insertExecutor.getPkIndex());
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        Assertions.assertEquals(0, insertExecutor.getPkIndex().get(ID_COLUMN));
+    }
+
+
+    @Test
+    public void test_checkPkValuesForMultiPk()
+    {
+        Map<String,List<Object>> pkValues = new HashMap<>();
+        List pkValues1 = new ArrayList();
+        List pkValues2 = new ArrayList();
+        pkValues.put("id",pkValues1);
+        pkValues.put("userCode",pkValues2);
+
+        //all pk support value
+        pkValues1.add(1);
+        pkValues2.add(2);
+        Assertions.assertTrue(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+        //supporting one pk is null
+        pkValues1.clear();
+        pkValues2.clear();
+        pkValues1.add(Null.get());
+        pkValues2.add(2);
+        Assertions.assertTrue(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+        //more one pk is null is not support
+        pkValues1.clear();
+        pkValues2.clear();
+        pkValues1.add(Null.get());
+        pkValues2.add(Null.get());
+        Assertions.assertFalse(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
+        //method is not support at all
+        pkValues1.clear();
+        pkValues2.clear();
+        pkValues1.add(new SqlMethodExpr());
+        pkValues2.add(2);
+        Assertions.assertFalse(insertExecutor.checkPkValuesForMultiPk(pkValues));
+
     }
 
     @Test
@@ -312,196 +363,196 @@ public class MySQLInsertExecutorTest {
         // ps = true
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(2);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(SqlDefaultExpr.get());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         // ps = false
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(Null.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(2);
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertTrue(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertTrue(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(SqlDefaultExpr.get());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         // not support.
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(Null.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(Null.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(1);
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlMethodExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(Null.get());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(new SqlSequenceExpr());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlMethodExpr());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, true));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, true));
 
         pkValues = new ArrayList<>();
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(SqlDefaultExpr.get());
-        Assertions.assertFalse(insertExecutor.checkPkValues(pkValues, false));
+        Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
     }
 
     private List<String> mockInsertColumns() {

@@ -24,15 +24,12 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.util.JdbcConstants;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.*;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -84,18 +81,17 @@ public class PostgresqlInsertExecutorTest {
         pkMap.put(ID_COLUMN, columnMeta);
         doReturn(pkMap).when(tableMeta).getPrimaryKeyMap();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
 
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
         doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
         //pk value = DEFAULT so getPkValuesByDefault
         doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault();
 
         verify(insertExecutor).getPkValuesByDefault();
-        Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
+        Assertions.assertEquals(pkValuesMap.get(ID_COLUMN), pkValuesAuto);
     }
 
     private void mockParametersPkWithDefault() {
@@ -129,7 +125,7 @@ public class PostgresqlInsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(Collections.singletonMap(ID_COLUMN,0)).when(insertExecutor).getPkIndex();
         return columns;
     }
 
