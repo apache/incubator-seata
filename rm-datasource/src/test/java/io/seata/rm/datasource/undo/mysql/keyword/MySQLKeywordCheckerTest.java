@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
+import java.sql.SQLException;
 import java.sql.Types;
 
 import io.seata.rm.datasource.undo.KeywordChecker;
@@ -125,7 +126,7 @@ public class MySQLKeywordCheckerTest {
         MySQLUndoUpdateExecutorExtension mySQLUndoUpdateExecutor = new MySQLUndoUpdateExecutorExtension(sqlUndoLog);
 
         Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, since = ? WHERE `key` = ?",
-            mySQLUndoUpdateExecutor.getSql());
+            mySQLUndoUpdateExecutor.getSql().trim());
 
     }
 
@@ -212,7 +213,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoInsertExecutorExtension mySQLUndoInsertExecutor = new MySQLUndoInsertExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?", mySQLUndoInsertExecutor.getSql());
+        Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?", mySQLUndoInsertExecutor.getSql().trim());
 
     }
 
@@ -245,9 +246,9 @@ public class MySQLKeywordCheckerTest {
         sqlUndoLog.setTableName("`lock`");
         sqlUndoLog.setSqlType(SQLType.DELETE);
 
-        TableRecords afterImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "id"));
+        TableRecords afterImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-        TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "id"));
+        TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
 
         Row afterRow1 = new Row();
 
