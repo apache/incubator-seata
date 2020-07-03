@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource;
-import io.seata.sqlparser.struct.Null;
 
+import io.seata.sqlparser.struct.Null;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -36,7 +36,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Abstract prepared statement proxy.
@@ -49,14 +51,10 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
     /**
      * The Parameters.
      */
-    protected ArrayList<Object>[] parameters;
+    protected Map<Integer,ArrayList<Object>> parameters;
 
-    private void initParameterHolder() throws SQLException {
-        int paramCount = targetStatement.getParameterMetaData().getParameterCount();
-        this.parameters = new ArrayList[paramCount];
-        for (int i = 0; i < paramCount; i++) {
-            parameters[i] = new ArrayList<>();
-        }
+    private void initParameterHolder() {
+        this.parameters = new HashMap<>();
     }
 
     /**
@@ -93,7 +91,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @return the params by index
      */
     public List<Object> getParamsByIndex(int index) {
-        return parameters[index];
+        return parameters.get(index);
     }
 
     /**
@@ -103,7 +101,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @param x     the x
      */
     protected void setParamByIndex(int index, Object x) {
-        parameters[--index].add(x);
+        parameters.computeIfAbsent(index,e -> new ArrayList<>()).add(x);
     }
 
     @Override

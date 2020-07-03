@@ -21,6 +21,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -69,7 +70,7 @@ public class PostgresqlDeleteRecognizerTest {
         SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) sqlRecognizers.get(0);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 return null;
             }
         }, new ArrayList<>());

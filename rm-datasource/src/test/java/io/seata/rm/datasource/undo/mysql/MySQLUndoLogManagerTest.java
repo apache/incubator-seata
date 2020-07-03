@@ -75,7 +75,7 @@ public class MySQLUndoLogManagerTest {
     @Test
     public void testDeleteUndoLogByLogCreated() throws SQLException {
         Assertions.assertEquals(0, undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, dataSource.getConnection()));
-        Assertions.assertThrows(SQLException.class, () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class MySQLUndoLogManagerTest {
 
         Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, dataSource.getConnection()));
 
-        Assertions.assertThrows(SQLException.class, () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
 
     }
 
@@ -101,14 +101,14 @@ public class MySQLUndoLogManagerTest {
     public void testDeleteUndoLog() {
         Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLog("xid", 1L, dataSource.getConnection()));
 
-        Assertions.assertThrows(SQLException.class, () -> undoLogManager.deleteUndoLog("xid", 1L, connectionProxy));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLog("xid", 1L, connectionProxy));
     }
 
     @Test
     public void testBatchDeleteUndoLog() {
         Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection()));
 
-        Assertions.assertThrows(SQLException.class, () -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
     }
 
     @Test

@@ -15,15 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -35,6 +26,12 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -158,7 +155,7 @@ public class OracleInsertExecutorTest {
 
     private SqlSequenceExpr mockParametersPkWithSeq() {
         SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(expr);
         ArrayList arrayList1 = new ArrayList<>();
@@ -167,10 +164,10 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
 
@@ -182,7 +179,7 @@ public class OracleInsertExecutorTest {
     }
 
     private void mockParametersPkWithAuto() {
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -191,10 +188,10 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
 

@@ -15,11 +15,13 @@
  */
 package io.seata.rm.datasource.sql.druid.postgresql;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +47,7 @@ public class PostgresqlSelectForUpdateRecognizerTest {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer, ArrayList<Object>> getParameters() {
                 return null;
             }
         }, new ArrayList<>());
