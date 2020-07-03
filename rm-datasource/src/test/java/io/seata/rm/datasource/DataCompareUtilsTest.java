@@ -25,7 +25,9 @@ import org.mockito.Mockito;
 
 import java.sql.JDBCType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Geng Zhang
@@ -60,7 +62,7 @@ public class DataCompareUtilsTest {
     @Test
     public void isRecordsEquals() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("pk");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"pk"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -127,7 +129,7 @@ public class DataCompareUtilsTest {
     @Test
     public void isRowsEquals() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("pk");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"pk"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         List<Row> rows = new ArrayList<>();
@@ -155,5 +157,67 @@ public class DataCompareUtilsTest {
         row3.add(field3);
         rows2.add(row3);
         Assertions.assertFalse(DataCompareUtils.isRowsEquals(tableMeta, rows, rows2).getResult());
+    }
+
+    @Test
+    public void testRowListToMapWithSinglePk(){
+        List<String> primaryKeyList = new ArrayList<>();
+        primaryKeyList.add("id");
+
+        List<Row> rows = new ArrayList<>();
+        Field field = new Field("id", 1, "1");
+        Row row = new Row();
+        row.add(field);
+        rows.add(row);
+
+        Field field2 = new Field("id", 1, "2");
+        Row row2 = new Row();
+        row2.add(field2);
+        rows.add(row2);
+
+        Field field3 = new Field("id", 1, "3");
+        Row row3 = new Row();
+        row3.add(field3);
+        rows.add(row3);
+
+        Map<String, Map<String, Field>> result =DataCompareUtils.rowListToMap(rows,primaryKeyList);
+        Assertions.assertTrue(result.size()==3);
+        Assertions.assertEquals(result.keySet().iterator().next(),"1");
+
+    }
+
+
+    @Test
+    public void testRowListToMapWithMultipPk(){
+        List<String> primaryKeyList = new ArrayList<>();
+        primaryKeyList.add("id1");
+        primaryKeyList.add("id2");
+
+        List<Row> rows = new ArrayList<>();
+        Field field1 = new Field("id1", 1, "1");
+        Field field11 = new Field("id2", 1, "2");
+        Row row = new Row();
+        row.add(field1);
+        row.add(field11);
+        rows.add(row);
+
+        Field field2 = new Field("id1", 1, "3");
+        Field field22 = new Field("id2", 1, "4");
+        Row row2 = new Row();
+        row2.add(field2);
+        row2.add(field22);
+        rows.add(row2);
+
+        Field field3 = new Field("id1", 1, "5");
+        Field field33 = new Field("id2", 1, "6");
+        Row row3 = new Row();
+        row3.add(field3);
+        row3.add(field33);
+        rows.add(row3);
+
+        Map<String, Map<String, Field>> result =DataCompareUtils.rowListToMap(rows,primaryKeyList);
+        Assertions.assertTrue(result.size()==3);
+        Assertions.assertEquals(result.keySet().iterator().next(),"1_2");
+
     }
 }

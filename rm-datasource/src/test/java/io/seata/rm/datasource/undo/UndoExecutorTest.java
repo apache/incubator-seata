@@ -43,9 +43,7 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 import com.alibaba.fastjson.JSON;
@@ -152,6 +150,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
         Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
+        Mockito.doReturn(JdbcConstants.MYSQL).when(spy).getDbType(connection);
         spy.executeOn(connection);
     }
 
@@ -221,6 +220,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
         Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
+        Mockito.doReturn(JdbcConstants.MYSQL).when(spy).getDbType(connection);
         spy.executeOn(connection);
     }
 
@@ -290,6 +290,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
         Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
+        Mockito.doReturn(JdbcConstants.MYSQL).when(spy).getDbType(connection);
         spy.executeOn(connection);
     }
 
@@ -318,8 +319,8 @@ public class UndoExecutorTest {
         }
 
         @Override
-        public String getPkName() {
-            return mockPK;
+        public List<String> getPrimaryKeyOnlyName(){
+            return Arrays.asList(new String[]{mockPK});
         }
     }
 

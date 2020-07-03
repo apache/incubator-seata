@@ -26,17 +26,17 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Sequenceable;
-import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 /**
  * @author jsbxyyx
  */
@@ -58,22 +58,37 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     }
 
     @Override
-    public List<Object> getPkValues() throws SQLException {
-        return containsPK() ? getPkValuesByColumn() :
-                (containsColumns() ? getGeneratedKeys() : getPkValuesByColumn());
+    public Map<String,List<Object>> getPkValues() throws SQLException {
+        Map<String,List<Object>> pkValuesMap = null;
+        Boolean isContainsPk = containsPK();
+        //when there is only one pk in the table
+        if (isContainsPk) {
+            pkValuesMap = getPkValuesByColumn();
+        }
+        else if (containsColumns()) {
+            String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
+            pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
+        }
+        else {
+            pkValuesMap = getPkValuesByColumn();
+        }
+        return pkValuesMap;
     }
 
     @Override
-    public List<Object> getPkValuesByColumn() throws SQLException {
-        List<Object> pkValues = parsePkValuesFromStatement();
+    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String,List<Object>> pkValuesMap = parsePkValuesFromStatement();
+        String pkKey = pkValuesMap.keySet().iterator().next();
+        List<Object> pkValues = pkValuesMap.get(pkKey);
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValues = getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0));
+            pkValuesMap.put(pkKey,getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
         } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValues = getGeneratedKeys();
+            pkValuesMap.put(pkKey,getGeneratedKeys());
         } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
-            pkValues = getPkValuesByDefault();
+            pkValuesMap.put(pkKey,getPkValuesByDefault());
         }
-        return pkValues;
+
+        return pkValuesMap;
     }
 
     /**
