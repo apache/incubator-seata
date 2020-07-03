@@ -78,7 +78,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static ConfigurableListableBeanFactory beanFactory;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
-    private static final Set<String> EXCLUDES = new HashSet<>();
+    private static final Set<String> EXCLUDE_SET = new HashSet<>();
     private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new HashSet<>();
 
     private MethodInterceptor interceptor;
@@ -209,7 +209,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         try {
             synchronized (PROXYED_SET) {
-                if (PROXYED_SET.contains(beanName) || EXCLUDES.contains(beanName)) {
+                if (PROXYED_SET.contains(beanName) || EXCLUDE_SET.contains(beanName)) {
                     return bean;
                 }
 
@@ -218,6 +218,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
                         try {
                             if (excluder.needExclude(bean, beanName, beanDefinition)) {
+                                EXCLUDE_SET.add(beanName); // cache to the EXCLUDE_SET
                                 return bean;
                             }
                         } catch (Throwable e) {
@@ -344,7 +345,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     public static void addScannerExcludeBeanNames(String... beanNames) {
         if (ArrayUtils.isNotEmpty(beanNames)) {
-            EXCLUDES.addAll(Arrays.asList(beanNames));
+            EXCLUDE_SET.addAll(Arrays.asList(beanNames));
         }
     }
 }
