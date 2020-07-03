@@ -47,6 +47,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -214,18 +215,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
 
                 if (!SCANNER_EXCLUDER_SET.isEmpty()) {
-                    BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-                    for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
-                        try {
-                            if (excluder.needExclude(bean, beanName, beanDefinition)) {
-                                EXCLUDE_SET.add(beanName); // cache to the EXCLUDE_SET
-                                return bean;
+                    try {
+                        BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+                        for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
+                            try {
+                                if (excluder.needExclude(bean, beanName, beanDefinition)) {
+                                    EXCLUDE_SET.add(beanName); // cache to the EXCLUDE_SET
+                                    return bean;
+                                }
+                            } catch (Throwable e) {
+                                String errorMsg = String.format("Do check need exclude failed: beanName=%s, excluder=%s",
+                                        beanName, excluder.getClass().getSimpleName());
+                                LOGGER.error(errorMsg, e);
                             }
-                        } catch (Throwable e) {
-                            String errorMsg = String.format("Do check need exclude failed: beanName=%s, excluder=%s",
-                                    beanName, excluder.getClass().getSimpleName());
-                            LOGGER.error(errorMsg, e);
                         }
+                    } catch (NoSuchBeanDefinitionException e) {
+                        // do nothing
                     }
                 }
 
