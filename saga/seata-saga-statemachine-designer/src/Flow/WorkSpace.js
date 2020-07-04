@@ -40,16 +40,16 @@ class WorkSpaceBase extends React.Component {
 
     if (param.action == 'add' && param.item.type == 'edge') {
       // Default polyline-round type @FIXME polyline-round has a bug
-      // if (param.item.target
-      //   && param.item.target.model
-      //   && param.item.source
-      //   && param.item.source.model) {
-      //   executeCommand(() => {
-      //     update(param.item, {
-      //       shape: 'flow-polyline-round',
-      //     });
-      //   });
-      // }
+      if (param.item.target
+        && param.item.target.model
+        && param.item.source
+        && param.item.source.model) {
+        executeCommand(() => {
+          update(param.item, {
+            shape: 'flow-polyline-round',
+          });
+        });
+      }
       if (param.item.target && param.item.target.model && param.item.target.model.stateType == 'Compensation') {
         executeCommand(() => {
           update(param.item, {
