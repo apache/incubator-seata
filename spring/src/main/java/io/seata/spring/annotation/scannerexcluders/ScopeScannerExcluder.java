@@ -15,9 +15,12 @@
  */
 package io.seata.spring.annotation.scannerexcluders;
 
+import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.ScannerExcluder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -36,6 +39,7 @@ import java.util.Set;
  */
 public class ScopeScannerExcluder implements ScannerExcluder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScopeScannerExcluder.class);
     private static final Set<String> EXCLUDE_SCOPE_SET = Collections.synchronizedSet(new HashSet<>());
 
     static {
@@ -66,18 +70,24 @@ public class ScopeScannerExcluder implements ScannerExcluder {
             return true; // exclude
         }
 
+        boolean isMatch = false;
         if (beanDefinition instanceof AnnotatedBeanDefinition) {
             AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
             if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
                 if (this.hasExcludeScope(annotatedBeanDefinition.getFactoryMethodMetadata())) {
-                    return true; // exclude
+                    isMatch = true; // exclude
                 }
             }
-            if (this.hasExcludeScope(annotatedBeanDefinition.getMetadata())) {
-                return true; // exclude
+            if (!isMatch && this.hasExcludeScope(annotatedBeanDefinition.getMetadata())) {
+                isMatch = true; // exclude
+            }
+
+            if (isMatch) {
+                LOGGER.warn("Exclude bean '{}' from the {}, because it contains scope {}",
+                        beanName, GlobalTransactionScanner.class.getSimpleName(), EXCLUDE_SCOPE_SET.toString());
             }
         }
-        return false; // not exclude
+        return isMatch;
     }
 
     private boolean hasExcludeScope(AnnotatedTypeMetadata annotatedTypeMetadata) {
