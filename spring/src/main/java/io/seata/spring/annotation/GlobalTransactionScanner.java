@@ -219,8 +219,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
                         for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
                             try {
-                                if (excluder.needExclude(bean, beanName, beanDefinition)) {
-                                    EXCLUDE_SET.add(beanName); // cache to the EXCLUDE_SET
+                                if (excluder.isMatch(bean, beanName, beanDefinition)) {
                                     return bean;
                                 }
                             } catch (Throwable e) {

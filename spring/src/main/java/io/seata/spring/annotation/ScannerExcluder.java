@@ -25,13 +25,12 @@ import org.springframework.beans.factory.config.BeanDefinition;
 public interface ScannerExcluder {
 
     /**
-     * Do check, and return whether to exclude
+     * Do matches need to be excluded
      *
      * @param bean           the bean
      * @param beanName       the bean name
      * @param beanDefinition the bean definition
      * @return the boolean: true=exclude|false=not exclude
      */
-    boolean needExclude(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable;
-
+    boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable;
 }

@@ -18,6 +18,7 @@ package io.seata.spring.annotation.scannerexcluders;
 import io.seata.spring.annotation.ScannerExcluder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -44,36 +45,6 @@ public class ScopeScannerExcluder implements ScannerExcluder {
         EXCLUDE_SCOPE_SET.add("job");
     }
 
-    public boolean needExclude(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
-        if (beanDefinition instanceof AnnotatedBeanDefinition) {
-            AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
-            if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
-                if (this.isNeedExcludeScope(annotatedBeanDefinition.getFactoryMethodMetadata())) {
-                    return true; // exclude
-                }
-            }
-            if (this.isNeedExcludeScope(annotatedBeanDefinition.getMetadata())) {
-                return true; // exclude
-            }
-        }
-        return false; // not exclude
-    }
-
-    private boolean isNeedExcludeScope(AnnotatedTypeMetadata annotatedTypeMetadata) {
-        MultiValueMap<String, Object> scopeAttributes = annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
-
-        if (scopeAttributes != null && !scopeAttributes.isEmpty()) {
-            if (scopeAttributes.containsKey("scopeName") && scopeAttributes.getFirst("scopeName") != null) {
-                String scopeName = scopeAttributes.getFirst("scopeName").toString();
-                if (EXCLUDE_SCOPE_SET.contains(scopeName.toLowerCase())) {
-                    return true; // exclude
-                }
-            }
-        }
-
-        return false;
-    }
-
     /**
      * Add more exclude scopes.
      *
@@ -87,5 +58,44 @@ public class ScopeScannerExcluder implements ScannerExcluder {
                 }
             }
         }
+    }
+
+
+    public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
+        if (bean instanceof ScopedProxyFactoryBean) {
+            return true; // exclude
+        }
+
+        if (beanDefinition instanceof AnnotatedBeanDefinition) {
+            AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
+            if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
+                if (this.hasExcludeScope(annotatedBeanDefinition.getFactoryMethodMetadata())) {
+                    return true; // exclude
+                }
+            }
+            if (this.hasExcludeScope(annotatedBeanDefinition.getMetadata())) {
+                return true; // exclude
+            }
+        }
+        return false; // not exclude
+    }
+
+    private boolean hasExcludeScope(AnnotatedTypeMetadata annotatedTypeMetadata) {
+        MultiValueMap<String, Object> scopeAttributes = annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
+
+        if (scopeAttributes != null && !scopeAttributes.isEmpty()) {
+            return false;
+        }
+
+        if (scopeAttributes.containsKey("scopeName")) {
+            Object scopeName = scopeAttributes.getFirst("scopeName");
+            if (scopeName != null) {
+                if (EXCLUDE_SCOPE_SET.contains(scopeName.toString().toLowerCase())) {
+                    return true; // exclude
+                }
+            }
+        }
+
+        return false;
     }
 }
