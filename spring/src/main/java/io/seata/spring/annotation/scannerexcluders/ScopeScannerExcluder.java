@@ -70,27 +70,22 @@ public class ScopeScannerExcluder implements ScannerExcluder {
             return true; // exclude
         }
 
-        boolean isMatch = false;
         if (beanDefinition instanceof AnnotatedBeanDefinition) {
             AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
             if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
-                if (this.hasExcludeScope(annotatedBeanDefinition.getFactoryMethodMetadata())) {
-                    isMatch = true; // exclude
+                if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getFactoryMethodMetadata())) {
+                    return true; // exclude
                 }
             }
-            if (!isMatch && this.hasExcludeScope(annotatedBeanDefinition.getMetadata())) {
-                isMatch = true; // exclude
-            }
-
-            if (isMatch) {
-                LOGGER.warn("Exclude bean '{}' from the {}, because it contains scope {}",
-                        beanName, GlobalTransactionScanner.class.getSimpleName(), EXCLUDE_SCOPE_SET.toString());
+            if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getMetadata())) {
+                return true; // exclude
             }
         }
-        return isMatch;
+
+        return false; // not exclude
     }
 
-    private boolean hasExcludeScope(AnnotatedTypeMetadata annotatedTypeMetadata) {
+    private boolean hasExcludeScope(String beanName, AnnotatedTypeMetadata annotatedTypeMetadata) {
         MultiValueMap<String, Object> scopeAttributes = annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
 
         if (scopeAttributes == null || scopeAttributes.isEmpty()) {
@@ -101,6 +96,10 @@ public class ScopeScannerExcluder implements ScannerExcluder {
             Object scopeName = scopeAttributes.getFirst("scopeName");
             if (scopeName != null) {
                 if (EXCLUDE_SCOPE_SET.contains(scopeName.toString().toLowerCase())) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Exclude bean '{}' from the {}, cause of @Scope(scopeName = \"{}\")",
+                                beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString());
+                    }
                     return true; // exclude
                 }
             }
