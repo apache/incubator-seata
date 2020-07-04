@@ -83,7 +83,7 @@ public class ScopeScannerExcluder implements ScannerExcluder {
     private boolean hasExcludeScope(AnnotatedTypeMetadata annotatedTypeMetadata) {
         MultiValueMap<String, Object> scopeAttributes = annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
 
-        if (scopeAttributes != null && !scopeAttributes.isEmpty()) {
+        if (scopeAttributes == null || scopeAttributes.isEmpty()) {
             return false;
         }
 
