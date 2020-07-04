@@ -25,9 +25,7 @@ import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -50,7 +48,7 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @Configuration
 @EnableConfigurationProperties({SeataProperties.class})
-public class SeataAutoConfiguration implements BeanFactoryPostProcessor {
+public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
@@ -68,15 +66,23 @@ public class SeataAutoConfiguration implements BeanFactoryPostProcessor {
     @Bean
     @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
-    public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
-                                                             @Autowired(required = false) List<ScannerExcluder> scannerExcluders) {
+    public GlobalTransactionScanner globalTransactionScanner(
+            SeataProperties seataProperties, FailureHandler failureHandler,
+            ConfigurableListableBeanFactory beanFactory, @Autowired(required = false) List<ScannerExcluder> scannerExcluders) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Automatically configure Seata");
         }
-        // add excluders and excludeBeanNames
+
+        // set bean factory
+        GlobalTransactionScanner.setBeanFactory(beanFactory);
+
+        // add excluders
         GlobalTransactionScanner.addScannerExcluders(scannerExcluders);
         GlobalTransactionScanner.addScannerExcluders(EnhancedServiceLoader.loadAll(ScannerExcluder.class));
+
+        // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanner());
+
         // create globa transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
@@ -86,10 +92,5 @@ public class SeataAutoConfiguration implements BeanFactoryPostProcessor {
     @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
     public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator(SeataProperties seataProperties) {
         return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(),seataProperties.getExcludesForAutoProxying());
-    }
-
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        GlobalTransactionScanner.setBeanFactory(beanFactory);
     }
 }
