@@ -58,15 +58,15 @@ public class UndoLogSerializerClassRegistry {
 
     static {
         // register serializer
-       registerClass(Collections.singletonList("").getClass(), new ArraysAsListSerializer());
-       registerClass(GregorianCalendar.class, new GregorianCalendarSerializer());
-       registerClass(InvocationHandler.class, new JdkProxySerializer());
-       registerClass(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
-       registerClass(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
-       registerClass(Pattern.class, new RegexSerializer());
-       registerClass(BitSet.class, new BitSetSerializer());
-       registerClass(URI.class, new URISerializer());
-       registerClass(UUID.class, new UUIDSerializer());
+        registerClass(Collections.singletonList("").getClass(), new ArraysAsListSerializer());
+        registerClass(GregorianCalendar.class, new GregorianCalendarSerializer());
+        registerClass(InvocationHandler.class, new JdkProxySerializer());
+        registerClass(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
+        registerClass(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
+        registerClass(Pattern.class, new RegexSerializer());
+        registerClass(BitSet.class, new BitSetSerializer());
+        registerClass(URI.class, new URISerializer());
+        registerClass(UUID.class, new UUIDSerializer());
 
         // register commonly class
         registerClass(HashMap.class);

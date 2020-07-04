@@ -15,12 +15,14 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import java.io.Serializable;
+
 /**
  * Field
  *
  * @author sharajava
  */
-public class Field {
+public class Field implements Serializable {
 
     /**
      * The Name.

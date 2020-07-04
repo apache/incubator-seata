@@ -15,14 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.sql.serial.SerialArray;
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialDatalink;
-import javax.sql.rowset.serial.SerialJavaObject;
-import javax.sql.rowset.serial.SerialRef;
+import java.io.Serializable;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -36,12 +29,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
+import javax.sql.rowset.serial.SerialJavaObject;
+import javax.sql.rowset.serial.SerialRef;
+
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.sql.serial.SerialArray;
+
 /**
  * The type Table records.
  *
  * @author sharajava
  */
-public class TableRecords {
+public class TableRecords implements Serializable {
 
     private transient TableMeta tableMeta;
 

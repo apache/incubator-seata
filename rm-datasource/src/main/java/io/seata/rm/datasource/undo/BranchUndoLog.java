@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ import java.util.List;
  *
  * @author sharajava
  */
-public class BranchUndoLog {
+public class BranchUndoLog implements Serializable {
 
     private String xid;
 

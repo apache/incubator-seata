@@ -16,13 +16,10 @@
 package io.seata.rm.datasource.undo.parser;
 
 import java.sql.Timestamp;
-
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
-
-import org.nustaq.serialization.FSTConfiguration;
-
 import io.seata.core.serializer.SerializerClassRegistry;
+import org.nustaq.serialization.FSTConfiguration;
 
 /**
  * @author funkye

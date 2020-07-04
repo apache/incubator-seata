@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ import java.util.List;
  *
  * @author sharajava
  */
-public class Row {
+public class Row implements Serializable {
 
     private List<Field> fields = new ArrayList<Field>();
 
