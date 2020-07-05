@@ -26,6 +26,7 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,23 +61,29 @@ public class RegRmProcessor implements RemotingProcessor {
         RegisterRMRequest message = (RegisterRMRequest) rpcMessage.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
+        String errorInfo = StringUtils.EMPTY;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
-                        ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
             isSuccess = false;
-            LOGGER.error(exx.getMessage());
+            errorInfo = exx.getMessage();
+            LOGGER.error("RM register fail, error message:{}", errorInfo);
+        }
+        RegisterRMResponse response = new RegisterRMResponse(isSuccess);
+        if (StringUtils.isNotEmpty(errorInfo)) {
+            response.setMsg(errorInfo);
         }
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), new RegisterRMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("RM register success,message:{},channel:{}", message, ctx.channel());
+            LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
+                message.getVersion());
         }
     }
 
