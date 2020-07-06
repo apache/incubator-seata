@@ -16,6 +16,7 @@
 package io.seata.sqlparser;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * The interface Parameters holder.
@@ -29,5 +30,5 @@ public interface ParametersHolder {
      *
      * @return the array list [ ]
      */
-    ArrayList<Object>[] getParameters();
+    Map<Integer,ArrayList<Object>> getParameters();
 }

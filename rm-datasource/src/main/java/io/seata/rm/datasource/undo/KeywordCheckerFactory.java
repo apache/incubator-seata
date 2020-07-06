@@ -15,10 +15,10 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * The type Keyword checker factory.

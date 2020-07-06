@@ -17,11 +17,13 @@ package io.seata.rm.datasource.undo.mysql;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
@@ -29,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type My sql undo insert executor.
@@ -40,7 +43,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
     /**
      * DELETE FROM a WHERE pk = ?
      */
-    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s = ?";
+    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s ";
 
     /**
      * Undo Inset.
@@ -54,18 +57,26 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         if (CollectionUtils.isEmpty(afterImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
-        Row row = afterImageRows.get(0);
-        Field pkField = row.primaryKeys().get(0);
-        // insert sql undo log after image all field come from table meta, need add escape.
-        // see BaseTransactionalExecutor#buildTableRecords
-        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
-                             ColumnUtils.addEscape(pkField.getName(), JdbcConstants.MYSQL));
+        return generateDeleteSql(afterImageRows,afterImage);
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
-        throws SQLException {
-        undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
+            throws SQLException {
+        int undoIndex = 0;
+        for (Field pkField:pkValueList) {
+            undoIndex++;
+            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+        }
+    }
+
+    private String generateDeleteSql(List<Row> rows,TableRecords afterImage) {
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        List<String> pkNameList = getOrderedPkList(afterImage,rows.get(0),JdbcConstants.MYSQL)
+                .stream().map(e -> e.getName())
+                .collect(Collectors.toList());
+        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,keywordChecker);
+        return String.format(DELETE_SQL_TEMPLATE,sqlUndoLog.getTableName(), whereSql);
     }
 
     /**
