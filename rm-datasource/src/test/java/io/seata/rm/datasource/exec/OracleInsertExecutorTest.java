@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -27,17 +26,17 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -68,6 +67,7 @@ public class OracleInsertExecutorTest {
     private OracleInsertExecutor insertExecutor;
 
     private final int pkIndex = 0;
+    private HashMap<String, Integer> pkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -81,6 +81,10 @@ public class OracleInsertExecutorTest {
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        pkIndexMap = new HashMap<String, Integer>() {{
+            put(ID_COLUMN, pkIndex);
+        }};
     }
 
     @Test
@@ -93,7 +97,7 @@ public class OracleInsertExecutorTest {
         pkValuesSeq.add(PK_VALUE);
 
         doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr);
-        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN, pkIndex);}}).when(insertExecutor).getPkIndex();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
 
         Map<String,List<Object>> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         verify(insertExecutor).getPkValuesBySequence(expr);
@@ -138,7 +142,7 @@ public class OracleInsertExecutorTest {
             insertExecutor.getGeneratedKeys();
         });
 
-        doReturn(new HashMap<String,Integer>(){{put(ID_COLUMN, pkIndex);}}).when(insertExecutor).getPkIndex();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             insertExecutor.getPkValuesByColumn();
@@ -178,7 +182,7 @@ public class OracleInsertExecutorTest {
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
 
         return expr;
     }
@@ -202,13 +206,13 @@ public class OracleInsertExecutorTest {
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
     private void mockStatementInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
 

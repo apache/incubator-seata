@@ -59,6 +59,7 @@ public class BatchInsertExecutorTest {
     private MySQLInsertExecutor insertExecutor;
 
     private final int pkIndex = 1;
+    private HashMap pkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -73,7 +74,11 @@ public class BatchInsertExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new MySQLInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        doReturn(new HashMap(){{put(ID_COLUMN, pkIndex);}}).when(insertExecutor).getPkIndex();
+        pkIndexMap = new HashMap() {{
+            put(ID_COLUMN, pkIndex);
+        }};
+
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
     }
 
     @Test
@@ -201,7 +206,7 @@ public class BatchInsertExecutorTest {
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "userStatus1"));
         insertRows.add(Arrays.asList("?", Null.get(), "?", "userStatus2"));
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
     }
 
     private void mockParameters_with_number_and_insertRows_with_placeholde_null() {
@@ -226,7 +231,7 @@ public class BatchInsertExecutorTest {
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "userStatus1"));
         insertRows.add(Arrays.asList("?", Null.get(), "?", "userStatus2"));
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
     }
 
     private List<String> mockInsertColumns() {
@@ -276,7 +281,7 @@ public class BatchInsertExecutorTest {
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
 
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters.get(PK_INDEX + 1));
     }
 
@@ -356,7 +361,7 @@ public class BatchInsertExecutorTest {
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
     }
 
@@ -400,7 +405,7 @@ public class BatchInsertExecutorTest {
         insertRows.add(Arrays.asList("?", "?", "4", "44"));
         insertRows.add(Arrays.asList("?", "?", "5", "55"));
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
     }
 
@@ -444,7 +449,7 @@ public class BatchInsertExecutorTest {
         insertRows.add(Arrays.asList("?", 100000004, "?", "4"));
         insertRows.add(Arrays.asList("?", 100000005, "?", "5"));
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
     }
 
 
@@ -483,8 +488,8 @@ public class BatchInsertExecutorTest {
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "?", "?"));
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
         when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters.get(PK_INDEX + 1));
+        doReturn(insertRows).when(sqlInsertRecognizer).getInsertRows(pkIndexMap.values());
     }
 
 
@@ -509,7 +514,7 @@ public class BatchInsertExecutorTest {
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", "?", "userName1", "userStatus1"));
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters.get(PK_INDEX + 1));
     }
 
@@ -526,7 +531,7 @@ public class BatchInsertExecutorTest {
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?", pkId, "?", "userStatus"));
         when(statementProxy.getParameters()).thenReturn(paramters);
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(insertRows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
     }
 
 }

@@ -56,6 +56,7 @@ public class PostgresqlInsertExecutorTest {
     private PostgresqlInsertExecutor insertExecutor;
 
     private final int pkIndex = 0;
+    private HashMap<String, Integer> pkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -69,6 +70,12 @@ public class PostgresqlInsertExecutorTest {
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new PostgresqlInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        pkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndex);
+            }
+        };
     }
 
     @Test
@@ -117,7 +124,7 @@ public class PostgresqlInsertExecutorTest {
     private void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex))).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
     private List<String> mockInsertColumns() {
@@ -127,7 +134,7 @@ public class PostgresqlInsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
-        doReturn(Collections.singletonMap(ID_COLUMN,0)).when(insertExecutor).getPkIndex();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
         return columns;
     }
 
