@@ -22,6 +22,7 @@ import io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine;
 import io.seata.saga.rm.StateMachineEngineHolder;
 import io.seata.spring.boot.autoconfigure.properties.SeataSagaAsyncThreadPoolProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -51,6 +52,8 @@ import java.util.concurrent.TimeUnit;
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class SeataSagaAutoConfiguration {
 
+    public static final String SAGA_DATA_SOURCE_BEAN_NAME = "saga-data-source";
+
     /**
      * Create state machine config bean.
      */
@@ -59,12 +62,13 @@ public class SeataSagaAutoConfiguration {
     @ConditionalOnMissingBean
     @ConfigurationProperties(StarterConstants.SAGA_STATE_MACHINE_PREFIX)
     public StateMachineConfig dbStateMachineConfig(
+            @Qualifier(SAGA_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource sagaDataSource,
             DataSource dataSource,
             @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
             @Value("${spring.application.name:}") String applicationId,
             @Value("${seata.tx-service-group:}") String txServiceGroup) {
         DbStateMachineConfig config = new DbStateMachineConfig();
-        config.setDataSource(dataSource);
+        config.setDataSource(sagaDataSource != null ? sagaDataSource : dataSource);
         config.setApplicationId(applicationId);
         config.setTxServiceGroup(txServiceGroup);
 
