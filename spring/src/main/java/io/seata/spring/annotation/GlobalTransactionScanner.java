@@ -76,11 +76,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
-    private static ConfigurableListableBeanFactory beanFactory;
-
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDE_SET = new HashSet<>();
     private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new HashSet<>();
+
+    private static ConfigurableListableBeanFactory beanFactory;
 
     private MethodInterceptor interceptor;
     private MethodInterceptor globalTransactionalInterceptor;
@@ -214,6 +214,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return bean;
                 }
 
+                //execute the excluders
                 if (!SCANNER_EXCLUDER_SET.isEmpty()) {
                     try {
                         BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
@@ -229,7 +230,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                             }
                         }
                     } catch (NoSuchBeanDefinitionException e) {
-                        // do nothing
+                        //do nothing
                     }
                 }
 

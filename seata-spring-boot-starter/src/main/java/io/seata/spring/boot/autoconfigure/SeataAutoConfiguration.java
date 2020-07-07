@@ -77,7 +77,9 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.setBeanFactory(beanFactory);
 
         // add excluders
+        // spring beans
         GlobalTransactionScanner.addScannerExcluders(scannerExcluders);
+        // '/META-INF/services/io.seata.spring.annotation.ScannerExcluder'
         GlobalTransactionScanner.addScannerExcluders(EnhancedServiceLoader.loadAll(ScannerExcluder.class));
 
         // add excludeBeanNames
@@ -91,6 +93,6 @@ public class SeataAutoConfiguration {
     @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = {"enableAutoDataSourceProxy", "enable-auto-data-source-proxy"}, havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
     public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator(SeataProperties seataProperties) {
-        return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(),seataProperties.getExcludesForAutoProxying());
+        return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(), seataProperties.getExcludesForAutoProxying());
     }
 }
