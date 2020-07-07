@@ -29,11 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -85,22 +81,21 @@ public class PostgresqlInsertExecutorTest {
         pkMap.put(ID_COLUMN, columnMeta);
         doReturn(pkMap).when(tableMeta).getPrimaryKeyMap();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
 
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
         doReturn(pkValuesAuto).when(insertExecutor).getGeneratedKeys();
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        Map<String,List<Object>> pkValuesMap = insertExecutor.getPkValuesByColumn();
         //pk value = DEFAULT so getPkValuesByDefault
         doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByDefault();
 
         verify(insertExecutor).getPkValuesByDefault();
-        Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
+        Assertions.assertEquals(pkValuesMap.get(ID_COLUMN), pkValuesAuto);
     }
 
     private void mockParametersPkWithDefault() {
-        ArrayList<Object>[] parameters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(SqlDefaultExpr.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -109,10 +104,10 @@ public class PostgresqlInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        parameters[0] = arrayList0;
-        parameters[1] = arrayList1;
-        parameters[2] = arrayList2;
-        parameters[3] = arrayList3;
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(parameters);
     }
@@ -130,7 +125,7 @@ public class PostgresqlInsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(Collections.singletonMap(ID_COLUMN,0)).when(insertExecutor).getPkIndex();
         return columns;
     }
 
