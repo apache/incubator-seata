@@ -70,7 +70,11 @@ public class ScopeScannerExcluder implements ScannerExcluder {
             return true; // exclude
         }
 
-        if (beanDefinition instanceof AnnotatedBeanDefinition) {
+        while (beanDefinition != null && !(beanDefinition instanceof AnnotatedBeanDefinition)) {
+            beanDefinition = beanDefinition.getOriginatingBeanDefinition();
+        }
+
+        if (beanDefinition != null) {
             AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
             if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
                 if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getFactoryMethodMetadata())) {
