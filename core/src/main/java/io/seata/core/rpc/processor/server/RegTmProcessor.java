@@ -26,6 +26,7 @@ import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,7 @@ public class RegTmProcessor implements RemotingProcessor {
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
+        String errorInfo = StringUtils.EMPTY;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
@@ -73,11 +75,17 @@ public class RegTmProcessor implements RemotingProcessor {
             }
         } catch (Exception exx) {
             isSuccess = false;
-            LOGGER.error(exx.getMessage());
+            errorInfo = exx.getMessage();
+            LOGGER.error("TM register fail, error message:{}", errorInfo);
         }
-        remotingServer.sendResponse(rpcMessage, ctx.channel(), new RegisterTMResponse(isSuccess));
+        RegisterTMResponse response = new RegisterTMResponse(isSuccess);
+        if (StringUtils.isNotEmpty(errorInfo)) {
+            response.setMsg(errorInfo);
+        }
+        remotingServer.sendResponse(rpcMessage, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("TM register success,message:{},channel:{}", message, ctx.channel());
+            LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
+                message.getVersion());
         }
     }
 
