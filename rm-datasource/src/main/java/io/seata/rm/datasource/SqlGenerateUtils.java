@@ -15,13 +15,12 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+
+import io.seata.rm.datasource.sql.struct.Field;
 
 /**
  * generate sql and set value to sql
@@ -34,7 +33,6 @@ public class SqlGenerateUtils {
 
     }
 
-
     /**
      * each pk is a condition.the result will like :" (id,userCode) in ((?,?) (?,?))"
      * Build where condition by pks string.
@@ -45,7 +43,8 @@ public class SqlGenerateUtils {
      * @return return where condition sql string.the sql can search all related records not just one.
      * @throws SQLException the sql exception
      */
-    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType) throws SQLException {
+    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType)
+        throws SQLException {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
 
@@ -77,7 +76,6 @@ public class SqlGenerateUtils {
         return whereStr.toString();
     }
 
-
     /**
      * set parameter for PreparedStatement, this is only used in pk sql.
      *
@@ -86,7 +84,8 @@ public class SqlGenerateUtils {
      * @param pst
      * @throws SQLException
      */
-    public static void setParamForPk(List<Map<String, Field>> pkRowsList, List<String> pkColumnNameList, PreparedStatement pst) throws SQLException {
+    public static void setParamForPk(List<Map<String, Field>> pkRowsList, List<String> pkColumnNameList,
+                                     PreparedStatement pst) throws SQLException {
         int paramIndex = 1;
         for (int i = 0; i < pkRowsList.size(); i++) {
             Map<String, Field> rowData = pkRowsList.get(i);
@@ -104,7 +103,7 @@ public class SqlGenerateUtils {
      * @param pkNameList
      * @return return where condition sql string.the sql can just search one related record.
      */
-    public static String buildWhereConditionByPKs(List<String> pkNameList, KeywordChecker keywordChecker) {
+    public static String buildWhereConditionByPKs(List<String> pkNameList, String dbType) {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
         for (int i = 0; i < pkNameList.size(); i++) {
@@ -112,11 +111,10 @@ public class SqlGenerateUtils {
                 whereStr.append(" and ");
             }
             String pkName = pkNameList.get(i);
-            whereStr.append(keywordChecker.checkAndReplace(pkName));
+            whereStr.append(ColumnUtils.addEscape(pkName, dbType));
             whereStr.append(" = ? ");
         }
         return whereStr.toString();
     }
-
 
 }
