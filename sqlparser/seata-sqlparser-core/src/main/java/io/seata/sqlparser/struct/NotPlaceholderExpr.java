@@ -13,29 +13,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.druid;
 
-import java.util.List;
-
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
+package io.seata.sqlparser.struct;
 
 /**
- * The type Abstract my sql recognizer test.
- *
- * @author hanwen created at 2019-01-25
+ * The not placeholder expression.
+ * @author jsbxyyx
  */
-public class AbstractMySQLRecognizerTest {
+public class NotPlaceholderExpr {
+
+    private static NotPlaceholderExpr instance = new NotPlaceholderExpr();
 
     /**
-     * Gets sql statement.
+     * Get NotPlaceholder.
      *
-     * @param sql the sql
-     * @return the sql statement
+     * @return the NotPlaceholder
      */
-    public SQLStatement getSQLStatement(String sql) {
-        List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
-        return stats.get(0);
+    public static NotPlaceholderExpr get() {
+        return instance;
+    }
+
+    private NotPlaceholderExpr() {
+    }
+
+    @Override
+    public String toString() {
+        return "NOT_PLACEHOLDER";
     }
 
 }

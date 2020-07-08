@@ -33,11 +33,13 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -107,14 +109,15 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
-    public List<List<Object>> getInsertRows() {
+    public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
-            for (SQLExpr expr : valuesClause.getValues()) {
+            for (int i = 0, len = exprs.size(); i < len; i++) {
+                SQLExpr expr = exprs.get(i);
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
@@ -128,7 +131,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                         String sequence = sqlMethodInvokeExpr.getParameters().get(0).toString();
                         row.add(new SqlSequenceExpr(sequence, function));
                     } else {
-                        row.add(new SqlMethodExpr());
+                        row.add(SqlMethodExpr.get());
                     }
                 } else if (expr instanceof SQLSequenceExpr) {
                     SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
@@ -138,7 +141,10 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                 } else if (expr instanceof SQLDefaultExpr) {
                     row.add(SqlDefaultExpr.get());
                 } else {
-                    throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    if (primaryKeyIndex.contains(i)) {
+                        throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    }
+                    row.add(NotPlaceholderExpr.get());
                 }
             }
         }
