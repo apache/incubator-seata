@@ -15,13 +15,12 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+
+import io.seata.rm.datasource.sql.struct.Field;
 
 /**
  * generate sql and set value to sql
@@ -104,7 +103,7 @@ public class SqlGenerateUtils {
      * @param pkNameList
      * @return return where condition sql string.the sql can just search one related record.
      */
-    public static String buildWhereConditionByPKs(List<String> pkNameList, KeywordChecker keywordChecker) {
+    public static String buildWhereConditionByPKs(List<String> pkNameList, String dbType) {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
         for (int i = 0; i < pkNameList.size(); i++) {
@@ -112,7 +111,7 @@ public class SqlGenerateUtils {
                 whereStr.append(" and ");
             }
             String pkName = pkNameList.get(i);
-            whereStr.append(keywordChecker.checkAndReplace(pkName));
+            whereStr.append(ColumnUtils.addEscape(pkName,dbType));
             whereStr.append(" = ? ");
         }
         return whereStr.toString();
