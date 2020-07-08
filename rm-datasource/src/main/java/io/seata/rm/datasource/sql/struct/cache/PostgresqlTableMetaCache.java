@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -37,8 +38,6 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
-
-    private KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -64,7 +63,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
             DatabaseMetaData dbmd = connection.getMetaData();
-            tableName = keywordChecker.checkAndReplace(tableName);
+            tableName = ColumnUtils.addEscape(tableName, JdbcConstants.POSTGRESQL);
             return resultSetMetaToSchema(dbmd, tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
