@@ -16,7 +16,7 @@
 package io.seata.core.store;
 
 /**
- * Branch Transaction model
+ * The type Branch transaction model.
  *
  * @author wang.liang
  */

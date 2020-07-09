@@ -18,11 +18,11 @@ package io.seata.core.store;
 import java.util.Date;
 
 /**
- * Model
+ * The type Base model.
  *
  * @author wang.liang
  */
-interface BaseModel {
+public interface BaseModel {
 
     Date getGmtCreate();
 
