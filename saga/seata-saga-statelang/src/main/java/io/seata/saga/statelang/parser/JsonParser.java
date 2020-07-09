@@ -13,29 +13,39 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.druid;
-
-import java.util.List;
-
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
+package io.seata.saga.statelang.parser;
 
 /**
- * The type Abstract my sql recognizer test.
  *
- * @author hanwen created at 2019-01-25
+ * Json Parser
+ *
+ * @author lorne.cl
  */
-public class AbstractMySQLRecognizerTest {
+public interface JsonParser {
 
     /**
-     * Gets sql statement.
+     * get Name
      *
-     * @param sql the sql
-     * @return the sql statement
+     * @return
      */
-    public SQLStatement getSQLStatement(String sql) {
-        List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
-        return stats.get(0);
-    }
+    String getName();
 
+    /**
+     * Object to Json string
+     *
+     * @param o
+     * @param prettyPrint
+     * @return
+     */
+    String toJsonString(Object o, boolean prettyPrint);
+
+    /**
+     * parse json string to Object
+     *
+     * @param json
+     * @param type
+     * @param <T>
+     * @return
+     */
+    <T> T parse(String json, Class<T> type, boolean ignoreAutoType);
 }

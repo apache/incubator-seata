@@ -26,7 +26,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
     /**
      * The Version.
      */
-    protected String version = Version.CURRENT;
+    protected String version = Version.getCurrent();
 
     /**
      * The Application id.
