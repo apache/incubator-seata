@@ -27,8 +27,6 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
