@@ -77,10 +77,10 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.setBeanFactory(beanFactory);
 
         // add excluders
-        // spring beans
-        GlobalTransactionScanner.addScannerExcluders(scannerExcluders);
         // '/META-INF/services/io.seata.spring.annotation.ScannerExcluder'
         GlobalTransactionScanner.addScannerExcluders(EnhancedServiceLoader.loadAll(ScannerExcluder.class));
+        // spring beans
+        GlobalTransactionScanner.addScannerExcluders(scannerExcluders);
 
         // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanner());

@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -78,7 +79,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDE_SET = new HashSet<>();
-    private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new HashSet<>();
+    private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new LinkedHashSet<>();
 
     private static ConfigurableListableBeanFactory beanFactory;
 

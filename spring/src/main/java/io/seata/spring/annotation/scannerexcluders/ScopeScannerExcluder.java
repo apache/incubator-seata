@@ -15,7 +15,10 @@
  */
 package io.seata.spring.annotation.scannerexcluders;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactionScanner;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.spring.annotation.ScannerExcluder;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +40,7 @@ import java.util.Set;
  *
  * @author wang.liang
  */
+@LoadLevel(name = "ScopeBeans", order = 200)
 public class ScopeScannerExcluder implements ScannerExcluder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScopeScannerExcluder.class);
@@ -101,8 +105,10 @@ public class ScopeScannerExcluder implements ScannerExcluder {
             if (scopeName != null) {
                 if (EXCLUDE_SCOPE_SET.contains(scopeName.toString().toLowerCase())) {
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Exclude bean '{}' from the {}, cause of @Scope(scopeName = \"{}\")",
-                                beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString());
+                        LOGGER.warn("Exclude bean '{}' from the {}, cause of @Scope(scopeName = \"{}\")." +
+                                        " @{} and @{} will be invalid in this bean.",
+                                beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString(),
+                                GlobalTransactional.class.getSimpleName(), GlobalLock.class.getSimpleName());
                     }
                     return true; // exclude
                 }
