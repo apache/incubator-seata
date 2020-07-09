@@ -53,6 +53,8 @@ import java.util.concurrent.TimeUnit;
 public class SeataSagaAutoConfiguration {
 
     public static final String SAGA_DATA_SOURCE_BEAN_NAME = "seataSagaDataSource";
+    public static final String SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME = "";
+    public static final String SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME = "seataSagaRejectedExecutionHandler";
 
     /**
      * Create state machine config bean.
@@ -62,9 +64,9 @@ public class SeataSagaAutoConfiguration {
     @ConditionalOnMissingBean
     @ConfigurationProperties(StarterConstants.SAGA_STATE_MACHINE_PREFIX)
     public StateMachineConfig dbStateMachineConfig(
-            @Qualifier(SAGA_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource sagaDataSource,
             DataSource dataSource,
-            @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
+            @Qualifier(SAGA_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource sagaDataSource,
+            @Qualifier(SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME) @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
             @Value("${spring.application.name:}") String applicationId,
             @Value("${seata.tx-service-group:}") String txServiceGroup) {
         DbStateMachineConfig config = new DbStateMachineConfig();
@@ -96,23 +98,24 @@ public class SeataSagaAutoConfiguration {
     @EnableConfigurationProperties({SeataSagaAsyncThreadPoolProperties.class})
     static class SagaAsyncThreadPoolExecutorConfiguration {
 
+
         /**
          * Create rejected execution handler bean.
          */
-        @Bean
+        @Bean(SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME)
         @ConditionalOnMissingBean
-        public RejectedExecutionHandler rejectedExecutionHandler() {
+        public RejectedExecutionHandler sagaRejectedExecutionHandler() {
             return new ThreadPoolExecutor.CallerRunsPolicy();
         }
 
         /**
          * Create state machine async thread pool executor bean.
          */
-        @Bean
+        @Bean(SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME)
         @ConditionalOnMissingBean
-        public ThreadPoolExecutor sagaStateMachineAsyncThreadPoolExecutor(
+        public ThreadPoolExecutor sagaAsyncThreadPoolExecutor(
                 SeataSagaAsyncThreadPoolProperties properties,
-                RejectedExecutionHandler rejectedExecutionHandler) {
+                @Qualifier(SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME) RejectedExecutionHandler rejectedExecutionHandler) {
             ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
             threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
             threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
