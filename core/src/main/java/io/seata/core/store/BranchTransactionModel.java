@@ -16,43 +16,43 @@
 package io.seata.core.store;
 
 /**
- * Global Transaction model
+ * Branch Transaction model
  *
  * @author wang.liang
  */
-public interface GlobalTransactionModel extends BaseModel {
+public interface BranchTransactionModel extends BaseModel {
 
     String getXid();
 
     void setXid(String xid);
 
+    long getTransactionId();
+
+    void setTransactionId(long transactionId);
+
+    long getBranchId();
+
+    void setBranchId(long branchId);
+
+    String getResourceGroupId();
+
+    void setResourceGroupId(String resourceGroupId);
+
+    String getResourceId();
+
+    void setResourceId(String resourceId);
+
+    String getBranchType();
+
+    void setBranchType(String branchType);
+
     int getStatus();
 
     void setStatus(int status);
 
-    String getApplicationId();
+    String getClientId();
 
-    void setApplicationId(String applicationId);
-
-    String getTransactionServiceGroup();
-
-    void setTransactionServiceGroup(String transactionServiceGroup);
-
-    String getTransactionName();
-
-    void setTransactionName(String transactionName);
-
-    int getTimeout();
-
-    void setTimeout(int timeout);
-
-    long getBeginTime();
-
-    void setBeginTime(long beginTime);
-
-    long getTransactionId();
-
-    void setTransactionId(long transactionId);
+    void setClientId(String clientId);
 
     String getApplicationData();
 
