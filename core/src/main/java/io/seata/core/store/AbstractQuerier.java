@@ -114,7 +114,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     }
 
     @Override
-    public void setSortParams(SortParam[] sortParams) {
+    public void setSortParams(SortParam... sortParams) {
         this.sortParams = sortParams;
     }
 
