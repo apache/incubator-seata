@@ -24,8 +24,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
  *
  * @author wang.liang
  */
-@LoadLevel(name = "ConfigBeans", order = 110)
-public class ConfigScannerExcluder implements ScannerExcluder {
+@LoadLevel(name = "ConfigBeans", order = 100)
+public class ConfigBeansScannerExcluder implements ScannerExcluder {
 
     public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
         return beanName == null

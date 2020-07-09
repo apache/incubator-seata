@@ -1,2 +1,2 @@
-io.seata.spring.annotation.scannerexcluders.ConfigScannerExcluder
-io.seata.spring.annotation.scannerexcluders.ScopeScannerExcluder
+io.seata.spring.annotation.scannerexcluders.ConfigBeansScannerExcluder
+io.seata.spring.annotation.scannerexcluders.ScopeBeansScannerExcluder

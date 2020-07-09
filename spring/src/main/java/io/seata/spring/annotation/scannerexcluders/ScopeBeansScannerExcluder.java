@@ -41,9 +41,9 @@ import java.util.Set;
  * @author wang.liang
  */
 @LoadLevel(name = "ScopeBeans", order = 200)
-public class ScopeScannerExcluder implements ScannerExcluder {
+public class ScopeBeansScannerExcluder implements ScannerExcluder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScopeScannerExcluder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScopeBeansScannerExcluder.class);
     private static final Set<String> EXCLUDE_SCOPE_SET = Collections.synchronizedSet(new HashSet<>());
 
     static {
