@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class MySQLUndoUpdateExecutorTest extends BaseExecutorTest {
     @BeforeAll
     public static void init(){
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("id");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"id"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();

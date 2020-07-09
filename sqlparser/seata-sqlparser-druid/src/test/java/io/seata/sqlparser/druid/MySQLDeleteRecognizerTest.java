@@ -15,11 +15,6 @@
  */
 package io.seata.sqlparser.druid;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
@@ -28,6 +23,12 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author hanwen created at 2019-01-25
  */
-public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
+public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
 
     @Test
     public void testVMarker() {
@@ -79,10 +80,12 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
-                return new ArrayList[] {idParam};
+                Map result = new HashMap<>();
+                result.put(1,idParam);
+                return result;
             }
         }, paramAppenderList);
 
@@ -109,12 +112,15 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
-                return new ArrayList[] {idParam, id2Param};
+                Map result = new HashMap();
+                result.put(1, idParam);
+                result.put(2, id2Param);
+                return result;
             }
         }, paramAppenderList);
 
@@ -141,12 +147,15 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
-                return new ArrayList[] {idParam, id2Param};
+                Map result = new HashMap();
+                result.put(1, idParam);
+                result.put(2, id2Param);
+                return result;
             }
         }, paramAppenderList);
 
@@ -180,7 +189,7 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 return null;
             }
         }, new ArrayList<>());
@@ -194,10 +203,12 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
         whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
-                return new ArrayList[] {idParam};
+                Map result = new HashMap();
+                result.put(1, idParam);
+                return result;
             }
         }, new ArrayList<>());
 
@@ -209,10 +220,12 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
         whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
-                return new ArrayList[] {idParam};
+                Map result = new HashMap();
+                result.put(1, idParam);
+                return result;
             }
         }, new ArrayList<>());
 
@@ -224,12 +237,15 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
         whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add(1);
                 ArrayList<Object> idParam2 = new ArrayList<>();
                 idParam.add(2);
-                return new ArrayList[] {idParam, idParam2};
+                Map result = new HashMap();
+                result.put(1, idParam);
+                result.put(2, idParam2);
+                return result;
             }
         }, new ArrayList<>());
         //test for sql with in
@@ -243,8 +259,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             deleteAst.setWhere(new MySqlOrderingExpr());
             new MySQLDeleteRecognizer(s, deleteAst).getWhereCondition(new ParametersHolder() {
                 @Override
-                public ArrayList<Object>[] getParameters() {
-                    return new ArrayList[0];
+                public Map<Integer,ArrayList<Object>> getParameters() {
+                    return new HashMap();
                 }
             }, new ArrayList<>());
         });
@@ -294,5 +310,10 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             deleteAst.setWhere(new MySqlOrderingExpr());
             new MySQLDeleteRecognizer(s, deleteAst).getWhereCondition();
         });
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
     }
 }
