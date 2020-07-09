@@ -16,7 +16,7 @@
 package io.seata.core.store;
 
 /**
- * Global Transaction model
+ * The type Global transaction model.
  *
  * @author wang.liang
  */
@@ -25,6 +25,10 @@ public interface GlobalTransactionModel extends BaseModel {
     String getXid();
 
     void setXid(String xid);
+
+    long getTransactionId();
+
+    void setTransactionId(long transactionId);
 
     int getStatus();
 
@@ -49,10 +53,6 @@ public interface GlobalTransactionModel extends BaseModel {
     long getBeginTime();
 
     void setBeginTime(long beginTime);
-
-    long getTransactionId();
-
-    void setTransactionId(long transactionId);
 
     String getApplicationData();
 
