@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 public class SeataSagaAutoConfiguration {
 
     public static final String SAGA_DATA_SOURCE_BEAN_NAME = "seataSagaDataSource";
-    public static final String SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME = "";
+    public static final String SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME = "seataSagaAsyncThreadPoolExecutor";
     public static final String SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME = "seataSagaRejectedExecutionHandler";
 
     /**
