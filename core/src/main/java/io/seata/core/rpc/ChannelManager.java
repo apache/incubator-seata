@@ -204,7 +204,7 @@ public class ChannelManager {
     }
 
     /**
-     * Repair: There is a BUG in delimiting strings when working with multiple database connection addresses
+     * Replace the comma in the multi-database connection address string with an underscore
      * @param dbkey
      * @param s2
      * @param s3
