@@ -24,6 +24,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ import java.util.Collection;
  * @author sharajava
  */
 public class SessionHolder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHolder.class);
 
     /**
      * The constant CONFIG.
@@ -95,9 +99,11 @@ public class SessionHolder {
                         case TimeoutRollbackFailed: // 14
                         case Finished: // 15
                             try {
+                                LOGGER.warn("Reloaded Session should NOT be " + globalStatus + ", xid = " + globalSession.getXid());
                                 SESSION_MANAGER.removeGlobalSession(globalSession);
-                            } catch (TransactionException e) {
-                                throw new ShouldNeverHappenException(e);
+                                LOGGER.info("Remove global session succeeded, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
+                            } catch (Exception e) {
+                                LOGGER.error("Remove the global session failed, xid = " + globalSession.getXid() + ", status = " + globalSession.getStatus(), e);
                             }
                             break;
                         case AsyncCommitting: // 8
