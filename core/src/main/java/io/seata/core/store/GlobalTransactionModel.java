@@ -59,5 +59,4 @@ public interface GlobalTransactionModel extends BaseModel {
     String getApplicationData();
 
     void setApplicationData(String applicationData);
-
 }

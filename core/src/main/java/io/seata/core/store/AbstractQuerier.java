@@ -15,6 +15,8 @@
  */
 package io.seata.core.store;
 
+import io.seata.common.util.ComparableUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,30 +81,13 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
      * @return a negative integer. 0: equals ; -1: a < b ; 1: a > b
      */
     protected int compareTo(Comparable a, Comparable b, SortOrder sortOrder) {
-        int ret;
-        if (a == null) {
-            if (b == null) {
-                return 0;
-            } else {
-                ret = -1;
-            }
-        } else {
-            if (b == null) {
-                ret = 1;
-            } else {
-                ret = a.compareTo(b);
-                if (ret == 0) {
-                    return 0;
-                }
-            }
+        int ret = ComparableUtils.compareTo(a, b);
+        if (ret == 0) {
+            return ret;
         }
 
         if (sortOrder == SortOrder.DESC) {
-            if (ret > 0) {
-                return -1;
-            } else {
-                return 1;
-            }
+            return ret > 0 ? -1 : 1; // -1 * ret
         }
 
         return ret;

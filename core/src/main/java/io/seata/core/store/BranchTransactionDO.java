@@ -21,6 +21,8 @@ import io.seata.core.model.BranchType;
 
 import java.util.Date;
 
+import java.util.Date;
+
 /**
  * branch transaction data object
  *

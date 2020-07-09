@@ -60,5 +60,4 @@ public interface BranchTransactionModel extends BaseModel {
     String getApplicationData();
 
     void setApplicationData(String applicationData);
-
 }
