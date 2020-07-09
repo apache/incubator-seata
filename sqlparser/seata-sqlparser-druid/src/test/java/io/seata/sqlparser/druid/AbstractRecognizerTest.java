@@ -13,32 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.struct;
+package io.seata.sqlparser.druid;
+
+import java.util.List;
+
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
- * TODO
- * sql method invoke expression
- * @author jsbxyyx
+ * The type Abstract my sql recognizer test.
+ *
+ * @author hanwen created at 2019-01-25
  */
-public class SqlMethodExpr {
-
-    private static SqlMethodExpr instance = new SqlMethodExpr();
+public abstract class AbstractRecognizerTest {
 
     /**
-     * Get SqlMethodExpr.
+     * Gets sql statement.
      *
-     * @return the SqlMethodExpr
+     * @param sql the sql
+     * @return the sql statement
      */
-    public static SqlMethodExpr get() {
-        return instance;
+    public SQLStatement getSQLStatement(String sql) {
+        List<SQLStatement> stats = SQLUtils.parseStatements(sql, getDbType());
+        return stats.get(0);
     }
 
-    private SqlMethodExpr() {
-    }
-
-    @Override
-    public String toString() {
-        return "SQL_METHOD";
-    }
+    public abstract String getDbType();
 
 }
