@@ -16,18 +16,16 @@
 package io.seata.saga.statelang.parser.impl;
 
 import java.util.Map;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.seata.common.util.StringUtils;
+import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.BaseState;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
+import io.seata.saga.statelang.parser.JsonParser;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
@@ -44,16 +42,23 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineParserImpl.class);
 
+    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
+
     @Override
     public StateMachine parse(String json) {
 
-        Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType, Feature.OrderedField);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
+        if (jsonParser == null) {
+            throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+        }
+        Map<String, Object> node = jsonParser.parse(json, Map.class, true);
         if (DesignerJsonTransformer.isDesignerJson(node)) {
             node = DesignerJsonTransformer.toStandardJson(node);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("===== Transformed standard state language:\n{}", JSON.toJSONString(node, SerializerFeature.PrettyFormat));
+                LOGGER.debug("===== Transformed standard state language:\n{}", jsonParser.toJsonString(node, true));
             }
         }
+
         StateMachineImpl stateMachine = new StateMachineImpl();
         stateMachine.setName((String) node.get("Name"));
         stateMachine.setComment((String) node.get("Comment"));
@@ -103,5 +108,13 @@ public class StateMachineParserImpl implements StateMachineParser {
             }
         }
         return stateMachine;
+    }
+
+    public String getJsonParserName() {
+        return jsonParserName;
+    }
+
+    public void setJsonParserName(String jsonParserName) {
+        this.jsonParserName = jsonParserName;
     }
 }
