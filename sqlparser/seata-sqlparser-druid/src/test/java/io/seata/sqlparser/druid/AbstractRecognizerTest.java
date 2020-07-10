@@ -13,24 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle.keyword;
+package io.seata.sqlparser.druid;
 
-import com.alibaba.druid.util.JdbcConstants;
+import java.util.List;
 
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
- * @author will
+ * The type Abstract my sql recognizer test.
+ *
+ * @author hanwen created at 2019-01-25
  */
-public class OracleKeywordCheckerTest {
+public abstract class AbstractRecognizerTest {
 
-    @Test
-    public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        Assertions.assertNotNull(keywordChecker);
+    /**
+     * Gets sql statement.
+     *
+     * @param sql the sql
+     * @return the sql statement
+     */
+    public SQLStatement getSQLStatement(String sql) {
+        List<SQLStatement> stats = SQLUtils.parseStatements(sql, getDbType());
+        return stats.get(0);
     }
+
+    public abstract String getDbType();
 
 }
