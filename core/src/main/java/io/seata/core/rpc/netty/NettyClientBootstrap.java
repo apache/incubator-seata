@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class NettyClientBootstrap implements RemotingBootstrap {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientBootstrap.class);
     private final NettyClientConfig nettyClientConfig;
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup eventLoopGroupWorker;
