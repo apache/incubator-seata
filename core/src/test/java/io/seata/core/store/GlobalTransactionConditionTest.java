@@ -77,7 +77,7 @@ public class GlobalTransactionConditionTest {
     }
 
     @Test
-    public void test_doFilter() throws InterruptedException {
+    public void test_doCount_doFilter() throws InterruptedException {
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
@@ -92,15 +92,21 @@ public class GlobalTransactionConditionTest {
         list.add(obj);
 
         // do filter
+        int count1 = condition.doCount(list);
         List<GlobalTransactionDO> list1 = condition.doFilter(list);
+        Assertions.assertEquals(count1, 0);
         Assertions.assertEquals(list1.size(), 0);
 
         Thread.sleep(101);
+        count1 = condition.doCount(list);
         list1 = condition.doFilter(list);
+        Assertions.assertEquals(count1, 0);
         Assertions.assertEquals(list1.size(), 0);
 
         condition.setStatuses(GlobalStatus.Begin);
+        count1 = condition.doCount(list);
         list1 = condition.doFilter(list);
+        Assertions.assertEquals(count1, 1);
         Assertions.assertEquals(list1.size(), 1);
     }
 
