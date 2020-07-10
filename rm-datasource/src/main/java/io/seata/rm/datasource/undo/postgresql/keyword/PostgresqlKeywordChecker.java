@@ -380,18 +380,6 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
         return true;
     }
 
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? replace(fieldOrTableName) : fieldOrTableName;
-    }
-
-    private String replace(String fieldOrTableName) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\"").append(fieldOrTableName).append("\"");
-        String name = builder.toString();
-        return name;
-    }
-
     private static boolean containsUppercase(String colName) {
         if (colName == null) {
             return false;

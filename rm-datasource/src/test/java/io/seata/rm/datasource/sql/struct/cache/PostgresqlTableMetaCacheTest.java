@@ -36,12 +36,12 @@ public class PostgresqlTableMetaCacheTest {
 
     private static Object[][] columnMetas =
         new Object[][] {
-            new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
+            new Object[] {"", "", "pt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+            new Object[] {"", "", "pt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
                 "NO"},
-            new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
+            new Object[] {"", "", "pt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
                 "NO"},
-            new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
+            new Object[] {"", "", "pt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
                 "NO"}
         };
 
@@ -68,15 +68,15 @@ public class PostgresqlTableMetaCacheTest {
 
         TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POSTGRESQL);
 
-        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t1", proxy.getResourceId());
+        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "pt1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
 
-        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.t1", proxy.getResourceId());
+        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.pt1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
 
-        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.\"t1\"", proxy.getResourceId());
+        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.\"pt1\"", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
     }

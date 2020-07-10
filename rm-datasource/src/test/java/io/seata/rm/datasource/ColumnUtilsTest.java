@@ -36,10 +36,20 @@ public class ColumnUtilsTest {
         Assertions.assertEquals("id", cols.get(0));
         Assertions.assertEquals("name", cols.get(1));
 
+        List<String> cols4 = new ArrayList<>();
+        cols4.add("`scheme`.`id`");
+        cols4 = ColumnUtils.delEscape(cols4, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols4.get(0));
+
         List<String> cols2 = new ArrayList<>();
         cols2.add("\"id\"");
         cols2 = ColumnUtils.delEscape(cols2, ColumnUtils.Escape.STANDARD);
         Assertions.assertEquals("id", cols2.get(0));
+
+        List<String> cols3 = new ArrayList<>();
+        cols3.add("\"scheme\".\"id\"");
+        cols3 = ColumnUtils.delEscape(cols3, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("scheme.id", cols3.get(0));
 
         Assertions.assertNull(ColumnUtils.delEscape((String) null, ColumnUtils.Escape.MYSQL));
     }

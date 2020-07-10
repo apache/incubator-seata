@@ -18,11 +18,10 @@ package io.seata.rm.datasource.exec;
 import io.seata.common.util.StringUtils;
 
 
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 
@@ -50,7 +49,6 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
             DeleteExecutor executor = new DeleteExecutor(statementProxy, statementCallback, sqlRecognizers.get(0));
             return executor.beforeImage();
         }
-        final KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(getDbType());
         final TableMeta tmeta = getTableMeta(sqlRecognizers.get(0).getTableName());
         final ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         StringBuilder whereCondition = new StringBuilder();
@@ -75,7 +73,7 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
         suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tmeta.getAllColumns().keySet()) {
-            selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
+            selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));
         }
         return buildTableRecords(tmeta, selectSQLAppender.toString(), paramAppenderList);
     }
