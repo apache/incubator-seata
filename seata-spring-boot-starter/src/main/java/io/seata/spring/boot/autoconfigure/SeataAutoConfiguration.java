@@ -104,7 +104,7 @@ public class SeataAutoConfiguration {
             ConfigNacosProperties configNacosProperties, ConfigConsulProperties configConsulProperties, ConfigZooKeeperProperties configZooKeeperProperties,
             ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, RegistryConsulProperties registryConsulProperties,
             RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties, RegistryNacosProperties registryNacosProperties,
-            RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties, RegistryZooKeeperProperties RegistryZooKeeperProperties
+            RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties, RegistryZooKeeperProperties registryZooKeeperProperties
     ) {
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, rmProperties);
         PROPERTY_BEAN_MAP.put(CLIENT_TM_PREFIX, tmProperties);
@@ -131,7 +131,7 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(REGISTRY_NACOS_PREFIX, registryNacosProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, registryRedisProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, registrySofaProperties);
-        PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties);
+        PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, registryZooKeeperProperties);
 
         return new SpringApplicationContextProvider();
     }
