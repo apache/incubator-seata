@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 
 
 import static io.seata.common.util.StringFormatUtils.DOT;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
@@ -88,9 +89,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     private Object get(String dataId) throws IllegalAccessException {
         String propertySuffix = getPropertySuffix(dataId);
-        Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
-        if (propertyClass != null) {
-            Object propertyObject = ObjectHolder.INSTANCE.getObject(ApplicationContext.class).getBean(propertyClass);
+        Object propertyObject = getPropertyObject(getPropertyPrefix(dataId));
+        if (propertyObject != null) {
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
@@ -152,6 +152,23 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             return SPECIAL_KEY_GROUPLIST;
         }
         return StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
+    }
+
+    /**
+     * Get property object
+     *
+     * @param propertyPrefix
+     * @return propertyObject
+     */
+    private Object getPropertyObject(String propertyPrefix) {
+        Object propertyObject = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        if (propertyObject == null) {
+            Class propertyClass = getPropertyClass(propertyPrefix);
+            if (propertyClass != null) {
+                propertyObject = ObjectHolder.INSTANCE.getObject(ApplicationContext.class).getBean(propertyClass);
+            }
+        }
+        return propertyObject;
     }
 
     /**
