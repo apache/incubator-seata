@@ -208,40 +208,40 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
             for (SortParam sortParam : super.getSortParams()) {
                 switch (sortParam.getSortFieldName()) {
                     case GLOBAL_TABLE_XID:
-                        ret = this.compareTo(a.getXid(), b.getXid(), sortParam.getSortOrder());
+                        ret = this.compare(a.getXid(), b.getXid(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_TRANSACTION_ID:
-                        ret = this.compareTo(a.getTransactionId(), b.getTransactionId(), sortParam.getSortOrder());
+                        ret = this.compare(a.getTransactionId(), b.getTransactionId(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_STATUS:
-                        ret = this.compareTo(a.getStatus(), b.getStatus(), sortParam.getSortOrder());
+                        ret = this.compare(a.getStatus(), b.getStatus(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_APPLICATION_ID:
-                        ret = this.compareTo(a.getApplicationId(), b.getApplicationId(), sortParam.getSortOrder());
+                        ret = this.compare(a.getApplicationId(), b.getApplicationId(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
-                        ret = this.compareTo(a.getTransactionServiceGroup(), b.getTransactionServiceGroup(), sortParam.getSortOrder());
+                        ret = this.compare(a.getTransactionServiceGroup(), b.getTransactionServiceGroup(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_TRANSACTION_NAME:
-                        ret = this.compareTo(a.getTransactionName(), b.getTransactionName(), sortParam.getSortOrder());
+                        ret = this.compare(a.getTransactionName(), b.getTransactionName(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_TIMEOUT:
-                        ret = this.compareTo(a.getTimeout(), b.getTimeout(), sortParam.getSortOrder());
+                        ret = this.compare(a.getTimeout(), b.getTimeout(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_BEGIN_TIME:
-                        ret = this.compareTo(a.getBeginTime(), b.getBeginTime(), sortParam.getSortOrder());
+                        ret = this.compare(a.getBeginTime(), b.getBeginTime(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_APPLICATION_DATA:
-                        ret = this.compareTo(a.getApplicationData(), b.getApplicationData(), sortParam.getSortOrder());
+                        ret = this.compare(a.getApplicationData(), b.getApplicationData(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_GMT_CREATE:
-                        ret = this.compareTo(a.getGmtCreate(), b.getGmtCreate(), sortParam.getSortOrder());
+                        ret = this.compare(a.getGmtCreate(), b.getGmtCreate(), sortParam.getSortOrder());
                         break;
                     case GLOBAL_TABLE_GMT_MODIFIED:
-                        ret = this.compareTo(a.getGmtModified(), b.getGmtModified(), sortParam.getSortOrder());
+                        ret = this.compare(a.getGmtModified(), b.getGmtModified(), sortParam.getSortOrder());
                         break;
                     default:
-                        break;
+                        throw new RuntimeException("Unknown or not support sort field name: " + sortParam.getSortFieldName());
                 }
                 if (ret != 0) {
                     return ret;

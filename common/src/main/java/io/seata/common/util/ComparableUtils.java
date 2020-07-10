@@ -11,13 +11,13 @@ public class ComparableUtils {
     }
 
     /**
-     * Compare to
+     * Compare a and b.
      *
      * @param a the comparable object a
      * @param b the comparable object b
      * @return 0: equals    -1: a < b    1: a > b
      */
-    public static int compareTo(Comparable a, Comparable b) {
+    public static int compare(Comparable a, Comparable b) {
         if (a == b) {
             return 0;
         } else if (a == null) {
