@@ -129,7 +129,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), new RegisterRMResponse(isSuccess));
+        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
@@ -161,7 +161,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), new RegisterTMResponse(isSuccess));
+        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
