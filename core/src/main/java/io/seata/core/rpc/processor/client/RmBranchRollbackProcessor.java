@@ -55,10 +55,10 @@ public class RmBranchRollbackProcessor implements RemotingProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm handle branch rollback process:" + msg);
         }
-        doBranchRollback(rpcMessage, remoteAddress, (BranchRollbackRequest) msg);
+        handleUndoLogDelete(rpcMessage, remoteAddress, (BranchRollbackRequest) msg);
     }
 
-    private void doBranchRollback(RpcMessage request, String serverAddress, BranchRollbackRequest branchRollbackRequest) {
+    private void handleUndoLogDelete(RpcMessage request, String serverAddress, BranchRollbackRequest branchRollbackRequest) {
         BranchRollbackResponse resultMessage;
         resultMessage = (BranchRollbackResponse) handler.onRequest(branchRollbackRequest, null);
         if (LOGGER.isDebugEnabled()) {

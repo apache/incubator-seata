@@ -55,10 +55,10 @@ public class RmBranchCommitProcessor implements RemotingProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm client handle branch commit process:" + msg);
         }
-        doBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
+        handleBranchCommit(rpcMessage, remoteAddress, (BranchCommitRequest) msg);
     }
 
-    private void doBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
+    private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest) {
         BranchCommitResponse resultMessage;
         resultMessage = (BranchCommitResponse) handler.onRequest(branchCommitRequest, null);
         if (LOGGER.isDebugEnabled()) {

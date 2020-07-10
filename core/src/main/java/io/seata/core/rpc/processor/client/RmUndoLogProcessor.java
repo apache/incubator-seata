@@ -48,10 +48,10 @@ public class RmUndoLogProcessor implements RemotingProcessor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm handle undo log process:" + msg);
         }
-        doUndoLogDelete((UndoLogDeleteRequest) msg);
+        handleUndoLogDelete((UndoLogDeleteRequest) msg);
     }
 
-    private void doUndoLogDelete(UndoLogDeleteRequest undoLogDeleteRequest) {
+    private void handleUndoLogDelete(UndoLogDeleteRequest undoLogDeleteRequest) {
         try {
             handler.onRequest(undoLogDeleteRequest, null);
         } catch (Exception e) {
