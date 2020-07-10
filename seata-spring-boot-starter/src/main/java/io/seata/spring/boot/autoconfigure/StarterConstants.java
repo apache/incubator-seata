@@ -17,31 +17,6 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
-import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -78,41 +53,7 @@ public class StarterConstants {
     public static final String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
 
-    public static final HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap();
-    public static final HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
-        private static final long serialVersionUID = -8902807645596274597L;
-
-        {
-            put(CLIENT_RM_PREFIX, RmProperties.class);
-            put(CLIENT_TM_PREFIX, TmProperties.class);
-            put(LOCK_PREFIX, LockProperties.class);
-            put(SERVICE_PREFIX, ServiceProperties.class);
-            put(SHUTDOWN_PREFIX, ShutdownProperties.class);
-            put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
-            put(UNDO_PREFIX, UndoProperties.class);
-            put(LOG_PREFIX, LogProperties.class);
-            put(TRANSPORT_PREFIX, TransportProperties.class);
-            put(CONFIG_PREFIX, ConfigProperties.class);
-            put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
-            put(REGISTRY_PREFIX, RegistryProperties.class);
-
-            put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
-            put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
-            put(CONFIG_ZK_PREFIX, ConfigZooKeeperProperties.class);
-            put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
-            put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
-
-            put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
-            put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
-            put(REGISTRY_EUREKA_PREFIX, RegistryEurekaProperties.class);
-            put(REGISTRY_NACOS_PREFIX, RegistryNacosProperties.class);
-            put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
-            put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
-            put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
-        }
-
-    };
-
+    public static final HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap(MAP_CAPACITY);
 
     /**
      * The following special keys need to be normalized.

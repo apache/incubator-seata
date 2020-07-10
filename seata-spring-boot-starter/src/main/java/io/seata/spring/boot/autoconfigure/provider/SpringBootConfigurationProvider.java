@@ -20,19 +20,16 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.context.ApplicationContext;
 
 
 import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
@@ -88,9 +85,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     }
 
     private Object get(String dataId) throws IllegalAccessException {
-        String propertySuffix = getPropertySuffix(dataId);
-        Object propertyObject = getPropertyObject(getPropertyPrefix(dataId));
+        Object propertyObject = PROPERTY_BEAN_MAP.get(getPropertyPrefix(dataId));
         if (propertyObject != null) {
+            String propertySuffix = getPropertySuffix(dataId);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
@@ -152,36 +149,5 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             return SPECIAL_KEY_GROUPLIST;
         }
         return StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
-    }
-
-    /**
-     * Get property object
-     *
-     * @param propertyPrefix
-     * @return propertyObject
-     */
-    private Object getPropertyObject(String propertyPrefix) {
-        Object propertyObject = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        if (propertyObject == null) {
-            Class propertyClass = getPropertyClass(propertyPrefix);
-            if (propertyClass != null) {
-                propertyObject = ObjectHolder.INSTANCE.getObject(ApplicationContext.class).getBean(propertyClass);
-            }
-        }
-        return propertyObject;
-    }
-
-    /**
-     * Get property class
-     *
-     * @param propertyPrefix
-     * @return propertyClass
-     */
-    private Class getPropertyClass(String propertyPrefix) {
-        return PROPERTY_MAP.entrySet().stream()
-            .filter(e -> propertyPrefix.equals(e.getKey()))
-            .findAny()
-            .map(Map.Entry::getValue)
-            .orElse(null);
     }
 }
