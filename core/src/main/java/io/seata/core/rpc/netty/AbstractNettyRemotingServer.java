@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
 /**
- * The type abstract remoting remoting server.
+ * The type abstract remoting server.
  *
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
