@@ -34,6 +34,24 @@ public interface Querier<T> {
     <D extends T> boolean isMatch(D data);
 
     /**
+     * Do count.
+     *
+     * @param list the list
+     * @return the count
+     */
+    default <D extends T> int doCount(List<D> list) {
+        int count = 0;
+        if (CollectionUtils.isNotEmpty(list)) {
+            for (D t : list) {
+                if (this.isMatch(t)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
      * Do filter.
      *
      * @param list the list
@@ -69,6 +87,7 @@ public interface Querier<T> {
 
     /**
      * Do query.
+     * doFilter + doSort + doPaging
      *
      * @param list the list
      * @return the list after query
