@@ -73,15 +73,15 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     }
 
     /**
-     * Compare to
+     * Compare fieldValueA and fieldValueB.
      *
-     * @param a         the object a
-     * @param b         the object b
-     * @param sortOrder the sort order
-     * @return a negative integer. 0: equals ; -1: a < b ; 1: a > b
+     * @param fieldValueA the field value a
+     * @param fieldValueB the field value b
+     * @param sortOrder   the sort order
+     * @return 0: equals    -1: a < b    1: a > b
      */
-    protected int compareTo(Comparable a, Comparable b, SortOrder sortOrder) {
-        int ret = ComparableUtils.compareTo(a, b);
+    protected int compare(Comparable fieldValueA, Comparable fieldValueB, SortOrder sortOrder) {
+        int ret = ComparableUtils.compare(fieldValueA, fieldValueB);
         if (ret == 0) {
             return ret;
         }
