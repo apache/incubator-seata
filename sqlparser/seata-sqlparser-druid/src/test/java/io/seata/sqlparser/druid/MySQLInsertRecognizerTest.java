@@ -23,11 +23,11 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
-import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,9 @@ import org.junit.jupiter.api.Test;
  *
  * @author hanwen created at 2019-01-25
  */
-public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
+public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
+
+    private final int pkIndex = 0;
 
     /**
      * Insert recognizer test 0.
@@ -53,8 +55,8 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
         Assertions.assertEquals(Collections.singletonList("name"), mySQLInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows().size());
-        Assertions.assertEquals(Collections.singletonList("name1"), mySQLInsertRecognizer.getInsertRows().get(0));
+        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Collections.singletonList("name1"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
     }
 
     /**
@@ -72,8 +74,8 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
         Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows().size());
-        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows().get(0));
+        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
     }
 
     /**
@@ -91,10 +93,10 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
         Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(3, mySQLInsertRecognizer.getInsertRows().size());
-        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows().get(0));
-        Assertions.assertEquals(Arrays.asList("name3", "name4"), mySQLInsertRecognizer.getInsertRows().get(1));
-        Assertions.assertEquals(Arrays.asList("name5", "name6"), mySQLInsertRecognizer.getInsertRows().get(2));
+        Assertions.assertEquals(3, mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+        Assertions.assertEquals(Arrays.asList("name3", "name4"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(1));
+        Assertions.assertEquals(Arrays.asList("name5", "name6"), mySQLInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(2));
     }
 
     @Test
@@ -153,7 +155,7 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
 
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
-        List<List<Object>> insertRows = recognizer.getInsertRows();
+        List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
@@ -161,11 +163,15 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
-            sqlInsertStatement.getValuesList().get(0).getValues().add(new MySqlOrderingExpr());
+            sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new MySqlOrderingExpr());
 
-            MySQLInsertRecognizer oracleInsertRecognizer = new MySQLInsertRecognizer(s, sqlInsertStatement);
-            oracleInsertRecognizer.getInsertRows();
+            MySQLInsertRecognizer mysqlInsertRecognizer = new MySQLInsertRecognizer(s, sqlInsertStatement);
+            mysqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
     }
 
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
+    }
 }
