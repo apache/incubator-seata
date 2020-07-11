@@ -23,10 +23,11 @@ import java.util.stream.Stream;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-
 
 import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
@@ -39,6 +40,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
  * @author xingfudeshi@gmail.com
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringBootConfigurationProvider.class);
     private static final String INTERCEPT_METHOD_PREFIX = "get";
 
     @Override
@@ -85,7 +87,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     }
 
     private Object get(String dataId) throws IllegalAccessException {
-        Object propertyObject = PROPERTY_BEAN_MAP.get(getPropertyPrefix(dataId));
+        String propertyPrefix = getPropertyPrefix(dataId);
+        Object propertyObject = PROPERTY_BEAN_MAP.get(propertyPrefix);
         if (propertyObject != null) {
             String propertySuffix = getPropertySuffix(dataId);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
@@ -100,6 +103,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 }
                 return valueObject;
             }
+        } else {
+            LOGGER.warn("Property bean with prefix '{}' was not found in `StarterConstants.PROPERTY_BEAN_MAP`."
+                    + " Please inform the {} committer to fix this BUG.", propertyPrefix, SEATA_PREFIX);
         }
         return null;
     }

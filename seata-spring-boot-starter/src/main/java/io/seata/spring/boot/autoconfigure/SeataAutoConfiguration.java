@@ -78,6 +78,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
@@ -94,9 +95,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
-    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
-    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
-    public SpringApplicationContextProvider springApplicationContextProvider(
+    public SeataAutoConfiguration(SeataProperties seataProperties,
             RmProperties rmProperties, TmProperties tmProperties, LockProperties lockProperties,
             ServiceProperties serviceProperties, ShutdownProperties shutdownProperties, ThreadFactoryProperties threadFactoryProperties,
             UndoProperties undoProperties, LogProperties logProperties, TransportProperties transportProperties,
@@ -104,8 +103,10 @@ public class SeataAutoConfiguration {
             ConfigNacosProperties configNacosProperties, ConfigConsulProperties configConsulProperties, ConfigZooKeeperProperties configZooKeeperProperties,
             ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, RegistryConsulProperties registryConsulProperties,
             RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties, RegistryNacosProperties registryNacosProperties,
-            RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties, RegistryZooKeeperProperties registryZooKeeperProperties
-    ) {
+            RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties, RegistryZooKeeperProperties registryZooKeeperProperties) {
+
+        PROPERTY_BEAN_MAP.put(SEATA_PREFIX, seataProperties);
+
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, rmProperties);
         PROPERTY_BEAN_MAP.put(CLIENT_TM_PREFIX, tmProperties);
         PROPERTY_BEAN_MAP.put(LOCK_PREFIX, lockProperties);
@@ -132,7 +133,11 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, registryRedisProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, registrySofaProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, registryZooKeeperProperties);
+    }
 
+    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
+    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
+    public SpringApplicationContextProvider springApplicationContextProvider() {
         return new SpringApplicationContextProvider();
     }
 
