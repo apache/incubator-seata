@@ -28,6 +28,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -46,7 +48,9 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @Bean
     RegistryRedisProperties registryRedisProperties() {
-        return new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, registryRedisProperties);
+        return registryRedisProperties;
     }
 
     @Test
