@@ -145,8 +145,12 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     @Override
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
-        dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
-        super.registerResource(dataSourceProxy);
+        synchronized (this) {
+            if (dataSourceCache.get(dataSourceProxy.getResourceId()) == null) {
+                dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
+                super.registerResource(dataSourceProxy);
+            }
+        }
     }
 
     @Override
