@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Configuration
 @ConditionalOnProperty(StarterConstants.SEATA_PREFIX + ".saga.enabled")
-@AutoConfigureAfter(DataSourceAutoConfiguration.class)
+@AutoConfigureAfter({DataSourceAutoConfiguration.class, SeataAutoConfiguration.class})
 public class SeataSagaAutoConfiguration {
 
     public static final String SAGA_DATA_SOURCE_BEAN_NAME = "seataSagaDataSource";
