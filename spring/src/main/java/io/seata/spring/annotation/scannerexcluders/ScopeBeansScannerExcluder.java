@@ -46,11 +46,16 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScopeBeansScannerExcluder.class);
     private static final Set<String> EXCLUDE_SCOPE_SET = Collections.synchronizedSet(new HashSet<>());
 
+    public static final String REQUEST_SCOPE_NAME = "request";
+    public static final String SESSION_SCOPE_NAME = "session";
+    public static final String JOB_SCOPE_NAME = "job";
+    public static final String STEP_SCOPE_NAME = "step";
+
     static {
-        EXCLUDE_SCOPE_SET.add("request");
-        EXCLUDE_SCOPE_SET.add("session");
-        EXCLUDE_SCOPE_SET.add("step");
-        EXCLUDE_SCOPE_SET.add("job");
+        EXCLUDE_SCOPE_SET.add(REQUEST_SCOPE_NAME);
+        EXCLUDE_SCOPE_SET.add(SESSION_SCOPE_NAME);
+        EXCLUDE_SCOPE_SET.add(JOB_SCOPE_NAME);
+        EXCLUDE_SCOPE_SET.add(STEP_SCOPE_NAME);
     }
 
     /**
@@ -68,10 +73,11 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
         }
     }
 
-
+    @Override
     public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
         if (bean instanceof ScopedProxyFactoryBean) {
-            return true; // exclude
+            // exclude
+            return true;
         }
 
         while (beanDefinition != null && !(beanDefinition instanceof AnnotatedBeanDefinition)) {
@@ -82,15 +88,18 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
             AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
             if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
                 if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getFactoryMethodMetadata())) {
-                    return true; // exclude
+                    // exclude
+                    return true;
                 }
             }
             if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getMetadata())) {
-                return true; // exclude
+                // exclude
+                return true;
             }
         }
 
-        return false; // not exclude
+        // not exclude
+        return false;
     }
 
     private boolean hasExcludeScope(String beanName, AnnotatedTypeMetadata annotatedTypeMetadata) {
@@ -110,7 +119,9 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
                                 beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString(),
                                 GlobalTransactional.class.getSimpleName(), GlobalLock.class.getSimpleName());
                     }
-                    return true; // exclude
+
+                    // exclude
+                    return true;
                 }
             }
         }

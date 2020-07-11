@@ -27,6 +27,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 @LoadLevel(name = "ConfigBeans", order = 100)
 public class ConfigBeansScannerExcluder implements ScannerExcluder {
 
+    @Override
     public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
         return beanName == null
                 || beanName.endsWith("AutoConfiguration")
