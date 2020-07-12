@@ -80,7 +80,7 @@ public class RegRmProcessor implements RemotingProcessor {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), new RegisterRMResponse(isSuccess));
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
