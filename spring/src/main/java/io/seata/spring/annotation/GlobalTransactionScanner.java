@@ -225,9 +225,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                                     return bean;
                                 }
                             } catch (Throwable e) {
-                                String errorMsg = String.format("Do check need exclude failed: beanName=%s, excluder=%s",
-                                        beanName, excluder.getClass().getSimpleName());
-                                LOGGER.error(errorMsg, e);
+                                LOGGER.error("Do check need exclude failed: beanName={}, excluder={}",
+                                        beanName, excluder.getClass().getSimpleName(), e);
                             }
                         }
                     } catch (NoSuchBeanDefinitionException e) {
