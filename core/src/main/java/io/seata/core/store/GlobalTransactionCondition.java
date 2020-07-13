@@ -49,8 +49,8 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     protected GlobalStatus[] statuses;
 
     /**
-     * filter is timeout or not timeout
-     * -  null: all..............   no condition
+     * filter is timeout or not timeout data
+     * -  null: all..............   no this condition
      * -  true: timeout data.....   condition: begin_time  < System.currentTimeMillis() - timeout
      * - false: not timeout data.   condition: begin_time >= System.currentTimeMillis() - timeout
      */
@@ -281,11 +281,11 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
         return isTimeoutData;
     }
 
-    public void filterIsTimeoutData() {
+    public void setTimeoutDataCondition() {
         this.isTimeoutData = true;
     }
 
-    public void filterNotTimeoutData() {
+    public void setNotTimeoutDataCondition() {
         this.isTimeoutData = false;
     }
 
