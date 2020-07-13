@@ -30,7 +30,7 @@ import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalReportRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
@@ -117,12 +117,12 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), resultMessage);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), result);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
         }
     }
 

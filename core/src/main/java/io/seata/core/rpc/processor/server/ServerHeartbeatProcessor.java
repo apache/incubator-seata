@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process client heartbeat message request(PING).
  * <p>
- * message type:
+ * process message type:
  * {@link HeartbeatMessage}
  *
  * @author zhangchenghui.dev@gmail.com
@@ -45,7 +45,7 @@ public class ServerHeartbeatProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         try {
-            remotingServer.sendResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
