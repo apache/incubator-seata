@@ -49,7 +49,7 @@ public class ProtocolConstants {
     /**
      * Message type: Request
      */
-    public static final byte MSGTYPE_RESQUEST = 0;
+    public static final byte MSGTYPE_RESQUEST_SYNC = 0;
     /**
      * Message type: Response
      */

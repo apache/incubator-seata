@@ -13,23 +13,34 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
-
-import io.netty.channel.Channel;
-import io.netty.channel.pool.AbstractChannelPoolHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package io.seata.core.rpc;
 
 /**
- * The type Default channel pool handler.
+ * The enum Transport protocol type.
  *
  * @author slievrly
  */
-public class DefaultChannelPoolHandler extends AbstractChannelPoolHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChannelPoolHandler.class);
+public enum TransportProtocolType {
+    /**
+     * Tcp transport protocol type.
+     */
+    TCP("tcp"),
 
-    @Override
-    public void channelCreated(Channel ch) throws Exception {
+    /**
+     * Udt transport protocol type.
+     */
+    UDT("udt"),
+    /**
+     * Unix domain socket transport protocol type.
+     */
+    UNIX_DOMAIN_SOCKET("unix-domain-socket");
 
+    /**
+     * The Name.
+     */
+    public final String name;
+
+    TransportProtocolType(String name) {
+        this.name = name;
     }
 }

@@ -27,9 +27,6 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -40,30 +37,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Rpc client.
+ * The rm netty client.
  *
  * @author slievrly
  * @author zhaojun
+ * @author zhangchenghui.dev@gmail.com
  */
 @Sharable
-public final class TmRpcClient extends AbstractRpcRemotingClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TmRpcClient.class);
-    private static volatile TmRpcClient instance;
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);
+    private static volatile TmNettyRemotingClient instance;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 2000;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
 
-    /**
-     * The constant enableDegrade.
-     */
-    public static boolean enableDegrade = false;
+    @Override
+    public void init() {
+        // registry processor
+        registerProcessor();
+        if (initialized.compareAndSet(false, true)) {
+            super.init();
+        }
+    }
 
-    private TmRpcClient(NettyClientConfig nettyClientConfig,
-                        EventExecutorGroup eventExecutorGroup,
-                        ThreadPoolExecutor messageExecutor) {
+    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
+                                  EventExecutorGroup eventExecutorGroup,
+                                  ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
     }
 
@@ -74,11 +75,11 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      * @param transactionServiceGroup the transaction service group
      * @return the instance
      */
-    public static TmRpcClient getInstance(String applicationId, String transactionServiceGroup) {
-        TmRpcClient tmRpcClient = getInstance();
-        tmRpcClient.setApplicationId(applicationId);
-        tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
-        return tmRpcClient;
+    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
+        TmNettyRemotingClient tmNettyRemotingClient = getInstance();
+        tmNettyRemotingClient.setApplicationId(applicationId);
+        tmNettyRemotingClient.setTransactionServiceGroup(transactionServiceGroup);
+        return tmNettyRemotingClient;
     }
 
     /**
@@ -86,9 +87,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      *
      * @return the instance
      */
-    public static TmRpcClient getInstance() {
+    public static TmNettyRemotingClient getInstance() {
         if (instance == null) {
-            synchronized (TmRpcClient.class) {
+            synchronized (TmNettyRemotingClient.class) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
@@ -98,7 +99,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmRpcClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
                 }
             }
         }
@@ -121,31 +122,6 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
      */
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
-    }
-
-    @Override
-    public void init() {
-        // registry processor
-        registerProcessor();
-        if (initialized.compareAndSet(false, true)) {
-            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
-            super.init();
-        }
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        initialized.getAndSet(false);
-        instance = null;
-    }
-
-    @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (severAddress) -> {
-            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
-        };
     }
 
     @Override
@@ -172,6 +148,21 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         String errMsg = String.format(
             "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        initialized.getAndSet(false);
+        instance = null;
+    }
+
+    @Override
+    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+        return (severAddress) -> {
+            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
+            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
+        };
     }
 
     private void registerProcessor() {

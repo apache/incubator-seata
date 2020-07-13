@@ -15,7 +15,7 @@
  */
 package io.seata.rm;
 
-import io.seata.core.rpc.netty.RmRpcClient;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
 
 /**
  * The Rm client Initiator.
@@ -31,10 +31,10 @@ public class RMClient {
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {
-        RmRpcClient rmRpcClient = RmRpcClient.getInstance(applicationId, transactionServiceGroup);
-        rmRpcClient.setResourceManager(DefaultResourceManager.get());
-        rmRpcClient.setTransactionMessageHandler(DefaultRMHandler.get());
-        rmRpcClient.init();
+        RmNettyRemotingClient rmNettyRemotingClient = RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        rmNettyRemotingClient.setResourceManager(DefaultResourceManager.get());
+        rmNettyRemotingClient.setTransactionMessageHandler(DefaultRMHandler.get());
+        rmNettyRemotingClient.init();
     }
 
 }

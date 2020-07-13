@@ -49,9 +49,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author slievrly
  * @author zhaojun
  */
-public class RpcClientBootstrap implements RemotingBootstrap {
+public class NettyClientBootstrap implements RemotingBootstrap {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientBootstrap.class);
     private final NettyClientConfig nettyClientConfig;
     private final Bootstrap bootstrap = new Bootstrap();
     private final EventLoopGroup eventLoopGroupWorker;
@@ -61,8 +61,8 @@ public class RpcClientBootstrap implements RemotingBootstrap {
     private final NettyPoolKey.TransactionRole transactionRole;
     private ChannelHandler[] channelHandlers;
 
-    public RpcClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
-                              NettyPoolKey.TransactionRole transactionRole) {
+    public NettyClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
+                                NettyPoolKey.TransactionRole transactionRole) {
         if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
@@ -144,7 +144,7 @@ public class RpcClientBootstrap implements RemotingBootstrap {
             });
 
         if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
-            LOGGER.info("RpcClientBootstrap has started");
+            LOGGER.info("NettyClientBootstrap has started");
         }
     }
 

@@ -122,7 +122,7 @@ public class ProtocolV1Client {
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setHeadMap(head);
         rpcMessage.setBody(body);
-        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST);
+        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
 
         if (channel != null) {
             DefaultPromise promise = new DefaultPromise(defaultEventExecutor);

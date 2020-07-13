@@ -19,7 +19,6 @@ import io.netty.channel.Channel;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
@@ -33,79 +32,48 @@ import java.util.concurrent.TimeoutException;
 public interface RemotingServer {
 
     /**
-     * Send response.
+     * server send sync request.
      *
-     * @param request the request
-     * @param channel the channel
-     * @param msg     the msg
+     * @param resourceId rm client resourceId
+     * @param clientId   rm client id
+     * @param msg        transaction message {@link io.seata.core.protocol}
+     * @return client result message
+     * @throws TimeoutException
      */
-    void sendResponse(RpcMessage request, Channel channel, Object msg);
+    Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException;
 
     /**
-     * Sync call to RM with timeout.
+     * server send sync request.
      *
-     * @param resourceId Resource ID
-     * @param clientId   Client ID
-     * @param message    Request message
-     * @param timeout    timeout of the call
-     * @return Response message
-     * @throws IOException      .
-     * @throws TimeoutException the timeout exception
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @return client result message
+     * @throws TimeoutException
      */
-    Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout)
-        throws IOException, TimeoutException;
+    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
 
     /**
-     * Sync call to RM
+     * server send async request.
      *
-     * @param resourceId Resource ID
-     * @param clientId   Client ID
-     * @param message    Request message
-     * @return Response message
-     * @throws IOException      .
-     * @throws TimeoutException the timeout exception
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
      */
-    Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException;
+    void sendAsyncRequest(Channel channel, Object msg);
 
     /**
-     * Send request with response object.
-     * send syn request for rm
+     * server send async response.
      *
-     * @param clientChannel the client channel
-     * @param message       the message
-     * @return the object
-     * @throws TimeoutException the timeout exception
+     * @param rpcMessage rpc message from client request
+     * @param channel    client channel
+     * @param msg        transaction message {@link io.seata.core.protocol}
      */
-    Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException;
-
-    /**
-     * Send request with response object.
-     * send syn request for rm
-     *
-     * @param clientChannel the client channel
-     * @param message       the message
-     * @param timeout       the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException;
-
-    /**
-     * ASync call to RM
-     *
-     * @param channel channel
-     * @param message Request message
-     * @return Response message
-     * @throws IOException      .
-     * @throws TimeoutException the timeout exception
-     */
-    Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException;
+    void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg);
 
     /**
      * register processor
      *
      * @param messageType {@link io.seata.core.protocol.MessageType}
-     * @param processor   {@link io.seata.core.rpc.processor.RemotingProcessor}
+     * @param processor   {@link RemotingProcessor}
      * @param executor    thread pool
      */
     void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);

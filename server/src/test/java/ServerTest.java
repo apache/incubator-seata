@@ -15,7 +15,8 @@
  */
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.netty.RpcServer;
+import io.seata.core.rpc.netty.NettyRemotingServer;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -40,11 +41,12 @@ public class ServerTest {
      */
     public static void main(String[] args) {
 
-        RpcServer rpcServer = new RpcServer(workingThreads);
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+        NettyRemotingServer nettyServer = new NettyRemotingServer(workingThreads);
+        nettyServer.setHandler(new DefaultCoordinator(nettyServer));
+        UUIDGenerator.init(1L);
         XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(rpcServer.getListenPort());
-        rpcServer.init();
+        XID.setPort(nettyServer.getListenPort());
+        nettyServer.init();
         System.exit(0);
     }
 

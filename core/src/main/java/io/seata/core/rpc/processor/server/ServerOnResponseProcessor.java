@@ -22,9 +22,9 @@ import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * handle RM/TM response message.
  * <p>
- * message type:
+ * process message type:
  * RM:
  * 1) {@link BranchCommitResponse}
  * 2) {@link BranchRollbackResponse}
@@ -47,8 +47,14 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
+    /**
+     * To handle the received RPC message on upper level.
+     */
     private TransactionMessageHandler transactionMessageHandler;
 
+    /**
+     * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
+     */
     private ConcurrentMap<Integer, MessageFuture> futures;
 
     public ServerOnResponseProcessor(TransactionMessageHandler transactionMessageHandler,

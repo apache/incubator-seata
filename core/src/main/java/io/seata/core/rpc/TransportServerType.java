@@ -13,34 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.core.rpc;
 
 /**
- * The enum Transport protocol type.
+ * The enum Transport server type.
  *
  * @author slievrly
  */
-public enum TransportProtocolType {
+public enum TransportServerType {
     /**
-     * Tcp transport protocol type.
+     * Native transport server type.
      */
-    TCP("tcp"),
-
+    NATIVE("native"),
     /**
-     * Udt transport protocol type.
+     * Nio transport server type.
      */
-    UDT("udt"),
-    /**
-     * Unix domain socket transport protocol type.
-     */
-    UNIX_DOMAIN_SOCKET("unix-domain-socket");
+    NIO("nio");
 
     /**
      * The Name.
      */
     public final String name;
 
-    TransportProtocolType(String name) {
+    TransportServerType(String name) {
         this.name = name;
     }
 }

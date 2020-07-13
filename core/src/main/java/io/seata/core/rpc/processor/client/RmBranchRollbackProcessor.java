@@ -65,9 +65,9 @@ public class RmBranchRollbackProcessor implements RemotingProcessor {
             LOGGER.debug("branch rollback result:" + resultMessage);
         }
         try {
-            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
         } catch (Throwable throwable) {
-            LOGGER.error("branch rollback error: {}", throwable.getMessage(), throwable);
+            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
     }
 }

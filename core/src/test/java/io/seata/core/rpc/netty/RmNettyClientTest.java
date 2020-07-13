@@ -29,17 +29,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author zhaojun
  */
-class RmRpcClientTest {
+class RmNettyClientTest {
     
     @Test
     public void assertGetInstanceAfterDestroy() {
-        RmRpcClient oldClient = RmRpcClient.getInstance("ap", "group");
+        RmNettyRemotingClient oldClient = RmNettyRemotingClient.getInstance("ap", "group");
         AtomicBoolean initialized = getInitializeStatus(oldClient);
         oldClient.init();
         assertTrue(initialized.get());
         oldClient.destroy();
         assertFalse(initialized.get());
-        RmRpcClient newClient = RmRpcClient.getInstance("ap", "group");
+        RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("ap", "group");
         Assertions.assertNotEquals(oldClient, newClient);
         initialized = getInitializeStatus(newClient);
         assertFalse(initialized.get());
@@ -48,11 +48,11 @@ class RmRpcClientTest {
         newClient.destroy();
     }
     
-    private AtomicBoolean getInitializeStatus(final RmRpcClient rmRpcClient) {
+    private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {
         try {
-            Field field = rmRpcClient.getClass().getDeclaredField("initialized");
+            Field field = rmNettyRemotingClient.getClass().getDeclaredField("initialized");
             field.setAccessible(true);
-            return (AtomicBoolean) field.get(rmRpcClient);
+            return (AtomicBoolean) field.get(rmNettyRemotingClient);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }

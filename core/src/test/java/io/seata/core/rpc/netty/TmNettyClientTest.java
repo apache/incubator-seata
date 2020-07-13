@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author slievrly xiajun.0706@163.com
  */
-public class TmRpcClientTest {
+public class TmNettyClientTest {
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
@@ -50,10 +50,10 @@ public class TmRpcClientTest {
     public void testGetInstance() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-        Field nettyClientKeyPoolField = getDeclaredField(tmRpcClient.getClientChannelManager(), "nettyClientKeyPool");
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        Field nettyClientKeyPoolField = getDeclaredField(tmNettyRemotingClient.getClientChannelManager(), "nettyClientKeyPool");
         nettyClientKeyPoolField.setAccessible(true);
-        GenericKeyedObjectPool nettyClientKeyPool = (GenericKeyedObjectPool) nettyClientKeyPoolField.get(tmRpcClient.getClientChannelManager());
+        GenericKeyedObjectPool nettyClientKeyPool = (GenericKeyedObjectPool) nettyClientKeyPoolField.get(tmNettyRemotingClient.getClientChannelManager());
         NettyClientConfig defaultNettyClientConfig = new NettyClientConfig();
         Assertions.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), nettyClientKeyPool.getMaxActive());
         Assertions.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), nettyClientKeyPool.getMinIdle());
@@ -72,14 +72,14 @@ public class TmRpcClientTest {
     public void testInit() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
-        tmRpcClient.init();
+        tmNettyRemotingClient.init();
 
-        //check if attr of tmRpcClient object has been set success
-        Field clientBootstrapField = getDeclaredField(tmRpcClient, "clientBootstrap");
+        //check if attr of tmNettyClient object has been set success
+        Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
         clientBootstrapField.setAccessible(true);
-        RpcClientBootstrap clientBootstrap = (RpcClientBootstrap)clientBootstrapField.get(tmRpcClient);
+        NettyClientBootstrap clientBootstrap = (NettyClientBootstrap)clientBootstrapField.get(tmNettyRemotingClient);
         Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
         bootstrapField.setAccessible(true);
         Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);
