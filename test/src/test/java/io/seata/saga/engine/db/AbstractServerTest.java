@@ -83,7 +83,7 @@ public abstract class AbstractServerTest {
                     XID.setPort(nettyServer.getListenPort());
 
                     nettyServer.init();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
