@@ -55,6 +55,9 @@ public class PostgresqlInsertExecutorTest {
 
     private PostgresqlInsertExecutor insertExecutor;
 
+    private final int pkIndex = 0;
+    private HashMap<String, Integer> pkIndexMap;
+
     @BeforeEach
     public void init() {
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
@@ -67,6 +70,12 @@ public class PostgresqlInsertExecutorTest {
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new PostgresqlInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        pkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndex);
+            }
+        };
     }
 
     @Test
@@ -95,7 +104,7 @@ public class PostgresqlInsertExecutorTest {
     }
 
     private void mockParametersPkWithDefault() {
-        ArrayList<Object>[] parameters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(SqlDefaultExpr.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -104,10 +113,10 @@ public class PostgresqlInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        parameters[0] = arrayList0;
-        parameters[1] = arrayList1;
-        parameters[2] = arrayList2;
-        parameters[3] = arrayList3;
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(parameters);
     }
@@ -115,7 +124,7 @@ public class PostgresqlInsertExecutorTest {
     private void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
     private List<String> mockInsertColumns() {
@@ -125,7 +134,7 @@ public class PostgresqlInsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
-        doReturn(Collections.singletonMap(ID_COLUMN,0)).when(insertExecutor).getPkIndex();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
         return columns;
     }
 

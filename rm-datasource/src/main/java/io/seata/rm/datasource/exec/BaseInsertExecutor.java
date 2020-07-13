@@ -144,9 +144,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
-            List<List<Object>> insertRows = recognizer.getInsertRows();
+            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             if (insertRows != null && !insertRows.isEmpty()) {
-                ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
+                Map<Integer,ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
                 int totalPlaceholderNum = -1;
                 for (int i = 0; i < rowSize; i++) {
@@ -181,7 +181,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                                 }
                             }
                             int idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex - currentRowNotPlaceholderNumBeforePkIndex;
-                            ArrayList<Object> parameter = parameters[idx];
+                            ArrayList<Object> parameter = parameters.get(idx + 1);
                             pkValues.addAll(parameter);
                         } else {
                             pkValues.add(pkValue);
@@ -195,7 +195,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         } else {
             ps = false;
-            List<List<Object>> insertRows = recognizer.getInsertRows();
+            List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             for (List<Object> row : insertRows) {
                 for (String pkKey:pkIndexMap.keySet()) {
                     int pkIndex = pkIndexMap.get(pkKey);
