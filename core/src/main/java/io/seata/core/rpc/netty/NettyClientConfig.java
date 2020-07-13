@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportServerType;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
