@@ -16,7 +16,6 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.server.RegRmProcessor;
@@ -28,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The netty remoting server.
@@ -40,17 +40,17 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyRemotingServer.class);
 
-    private final NettyServerBootstrap serverBootstrap;
-
     private TransactionMessageHandler transactionMessageHandler;
+
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
     public void init() {
         // registry processor
         registerProcessor();
-        setChannelHandlers(new ServerHandler());
-        super.init();
-        serverBootstrap.start();
+        if (initialized.compareAndSet(false, true)) {
+            super.init();
+        }
     }
 
     /**
@@ -59,8 +59,7 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
      * @param messageExecutor   the message executor
      */
     public NettyRemotingServer(ThreadPoolExecutor messageExecutor) {
-        super(messageExecutor);
-        serverBootstrap = new NettyServerBootstrap(new NettyServerConfig());
+        super(messageExecutor, new NettyServerConfig());
     }
 
     /**
@@ -74,39 +73,6 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
 
     public TransactionMessageHandler getHandler() {
         return transactionMessageHandler;
-    }
-
-    /**
-     * Sets channel handlers.
-     *
-     * @param handlers the handlers
-     */
-    private void setChannelHandlers(ChannelHandler... handlers) {
-        serverBootstrap.setChannelHandlers(handlers);
-    }
-
-    /**
-     * Sets listen port.
-     *
-     * @param listenPort the listen port
-     */
-    public void setListenPort(int listenPort) {
-        serverBootstrap.setListenPort(listenPort);
-    }
-
-    /**
-     * Gets listen port.
-     *
-     * @return the listen port
-     */
-    public int getListenPort() {
-        return serverBootstrap.getListenPort();
-    }
-
-    @Override
-    public void destroy() {
-        serverBootstrap.shutdown();
-        super.destroy();
     }
 
     @Override

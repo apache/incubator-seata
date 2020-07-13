@@ -47,8 +47,18 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingServer.class);
 
-    public AbstractNettyRemotingServer(ThreadPoolExecutor messageExecutor) {
+    private final NettyServerBootstrap serverBootstrap;
+
+    @Override
+    public void init() {
+        super.init();
+        serverBootstrap.start();
+    }
+
+    public AbstractNettyRemotingServer(ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
         super(messageExecutor);
+        serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
+        serverBootstrap.setChannelHandlers(new ServerHandler());
     }
 
     @Override
@@ -99,6 +109,30 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(messageType, pair);
+    }
+
+    /**
+     * Sets listen port.
+     *
+     * @param listenPort the listen port
+     */
+    public void setListenPort(int listenPort) {
+        serverBootstrap.setListenPort(listenPort);
+    }
+
+    /**
+     * Gets listen port.
+     *
+     * @return the listen port
+     */
+    public int getListenPort() {
+        return serverBootstrap.getListenPort();
+    }
+
+    @Override
+    public void destroy() {
+        serverBootstrap.shutdown();
+        super.destroy();
     }
 
     /**

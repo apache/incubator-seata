@@ -100,8 +100,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        clientBootstrap.setChannelHandlers(new ClientHandler());
-        clientBootstrap.start();
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -117,6 +115,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
+        clientBootstrap.start();
     }
 
     public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
@@ -124,6 +123,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         super(messageExecutor);
         this.transactionRole = transactionRole;
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
+        clientBootstrap.setChannelHandlers(new ClientHandler());
         clientChannelManager = new NettyClientChannelManager(
             new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
