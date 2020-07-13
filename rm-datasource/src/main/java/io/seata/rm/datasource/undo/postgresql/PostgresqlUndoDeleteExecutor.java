@@ -59,9 +59,7 @@ public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        Field pkField = row.primaryKeys().get(0);
-        // PK is at last one.
-        fields.add(pkField);
+        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.POSTGRESQL));
 
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
