@@ -15,13 +15,10 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ComparableUtils;
 import io.seata.core.model.GlobalStatus;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA;
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID;
@@ -142,7 +139,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
 
     //endregion
 
-    //region Override Querier
+    //region Override Querier.isMatch, AbstractQuerier.compareByFieldName
 
     /**
      * Match data.
@@ -224,35 +221,6 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
             default:
                 throw new RuntimeException("Unknown or not support sort field name: " + sortFieldName);
         }
-    }
-
-    /**
-     * do sort
-     *
-     * @param globalTransactionDOs the global transactions
-     * @return the after sort list
-     */
-    @Override
-    public <D extends GlobalTransactionModel> List<D> doSort(List<D> globalTransactionDOs) {
-        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
-            return new ArrayList<>();
-        }
-
-        if (!super.isNeedSort()) {
-            return globalTransactionDOs;
-        }
-
-        globalTransactionDOs.sort((a, b) -> {
-            int ret = 0;
-            for (SortParam sortParam : super.getSortParams()) {
-
-                if (ret != 0) {
-                    return ret;
-                }
-            }
-            return ret;
-        });
-        return globalTransactionDOs;
     }
 
     //endregion
