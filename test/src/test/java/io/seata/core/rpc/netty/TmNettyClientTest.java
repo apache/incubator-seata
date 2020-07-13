@@ -24,6 +24,7 @@ import io.netty.channel.Channel;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -33,7 +34,7 @@ import org.junit.jupiter.api.Test;
  * @author slievrly
  */
 @Disabled
-public class TmRpcClientTest {
+public class TmNettyClientTest {
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
@@ -51,9 +52,10 @@ public class TmRpcClientTest {
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
-                RpcServer rpcServer = new RpcServer(workingThreads);
-                rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-                rpcServer.init();
+                NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+                nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                UUIDGenerator.init(1L);
+                nettyRemotingServer.init();
             }
         });
 
@@ -62,14 +64,14 @@ public class TmRpcClientTest {
 
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
-        tmRpcClient.init();
+        tmNettyRemotingClient.init();
 
-        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
+        Method doConnectMethod = TmNettyRemotingClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
+        Channel channel = (Channel) doConnectMethod.invoke(tmNettyRemotingClient, serverAddress);
         Assertions.assertNotNull(channel);
     }
 
@@ -85,9 +87,10 @@ public class TmRpcClientTest {
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
-                RpcServer rpcServer = new RpcServer(workingThreads);
-                rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-                rpcServer.init();
+                NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+                nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                UUIDGenerator.init(1L);
+                nettyRemotingServer.init();
             }
         });
 
@@ -96,13 +99,13 @@ public class TmRpcClientTest {
 
         String applicationId = "app 1";
         String transactionServiceGroup = "my_test_tx_group";
-        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
-        tmRpcClient.init();
+        tmNettyRemotingClient.init();
 
-        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("reconnect");
+        Method doConnectMethod = TmNettyRemotingClient.class.getDeclaredMethod("reconnect");
         doConnectMethod.setAccessible(true);
-        doConnectMethod.invoke(tmRpcClient);
+        doConnectMethod.invoke(tmNettyRemotingClient);
     }
 
     @Test
@@ -110,29 +113,30 @@ public class TmRpcClientTest {
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
-                RpcServer rpcServer = new RpcServer(workingThreads);
-                rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-                rpcServer.init();
+                NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+                nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                UUIDGenerator.init(1L);
+                nettyRemotingServer.init();
             }
         });
         Thread.sleep(3000);
 
         String applicationId = "app 1";
         String transactionServiceGroup = "my_test_tx_group";
-        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-        tmRpcClient.init();
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        tmNettyRemotingClient.init();
 
-        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
+        Method doConnectMethod = TmNettyRemotingClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
+        Channel channel = (Channel) doConnectMethod.invoke(tmNettyRemotingClient, serverAddress);
         Assertions.assertNotNull(channel);
 
         BranchRegisterRequest request = new BranchRegisterRequest();
         request.setXid("127.0.0.1:8091:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
-        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(request);
+        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assertions.assertEquals("RuntimeException[SessionManager is NOT init!]",
