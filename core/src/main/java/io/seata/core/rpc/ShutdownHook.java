@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.core.rpc;
 
 import java.util.Objects;
 import java.util.Set;
@@ -21,7 +21,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
