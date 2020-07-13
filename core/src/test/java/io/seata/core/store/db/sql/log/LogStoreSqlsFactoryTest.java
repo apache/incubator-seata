@@ -51,7 +51,7 @@ public class LogStoreSqlsFactoryTest {
         sql = mysqlLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Assertions.assertNotNull(sql);
         sql = mysqlLog.getQueryGlobalTransactionSQLByCondition(globalTable,
-                " where status = 1", " order by gmt_create", null);
+                " where status = 1", " order by gmt_modified", null);
         Assertions.assertNotNull(sql);
         sql = mysqlLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
         Assertions.assertNotNull(sql);
@@ -87,7 +87,7 @@ public class LogStoreSqlsFactoryTest {
         sql = oracleLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Assertions.assertNotNull(sql);
         sql = oracleLog.getQueryGlobalTransactionSQLByCondition(globalTable,
-                " where status = 1", " order by gmt_create", null);
+                " where status = 1", " order by gmt_modified", null);
         Assertions.assertNotNull(sql);
         sql = oracleLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
         Assertions.assertNotNull(sql);
@@ -123,7 +123,7 @@ public class LogStoreSqlsFactoryTest {
         sql = pgLog.getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Assertions.assertNotNull(sql);
         sql = pgLog.getQueryGlobalTransactionSQLByCondition(globalTable,
-                " where status = 1", " order by gmt_create", null);
+                " where status = 1", " order by gmt_modified", null);
         Assertions.assertNotNull(sql);
         sql = pgLog.getQueryGlobalTransactionForRecoverySQL(globalTable);
         Assertions.assertNotNull(sql);
@@ -159,7 +159,7 @@ public class LogStoreSqlsFactoryTest {
         sql = h2Log.getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Assertions.assertNotNull(sql);
         sql = h2Log.getQueryGlobalTransactionSQLByCondition(globalTable,
-                " where status = 1", " order by gmt_create", null);
+                " where status = 1", " order by gmt_modified", null);
         Assertions.assertNotNull(sql);
         sql = h2Log.getQueryGlobalTransactionForRecoverySQL(globalTable);
         Assertions.assertNotNull(sql);
@@ -195,7 +195,7 @@ public class LogStoreSqlsFactoryTest {
         sql = oceanbase.getQueryGlobalTransactionSQLByTransactionId(globalTable);
         Assertions.assertNotNull(sql);
         sql = oceanbase.getQueryGlobalTransactionSQLByCondition(globalTable,
-                " where status = 1", " order by gmt_create", null);
+                " where status = 1", " order by gmt_modified", null);
         Assertions.assertNotNull(sql);
         sql = oceanbase.getQueryGlobalTransactionForRecoverySQL(globalTable);
         Assertions.assertNotNull(sql);
