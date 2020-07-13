@@ -18,14 +18,16 @@ package io.seata.saga.engine.db;
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RpcServer;
-import io.seata.core.rpc.netty.ShutdownHook;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.ParameterParser;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractServerTest {
 
 
-    private static RpcServer rpcServer;
+    private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -46,47 +48,52 @@ public abstract class AbstractServerTest {
         (new Thread(new Runnable() {
             @Override
             public void run() {
-                File file = new File("sessionStore/root.data");
-                if (file.exists()) {
-                    file.delete();
+                try {
+                    File file = new File("sessionStore/root.data");
+                    if(file.exists()){
+                        file.delete();
+                    }
+
+                    ParameterParser parameterParser = new ParameterParser(new String[]{});
+
+                    //initialize the metrics
+                    MetricsManager.get().init();
+
+                    System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
+
+                    nettyServer = new NettyRemotingServer(workingThreads);
+                    //server port
+                    nettyServer.setListenPort(parameterParser.getPort());
+                    UUIDGenerator.init(parameterParser.getServerNode());
+                    //log store mode : file、db
+                    SessionHolder.init(parameterParser.getStoreMode());
+
+                    DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
+                    coordinator.init();
+                    nettyServer.setHandler(coordinator);
+                    // register ShutdownHook
+                    ShutdownHook.getInstance().addDisposable(coordinator);
+
+                    //127.0.0.1 and 0.0.0.0 are not valid here.
+                    if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+                        XID.setIpAddress(parameterParser.getHost());
+                    } else {
+                        XID.setIpAddress(NetUtil.getLocalIp());
+                    }
+                    XID.setPort(nettyServer.getListenPort());
+
+                    nettyServer.init();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-
-                ParameterParser parameterParser = new ParameterParser(new String[]{});
-
-                //initialize the metrics
-                MetricsManager.get().init();
-
-                System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
-                rpcServer = new RpcServer(workingThreads);
-                //server port
-                rpcServer.setListenPort(parameterParser.getPort());
-                //log store mode : file、db
-                SessionHolder.init(parameterParser.getStoreMode());
-
-                DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
-                coordinator.init();
-                rpcServer.setHandler(coordinator);
-                // register ShutdownHook
-                ShutdownHook.getInstance().addDisposable(coordinator);
-
-                //127.0.0.1 and 0.0.0.0 are not valid here.
-                if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-                    XID.setIpAddress(parameterParser.getHost());
-                } else {
-                    XID.setIpAddress(NetUtil.getLocalIp());
-                }
-                XID.setPort(rpcServer.getListenPort());
-
-                rpcServer.init();
             }
         })).start();
         Thread.sleep(5000);
     }
 
     protected static final void stopSeataServer() throws InterruptedException {
-        if (rpcServer != null) {
-            rpcServer.destroy();
+        if(nettyServer != null){
+            nettyServer.destroy();
             Thread.sleep(5000);
         }
     }

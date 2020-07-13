@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.seata.common.Constants;
@@ -23,7 +23,7 @@ import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.netty.NettyPoolKey;
+import io.seata.core.rpc.RpcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
