@@ -389,7 +389,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         }
 
         // get update branch sql
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(brachTable, sb.toString());
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(branchTable, sb.toString());
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -422,7 +422,7 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteBranchTransactionByBranchIdSQL(brachTable);
+        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getDeleteBranchTransactionByBranchIdSQL(branchTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {

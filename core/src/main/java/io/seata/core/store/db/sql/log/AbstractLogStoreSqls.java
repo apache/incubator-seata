@@ -82,14 +82,14 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_GLOBAL_TRANSACTION.
      */
     public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_ID.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_ID = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
 
     /**
@@ -110,7 +110,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_BRANCH_TRANSACTION.
      */
     public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS
-            + " from " + BRANCH_TABLE_PLACEHOLD
+            + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
@@ -118,7 +118,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant QUERY_BRANCH_TRANSACTION_XIDS.
      */
     public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS
-            + " from " + BRANCH_TABLE_PLACEHOLD
+            + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ")"
             + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
 
@@ -126,17 +126,17 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      * The constant CHECK_MAX_TRANS_ID.
      */
     public static final String QUERY_MAX_TRANS_ID = "select max(" + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + ")"
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " < ?"
-            + " and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
+            + "   and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
 
     /**
      * The constant CHECK_MAX_BTANCH_ID.
      */
     public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + ")"
-            + " from " + BRANCH_TABLE_PLACEHOLD
+            + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " < ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     @Override
     public abstract String getInsertGlobalTransactionSQL(String globalTable);

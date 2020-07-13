@@ -44,7 +44,7 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      * This constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
             + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
             + " limit ?";
