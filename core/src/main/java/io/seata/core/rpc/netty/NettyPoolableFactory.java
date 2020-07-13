@@ -35,16 +35,16 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyPoolableFactory.class);
 
-    private final AbstractRpcRemotingClient rpcRemotingClient;
+    private final AbstractNettyRemotingClient rpcRemotingClient;
 
-    private final RpcClientBootstrap clientBootstrap;
+    private final NettyClientBootstrap clientBootstrap;
 
     /**
      * Instantiates a new Netty key poolable factory.
      *
      * @param rpcRemotingClient the rpc remoting client
      */
-    public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient, RpcClientBootstrap clientBootstrap) {
+    public NettyPoolableFactory(AbstractNettyRemotingClient rpcRemotingClient, NettyClientBootstrap clientBootstrap) {
         this.rpcRemotingClient = rpcRemotingClient;
         this.clientBootstrap = clientBootstrap;
     }
@@ -63,7 +63,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
             throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }
         try {
-            response = rpcRemotingClient.sendAsyncRequestWithResponse(tmpChannel, key.getMessage());
+            response = rpcRemotingClient.sendSyncRequest(tmpChannel, key.getMessage());
             if (!isRegisterSuccess(response, key.getTransactionRole())) {
                 rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
             } else {
@@ -107,9 +107,9 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     private String getVersion(Object response, NettyPoolKey.TransactionRole transactionRole) {
         if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
-            return ((RegisterTMResponse)response).getVersion();
+            return ((RegisterTMResponse) response).getVersion();
         } else {
-            return ((RegisterRMResponse)response).getVersion();
+            return ((RegisterRMResponse) response).getVersion();
         }
     }
 
