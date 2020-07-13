@@ -36,7 +36,8 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_GLOBAL_TRANSACTION_ORACLE.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_ORACLE = "update " + GLOBAL_TABLE_PLACEHOLD
-            + " set " + SETS_PLACEHOLD + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = sysdate"
+            + "   set " + SETS_PLACEHOLD
+            + "       " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = sysdate"
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
@@ -72,9 +73,10 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_BRANCH_TRANSACTION_ORACLE.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
-            + " set " + SETS_PLACEHOLD + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = systimestamp"
+            + "   set " + SETS_PLACEHOLD
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = systimestamp"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {

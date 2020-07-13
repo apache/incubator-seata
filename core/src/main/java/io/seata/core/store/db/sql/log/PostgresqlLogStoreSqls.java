@@ -36,7 +36,8 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_GLOBAL_TRANSACTION_POSTGRESQL.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_POSTGRESQL = "update " + GLOBAL_TABLE_PLACEHOLD
-            + " set " + SETS_PLACEHOLD + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = now()"
+            + "   set " + SETS_PLACEHOLD
+            + "       " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = now()"
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
@@ -45,15 +46,17 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
             + " from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " limit ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
-            + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14)"
-            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " limit ?";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_POSTGRESQL.
@@ -66,9 +69,10 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_BRANCH_TRANSACTION_POSTGRESQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_POSTGRESQL = "update " + BRANCH_TABLE_PLACEHOLD
-            + " set " + SETS_PLACEHOLD + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now()"
+            + "   set " + SETS_PLACEHOLD
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now()"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
