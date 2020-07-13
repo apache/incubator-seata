@@ -48,7 +48,7 @@ public class SeataProperties {
      */
     private boolean useJdkProxy = false;
     /**
-     * Specifies which bean do not scanner in the GlobalTransactionScanner
+     * Specifies beans that won't be scanned in the GlobalTransactionScanner
      */
     private String[] excludesForScanner = {};
     /**
