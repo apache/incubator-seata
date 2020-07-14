@@ -153,7 +153,6 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     @Override
     public void onResponse(AbstractResultMessage response, RpcContext context) {
-        throw new ShouldNeverHappenException();
     }
 
     public abstract BranchType getBranchType();
