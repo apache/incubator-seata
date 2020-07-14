@@ -26,7 +26,9 @@ class Panel extends React.Component {
 
     return (
       <div {...pick(this.props, ['style', 'className'])}>
-        {children}
+        {
+          React.Children.toArray(children).map(child => React.cloneElement(child))
+        }
       </div>
     );
   }

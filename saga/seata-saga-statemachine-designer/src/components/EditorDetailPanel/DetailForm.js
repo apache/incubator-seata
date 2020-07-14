@@ -16,13 +16,11 @@ const inlineFormItemLayout = {
   },
 };
 
-let lastSelectedItem;
-
 class DetailForm extends React.Component {
   get item() {
     const { propsAPI } = this.props;
 
-    return propsAPI.getSelected()[0] ? propsAPI.getSelected()[0] : lastSelectedItem;
+    return propsAPI.getSelected()[0];
   }
 
   handleSubmit = (e) => {
@@ -48,8 +46,6 @@ class DetailForm extends React.Component {
         if (values.stateProps) {
           values.stateProps = JSON.parse(values.stateProps);
         }
-
-        lastSelectedItem = item;
 
         executeCommand(() => {
           update(item, {
