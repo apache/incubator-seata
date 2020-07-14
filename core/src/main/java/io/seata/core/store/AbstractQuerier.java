@@ -84,7 +84,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
             return new ArrayList<>();
         }
 
-        if (!this.isNeedSort()) {
+        if (!this.isNeedSort(globalTransactionDOs)) {
             return globalTransactionDOs;
         }
 
