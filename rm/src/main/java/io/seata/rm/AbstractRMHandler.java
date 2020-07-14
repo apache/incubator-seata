@@ -152,7 +152,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     @Override
     public void onResponse(AbstractResultMessage response, RpcContext context) {
-        LOGGER.info("the rm client received response msg from tc server, bug without any processing logic.");
+        LOGGER.info("the rm client received response msg [{}] from tc server.", response.toString());
     }
 
     public abstract BranchType getBranchType();
