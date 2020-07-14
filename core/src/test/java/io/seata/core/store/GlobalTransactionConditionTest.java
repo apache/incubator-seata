@@ -36,8 +36,6 @@ public class GlobalTransactionConditionTest {
     public void test_isMatch() throws InterruptedException {
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
 
-        condition.filterIsTimeoutData();
-
         GlobalTransactionDO obj = new GlobalTransactionDO();
 
         // condition1: statuses
@@ -48,20 +46,20 @@ public class GlobalTransactionConditionTest {
         Assertions.assertTrue(condition.isMatch(obj));
 
         // condition2: isTimeoutData
-        condition.filterNotTimeoutData();
+        condition.setNotTimeoutDataCondition();
         obj.setBeginTime(System.currentTimeMillis());
         obj.setTimeout(10);
         Assertions.assertTrue(condition.isMatch(obj));
-        Thread.sleep(11);
+        Thread.sleep(12);
         Assertions.assertFalse(condition.isMatch(obj));
-        condition.filterIsTimeoutData();
+        condition.setTimeoutDataCondition();
         Assertions.assertTrue(condition.isMatch(obj));
 
         // condition3: overTimeAliveMills
         condition.setOverTimeAliveMills(10);
         obj.setBeginTime(System.currentTimeMillis());
         Assertions.assertFalse(condition.isMatch(obj));
-        Thread.sleep(11);
+        Thread.sleep(12);
         Assertions.assertTrue(condition.isMatch(obj));
 
         // condition4: minGmtModified
@@ -81,7 +79,7 @@ public class GlobalTransactionConditionTest {
         GlobalTransactionCondition condition = new GlobalTransactionCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
-        condition.filterIsTimeoutData();
+        condition.setTimeoutDataCondition();
 
         List<GlobalTransactionDO> list = new ArrayList<>();
 
@@ -97,7 +95,7 @@ public class GlobalTransactionConditionTest {
         Assertions.assertEquals(count1, 0);
         Assertions.assertEquals(list1.size(), 0);
 
-        Thread.sleep(101);
+        Thread.sleep(102);
         count1 = condition.doCount(list);
         list1 = condition.doFilter(list);
         Assertions.assertEquals(count1, 0);

@@ -71,7 +71,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     //region Override TransactionStoreManager
 
     @Override
-    public GlobalSession getSession(String xid, boolean withBranchSessions) {
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
         //global transaction
         GlobalSession globalTransactionDO = logStore.getGlobalTransactionDO(xid);
         //withBranchSessions without process in memory
@@ -79,13 +79,13 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     @Override
-    public List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions) {
+    public List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions) {
         if (sessionCondition.getPageSize() <= 0) {
             sessionCondition.setPageSize(logQueryLimit <= 0 ? DEFAULT_LOG_QUERY_LIMIT : logQueryLimit);
         }
 
         //global transactions
-        List<GlobalSession> globalTransactionDOs = logStore.findGlobalTransactionDO(sessionCondition);
+        List<GlobalSession> globalTransactionDOs = logStore.queryGlobalTransactionDO(sessionCondition);
         //withBranchSessions without process in memory
         return globalTransactionDOs;
     }

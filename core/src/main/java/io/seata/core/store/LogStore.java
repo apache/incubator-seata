@@ -27,7 +27,7 @@ import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
  *
  * @author zhangsen
  */
-public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransactionDO> {
+public interface LogStore<G extends GlobalTransactionModel, B extends BranchTransactionModel> {
 
     /**
      * Get global transaction do global transaction do.
@@ -46,32 +46,32 @@ public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransac
     G getGlobalTransactionDO(long transactionId);
 
     /**
-     * Find global transaction do list.
+     * Query global transaction do list.
      *
      * @param condition the condition
      * @return the list
      */
-    List<G> findGlobalTransactionDO(GlobalTransactionCondition condition);
+    List<G> queryGlobalTransactionDO(GlobalTransactionCondition condition);
 
     /**
-     * Find global transaction do list.
+     * Query global transaction do list.
      *
      * @param statuses the statuses
      * @return the list
      */
-    default List<G> findGlobalTransactionDO(GlobalStatus... statuses) {
-        return this.findGlobalTransactionDO(new GlobalTransactionCondition(statuses));
+    default List<G> queryGlobalTransactionDO(GlobalStatus... statuses) {
+        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses));
     }
 
     /**
-     * Find global transaction do list.
+     * Query global transaction do list.
      *
      * @param statuses the statuses
      * @param limit    the limit
      * @return the list
      */
-    default List<G> findGlobalTransactionDO(GlobalStatus[] statuses, int limit) {
-        return this.findGlobalTransactionDO(new GlobalTransactionCondition(statuses, FIRST_PAGE_INDEX, limit));
+    default List<G> queryGlobalTransactionDO(GlobalStatus[] statuses, int limit) {
+        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses, FIRST_PAGE_INDEX, limit));
     }
 
     /**
@@ -117,20 +117,20 @@ public interface LogStore<G extends GlobalTransactionDO, B extends BranchTransac
     boolean deleteGlobalTransactionDO(G globalTransactionDO);
 
     /**
-     * Find branch transaction do list.
+     * Query branch transaction do list.
      *
      * @param xid the xid
      * @return the BranchTransactionDO list
      */
-    List<B> findBranchTransactionDO(String xid);
+    List<B> queryBranchTransactionDO(String xid);
 
     /**
-     * Find branch transaction do list.
+     * Query branch transaction do list.
      *
      * @param xids the xid list
      * @return the BranchTransactionDO list
      */
-    List<B> findBranchTransactionDO(List<String> xids);
+    List<B> queryBranchTransactionDO(List<String> xids);
 
     /**
      * Insert branch transaction do boolean.

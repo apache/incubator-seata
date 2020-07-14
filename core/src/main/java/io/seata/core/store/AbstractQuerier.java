@@ -15,7 +15,7 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.ComparableUtils;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,25 +73,48 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     }
 
     /**
-     * Compare fieldValueA and fieldValueB.
+     * do sort
      *
-     * @param fieldValueA the field value a
-     * @param fieldValueB the field value b
-     * @param sortOrder   the sort order
-     * @return 0: equals    -1: a < b    1: a > b
+     * @param globalTransactionDOs the global transactions
+     * @return the after sort list
      */
-    protected int compare(Comparable fieldValueA, Comparable fieldValueB, SortOrder sortOrder) {
-        int ret = ComparableUtils.compare(fieldValueA, fieldValueB);
-        if (ret == 0) {
-            return ret;
+    @Override
+    public <D extends T> List<D> doSort(List<D> globalTransactionDOs) {
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return new ArrayList<>();
         }
 
-        if (sortOrder == SortOrder.DESC) {
-            return ret > 0 ? -1 : 1; // -1 * ret
+        if (!this.isNeedSort(globalTransactionDOs)) {
+            return globalTransactionDOs;
         }
 
-        return ret;
+        globalTransactionDOs.sort((a, b) -> {
+            int ret;
+            for (SortParam sortParam : this.getSortParams()) {
+                ret = this.compareByFieldName(a, b, sortParam.getSortFieldName());
+                if (ret == 0) {
+                    continue;
+                }
+
+                if (sortParam.getSortOrder() == SortOrder.DESC) {
+                    ret = ret > 0 ? -1 : 1; // -1 * ret
+                }
+                return ret;
+            }
+            return 0;
+        });
+        return globalTransactionDOs;
     }
+
+    /**
+     * Compare by field name.
+     *
+     * @param a             the object a
+     * @param b             the object b
+     * @param sortFieldName the sort field name
+     * @return the compare result
+     */
+    public abstract <D extends T> int compareByFieldName(D a, D b, String sortFieldName);
 
     @Override
     public SortParam[] getSortParams() {

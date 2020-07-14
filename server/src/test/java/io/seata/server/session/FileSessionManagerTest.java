@@ -74,7 +74,7 @@ public class FileSessionManagerTest {
      */
     @ParameterizedTest
     @MethodSource("globalSessionProvider")
-    public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
+    public void getGlobalSessionTest(GlobalSession globalSession) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             sessionManager.addGlobalSession(globalSession);
             GlobalSession expected = sessionManager.getGlobalSession(globalSession.getXid());
@@ -213,7 +213,7 @@ public class FileSessionManagerTest {
      */
     @ParameterizedTest
     @MethodSource("globalSessionsProvider")
-    public void findGlobalSessionsTest(List<GlobalSession> globalSessions) throws Exception {
+    public void queryGlobalSessionsTest(List<GlobalSession> globalSessions) throws Exception {
         for (SessionManager sessionManager : sessionManagerList) {
             for (GlobalSession globalSession : globalSessions) {
                 sessionManager.addGlobalSession(globalSession);

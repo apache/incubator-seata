@@ -182,7 +182,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     }
 
     @Override
-    public List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
         List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -195,7 +195,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
             String wherePlaceHolder = this.buildWherePlaceHolder(condition);
             // order by xxx [asc|desc], yyy [asc|desc]
             StringBuilder orderByPlaceHolder = new StringBuilder();
-            if (condition.isNeedSort()) {
+            if (condition.hasSortParams()) {
                 orderByPlaceHolder.append(" order by ");
 
                 SortParam[] sortParams = condition.getSortParams();
@@ -356,7 +356,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     }
 
     @Override
-    public List<BranchTransactionDO> findBranchTransactionDO(String xid) {
+    public List<BranchTransactionDO> queryBranchTransactionDO(String xid) {
         List<BranchTransactionDO> rets = new ArrayList<>();
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(branchTable);
         Connection conn = null;
@@ -382,7 +382,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     }
 
     @Override
-    public List<BranchTransactionDO> findBranchTransactionDO(List<String> xids) {
+    public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
         int length = xids.size();
         List<BranchTransactionDO> rets = new ArrayList<>(length * 3);
         String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", length);

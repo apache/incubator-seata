@@ -15,6 +15,10 @@
  */
 package io.seata.server.session;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
@@ -26,10 +30,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * The type Session holder.

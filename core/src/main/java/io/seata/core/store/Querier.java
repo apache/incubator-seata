@@ -28,8 +28,8 @@ public interface Querier<T> {
     /**
      * Match data
      *
-     * @param data
-     * @return
+     * @param data the data
+     * @return the boolean
      */
     <D extends T> boolean isMatch(D data);
 
@@ -102,16 +102,16 @@ public interface Querier<T> {
         }
 
         // do filter
-        list = doFilter(list);
+        list = this.doFilter(list);
         if (CollectionUtils.isEmpty(list)) {
             return list;
         }
 
         // do sort
-        list = doSort(list);
+        list = this.doSort(list);
 
         // do paging
-        list = doPaging(list);
+        list = this.doPaging(list);
 
         return list;
     }

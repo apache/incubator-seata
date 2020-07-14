@@ -91,23 +91,23 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     @Override
-    public GlobalSession getSession(String xid, boolean withBranchSessions) {
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
         if (super.logStore != null) {
-            return super.getSession(xid, withBranchSessions);
+            return super.readSession(xid, withBranchSessions);
         } else {
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                return this.create(jedis).getSession(xid, withBranchSessions);
+                return this.create(jedis).readSession(xid, withBranchSessions);
             }
         }
     }
 
     @Override
-    public List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions) {
+    public List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions) {
         if (super.logStore != null) {
-            return super.findSession(sessionCondition, withBranchSessions);
+            return super.readSession(sessionCondition, withBranchSessions);
         } else {
             try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                return this.create(jedis).findSession(sessionCondition, withBranchSessions);
+                return this.create(jedis).readSession(sessionCondition, withBranchSessions);
             }
         }
     }

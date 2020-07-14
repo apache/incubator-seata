@@ -37,31 +37,52 @@ public interface TransactionStoreManager {
      */
     boolean writeSession(LogOperation logOperation, SessionStorable session);
 
+
     /**
-     * Get global session.
+     * Read global session.
+     *
+     * @param xid the xid
+     * @return the global session
+     */
+    default GlobalSession readSession(String xid) {
+        return readSession(xid, true);
+    }
+
+    /**
+     * Read global session.
      *
      * @param xid                the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
-    GlobalSession getSession(String xid, boolean withBranchSessions);
+    GlobalSession readSession(String xid, boolean withBranchSessions);
 
     /**
-     * Get global session.
+     * Read global session.
+     *
+     * @param transactionId the transaction id
+     * @return the global session
+     */
+    default GlobalSession readSession(long transactionId) {
+        return readSession(transactionId, true);
+    }
+
+    /**
+     * Read global session.
      *
      * @param transactionId      the transaction id
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
-    GlobalSession getSession(long transactionId, boolean withBranchSessions);
+    GlobalSession readSession(long transactionId, boolean withBranchSessions);
 
     /**
-     * Find global session by condition.
+     * Read session by condition.
      *
      * @param sessionCondition the session condition
      * @return the list
      */
-    List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions);
+    List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions);
 
     /**
      * Shutdown.

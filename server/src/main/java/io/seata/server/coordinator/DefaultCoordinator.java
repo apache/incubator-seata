@@ -216,7 +216,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void timeoutCheck() throws TransactionException {
         // Condition is: status = 1 and begin_time < System.currentTimeMillis() - timeout
         SessionCondition condition = new SessionCondition(GlobalStatus.Begin);
-        condition.filterIsTimeoutData();
+        condition.setTimeoutDataCondition();
 
         Collection<GlobalSession> allSessions = SessionHolder.getSessionManager().findGlobalSessions(condition);
         if (CollectionUtils.isEmpty(allSessions)) {

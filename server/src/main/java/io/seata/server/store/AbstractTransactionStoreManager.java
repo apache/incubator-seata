@@ -95,7 +95,7 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
     }
 
     @Override
-    public GlobalSession getSession(String xid, boolean withBranchSessions) {
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
         //global transaction
         GlobalTransactionDO globalTransactionDO = logStore.getGlobalTransactionDO(xid);
         //branch transactions
@@ -103,7 +103,7 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
     }
 
     @Override
-    public GlobalSession getSession(long transactionId, boolean withBranchSessions) {
+    public GlobalSession readSession(long transactionId, boolean withBranchSessions) {
         //global transaction
         GlobalTransactionDO globalTransactionDO = logStore.getGlobalTransactionDO(transactionId);
         //branch transactions
@@ -111,13 +111,13 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
     }
 
     @Override
-    public List<GlobalSession> findSession(SessionCondition sessionCondition, boolean withBranchSessions) {
+    public List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions) {
         if (sessionCondition.getPageSize() <= 0) {
             sessionCondition.setPageSize(logQueryLimit <= 0 ? DEFAULT_LOG_QUERY_LIMIT : logQueryLimit);
         }
 
         //global transactions
-        List<? extends GlobalTransactionDO> globalTransactionDOs = logStore.findGlobalTransactionDO(sessionCondition);
+        List<? extends GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(sessionCondition);
         //branch transactions
         return this.loadBranchs(globalTransactionDOs, withBranchSessions);
     }
@@ -137,7 +137,7 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
         }
         List<? extends BranchTransactionDO> branchTransactionDOs = null;
         if (withBranchSessions) {
-            branchTransactionDOs = logStore.findBranchTransactionDO(globalTransactionDO.getXid());
+            branchTransactionDOs = logStore.queryBranchTransactionDO(globalTransactionDO.getXid());
         }
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
@@ -150,7 +150,7 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
         Map<String, List<BranchTransactionDO>> branchTransactionDOsMap;
         if (withBranchSessions) {
             List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
-            List<? extends BranchTransactionDO> branchTransactionDOs = logStore.findBranchTransactionDO(xids);
+            List<? extends BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
             branchTransactionDOsMap = branchTransactionDOs.stream()
                     .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
         } else {

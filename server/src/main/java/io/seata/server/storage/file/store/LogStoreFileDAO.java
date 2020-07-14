@@ -241,7 +241,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     }
 
     @Override
-    public List<GlobalSession> findGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public List<GlobalSession> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
 
         // where
@@ -270,7 +270,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
         condition.setPageSize(0);
 
         try {
-            return findGlobalTransactionDO(condition).size();
+            return queryGlobalTransactionDO(condition).size();
         } finally {
             condition.setPageIndex(pageIndexBak);
             condition.setPageSize(pageSizeBak);
@@ -296,12 +296,12 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     }
 
     @Override
-    public List<BranchSession> findBranchTransactionDO(String xid) {
+    public List<BranchSession> queryBranchTransactionDO(String xid) {
         throw new StoreException("unsupport for read from file");
     }
 
     @Override
-    public List<BranchSession> findBranchTransactionDO(List<String> xids) {
+    public List<BranchSession> queryBranchTransactionDO(List<String> xids) {
         throw new StoreException("unsupport for read from file");
     }
 
@@ -514,7 +514,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     }
 
     private boolean findTimeoutAndSave() throws IOException {
-        List<GlobalSession> globalSessionsOverMaxTimeout = this.findGlobalTransactionDO(
+        List<GlobalSession> globalSessionsOverMaxTimeout = this.queryGlobalTransactionDO(
                 new GlobalTransactionCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;

@@ -228,7 +228,7 @@ public class LogStoreDataBaseDAOTest {
         int count = logStoreDataBaseDAO.countGlobalTransactionDO(new GlobalStatus[]{Begin});
         Assertions.assertEquals(2, count);
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.findGlobalTransactionDO(new GlobalStatus[]{Begin}, 10);
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new GlobalStatus[]{Begin}, 10);
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(2, globalTransactionDOs.size());
 
@@ -300,7 +300,7 @@ public class LogStoreDataBaseDAOTest {
         int count = logStoreDataBaseDAO.countGlobalTransactionDO(new GlobalStatus[]{Begin});
         Assertions.assertEquals(2, count);
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.findGlobalTransactionDO(new GlobalStatus[]{Begin}, 1);
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new GlobalStatus[]{Begin}, 1);
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(1, globalTransactionDOs.size());
 
@@ -484,7 +484,7 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<BranchTransactionDO> rets = logStoreDataBaseDAO.findBranchTransactionDO("abc-123:6789");
+        List<BranchTransactionDO> rets = logStoreDataBaseDAO.queryBranchTransactionDO("abc-123:6789");
         Assertions.assertTrue(CollectionUtils.isNotEmpty(rets));
         Assertions.assertEquals(2, rets.size());
 

@@ -17,6 +17,8 @@ package io.seata.core.store;
 
 import org.apache.commons.lang.ArrayUtils;
 
+import java.util.List;
+
 /**
  * @author wang.liang
  */
@@ -89,11 +91,20 @@ public interface Sortable {
     }
 
     /**
-     * Is need sort boolean
+     * Has sort params.
      *
      * @return the boolean
      */
-    default boolean isNeedSort() {
+    default boolean hasSortParams() {
         return ArrayUtils.isNotEmpty(getSortParams());
+    }
+
+    /**
+     * Is need sort.
+     *
+     * @return the boolean
+     */
+    default boolean isNeedSort(List<?> dataList) {
+        return this.hasSortParams() && dataList != null && dataList.size() > 1;
     }
 }

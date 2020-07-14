@@ -102,7 +102,7 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
     }
 
     @Override
-    public List<GlobalTransactionDO> findGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
         Set<String> keys = new HashSet<>();
         String cursor = INITIAL_CURSOR;
         ScanParams params = new ScanParams();
@@ -168,7 +168,7 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
     }
 
     @Override
-    public List<BranchTransactionDO> findBranchTransactionDO(String xid) {
+    public List<BranchTransactionDO> queryBranchTransactionDO(String xid) {
         Set<String> keys = lRange(jedis, getBranchListKeyByXid(xid));
         if (CollectionUtils.isNotEmpty(keys)) {
             return getBranchJsons(jedis, keys);
@@ -178,7 +178,7 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
     }
 
     @Override
-    public List<BranchTransactionDO> findBranchTransactionDO(List<String> xids) {
+    public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
         List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
         for (String xid : xids) {
             Set<String> branches = lRange(jedis, getBranchListKeyByXid(xid));

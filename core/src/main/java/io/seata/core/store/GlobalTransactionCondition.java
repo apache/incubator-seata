@@ -15,12 +15,10 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ComparableUtils;
 import io.seata.core.model.GlobalStatus;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA;
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID;
@@ -49,8 +47,8 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     protected GlobalStatus[] statuses;
 
     /**
-     * filter is timeout or not timeout
-     * -  null: all..............   no condition
+     * filter is timeout or not timeout data
+     * -  null: all..............   no this condition
      * -  true: timeout data.....   condition: begin_time  < System.currentTimeMillis() - timeout
      * - false: not timeout data.   condition: begin_time >= System.currentTimeMillis() - timeout
      */
@@ -141,7 +139,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
 
     //endregion
 
-    //region Override Querier
+    //region Override Querier.isMatch, AbstractQuerier.compareByFieldName
 
     /**
      * Match data.
@@ -188,68 +186,41 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     }
 
     /**
-     * do sort
+     * Compare by field name.
      *
-     * @param globalTransactionDOs the global transactions
-     * @return the after sort list
+     * @param a             the object a
+     * @param b             the object b
+     * @param sortFieldName the sort field name
+     * @return the compare result
      */
     @Override
-    public <D extends GlobalTransactionModel> List<D> doSort(List<D> globalTransactionDOs) {
-        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
-            return new ArrayList<>();
+    public  <D extends GlobalTransactionModel> int compareByFieldName(D a, D b, String sortFieldName) {
+        switch (sortFieldName) {
+            case GLOBAL_TABLE_XID:
+                return ComparableUtils.compare(a.getXid(), b.getXid());
+            case GLOBAL_TABLE_TRANSACTION_ID:
+                return ComparableUtils.compare(a.getTransactionId(), b.getTransactionId());
+            case GLOBAL_TABLE_STATUS:
+                return ComparableUtils.compare(a.getStatus(), b.getStatus());
+            case GLOBAL_TABLE_APPLICATION_ID:
+                return ComparableUtils.compare(a.getApplicationId(), b.getApplicationId());
+            case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
+                return ComparableUtils.compare(a.getTransactionServiceGroup(), b.getTransactionServiceGroup());
+            case GLOBAL_TABLE_TRANSACTION_NAME:
+                return ComparableUtils.compare(a.getTransactionName(), b.getTransactionName());
+            case GLOBAL_TABLE_TIMEOUT:
+                return ComparableUtils.compare(a.getTimeout(), b.getTimeout());
+            case GLOBAL_TABLE_BEGIN_TIME:
+                return ComparableUtils.compare(a.getBeginTime(), b.getBeginTime());
+            case GLOBAL_TABLE_APPLICATION_DATA:
+                return ComparableUtils.compare(a.getApplicationData(), b.getApplicationData());
+            case GLOBAL_TABLE_GMT_CREATE:
+                return ComparableUtils.compare(a.getGmtCreate(), b.getGmtCreate());
+            case GLOBAL_TABLE_GMT_MODIFIED:
+                return ComparableUtils.compare(a.getGmtModified(), b.getGmtModified());
+            default:
+                throw new RuntimeException("Unknown or not support sort field name: " + sortFieldName);
         }
-
-        if (!super.isNeedSort()) {
-            return globalTransactionDOs;
-        }
-
-        globalTransactionDOs.sort((a, b) -> {
-            int ret = 0;
-            for (SortParam sortParam : super.getSortParams()) {
-                switch (sortParam.getSortFieldName()) {
-                    case GLOBAL_TABLE_XID:
-                        ret = this.compare(a.getXid(), b.getXid(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_TRANSACTION_ID:
-                        ret = this.compare(a.getTransactionId(), b.getTransactionId(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_STATUS:
-                        ret = this.compare(a.getStatus(), b.getStatus(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_APPLICATION_ID:
-                        ret = this.compare(a.getApplicationId(), b.getApplicationId(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
-                        ret = this.compare(a.getTransactionServiceGroup(), b.getTransactionServiceGroup(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_TRANSACTION_NAME:
-                        ret = this.compare(a.getTransactionName(), b.getTransactionName(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_TIMEOUT:
-                        ret = this.compare(a.getTimeout(), b.getTimeout(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_BEGIN_TIME:
-                        ret = this.compare(a.getBeginTime(), b.getBeginTime(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_APPLICATION_DATA:
-                        ret = this.compare(a.getApplicationData(), b.getApplicationData(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_GMT_CREATE:
-                        ret = this.compare(a.getGmtCreate(), b.getGmtCreate(), sortParam.getSortOrder());
-                        break;
-                    case GLOBAL_TABLE_GMT_MODIFIED:
-                        ret = this.compare(a.getGmtModified(), b.getGmtModified(), sortParam.getSortOrder());
-                        break;
-                    default:
-                        throw new RuntimeException("Unknown or not support sort field name: " + sortParam.getSortFieldName());
-                }
-                if (ret != 0) {
-                    return ret;
-                }
-            }
-            return ret;
-        });
-        return globalTransactionDOs;
     }
 
     //endregion
@@ -281,11 +252,11 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
         return isTimeoutData;
     }
 
-    public void filterIsTimeoutData() {
+    public void setTimeoutDataCondition() {
         this.isTimeoutData = true;
     }
 
-    public void filterNotTimeoutData() {
+    public void setNotTimeoutDataCondition() {
         this.isTimeoutData = false;
     }
 

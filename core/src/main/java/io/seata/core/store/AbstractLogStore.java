@@ -23,7 +23,7 @@ import io.seata.config.ConfigurationFactory;
  *
  * @author wang.liang
  */
-public abstract class AbstractLogStore<G extends GlobalTransactionDO, B extends BranchTransactionDO>
+public abstract class AbstractLogStore<G extends GlobalTransactionModel, B extends BranchTransactionModel>
         implements LogStore<G, B> {
 
     /**

@@ -214,8 +214,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     @Override
     public String getCountGlobalTransactionSQLByCondition(String globalTable, String wherePlaceHolder) {
-        return COUNT_GLOBAL_TRANSACTION_BY_CONDITION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
-            .replace(WHERE_PLACEHOLD, wherePlaceHolder);
+        return COUNT_GLOBAL_TRANSACTION_BY_CONDITION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(WHERE_PLACEHOLD, wherePlaceHolder);
     }
 
     @Override
