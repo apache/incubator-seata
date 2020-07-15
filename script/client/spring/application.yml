@@ -4,7 +4,7 @@ seata:
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
   use-jdk-proxy: false
-  packages-for-scanner: firstPackageForScanner,secondPackageForScanner
+  scan-packages: firstPackage,secondPackage
   excludes-for-scanner: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:

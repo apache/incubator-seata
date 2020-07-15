@@ -48,9 +48,9 @@ public class SeataProperties {
      */
     private boolean useJdkProxy = false;
     /**
-     * The scannable packages.
+     * The scan packages. If empty, will scan all beans.
      */
-    private String[] packagesForScanner = {};
+    private String[] scanPackages = {};
     /**
      * Specifies beans that won't be scanned in the GlobalTransactionScanner
      */
@@ -123,12 +123,12 @@ public class SeataProperties {
         return this;
     }
 
-    public String[] getPackagesForScanner() {
-        return packagesForScanner;
+    public String[] getScanPackages() {
+        return scanPackages;
     }
 
-    public SeataProperties setPackagesForScanner(String[] packagesForScanner) {
-        this.packagesForScanner = packagesForScanner;
+    public SeataProperties setScanPackages(String[] scanPackages) {
+        this.scanPackages = scanPackages;
         return this;
     }
 
