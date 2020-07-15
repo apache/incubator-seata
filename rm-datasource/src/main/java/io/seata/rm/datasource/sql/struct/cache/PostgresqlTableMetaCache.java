@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -61,7 +60,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
             DatabaseMetaData dbmd = connection.getMetaData();
-            tableName = ColumnUtils.addEscape(tableName, JdbcConstants.POSTGRESQL);
             return resultSetMetaToSchema(dbmd, tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
