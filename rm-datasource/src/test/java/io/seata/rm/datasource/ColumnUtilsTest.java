@@ -36,11 +36,6 @@ public class ColumnUtilsTest {
         Assertions.assertEquals("id", cols.get(0));
         Assertions.assertEquals("name", cols.get(1));
 
-        List<String> cols4 = new ArrayList<>();
-        cols4.add("`scheme`.`id`");
-        cols4 = ColumnUtils.delEscape(cols4, ColumnUtils.Escape.MYSQL);
-        Assertions.assertEquals("scheme.id", cols4.get(0));
-
         List<String> cols2 = new ArrayList<>();
         cols2.add("\"id\"");
         cols2 = ColumnUtils.delEscape(cols2, ColumnUtils.Escape.STANDARD);
@@ -50,6 +45,36 @@ public class ColumnUtilsTest {
         cols3.add("\"scheme\".\"id\"");
         cols3 = ColumnUtils.delEscape(cols3, ColumnUtils.Escape.STANDARD);
         Assertions.assertEquals("scheme.id", cols3.get(0));
+
+        List<String> cols4 = new ArrayList<>();
+        cols4.add("`scheme`.`id`");
+        cols4 = ColumnUtils.delEscape(cols4, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols4.get(0));
+
+        List<String> cols5 = new ArrayList<>();
+        cols5.add("\"scheme\".id");
+        cols5 = ColumnUtils.delEscape(cols5, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("scheme.id", cols5.get(0));
+
+        List<String> cols6 = new ArrayList<>();
+        cols6.add("\"tab\"\"le\"");
+        cols6 = ColumnUtils.delEscape(cols6, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("tab\"\"le", cols6.get(0));
+
+        List<String> cols7 = new ArrayList<>();
+        cols7.add("scheme.\"id\"");
+        cols7 = ColumnUtils.delEscape(cols7, ColumnUtils.Escape.STANDARD);
+        Assertions.assertEquals("scheme.id", cols7.get(0));
+
+        List<String> cols8 = new ArrayList<>();
+        cols8.add("`scheme`.id");
+        cols8 = ColumnUtils.delEscape(cols8, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols8.get(0));
+
+        List<String> cols9 = new ArrayList<>();
+        cols9.add("scheme.`id`");
+        cols9 = ColumnUtils.delEscape(cols9, ColumnUtils.Escape.MYSQL);
+        Assertions.assertEquals("scheme.id", cols9.get(0));
 
         Assertions.assertNull(ColumnUtils.delEscape((String) null, ColumnUtils.Escape.MYSQL));
     }
@@ -97,6 +122,26 @@ public class ColumnUtilsTest {
         cols5.add("ID");
         cols5 = ColumnUtils.addEscape(cols5, JdbcConstants.ORACLE);
         Assertions.assertEquals("ID", cols5.get(0));
+
+        List<String> cols6 = new ArrayList<>();
+        cols6.add("\"SCHEME\".ID");
+        cols6 = ColumnUtils.addEscape(cols6, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"SCHEME\".\"ID\"", cols6.get(0));
+
+        List<String> cols7 = new ArrayList<>();
+        cols7.add("`SCHEME`.ID");
+        cols7 = ColumnUtils.addEscape(cols7, JdbcConstants.MYSQL);
+        Assertions.assertEquals("`SCHEME`.`ID`", cols7.get(0));
+
+        List<String> cols8 = new ArrayList<>();
+        cols8.add("SCHEME.`ID`");
+        cols8 = ColumnUtils.addEscape(cols8, JdbcConstants.MYSQL);
+        Assertions.assertEquals("`SCHEME`.`ID`", cols8.get(0));
+
+        List<String> cols9 = new ArrayList<>();
+        cols9.add("SCHEME.\"ID\"");
+        cols9 = ColumnUtils.addEscape(cols8, JdbcConstants.ORACLE);
+        Assertions.assertEquals("`SCHEME`.`ID`", cols8.get(0));
 
     }
 

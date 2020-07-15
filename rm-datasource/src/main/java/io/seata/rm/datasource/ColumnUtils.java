@@ -108,6 +108,7 @@ public final class ColumnUtils {
         if (colName == null || colName.isEmpty()) {
             return colName;
         }
+
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
             final String withScheme = escape.value + DOT + escape.value;
             int index = colName.indexOf(withScheme);
@@ -115,6 +116,17 @@ public final class ColumnUtils {
                 return colName.substring(1, index) + DOT + colName.substring(index + withScheme.length(), colName.length() - 1);
             }
             return colName.substring(1, colName.length() - 1);
+        } else {
+            String withScheme = escape.value + DOT;
+            int index = colName.indexOf(withScheme);
+            if (index > -1 && colName.charAt(0) == escape.value) {
+                return colName.substring(1, index) + DOT + colName.substring(index + withScheme.length());
+            }
+            withScheme = DOT + escape.value;
+            index = colName.indexOf(withScheme);
+            if (index > -1 && colName.charAt(colName.length() - 1) == escape.value) {
+                return colName.substring(0, index) + DOT + colName.substring(index + withScheme.length(), colName.length() - 1);
+            }
         }
         return colName;
     }
@@ -173,11 +185,34 @@ public final class ColumnUtils {
             }
         }
 
+        // like ". `.
+        String str = escape.value + DOT;
+        int dotIndex = colName.indexOf(str);
+        if (dotIndex > -1) {
+            return new StringBuilder()
+                    .append(colName.substring(0, dotIndex))
+                    .append(DOT)
+                    .append(escape.value)
+                    .append(colName.substring(dotIndex + str.length()))
+                    .append(escape.value).toString();
+        }
+        // like ." .`
+        str = DOT + escape.value;
+        dotIndex = colName.indexOf(str);
+        if (dotIndex > -1) {
+            return new StringBuilder()
+                    .append(escape.value)
+                    .append(colName.substring(0, dotIndex))
+                    .append(escape.value)
+                    .append(colName.substring(dotIndex + str.length()))
+                    .append(escape.value).toString();
+        }
+
         char[] buf = new char[colName.length() + 2];
         buf[0] = escape.value;
         buf[buf.length - 1] = escape.value;
 
-        colName.getChars(0,colName.length(),buf,1);
+        colName.getChars(0, colName.length(), buf, 1);
 
         return new String(buf).intern();
     }
