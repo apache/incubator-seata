@@ -31,6 +31,7 @@ import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
+import io.seata.spring.annotation.scannerexcluders.PackageScannerExcluder;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
@@ -333,6 +334,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     public static void setBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         GlobalTransactionScanner.beanFactory = beanFactory;
+    }
+
+    public static void addScannablePackages(String... packages) {
+        PackageScannerExcluder.addScannablePackages(packages);
     }
 
     public static void addScannerExcluders(Collection<ScannerExcluder> scannerExcluders) {

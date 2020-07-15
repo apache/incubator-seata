@@ -44,7 +44,7 @@ import java.util.Set;
 public class ScopeBeansScannerExcluder implements ScannerExcluder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScopeBeansScannerExcluder.class);
-    private static final Set<String> EXCLUDE_SCOPE_SET = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<String> EXCLUDE_SCOPE_SET = new HashSet<>();
 
     public static final String REQUEST_SCOPE_NAME = "request";
     public static final String SESSION_SCOPE_NAME = "session";
@@ -65,14 +65,19 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
      */
     public static void addExcludeScopes(String... scopeNames) {
         if (ArrayUtils.isNotEmpty(scopeNames)) {
-            for (String scopeName : scopeNames) {
-                if (StringUtils.isNotBlank(scopeName)) {
-                    EXCLUDE_SCOPE_SET.add(scopeName.trim().toLowerCase());
+            synchronized (EXCLUDE_SCOPE_SET) {
+                for (String scopeName : scopeNames) {
+                    if (StringUtils.isNotBlank(scopeName)) {
+                        EXCLUDE_SCOPE_SET.add(scopeName.trim().toLowerCase());
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Match the '@Scope' beans, and check whether exclusion is required.
+     */
     @Override
     public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
         if (bean instanceof ScopedProxyFactoryBean) {
