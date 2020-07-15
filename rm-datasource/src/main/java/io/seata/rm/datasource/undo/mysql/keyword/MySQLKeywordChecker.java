@@ -1105,7 +1105,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
-        if (null != fieldOrTableName) {
+        if (fieldOrTableName != null) {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
@@ -1115,11 +1115,6 @@ public class MySQLKeywordChecker implements KeywordChecker {
     @Override
     public boolean checkEscape(String fieldOrTableName) {
         return check(fieldOrTableName);
-    }
-
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? "`" + fieldOrTableName + "`" : fieldOrTableName;
     }
 
 }

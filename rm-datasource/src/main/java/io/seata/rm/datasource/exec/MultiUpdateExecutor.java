@@ -15,24 +15,29 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.util.IOUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.SQLUpdateRecognizer;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.StringJoiner;
+
+import io.seata.common.util.IOUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DefaultValues;
+import io.seata.rm.datasource.ColumnUtils;
+import io.seata.rm.datasource.SqlGenerateUtils;
+import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLUpdateRecognizer;
 
 /**
  * The type MultiSql executor.
@@ -42,6 +47,19 @@ import java.util.StringJoiner;
  * @author wangwei-ying
  */
 public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    private static final boolean ONLY_CARE_UPDATE_COLUMNS = CONFIG.getBoolean(
+        ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
+
+    /**
+     * Instantiates a new Multi update executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizers    the sql recognizers
+     */
     public MultiUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
         super(statementProxy, statementCallback, sqlRecognizers);
     }
@@ -77,9 +95,6 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
-        if (!containsPK(new ArrayList<>(updateColumnsSet))) {
-            prefix.append(getColumnNameInSQL(tmeta.getEscapePkName(getDbType()))).append(", ");
-        }
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (noWhereCondition) {
             //select all rows
@@ -89,8 +104,17 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
-        for (String updateCol : updateColumnsSet) {
-            selectSQLAppender.add(updateCol);
+        if (ONLY_CARE_UPDATE_COLUMNS) {
+            if (!containsPK(new ArrayList<>(updateColumnsSet))) {
+                selectSQLAppender.add(getColumnNamesInSQL(tmeta.getEscapePkNameList(getDbType())));
+            }
+            for (String updateCol : updateColumnsSet) {
+                selectSQLAppender.add(updateCol);
+            }
+        } else {
+            for (String columnName : tmeta.getAllColumns().keySet()) {
+                selectSQLAppender.add(ColumnUtils.addEscape(columnName, getDbType()));
+            }
         }
         return buildTableRecords(tmeta, selectSQLAppender.toString(), paramAppenderList);
     }
@@ -108,11 +132,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {
-            List<Field> pkRows = beforeImage.pkRows();
-            for (int i = 1; i <= pkRows.size(); i++) {
-                Field pkField = pkRows.get(i - 1);
-                pst.setObject(i, pkField.getValue(), pkField.getType());
-            }
+            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(),getTableMeta().getPrimaryKeyOnlyName(),pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
         } finally {
@@ -129,14 +149,19 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
-        if (!containsPK(new ArrayList<>(updateColumnsSet))) {
-            // PK should be included.
-            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
-        }
-        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
+        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(),beforeImage.pkRows().size(),getDbType());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        for (String column : updateColumnsSet) {
-            selectSQLJoiner.add(column);
+        if (ONLY_CARE_UPDATE_COLUMNS) {
+            if (!containsPK(new ArrayList<>(updateColumnsSet))) {
+                selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
+            }
+            for (String updateCol : updateColumnsSet) {
+                selectSQLJoiner.add(updateCol);
+            }
+        } else {
+            for (String columnName : tableMeta.getAllColumns().keySet()) {
+                selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
+            }
         }
         return selectSQLJoiner.toString();
     }

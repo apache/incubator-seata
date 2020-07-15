@@ -15,22 +15,23 @@
  */
 package io.seata.server;
 
-import io.seata.common.XID;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RpcServer;
-import io.seata.core.rpc.netty.ShutdownHook;
-import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.metrics.MetricsManager;
-import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import io.seata.common.XID;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.NettyRemotingServer;
+import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.env.ContainerHelper;
+import io.seata.server.env.PortHelper;
+import io.seata.server.metrics.MetricsManager;
+import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Server.
@@ -38,8 +39,6 @@ import java.util.concurrent.TimeUnit;
  * @author slievrly
  */
 public class Server {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     private static final int MIN_SERVER_POOL_SIZE = 50;
     private static final int MAX_SERVER_POOL_SIZE = 500;
@@ -57,6 +56,16 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        // get port first, use to logback.xml
+        int port = PortHelper.getPort(args);
+        System.setProperty(ConfigurationKeys.SERVER_PORT, Integer.toString(port));
+
+        // create logger
+        final Logger logger = LoggerFactory.getLogger(Server.class);
+        if (ContainerHelper.isRunningInContainer()) {
+            logger.info("The server is running in container.");
+        }
+
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
@@ -67,19 +76,19 @@ public class Server {
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-        RpcServer rpcServer = new RpcServer(WORKING_THREADS);
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(WORKING_THREADS);
         //server port
-        rpcServer.setListenPort(parameterParser.getPort());
+        nettyRemotingServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());
-        //log store mode : file, db
+        //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getStoreMode());
 
-        DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
-        rpcServer.setHandler(coordinator);
+        nettyRemotingServer.setHandler(coordinator);
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
-        ShutdownHook.getInstance().addDisposable(rpcServer);
+        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -87,12 +96,12 @@ public class Server {
         } else {
             XID.setIpAddress(NetUtil.getLocalIp());
         }
-        XID.setPort(rpcServer.getListenPort());
+        XID.setPort(nettyRemotingServer.getListenPort());
 
         try {
-            rpcServer.init();
+            nettyRemotingServer.init();
         } catch (Throwable e) {
-            LOGGER.error("rpcServer init error:{}", e.getMessage(), e);
+            logger.error("nettyServer init error:{}", e.getMessage(), e);
             System.exit(-1);
         }
 

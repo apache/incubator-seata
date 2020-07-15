@@ -15,10 +15,67 @@
  */
 package io.seata.core.rpc;
 
+import io.netty.channel.Channel;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.processor.RemotingProcessor;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
+
 /**
  * The interface Remoting server.
  *
  * @author slievrly
+ * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-public interface RemotingServer extends RemotingService {
+public interface RemotingServer {
+
+    /**
+     * server send sync request.
+     *
+     * @param resourceId rm client resourceId
+     * @param clientId   rm client id
+     * @param msg        transaction message {@link io.seata.core.protocol}
+     * @return client result message
+     * @throws TimeoutException
+     */
+    Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException;
+
+    /**
+     * server send sync request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @return client result message
+     * @throws TimeoutException
+     */
+    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
+
+    /**
+     * server send async request.
+     *
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     */
+    void sendAsyncRequest(Channel channel, Object msg);
+
+    /**
+     * server send async response.
+     *
+     * @param rpcMessage rpc message from client request
+     * @param channel    client channel
+     * @param msg        transaction message {@link io.seata.core.protocol}
+     */
+    void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg);
+
+    /**
+     * register processor
+     *
+     * @param messageType {@link io.seata.core.protocol.MessageType}
+     * @param processor   {@link RemotingProcessor}
+     * @param executor    thread pool
+     */
+    void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
+
 }
