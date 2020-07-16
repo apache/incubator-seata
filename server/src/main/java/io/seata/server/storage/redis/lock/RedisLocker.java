@@ -144,6 +144,7 @@ public class RedisLocker extends AbstractLocker {
             if (CollectionUtils.isNotEmpty(keys)) {
                 Pipeline pipeline = null;
                 Iterator<String> it = keys.iterator();
+                List<String> delKeys = new ArrayList<>();
                 while (it.hasNext()) {
                     String key = it.next();
                     LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
@@ -152,15 +153,16 @@ public class RedisLocker extends AbstractLocker {
                             if (pipeline == null) {
                                 pipeline = jedis.pipelined();
                             }
-                            pipeline.del(key);
-                            pipeline.lrem(lockListKey, 0, key);
-                            it.remove();
+                            delKeys.add(key);
                         }
                     }
-                    if (pipeline != null) {
-                        pipeline.sync();
-                        pipeline = null;
+                }
+                if (pipeline != null) {
+                    pipeline.del(delKeys.toArray(new String[0]));
+                    for (String key : delKeys) {
+                        pipeline.lrem(lockListKey, 0, key);
                     }
+                    pipeline.sync();
                 }
             }
             return true;
