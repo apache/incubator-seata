@@ -15,8 +15,6 @@
  */
 package io.seata.tm;
 
-import java.util.concurrent.TimeoutException;
-
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -35,7 +33,9 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
+
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Default transaction manager.
@@ -50,7 +50,7 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
-        GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
+        GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }
@@ -61,7 +61,7 @@ public class DefaultTransactionManager implements TransactionManager {
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
         globalCommit.setXid(xid);
-        GlobalCommitResponse response = (GlobalCommitResponse)syncCall(globalCommit);
+        GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
         return response.getGlobalStatus();
     }
 
@@ -69,7 +69,7 @@ public class DefaultTransactionManager implements TransactionManager {
     public GlobalStatus rollback(String xid) throws TransactionException {
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
         globalRollback.setXid(xid);
-        GlobalRollbackResponse response = (GlobalRollbackResponse)syncCall(globalRollback);
+        GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
         return response.getGlobalStatus();
     }
 
@@ -77,7 +77,7 @@ public class DefaultTransactionManager implements TransactionManager {
     public GlobalStatus getStatus(String xid) throws TransactionException {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
-        GlobalStatusResponse response = (GlobalStatusResponse)syncCall(queryGlobalStatus);
+        GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
         return response.getGlobalStatus();
     }
 
@@ -92,7 +92,7 @@ public class DefaultTransactionManager implements TransactionManager {
 
     private AbstractTransactionResponse syncCall(AbstractTransactionRequest request) throws TransactionException {
         try {
-            return (AbstractTransactionResponse)TmRpcClient.getInstance().sendMsgWithResponse(request);
+            return (AbstractTransactionResponse) TmNettyRemotingClient.getInstance().sendSyncRequest(request);
         } catch (TimeoutException toe) {
             throw new TmTransactionException(TransactionExceptionCode.IO, "RPC timeout", toe);
         }
