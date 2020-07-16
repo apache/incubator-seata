@@ -14,7 +14,7 @@
                     "fooInput": "$.[a]"
                 }
             ],
-            "output": {
+            "Output": {
                 "fooResult": "$.#root"
             }
         },
@@ -65,7 +65,7 @@
                     "throwException": "$.[barThrowException]"
                 }
             ],
-            "output": {
+            "Output": {
                 "barResult": "$.#root"
             },
             "Catch": [
@@ -87,7 +87,7 @@
                     "fooInput": "$.[fooResult]"
                 }
             ],
-            "output": {
+            "Output": {
                 "fooResult": "$.#root"
             },
             "Next": "Succeed"
