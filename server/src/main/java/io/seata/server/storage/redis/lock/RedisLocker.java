@@ -157,9 +157,10 @@ public class RedisLocker extends AbstractLocker {
                             it.remove();
                         }
                     }
-                }
-                if (pipeline != null) {
-                    pipeline.sync();
+                    if (pipeline != null) {
+                        pipeline.sync();
+                        pipeline = null;
+                    }
                 }
             }
             return true;
