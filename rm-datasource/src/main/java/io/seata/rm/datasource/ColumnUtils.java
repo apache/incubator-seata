@@ -208,40 +208,41 @@ public final class ColumnUtils {
             }
         }
 
-        // like "scheme".id `scheme`.id
-        String str = escape.value + DOT;
-        int dotIndex = colName.indexOf(str);
-        if (dotIndex > -1) {
-            return new StringBuilder()
-                    .append(colName.substring(0, dotIndex))
-                    .append(DOT)
-                    .append(escape.value)
-                    .append(colName.substring(dotIndex + str.length()))
-                    .append(escape.value).toString();
-        }
-        // like scheme."id" scheme.`id`
-        str = DOT + escape.value;
-        dotIndex = colName.indexOf(str);
-        if (dotIndex > -1) {
-            return new StringBuilder()
-                    .append(escape.value)
-                    .append(colName.substring(0, dotIndex))
-                    .append(escape.value)
-                    .append(colName.substring(dotIndex))
-                    .toString();
-        }
+        if (colName.contains(DOT)) {
+            // like "scheme".id `scheme`.id
+            String str = escape.value + DOT;
+            int dotIndex = colName.indexOf(str);
+            if (dotIndex > -1) {
+                return new StringBuilder()
+                        .append(colName.substring(0, dotIndex + str.length()))
+                        .append(escape.value)
+                        .append(colName.substring(dotIndex + str.length()))
+                        .append(escape.value).toString();
+            }
+            // like scheme."id" scheme.`id`
+            str = DOT + escape.value;
+            dotIndex = colName.indexOf(str);
+            if (dotIndex > -1) {
+                return new StringBuilder()
+                        .append(escape.value)
+                        .append(colName.substring(0, dotIndex))
+                        .append(escape.value)
+                        .append(colName.substring(dotIndex))
+                        .toString();
+            }
 
-        str = DOT;
-        dotIndex = colName.indexOf(str);
-        if (dotIndex > -1) {
-            return new StringBuilder()
-                    .append(escape.value)
-                    .append(colName.substring(0, dotIndex))
-                    .append(escape.value)
-                    .append(DOT)
-                    .append(escape.value)
-                    .append(colName.substring(dotIndex + str.length()))
-                    .append(escape.value).toString();
+            str = DOT;
+            dotIndex = colName.indexOf(str);
+            if (dotIndex > -1) {
+                return new StringBuilder()
+                        .append(escape.value)
+                        .append(colName.substring(0, dotIndex))
+                        .append(escape.value)
+                        .append(DOT)
+                        .append(escape.value)
+                        .append(colName.substring(dotIndex + str.length()))
+                        .append(escape.value).toString();
+            }
         }
 
         char[] buf = new char[colName.length() + 2];

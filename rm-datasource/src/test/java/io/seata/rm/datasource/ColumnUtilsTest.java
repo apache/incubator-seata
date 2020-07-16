@@ -166,6 +166,11 @@ public class ColumnUtilsTest {
         Assertions.assertEquals("\"SCHEME\".ID", cols.get(0));
 
         cols = new ArrayList<>();
+        cols.add("\"scheme\".id");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
+        Assertions.assertEquals("\"scheme\".\"id\"", cols.get(0));
+
+        cols = new ArrayList<>();
         cols.add("SCHEME.\"ID\"");
         cols = ColumnUtils.addEscape(cols, JdbcConstants.ORACLE);
         Assertions.assertEquals("SCHEME.\"ID\"", cols.get(0));
@@ -203,6 +208,11 @@ public class ColumnUtilsTest {
 
         cols = new ArrayList<>();
         cols.add("SCHEME.\"ID\"");
+        cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
+        Assertions.assertEquals("\"SCHEME\".\"ID\"", cols.get(0));
+
+        cols = new ArrayList<>();
+        cols.add("\"SCHEME\".ID");
         cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
         Assertions.assertEquals("\"SCHEME\".\"ID\"", cols.get(0));
 
