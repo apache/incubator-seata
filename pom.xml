@@ -29,7 +29,7 @@
         <module>config</module>
         <module>core</module>
         <module>discovery</module>
-        <module>distribution</module>
+        <!--<module>distribution</module>-->
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
@@ -41,7 +41,7 @@
         <module>server</module>
         <module>spring</module>
         <module>tcc</module>
-        <module>test</module>
+        <!--<module>test</module>-->
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
@@ -88,7 +88,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.3.0</revision>
+        <revision>1.4.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -244,8 +244,8 @@
                 </repository>
             </distributionManagement>
             <properties>
-                <image.publish.skip>false</image.publish.skip>
-                <image.tags>${project.version},latest</image.tags>
+                <!--<image.publish.skip>false</image.publish.skip>-->
+                <!--<image.tags>${project.version},latest</image.tags>-->
             </properties>
         </profile>
         <profile>
