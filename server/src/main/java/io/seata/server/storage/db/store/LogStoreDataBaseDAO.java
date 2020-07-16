@@ -173,7 +173,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             String wherePlaceHolder = this.buildWherePlaceHolder(condition);
             // order by xxx [asc|desc], yyy [asc|desc]
             StringBuilder orderByPlaceHolder = new StringBuilder();
-            if (condition.isNeedSort()) {
+            if (condition.hasSortParams()) {
                 orderByPlaceHolder.append(" order by ");
 
                 SortParam[] sortParams = condition.getSortParams();
@@ -190,7 +190,7 @@ public class LogStoreDataBaseDAO implements LogStore {
                 }
             } else {
                 // db mode: default sort is: order by gmt_modified asc
-                orderByPlaceHolder.append(" order by " + GlobalTableField.GMT_MODIFIED.getFieldName());
+                orderByPlaceHolder.append(" order by ").append(GlobalTableField.GMT_MODIFIED.getFieldName());
             }
             // build sql
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByCondition(globalTable,
