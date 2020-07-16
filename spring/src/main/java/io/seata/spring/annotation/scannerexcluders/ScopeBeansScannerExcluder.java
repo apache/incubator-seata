@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.MultiValueMap;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
