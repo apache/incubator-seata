@@ -20,7 +20,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
+import io.seata.core.rpc.RegisterCheckAuthHandler;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
 

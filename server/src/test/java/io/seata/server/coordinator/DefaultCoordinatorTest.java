@@ -36,17 +36,6 @@ import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -57,6 +46,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
@@ -260,12 +259,7 @@ public class DefaultCoordinatorTest {
     public static class MockServerMessageSender implements RemotingServer {
 
         @Override
-        public void sendResponse(RpcMessage request, Channel channel, Object msg) {
-
-        }
-
-        @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout) throws IOException, TimeoutException {
+        public Object sendSyncRequest(String resourceId, String clientId, Object message) throws TimeoutException {
             if (message instanceof BranchCommitRequest) {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
@@ -280,25 +274,18 @@ public class DefaultCoordinatorTest {
         }
 
         @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException {
-
-            return sendSyncRequest(resourceId, clientId, message, 3000);
-
-        }
-
-        @Override
-        public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
-            return null;
-        }
-
-        @Override
         public Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException {
             return null;
         }
 
         @Override
-        public Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException {
-            return null;
+        public void sendAsyncRequest(Channel channel, Object msg) {
+
+        }
+
+        @Override
+        public void sendAsyncResponse(RpcMessage request, Channel channel, Object msg) {
+
         }
 
         @Override
