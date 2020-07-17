@@ -13,34 +13,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+
+package io.seata.sqlparser.struct;
 
 /**
- * The enum Transport protocol type.
- *
- * @author slievrly
+ * The not placeholder expression.
+ * @author jsbxyyx
  */
-public enum TransportProtocolType {
-    /**
-     * Tcp transport protocol type.
-     */
-    TCP("tcp"),
+public class NotPlaceholderExpr {
+
+    private static NotPlaceholderExpr instance = new NotPlaceholderExpr();
 
     /**
-     * Udt transport protocol type.
+     * Get NotPlaceholder.
+     *
+     * @return the NotPlaceholder
      */
-    UDT("udt"),
-    /**
-     * Unix domain socket transport protocol type.
-     */
-    UNIX_DOMAIN_SOCKET("unix-domain-socket");
-
-    /**
-     * The Name.
-     */
-    public final String name;
-
-    TransportProtocolType(String name) {
-        this.name = name;
+    public static NotPlaceholderExpr get() {
+        return instance;
     }
+
+    private NotPlaceholderExpr() {
+    }
+
+    @Override
+    public String toString() {
+        return "NOT_PLACEHOLDER";
+    }
+
 }

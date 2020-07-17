@@ -16,11 +16,10 @@
 package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import io.seata.core.protocol.RpcMessage;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-
-import io.seata.core.protocol.RpcMessage;
 
 /**
  * The interface Server message sender.

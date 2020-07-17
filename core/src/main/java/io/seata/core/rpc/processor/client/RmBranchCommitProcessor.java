@@ -65,7 +65,7 @@ public class RmBranchCommitProcessor implements RemotingProcessor {
             LOGGER.debug("branch commit result:" + resultMessage);
         }
         try {
-            this.remotingClient.sendResponse(request, serverAddress, resultMessage);
+            this.remotingClient.sendAsyncResponse(serverAddress, request, resultMessage);
         } catch (Throwable throwable) {
             LOGGER.error("branch commit error: {}", throwable.getMessage(), throwable);
         }
