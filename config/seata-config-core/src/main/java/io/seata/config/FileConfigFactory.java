@@ -29,12 +29,9 @@ import java.util.Set;
  */
 public class FileConfigFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigFactory.class);
-
     public static final String DEFAULT_TYPE = "CONF";
 
     public static final String YAML_TYPE = "YAML";
-
 
     private static final LinkedHashMap<String, String> SUFFIX_MAP = new LinkedHashMap<String, String>(4) {
         {
@@ -46,7 +43,6 @@ public class FileConfigFactory {
 
 
     public static FileConfig load() {
-
         return loadService(DEFAULT_TYPE, null, null);
     }
 
