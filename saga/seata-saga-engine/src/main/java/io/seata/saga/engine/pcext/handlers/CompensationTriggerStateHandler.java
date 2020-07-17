@@ -60,7 +60,10 @@ public class CompensationTriggerStateHandler implements StateHandler {
         if (stateListToBeCompensated != null && stateListToBeCompensated.size() > 0) {
 
             //Clear exceptions that occur during forward execution
-            context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            Exception e = (Exception)context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            if (e != null) {
+                stateMachineInstance.setException(e);
+            }
 
             Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
                 .getStateStackNeedCompensation();

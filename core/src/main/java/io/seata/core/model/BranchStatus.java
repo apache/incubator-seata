@@ -135,7 +135,7 @@ public enum BranchStatus {
     public static BranchStatus get(int code) {
         BranchStatus status = MAP.get(code);
 
-        if (null == status) {
+        if (status == null) {
             throw new ShouldNeverHappenException("Unknown BranchStatus[" + code + "]");
         }
 
