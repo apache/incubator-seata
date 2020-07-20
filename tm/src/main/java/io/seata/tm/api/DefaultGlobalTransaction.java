@@ -1,17 +1,14 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Copyright 1999-2019 Seata.io Group.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package io.seata.tm.api;
 
@@ -58,11 +55,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private volatile boolean used;
 
-    private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
+    private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance()
+        .getInt(ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
-    private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
+    private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance()
+        .getInt(ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
 
     /**
      * Instantiates a new Default global transaction.
@@ -74,9 +71,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     /**
      * Instantiates a new Default global transaction.
      *
-     * @param xid    the xid
-     * @param status the status
-     * @param role   the role
+     * @param xid
+     *            the xid
+     * @param status
+     *            the status
+     * @param role
+     *            the role
      */
     DefaultGlobalTransaction(String xid, GlobalStatus status, GlobalTransactionRole role) {
         this.transactionManager = TransactionManagerHolder.get();
@@ -244,7 +244,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (StringUtils.isNotEmpty(xid) && unbindXid) {
             RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction,xid = {}",xid);
+                LOGGER.debug("Suspending current transaction,xid = {}", xid);
             }
         } else {
             xid = null;
@@ -315,7 +315,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
     }
-    
+
     public boolean existingTransaction() {
         return StringUtils.isNotEmpty(RootContext.getXID());
     }
