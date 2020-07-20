@@ -15,9 +15,9 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.concurrent.ThreadFactory;
-
 import io.netty.channel.EventLoopGroup;
+
+import java.util.concurrent.ThreadFactory;
 
 /**
  * The interface Rpc event loop group.

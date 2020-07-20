@@ -124,9 +124,13 @@ public class RootContext {
      * @return the branch type String
      */
     public static String getBranchType() {
-        String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
-        if (StringUtils.isNotBlank(branchType)) {
-            return branchType;
+        if (inGlobalTransaction()) {
+            String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+            if (StringUtils.isNotBlank(branchType)) {
+                return branchType;
+            }
+            //default branchType is AT
+            return BranchType.AT.name();
         }
         return null;
     }

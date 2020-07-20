@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.spring.event.DegradeCheckEvent;
 import io.seata.spring.util.GlobalTransactionalCheck;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.TransactionalExecutor;
@@ -73,7 +74,9 @@ public class HandleGlobalTransaction {
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
         } finally {
-            GlobalTransactionalCheck.onDegradeCheck(succeed);
+            if (GlobalTransactionalCheck.degradeCheck) {
+                GlobalTransactionalCheck.EVENT_BUS.post(new DegradeCheckEvent(succeed));
+            }
         }
     }
 

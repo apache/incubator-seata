@@ -17,12 +17,16 @@ package io.seata.spring.util;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import com.google.common.eventbus.Subscribe;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.event.EventBus;
+import io.seata.core.event.GuavaEventBus;
+import io.seata.spring.event.DegradeCheckEvent;
 import io.seata.tm.TransactionManagerHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +46,14 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalCheck.class);
     private static int degradeCheckPeriod;
-    private static volatile boolean degradeCheck;
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
     private static volatile boolean disable;
     private static ScheduledThreadPoolExecutor executor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
+    public static volatile boolean degradeCheck;
+    public static final EventBus EVENT_BUS = new GuavaEventBus("degradeCheckEventBus", true);
 
     public GlobalTransactionalCheck() {
         disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
@@ -61,6 +66,7 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
             degradeCheckAllowTimes = ConfigurationFactory.getInstance()
                 .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
+            EVENT_BUS.register(this);
             if (degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
                 startDegradeCheck();
             }
@@ -76,40 +82,39 @@ public class GlobalTransactionalCheck implements ConfigurationChangeListener {
                 try {
                     String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
                     TransactionManagerHolder.get().commit(xid);
-                    onDegradeCheck(true);
+                    EVENT_BUS.post(new DegradeCheckEvent(true));
                 } catch (Exception e) {
-                    onDegradeCheck(false);
+                    EVENT_BUS.post(new DegradeCheckEvent(false));
                 }
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
 
-    public static synchronized void onDegradeCheck(boolean succeed) {
-        if (!degradeCheck) {
-            if (succeed) {
-                if (degradeNum >= degradeCheckAllowTimes) {
-                    reachNum++;
-                    if (reachNum >= degradeCheckAllowTimes) {
-                        reachNum = 0;
-                        degradeNum = 0;
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("the current global transaction has been restored");
-                        }
-                    }
-                } else if (degradeNum != 0) {
-                    degradeNum = 0;
-                }
-            } else {
-                if (degradeNum < degradeCheckAllowTimes) {
-                    degradeNum++;
-                    if (degradeNum >= degradeCheckAllowTimes) {
-                        if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn("the current global transaction has been automatically downgraded");
-                        }
-                    }
-                } else if (reachNum != 0) {
+    @Subscribe
+    public static void onDegradeCheck(DegradeCheckEvent event) {
+        if (event.isRequestSuccess()) {
+            if (degradeNum >= degradeCheckAllowTimes) {
+                reachNum++;
+                if (reachNum >= degradeCheckAllowTimes) {
                     reachNum = 0;
+                    degradeNum = 0;
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("the current global transaction has been restored");
+                    }
                 }
+            } else if (degradeNum != 0) {
+                degradeNum = 0;
+            }
+        } else {
+            if (degradeNum < degradeCheckAllowTimes) {
+                degradeNum++;
+                if (degradeNum >= degradeCheckAllowTimes) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("the current global transaction has been automatically downgraded");
+                    }
+                }
+            } else if (reachNum != 0) {
+                reachNum = 0;
             }
         }
     }

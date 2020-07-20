@@ -30,6 +30,8 @@ import java.util.List;
  */
 public final class ColumnUtils {
 
+    private static final String DOT = ".";
+
     /**
      * The escape
      */
@@ -107,6 +109,11 @@ public final class ColumnUtils {
             return colName;
         }
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
+            final String withScheme = escape.value + DOT + escape.value;
+            int index = colName.indexOf(withScheme);
+            if (index > -1) {
+                return colName.substring(1, index) + DOT + colName.substring(index + withScheme.length(), colName.length() - 1);
+            }
             return colName.substring(1, colName.length() - 1);
         }
         return colName;
