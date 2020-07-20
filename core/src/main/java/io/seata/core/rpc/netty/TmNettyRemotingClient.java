@@ -29,10 +29,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
 import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.auth.AuthSigner;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -68,14 +65,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private String accessKey;
     private String secretKey;
 
-    @Override
-    public void init() {
-        // registry processor
-        registerProcessor();
-        if (initialized.compareAndSet(false, true)) {
-            super.init();
-        }
-    }
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
                                   EventExecutorGroup eventExecutorGroup,
@@ -92,11 +81,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @return the instance
      */
     public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup) {
-        TmNettyRemotingClient tmNettyRemotingClient = getInstance();
-        tmNettyRemotingClient.setApplicationId(applicationId);
-        tmNettyRemotingClient.setTransactionServiceGroup(transactionServiceGroup);
-        return tmNettyRemotingClient;
-    public static TmRpcClient getInstance(String applicationId, String transactionServiceGroup) {
         return getInstance(applicationId, transactionServiceGroup, null, null);
     }
 
@@ -109,8 +93,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @param secretKey               the secret key
      * @return the instance
      */
-    public static TmRpcClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
-        TmRpcClient tmRpcClient = getInstance();
+    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
+        TmNettyRemotingClient tmRpcClient = getInstance();
         tmRpcClient.setApplicationId(applicationId);
         tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
         tmRpcClient.setAccessKey(accessKey);
@@ -191,7 +175,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         // registry processor
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
-            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
             super.init();
         }
     }
@@ -252,21 +235,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         String errMsg = String.format(
             "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        initialized.getAndSet(false);
-        instance = null;
-    }
-
-    @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (severAddress) -> {
-            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
-        };
     }
 
     private void registerProcessor() {
