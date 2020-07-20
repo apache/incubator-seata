@@ -18,7 +18,6 @@ package io.seata.server.storage.redis.lock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -140,24 +139,20 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
-            Set<String> keys = lRange(jedis, lockListKey);
+            List<String> keys = lRange(jedis, lockListKey);
             if (CollectionUtils.isNotEmpty(keys)) {
-                Pipeline pipeline = null;
-                Iterator<String> it = keys.iterator();
                 List<String> delKeys = new ArrayList<>();
-                while (it.hasNext()) {
-                    String key = it.next();
-                    LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
+                List<String> values = jedis.mget(keys.toArray(new String[0]));
+                for (String value : values) {
                     for (int i = 0; i < branchIds.size(); i++) {
+                        LockDO lock = JSON.parseObject(value, LockDO.class);
                         if (lock != null && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
-                            if (pipeline == null) {
-                                pipeline = jedis.pipelined();
-                            }
-                            delKeys.add(key);
+                            delKeys.add(keys.get(i));
                         }
                     }
                 }
-                if (pipeline != null) {
+                if (CollectionUtils.isNotEmpty(delKeys)) {
+                    Pipeline pipeline = jedis.pipelined();
                     pipeline.del(delKeys.toArray(new String[0]));
                     for (String key : delKeys) {
                         pipeline.lrem(lockListKey, 0, key);
@@ -202,8 +197,8 @@ public class RedisLocker extends AbstractLocker {
         return true;
     }
 
-    private Set<String> lRange(Jedis jedis, String key) {
-        Set<String> keys = new HashSet<>();
+    private List<String> lRange(Jedis jedis, String key) {
+        List<String> keys = new ArrayList<>();
         List<String> redisLockJson;
         int start = 0;
         int stop = logQueryLimit;
