@@ -131,7 +131,7 @@ public class ConfigTools {
             String password = scan.nextLine();
             if (StringUtils.isNotBlank(password) && !"q".equalsIgnoreCase(password)) {
                 String byte2Base64 = ConfigTools.privateEncrypt(password, privateKeyStr);
-                System.out.println("encryption completed：\n" + byte2Base64);
+                System.out.println("encryption completed: \n" + byte2Base64);
             }
             break;
         }
