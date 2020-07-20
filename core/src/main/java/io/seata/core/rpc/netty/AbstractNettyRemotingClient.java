@@ -135,7 +135,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
-        String serverAddress = loadBalance(getTransactionServiceGroup());
+        String serverAddress = loadBalance(getTransactionServiceGroup(), msg);
         int timeoutMillis = NettyClientConfig.getRpcRequestTimeout();
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
 
@@ -196,12 +196,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     @Override
-    public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        String validAddress = loadBalance(getTransactionServiceGroup(), msg);
-        return sendMsgWithResponse(validAddress, msg, timeout);
-    }
-
-    @Override
     public void sendAsyncRequest(Channel channel, Object msg) {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequest nothing, caused by null channel.");
@@ -255,7 +249,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return clientChannelManager;
     }
 
-    private String loadBalance(String transactionServiceGroup) {
+    private String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
             @SuppressWarnings("unchecked")
