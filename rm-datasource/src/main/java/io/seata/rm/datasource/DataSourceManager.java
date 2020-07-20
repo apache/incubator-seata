@@ -15,10 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.executor.Initialize;
@@ -34,11 +30,23 @@ import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
+import io.seata.discovery.loadbalance.LoadBalanceFactory;
+import io.seata.discovery.registry.RegistryFactory;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
+import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The type Data source manager.
@@ -71,9 +79,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
 
-            GlobalLockQueryResponse response;
+            GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+                response = (GlobalLockQueryResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             } else {
                 throw new RuntimeException("unknow situation!");
             }
@@ -89,6 +97,23 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             throw new RmTransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
         }
 
+    }
+
+    @Deprecated
+    @SuppressWarnings("unchecked")
+    private String loadBalance() {
+        InetSocketAddress address = null;
+        try {
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+                TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+        } catch (Exception ignore) {
+            LOGGER.error(ignore.getMessage());
+        }
+        if (address == null) {
+            throw new FrameworkException(NoAvailableService);
+        }
+        return NetUtil.toStringAddress(address);
     }
 
     /**
@@ -115,7 +140,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
     @Override
     public void registerResource(Resource resource) {
-        DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
+        DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
         super.registerResource(dataSourceProxy);
     }
@@ -132,7 +157,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      * @return the data source proxy
      */
     public DataSourceProxy get(String resourceId) {
-        return (DataSourceProxy)dataSourceCache.get(resourceId);
+        return (DataSourceProxy) dataSourceCache.get(resourceId);
     }
 
     @Override

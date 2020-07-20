@@ -52,16 +52,6 @@ public class MySQLKeywordCheckerTest {
     }
 
     /**
-     * Test check and replace
-     */
-    @Test
-    public void testCheckAndReplace() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        Assertions.assertEquals("`desc`", keywordChecker.checkAndReplace("desc"));
-
-    }
-
-    /**
      * Test keyword check with UPDATE case
      */
     @Test

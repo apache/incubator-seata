@@ -15,14 +15,6 @@
  */
 package io.seata.core.rpc;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
@@ -37,10 +29,18 @@ import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
+import io.seata.core.rpc.netty.ChannelManager;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Default server message listener.
@@ -94,14 +94,14 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            getServerMessageSender().sendResponse(request, ctx.channel(), resultMessage);
+            getServerMessageSender().sendAsyncResponse(request, ctx.channel(), resultMessage);
         } else if (message instanceof AbstractResultMessage) {
             transactionMessageHandler.onResponse((AbstractResultMessage) message, rpcContext);
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            getServerMessageSender().sendResponse(request, ctx.channel(), result);
+            getServerMessageSender().sendAsyncResponse(request, ctx.channel(), result);
         }
     }
 
@@ -129,7 +129,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        getServerMessageSender().sendResponse(request, ctx.channel(), response);
+        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
@@ -161,7 +161,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        getServerMessageSender().sendResponse(request, ctx.channel(), response);
+        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
@@ -171,7 +171,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx) {
         try {
-            getServerMessageSender().sendResponse(request, ctx.channel(), HeartbeatMessage.PONG);
+            getServerMessageSender().sendAsyncResponse(request, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
