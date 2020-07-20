@@ -22,7 +22,7 @@ package io.seata.core.protocol;
  */
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
-    private String version = Version.CURRENT;
+    private String version = Version.getCurrent();
 
     private String extraData;
 

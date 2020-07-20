@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
  *
  * @author slievrly
  */
+@Deprecated
 public interface ChannelEventListener {
     /**
      * On channel connect.

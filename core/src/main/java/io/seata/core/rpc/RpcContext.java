@@ -16,6 +16,8 @@
 package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import io.seata.common.util.StringUtils;
+import io.seata.core.rpc.netty.ChannelUtil;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +84,7 @@ public class RpcContext {
             }
             clientRMHolderMap = null;
         }
-        if (null != resourceSets) {
+        if (resourceSets != null) {
             resourceSets.clear();
         }
     }
@@ -121,7 +123,7 @@ public class RpcContext {
      * @param portMap    the client rm holder map
      */
     public void holdInResourceManagerChannels(String resourceId, ConcurrentMap<Integer, RpcContext> portMap) {
-        if (null == this.clientRMHolderMap) {
+        if (this.clientRMHolderMap == null) {
             this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
         }
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
@@ -136,7 +138,7 @@ public class RpcContext {
      * @param clientPort the client port
      */
     public void holdInResourceManagerChannels(String resourceId, Integer clientPort) {
-        if (null == this.clientRMHolderMap) {
+        if (this.clientRMHolderMap == null) {
             this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
         }
         clientRMHolderMap.putIfAbsent(resourceId, new ConcurrentHashMap<Integer, RpcContext>());
@@ -286,7 +288,10 @@ public class RpcContext {
      * @param resource the resource
      */
     public void addResource(String resource) {
-        if (null == resource) {
+        if (StringUtils.isBlank(resource)) {
+            return;
+        }
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.add(resource);
@@ -295,14 +300,14 @@ public class RpcContext {
     /**
      * Add resources.
      *
-     * @param resource the resource
+     * @param resources the resources
      */
-    public void addResources(Set<String> resource) {
-        if (null == resource) { return; }
-        if (null == resourceSets) {
+    public void addResources(Set<String> resources) {
+        if (resources == null) { return; }
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
-        this.resourceSets.addAll(resource);
+        this.resourceSets.addAll(resources);
     }
 
     /**

@@ -30,6 +30,7 @@ import io.protostuff.runtime.DefaultIdStrategy;
 import io.protostuff.runtime.Delegate;
 import io.protostuff.runtime.RuntimeEnv;
 import io.protostuff.runtime.RuntimeSchema;
+import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -40,20 +41,21 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  * @author Geng Zhang
  */
 @LoadLevel(name = ProtostuffUndoLogParser.NAME)
-public class ProtostuffUndoLogParser implements UndoLogParser {
+public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "protostuff";
 
-    private final static DefaultIdStrategy ID_STRATEGY = (DefaultIdStrategy)RuntimeEnv.ID_STRATEGY;
+    private final DefaultIdStrategy idStrategy = (DefaultIdStrategy) RuntimeEnv.ID_STRATEGY;
 
-    static {
-        ID_STRATEGY.registerDelegate(new DateDelegate());
-        ID_STRATEGY.registerDelegate(new TimestampDelegate());
-        ID_STRATEGY.registerDelegate(new SqlDateDelegate());
-        ID_STRATEGY.registerDelegate(new TimeDelegate());
+    private final Schema<BranchUndoLog> schema = RuntimeSchema.getSchema(BranchUndoLog.class, idStrategy);
+
+    @Override
+    public void init() {
+        idStrategy.registerDelegate(new DateDelegate());
+        idStrategy.registerDelegate(new TimestampDelegate());
+        idStrategy.registerDelegate(new SqlDateDelegate());
+        idStrategy.registerDelegate(new TimeDelegate());
     }
-
-    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class, ID_STRATEGY);
 
     @Override
     public String getName() {
@@ -71,7 +73,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         LinkedBuffer buffer = LinkedBuffer.allocate(512);
         // ser
         try {
-            return ProtostuffIOUtil.toByteArray(branchUndoLog, SCHEMA, buffer);
+            return ProtostuffIOUtil.toByteArray(branchUndoLog, schema, buffer);
         } finally {
             buffer.clear();
         }
@@ -82,8 +84,8 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         if (bytes.length == 0) {
             return new BranchUndoLog();
         }
-        BranchUndoLog fooParsed = SCHEMA.newMessage();
-        ProtostuffIOUtil.mergeFrom(bytes, fooParsed, SCHEMA);
+        BranchUndoLog fooParsed = schema.newMessage();
+        ProtostuffIOUtil.mergeFrom(bytes, fooParsed, schema);
         return fooParsed;
     }
 

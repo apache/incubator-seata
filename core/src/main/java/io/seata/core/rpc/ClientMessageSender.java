@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author slievrly
  */
+@Deprecated
 public interface ClientMessageSender {
     /**
      * Send msg with response object.

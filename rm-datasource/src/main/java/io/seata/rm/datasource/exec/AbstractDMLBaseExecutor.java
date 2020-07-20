@@ -15,16 +15,20 @@
  */
 package io.seata.rm.datasource.exec;
 
+
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.concurrent.Callable;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +55,18 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
+    /**
+     * Instantiates a new Base transactional executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizers     the multi sql recognizer
+     */
+    public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
+                                   List<SQLRecognizer> sqlRecognizers) {
+        super(statementProxy, statementCallback, sqlRecognizers);
+    }
+
     @Override
     public T doExecute(Object... args) throws Throwable {
         AbstractConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
@@ -69,6 +85,10 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
+        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1)
+        {
+            throw new NotSupportYetException("multi pk only support mysql!");
+        }
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         TableRecords afterImage = afterImage(beforeImage);

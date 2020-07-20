@@ -164,11 +164,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         try {
-            if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
-                return;
+            if (StringUtils.isBlank(xid)) {
+                if (Propagation.NOT_SUPPORTED.equals(this.propagation) || Propagation.SUPPORTS.equals(this.propagation)
+                    || Propagation.NEVER.equals(this.propagation)) {
+                    return;
+                }
             }
             assertXIDNotNull();
-            int retry = COMMIT_RETRY_COUNT;
+            int retry = COMMIT_RETRY_COUNT <= 0 ? DEFAULT_TM_COMMIT_RETRY_COUNT : COMMIT_RETRY_COUNT;
             while (retry > 0) {
                 try {
                     status = transactionManager.commit(xid);
@@ -203,11 +206,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         try {
-            if (Propagation.NOT_SUPPORTED.equals(this.propagation)) {
-                return;
+            if (StringUtils.isBlank(xid)) {
+                if (Propagation.NOT_SUPPORTED.equals(this.propagation) || Propagation.SUPPORTS.equals(this.propagation)
+                    || Propagation.NEVER.equals(this.propagation)) {
+                    return;
+                }
             }
             assertXIDNotNull();
-            int retry = ROLLBACK_RETRY_COUNT;
+            int retry = ROLLBACK_RETRY_COUNT <= 0 ? DEFAULT_TM_ROLLBACK_RETRY_COUNT : ROLLBACK_RETRY_COUNT;
             while (retry > 0) {
                 try {
                     status = transactionManager.rollback(xid);

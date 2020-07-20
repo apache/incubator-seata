@@ -1,10 +1,23 @@
 # Script usage demo
-![Since 1.1.0](https://img.shields.io/badge/Since%20-1.1.0-orange.svg?style=flat-square)
+![Since 1.2.0](https://img.shields.io/badge/Since%20-1.2.0-orange.svg?style=flat-square)
+
+## important attributes 
+
+you only need to follow the instructions below and keep the corresponding configuration in 'config.txt' to run. For more configuration information, please visit [seata.io](https://seata.io/)
+
+| server                   | client                                                       |
+| ------------------------ | ------------------------------------------------------------ |
+| store.mode: file,db      | config.type: file、nacos 、apollo、zk、consul、etcd3、custom |
+| #only db:                | #only file:                                                  |
+| store.db.driverClassName | service.default.grouplist                                    |
+| store.db.url             | #All:                                                        |
+| store.db.user            | service.vgroupMapping.my_test_tx_group                       |
+| store.db.password        | service.disableGlobalTransaction                             |
 
 ## Nacos
 shell:
 ```bash
-sh ${SEATAPATH}/script/config-center/nacos/nacos-config.sh -h localhost -p 8848 -g SEATA_GROUP -t 5a3c7d6c-f497-4d68-a71a-2e5e3340b3ca
+sh ${SEATAPATH}/script/config-center/nacos/nacos-config.sh -h localhost -p 8848 -g SEATA_GROUP -t 5a3c7d6c-f497-4d68-a71a-2e5e3340b3ca -u username -w password
 ```
 
 Parameter Description:
@@ -16,6 +29,10 @@ Parameter Description:
 -g: Configure grouping, the default value is 'SEATA_GROUP'.
 
 -t: Tenant information, corresponding to the namespace ID field of Nacos, the default value is ''.
+
+-u: username, nacos 1.2.0+ on permission control, the default value is ''.
+
+-w: password, nacos 1.2.0+ on permission control, the default value is ''.
 
 python:
 ```bash

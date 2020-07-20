@@ -77,7 +77,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachine.setStartState(parsedStatMachine.getStartState());
                         stateMachine.getStates().putAll(parsedStatMachine.getStates());
                         item.setValue(stateMachine);
-                        stateMachineMapByNameAndTenant.put(stateMachine.getName() + "_" + stateMachine.getTenantId(),
+                        stateMachineMapById.put(stateMachine.getName() + "_" + stateMachine.getTenantId(),
                             item);
                     }
 
@@ -158,7 +158,9 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                     return stateMachine;
                 }
             }
-            stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE));
+            if (StringUtils.isBlank(stateMachine.getId())) {
+                stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE));
+            }
             stateMachine.setGmtCreate(new Date());
             stateLangStore.storeStateMachine(stateMachine);
         }

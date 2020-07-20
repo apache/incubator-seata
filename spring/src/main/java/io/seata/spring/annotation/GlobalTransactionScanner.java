@@ -18,21 +18,20 @@ package io.seata.spring.annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationCache;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RmRpcClient;
-import io.seata.core.rpc.netty.ShutdownHook;
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
@@ -49,6 +48,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
+
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
 /**
@@ -60,9 +60,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,
     DisposableBean {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
@@ -74,9 +71,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
-    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private MethodInterceptor interceptor;
+    private MethodInterceptor globalTransactionalInterceptor;
 
     private final String applicationId;
     private final String txServiceGroup;
@@ -125,7 +122,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param mode           the mode
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
-        this(applicationId, txServiceGroup, mode, DEFAULT_FAIL_HANDLER);
+        this(applicationId, txServiceGroup, mode, null);
     }
 
     /**
@@ -192,8 +189,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
-        ShutdownHook.getInstance().addDisposable(RmRpcClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
     @Override
@@ -221,8 +218,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
 
                     if (interceptor == null) {
-                        interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) interceptor);
+                        if (globalTransactionalInterceptor == null) {
+                            globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                            ConfigurationCache.addConfigListener(
+                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                                (ConfigurationChangeListener)globalTransactionalInterceptor);
+                        }
+                        interceptor = globalTransactionalInterceptor;
                     }
                 }
 
@@ -250,9 +252,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (clazz == null) {
                     continue;
                 }
+                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
+                if (trxAnno != null) {
+                    return true;
+                }
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
-                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
+                    trxAnno = method.getAnnotation(GlobalTransactional.class);
                     if (trxAnno != null) {
                         return true;
                     }
@@ -286,7 +292,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             return;
         }
         initClient();
-
     }
 
     @Override

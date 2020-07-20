@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportServerType;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
@@ -39,7 +40,6 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private final boolean useConnPool = false;
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;
@@ -221,15 +221,6 @@ public class NettyClientConfig extends NettyBaseConfig {
      */
     public static int getRpcRequestTimeout() {
         return RPC_REQUEST_TIMEOUT;
-    }
-
-    /**
-     * Is use conn pool boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isUseConnPool() {
-        return useConnPool;
     }
 
     /**
