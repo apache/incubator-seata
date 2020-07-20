@@ -15,7 +15,7 @@
  */
 package io.seata.tm;
 
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 /**
  * The type Tm client.

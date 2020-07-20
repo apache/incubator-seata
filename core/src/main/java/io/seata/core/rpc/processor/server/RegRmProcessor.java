@@ -16,22 +16,24 @@
 package io.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
+import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * process RM client registry message.
  * <p>
- * message type:
+ * process message type:
  * {@link RegisterRMRequest}
  *
  * @author zhangchenghui.dev@gmail.com
@@ -45,9 +47,9 @@ public class RegRmProcessor implements RemotingProcessor {
 
     private RegisterCheckAuthHandler checkAuthHandler;
 
-    public RegRmProcessor(RemotingServer remotingServer, RegisterCheckAuthHandler checkAuthHandler) {
+    public RegRmProcessor(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
-        this.checkAuthHandler = checkAuthHandler;
+        this.checkAuthHandler = EnhancedServiceLoader.load(RegisterCheckAuthHandler.class);
     }
 
     @Override
@@ -59,23 +61,29 @@ public class RegRmProcessor implements RemotingProcessor {
         RegisterRMRequest message = (RegisterRMRequest) rpcMessage.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
+        String errorInfo = StringUtils.EMPTY;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{}",
-                        ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
             isSuccess = false;
-            LOGGER.error(exx.getMessage());
+            errorInfo = exx.getMessage();
+            LOGGER.error("RM register fail, error message:{}", errorInfo);
         }
-        remotingServer.sendResponse(rpcMessage, ctx.channel(), new RegisterRMResponse(isSuccess));
+        RegisterRMResponse response = new RegisterRMResponse(isSuccess);
+        if (StringUtils.isNotEmpty(errorInfo)) {
+            response.setMsg(errorInfo);
+        }
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("RM register success,message:{},channel:{}", message, ctx.channel());
+            LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
+                message.getVersion());
         }
     }
 

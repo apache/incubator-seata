@@ -18,13 +18,13 @@ package io.seata.server;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import io.seata.common.util.IdWorker;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
 
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
-import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_NODE;
 import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_PORT;
 import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
@@ -46,8 +46,8 @@ public class ParameterParser {
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
-    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
-    private Long serverNode = SERVER_DEFAULT_NODE;
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
+    private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
     private String seataEnv;
@@ -76,6 +76,9 @@ public class ParameterParser {
                     jCommander.usage();
                     System.exit(0);
                 }
+            }
+            if (this.serverNode == null) {
+                this.serverNode = IdWorker.initWorkerId();
             }
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
