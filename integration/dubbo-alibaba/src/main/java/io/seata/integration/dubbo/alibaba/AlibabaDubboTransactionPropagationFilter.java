@@ -72,8 +72,8 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
             return invoker.invoke(invocation);
         } finally {
             if (bind) {
-                String previousBranchType = RootContext.getBranchType();
                 String unbindXid = RootContext.unbind();
+                String previousBranchType = RootContext.getBranchType();
                 if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
                     RootContext.unbindBranchType();
                 }
