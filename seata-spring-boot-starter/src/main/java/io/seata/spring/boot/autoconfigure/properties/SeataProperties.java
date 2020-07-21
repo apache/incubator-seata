@@ -44,6 +44,10 @@ public class SeataProperties {
      */
     private boolean enableAutoDataSourceProxy = true;
     /**
+     * data source proxy mode
+     */
+    private String dataSourceProxyMode = "AT";
+    /**
      * Whether use JDK proxy instead of CGLIB proxy
      */
     private boolean useJdkProxy = false;
@@ -95,6 +99,14 @@ public class SeataProperties {
     public SeataProperties setEnableAutoDataSourceProxy(boolean enableAutoDataSourceProxy) {
         this.enableAutoDataSourceProxy = enableAutoDataSourceProxy;
         return this;
+    }
+
+    public String getDataSourceProxyMode() {
+        return dataSourceProxyMode;
+    }
+
+    public void setDataSourceProxyMode(String dataSourceProxyMode) {
+        this.dataSourceProxyMode = dataSourceProxyMode;
     }
 
     public boolean isUseJdkProxy() {
