@@ -20,6 +20,8 @@ import java.util.Map;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.DefaultValues;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +40,6 @@ public class RootContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
 
-    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance().getConfig("dataSourceProxyMode");
-
     /**
      * The constant KEY_XID.
      */
@@ -53,6 +53,9 @@ public class RootContext {
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
+
+    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
 
     /**
      * Gets xid.

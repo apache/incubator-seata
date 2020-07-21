@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure.properties;
 
+import io.seata.core.constants.DefaultValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -46,7 +47,7 @@ public class SeataProperties {
     /**
      * data source proxy mode
      */
-    private String dataSourceProxyMode = "AT";
+    private String dataSourceProxyMode = DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE;
     /**
      * Whether use JDK proxy instead of CGLIB proxy
      */
