@@ -66,6 +66,6 @@ public enum ConfigType {
                 return configType;
             }
         }
-        throw new IllegalArgumentException("illegal type:" + name);
+        throw new IllegalArgumentException("not support config type: " + name);
     }
 }

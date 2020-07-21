@@ -15,10 +15,8 @@
  */
 package io.seata.config;
 
-
-import io.seata.common.util.DurationUtil;
-
 import java.time.Duration;
+import io.seata.common.util.DurationUtil;
 
 /**
  * The type Abstract configuration.
@@ -120,6 +118,11 @@ public abstract class AbstractConfiguration implements Configuration {
     @Override
     public String getConfig(String dataId, long timeoutMills) {
         return getConfig(dataId, null, timeoutMills);
+    }
+
+    @Override
+    public String getConfig(String dataId, String content, long timeoutMills) {
+        return getLatestConfig(dataId, content, timeoutMills);
     }
 
     @Override

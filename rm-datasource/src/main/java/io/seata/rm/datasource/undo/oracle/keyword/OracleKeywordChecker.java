@@ -492,7 +492,7 @@ public class OracleKeywordChecker implements KeywordChecker {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
-        if (null != fieldOrTableName) {
+        if (fieldOrTableName != null) {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
@@ -509,12 +509,6 @@ public class OracleKeywordChecker implements KeywordChecker {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
-        //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
     }
 
     private static boolean isUppercase(String fieldOrTableName) {

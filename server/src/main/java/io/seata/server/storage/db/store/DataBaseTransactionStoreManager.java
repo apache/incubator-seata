@@ -77,9 +77,9 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * Get the instance.
      */
     public static DataBaseTransactionStoreManager getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (DataBaseTransactionStoreManager.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new DataBaseTransactionStoreManager();
                 }
             }

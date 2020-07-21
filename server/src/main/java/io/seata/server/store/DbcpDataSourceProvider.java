@@ -39,6 +39,7 @@ public class DbcpDataSourceProvider extends AbstractDataSourceProvider {
         ds.setDriverClassLoader(getDriverClassLoader());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
+
         ds.setPassword(getPassword());
         ds.setInitialSize(getMinConn());
         ds.setMaxTotal(getMaxConn());

@@ -15,12 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -52,18 +46,24 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.Disposable;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.RpcServer;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Default coordinator.
@@ -134,7 +134,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("UndoLogDelete", 1));
 
-    private ServerMessageSender messageSender;
+    private RemotingServer remotingServer;
 
     private DefaultCore core;
 
@@ -143,11 +143,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     /**
      * Instantiates a new Default coordinator.
      *
-     * @param messageSender the message sender
+     * @param remotingServer the remoting server
      */
-    public DefaultCoordinator(ServerMessageSender messageSender) {
-        this.messageSender = messageSender;
-        this.core = new DefaultCore(messageSender);
+    public DefaultCoordinator(RemotingServer remotingServer) {
+        this.remotingServer = remotingServer;
+        this.core = new DefaultCore(remotingServer);
     }
 
     @Override
@@ -364,7 +364,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             deleteRequest.setResourceId(resourceId);
             deleteRequest.setSaveDays(saveDays > 0 ? saveDays : UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
             try {
-                messageSender.sendASyncRequest(channelEntry.getValue(), deleteRequest);
+                remotingServer.sendAsyncRequest(channelEntry.getValue(), deleteRequest);
             } catch (Exception e) {
                 LOGGER.error("Failed to async delete undo log resourceId = {}, exception: {}", resourceId, e.getMessage());
             }
@@ -451,8 +451,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         }
         // 2. second close netty flow
-        if (messageSender instanceof RpcServer) {
-            ((RpcServer) messageSender).destroy();
+        if (remotingServer instanceof NettyRemotingServer) {
+            ((NettyRemotingServer) remotingServer).destroy();
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();

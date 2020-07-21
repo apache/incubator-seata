@@ -90,9 +90,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
      * @return instance
      */
     public static EtcdConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (EtcdConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new EtcdConfiguration();
                 }
             }
@@ -106,7 +106,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -152,7 +152,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
@@ -188,9 +188,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
      * @return client
      */
     private static Client getClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (EtcdConfiguration.class) {
-                if (null == client) {
+                if (client == null) {
                     client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
                         .build();
                 }
@@ -213,7 +213,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 List<KeyValue> keyValues = ((GetResponse)response).getKvs();
                 if (CollectionUtils.isNotEmpty(keyValues)) {
                     ByteSequence value = keyValues.get(0).getValue();
-                    if (null != value) {
+                    if (value != null) {
                         configFuture.setResult(value.toString(UTF_8));
                     }
                 }

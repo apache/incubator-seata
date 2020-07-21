@@ -378,10 +378,6 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
-
-        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assertions.assertNotNull(globalTransaction);
-        Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
     }
 
     @Test
@@ -460,6 +456,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled("https://github.com/seata/seata/issues/2414#issuecomment-639546811")
     public void simpleChoiceTestStateMachineAsyncConcurrently() throws Exception {
 
         final CountDownLatch countDownLatch = new CountDownLatch(100);
@@ -514,6 +511,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled("https://github.com/seata/seata/issues/2414#issuecomment-651526068")
     public void testCompensationAndSubStateMachineAsync() throws Exception {
 
         long start = System.currentTimeMillis();
@@ -539,6 +537,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled("https://github.com/seata/seata/issues/2414#issuecomment-640432396")
     public void testCompensationAndSubStateMachineAsyncWithLayout() throws Exception {
 
         long start = System.currentTimeMillis();
