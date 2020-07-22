@@ -89,9 +89,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
      * @return the instance
      */
     static SofaRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (SofaRegistryServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     registryProps = getNamingProperties();
                     instance = new SofaRegistryServiceImpl();
                 }
@@ -118,9 +118,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     private RegistryClient getRegistryInstance() {
-        if (null == registryClient) {
+        if (registryClient == null) {
             synchronized (SofaRegistryServiceImpl.class) {
-                if (null == registryClient) {
+                if (registryClient == null) {
                     String address = registryProps.getProperty(PRO_SERVER_ADDR_KEY);
                     final String portStr = StringUtils.substringAfter(address, HOST_SEPERATOR);
 
@@ -159,14 +159,14 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
-        if (null == clusterName) {
+        if (clusterName == null) {
             return null;
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             CountDownLatch respondRegistries = new CountDownLatch(1);
             subscribe(clusterName, (dataId, data) -> {
                 Map<String, List<String>> instances = data.getZoneData();
-                if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                if (instances == null && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
                     CLUSTER_ADDRESS_MAP.remove(clusterName);
                 } else {
                     List<InetSocketAddress> tranformData = flatData(instances);
@@ -204,59 +204,59 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private static Properties getNamingProperties() {
         Properties properties = new Properties();
-        if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY)) {
+        if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getSofaAddrFileKey());
-            if (null != address) {
+            if (address != null) {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
         }
-        if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY)) {
+        if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY) != null) {
             properties.setProperty(PRO_REGION_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY));
         } else {
             String region = FILE_CONFIG.getConfig(getSofaRegionFileKey());
-            if (null == region) {
+            if (region == null) {
                 region = DEFAULT_LOCAL_REGION;
             }
             properties.setProperty(PRO_REGION_KEY, region);
         }
 
-        if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY)) {
+        if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY) != null) {
             properties.setProperty(PRO_DATACENTER_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY));
         } else {
             String datacenter = FILE_CONFIG.getConfig(getSofaDataCenterFileKey());
-            if (null == datacenter) {
+            if (datacenter == null) {
                 datacenter = DEFAULT_LOCAL_DATACENTER;
             }
             properties.setProperty(PRO_DATACENTER_KEY, datacenter);
         }
 
-        if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY)) {
+        if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY) != null) {
             properties.setProperty(PRO_GROUP_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY));
         } else {
             String group = FILE_CONFIG.getConfig(getSofaGroupFileKey());
-            if (null == group) {
+            if (group == null) {
                 group = DEFAULT_GROUP;
             }
             properties.setProperty(PRO_GROUP_KEY, group);
         }
 
-        if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY)) {
+        if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY) != null) {
             properties.setProperty(PRO_CLUSTER_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY));
         } else {
             String cluster = FILE_CONFIG.getConfig(getSofaClusterFileKey());
-            if (null == cluster) {
+            if (cluster == null) {
                 cluster = DEFAULT_CLUSTER;
             }
             properties.setProperty(PRO_CLUSTER_KEY, cluster);
         }
 
-        if (null != System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY)) {
+        if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY) != null) {
             properties.setProperty(PRO_ADDRESS_WAIT_TIME_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY));
         } else {
             String group = FILE_CONFIG.getConfig(getSofaAddressWaitTimeFileKey());
-            if (null == group) {
+            if (group == null) {
                 group = DEFAULT_ADDRESS_WAIT_TIME;
             }
             properties.setProperty(PRO_ADDRESS_WAIT_TIME_KEY, group);
@@ -295,7 +295,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private String getApplicationName() {
         String application = FILE_CONFIG.getConfig(getApplicationFileKey());
-        if (null == application) {
+        if (application == null) {
             application = DEFAULT_APPLICATION;
         }
         return application;

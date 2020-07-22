@@ -1,4 +1,4 @@
-import GGEditorCore from 'gg-editor-core';
+import GGEditorCore from '@gg-editor-core/bundle';
 import { EVENT_BEFORE_ADD_PAGE } from '@common/constants';
 import track from '@helpers/track';
 import { uniqueId } from '@utils';

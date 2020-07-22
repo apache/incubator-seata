@@ -73,6 +73,13 @@ public class DefaultValues {
      */
     public static final String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
+    public static final String DEFAULT_STORE_DB_DATASOURCE = "dbcp";
+    public static final String DEFAULT_STORE_DB_TYPE = "mysql";
+    public static final String DEFAULT_STORE_DB_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+    public static final String DEFAULT_STORE_DB_URL = "jdbc:mysql://127.0.0.1:3306/seata";
+    public static final String DEFAULT_STORE_DB_USER = "mysql";
+    public static final String DEFAULT_STORE_DB_PASSWORD = "mysql";
+
     public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
 
@@ -85,4 +92,8 @@ public class DefaultValues {
     public static final int SERVER_DEFAULT_PORT = 8091;
     public static final String SERVER_DEFAULT_STORE_MODE = "file";
     public static final long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
+
+    public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
+
+    public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 }

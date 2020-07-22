@@ -22,4 +22,23 @@ package io.seata.sqlparser.struct;
  */
 public class SqlMethodExpr {
 
+    private static SqlMethodExpr instance = new SqlMethodExpr();
+
+    /**
+     * Get SqlMethodExpr.
+     *
+     * @return the SqlMethodExpr
+     */
+    public static SqlMethodExpr get() {
+        return instance;
+    }
+
+    private SqlMethodExpr() {
+    }
+
+    @Override
+    public String toString() {
+        return "SQL_METHOD";
+    }
+
 }
