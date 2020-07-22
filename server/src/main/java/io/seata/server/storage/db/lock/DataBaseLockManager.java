@@ -32,8 +32,6 @@ import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_DATASOURCE;
-
 /**
  * The type db lock manager.
  *
@@ -50,8 +48,7 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
     @Override
     public void init() {
         // init dataSource
-        String datasourceType = ConfigurationFactory.getInstance().getConfig(
-                ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, DEFAULT_STORE_DB_DATASOURCE);
+        String datasourceType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         DataSource lockStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         locker = new DataBaseLocker(lockStoreDataSource);
     }
