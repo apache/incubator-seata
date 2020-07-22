@@ -371,7 +371,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     @Override
     public boolean checkEscape(String fieldOrTableName) {
         boolean check = check(fieldOrTableName);
-        if (!check && containsUppercase(fieldOrTableName)) {
+        if (!check && !containsUppercase(fieldOrTableName)) {
             // postgresql
             // we are recommend table name and column name must lowercase.
             // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
