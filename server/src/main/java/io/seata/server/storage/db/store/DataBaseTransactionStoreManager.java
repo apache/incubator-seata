@@ -43,6 +43,8 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_DATASOURCE;
+
 /**
  * The type Database transaction store manager.
  *
@@ -92,7 +94,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      */
     private DataBaseTransactionStoreManager() {
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
-        String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE, DEFAULT_STORE_DB_DATASOURCE);
         //init dataSource
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         logStore = new LogStoreDataBaseDAO(logStoreDataSource);
