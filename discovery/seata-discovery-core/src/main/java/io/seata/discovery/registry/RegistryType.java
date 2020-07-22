@@ -54,7 +54,7 @@ public enum RegistryType {
      */
     Sofa,
     /**
-     * Sofa registry type
+     * Custom registry type
      */
     Custom;
 
