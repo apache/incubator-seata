@@ -88,7 +88,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                             CONFIG_CACHE.put(rawDataId, result);
                         }
                     }
-                    if (method.getReturnType().equals(String.class)) {
+                    if (null != result && method.getReturnType().equals(String.class)) {
                         return String.valueOf(result);
                     }
                     return result;
