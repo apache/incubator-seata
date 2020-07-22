@@ -21,7 +21,6 @@ import java.util.List;
  * The interface Lock store.
  *
  * @author zhangsen
- * @data 2019 /4/25
  */
 public interface LockStore {
 
@@ -57,6 +56,10 @@ public interface LockStore {
      * @return the boolean
      */
     boolean unLock(List<LockDO> lockDOs);
+
+    boolean unLock(String xid, Long branchId);
+
+    boolean unLock(String xid, List<Long> branchIds);
 
     /**
      * Is lockable boolean.

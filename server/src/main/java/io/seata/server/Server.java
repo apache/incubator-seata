@@ -15,28 +15,32 @@
  */
 package io.seata.server;
 
-import io.seata.common.XID;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.netty.RpcServer;
-import io.seata.core.rpc.netty.ShutdownHook;
-import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.metrics.MetricsManager;
-import io.seata.server.session.SessionHolder;
-
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import io.seata.common.XID;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.NettyRemotingServer;
+import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.env.ContainerHelper;
+import io.seata.server.env.PortHelper;
+import io.seata.server.metrics.MetricsManager;
+import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class Server {
 
-    private static final int MIN_SERVER_POOL_SIZE = 100;
+    private static final int MIN_SERVER_POOL_SIZE = 50;
     private static final int MAX_SERVER_POOL_SIZE = 500;
     private static final int MAX_TASK_QUEUE_SIZE = 20000;
     private static final int KEEP_ALIVE_TIME = 500;
@@ -52,26 +56,39 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        // get port first, use to logback.xml
+        int port = PortHelper.getPort(args);
+        System.setProperty(ConfigurationKeys.SERVER_PORT, Integer.toString(port));
+
+        // create logger
+        final Logger logger = LoggerFactory.getLogger(Server.class);
+        if (ContainerHelper.isRunningInContainer()) {
+            logger.info("The server is running in container.");
+        }
+
+        //initialize the parameter parser
+        //Note that the parameter parser should always be the first line to execute.
+        //Because, here we need to parse the parameters needed for startup.
+        ParameterParser parameterParser = new ParameterParser(args);
+
         //initialize the metrics
         MetricsManager.get().init();
 
-        //initialize the parameter parser
-        ParameterParser parameterParser = new ParameterParser(args);
+        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-        RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-        //server host
-        rpcServer.setHost(parameterParser.getHost());
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(WORKING_THREADS);
         //server port
-        rpcServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(1);
-        //log store mode : file、db
+        nettyRemotingServer.setListenPort(parameterParser.getPort());
+        UUIDGenerator.init(parameterParser.getServerNode());
+        //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getStoreMode());
 
-        DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
-        rpcServer.setHandler(coordinator);
+        nettyRemotingServer.setHandler(coordinator);
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
+        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -79,9 +96,14 @@ public class Server {
         } else {
             XID.setIpAddress(NetUtil.getLocalIp());
         }
-        XID.setPort(rpcServer.getListenPort());
+        XID.setPort(nettyRemotingServer.getListenPort());
 
-        rpcServer.init();
+        try {
+            nettyRemotingServer.init();
+        } catch (Throwable e) {
+            logger.error("nettyServer init error:{}", e.getMessage(), e);
+            System.exit(-1);
+        }
 
         System.exit(0);
     }

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -23,10 +24,11 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  */
 class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
 
-    ProtostuffUndoLogParser parser = new ProtostuffUndoLogParser();
+    ProtostuffUndoLogParser parser = (ProtostuffUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, ProtostuffUndoLogParser.NAME);
 
     @Override
     public UndoLogParser getParser() {
         return parser;
     }
+
 }

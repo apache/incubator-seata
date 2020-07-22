@@ -17,19 +17,23 @@ package io.seata.rm.datasource;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.Result;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.HashMap;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * The type Data compare utils.
@@ -38,37 +42,46 @@ import java.util.Map;
  */
 public class DataCompareUtils {
 
+    private DataCompareUtils() {
+
+    }
+
     /**
      * Is field equals.
      *
      * @param f0 the f0
-     * @param f1  the f1
-     * @return the boolean
+     * @param f1 the f1
+     * @return the Result<Boolean>
      */
-    public static boolean isFieldEquals(Field f0, Field f1) {
+    public static Result<Boolean> isFieldEquals(Field f0, Field f1) {
         if (f0 == null) {
-            return f1 == null;
+            return Result.build(f1 == null);
         } else {
             if (f1 == null) {
-                return false;
+                return Result.build(false);
             } else {
                 if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
                         && f0.getType() == f1.getType()) {
                     if (f0.getValue() == null) {
-                        return f1.getValue() == null;
+                        return Result.build(f1.getValue() == null);
                     } else {
                         if (f1.getValue() == null) {
-                            return false;
+                            return Result.buildWithParams(false, "Field not equals, name {}, new value is null", f0.getName());
                         } else {
-                            String currentSerializer = UndoLogManager.getCurrentSerializer();
+                            String currentSerializer = AbstractUndoLogManager.getCurrentSerializer();
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            return f0.getValue().equals(f1.getValue());
+                            boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
+                            if (result) {
+                                return Result.ok();
+                            } else {
+                                return Result.buildWithParams(false, "Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
+                            }
                         }
                     }
                 } else {
-                    return false;
+                    return Result.buildWithParams(false, "Field not equals, old name {} type {}, new name {} type {}", f0.getName(), f0.getType(), f1.getName(), f1.getType());
                 }
             }
         }
@@ -89,6 +102,12 @@ public class DataCompareUtils {
         if (f1Type == Types.DECIMAL && f1.getValue().getClass().equals(Integer.class)) {
             f1.setValue(new BigDecimal(f1.getValue().toString()));
         }
+        if (f0Type == Types.BIGINT && f0.getValue().getClass().equals(Integer.class)) {
+            f0.setValue(Long.parseLong(f0.getValue().toString()));
+        }
+        if (f1Type == Types.BIGINT && f1.getValue().getClass().equals(Integer.class)) {
+            f1.setValue(Long.parseLong(f1.getValue().toString()));
+        }
     }
 
     /**
@@ -96,21 +115,24 @@ public class DataCompareUtils {
      *
      * @param beforeImage the before image
      * @param afterImage  the after image
-     * @return boolean
+     * @return Result<Boolean>
      */
-    public static boolean isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
+    public static Result<Boolean> isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
         if (beforeImage == null) {
-            return afterImage == null;
+            return Result.build(afterImage == null, null);
         } else {
             if (afterImage == null) {
-                return false;
-            } else {
-                if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
-                        && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
-                    return compareRows(beforeImage.getTableMeta(), beforeImage.getRows(), afterImage.getRows());
-                } else {
-                    return false;
+                return Result.build(false, null);
+            }
+            if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
+                    && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
+                //when image is EmptyTableRecords, getTableMeta will throw an exception
+                if (CollectionUtils.isEmpty(beforeImage.getRows())) {
+                    return Result.ok();
                 }
+                return compareRows(beforeImage.getTableMeta(), beforeImage.getRows(), afterImage.getRows());
+            } else {
+                return Result.build(false, null);
             }
         }
     }
@@ -122,55 +144,71 @@ public class DataCompareUtils {
      * @param tableMetaData the table meta data
      * @param oldRows       the old rows
      * @param newRows       the new rows
-     * @return the boolean
+     * @return the Result<Boolean>
      */
-    public static boolean isRowsEquals(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
-        return CollectionUtils.isSizeEquals(oldRows, newRows) && compareRows(tableMetaData, oldRows, newRows);
+    public static Result<Boolean> isRowsEquals(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
+        if (!CollectionUtils.isSizeEquals(oldRows, newRows)) {
+            return Result.build(false, null);
+        }
+        return compareRows(tableMetaData, oldRows, newRows);
     }
 
-    private static boolean compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
+    private static Result<Boolean> compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         // old row to map
-        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPrimaryKeyOnlyName());
         // new row to map
-        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPrimaryKeyOnlyName());
         // compare data
-        for (String rowKey : oldRowsMap.keySet()) {
-            Map<String, Field> oldRow = oldRowsMap.get(rowKey);
-            Map<String, Field> newRow = newRowsMap.get(rowKey);
+        for (Map.Entry<String, Map<String, Field>> oldEntry : oldRowsMap.entrySet()) {
+            String key = oldEntry.getKey();
+            Map<String, Field> oldRow = oldEntry.getValue();
+            Map<String, Field> newRow = newRowsMap.get(key);
             if (newRow == null) {
-                return false;
+                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", key);
             }
-            for (String fieldName : oldRow.keySet()) {
-                Field oldField = oldRow.get(fieldName);
+            for (Map.Entry<String, Field> oldRowEntry : oldRow.entrySet()) {
+                String fieldName = oldRowEntry.getKey();
+                Field oldField = oldRowEntry.getValue();
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
-                    return false;
+                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
-                if (!isFieldEquals(oldField, newField)) {
-                    return false;
+                Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
+                if (!oldEqualsNewFieldResult.getResult()) {
+                    return oldEqualsNewFieldResult;
                 }
             }
         }
-        return true;
+        return Result.ok();
     }
 
-    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, String primaryKey) {
+    public static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeyList) {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
+            //ensure the order of column
+            List<Field> rowFieldList = row.getFields().stream()
+                    .sorted(Comparator.comparing(Field::getName))
+                    .collect(Collectors.toList());
             // {uppercase fieldName : field}
             Map<String, Field> colsMap = new HashMap<>();
-            String rowKey = null;
-            for (int j = 0; j < row.getFields().size(); j++) {
-                Field field = row.getFields().get(j);
-                if (field.getName().equalsIgnoreCase(primaryKey)) {
-                    rowKey = String.valueOf(field.getValue());
+            StringBuilder rowKey = new StringBuilder();
+            boolean firstUnderline = false;
+            for (int j = 0; j < rowFieldList.size(); j++) {
+                Field field = rowFieldList.get(j);
+                if (primaryKeyList.stream().anyMatch(e -> field.getName().equals(e))) {
+                    if (firstUnderline && j > 0) {
+                        rowKey.append("_");
+                    }
+                    rowKey.append(String.valueOf(field.getValue()));
+                    firstUnderline = true;
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
             }
-            rowMap.put(rowKey, colsMap);
+            rowMap.put(rowKey.toString(), colsMap);
         }
         return rowMap;
     }
+
 
 }

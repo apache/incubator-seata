@@ -15,7 +15,6 @@
  */
 package io.seata.rm;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -29,6 +28,7 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.RMInboundHandler;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import org.slf4j.Logger;
@@ -68,6 +68,15 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             }
         }, request, response);
         return response;
+    }
+
+    /**
+     * delete undo log
+     * @param request the request
+     */
+    @Override
+    public void handle(UndoLogDeleteRequest request) {
+        // https://github.com/seata/seata/issues/2226
     }
 
     /**
@@ -143,7 +152,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     @Override
     public void onResponse(AbstractResultMessage response, RpcContext context) {
-        throw new ShouldNeverHappenException();
+        LOGGER.info("the rm client received response msg [{}] from tc server.", response.toString());
     }
 
     public abstract BranchType getBranchType();

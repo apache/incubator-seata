@@ -28,6 +28,10 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class UndoLogParserFactory {
 
+    private UndoLogParserFactory() {
+
+    }
+
     /**
      * {serializerName:UndoLogParser}
      */

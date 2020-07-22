@@ -34,13 +34,10 @@ public class RegisterTMResponseTest {
     @Test
     public void testToString() throws Exception {
         RegisterTMResponse registerTMResponse = new RegisterTMResponse();
-
         registerTMResponse.setVersion("1");
         registerTMResponse.setIdentified(true);
         registerTMResponse.setResultCode(ResultCode.Success);
-
         Assertions.assertEquals("version=1,extraData=null,identified=true,resultCode=Success,msg=null",
-            registerTMResponse.toString());
-
+                registerTMResponse.toString());
     }
 }

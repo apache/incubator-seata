@@ -15,13 +15,10 @@
  */
 package io.seata.discovery.registry;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * The enum Registry type.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/26
+ * @author slievrly
  */
 public enum RegistryType {
     /**
@@ -55,7 +52,11 @@ public enum RegistryType {
     /**
      * Sofa registry type
      */
-    Sofa;
+    Sofa,
+    /**
+     * Custom registry type
+     */
+    Custom;
 
     /**
      * Gets type.
@@ -64,24 +65,11 @@ public enum RegistryType {
      * @return the type
      */
     public static RegistryType getType(String name) {
-        if (File.name().equalsIgnoreCase(name)) {
-            return File;
-        } else if (Nacos.name().equalsIgnoreCase(name)) {
-            return Nacos;
-        } else if (Redis.name().equalsIgnoreCase(name)) {
-            return Redis;
-        } else if (Eureka.name().equalsIgnoreCase(name)) {
-            return Eureka;
-        } else if (ZK.name().equalsIgnoreCase(name)) {
-            return ZK;
-        } else if (Consul.name().equalsIgnoreCase(name)) {
-            return Consul;
-        } else if (Etcd3.name().equalsIgnoreCase(name)) {
-            return Etcd3;
-        } else if (Sofa.name().equalsIgnoreCase(name)) {
-            return Sofa;
-        } else {
-            throw new NotSupportYetException("unsupported type:" + name);
+        for (RegistryType registryType : RegistryType.values()) {
+            if (registryType.name().equalsIgnoreCase(name)) {
+                return registryType;
+            }
         }
+        throw new IllegalArgumentException("not support registry type: " + name);
     }
 }

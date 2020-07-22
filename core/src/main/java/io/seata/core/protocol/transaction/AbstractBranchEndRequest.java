@@ -15,8 +15,6 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.seata.core.model.BranchType;
 
 /**

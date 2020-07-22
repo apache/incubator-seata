@@ -17,6 +17,7 @@ package io.seata.server.store;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.server.storage.file.FlushDiskMode;
 
 import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
@@ -29,28 +30,34 @@ public class StoreConfig {
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
 
-    // default 16kb
+    /**
+     * Default 16kb.
+     */
     private static final int DEFAULT_MAX_BRANCH_SESSION_SIZE = 1024 * 16;
 
-    // default 512b
+    /**
+     * Default 512b.
+     */
     private static final int DEFAULT_MAX_GLOBAL_SESSION_SIZE = 512;
 
-    // default 16kb
+    /**
+     * Default 16kb.
+     */
     private static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
     public static int getMaxBranchSessionSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "maxBranchSessionSize", DEFAULT_MAX_BRANCH_SESSION_SIZE);
     }
 
     public static int getMaxGlobalSessionSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-global-session-size", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "maxGlobalSessionSize", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
     }
 
     public static int getFileWriteBufferCacheSize() {
-        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "fileWriteBufferCacheSize", DEFAULT_WRITE_BUFFER_SIZE);
     }
 
     public static FlushDiskMode getFlushDiskMode() {
-        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flush-disk-mode"));
+        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
     }
 }

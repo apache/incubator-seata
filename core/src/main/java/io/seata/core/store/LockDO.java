@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
  * The type Lock do.
  *
  * @author zhangsen
- * @data 2019 /4/25
  */
 public class LockDO {
 

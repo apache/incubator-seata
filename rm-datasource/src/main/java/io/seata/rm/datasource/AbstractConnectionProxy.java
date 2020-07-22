@@ -15,8 +15,14 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-
+import io.seata.core.model.BranchType;
+import io.seata.rm.datasource.sql.SQLVisitorFactory;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -32,6 +38,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -99,7 +106,25 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement targetPreparedStatement = getTargetConnection().prepareStatement(sql);
+        String dbType = getDbType();
+        // support oracle 10.2+
+        PreparedStatement targetPreparedStatement = null;
+        if (StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
+            List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
+            if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
+                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
+                            sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
+                    String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
+                    tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
+                    targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
+                }
+            }
+        }
+        if (targetPreparedStatement == null) {
+            targetPreparedStatement = getTargetConnection().prepareStatement(sql);
+        }
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
     }
 
@@ -186,9 +211,9 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-        throws SQLException {
+            throws SQLException {
         PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
-            resultSetConcurrency);
+                resultSetConcurrency);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
@@ -244,9 +269,9 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-        throws SQLException {
+            throws SQLException {
         Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency,
-            resultSetHoldability);
+                resultSetHoldability);
         return new StatementProxy<Statement>(this, statement);
     }
 
@@ -254,7 +279,7 @@ public abstract class AbstractConnectionProxy implements Connection {
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
                                               int resultSetHoldability) throws SQLException {
         PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
-            resultSetConcurrency, resultSetHoldability);
+                resultSetConcurrency, resultSetHoldability);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 

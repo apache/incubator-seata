@@ -24,13 +24,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.Constants;
 import io.seata.common.XID;
+import io.seata.common.util.StringUtils;
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -68,11 +72,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
+
 
     /**
      * Add boolean.
@@ -103,11 +108,27 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC) {
+            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Is saga type transaction
+     *
+     * @return is saga
+     */
+    public boolean isSaga() {
+        if (branchSessions.size() > 0) {
+            return BranchType.SAGA == branchSessions.get(0).getBranchType();
+        }
+        else if (StringUtils.isNotBlank(transactionName)
+                && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -117,6 +138,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean isTimeout() {
         return (System.currentTimeMillis() - beginTime) > timeout;
+    }
+
+    /**
+     * prevent could not handle rollbacking transaction
+     * @return if true force roll back
+     */
+    public boolean isRollbackingDead() {
+        return (System.currentTimeMillis() - beginTime) > (2 * 6000);
     }
 
     @Override
@@ -173,9 +202,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void clean() throws TransactionException {
-        for (BranchSession branchSession : branchSessions) {
-            branchSession.unlock();
-        }
+        LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
 
     }
 
@@ -251,8 +278,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the sorted branches
      */
     public ArrayList<BranchSession> getSortedBranches() {
-        ArrayList<BranchSession> sorted = new ArrayList<>(branchSessions);
-        return sorted;
+        return new ArrayList<>(branchSessions);
     }
 
     /**
@@ -466,19 +492,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != byApplicationIdBytes) {
+        if (byApplicationIdBytes != null) {
             byteBuffer.putShort((short)byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byServiceGroupBytes) {
+        if (byServiceGroupBytes != null) {
             byteBuffer.putShort((short)byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byTxNameBytes) {
+        if (byTxNameBytes != null) {
             byteBuffer.putShort((short)byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {
@@ -512,6 +538,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + 2 // byApplicationIdBytes.length
             + 2 // byServiceGroupBytes.length
             + 2 // byTxNameBytes.length
+            + 4 // xidBytes.length
+            + 4 // applicationDataBytes.length
             + 8 // beginTime
             + 1 // statusCode
             + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
@@ -579,25 +607,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         globalSessionLock.unlock();
     }
 
-    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException {
-        this.lock();
-        try {
-            excuteRunnable.run();
-        } finally {
-            this.unlock();
-        }
-    }
-
-    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException {
-        this.lock();
-        try {
-            return lockCallable.call();
-        } finally {
-            this.unlock();
-        }
-    }
-
-    private class GlobalSessionLock {
+    private static class GlobalSessionLock {
 
         private Lock globalSessionLock = new ReentrantLock();
 
@@ -611,7 +621,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             } catch (InterruptedException e) {
                 LOGGER.error("Interrupted error", e);
             }
-            throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
+            throw new GlobalTransactionException(TransactionExceptionCode.FailedLockGlobalTranscation, "Lock global session failed");
         }
 
         public void unlock() {
@@ -630,5 +640,32 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public interface LockCallable<V> {
 
         V call() throws TransactionException;
+    }
+
+    public ArrayList<BranchSession> getBranchSessions() {
+        return branchSessions;
+    }
+
+    public void asyncCommit() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
+        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+        this.changeStatus(GlobalStatus.AsyncCommitting);
+    }
+
+    public void queueToRetryCommit() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
+        SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
+        this.changeStatus(GlobalStatus.CommitRetrying);
+    }
+
+    public void queueToRetryRollback() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+        GlobalStatus currentStatus = this.getStatus();
+        if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
+            this.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
+        } else {
+            this.changeStatus(GlobalStatus.RollbackRetrying);
+        }
     }
 }

@@ -21,7 +21,6 @@ import java.io.Serializable;
 
 /**
  * @author guoyao
- * @date 2019/4/17
  */
 public class RollbackRule implements Serializable {
 

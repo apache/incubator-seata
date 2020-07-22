@@ -23,8 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Framework exception.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9
+ * @author slievrly
  */
 public class FrameworkException extends RuntimeException {
     private static final Logger LOGGER = LoggerFactory.getLogger(FrameworkException.class);

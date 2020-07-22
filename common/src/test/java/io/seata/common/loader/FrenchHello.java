@@ -19,7 +19,6 @@ package io.seata.common.loader;
  * The type French hello.
  *
  * @author Otis.z
- * @date 2019 /2/26
  */
 @LoadLevel(name = "FrenchHello", order = 2)
 public class FrenchHello implements Hello {

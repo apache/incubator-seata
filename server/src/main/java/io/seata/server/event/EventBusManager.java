@@ -28,7 +28,7 @@ public class EventBusManager {
         private static EventBus INSTANCE = new GuavaEventBus("tc");
     }
 
-    public static final EventBus get() {
+    public static EventBus get() {
         return SingletonHolder.INSTANCE;
     }
 }

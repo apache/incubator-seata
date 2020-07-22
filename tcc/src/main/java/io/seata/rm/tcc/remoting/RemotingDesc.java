@@ -43,7 +43,7 @@ public class RemotingDesc {
     private String interfaceClassName;
 
     /**
-     * rpc uniqueId: hsf、dubbo's version、sofa-rpc's uniqueId
+     * rpc uniqueId: hsf, dubbo's version, sofa-rpc's uniqueId
      */
     private String uniqueId;
 
@@ -53,7 +53,7 @@ public class RemotingDesc {
     private String group;
 
     /**
-     * protocol: sofa-rpc、dubbo、injvm etc.
+     * protocol: sofa-rpc, dubbo, injvm etc.
      */
     private short protocol;
 

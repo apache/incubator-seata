@@ -23,7 +23,7 @@ import io.seata.common.loader.LoadLevel;
 /**
  * The type Thread local context core.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 @LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE)
 public class ThreadLocalContextCore implements ContextCore {
@@ -49,5 +49,10 @@ public class ThreadLocalContextCore implements ContextCore {
     @Override
     public String remove(String key) {
         return threadLocal.get().remove(key);
+    }
+
+    @Override
+    public Map<String, String> entries() {
+        return threadLocal.get();
     }
 }

@@ -30,6 +30,6 @@ public interface ActionContextFilter {
      * @param parameter the parameter
      * @return the boolean
      */
-    public boolean needFilter(BusinessActionContextParameter parameter);
+    boolean needFilter(BusinessActionContextParameter parameter);
 
 }

@@ -15,16 +15,24 @@
  */
 package io.seata.rm.datasource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import javax.sql.DataSource;
-
-import com.alibaba.druid.util.JdbcUtils;
-
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.util.JdbcUtils;
+import io.seata.sqlparser.util.JdbcConstants;
+
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 
 /**
  * The type Data source proxy.
@@ -40,6 +48,22 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String jdbcUrl;
 
     private String dbType;
+
+    private String userName;
+
+    /**
+     * Enable the table meta checker
+     */
+    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
+
+    /**
+     * Table meta checker interval
+     */
+    private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
+
+    private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
+        new NamedThreadFactory("tableMetaChecker", 1, true));
 
     /**
      * Instantiates a new Data source proxy.
@@ -65,11 +89,23 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         this.resourceGroupId = resourceGroupId;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
-            dbType = JdbcUtils.getDbType(jdbcUrl, null);
+            dbType = JdbcUtils.getDbType(jdbcUrl);
+            if (JdbcConstants.ORACLE.equals(dbType)) {
+                userName = connection.getMetaData().getUserName();
+            }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
         DefaultResourceManager.get().registerResource(this);
+        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
+            tableMetaExcutor.scheduleAtFixedRate(() -> {
+                try (Connection connection = dataSource.getConnection()) {
+                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
+                        .refresh(connection, DataSourceProxy.this.getResourceId());
+                } catch (Exception ignore) {
+                }
+            }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
+        }
     }
 
     /**
@@ -110,8 +146,56 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
+        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
+            return getPGResourceId();
+        } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
+            return getDefaultResourceId() + "/" + userName;
+        } else {
+            return getDefaultResourceId();
+        }
+    }
+
+    /**
+     * get the default resource id
+     * @return resource id
+     */
+    private String getDefaultResourceId() {
         if (jdbcUrl.contains("?")) {
-            return jdbcUrl.substring(0, jdbcUrl.indexOf("?"));
+            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+        } else {
+            return jdbcUrl;
+        }
+    }
+
+    /**
+     * prevent pg sql url like
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
+     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata
+     * cause the duplicated resourceId
+     * it will cause the problem like
+     * 1.get file lock fail
+     * 2.error table meta cache
+     * @return resourceId
+     */
+    private String getPGResourceId() {
+        if (jdbcUrl.contains("?")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl.substring(0, jdbcUrl.indexOf('?')));
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1, jdbcUrl.length());
+            String[] urlParams = paramUrl.split("&");
+            for (String urlParam : urlParams) {
+                if (urlParam.contains("currentSchema")) {
+                    paramsBuilder.append(urlParam);
+                    break;
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            return jdbcUrlBuilder.toString();
         } else {
             return jdbcUrl;
         }

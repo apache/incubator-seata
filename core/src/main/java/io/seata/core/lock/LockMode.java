@@ -15,13 +15,10 @@
  */
 package io.seata.core.lock;
 
-import io.seata.core.store.StoreMode;
-
 /**
  * lock mode
  *
  * @author zhangsen
- * @data 2019 /4/25
  */
 public enum LockMode {
 

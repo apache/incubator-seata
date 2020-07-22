@@ -15,24 +15,23 @@
  */
 package io.seata.discovery.registry.consul;
 
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.RegistryService;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -43,7 +42,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/4/1
  */
 public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener> {
 
@@ -60,10 +58,10 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String SERVICE_TAG = "services";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
 
-    private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap = null;
-    private static ConcurrentMap<String, Set<ConsulListener>> listenerMap = null;
-    private static ExecutorService notifierExecutor = null;
-    private static ConcurrentMap<String, ConsulNotifier> notifiers = null;
+    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, Set<ConsulListener>> listenerMap;
+    private ExecutorService notifierExecutor;
+    private ConcurrentMap<String, ConsulNotifier> notifiers;
 
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -87,6 +85,13 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
 
 
     private ConsulRegistryServiceImpl() {
+        //initial the capacity with 8
+        clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        notifiers = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("services-consul-notifier", THREAD_POOL_NUM));
     }
 
     /**
@@ -95,18 +100,10 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return instance
      */
     static ConsulRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ConsulRegistryServiceImpl.class) {
-                if (null == instance) {
-                    //initial the capacity with 8
-                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    notifiers = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory("services-consul-notifier", THREAD_POOL_NUM));
+                if (instance == null) {
                     instance = new ConsulRegistryServiceImpl();
-
                 }
             }
         }
@@ -150,16 +147,14 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         final String cluster = getServiceGroup(key);
-        if (null == cluster) {
+        if (cluster == null) {
             return null;
         }
         if (!listenerMap.containsKey(cluster)) {
             //1.refresh cluster
             refreshCluster(cluster);
             //2. subscribe
-            subscribe(cluster, services -> {
-                refreshCluster(cluster, services);
-            });
+            subscribe(cluster, services -> refreshCluster(cluster, services));
         }
         return clusterAddressMap.get(cluster);
     }
@@ -170,10 +165,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return client
      */
     private ConsulClient getConsulClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (ConsulRegistryServiceImpl.class) {
-                if (null == client) {
-                    client = new ConsulClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY));
+                if (client == null) {
+                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
+                    client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
             }
         }
@@ -186,8 +183,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return
      */
     private String getClusterName() {
-        String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
         return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 
@@ -248,23 +244,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     /**
-     * get service group
-     *
-     * @param key
-     * @return clusterNameKey
-     */
-    private String getServiceGroup(String key) {
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
-    }
-
-    /**
      * refresh cluster
      *
      * @param cluster
      */
     private void refreshCluster(String cluster) {
-        if (null == cluster) {
+        if (cluster == null) {
             return;
         }
         Response<List<HealthService>> response = getHealthyServices(getClusterName(), -1, -1);
@@ -281,7 +266,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @param services
      */
     private void refreshCluster(String cluster, List<HealthService> services) {
-        if (null == cluster || services == null) {
+        if (cluster == null || services == null) {
             return;
         }
         clusterAddressMap.put(cluster, services.stream()

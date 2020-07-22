@@ -19,7 +19,6 @@ package io.seata.discovery.registry.redis;
  * The RedisListener
  *
  * @author kl @kailing.pub
- * @date 2019 /2/27
  */
 public interface RedisListener {
     /**
@@ -32,7 +31,7 @@ public interface RedisListener {
     String UN_REGISTER = "unregister";
 
     /**
-     * 用于订阅redis事件
+     * use for redis event
      *
      * @param event the event
      */

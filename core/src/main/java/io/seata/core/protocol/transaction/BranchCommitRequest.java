@@ -15,10 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.protocol.AbstractMessage;
 
 /**
  * The type Branch commit request.

@@ -18,8 +18,7 @@ package io.seata.integration.motan;
 import io.seata.core.context.RootContext;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/05/27
+ * @author slievrly
  */
 public class XIDServiceImpl implements XIDService {
 

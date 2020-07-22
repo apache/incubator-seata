@@ -16,15 +16,12 @@
 package io.seata.core.protocol.transaction;
 
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import io.seata.core.model.BranchType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/04/16
+ * @author: slievrly
  */
 public class BranchRollbackRequestTest {
     @Test

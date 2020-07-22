@@ -21,7 +21,6 @@ import java.util.List;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/3/26
  */
 public interface ConsulListener {
     /**

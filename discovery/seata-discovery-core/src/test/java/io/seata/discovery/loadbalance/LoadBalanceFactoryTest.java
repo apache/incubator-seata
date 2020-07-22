@@ -32,8 +32,7 @@ import java.util.stream.Stream;
 /**
  * The type Load balance factory test.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/12
+ * @author slievrly
  */
 public class LoadBalanceFactoryTest {
 
@@ -92,7 +91,8 @@ public class LoadBalanceFactoryTest {
         List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
         InetSocketAddress balanceAddress = loadBalance.select(addressList);
         Assertions.assertNotNull(balanceAddress);
-        TimeUnit.SECONDS.sleep(30);//等待testUnRegistry事件触发
+        //wait trigger testUnRegistry
+        TimeUnit.SECONDS.sleep(30);
         List<InetSocketAddress> addressList1 = registryService.lookup("my_test_tx_group");
         Assertions.assertEquals(1, addressList1.size());
     }

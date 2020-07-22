@@ -26,7 +26,6 @@ import java.util.HashSet;
  * @author kaitithoma
  * @author Danaykap
  * 
- * @date 2019/ 3/31
  *
  */
 
@@ -122,10 +121,10 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testAddResourceNull() {
-		rpcContext.addResource(null);
 		HashSet<String> resourceSet = new HashSet<String>();
-		resourceSet.add(null);
-		Assertions.assertEquals(resourceSet, rpcContext.getResourceSets());
+		rpcContext.setResourceSets(resourceSet);
+		rpcContext.addResource(null);
+		Assertions.assertEquals(0, rpcContext.getResourceSets().size());
 	}
 
 	/**

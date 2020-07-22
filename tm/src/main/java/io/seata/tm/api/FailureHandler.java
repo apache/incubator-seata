@@ -18,7 +18,7 @@ package io.seata.tm.api;
 /**
  * Callback on failure.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface FailureHandler {
 
@@ -41,8 +41,16 @@ public interface FailureHandler {
     /**
      * On rollback failure.
      *
-     * @param tx    the tx
-     * @param cause the cause
+     * @param tx                the tx
+     * @param originalException the originalException
      */
-    void onRollbackFailure(GlobalTransaction tx, Throwable cause);
+    void onRollbackFailure(GlobalTransaction tx, Throwable originalException);
+
+    /**
+     * On rollback retrying
+     *
+     * @param tx                the tx
+     * @param originalException the originalException
+     */
+    void onRollbackRetrying(GlobalTransaction tx, Throwable originalException);
 }
