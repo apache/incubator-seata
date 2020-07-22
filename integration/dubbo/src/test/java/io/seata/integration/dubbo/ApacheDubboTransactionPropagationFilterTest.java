@@ -17,10 +17,7 @@ package io.seata.integration.dubbo;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-import io.seata.integration.dubbo.mock.MockInvocation;
 import io.seata.integration.dubbo.mock.MockInvoker;
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcContext;
 import org.junit.jupiter.api.Test;
 
@@ -36,21 +33,37 @@ public class ApacheDubboTransactionPropagationFilterTest {
     @Test
     public void testInvoke_And_RootContext() {
         ApacheDubboTransactionPropagationFilter filter = new ApacheDubboTransactionPropagationFilter();
-        Invoker<Object> invoker = new MockInvoker();
-        Invocation invocation = new MockInvocation();
 
         // SAGA
         RpcContext.getContext().setAttachment(RootContext.KEY_XID, DEFAULT_XID);
         RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, BranchType.SAGA.name());
-        filter.invoke(invoker, invocation);
+        filter.invoke(new MockInvoker(() -> {
+            assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.AT.name());
+        }), null);
         assertThat(RootContext.unbind()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
 
         // TCC
         RpcContext.getContext().setAttachment(RootContext.KEY_XID, DEFAULT_XID);
         RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, BranchType.TCC.name());
-        filter.invoke(invoker, invocation);
+        filter.invoke(new MockInvoker(() -> {
+            assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.TCC.name());
+        }), null);
         assertThat(RootContext.unbind()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
+
+        // TCC
+        RootContext.bind(DEFAULT_XID);
+        RootContext.bindBranchType(BranchType.SAGA);
+        RpcContext.getContext().setAttachment(RootContext.KEY_XID, DEFAULT_XID);
+        RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, BranchType.TCC.name());
+        filter.invoke(new MockInvoker(() -> {
+            assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
+            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.SAGA.name());
+        }), null);
+        assertThat(RootContext.unbind()).isEqualTo(DEFAULT_XID);
+        assertThat(RootContext.unbindBranchType()).isEqualTo(BranchType.SAGA.name());
     }
 }

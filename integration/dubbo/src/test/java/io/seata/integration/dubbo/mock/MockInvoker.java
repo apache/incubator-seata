@@ -26,6 +26,15 @@ import org.apache.dubbo.rpc.RpcException;
  */
 public class MockInvoker implements Invoker<Object> {
 
+    private Runnable runnable;
+
+    public MockInvoker() {
+    }
+
+    public MockInvoker(Runnable runnable) {
+        this.runnable = runnable;
+    }
+
     @Override
     public Class<Object> getInterface() {
         return null;
@@ -33,6 +42,9 @@ public class MockInvoker implements Invoker<Object> {
 
     @Override
     public Result invoke(Invocation invocation) throws RpcException {
+        if (runnable != null) {
+            runnable.run();
+        }
         return null;
     }
 
