@@ -35,6 +35,10 @@ public abstract class AbstractDataSourceProxy implements DataSource {
 
     /**
      * Instantiates a new Abstract data source proxy.
+     */
+    public AbstractDataSourceProxy(){}
+    /**
+     * Instantiates a new Abstract data source proxy.
      *
      * @param targetDataSource the target data source
      */
