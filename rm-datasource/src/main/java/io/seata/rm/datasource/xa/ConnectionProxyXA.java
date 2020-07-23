@@ -133,11 +133,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 // 1. register branch to TC then get the branchId
                 branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
                     null);
-                RMTransactionHookManager.setLocalBranchId(branchId);
             } catch (TransactionException te) {
                 cleanXABranchContext();
                 throw new SQLException("failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
             }
+            RMTransactionHookManager.setLocalBranchId(branchId);
+
             // 2. build XA-Xid with xid and branchId
             this.xaBranchXid = XAXidBuilder.build(xid, branchId);
             try {

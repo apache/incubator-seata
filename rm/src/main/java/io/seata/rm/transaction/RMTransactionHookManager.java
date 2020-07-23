@@ -89,6 +89,15 @@ public final class RMTransactionHookManager {
      */
     public static void setLocalBranchId(long branchId) {
         LOCAL_BRANCH_ID.set(branchId);
+        localHooksToBranchHooks(branchId);
+    }
+
+    /**
+     * local hooks to branch hooks
+     *
+     * @param branchId the branch id
+     */
+    public static void localHooksToBranchHooks(long branchId) {
         List<RMTransactionHook> localHooks = LOCAL_HOOKS.get();
         if (localHooks != null && !localHooks.isEmpty()) {
             BRANCH_HOOKS.put(branchId, localHooks);
