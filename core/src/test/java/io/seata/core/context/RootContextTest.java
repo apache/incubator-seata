@@ -58,6 +58,45 @@ public class RootContextTest {
     }
 
     /**
+     * Test bind and unbind branchType.
+     */
+    @Test
+    public void testBind_And_Unbind_BranchType() {
+        assertThat(RootContext.unbindBranchType()).isNull();
+        RootContext.bindBranchType(DEFAULT_BRANCH_TYPE);
+
+        //before bind xid, branchType is null
+        assertThat(RootContext.getBranchType()).isNull();
+        //after bind xid, branchType is not null
+        RootContext.bind(DEFAULT_XID);
+        assertThat(RootContext.getBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+
+        //unbind xid and branchType
+        assertThat(RootContext.unbind()).isEqualTo(DEFAULT_XID);
+        assertThat(RootContext.getBranchType()).isNull();
+        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        assertThat(RootContext.getBranchType()).isNull();
+    }
+
+    /**
+     * Test get branchType.
+     */
+    @Test
+    public void testGetBranchType() {
+        RootContext.bindBranchType(DEFAULT_BRANCH_TYPE);
+
+        //before bind xid, branchType is null
+        assertThat(RootContext.getBranchType()).isNull();
+        //after bind xid, branchType is not null
+        RootContext.bind(DEFAULT_XID);
+        assertThat(RootContext.getBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+
+        RootContext.unbind();
+        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        assertThat(RootContext.getBranchType()).isNull();
+    }
+
+    /**
      * Test in global transaction.
      */
     @Test
