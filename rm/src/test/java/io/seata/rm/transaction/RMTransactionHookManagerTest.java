@@ -16,11 +16,10 @@
 package io.seata.rm.transaction;
 
 import io.seata.core.model.BranchType;
+import io.seata.rm.transaction.mock.MockRMTransactionHook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,46 +28,109 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RMTransactionHookManagerTest {
 
+    private static final String DEFAULT_XID = "1234567890";
+    private static final long DEFAULT_BRANCH_ID = 1234567890L;
+
     @AfterEach
-    public void clear() {
-        RMTransactionHookManager.getHooks().clear();
+    public void clearAfterEach() {
+        RMTransactionHookManager.getGlobalHooks().clear();
+        RMTransactionHookManager.clear();
     }
 
     @Test
-    public void testGetHooks() {
-        assertThat(RMTransactionHookManager.getHooks()).isEmpty();
-        RMTransactionHookManager.registerGlobalHook(new RMTransactionHook() {});
-        assertThat(RMTransactionHookManager.getHooks()).isNotEmpty();
+    public void test_getGlobalHooks_registerGlobalHooks() {
+        assertThat(RMTransactionHookManager.getGlobalHooks()).isNotNull();
+        assertThat(RMTransactionHookManager.getGlobalHooks()).isEmpty();
+        RMTransactionHookManager.registerGlobalHook(new MockRMTransactionHook());
+        assertThat(RMTransactionHookManager.getGlobalHooks()).isNotEmpty();
     }
 
     @Test
-    public void testRegisterGlobalHook() {
-        RMTransactionHook rmTransactionHook = new RMTransactionHook() {};
-        RMTransactionHookManager.registerGlobalHook(rmTransactionHook);
-        List<RMTransactionHook> hooks = RMTransactionHookManager.getHooks();
-        assertThat(hooks).isNotEmpty();
-        assertThat(hooks.get(0)).isEqualTo(rmTransactionHook);
+    public void test_getLocalBranchId_setLocalBranchId() {
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isNull();
+        RMTransactionHookManager.setLocalBranchId(DEFAULT_BRANCH_ID);
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isEqualTo(DEFAULT_BRANCH_ID);
+        RMTransactionHookManager.clear();
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isNull();
     }
 
     @Test
-    public void testTriggerHooks() {
+    public void test_getLocalHooks_registerLocalHook_getBranchHooks_removeBranchHooks_clear() {
+        assertThat(RMTransactionHookManager.getBranchHooks(DEFAULT_BRANCH_ID)).isNull();
+
+        // before set local branch id
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNull();
+        RMTransactionHookManager.registerLocalHook(new MockRMTransactionHook()); // register to local hooks
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNotEmpty();
+        assertThat(RMTransactionHookManager.getBranchHooks(DEFAULT_BRANCH_ID)).isNull();
+
+        // after set local branch id
+        RMTransactionHookManager.setLocalBranchId(DEFAULT_BRANCH_ID);
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNull(); // after setLocalBranchId, the localHooks moved to branchHooks
+        assertThat(RMTransactionHookManager.getBranchHooks(DEFAULT_BRANCH_ID)).isNotEmpty();
+        RMTransactionHookManager.registerLocalHook(new MockRMTransactionHook()); // register to branch hooks
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNull();
+
+        //remove
+        RMTransactionHookManager.removeBranchHooks(DEFAULT_BRANCH_ID);
+        assertThat(RMTransactionHookManager.getBranchHooks(DEFAULT_BRANCH_ID)).isNull();
+
+        //clear
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isEqualTo(DEFAULT_BRANCH_ID);
+        RMTransactionHookManager.clear();
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isNull();
+    }
+
+    @Test
+    public void test_getHooks_triggerHooks() {
         RMTransactionHookManager.registerGlobalHook(new RMTransactionHook() {
             @Override
             public void beforeBranchCommit(BranchType branchType, String xid, long branchId) {
+                assertThat(branchType).isEqualTo(BranchType.SAGA);
+                assertThat(xid).isEqualTo(DEFAULT_XID);
+                assertThat(branchId).isEqualTo(DEFAULT_BRANCH_ID);
                 throw new RuntimeException();
             }
         });
 
+        StringBuilder sb = new StringBuilder();
+
         //no throw
-        RMTransactionHookManager.triggerHooks(null, 0, (hook) -> {
-            hook.beforeBranchCommit(null, null, 0);
+        Assertions.assertDoesNotThrow(() -> {
+            RMTransactionHookManager.triggerHooks(null, DEFAULT_BRANCH_ID, (hook) -> {
+                sb.append("1");
+                hook.beforeBranchCommit(BranchType.SAGA, DEFAULT_XID, DEFAULT_BRANCH_ID);
+            });
         });
+        assertThat(sb.toString()).isEqualTo("1");
+    }
+
+    @Test
+    public void test_clear() {
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isNull();
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNull();
+
+        RMTransactionHookManager.registerLocalHook(new MockRMTransactionHook());
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNotEmpty();
+        RMTransactionHookManager.clear();
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNull();
+
+        //clear
+        RMTransactionHookManager.setLocalBranchId(DEFAULT_BRANCH_ID);
+        RMTransactionHookManager.registerLocalHook(new MockRMTransactionHook());
+        assertThat(RMTransactionHookManager.getLocalHooks()).isNull();
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isEqualTo(DEFAULT_BRANCH_ID);
+        RMTransactionHookManager.clear();
+        assertThat(RMTransactionHookManager.getLocalBranchId()).isNull();
     }
 
     @Test
     public void testNPE() {
         Assertions.assertThrows(NullPointerException.class, () -> {
             RMTransactionHookManager.registerGlobalHook(null);
+        });
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            RMTransactionHookManager.registerLocalHook(null);
         });
     }
 }

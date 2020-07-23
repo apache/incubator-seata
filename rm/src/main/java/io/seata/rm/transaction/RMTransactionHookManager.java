@@ -19,7 +19,10 @@ import io.seata.common.util.CollectionUtils;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
 /**
@@ -29,49 +32,152 @@ import java.util.function.Consumer;
  */
 public final class RMTransactionHookManager {
 
-    private static final List<RMTransactionHook> GLOBAL_HOOKS = new ArrayList<>();
-
     private RMTransactionHookManager() {
     }
 
+    //global hooks
+    private static final List<RMTransactionHook> GLOBAL_HOOKS = new ArrayList<>();
+    //branch hooks
+    private static final ConcurrentMap<Long, List<RMTransactionHook>> BRANCH_HOOKS = new ConcurrentHashMap<>();
+    //local branchId, hooks
+    private static final ThreadLocal<Long> LOCAL_BRANCH_ID = new ThreadLocal<>();
+    private static final ThreadLocal<List<RMTransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
+
     /**
-     * get the hooks
+     * get global hooks
      */
-    public static List<RMTransactionHook> getHooks() {
+    public static List<RMTransactionHook> getGlobalHooks() {
         return GLOBAL_HOOKS;
     }
 
     /**
-     * add new global hook
+     * get branch hooks
      *
-     * @param rmTransactionHook
+     * @param branchId the branch id
+     */
+    public static List<RMTransactionHook> getBranchHooks(long branchId) {
+        return BRANCH_HOOKS.get(branchId);
+    }
+
+    /**
+     * get local hooks
+     */
+    public static List<RMTransactionHook> getLocalHooks() {
+        return LOCAL_HOOKS.get();
+    }
+
+    /**
+     * remove branch hooks
+     *
+     * @param branchId the branch id
+     */
+    public static void removeBranchHooks(long branchId) {
+        BRANCH_HOOKS.remove(branchId);
+    }
+
+    /**
+     * get local branch id
+     */
+    public static Long getLocalBranchId() {
+        return LOCAL_BRANCH_ID.get();
+    }
+
+    /**
+     * set local branch id
+     *
+     * @param branchId the branch id
+     */
+    public static void setLocalBranchId(long branchId) {
+        LOCAL_BRANCH_ID.set(branchId);
+        List<RMTransactionHook> localHooks = LOCAL_HOOKS.get();
+        if (localHooks != null && !localHooks.isEmpty()) {
+            BRANCH_HOOKS.put(branchId, localHooks);
+            LOCAL_HOOKS.remove();
+        }
+    }
+
+    /**
+     * get the hooks
+     *
+     * @param branchId the branch id
+     */
+    private static List<RMTransactionHook> getHooks(long branchId) {
+        List<RMTransactionHook> hooks = getBranchHooks(branchId);
+        if (hooks == null || hooks.isEmpty()) {
+            hooks = GLOBAL_HOOKS;
+        } else {
+            hooks = new ArrayList<>(hooks);
+            hooks.addAll(0, GLOBAL_HOOKS);
+        }
+        return Collections.unmodifiableList(hooks);
+    }
+
+    /**
+     * add new global hook
      */
     public static void registerGlobalHook(RMTransactionHook rmTransactionHook) {
         if (rmTransactionHook == null) {
-            throw new NullPointerException("RM transactionHook must not be null");
+            throw new NullPointerException("RM transactionHook must be not null");
         }
-        List<RMTransactionHook> transactionHooks = getHooks();
-        transactionHooks.add(rmTransactionHook);
+        GLOBAL_HOOKS.add(rmTransactionHook);
+    }
+
+    /**
+     * add new local hook
+     */
+    public static void registerLocalHook(RMTransactionHook rmTransactionHook) {
+        if (rmTransactionHook == null) {
+            throw new NullPointerException("RM transactionHook must be not null");
+        }
+
+        // get list
+        Long branchId = getLocalBranchId();
+        List<RMTransactionHook> list;
+        if (branchId != null) {
+            list = getBranchHooks(branchId);
+            if (list == null) {
+                list = new ArrayList<>();
+                BRANCH_HOOKS.put(branchId, list);
+            }
+        } else {
+            list = LOCAL_HOOKS.get();
+            if (list == null) {
+                list = new ArrayList<>();
+                LOCAL_HOOKS.set(list);
+            }
+        }
+
+        // add to list
+        list.add(rmTransactionHook);
     }
 
     /**
      * trigger hooks
      *
      * @param logger   the logger in the trigger
+     * @param branchId the branch id
      * @param consumer the hook consumer
      */
     public static void triggerHooks(Logger logger, long branchId, Consumer<RMTransactionHook> consumer) {
-        List<RMTransactionHook> hooks = getHooks();
+        List<RMTransactionHook> hooks = getHooks(branchId);
         if (CollectionUtils.isNotEmpty(hooks)) {
             for (RMTransactionHook hook : hooks) {
                 try {
                     consumer.accept(hook);
                 } catch (Exception e) {
                     if (logger != null) {
-                        logger.error("execute rm transaction hook failed: branchId=" + branchId, e);
+                        logger.error("execute rm transaction hook failed: branchId={}", branchId, e);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * clear local hooks
+     */
+    public static void clear() {
+        LOCAL_HOOKS.remove();
+        LOCAL_BRANCH_ID.remove();
     }
 }

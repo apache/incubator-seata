@@ -31,6 +31,7 @@ import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.transaction.RMTransactionHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,6 +239,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
+        RMTransactionHookManager.setLocalBranchId(branchId);
     }
 
     @Override

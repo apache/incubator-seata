@@ -124,6 +124,11 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
                     hook.afterBranchCommitFailed(branchType, xid, branchId, status);
                 });
             }
+
+            //if committed or unretryable, remove branch hooks
+            if (status == BranchStatus.PhaseTwo_Committed || status == BranchStatus.PhaseTwo_CommitFailed_Unretryable) {
+                RMTransactionHookManager.removeBranchHooks(branchId);
+            }
         } catch (Exception e) {
             //trigger after branch commit failed hooks
             RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
@@ -178,6 +183,11 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
                 RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
                     hook.afterBranchRollbackFailed(branchType, xid, branchId, status);
                 });
+            }
+
+            //if rollbacked or unretryable, remove branch hooks
+            if (status == BranchStatus.PhaseTwo_Rollbacked || status == BranchStatus.PhaseTwo_RollbackFailed_Unretryable) {
+                RMTransactionHookManager.removeBranchHooks(branchId);
             }
         } catch (Exception e) {
             //trigger after branch rollback failed hooks
