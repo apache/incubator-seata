@@ -64,6 +64,12 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String LIMIT_PLACEHOLD = " #LIMIT_PLACEHOLD# ";
 
     /**
+     * The constant SETS_PLACEHOLD.
+     * format: xxx = ?, yyy = ?, zzz = ?,
+     */
+    public static final String SETS_PLACEHOLD = " #SETS_PLACEHOLD# ";
+
+    /**
      * The constant PRAMETER_PLACEHOLD.
      * format: ?, ?, ?
      */
@@ -170,7 +176,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public abstract String getInsertGlobalTransactionSQL(String globalTable);
 
     @Override
-    public abstract String getUpdateGlobalTransactionStatusSQL(String globalTable);
+    public abstract String getUpdateGlobalTransactionSQL(String globalTable, String setsPlaceHolder);
 
     @Override
     public String getDeleteGlobalTransactionSQL(String globalTable) {
@@ -212,14 +218,10 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
-
-
-    @Override
     public abstract String getInsertBranchTransactionSQL(String branchTable);
 
     @Override
-    public abstract String getUpdateBranchTransactionStatusSQL(String branchTable);
+    public abstract String getUpdateBranchTransactionSQL(String branchTable, String setsPlaceHolder);
 
     @Override
     public String getDeleteBranchTransactionByBranchIdSQL(String branchTable) {

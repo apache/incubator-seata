@@ -39,10 +39,10 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
-     * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE.
+     * The constant UPDATE_GLOBAL_TRANSACTION_ORACLE.
      */
-    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE = "update " + GLOBAL_TABLE_PLACEHOLD
-            + "   set " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?,"
+    public static final String UPDATE_GLOBAL_TRANSACTION_ORACLE = "update " + GLOBAL_TABLE_PLACEHOLD
+            + "   set " + SETS_PLACEHOLD
             + "       " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = sysdate"
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
@@ -70,17 +70,6 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + ") B where B.RNUM > ?";
 
     /**
-     * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE.
-     */
-    public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE = "select A.* from ("
-            + " select " + ALL_GLOBAL_COLUMNS
-            + "   from " + GLOBAL_TABLE_PLACEHOLD
-            + "  where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14)"
-            + "  order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
-            + " ) A"
-            + " where ROWNUM <= ?";
-
-    /**
      * The constant INSERT_BRANCH_TRANSACTION_ORACLE.
      */
     public static final String INSERT_BRANCH_TRANSACTION_ORACLE = "insert into " + BRANCH_TABLE_PLACEHOLD
@@ -88,10 +77,10 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, systimestamp, systimestamp)";
 
     /**
-     * The constant UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE.
+     * The constant UPDATE_BRANCH_TRANSACTION_ORACLE.
      */
-    public static final String UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
-            + "   set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?,"
+    public static final String UPDATE_BRANCH_TRANSACTION_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
+            + "   set " + SETS_PLACEHOLD
             + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = systimestamp"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
@@ -102,8 +91,9 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     }
 
     @Override
-    public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
-        return UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
+    public String getUpdateGlobalTransactionSQL(String globalTable, String setsPlaceHolder) {
+        return UPDATE_GLOBAL_TRANSACTION_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+            .replace(SETS_PLACEHOLD, setsPlaceHolder);
     }
 
     @Override
@@ -140,17 +130,13 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     }
 
     @Override
-    public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
-        return QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
-    }
-
-    @Override
     public String getInsertBranchTransactionSQL(String branchTable) {
         return INSERT_BRANCH_TRANSACTION_ORACLE.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 
     @Override
-    public String getUpdateBranchTransactionStatusSQL(String branchTable) {
-        return UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    public String getUpdateBranchTransactionSQL(String branchTable, String setsPlaceHolder) {
+        return UPDATE_BRANCH_TRANSACTION_ORACLE.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
+            .replace(SETS_PLACEHOLD, setsPlaceHolder);
     }
 }

@@ -27,27 +27,27 @@ import java.util.Date;
  */
 public class GlobalTransactionDO implements GlobalTransactionModel {
 
-    private String xid;
+    protected String xid;
 
-    private long transactionId;
+    protected long transactionId;
 
-    private int status = GlobalStatus.UnKnown.getCode();
+    protected int status = GlobalStatus.UnKnown.getCode();
 
-    private String applicationId;
+    protected String applicationId;
 
-    private String transactionServiceGroup;
+    protected String transactionServiceGroup;
 
-    private String transactionName;
+    protected String transactionName;
 
-    private int timeout;
+    protected int timeout;
 
-    private long beginTime;
+    protected long beginTime;
 
-    private String applicationData;
+    protected String applicationData;
 
-    private Date gmtCreate;
+    protected Date gmtCreate;
 
-    private Date gmtModified;
+    protected Date gmtModified;
 
     /**
      * Gets xid.

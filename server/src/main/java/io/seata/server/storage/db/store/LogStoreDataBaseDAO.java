@@ -53,6 +53,8 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABL
  */
 public class LogStoreDataBaseDAO implements LogStore {
 
+    //region Constants
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);
 
     /**
@@ -69,10 +71,14 @@ public class LogStoreDataBaseDAO implements LogStore {
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
+    //endregion
+
+    //region Fields
+
     /**
      * The Log store data source.
      */
-    protected DataSource logStoreDataSource = null;
+    protected DataSource logStoreDataSource;
 
     /**
      * The Global table.
@@ -84,9 +90,19 @@ public class LogStoreDataBaseDAO implements LogStore {
      */
     protected String branchTable;
 
+    /**
+     * The db type.
+     */
     private String dbType;
 
+    /**
+     * The transaction name column size.
+     */
     private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
+
+    //endregion
+
+    //region Constructor
 
     /**
      * Instantiates a new Log store data base dao.
@@ -109,6 +125,10 @@ public class LogStoreDataBaseDAO implements LogStore {
         // init transaction_name size
         initTransactionNameSize();
     }
+
+    //endregion
+
+    //region Override LogStore
 
     @Override
     public GlobalTransactionDO queryGlobalTransactionDO(String xid) {
@@ -261,15 +281,24 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusSQL(globalTable);
+        // sets place holder
+        StringBuilder setsPlaceHolder = new StringBuilder();
+        setsPlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
+
+        // build update sql
+        String updateSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable, setsPlaceHolder.toString());
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
+
+            //sets
+            ps = conn.prepareStatement(updateSql);
             ps.setInt(1, globalTransactionDO.getStatus());
             ps.setString(2, globalTransactionDO.getXid());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -379,16 +408,27 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(branchTable);
+        // sets place holder
+        StringBuilder setsPlaceHolder = new StringBuilder();
+        setsPlaceHolder.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
+        setsPlaceHolder.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
+
+        // build update branch sql
+        String updateSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(branchTable, setsPlaceHolder.toString());
+
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
+
+            //sets
+            ps = conn.prepareStatement(updateSql);
             ps.setInt(1, branchTransactionDO.getStatus());
-            ps.setString(2, branchTransactionDO.getXid());
-            ps.setLong(3, branchTransactionDO.getBranchId());
+            ps.setString(2, branchTransactionDO.getApplicationData());
+            ps.setString(3, branchTransactionDO.getXid());
+            ps.setLong(4, branchTransactionDO.getBranchId());
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -425,6 +465,10 @@ public class LogStoreDataBaseDAO implements LogStore {
         long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
         return maxBranchId > maxTransId ? maxBranchId : maxTransId;
     }
+
+    //endregion
+
+    //region Private
 
     private long getCurrentMaxSessionId(String sql, long high, long low) {
         long max = 0;
@@ -630,6 +674,10 @@ public class LogStoreDataBaseDAO implements LogStore {
         return conn.getMetaData().getUserName();
     }
 
+    //endregion
+
+    //region Gets and Sets
+
     /**
      * Sets log store data source.
      *
@@ -666,9 +714,17 @@ public class LogStoreDataBaseDAO implements LogStore {
         this.dbType = dbType;
     }
 
+    /**
+     * Gets transaction name column size.
+     *
+     * @return the transaction name column size
+     */
     public int getTransactionNameColumnSize() {
         return transactionNameColumnSize;
     }
+
+    //endregion
+
 
     /**
      * column info

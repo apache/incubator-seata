@@ -27,27 +27,27 @@ import java.util.Date;
  */
 public class BranchTransactionDO implements BranchTransactionModel {
 
-    private String xid;
+    protected String xid;
 
-    private long transactionId;
+    protected long transactionId;
 
-    private long branchId;
+    protected long branchId;
 
-    private String resourceGroupId;
+    protected String resourceGroupId;
 
-    private String resourceId;
+    protected String resourceId;
 
-    private String branchType;
+    protected String branchType;
 
-    private int status = BranchStatus.Unknown.getCode();
+    protected int status = BranchStatus.Unknown.getCode();
 
-    private String clientId;
+    protected String clientId;
 
-    private String applicationData;
+    protected String applicationData;
 
-    private Date gmtCreate;
+    protected Date gmtCreate;
 
-    private Date gmtModified;
+    protected Date gmtModified;
 
     /**
      * Gets xid.
