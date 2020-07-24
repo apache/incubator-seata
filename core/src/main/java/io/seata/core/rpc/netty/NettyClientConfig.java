@@ -19,6 +19,8 @@ import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX;
+import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_SIZE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
@@ -441,5 +443,23 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
+    }
+
+    /**
+     * Get client pipeline thread prefix string.
+     *
+     * @return the string
+     */
+    public String getClientPipelineThreadPrefix() {
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_PIPELINE_THREAD_PREFIX, DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX);
+    }
+
+    /**
+     * Get client pipeline thread size int.
+     *
+     * @return the int
+     */
+    public int getClientPipelineThreadSize() {
+        return CONFIG.getInt(ConfigurationKeys.CLIENT_PIPELINE_THREAD_SIZE, DEFAULT_CLIENT_PIPELINE_THREAD_SIZE);
     }
 }

@@ -40,6 +40,11 @@ public class DefaultValues {
     public static final int DEFAULT_SELECTOR_THREAD_SIZE = 1;
     public static final int DEFAULT_BOSS_THREAD_SIZE = 1;
 
+    public static final String DEFAULT_SERVER_PIPELINE_THREAD_PREFIX = "NettyServerPipeline";
+    public static final int DEFAULT_SERVER_PIPELINE_THREAD_SIZE = 8;
+    public static final String DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX = "NettyClientPipeline";
+    public static final int DEFAULT_CLIENT_PIPELINE_THREAD_SIZE = 4;
+
 
     public static final String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     public static final String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";

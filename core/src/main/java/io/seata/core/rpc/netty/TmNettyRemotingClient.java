@@ -22,8 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
@@ -43,7 +41,6 @@ import org.slf4j.LoggerFactory;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-@Sharable
 public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);
     private static volatile TmNettyRemotingClient instance;
@@ -62,10 +59,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
     }
 
-    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
-                                  EventExecutorGroup eventExecutorGroup,
-                                  ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
+        super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
     }
 
     /**
@@ -99,7 +94,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
             }
         }
