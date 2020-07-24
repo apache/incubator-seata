@@ -61,7 +61,8 @@ public class RedisLocker extends AbstractLocker {
             ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
-    @Override public boolean acquireLock(List<RowLock> rowLocks) {
+    @Override
+    public boolean acquireLock(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
@@ -109,7 +110,8 @@ public class RedisLocker extends AbstractLocker {
         }
     }
 
-    @Override public boolean releaseLock(List<RowLock> rowLocks) {
+    @Override
+    public boolean releaseLock(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
@@ -167,13 +169,15 @@ public class RedisLocker extends AbstractLocker {
         }
     }
 
-    @Override public boolean releaseLock(String xid, Long branchId) {
+    @Override
+    public boolean releaseLock(String xid, Long branchId) {
         List<Long> branchIds = new ArrayList<>();
         branchIds.add(branchId);
         return releaseLock(xid, branchIds);
     }
 
-    @Override public boolean isLockable(List<RowLock> rowLocks) {
+    @Override
+    public boolean isLockable(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
