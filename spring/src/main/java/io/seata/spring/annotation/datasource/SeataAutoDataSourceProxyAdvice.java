@@ -18,7 +18,6 @@ package io.seata.spring.annotation.datasource;
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -35,8 +34,8 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         if (!RootContext.requireGlobalLock()
-                && !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())
-                && !StringUtils.equals(BranchType.XA.name(), RootContext.getBranchType())) {
+                && !BranchType.AT.name().equalsIgnoreCase(RootContext.getBranchType())
+                && !BranchType.XA.name().equalsIgnoreCase(RootContext.getBranchType())) {
             return invocation.proceed();
         }
 
