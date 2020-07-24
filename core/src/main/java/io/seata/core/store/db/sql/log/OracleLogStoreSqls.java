@@ -121,10 +121,10 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
                 int fromIndex = (pageable.getPageIndex() - FIRST_PAGE_INDEX) * pageable.getPageSize();
                 int toIndex = fromIndex + pageable.getPageSize();
                 // Different from other databases, first is toIndex, second is fromIndex
-                ps.setInt(currentParamIndex++, toIndex);
-                ps.setInt(currentParamIndex, fromIndex);
+                ps.setInt(++currentParamIndex, toIndex);
+                ps.setInt(++currentParamIndex, fromIndex);
             } else {
-                ps.setInt(currentParamIndex, pageable.getPageSize());
+                ps.setInt(++currentParamIndex, pageable.getPageSize());
             }
         }
     }

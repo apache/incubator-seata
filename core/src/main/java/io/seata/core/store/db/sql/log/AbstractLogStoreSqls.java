@@ -204,10 +204,10 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             if (pageable.getPageIndex() > FIRST_PAGE_INDEX) {
                 int fromIndex = (pageable.getPageIndex() - FIRST_PAGE_INDEX) * pageable.getPageSize();
                 int toIndex = fromIndex + pageable.getPageSize();
-                ps.setInt(currentParamIndex++, fromIndex);
-                ps.setInt(currentParamIndex, toIndex);
+                ps.setInt(++currentParamIndex, fromIndex);
+                ps.setInt(++currentParamIndex, toIndex);
             } else {
-                ps.setInt(currentParamIndex, pageable.getPageSize());
+                ps.setInt(++currentParamIndex, pageable.getPageSize());
             }
         }
     }

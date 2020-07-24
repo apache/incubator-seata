@@ -36,7 +36,6 @@ public class WriteStoreMultithreadTest {
     private static int per_thread_trx_num = 65535;
     private static int threadNum = 16;
     private static CountDownLatch countDownLatch = new CountDownLatch(threadNum);
-
     public static void main(String[] args) throws Exception {
         LogStore fileDAO = new LogStoreFileDAO("data");
 

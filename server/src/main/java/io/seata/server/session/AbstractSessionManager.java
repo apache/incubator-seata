@@ -122,7 +122,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     @Override
     public void updateBranchSession(BranchSession branchSession, BranchStatus status, String applicationData)
-            throws TransactionException {
+        throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + this.getClass().getSimpleName() + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
         }
@@ -137,7 +137,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession branchSession)
-            throws TransactionException {
+        throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + this.getClass().getSimpleName() + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_REMOVE);
         }

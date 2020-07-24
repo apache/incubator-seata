@@ -51,7 +51,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     /**
      * Get global session global session.
      *
-     * @param xid                the xid
+     * @param xid the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
@@ -196,7 +196,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * lock and execute
      *
      * @param globalSession the global session
-     * @param lockCallable  the lock Callable
+     * @param lockCallable the lock Callable
      * @return the value
      */
     <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)

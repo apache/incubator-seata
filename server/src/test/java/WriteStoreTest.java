@@ -49,7 +49,7 @@ public class WriteStoreTest {
      *
      * @param args the input arguments
      * @throws InterruptedException the interrupted exception
-     * @throws IOException          the io exception
+     * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException, NoSuchMethodException, InterruptedException {
         LogStoreFileDAO fileDAO = new LogStoreFileDAO("~/Documents/test/data");

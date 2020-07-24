@@ -39,7 +39,6 @@ import java.util.List;
 
 import static io.seata.core.model.GlobalStatus.Begin;
 
-
 /**
  * @author zhangsen
  */

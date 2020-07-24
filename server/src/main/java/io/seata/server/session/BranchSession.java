@@ -211,7 +211,7 @@ public class BranchSession extends BranchTransactionDO
             + (clientIdBytes == null ? 0 : clientIdBytes.length)
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
-            + 1;// branchType
+            + 1; //branchType
         return size;
     }
 
@@ -264,6 +264,7 @@ public class BranchSession extends BranchTransactionDO
             this.branchType = BranchType.values()[branchTypeId];
         }
         this.status = BranchStatus.get(byteBuffer.get());
+
     }
 
 }

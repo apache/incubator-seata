@@ -71,7 +71,7 @@ public interface LogStore<G extends GlobalTransactionModel, B extends BranchTran
      * @return the list
      */
     default List<G> queryGlobalTransactionDO(GlobalStatus[] statuses, int limit) {
-        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses, FIRST_PAGE_INDEX, limit));
+        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses, limit));
     }
 
     /**

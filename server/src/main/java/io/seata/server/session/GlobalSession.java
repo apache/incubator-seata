@@ -387,28 +387,28 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
         if (byApplicationIdBytes != null) {
-            byteBuffer.putShort((short) byApplicationIdBytes.length);
+            byteBuffer.putShort((short)byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (byServiceGroupBytes != null) {
-            byteBuffer.putShort((short) byServiceGroupBytes.length);
+            byteBuffer.putShort((short)byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (byTxNameBytes != null) {
-            byteBuffer.putShort((short) byTxNameBytes.length);
+            byteBuffer.putShort((short)byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (xidBytes != null) {
-            byteBuffer.putShort((short) xidBytes.length);
+            byteBuffer.putShort((short)xidBytes.length);
             byteBuffer.put(xidBytes);
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         if (applicationDataBytes != null) {
             byteBuffer.putInt(applicationDataBytes.length);
@@ -418,7 +418,7 @@ public class GlobalSession extends GlobalTransactionDO implements SessionLifecyc
         }
 
         byteBuffer.putLong(beginTime);
-        byteBuffer.put((byte) status.getCode());
+        byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
