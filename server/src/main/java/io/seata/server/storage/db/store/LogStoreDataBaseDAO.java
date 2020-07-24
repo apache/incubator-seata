@@ -34,7 +34,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTableField;
 import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
@@ -169,32 +168,14 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            // where
+            // where place holder
             String wherePlaceHolder = this.buildWherePlaceHolder(condition);
-            // order by xxx [asc|desc], yyy [asc|desc]
-            StringBuilder orderByPlaceHolder = new StringBuilder();
-            if (condition.hasSortParams()) {
-                orderByPlaceHolder.append(" order by ");
+            // order by place holder
+            String orderByPlaceHolder = this.buildOrderByPlaceHolder(condition);
 
-                SortParam[] sortParams = condition.getSortParams();
-                SortParam sortParam;
-                for (int i = 0, l = sortParams.length; i < l; ++i) {
-                    sortParam = sortParams[i];
-                    if (i > 0) {
-                        orderByPlaceHolder.append(", ");
-                    }
-                    orderByPlaceHolder.append(sortParam.getSortFieldName());
-                    if (SortOrder.DESC == sortParam.getSortOrder()) {
-                        orderByPlaceHolder.append(" desc");
-                    }
-                }
-            } else {
-                // db mode: default sort is: order by gmt_modified asc
-                orderByPlaceHolder.append(" order by ").append(GlobalTableField.GMT_MODIFIED.getFieldName());
-            }
             // build sql
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByCondition(globalTable,
-                    wherePlaceHolder, orderByPlaceHolder.toString(), condition);
+                    wherePlaceHolder, orderByPlaceHolder, condition);
 
             ps = conn.prepareStatement(sql);
 
@@ -224,8 +205,9 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            // where
+            // where place holder
             String wherePlaceHolder = this.buildWherePlaceHolder(condition);
+
             // build sql
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getCountGlobalTransactionSQLByCondition(globalTable,
                     wherePlaceHolder);
@@ -487,11 +469,12 @@ public class LogStoreDataBaseDAO implements LogStore {
         //  true: begin_time  < System.currentTimeMillis() - timeout
         // false: begin_time >= System.currentTimeMillis() - timeout
         if (condition.getIsTimeoutData() != null) {
-            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ");
+            wherePlaceHolder.append(wherePlaceHolder.length() == 0 ? " where " : " and ")
+                    .append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME);
             if (condition.getIsTimeoutData()) {
-                wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" < ? - timeout");
+                wherePlaceHolder.append(" < ? - timeout");
             } else {
-                wherePlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME).append(" >= ? - timeout");
+                wherePlaceHolder.append(" >= ? - timeout");
             }
         }
         // begin_time < System.currentTimeMillis() - :overTimeAliveMills
@@ -508,27 +491,49 @@ public class LogStoreDataBaseDAO implements LogStore {
         return wherePlaceHolder.toString();
     }
 
+    private String buildOrderByPlaceHolder(GlobalTransactionCondition condition) {
+        if (condition.hasSortParams()) {
+            StringBuilder orderByPlaceHolder = new StringBuilder(" order by ");
+            SortParam[] sortParams = condition.getSortParams();
+            SortParam sortParam;
+            for (int i = 0, l = sortParams.length; i < l; ++i) {
+                sortParam = sortParams[i];
+                if (i > 0) {
+                    orderByPlaceHolder.append(", ");
+                }
+                orderByPlaceHolder.append(sortParam.getSortFieldName());
+                if (SortOrder.DESC == sortParam.getSortOrder()) {
+                    orderByPlaceHolder.append(" desc");
+                }
+            }
+            return orderByPlaceHolder.toString();
+        } else {
+            // db mode default sort is: order by gmt_modified asc
+            return " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
+        }
+    }
+
     private int setConditionParameters(PreparedStatement ps, GlobalTransactionCondition condition) throws SQLException {
-        int i = 1;
+        int i = 0;
         long now = System.currentTimeMillis();
         // status in (?, ?, ?)
         if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
             for (int j = 0, l = condition.getStatuses().length; j < l; j++) {
-                ps.setInt(i++, condition.getStatuses()[j].getCode());
+                ps.setInt(++i, condition.getStatuses()[j].getCode());
             }
         }
         //  true: begin_time  < System.currentTimeMillis() - timeout
         // false: begin_time >= System.currentTimeMillis() - timeout
         if (condition.getIsTimeoutData() != null) {
-            ps.setLong(i++, now);
+            ps.setLong(++i, now);
         }
         // begin_time < System.currentTimeMillis() - :overTimeAliveMills
         if (condition.getOverTimeAliveMills() > 0) {
-            ps.setLong(i++, now - condition.getOverTimeAliveMills());
+            ps.setLong(++i, now - condition.getOverTimeAliveMills());
         }
         // gmt_modified >= :minGmtModified
         if (condition.getMinGmtModified() != null) {
-            ps.setDate(i++, new Date(condition.getMinGmtModified().getTime()));
+            ps.setDate(++i, new Date(condition.getMinGmtModified().getTime()));
         }
 
         return i;
