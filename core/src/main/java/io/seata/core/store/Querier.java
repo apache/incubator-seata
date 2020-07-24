@@ -93,11 +93,7 @@ public interface Querier<T> {
      * @return the list after query
      */
     default <D extends T> List<D> doQuery(List<D> list) {
-        if (list == null) {
-            return new ArrayList<>();
-        }
-
-        if (list.isEmpty()) {
+        if (CollectionUtils.isEmpty(list)) {
             return list;
         }
 
