@@ -104,8 +104,10 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 return valueObject;
             }
         } else {
-            LOGGER.warn("Property bean with prefix '{}' was not found in `StarterConstants.PROPERTY_BEAN_MAP`."
-                    + " Please inform the {} committer to fix this BUG.", propertyPrefix, SEATA_PREFIX);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Property bean with prefix '{}' was not found in `StarterConstants.PROPERTY_BEAN_MAP`."
+                        + " Please inform the {} committer to fix this BUG.", propertyPrefix, SEATA_PREFIX);
+            }
         }
         return null;
     }
