@@ -18,10 +18,12 @@ package io.seata.server.storage.redis.lock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
@@ -53,15 +55,13 @@ public class RedisLocker extends AbstractLocker {
 
     /**
      * Instantiates a new Redis locker.
-     *
      */
     public RedisLocker() {
         logQueryLimit =
             ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
-    @Override
-    public boolean acquireLock(List<RowLock> rowLocks) {
+    @Override public boolean acquireLock(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
@@ -109,8 +109,7 @@ public class RedisLocker extends AbstractLocker {
         }
     }
 
-    @Override
-    public boolean releaseLock(List<RowLock> rowLocks) {
+    @Override public boolean releaseLock(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
@@ -139,15 +138,19 @@ public class RedisLocker extends AbstractLocker {
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String lockListKey = getXidLockKey(xid);
-            List<String> keys = lRange(jedis, lockListKey);
+            Set<String> keys = lRange(jedis, lockListKey);
             if (CollectionUtils.isNotEmpty(keys)) {
                 List<String> delKeys = new ArrayList<>();
                 List<String> values = jedis.mget(keys.toArray(new String[0]));
                 for (String value : values) {
-                    for (int i = 0; i < branchIds.size(); i++) {
+                    Iterator<Long> it = branchIds.iterator();
+                    while (it.hasNext()) {
+                        Long branchId = it.next();
                         LockDO lock = JSON.parseObject(value, LockDO.class);
-                        if (lock != null && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
-                            delKeys.add(keys.get(i));
+                        if (lock != null && Objects.equals(lock.getBranchId(), branchId)) {
+                            delKeys.add(getLockKey(lock.getRowKey()));
+                            it.remove();
+                            break;
                         }
                     }
                 }
@@ -164,15 +167,13 @@ public class RedisLocker extends AbstractLocker {
         }
     }
 
-    @Override
-    public boolean releaseLock(String xid, Long branchId) {
+    @Override public boolean releaseLock(String xid, Long branchId) {
         List<Long> branchIds = new ArrayList<>();
         branchIds.add(branchId);
         return releaseLock(xid, branchIds);
     }
 
-    @Override
-    public boolean isLockable(List<RowLock> rowLocks) {
+    @Override public boolean isLockable(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return true;
@@ -197,8 +198,8 @@ public class RedisLocker extends AbstractLocker {
         return true;
     }
 
-    private List<String> lRange(Jedis jedis, String key) {
-        List<String> keys = new ArrayList<>();
+    private Set<String> lRange(Jedis jedis, String key) {
+        Set<String> keys = new HashSet<>();
         List<String> redisLockJson;
         int start = 0;
         int stop = logQueryLimit;
