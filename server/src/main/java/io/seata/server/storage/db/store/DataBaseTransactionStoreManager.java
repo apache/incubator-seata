@@ -32,7 +32,7 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager<GlobalTransactionDO
         , BranchTransactionDO> {
 
-    //region Instance
+    //region static Instance
 
     private static volatile DataBaseTransactionStoreManager instance;
 

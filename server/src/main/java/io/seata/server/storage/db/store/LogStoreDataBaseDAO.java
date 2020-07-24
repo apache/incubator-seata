@@ -77,6 +77,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     //endregion
 
     //region Fields
+
     /**
      * The Log store data source.
      */
@@ -283,32 +284,23 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
 
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        if (globalTransactionDO.getStatus() == null) {
-            return true;
-        }
-
         // sets place holder
-        StringBuilder sb = new StringBuilder();
-        if (globalTransactionDO.getStatus() != null) {
-            sb.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
-        }
+        StringBuilder setsPlaceHolder = new StringBuilder();
+        setsPlaceHolder.append(ServerTableColumnsName.GLOBAL_TABLE_STATUS).append(" = ?, ");
 
-        // get update sql
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable, sb.toString());
+        // build update sql
+        String updateSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionSQL(globalTable, setsPlaceHolder.toString());
 
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
 
             //sets
-            int i = 1;
-            if (globalTransactionDO.getStatus() != null) {
-                ps.setInt(i++, globalTransactionDO.getStatus().getCode());
-            }
-            ps.setString(i, globalTransactionDO.getXid());
+            ps = conn.prepareStatement(updateSql);
+            ps.setInt(1, globalTransactionDO.getStatus().getCode());
+            ps.setString(2, globalTransactionDO.getXid());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -419,40 +411,26 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
 
     @Override
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        if (branchTransactionDO.getStatus() == null
-                && StringUtils.isBlank(branchTransactionDO.getApplicationData())) {
-            return true;
-        }
-
         // sets place holder
-        StringBuilder sb = new StringBuilder();
-        if (branchTransactionDO.getStatus() != null) {
-            sb.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
-        }
-        if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
-            sb.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
-        }
+        StringBuilder setsPlaceHolder = new StringBuilder();
+        setsPlaceHolder.append(ServerTableColumnsName.BRANCH_TABLE_STATUS).append(" = ?, ");
+        setsPlaceHolder.append(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA).append(" = ?, ");
 
-        // get update branch sql
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(branchTable, sb.toString());
+        // build update branch sql
+        String updateSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionSQL(branchTable, setsPlaceHolder.toString());
 
         Connection conn = null;
         PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
 
             //sets
-            int i = 0;
-            if (branchTransactionDO.getStatus() != null) {
-                ps.setInt(++i, branchTransactionDO.getStatus().getCode());
-            }
-            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
-                ps.setString(++i, branchTransactionDO.getApplicationData());
-            }
-            ps.setString(++i, branchTransactionDO.getXid());
-            ps.setLong(++i, branchTransactionDO.getBranchId());
+            ps = conn.prepareStatement(updateSql);
+            ps.setInt(1, branchTransactionDO.getStatus().getCode());
+            ps.setString(2, branchTransactionDO.getApplicationData());
+            ps.setString(3, branchTransactionDO.getXid());
+            ps.setLong(4, branchTransactionDO.getBranchId());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {

@@ -20,8 +20,6 @@ import io.seata.core.model.GlobalStatus;
 
 import java.util.List;
 
-import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
-
 /**
  * the transaction log store
  *
