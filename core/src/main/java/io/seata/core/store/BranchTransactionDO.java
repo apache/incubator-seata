@@ -15,10 +15,10 @@
  */
 package io.seata.core.store;
 
+import java.util.Date;
+
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
-
-import java.util.Date;
 
 /**
  * branch transaction data object
