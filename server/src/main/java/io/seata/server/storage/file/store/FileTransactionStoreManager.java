@@ -54,18 +54,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         super.logQueryLimit = logQueryLimit;
     }
 
-    /**
-     * Instantiates a new File transaction store manager.
-     *
-     * @param logStore      the log store
-     * @param logQueryLimit the log query limit
-     * @throws IOException the io exception
-     */
-    public FileTransactionStoreManager(LogStore logStore, int logQueryLimit) throws IOException {
-        super.logStore = logStore;
-        super.logQueryLimit = logQueryLimit;
-    }
-
     //endregion
 
     //region Override TransactionStoreManager
