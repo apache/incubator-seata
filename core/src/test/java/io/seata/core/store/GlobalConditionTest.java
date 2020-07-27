@@ -30,11 +30,11 @@ import static io.seata.core.store.GlobalTableField.TIMEOUT;
 /**
  * @author wang.liang
  */
-public class GlobalTransactionConditionTest {
+public class GlobalConditionTest {
 
     @Test
     public void test_isMatch() throws InterruptedException {
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
 
@@ -76,7 +76,7 @@ public class GlobalTransactionConditionTest {
 
     @Test
     public void test_doCount_doFilter() throws InterruptedException {
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
         condition.setTimeoutDataCondition();
@@ -139,7 +139,7 @@ public class GlobalTransactionConditionTest {
         int size = list0.size();
 
         // set sort fields
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
         condition.setSortFields(TIMEOUT, BEGIN_TIME, STATUS); // sort by multi fields
 
         // do sort
@@ -173,7 +173,7 @@ public class GlobalTransactionConditionTest {
         obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
         list0.add(obj);
 
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
         condition.setPageIndex(2);
         condition.setPageSize(3);
         List<GlobalTransactionDO> list1 = condition.doPaging(list0);
@@ -219,7 +219,7 @@ public class GlobalTransactionConditionTest {
         obj.setTimeout(0);
         list0.add(obj);
 
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
         // condition
         condition.setStatuses(GlobalStatus.Begin);
         // sort params
@@ -252,7 +252,7 @@ public class GlobalTransactionConditionTest {
 
     @Test
     public void test_getFromIndex_getToIndex() {
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
         condition.setPageIndex(2);
         condition.setPageSize(2);
 

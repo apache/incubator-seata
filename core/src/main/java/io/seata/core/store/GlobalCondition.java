@@ -37,7 +37,7 @@ import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_XID;
  *
  * @author wang.liang
  */
-public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactionModel> {
+public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     //region Fields
 
@@ -71,7 +71,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
     /**
      * Instantiates a new condition.
      */
-    public GlobalTransactionCondition() {
+    public GlobalCondition() {
     }
 
     /**
@@ -79,7 +79,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      *
      * @param statuses the statuses
      */
-    public GlobalTransactionCondition(GlobalStatus... statuses) {
+    public GlobalCondition(GlobalStatus... statuses) {
         this.statuses = statuses;
     }
 
@@ -89,7 +89,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      * @param status   the status
      * @param pageSize the page size
      */
-    public GlobalTransactionCondition(GlobalStatus status, int pageSize) {
+    public GlobalCondition(GlobalStatus status, int pageSize) {
         this(new GlobalStatus[]{status}, pageSize);
     }
 
@@ -100,7 +100,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      * @param pageIndex the page index
      * @param pageSize  the page size
      */
-    public GlobalTransactionCondition(GlobalStatus status, int pageIndex, int pageSize) {
+    public GlobalCondition(GlobalStatus status, int pageIndex, int pageSize) {
         this(new GlobalStatus[]{status}, pageIndex, pageSize);
     }
 
@@ -110,7 +110,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      * @param statuses the statuses
      * @param pageSize the page size
      */
-    public GlobalTransactionCondition(GlobalStatus[] statuses, int pageSize) {
+    public GlobalCondition(GlobalStatus[] statuses, int pageSize) {
         this.statuses = statuses;
         this.pageSize = pageSize;
     }
@@ -122,7 +122,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      * @param pageIndex the page index
      * @param pageSize  the page size
      */
-    public GlobalTransactionCondition(GlobalStatus[] statuses, int pageIndex, int pageSize) {
+    public GlobalCondition(GlobalStatus[] statuses, int pageIndex, int pageSize) {
         this.statuses = statuses;
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
@@ -133,7 +133,7 @@ public class GlobalTransactionCondition extends AbstractQuerier<GlobalTransactio
      *
      * @param overTimeAliveMills the over time alive mills
      */
-    public GlobalTransactionCondition(long overTimeAliveMills) {
+    public GlobalCondition(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 

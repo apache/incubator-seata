@@ -32,7 +32,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -255,7 +255,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition) {
+    public List<GlobalSession> readSession(GlobalCondition sessionCondition) {
         if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
         }

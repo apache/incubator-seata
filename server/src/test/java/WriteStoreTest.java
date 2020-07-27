@@ -23,7 +23,7 @@ import java.util.Map;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionManager;
@@ -116,7 +116,7 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public List<GlobalSession> findGlobalSessions(GlobalTransactionCondition condition) {
+                public List<GlobalSession> findGlobalSessions(GlobalCondition condition) {
                     List<GlobalSession> globalSessions = new ArrayList<>();
                     int begin = 10000;
                     int num = 1000;
