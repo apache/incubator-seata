@@ -22,7 +22,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.Disposable;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 
 /**
  * The interface Session manager.
@@ -138,7 +138,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @return the collection
      */
     default Collection<GlobalSession> allSessions(boolean withBranchSessions) {
-        GlobalTransactionCondition condition = new GlobalTransactionCondition();
+        GlobalCondition condition = new GlobalCondition();
         condition.setPageSize(0);
         return findGlobalSessions(condition, withBranchSessions);
     }
@@ -149,7 +149,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param condition the condition
      * @return the list
      */
-    default List<GlobalSession> findGlobalSessions(GlobalTransactionCondition condition) {
+    default List<GlobalSession> findGlobalSessions(GlobalCondition condition) {
         return findGlobalSessions(condition, true);
     }
 
@@ -160,7 +160,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param withBranchSessions the withBranchSessions
      * @return the list
      */
-    List<GlobalSession> findGlobalSessions(GlobalTransactionCondition condition, boolean withBranchSessions);
+    List<GlobalSession> findGlobalSessions(GlobalCondition condition, boolean withBranchSessions);
 
     /**
      * Query global sessions list by status list.
@@ -180,7 +180,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @return the list
      */
     default List<GlobalSession> findGlobalSessions(GlobalStatus[] statuses, boolean withBranchSessions) {
-        return findGlobalSessions(new GlobalTransactionCondition(statuses), withBranchSessions);
+        return findGlobalSessions(new GlobalCondition(statuses), withBranchSessions);
     }
 
     /**
@@ -190,7 +190,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @return the list
      */
     default List<GlobalSession> findGlobalSessions(long overTimeAliveMills) {
-        return findGlobalSessions(new GlobalTransactionCondition(overTimeAliveMills));
+        return findGlobalSessions(new GlobalCondition(overTimeAliveMills));
     }
 
     /**

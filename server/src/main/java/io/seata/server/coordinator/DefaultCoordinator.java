@@ -52,7 +52,7 @@ import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
@@ -215,7 +215,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void timeoutCheck() throws TransactionException {
         // Condition is: status = 1 and begin_time < System.currentTimeMillis() - timeout
-        GlobalTransactionCondition condition = new GlobalTransactionCondition(GlobalStatus.Begin);
+        GlobalCondition condition = new GlobalCondition(GlobalStatus.Begin);
         condition.setTimeoutDataCondition();
 
         Collection<GlobalSession> allSessions = SessionHolder.getSessionManager().findGlobalSessions(condition);
@@ -259,7 +259,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleRetryRollbacking() {
         // Condition is: status in (4, 5, 6, 7)
-        GlobalTransactionCondition condition = new GlobalTransactionCondition(GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying,
+        GlobalCondition condition = new GlobalCondition(GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying,
                 GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying);
 
         Collection<GlobalSession> rollbackingSessions = SessionHolder.getSessionManager().findGlobalSessions(condition);
@@ -293,7 +293,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleRetryCommitting() {
         // Condition is: status = 4 and begin_time < System.currentTimeMillis() - 2 * 6000
-        GlobalTransactionCondition condition = new GlobalTransactionCondition(GlobalStatus.Rollbacking);
+        GlobalCondition condition = new GlobalCondition(GlobalStatus.Rollbacking);
         condition.setOverTimeAliveMills(2 * 6000);
 
         Collection<GlobalSession> committingSessions = SessionHolder.getSessionManager().findGlobalSessions(condition);
@@ -328,7 +328,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleAsyncCommitting() {
         // Condition is: status = 8
-        GlobalTransactionCondition condition = new GlobalTransactionCondition(GlobalStatus.AsyncCommitting);
+        GlobalCondition condition = new GlobalCondition(GlobalStatus.AsyncCommitting);
 
         Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getSessionManager()
                 .findGlobalSessions(condition);

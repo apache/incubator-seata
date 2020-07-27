@@ -36,7 +36,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.SortOrder;
 import io.seata.core.store.SortParam;
@@ -175,7 +175,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     }
 
     @Override
-    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalCondition condition) {
         List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -213,7 +213,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     }
 
     @Override
-    public int countGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public int countGlobalTransactionDO(GlobalCondition condition) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -490,7 +490,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
         return max;
     }
 
-    private String buildWherePlaceHolder(GlobalTransactionCondition condition) {
+    private String buildWherePlaceHolder(GlobalCondition condition) {
         // where
         StringBuilder wherePlaceHolder = new StringBuilder();
         // status in (?, ?, ?)
@@ -531,7 +531,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
         return wherePlaceHolder.toString();
     }
 
-    private String buildOrderByPlaceHolder(GlobalTransactionCondition condition) {
+    private String buildOrderByPlaceHolder(GlobalCondition condition) {
         if (condition.hasSortParams()) {
             StringBuilder orderByPlaceHolder = new StringBuilder(" order by ");
             SortParam[] sortParams = condition.getSortParams();
@@ -553,7 +553,7 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
         }
     }
 
-    private int setConditionParameters(PreparedStatement ps, GlobalTransactionCondition condition) throws SQLException {
+    private int setConditionParameters(PreparedStatement ps, GlobalCondition condition) throws SQLException {
         int i = 0;
         long now = System.currentTimeMillis();
         // status in (?, ?, ?)

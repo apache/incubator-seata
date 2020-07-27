@@ -21,7 +21,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.server.session.BranchSession;
@@ -111,7 +111,7 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition, boolean withBranchSessions) {
+    public List<GlobalSession> readSession(GlobalCondition sessionCondition, boolean withBranchSessions) {
         if (sessionCondition.getPageSize() <= 0) {
             sessionCondition.setPageSize(logQueryLimit <= 0 ? DEFAULT_LOG_QUERY_LIMIT : logQueryLimit);
         }

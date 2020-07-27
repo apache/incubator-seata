@@ -25,7 +25,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BaseModel;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
@@ -241,7 +241,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     }
 
     @Override
-    public List<GlobalSession> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public List<GlobalSession> queryGlobalTransactionDO(GlobalCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
 
         // where
@@ -261,7 +261,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     }
 
     @Override
-    public int countGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public int countGlobalTransactionDO(GlobalCondition condition) {
         // TODO:
         int pageIndexBak = condition.getPageIndex();
         int pageSizeBak = condition.getPageSize();
@@ -515,7 +515,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
 
     private boolean findTimeoutAndSave() throws IOException {
         List<GlobalSession> globalSessionsOverMaxTimeout = this.queryGlobalTransactionDO(
-                new GlobalTransactionCondition(MAX_TRX_TIMEOUT_MILLS));
+                new GlobalCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;
         }
