@@ -49,7 +49,7 @@ public interface LogStore {
      * @param condition the condition
      * @return the list
      */
-    List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalTransactionCondition condition);
+    List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalCondition condition);
 
     /**
      * Query global transaction do list.
@@ -58,7 +58,7 @@ public interface LogStore {
      * @return the list
      */
     default List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalStatus... statuses) {
-        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses));
+        return this.queryGlobalTransactionDO(new GlobalCondition(statuses));
     }
 
     /**
@@ -69,7 +69,7 @@ public interface LogStore {
      * @return the list
      */
     default List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalStatus[] statuses, int limit) {
-        return this.queryGlobalTransactionDO(new GlobalTransactionCondition(statuses, limit));
+        return this.queryGlobalTransactionDO(new GlobalCondition(statuses, limit));
     }
 
     /**
@@ -78,7 +78,7 @@ public interface LogStore {
      * @param condition the condition
      * @return the count
      */
-    int countGlobalTransactionDO(GlobalTransactionCondition condition);
+    int countGlobalTransactionDO(GlobalCondition condition);
 
     /**
      * Count global transaction do.
@@ -87,7 +87,7 @@ public interface LogStore {
      * @return the list
      */
     default int countGlobalTransactionDO(GlobalStatus... statuses) {
-        return this.countGlobalTransactionDO(new GlobalTransactionCondition(statuses));
+        return this.countGlobalTransactionDO(new GlobalCondition(statuses));
     }
 
     /**

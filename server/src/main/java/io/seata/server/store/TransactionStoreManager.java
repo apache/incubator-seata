@@ -15,7 +15,7 @@
  */
 package io.seata.server.store;
 
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.server.session.GlobalSession;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public interface TransactionStoreManager {
      * @param sessionCondition the session condition
      * @return the list
      */
-    List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition);
+    List<GlobalSession> readSession(GlobalCondition sessionCondition);
 
     /**
      * Shutdown.
