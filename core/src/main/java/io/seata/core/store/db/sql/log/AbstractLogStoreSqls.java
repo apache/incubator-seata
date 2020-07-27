@@ -97,7 +97,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
      */
     public static final String DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID = "delete from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
-            + " and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_XID.

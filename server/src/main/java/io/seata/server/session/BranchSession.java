@@ -421,6 +421,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public byte[] encode() {
+
         byte[] resourceIdBytes = resourceId != null ? resourceId.getBytes() : null;
 
         byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;

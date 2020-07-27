@@ -80,8 +80,14 @@ public class LogStoreDataBaseDAO implements LogStore {
      */
     protected String branchTable;
 
+    /**
+     * The db type.
+     */
     private String dbType;
 
+    /**
+     * The transaction name column size.
+     */
     private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
 
     /**

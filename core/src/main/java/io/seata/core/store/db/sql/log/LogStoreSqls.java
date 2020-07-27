@@ -32,7 +32,7 @@ public interface LogStoreSqls {
     /**
      * Get update global transaction sql string.
      *
-     * @param globalTable the global table
+     * @param globalTable     the global table
      * @param setsPlaceHolder the sets place holder
      * @return the string
      */
@@ -90,7 +90,7 @@ public interface LogStoreSqls {
     /**
      * Get update branch transaction sql string.
      *
-     * @param branchTable the branch table
+     * @param branchTable     the branch table
      * @param setsPlaceHolder the sets place holder
      * @return the string
      */
