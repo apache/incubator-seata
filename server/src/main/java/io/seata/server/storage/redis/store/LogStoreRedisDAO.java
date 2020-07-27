@@ -117,7 +117,7 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
 
         if (CollectionUtils.isNotEmpty(keys)) {
             List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>();
-            // where
+            // get and match
             for (String globalKey : keys) {
                 GlobalTransactionDO globalTransactionDO = JSON.parseObject(jedis.get(globalKey), GlobalTransactionDO.class);
                 if (condition.isMatch(globalTransactionDO)) {
@@ -125,9 +125,7 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
                 }
             }
             // order by
-            if (!globalTransactionDOs.isEmpty()) {
-                globalTransactionDOs = condition.doSort(globalTransactionDOs);
-            }
+            globalTransactionDOs = condition.doSort(globalTransactionDOs);
             return globalTransactionDOs;
         } else {
             return null;

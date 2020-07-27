@@ -22,11 +22,11 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.session.DataBaseSessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
@@ -535,7 +535,7 @@ public class DataBaseSessionManagerTest {
         }
 
 
-        Collection<GlobalSession> rets = sessionManager.findGlobalSessions(new SessionCondition( GlobalStatus.Begin));
+        Collection<GlobalSession> rets = sessionManager.findGlobalSessions(new GlobalTransactionCondition( GlobalStatus.Begin));
         Assertions.assertNotNull(rets);
         Assertions.assertEquals(1, rets.size());
 

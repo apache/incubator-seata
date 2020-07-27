@@ -29,8 +29,6 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.model.BranchStatus;
@@ -68,11 +66,6 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
      * The transaction name default size is 128
      */
     private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
-
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     //endregion
 

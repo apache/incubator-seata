@@ -17,10 +17,10 @@ package io.seata.server.storage.redis.store;
 
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
@@ -102,7 +102,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     @Override
-    public List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions) {
+    public GlobalSession readSession(long transactionId, boolean withBranchSessions) {
+        if (super.logStore != null) {
+            return super.readSession(transactionId, withBranchSessions);
+        } else {
+            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+                return this.create(jedis).readSession(transactionId, withBranchSessions);
+            }
+        }
+    }
+
+    @Override
+    public List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition, boolean withBranchSessions) {
         if (super.logStore != null) {
             return super.readSession(sessionCondition, withBranchSessions);
         } else {

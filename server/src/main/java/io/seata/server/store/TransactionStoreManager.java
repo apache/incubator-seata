@@ -15,9 +15,9 @@
  */
 package io.seata.server.store;
 
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.LogStore;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
 
 import java.util.List;
 
@@ -82,7 +82,18 @@ public interface TransactionStoreManager {
      * @param sessionCondition the session condition
      * @return the list
      */
-    List<GlobalSession> readSession(SessionCondition sessionCondition, boolean withBranchSessions);
+    default List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition) {
+        return readSession(sessionCondition, true);
+    }
+
+    /**
+     * Read session by condition.
+     *
+     * @param sessionCondition   the session condition
+     * @param withBranchSessions the withBranchSessions
+     * @return the list
+     */
+    List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition, boolean withBranchSessions);
 
     /**
      * Shutdown.
