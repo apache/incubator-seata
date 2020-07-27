@@ -16,7 +16,7 @@
 package io.seata.server.storage.redis.store;
 
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.core.store.LogStore;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.redis.JedisPooledFactory;
@@ -110,7 +110,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition, boolean withBranchSessions) {
+    public List<GlobalSession> readSession(GlobalCondition sessionCondition, boolean withBranchSessions) {
         if (super.logStore != null) {
             return super.readSession(sessionCondition, withBranchSessions);
         } else {

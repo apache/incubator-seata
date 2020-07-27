@@ -20,7 +20,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionCondition;
+import io.seata.core.store.GlobalCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
@@ -103,7 +103,7 @@ public class LogStoreRedisDAO extends AbstractLogStore {
     }
 
     @Override
-    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalCondition condition) {
         Set<String> keys = new HashSet<>();
         String cursor = INITIAL_CURSOR;
         ScanParams params = new ScanParams();
@@ -134,7 +134,7 @@ public class LogStoreRedisDAO extends AbstractLogStore {
     }
 
     @Override
-    public int countGlobalTransactionDO(GlobalTransactionCondition condition) {
+    public int countGlobalTransactionDO(GlobalCondition condition) {
         // TODO:
         return 0;
     }
