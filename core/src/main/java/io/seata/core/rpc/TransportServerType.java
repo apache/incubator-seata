@@ -13,31 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
-
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+package io.seata.core.rpc;
 
 /**
- * The interface Register check auth handler.
+ * The enum Transport server type.
  *
  * @author slievrly
  */
-public interface RegisterCheckAuthHandler {
+public enum TransportServerType {
+    /**
+     * Native transport server type.
+     */
+    NATIVE("native"),
+    /**
+     * Nio transport server type.
+     */
+    NIO("nio");
 
     /**
-     * Reg transaction manager check auth boolean.
-     *
-     * @param request the request
-     * @return the boolean
+     * The Name.
      */
-    boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
+    public final String name;
 
-    /**
-     * Reg resource manager check auth boolean.
-     *
-     * @param request the request
-     * @return the boolean
-     */
-    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
+    TransportServerType(String name) {
+        this.name = name;
+    }
 }

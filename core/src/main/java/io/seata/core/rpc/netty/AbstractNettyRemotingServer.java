@@ -23,11 +23,11 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -35,54 +35,80 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 
 /**
- * The type Rpc remoting server.
+ * The type abstract remoting server.
  *
- * @author slievrly
- * @author xingfudeshi@gmail.com
  * @author zhangchenghui.dev@gmail.com
+ * @since 1.3.0
  */
-public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
+public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting implements RemotingServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingServer.class);
 
-    private final RpcServerBootstrap serverBootstrap;
+    private final NettyServerBootstrap serverBootstrap;
 
-    private TransactionMessageHandler transactionMessageHandler;
+    @Override
+    public void init() {
+        super.init();
+        serverBootstrap.start();
+    }
 
-    /**
-     * Instantiates a new Rpc remoting server.
-     *
-     * @param messageExecutor   the message executor
-     * @param nettyServerConfig the netty server config
-     */
-    public AbstractRpcRemotingServer(final ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
+    public AbstractNettyRemotingServer(ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
         super(messageExecutor);
-        serverBootstrap = new RpcServerBootstrap(nettyServerConfig);
+        serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
+        serverBootstrap.setChannelHandlers(new ServerHandler());
     }
 
-    /**
-     * Sets transactionMessageHandler.
-     *
-     * @param transactionMessageHandler the transactionMessageHandler
-     */
-    public void setHandler(TransactionMessageHandler transactionMessageHandler) {
-        this.transactionMessageHandler = transactionMessageHandler;
+    @Override
+    public Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException {
+        Channel channel = ChannelManager.getChannel(resourceId, clientId);
+        if (channel == null) {
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
-    public TransactionMessageHandler getTransactionMessageHandler() {
-        return transactionMessageHandler;
+    @Override
+    public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
+        if (channel == null) {
+            throw new RuntimeException("client is not connected");
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
+    @Override
+    public void sendAsyncRequest(Channel channel, Object msg) {
+        if (channel == null) {
+            throw new RuntimeException("client is not connected");
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        super.sendAsync(channel, rpcMessage);
+    }
 
-    /**
-     * Sets channel handlers.
-     *
-     * @param handlers the handlers
-     */
-    public void setChannelHandlers(ChannelHandler... handlers) {
-        serverBootstrap.setChannelHandlers(handlers);
+    @Override
+    public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
+        Channel clientChannel = channel;
+        if (!(msg instanceof HeartbeatMessage)) {
+            clientChannel = ChannelManager.getSameClientChannel(channel);
+        }
+        if (clientChannel != null) {
+            RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
+                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
+                : ProtocolConstants.MSGTYPE_RESPONSE);
+            super.sendAsync(clientChannel, rpcMsg);
+        } else {
+            throw new RuntimeException("channel is error.");
+        }
+    }
+
+    @Override
+    public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
+        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
+        this.processorTable.put(messageType, pair);
     }
 
     /**
@@ -101,12 +127,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      */
     public int getListenPort() {
         return serverBootstrap.getListenPort();
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        serverBootstrap.start();
     }
 
     @Override
@@ -132,21 +152,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
         ctx.disconnect();
         ctx.close();
-    }
-
-    @Override
-    public void destroyChannel(String serverAddress, Channel channel) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("will destroy channel:{},address:{}", channel, serverAddress);
-        }
-        channel.disconnect();
-        channel.close();
-    }
-
-    @Override
-    public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
-        Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);
-        this.processorTable.put(messageType, pair);
     }
 
     /**
@@ -265,5 +270,4 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
 
     }
-
 }

@@ -25,7 +25,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
  *
  * @author hanwen created at 2019-01-25
  */
-public class AbstractMySQLRecognizerTest {
+public abstract class AbstractRecognizerTest {
 
     /**
      * Gets sql statement.
@@ -34,8 +34,10 @@ public class AbstractMySQLRecognizerTest {
      * @return the sql statement
      */
     public SQLStatement getSQLStatement(String sql) {
-        List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
+        List<SQLStatement> stats = SQLUtils.parseStatements(sql, getDbType());
         return stats.get(0);
     }
+
+    public abstract String getDbType();
 
 }

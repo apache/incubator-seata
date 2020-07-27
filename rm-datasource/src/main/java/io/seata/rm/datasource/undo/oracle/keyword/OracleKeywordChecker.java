@@ -511,12 +511,6 @@ public class OracleKeywordChecker implements KeywordChecker {
         return true;
     }
 
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
-        //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
-    }
-
     private static boolean isUppercase(String fieldOrTableName) {
         if (fieldOrTableName == null) {
             return false;
