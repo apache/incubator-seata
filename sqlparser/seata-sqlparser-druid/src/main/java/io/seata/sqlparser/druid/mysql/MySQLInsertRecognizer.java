@@ -31,10 +31,12 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -106,24 +108,28 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     }
 
     @Override
-    public List<List<Object>> getInsertRows() {
+    public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
-            for (SQLExpr expr : valuesClause.getValues()) {
+            for (int i = 0, len = exprs.size(); i < len; i++) {
+                SQLExpr expr = exprs.get(i);
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
-                    row.add(((SQLValuableExpr)expr).getValue());
+                    row.add(((SQLValuableExpr) expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
-                    row.add(((SQLVariantRefExpr)expr).getName());
+                    row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
-                    row.add(new SqlMethodExpr());
+                    row.add(SqlMethodExpr.get());
                 } else {
-                    throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    if (primaryKeyIndex.contains(i)) {
+                        throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                    }
+                    row.add(NotPlaceholderExpr.get());
                 }
             }
         }

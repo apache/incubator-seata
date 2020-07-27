@@ -25,10 +25,11 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.invoker.ServiceInvoker;
-import io.seata.saga.engine.pcext.InterceptibleStateHandler;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
+import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.CompensateSubStateMachineState;
@@ -37,8 +38,6 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.ServiceTaskState;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import io.seata.saga.statelang.domain.TaskState;
-import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,72 +49,11 @@ import org.springframework.util.StringUtils;
  *
  * @author lorne.cl
  */
-public class ServiceTaskStateHandler implements StateHandler, InterceptibleStateHandler {
+public class ServiceTaskStateHandler implements StateHandler, InterceptableStateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskStateHandler.class);
 
-    private List<StateHandlerInterceptor> interceptors;
-
-    public static void handleException(ProcessContext context, AbstractTaskState state, Throwable e) {
-        List<TaskState.ExceptionMatch> catches = state.getCatches();
-        if (catches != null && catches.size() > 0) {
-            for (TaskState.ExceptionMatch exceptionMatch : catches) {
-
-                List<String> exceptions = exceptionMatch.getExceptions();
-                List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
-                if (exceptions != null && exceptions.size() > 0) {
-
-                    if (exceptionClasses == null) {
-                        synchronized (exceptionMatch) {
-                            exceptionClasses = exceptionMatch.getExceptionClasses();
-                            if (exceptionClasses == null) {
-
-                                exceptionClasses = new ArrayList<>(exceptions.size());
-                                for (String expStr : exceptions) {
-
-                                    Class<? extends Exception> expClass = null;
-                                    try {
-                                        expClass = (Class<? extends Exception>) ServiceTaskStateHandler.class
-                                                .getClassLoader().loadClass(expStr);
-                                    } catch (Exception e1) {
-
-                                        LOGGER.warn("Cannot Load Exception Class by getClass().getClassLoader()", e1);
-
-                                        try {
-                                            expClass = (Class<? extends Exception>) Thread.currentThread()
-                                                    .getContextClassLoader().loadClass(expStr);
-                                        } catch (Exception e2) {
-                                            LOGGER.warn(
-                                                    "Cannot Load Exception Class by Thread.currentThread()"
-                                                            + ".getContextClassLoader()",
-                                                    e2);
-                                        }
-                                    }
-
-                                    if (expClass != null) {
-                                        exceptionClasses.add(expClass);
-                                    }
-                                }
-                                exceptionMatch.setExceptionClasses(exceptionClasses);
-                            }
-                        }
-                    }
-
-                    for (Class<? extends Exception> expClass : exceptionClasses) {
-                        if (expClass.isAssignableFrom(e.getClass())) {
-                            ((HierarchicalProcessContext) context).setVariableLocally(
-                                    DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, exceptionMatch.getNext());
-                            return;
-                        }
-                    }
-
-                }
-            }
-        }
-
-        LOGGER.error("Task execution failed and no catches configured");
-        ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH, true);
-    }
+    private List<StateHandlerInterceptor> interceptors = new ArrayList<>();
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
@@ -181,7 +119,7 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
             ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
-            handleException(context, state, e);
+            EngineUtils.handleException(context, state, e);
         }
 
     }
@@ -237,6 +175,13 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
     @Override
     public List<StateHandlerInterceptor> getInterceptors() {
         return interceptors;
+    }
+
+    @Override
+    public void addInterceptor(StateHandlerInterceptor interceptor) {
+        if (interceptors != null && !interceptors.contains(interceptor)) {
+            interceptors.add(interceptor);
+        }
     }
 
     public void setInterceptors(List<StateHandlerInterceptor> interceptors) {

@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource.sql.druid.postgresql;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
@@ -26,8 +30,6 @@ import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -108,7 +110,7 @@ public class PostgresqlUpdateRecognizerTest {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
-            public ArrayList<Object>[] getParameters() {
+            public Map<Integer, ArrayList<Object>> getParameters() {
                 return null;
             }
         }, new ArrayList<>());

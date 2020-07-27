@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.channel.Channel;
 import io.seata.common.util.NetUtil;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * The type Version.
@@ -31,7 +32,9 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    public static final String CURRENT = "1.3.0-SNAPSHOT";
+    private static final String CURRENT = "1.4.0-SNAPSHOT";
+    private static final String VERSION_0_7_1 = "0.7.1";
+    private static final int MAX_VERSION_DOT = 3;
 
     /**
      * The constant VERSION_MAP.
@@ -40,6 +43,10 @@ public class Version {
 
     private Version() {
 
+    }
+
+    public static String getCurrent() {
+        return CURRENT;
     }
 
     /**
@@ -69,8 +76,40 @@ public class Version {
      * @return the string
      * @throws IncompatibleVersionException the incompatible version exception
      */
-    public static String checkVersion(String version) throws IncompatibleVersionException {
-        // TODO: check
-        return version;
+    public static void checkVersion(String version) throws IncompatibleVersionException {
+        long current = convertVersion(CURRENT);
+        long clientVersion = convertVersion(version);
+        long divideVersion = convertVersion(VERSION_0_7_1);
+        if ((current > divideVersion && clientVersion < divideVersion) || (current < divideVersion && clientVersion > divideVersion)) {
+            throw new IncompatibleVersionException("incompatible client version:" + version);
+        }
+    }
+
+    private static long convertVersion(String version) throws IncompatibleVersionException {
+        String[] parts = StringUtils.split(version, '.');
+        long result = 0L;
+        int i = 1;
+        int size = parts.length;
+        if (size > MAX_VERSION_DOT + 1) {
+            throw new IncompatibleVersionException("incompatible version format:" + version);
+        }
+        size = MAX_VERSION_DOT + 1;
+        for (String part : parts) {
+            if (StringUtils.isNumeric(part)) {
+                result += calculatePartValue(part, size, i);
+            } else {
+                String[] subParts = StringUtils.split(part, '-');
+                if (StringUtils.isNumeric(subParts[0])) {
+                    result += calculatePartValue(subParts[0], size, i);
+                }
+            }
+
+            i++;
+        }
+        return result;
+    }
+
+    private static long calculatePartValue(String partNumeric, int size, int index) {
+        return Long.parseLong(partNumeric) * Double.valueOf(Math.pow(100, size - index)).longValue();
     }
 }

@@ -55,7 +55,7 @@ public class LogStoreDataBaseDAOTest {
         logStoreDataBaseDAO = new LogStoreDataBaseDAO(dataSource);
         logStoreDataBaseDAO.setDbType("h2");
         logStoreDataBaseDAO.setGlobalTable("global_table");
-        logStoreDataBaseDAO.setBrachTable("branch_table");
+        logStoreDataBaseDAO.setBranchTable("branch_table");
 
         prepareTable(dataSource);
     }

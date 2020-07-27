@@ -20,7 +20,7 @@ Naturally, data consistency will be guaranteed by the local transaction.
 
 ![Monolithic App](https://cdn.nlark.com/lark/0/2018/png/18862/1545296770244-4cedf37e-9dc6-4fc0-a97f-f4240b9d8640.png) 
 
-Things have changed in microservices architecture. The 3 modules mentioned above are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by the local transaction. 
+Things have changed in a microservices architecture. The 3 modules mentioned above are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by the local transaction. 
 
 **But how about the whole business logic scope?**
 
@@ -50,7 +50,7 @@ A typical lifecycle of Seata managed distributed transaction:
 
 1. TM asks TC to begin a new global transaction. TC generates an XID representing the global transaction.
 2. XID is propagated through microservices' invoke chain.
-3. RM register local transaction as a branch of the corresponding global transaction of XID to TC. 
+3. RM registers local transaction as a branch of the corresponding global transaction of XID to TC. 
 4. TM asks TC for committing or rollbacking the corresponding global transaction of XID.
 5. TC drives all branch transactions under the corresponding global transaction of XID to finish branch committing or rollbacking.
 
@@ -68,20 +68,20 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ##### Alibaba
 
-- **TXC**: Taobao Transaction Constructor. Alibaba middleware team start this project since 2014 to meet distributed transaction problem caused by application architecture change from monolithic to microservices.
+- **TXC**: Taobao Transaction Constructor. Alibaba middleware team started this project since 2014 to meet the distributed transaction problems caused by application architecture change from monolithic to microservices.
 - **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
-- **Fescar**: we start the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
+- **Fescar**: we started the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
 
 
 ##### Seata Community
 
-- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be renamed to Seata.
+- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction, and Fescar be renamed to Seata.
 
 
 
 ## Maven dependency
 ```xml
-<seata.version>1.2.0</seata.version>
+<seata.version>1.3.0</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>

@@ -132,15 +132,15 @@ public class TransactionalTemplate {
 
 
 
-    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
+    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
         //roll back
-        if (txInfo != null && txInfo.rollbackOn(ex)) {
+        if (txInfo != null && txInfo.rollbackOn(originalException)) {
             try {
-                rollbackTransaction(tx, ex);
+                rollbackTransaction(tx, originalException);
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.RollbackFailure, ex);
+                        TransactionalExecutor.Code.RollbackFailure, originalException);
             }
         } else {
             // not roll back on this exception, so commit
@@ -160,13 +160,13 @@ public class TransactionalTemplate {
         }
     }
 
-    private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
+    private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         tx.rollback();
         triggerAfterRollback();
         // 3.1 Successfully rolled back
         throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, ex);
+            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {

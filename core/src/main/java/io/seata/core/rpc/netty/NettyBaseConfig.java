@@ -32,6 +32,8 @@ import io.netty.util.internal.PlatformDependent;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportProtocolType;
+import io.seata.core.rpc.TransportServerType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +116,7 @@ public class NettyBaseConfig {
         String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
-        } else if (null != WorkThreadMode.getModeByName(workerThreadSize)) {
+        } else if (WorkThreadMode.getModeByName(workerThreadSize) != null) {
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
