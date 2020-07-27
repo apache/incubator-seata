@@ -17,6 +17,10 @@ package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -32,16 +36,21 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+
 /**
  * TCC Interceptor
  *
  * @author zhangsen
  */
-public class TccActionInterceptor implements MethodInterceptor {
+public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+
+    private boolean disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                                                                 DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     /**
      * remoting bean info
@@ -65,7 +74,7 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        if (!RootContext.inGlobalTransaction()) {
+        if (!RootContext.inGlobalTransaction() || disable) {
             //not in transaction
             return invocation.proceed();
         }
@@ -145,6 +154,15 @@ public class TccActionInterceptor implements MethodInterceptor {
         } else {
             //jdk/cglib proxy
             return SpringProxyUtils.getTargetInterface(proxyBean);
+        }
+    }
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                disable, event.getNewValue());
+            disable = Boolean.parseBoolean(event.getNewValue().trim());
         }
     }
 }

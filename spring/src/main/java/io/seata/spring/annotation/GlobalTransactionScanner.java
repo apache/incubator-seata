@@ -18,8 +18,11 @@ package io.seata.spring.annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationCache;
@@ -57,8 +60,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware,
-    DisposableBean {
+    implements ConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,8 +80,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
-    private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
+    private boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private final FailureHandler failureHandlerHook;
 
@@ -195,9 +198,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        if (disableGlobalTransaction) {
-            return bean;
-        }
         try {
             synchronized (PROXYED_SET) {
                 if (PROXYED_SET.contains(beanName)) {
@@ -208,6 +208,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
                     //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
+                    ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                        (ConfigurationChangeListener)interceptor);
                 } else {
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
@@ -285,18 +287,34 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     public void afterPropertiesSet() {
+        ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+            (ConfigurationChangeListener)this);
         if (disableGlobalTransaction) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Global transaction is disabled.");
             }
             return;
         }
-        initClient();
+        if (initialized.compareAndSet(false, true)) {
+            initClient();
+        }
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.setBeanFactory(applicationContext);
+    }
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
+            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                disableGlobalTransaction, event.getNewValue());
+            disableGlobalTransaction = Boolean.parseBoolean(event.getNewValue().trim());
+            if (!disableGlobalTransaction && initialized.compareAndSet(false, true)) {
+                initClient();
+            }
+        }
     }
 }
