@@ -132,7 +132,7 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
 
     //region Load branch list
 
-    protected <G extends GlobalTransactionDO> GlobalSession loadBranchs(G globalTransactionDO, boolean withBranchSessions) {
+    protected GlobalSession loadBranchs(GlobalTransactionDO globalTransactionDO, boolean withBranchSessions) {
         if (globalTransactionDO == null) {
             return null;
         }
