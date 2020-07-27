@@ -72,7 +72,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
-    private String retryStrategy = RETRY_STRATEGY;
+    private String retryStrategy;
 
     private RetryStrategyInfo retryStrategyInfo;
 
@@ -226,7 +226,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      * @param retryStrategy the retry strategy
      */
     public void setRetryStrategy(String retryStrategy) {
+        if (StringUtils.equals(this.retryStrategy, retryStrategy)) {
+            return;
+        }
         this.retryStrategy = retryStrategy;
+        this.retryStrategyInfo = null;
     }
 
     /**
@@ -235,7 +239,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      * @return the retry strategy info
      */
     public RetryStrategyInfo getRetryStrategyInfo() {
-        if (retryStrategyInfo == null && StringUtils.isNotBlank(retryStrategy)) {
+        if (retryStrategyInfo == null) {
+            String retryStrategy = this.retryStrategy;
+            if (StringUtils.isBlank(retryStrategy)) {
+                retryStrategy = RETRY_STRATEGY;
+            }
             retryStrategyInfo = new RetryStrategyInfo(retryStrategy);
         }
         return retryStrategyInfo;
@@ -354,9 +362,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     public boolean isExpired(long globalTransactionBeginTime) {
         try {
             RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
-            return retryStrategy != null ? retryStrategy.isExpired(globalTransactionBeginTime) : false;
+            return retryStrategy.isExpired(globalTransactionBeginTime);
         } catch (Exception e) {
-            LOGGER.error("isExpired error: xid=" + xid + " branchId=" + branchId, e);
+            LOGGER.error("isExpired error: xid={} branchId={}", xid, branchId, e);
             return false;
         }
     }
@@ -371,9 +379,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     public boolean isReachedMaxRetryCount(int branchRetryCount) {
         try {
             RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
-            return retryStrategy != null ? retryStrategy.isReachedMaxRetryCount(branchRetryCount) : false;
+            return retryStrategy.isReachedMaxRetryCount(branchRetryCount);
         } catch (Exception e) {
-            LOGGER.error("isReachedMaxRetryCount error: xid=" + xid + " branchId=" + branchId, e);
+            LOGGER.error("isReachedMaxRetryCount error: xid={} branchId={}", xid, branchId, e);
             return false;
         }
     }
@@ -390,7 +398,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             RetryStrategyInfo retryStrategy = getRetryStrategyInfo();
             return retryStrategy != null ? retryStrategy.nextRetryInterval(branchRetryCount) : 0L;
         } catch (Exception e) {
-            LOGGER.error("nextRetryInterval error: xid=" + xid + " branchId=" + branchId, e);
+            LOGGER.error("nextRetryInterval error: xid={} branchId={}", xid, branchId, e);
             return 0L;
         }
     }

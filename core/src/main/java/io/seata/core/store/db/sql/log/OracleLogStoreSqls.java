@@ -48,7 +48,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + "   from " + GLOBAL_TABLE_PLACEHOLD
             + "  where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
             + "  order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
-            + ") A"
+            + " ) A"
             + " where ROWNUM <= ?";
 
     /**

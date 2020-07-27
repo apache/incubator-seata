@@ -146,7 +146,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private RemotingServer remotingServer;
 
-    private Core core;
+    private DefaultCore core;
 
     private EventBus eventBus = EventBusManager.get();
 

@@ -106,6 +106,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
         //new global session for update
         GlobalSession updateSession = new GlobalSession();
         updateSession.setXid(session.getXid());
+        // update fields
         updateSession.setStatus(status);
         updateSession.setSuspendedEndTime(suspendedEndTime);
         updateSession.setStoppedReason(stoppedReason);
@@ -154,6 +155,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
         updateBranchSession.setXid(branchSession.getXid());
         updateBranchSession.setBranchId(branchSession.getBranchId());
         updateBranchSession.setBranchType(branchSession.getBranchType());
+        // update fields
         updateBranchSession.setStatus(status);
         updateBranchSession.setApplicationData(applicationData);
         updateBranchSession.setRetryCount(retryCount);
