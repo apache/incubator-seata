@@ -29,14 +29,12 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.AbstractLogStore;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.core.store.LogStore;
 import io.seata.core.store.SortOrder;
 import io.seata.core.store.SortParam;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
@@ -51,7 +49,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABL
  *
  * @author zhangsen
  */
-public class LogStoreDataBaseDAO implements LogStore {
+public class LogStoreDataBaseDAO extends AbstractLogStore {
 
     //region Constants
 
@@ -65,11 +63,6 @@ public class LogStoreDataBaseDAO implements LogStore {
      * The transaction name default size is 128
      */
     private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
-
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     //endregion
 

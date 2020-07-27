@@ -35,6 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.seata.common.exception.StoreException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.store.GlobalTransactionCondition;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -300,12 +301,17 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     @Override
-    public GlobalSession readSession(String xid) {
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
         throw new StoreException("unsupport for read from file, xid:" + xid);
     }
 
     @Override
-    public List<GlobalSession> readSession(SessionCondition sessionCondition) {
+    public GlobalSession readSession(long transactionId, boolean withBranchSessions) {
+        throw new StoreException("unsupport for read from file, transactionId:" + transactionId);
+    }
+
+    @Override
+    public List<GlobalSession> readSession(GlobalTransactionCondition sessionCondition, boolean withBranchSessions) {
         throw new StoreException("unsupport for read from file");
     }
 
