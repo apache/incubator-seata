@@ -18,7 +18,9 @@ package io.seata.tm;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -43,6 +45,7 @@ import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import java.util.concurrent.TimeoutException;
 
 import static io.seata.core.constants.ConfigurationKeys.STORE_MODE;
+import static io.seata.core.constants.ConfigurationKeys.TX_SERVICE_GROUP;
 
 /**
  * The type Default transaction manager.
@@ -52,13 +55,22 @@ import static io.seata.core.constants.ConfigurationKeys.STORE_MODE;
 @LoadLevel(name = "defaultTM")
 public class DefaultTransactionManager implements TransactionManager {
 
-    private TransactionManager sameStoreTM;
+    private static final TransactionManager SAME_STORE_TM;
+    private static final String APPLICATION_ID;
+    private static final String TRANSACTION_SERVICE_GROUP;
 
-    public DefaultTransactionManager() {
-        String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
+    static {
+        Configuration config = ConfigurationFactory.getInstance();
+        String storeMode = config.getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            sameStoreTM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore",
+            SAME_STORE_TM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
+            APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);
+            TRANSACTION_SERVICE_GROUP = config.getConfig(TX_SERVICE_GROUP);
+        } else {
+            SAME_STORE_TM = null;
+            APPLICATION_ID = null;
+            TRANSACTION_SERVICE_GROUP = null;
         }
     }
 
@@ -66,8 +78,14 @@ public class DefaultTransactionManager implements TransactionManager {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
-        if (sameStoreTM != null) {
-           return sameStoreTM.begin(applicationId, transactionServiceGroup, name, timeout);
+        if (SAME_STORE_TM != null) {
+            if (StringUtils.isBlank(applicationId)) {
+               applicationId = APPLICATION_ID;
+            }
+            if (StringUtils.isBlank(transactionServiceGroup)) {
+                transactionServiceGroup = TRANSACTION_SERVICE_GROUP;
+            }
+           return SAME_STORE_TM.begin(applicationId, transactionServiceGroup, name, timeout);
         }
 
         GlobalBeginRequest request = new GlobalBeginRequest();
@@ -98,8 +116,8 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
-        if (sameStoreTM != null) {
-            return sameStoreTM.getStatus(xid);
+        if (SAME_STORE_TM != null) {
+            return SAME_STORE_TM.getStatus(xid);
         }
 
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
@@ -110,8 +128,8 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
-        if (sameStoreTM != null) {
-            return sameStoreTM.globalReport(xid, globalStatus);
+        if (SAME_STORE_TM != null) {
+            return SAME_STORE_TM.globalReport(xid, globalStatus);
         }
 
         GlobalReportRequest globalReport = new GlobalReportRequest();

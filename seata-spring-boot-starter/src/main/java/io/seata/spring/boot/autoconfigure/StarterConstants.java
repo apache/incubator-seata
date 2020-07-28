@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure;
 import java.util.HashMap;
 
 import io.seata.spring.boot.autoconfigure.properties.client.DbStoreProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.FileStoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RedisStoreProperties;
@@ -82,6 +83,7 @@ public class StarterConstants {
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
 
     public static final String STORE_PREFIX = SEATA_PREFIX + ".store";
+    public static final String FILE_STORE_PREFIX = STORE_PREFIX + ".file";
     public static final String DB_STORE_PREFIX = STORE_PREFIX + ".db";
     public static final String REDIS_STORE_PREFIX = STORE_PREFIX + ".redis";
 
@@ -117,6 +119,7 @@ public class StarterConstants {
             put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
 
             put(STORE_PREFIX, StoreProperties.class);
+            put(FILE_STORE_PREFIX, FileStoreProperties.class);
             put(DB_STORE_PREFIX, DbStoreProperties.class);
             put(REDIS_STORE_PREFIX, RedisStoreProperties.class);
         }

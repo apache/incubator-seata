@@ -18,7 +18,9 @@ package io.seata.rm;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -51,14 +53,18 @@ public abstract class AbstractResourceManager implements ResourceManager {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceManager.class);
 
     protected static final ResourceManagerOutbound SAME_STORE_RM;
+    private static final String APPLICATION_ID;
 
     static {
-        String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
+        Configuration config = ConfigurationFactory.getInstance();
+        String storeMode = config.getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
             SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
+            APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);
         } else {
             SAME_STORE_RM = null;
+            APPLICATION_ID = null;
         }
     }
 
@@ -77,6 +83,9 @@ public abstract class AbstractResourceManager implements ResourceManager {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
             if (SAME_STORE_RM != null) {
+                if (StringUtils.isBlank(clientId)) {
+                    clientId = APPLICATION_ID + ":0.0.0.0:0";
+                }
                 return SAME_STORE_RM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
             }
 
