@@ -56,7 +56,7 @@ public class DefaultTransactionManager implements TransactionManager {
     public DefaultTransactionManager() {
         String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            sameStoreTM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore");
+            sameStoreTM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore", new Object[] {null});
         }
     }
 

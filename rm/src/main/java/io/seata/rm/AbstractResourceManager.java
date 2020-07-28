@@ -54,7 +54,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     static {
         String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class);
+            SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore", new Object[]{null});
         } else {
             SAME_STORE_RM = null;
         }
