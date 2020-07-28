@@ -9,16 +9,6 @@
       "defaultValue": "druid"
     },
     {
-      "name": "seata.store.db.db-type",
-      "type": "io.seata.core.constants.DBType",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.DbStoreProperties"
-    },
-    {
-      "name": "seata.store.db.driver-class-name",
-      "type": "java.lang.Class<java.sql.Driver>",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.DbStoreProperties"
-    },
-    {
       "name": "seata.store.db.min-conn",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.DbStoreProperties",

@@ -15,8 +15,11 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
+import io.seata.core.constants.DBType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import java.sql.Driver;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DB_DATASOURCE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_DB_MAX_CONN;
@@ -38,8 +41,8 @@ public class DbStoreProperties {
      */
     private String datasource = DEFAULT_DB_DATASOURCE;
 
-    private String dbType;
-    private String driverClassName;
+    private DBType dbType;
+    private Class<Driver> driverClassName;
     private String url;
     private String user;
     private String password;
@@ -62,20 +65,24 @@ public class DbStoreProperties {
     }
 
     public String getDbType() {
-        return dbType;
+        return dbType != null ? dbType.name() : null;
     }
 
     public DbStoreProperties setDbType(String dbType) {
-        this.dbType = dbType;
+        this.dbType = DBType.valueOf(dbType);
         return this;
     }
 
     public String getDriverClassName() {
-        return driverClassName;
+        return driverClassName != null ? driverClassName.getName() : null;
     }
 
     public DbStoreProperties setDriverClassName(String driverClassName) {
-        this.driverClassName = driverClassName;
+        try {
+            this.driverClassName = (Class<Driver>) Class.forName(driverClassName);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
