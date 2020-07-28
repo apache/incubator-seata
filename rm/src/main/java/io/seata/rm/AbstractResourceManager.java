@@ -49,14 +49,14 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceManager.class);
 
-    protected static final ResourceManagerOutbound sameStoreRM;
+    protected static final ResourceManagerOutbound SAME_STORE_RM;
 
     static {
         String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            sameStoreRM = EnhancedServiceLoader.load(ResourceManagerOutbound.class);
+            SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class);
         } else {
-            sameStoreRM = null;
+            SAME_STORE_RM = null;
         }
     }
 
@@ -74,8 +74,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
-            if (sameStoreRM != null) {
-                return sameStoreRM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
+            if (SAME_STORE_RM != null) {
+                return SAME_STORE_RM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
             }
 
             BranchRegisterRequest request = new BranchRegisterRequest();
@@ -110,8 +110,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
-            if (sameStoreRM != null) {
-                sameStoreRM.branchReport(branchType, xid, branchId, status, applicationData);
+            if (SAME_STORE_RM != null) {
+                SAME_STORE_RM.branchReport(branchType, xid, branchId, status, applicationData);
                 return;
             }
 
