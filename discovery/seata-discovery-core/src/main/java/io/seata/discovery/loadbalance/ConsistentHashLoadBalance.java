@@ -26,6 +26,7 @@ import io.seata.config.ConfigurationFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.core.constants.DefaultValues.VIRTUAL_NODES_DEFAULT;
 
 /**
  * The type consistent hash load balance.
@@ -36,7 +37,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     private static final String VIRTUAL_NODES = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalanceVirtualNodes";
-    private static final int VIRTUAL_NODES_DEFAULT = 10;
     private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(VIRTUAL_NODES, VIRTUAL_NODES_DEFAULT);
 
     @Override

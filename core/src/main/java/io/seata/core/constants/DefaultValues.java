@@ -89,4 +89,7 @@ public class DefaultValues {
     public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
     public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
+
+    public static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    public static final int VIRTUAL_NODES_DEFAULT = 10;
 }

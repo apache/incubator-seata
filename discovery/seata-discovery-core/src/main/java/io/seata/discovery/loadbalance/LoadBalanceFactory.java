@@ -20,6 +20,7 @@ import io.seata.config.ConfigurationFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOAD_BALANCE;
 
 /**
  * The type Load balance factory.
@@ -32,11 +33,6 @@ public class LoadBalanceFactory {
      * The constant LOAD_BALANCE.
      */
     private static final String LOAD_BALANCE = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalance";
-
-    /**
-     * The default load balance.
-     */
-    private static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
 
     /**
      * Get instance.
