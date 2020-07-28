@@ -41,8 +41,8 @@ public class DbStoreProperties {
      */
     private String datasource = DEFAULT_DB_DATASOURCE;
 
-    private DBType dbType;
-    private Class<Driver> driverClassName;
+    private String dbType;
+    private String driverClassName;
     private String url;
     private String user;
     private String password;
@@ -65,24 +65,20 @@ public class DbStoreProperties {
     }
 
     public String getDbType() {
-        return dbType != null ? dbType.name() : null;
+        return dbType;
     }
 
     public DbStoreProperties setDbType(String dbType) {
-        this.dbType = DBType.valueOf(dbType);
+        this.dbType = dbType;
         return this;
     }
 
     public String getDriverClassName() {
-        return driverClassName != null ? driverClassName.getName() : null;
+        return driverClassName;
     }
 
     public DbStoreProperties setDriverClassName(String driverClassName) {
-        try {
-            this.driverClassName = (Class<Driver>) Class.forName(driverClassName);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        this.driverClassName = driverClassName;
         return this;
     }
 
