@@ -18,6 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties.registry;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_LOAD_BALANCE;
+import static io.seata.core.constants.DefaultValues.VIRTUAL_NODES_DEFAULT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
 
 /**
@@ -33,11 +35,11 @@ public class RegistryProperties {
     /**
      * the load balance
      */
-    private String loadBalance = "RandomLoadBalance";
+    private String loadBalance = DEFAULT_LOAD_BALANCE;
     /**
      * the load balance virtual nodes
      */
-    private int loadBalanceVirtualNodes = 10;
+    private int loadBalanceVirtualNodes = VIRTUAL_NODES_DEFAULT;
 
     public String getType() {
         return type;

@@ -115,6 +115,8 @@ public class PropertiesTest {
         assertEquals("NettyClientSelector", context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadPrefix());
         assertEquals(1, context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadSize());
         assertEquals("NettyClientWorkerThread", context.getBean(ThreadFactoryProperties.class).getClientWorkerThreadPrefix());
+        assertEquals(1, context.getBean(ThreadFactoryProperties.class).getBossThreadSize());
+        assertEquals("Default", context.getBean(ThreadFactoryProperties.class).getWorkerThreadSize());
     }
 
     @Test
@@ -213,6 +215,8 @@ public class PropertiesTest {
     @Test
     public void testRegistryProperties() {
         assertEquals("file", context.getBean(RegistryProperties.class).getType());
+        assertEquals("RandomLoadBalance", context.getBean(RegistryProperties.class).getLoadBalance());
+        assertEquals(10, context.getBean(RegistryProperties.class).getLoadBalanceVirtualNodes());
     }
 
     @Test
