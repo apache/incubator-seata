@@ -26,7 +26,7 @@ import io.seata.common.rpc.RpcStatus;
  *
  * @author ph3636
  */
-@LoadLevel(name = "LeastActiveLoadBalance", order = 4)
+@LoadLevel(name = "LeastActiveLoadBalance")
 public class LeastActiveLoadBalance extends AbstractLoadBalance {
 
     @Override
