@@ -115,6 +115,10 @@ public class PropertiesTest {
         assertEquals("NettyClientSelector", context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadPrefix());
         assertEquals(1, context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadSize());
         assertEquals("NettyClientWorkerThread", context.getBean(ThreadFactoryProperties.class).getClientWorkerThreadPrefix());
+        assertEquals("NettyServerPipeline", context.getBean(ThreadFactoryProperties.class).getServerPipelineThreadPrefix());
+        assertEquals(8, context.getBean(ThreadFactoryProperties.class).getServerPipelineThreadSize());
+        assertEquals("NettyClientPipeline", context.getBean(ThreadFactoryProperties.class).getClientPipelineThreadPrefix());
+        assertEquals(4, context.getBean(ThreadFactoryProperties.class).getClientPipelineThreadSize());
     }
 
     @Test
