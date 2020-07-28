@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
@@ -54,7 +55,6 @@ public class RedisLocker extends AbstractLocker {
 
     /**
      * Instantiates a new Redis locker.
-     *
      */
     public RedisLocker() {
         logQueryLimit =
@@ -142,23 +142,26 @@ public class RedisLocker extends AbstractLocker {
             String lockListKey = getXidLockKey(xid);
             Set<String> keys = lRange(jedis, lockListKey);
             if (CollectionUtils.isNotEmpty(keys)) {
-                Pipeline pipeline = null;
-                Iterator<String> it = keys.iterator();
-                while (it.hasNext()) {
-                    String key = it.next();
-                    LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                    for (int i = 0; i < branchIds.size(); i++) {
-                        if (lock != null && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
-                            if (pipeline == null) {
-                                pipeline = jedis.pipelined();
-                            }
-                            pipeline.del(key);
-                            pipeline.lrem(lockListKey, 0, key);
+                List<String> delKeys = new ArrayList<>();
+                List<String> values = jedis.mget(keys.toArray(new String[0]));
+                for (String value : values) {
+                    Iterator<Long> it = branchIds.iterator();
+                    while (it.hasNext()) {
+                        Long branchId = it.next();
+                        LockDO lock = JSON.parseObject(value, LockDO.class);
+                        if (lock != null && Objects.equals(lock.getBranchId(), branchId)) {
+                            delKeys.add(getLockKey(lock.getRowKey()));
                             it.remove();
+                            break;
                         }
                     }
                 }
-                if (pipeline != null) {
+                if (CollectionUtils.isNotEmpty(delKeys)) {
+                    Pipeline pipeline = jedis.pipelined();
+                    pipeline.del(delKeys.toArray(new String[0]));
+                    for (String key : delKeys) {
+                        pipeline.lrem(lockListKey, 0, key);
+                    }
                     pipeline.sync();
                 }
             }
