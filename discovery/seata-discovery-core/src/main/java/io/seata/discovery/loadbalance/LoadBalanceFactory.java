@@ -34,17 +34,16 @@ public class LoadBalanceFactory {
     private static final String LOAD_BALANCE = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalance";
 
     /**
-     * The load balance.
+     * The default load balance.
      */
-    private static final LoadBalance LOAD_BALANCE_INSTANCE = EnhancedServiceLoader.load(LoadBalance.class,
-            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE));
+    private static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
 
     /**
-     * Gets instance.
+     * Get instance.
      *
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        return LOAD_BALANCE_INSTANCE;
+        return EnhancedServiceLoader.load(LoadBalance.class, ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE, DEFAULT_LOAD_BALANCE));
     }
 }

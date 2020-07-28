@@ -32,7 +32,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
  *
  * @author ph3636
  */
-@LoadLevel(name = "ConsistentHashLoadBalance", order = 3)
+@LoadLevel(name = "ConsistentHashLoadBalance")
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     private static final String VIRTUAL_NODES = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalanceVirtualNodes";

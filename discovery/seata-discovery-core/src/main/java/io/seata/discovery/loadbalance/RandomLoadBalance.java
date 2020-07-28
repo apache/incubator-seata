@@ -25,7 +25,7 @@ import io.seata.common.loader.LoadLevel;
  *
  * @author yuoyao
  */
-@LoadLevel(name = "RandomLoadBalance", order = 2)
+@LoadLevel(name = "RandomLoadBalance")
 public class RandomLoadBalance extends AbstractLoadBalance {
 
     @Override

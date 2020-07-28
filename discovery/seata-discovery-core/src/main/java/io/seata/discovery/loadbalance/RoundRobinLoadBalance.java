@@ -25,7 +25,7 @@ import io.seata.common.loader.LoadLevel;
  *
  * @author slievrly
  */
-@LoadLevel(name = "RoundRobinLoadBalance", order = 1)
+@LoadLevel(name = "RoundRobinLoadBalance")
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
 
     private final AtomicInteger sequence = new AtomicInteger();
