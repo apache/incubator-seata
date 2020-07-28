@@ -26,6 +26,12 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import static io.seata.core.constants.DefaultValues.DEFAULT_REDIS_DATABASE;
+import static io.seata.core.constants.DefaultValues.DEFAULT_REDIS_HOST;
+import static io.seata.core.constants.DefaultValues.DEFAULT_REDIS_MAXCONN;
+import static io.seata.core.constants.DefaultValues.DEFAULT_REDIS_MINCONN;
+import static io.seata.core.constants.DefaultValues.DEFAULT_REDIS_PORT;
+
 /**
  * @author funkye
  */
@@ -37,15 +43,15 @@ public class JedisPooledFactory {
 
     private static volatile JedisPool jedisPool = null;
 
-    private static final String HOST = "127.0.0.1";
+    private static final String HOST = DEFAULT_REDIS_HOST;
 
-    private static final int PORT = 6379;
+    private static final int PORT = DEFAULT_REDIS_PORT;
 
-    private static final int MINCONN = 1;
+    private static final int MINCONN = DEFAULT_REDIS_MINCONN;
 
-    private static final int MAXCONN = 10;
+    private static final int MAXCONN = DEFAULT_REDIS_MAXCONN;
 
-    private static final int DATABASE = 0;
+    private static final int DATABASE = DEFAULT_REDIS_DATABASE;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 

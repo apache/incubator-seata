@@ -15,6 +15,10 @@
  */
 package io.seata.tm;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -37,16 +41,33 @@ import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 import java.util.concurrent.TimeoutException;
 
+import static io.seata.core.constants.ConfigurationKeys.STORE_MODE;
+
 /**
  * The type Default transaction manager.
  *
  * @author sharajava
  */
+@LoadLevel(name = "defaultTM")
 public class DefaultTransactionManager implements TransactionManager {
+
+    private TransactionManager sameStoreTM;
+
+    public DefaultTransactionManager() {
+        String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
+        if (StringUtils.isNotBlank(storeMode)) {
+            sameStoreTM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore");
+        }
+    }
+
 
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
+        if (sameStoreTM != null) {
+           return sameStoreTM.begin(applicationId, transactionServiceGroup, name, timeout);
+        }
+
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
@@ -75,6 +96,10 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
+        if (sameStoreTM != null) {
+            return sameStoreTM.getStatus(xid);
+        }
+
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
         GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
@@ -83,6 +108,10 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
+        if (sameStoreTM != null) {
+            return sameStoreTM.globalReport(xid, globalStatus);
+        }
+
         GlobalReportRequest globalReport = new GlobalReportRequest();
         globalReport.setXid(xid);
         globalReport.setGlobalStatus(globalStatus);

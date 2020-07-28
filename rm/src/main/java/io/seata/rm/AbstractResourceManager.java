@@ -16,6 +16,9 @@
 package io.seata.rm;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -23,6 +26,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
+import io.seata.core.model.ResourceManagerOutbound;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
@@ -34,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeoutException;
 
+import static io.seata.core.constants.ConfigurationKeys.STORE_MODE;
+
 /**
  * abstract ResourceManager
  *
@@ -42,6 +48,17 @@ import java.util.concurrent.TimeoutException;
 public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceManager.class);
+
+    protected static final ResourceManagerOutbound sameStoreRM;
+
+    static {
+        String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
+        if (StringUtils.isNotBlank(storeMode)) {
+            sameStoreRM = EnhancedServiceLoader.load(ResourceManagerOutbound.class);
+        } else {
+            sameStoreRM = null;
+        }
+    }
 
     /**
      * registry branch record
@@ -57,6 +74,10 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
+            if (sameStoreRM != null) {
+                return sameStoreRM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
+            }
+
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
             request.setLockKey(lockKeys);
@@ -89,6 +110,11 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
+            if (sameStoreRM != null) {
+                sameStoreRM.branchReport(branchType, xid, branchId, status, applicationData);
+                return;
+            }
+
             BranchReportRequest request = new BranchReportRequest();
             request.setXid(xid);
             request.setBranchId(branchId);

@@ -75,6 +75,10 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
         throws TransactionException {
         try {
+            if (sameStoreRM != null) {
+                return sameStoreRM.lockQuery(branchType, resourceId, xid, lockKeys);
+            }
+
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
             request.setXid(xid);
             request.setLockKey(lockKeys);
