@@ -32,6 +32,7 @@ import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.BranchReportResponse;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
     static {
         String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore", new Object[]{null});
+            SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
+                    new Class[]{RemotingServer.class}, new Object[]{null});
         } else {
             SAME_STORE_RM = null;
         }

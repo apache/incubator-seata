@@ -37,6 +37,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 import java.util.concurrent.TimeoutException;
@@ -56,7 +57,8 @@ public class DefaultTransactionManager implements TransactionManager {
     public DefaultTransactionManager() {
         String storeMode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            sameStoreTM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore", new Object[] {null});
+            sameStoreTM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore",
+                    new Class[]{RemotingServer.class}, new Object[]{null});
         }
     }
 
