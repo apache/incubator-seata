@@ -79,16 +79,20 @@ public class RedisLocker extends AbstractLocker {
             List<String> readyKeys = new ArrayList<>();
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
-                // check the lock if it is existed
-                LockDO existed = JSON.parseObject(jedis.get(key), LockDO.class);
-                if (existed != null && StringUtils.equals(existed.getXid(), lock.getXid())) {
-                    continue;
-                }
                 pipeline.setnx(key, JSON.toJSONString(lock));
                 readyKeys.add(key);
             }
-            if (CollectionUtils.isEmpty(readyKeys)) {
-                return true;
+            // check reentrant lock
+            List<String> lockList = jedis.mget(readyKeys.toArray(new String[0]));
+            for (int i = 0; i < lockList.size(); i++) {
+                if (lockList.get(i) == null) {
+                    continue;
+                }
+                LockDO currentLock = locks.get(i);
+                LockDO existed = JSON.parseObject(lockList.get(i), LockDO.class);
+                if (StringUtils.equals(existed.getXid(), currentLock.getXid())) {
+                    return true;
+                }
             }
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
