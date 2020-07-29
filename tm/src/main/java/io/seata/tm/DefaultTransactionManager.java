@@ -62,7 +62,7 @@ public class DefaultTransactionManager implements TransactionManager {
     static {
         Configuration config = ConfigurationFactory.getInstance();
         String storeMode = config.getConfig(STORE_MODE);
-        if (StringUtils.isNotBlank(storeMode)) {
+        if (StringUtils.isNotBlank(storeMode) && !"none".equalsIgnoreCase(storeMode) && !"file".equalsIgnoreCase(storeMode)) {
             DIRECT_CONNECT_TC_STORE_TM = EnhancedServiceLoader.load(TransactionManager.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
             APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);

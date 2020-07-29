@@ -80,6 +80,9 @@
       "name": "seata.store.mode",
       "values": [
         {
+          "value": "none"
+        },
+        {
           "value": "db"
         },
         {
