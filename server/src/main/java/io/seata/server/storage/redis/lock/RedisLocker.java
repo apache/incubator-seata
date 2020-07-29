@@ -79,6 +79,7 @@ public class RedisLocker extends AbstractLocker {
             List<String> readyKeys = new ArrayList<>();
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
+                // check the lock if it is existed
                 LockDO existed = JSON.parseObject(jedis.get(key), LockDO.class);
                 if (existed != null && StringUtils.equals(existed.getXid(), lock.getXid())) {
                     continue;
