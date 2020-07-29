@@ -54,11 +54,11 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
-    private static final String UNSUPPORT_STORE_MODE = "file";
-
     public SeataAutoConfiguration(SeataProperties seataProperties,
             StoreProperties storeProperties) throws IOException {
-        if (StringUtils.isNotBlank(storeProperties.getMode()) && !UNSUPPORT_STORE_MODE.equalsIgnoreCase(storeProperties.getMode())) {
+
+        String storeMode = storeProperties.getMode();
+        if (StringUtils.isNotBlank(storeMode) && !"none".equalsIgnoreCase(storeMode) && !"file".equalsIgnoreCase(storeMode)) {
             UUIDGenerator.init(seataProperties.getServerNode() >= 0 ? seataProperties.getServerNode() : IdWorker.initWorkerId());
 
             XID.setIpAddress(NetUtil.getLocalIp());
