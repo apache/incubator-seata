@@ -56,7 +56,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final ResourceManagerOutbound DIRECT_CONNECT_TC_STORE_RM;
     private static final String APPLICATION_ID;
-    private static final String CLIENT_SUFFIX;
+    private static final String CLIENT_SUFFIX = Constants.CLIENT_ID_SPLIT_CHAR + "0.0.0.0" + Constants.CLIENT_ID_SPLIT_CHAR + "0";
 
     static {
         Configuration config = ConfigurationFactory.getInstance();
@@ -65,11 +65,9 @@ public abstract class AbstractResourceManager implements ResourceManager {
             DIRECT_CONNECT_TC_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
             APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);
-            CLIENT_SUFFIX = Constants.CLIENT_ID_SPLIT_CHAR + NetUtil.getLocalIp() + Constants.CLIENT_ID_SPLIT_CHAR + "0";
         } else {
             DIRECT_CONNECT_TC_STORE_RM = null;
             APPLICATION_ID = null;
-            CLIENT_SUFFIX = null;
         }
     }
 
