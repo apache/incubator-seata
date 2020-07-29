@@ -17,6 +17,7 @@ package io.seata.rm;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -54,6 +55,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final ResourceManagerOutbound SAME_STORE_RM;
     private static final String APPLICATION_ID;
+    private static final String IP_PORT;
 
     static {
         Configuration config = ConfigurationFactory.getInstance();
@@ -62,9 +64,11 @@ public abstract class AbstractResourceManager implements ResourceManager {
             SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
             APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);
+            IP_PORT = NetUtil.getLocalIp() + ":0";
         } else {
             SAME_STORE_RM = null;
             APPLICATION_ID = null;
+            IP_PORT = null;
         }
     }
 
@@ -84,7 +88,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
         try {
             if (SAME_STORE_RM != null) {
                 if (StringUtils.isBlank(clientId)) {
-                    clientId = APPLICATION_ID + ":0.0.0.0:0";
+                    clientId = APPLICATION_ID + IP_PORT;
                 }
                 return SAME_STORE_RM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
             }
