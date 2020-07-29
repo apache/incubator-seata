@@ -79,8 +79,15 @@ public class RedisLocker extends AbstractLocker {
             List<String> readyKeys = new ArrayList<>();
             for (LockDO lock : locks) {
                 String key = getLockKey(lock.getRowKey());
+                LockDO existed = JSON.parseObject(jedis.get(key), LockDO.class);
+                if (existed != null && StringUtils.equals(existed.getXid(), lock.getXid())) {
+                    continue;
+                }
                 pipeline.setnx(key, JSON.toJSONString(lock));
                 readyKeys.add(key);
+            }
+            if (CollectionUtils.isEmpty(readyKeys)) {
+                return true;
             }
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
