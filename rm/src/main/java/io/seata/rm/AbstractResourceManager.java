@@ -53,7 +53,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceManager.class);
 
-    protected static final ResourceManagerOutbound SAME_STORE_RM;
+    protected static final ResourceManagerOutbound DIRECT_CONNECT_TC_STORE_RM;
     private static final String APPLICATION_ID;
     private static final String IP_PORT;
 
@@ -61,12 +61,12 @@ public abstract class AbstractResourceManager implements ResourceManager {
         Configuration config = ConfigurationFactory.getInstance();
         String storeMode = config.getConfig(STORE_MODE);
         if (StringUtils.isNotBlank(storeMode)) {
-            SAME_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
+            DIRECT_CONNECT_TC_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
             APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);
             IP_PORT = NetUtil.getLocalIp() + ":0";
         } else {
-            SAME_STORE_RM = null;
+            DIRECT_CONNECT_TC_STORE_RM = null;
             APPLICATION_ID = null;
             IP_PORT = null;
         }
@@ -86,11 +86,11 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
-            if (SAME_STORE_RM != null) {
+            if (DIRECT_CONNECT_TC_STORE_RM != null) {
                 if (StringUtils.isBlank(clientId)) {
                     clientId = APPLICATION_ID + IP_PORT;
                 }
-                return SAME_STORE_RM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
+                return DIRECT_CONNECT_TC_STORE_RM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
             }
 
             BranchRegisterRequest request = new BranchRegisterRequest();
@@ -125,8 +125,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
-            if (SAME_STORE_RM != null) {
-                SAME_STORE_RM.branchReport(branchType, xid, branchId, status, applicationData);
+            if (DIRECT_CONNECT_TC_STORE_RM != null) {
+                DIRECT_CONNECT_TC_STORE_RM.branchReport(branchType, xid, branchId, status, applicationData);
                 return;
             }
 
