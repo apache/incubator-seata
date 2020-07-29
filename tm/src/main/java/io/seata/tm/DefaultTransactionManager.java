@@ -80,12 +80,12 @@ public class DefaultTransactionManager implements TransactionManager {
         throws TransactionException {
         if (SAME_STORE_TM != null) {
             if (StringUtils.isBlank(applicationId)) {
-               applicationId = APPLICATION_ID;
+                applicationId = APPLICATION_ID;
             }
             if (StringUtils.isBlank(transactionServiceGroup)) {
                 transactionServiceGroup = TRANSACTION_SERVICE_GROUP;
             }
-           return SAME_STORE_TM.begin(applicationId, transactionServiceGroup, name, timeout);
+            return SAME_STORE_TM.begin(applicationId, transactionServiceGroup, name, timeout);
         }
 
         GlobalBeginRequest request = new GlobalBeginRequest();
