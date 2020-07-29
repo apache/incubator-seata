@@ -15,6 +15,7 @@
  */
 package io.seata.rm;
 
+import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
@@ -55,7 +56,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final ResourceManagerOutbound DIRECT_CONNECT_TC_STORE_RM;
     private static final String APPLICATION_ID;
-    private static final String IP_PORT;
+    private static final String CLIENT_SUFFIX;
 
     static {
         Configuration config = ConfigurationFactory.getInstance();
@@ -64,11 +65,11 @@ public abstract class AbstractResourceManager implements ResourceManager {
             DIRECT_CONNECT_TC_STORE_RM = EnhancedServiceLoader.load(ResourceManagerOutbound.class, "defaultCore",
                     new Class[]{RemotingServer.class}, new Object[]{null});
             APPLICATION_ID = config.getConfig(ConfigurationKeys.APPLICATION_ID);
-            IP_PORT = NetUtil.getLocalIp() + ":0";
+            CLIENT_SUFFIX = Constants.CLIENT_ID_SPLIT_CHAR + NetUtil.getLocalIp() + Constants.CLIENT_ID_SPLIT_CHAR + "0";
         } else {
             DIRECT_CONNECT_TC_STORE_RM = null;
             APPLICATION_ID = null;
-            IP_PORT = null;
+            CLIENT_SUFFIX = null;
         }
     }
 
@@ -88,7 +89,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
         try {
             if (DIRECT_CONNECT_TC_STORE_RM != null) {
                 if (StringUtils.isBlank(clientId)) {
-                    clientId = APPLICATION_ID + IP_PORT;
+                    clientId = APPLICATION_ID + CLIENT_SUFFIX;
                 }
                 return DIRECT_CONNECT_TC_STORE_RM.branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
             }
