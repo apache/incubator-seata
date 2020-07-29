@@ -15,11 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
-import io.seata.core.constants.DBType;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.sql.Driver;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DB_DATASOURCE;
 import static io.seata.core.constants.DefaultValues.DEFAULT_DB_MAX_CONN;
