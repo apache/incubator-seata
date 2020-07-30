@@ -101,7 +101,6 @@ public class RedisLocker extends AbstractLocker {
             if (CollectionUtils.isEmpty(readyKeys)) {
                 return true;
             }
-            @SuppressWarnings("ConstantConditions")
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
                 Long result = (long)results.get(i);
