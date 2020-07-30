@@ -15,13 +15,7 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
@@ -81,15 +75,12 @@ public class RedisLocker extends AbstractLocker {
             });
             List<String> lockList = jedis.mget(existedKeyList.toArray(new String[0]));
             List<String> readyKeys = new ArrayList<>();
-            Pipeline pipeline = null;
+            Map<String, String> map = new HashMap<>(existedKeyList.size(), 1);
             for (int i = 0; i < existedKeyList.size(); i++) {
                 String existedValue = lockList.get(i);
                 if (existedValue == null) {
-                    if (pipeline == null) {
-                        pipeline = jedis.pipelined();
-                    }
                     String key = existedKeyList.get(i);
-                    pipeline.setnx(key, JSON.toJSONString(locks.get(i)));
+                    map.put(key, JSON.toJSONString(locks.get(i)));
                     readyKeys.add(key);
                 } else {
                     LockDO existed = JSON.parseObject(existedValue, LockDO.class);
@@ -98,9 +89,11 @@ public class RedisLocker extends AbstractLocker {
                     }
                 }
             }
-            if (CollectionUtils.isEmpty(readyKeys)) {
+            if (map.size() == 0) {
                 return true;
             }
+            Pipeline pipeline = jedis.pipelined();
+            map.forEach(pipeline::setnx);
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
                 Long result = (long)results.get(i);
