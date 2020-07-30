@@ -508,4 +508,9 @@ public class ConfigurationKeys {
      * The constant TX_SERVICE_GROUP.
      */
     public static final String TX_SERVICE_GROUP = "txServiceGroup";
+
+    /**
+     * The constant DATA_SOURCE_PROXY_MODE.
+     */
+    public static final String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 }

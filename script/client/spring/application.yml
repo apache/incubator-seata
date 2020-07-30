@@ -3,6 +3,7 @@ seata:
   application-id: applicationName
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
+  data-source-proxy-mode: AT
   use-jdk-proxy: false
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:

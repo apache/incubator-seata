@@ -1,0 +1,25 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "seata.data-source-proxy-mode",
+      "type": "java.lang.String",
+      "description": "data source proxy mode.",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
+      "defaultValue": "AT"
+    }
+  ],
+  "hints": [
+    {
+      "name": "seata.data-source-proxy-mode",
+      "values": [
+        {
+          "value": "AT"
+        },
+        {
+          "value": "XA"
+        }
+      ]
+    }
+  ]
+}
