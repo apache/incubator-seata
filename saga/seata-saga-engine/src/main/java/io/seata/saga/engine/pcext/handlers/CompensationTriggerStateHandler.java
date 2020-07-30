@@ -45,15 +45,8 @@ public class CompensationTriggerStateHandler implements StateHandler {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        List<StateInstance> stateInstanceList = null;
-        if (stateMachineInstance != null) {
-            stateInstanceList = stateMachineInstance.getStateList();
-        } else if (stateMachineConfig.getStateLogStore() != null) {
-            stateInstanceList = stateMachineConfig.getStateLogStore().queryStateInstanceListByMachineInstanceId(
-                stateMachineInstance.getId());
-        }
+
+        List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
 
         List<StateInstance> stateListToBeCompensated = CompensationHolder.findStateInstListToBeCompensated(context,
             stateInstanceList);
