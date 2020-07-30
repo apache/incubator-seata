@@ -76,6 +76,7 @@ public class RedisLocker extends AbstractLocker {
                     locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
             List<String> existedKeyList = new ArrayList<>();
+
             locks.forEach(lockDO -> {
                 existedKeyList.add(getLockKey(lockDO.getRowKey()));
             });
