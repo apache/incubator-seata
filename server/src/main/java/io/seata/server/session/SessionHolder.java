@@ -141,57 +141,27 @@ public class SessionHolder {
                     case TimeoutRollbacked:
                     case TimeoutRollbackFailed:
                     case Finished:
-                        try {
-                            LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalStatus, globalSession.getXid());
-                            ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
-                            if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Remove global session succeeded, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
-                            }
-                        } catch (Exception e) {
-                            LOGGER.error("Remove global session failed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus(), e);
-                        }
+                        removeInErrorState(globalSession);
                         break;
                     case AsyncCommitting:
                         if (storeMode == StoreMode.FILE) {
-                            try {
-                                globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-                                getAsyncCommittingSessionManager().addGlobalSession(globalSession);
-                            } catch (TransactionException e) {
-                                throw new ShouldNeverHappenException(e);
-                            }
+                            queueToAsyncCommitting(globalSession);
                         }
                         break;
                     default: {
                         if (storeMode == StoreMode.FILE) {
-                            ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-                            branchSessions.forEach(branchSession -> {
-                                try {
-                                    branchSession.lock();
-                                } catch (TransactionException e) {
-                                    throw new ShouldNeverHappenException(e);
-                                }
-                            });
+                            lockBranchSessions(globalSession.getSortedBranches());
 
                             switch (globalStatus) {
                                 case Committing:
                                 case CommitRetrying:
-                                    try {
-                                        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-                                        getRetryCommittingSessionManager().addGlobalSession(globalSession);
-                                    } catch (TransactionException e) {
-                                        throw new ShouldNeverHappenException(e);
-                                    }
+                                    queueToRetryCommit(globalSession);
                                     break;
                                 case Rollbacking:
                                 case RollbackRetrying:
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
-                                    try {
-                                        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-                                        getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-                                    } catch (TransactionException e) {
-                                        throw new ShouldNeverHappenException(e);
-                                    }
+                                    queueToRetryRollback(globalSession);
                                     break;
                                 case Begin:
                                     globalSession.setActive(true);
@@ -205,6 +175,55 @@ public class SessionHolder {
                 }
             });
         }
+    }
+
+    private static void removeInErrorState(GlobalSession globalSession) {
+        try {
+            LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
+            ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Remove global session succeeded, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Remove global session failed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus(), e);
+        }
+    }
+
+    private static void queueToAsyncCommitting(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
+            getAsyncCommittingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    private static void queueToRetryCommit(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
+            getRetryCommittingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    private static void queueToRetryRollback(GlobalSession globalSession) {
+        try {
+            globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
+            getRetryRollbackingSessionManager().addGlobalSession(globalSession);
+        } catch (TransactionException e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
+        branchSessions.forEach(branchSession -> {
+            try {
+                branchSession.lock();
+            } catch (TransactionException e) {
+                throw new ShouldNeverHappenException(e);
+            }
+        });
     }
 
     /**
