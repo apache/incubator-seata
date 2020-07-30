@@ -75,7 +75,7 @@ public class RedisLocker extends AbstractLocker {
             });
             List<String> lockList = jedis.mget(existedKeyList.toArray(new String[0]));
             List<String> readyKeys = new ArrayList<>();
-            Map<String, String> map = new HashMap<>(existedKeyList.size(), 1);
+            Map<String, String> map = new LinkedHashMap<>(existedKeyList.size(), 1);
             for (int i = 0; i < existedKeyList.size(); i++) {
                 String existedValue = lockList.get(i);
                 if (existedValue == null) {
