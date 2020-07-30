@@ -36,16 +36,24 @@ import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.util.dataTrace.TraceBranchUndoLog;
+import io.seata.rm.datasource.util.dataTrace.TraceField;
+import io.seata.rm.datasource.util.dataTrace.TraceSQLUndoLog;
+import io.seata.rm.datasource.util.dataTrace.TraceTableRecords;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.Collectors;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
@@ -191,6 +199,14 @@ public class JacksonUndoLogParser implements UndoLogParser {
                     jgen.writeObject("");// 直接输出为空字符串
                 }
             });
+            simpleModule.addSerializer(Field.class, new JsonSerializer<Object>() {
+                @Override
+                public void serialize(Object value, JsonGenerator jgen,
+                    SerializerProvider provider) throws IOException, JsonProcessingException {
+                    Field fd = (Field)value;
+                    jgen.writeObject(new TraceField(fd.getName(),fd.getValue()));
+                }
+            });
             //oracle.sql.TIMESTAMP  转string
             simpleModule.addSerializer(oracle.sql.TIMESTAMP.class, new OracleTimestampToStringSerializer());
 
@@ -198,7 +214,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
             simpleModule.addSerializer(SerialClob.class, CLOB_SERIALIZER);
             objectMapper.registerModule(simpleModule);
 
-            String context = objectMapper.writeValueAsString(branchUndoLog);
+            String context = objectMapper.writeValueAsString(conversionData(branchUndoLog));
             return context;
         } catch (JsonProcessingException e) {
             LOGGER.error("json encode exception, {}", e.getMessage(), e);
@@ -206,8 +222,19 @@ public class JacksonUndoLogParser implements UndoLogParser {
         }
     }
 
-    public static void main(String[] args) {
-
+    private static TraceBranchUndoLog conversionData(BranchUndoLog branchUndoLog) {
+        TraceBranchUndoLog branchUndoLogtrace = new TraceBranchUndoLog();
+        branchUndoLogtrace.setExecuteDate(branchUndoLog.getExecuteDate());
+        branchUndoLogtrace.setSqlUndoLogs(branchUndoLog.getSqlUndoLogs().stream().map(sqlUndoLog ->{
+            TraceSQLUndoLog traceSQLUndoLog = new TraceSQLUndoLog();
+            traceSQLUndoLog.setTableName(sqlUndoLog.getTableName());
+            traceSQLUndoLog.setSqlType(sqlUndoLog.getSqlType());
+            traceSQLUndoLog.setAfterImage(new TraceTableRecords(sqlUndoLog.getAfterImage().getRows()));
+            traceSQLUndoLog.setBeforeImage(new TraceTableRecords(sqlUndoLog.getBeforeImage().getRows()));
+            return traceSQLUndoLog;
+        }) .collect(Collectors.toList()));
+        branchUndoLogtrace.setUserName(branchUndoLog.getUserName());
+      return branchUndoLogtrace;
     }
 
     /**
