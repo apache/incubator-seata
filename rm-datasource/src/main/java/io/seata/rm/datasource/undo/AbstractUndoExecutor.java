@@ -46,7 +46,7 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
 
 import java.util.Map;
 import java.util.stream.Collectors;

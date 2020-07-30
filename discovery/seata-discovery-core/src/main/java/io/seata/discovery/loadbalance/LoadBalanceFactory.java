@@ -20,7 +20,7 @@ import io.seata.config.ConfigurationFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
-import static io.seata.core.constants.DefaultValues.DEFAULT_LOAD_BALANCE;
+import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
 
 /**
  * The type Load balance factory.

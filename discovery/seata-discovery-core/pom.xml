@@ -31,16 +31,5 @@
             <artifactId>seata-config-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-core</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>${project.groupId}</groupId>
-                    <artifactId>seata-discovery-core</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 </project>

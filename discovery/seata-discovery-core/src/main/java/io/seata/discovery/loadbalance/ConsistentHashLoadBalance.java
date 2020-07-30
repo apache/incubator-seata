@@ -26,7 +26,7 @@ import io.seata.config.ConfigurationFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
-import static io.seata.core.constants.DefaultValues.VIRTUAL_NODES_DEFAULT;
+import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
 
 /**
  * The type consistent hash load balance.
