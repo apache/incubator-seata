@@ -117,91 +117,93 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        reload(storeMode);
+        reloadAndRevise(storeMode);
     }
 
     /**
-     * Reload.
+     * Reload and revise.
      */
-    protected static void reload(StoreMode storeMode) {
+    protected static void reloadAndRevise(StoreMode storeMode) {
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable)ROOT_SESSION_MANAGER).reload();
+            ((Reloadable) ROOT_SESSION_MANAGER).reload();
+        }
 
-            Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
-            if (reloadedSessions != null && !reloadedSessions.isEmpty()) {
-                reloadedSessions.forEach(globalSession -> {
-                    GlobalStatus globalStatus = globalSession.getStatus();
-                    switch (globalStatus) {
-                        case UnKnown:
-                        case Committed:
-                        case CommitFailed:
-                        case Rollbacked:
-                        case RollbackFailed:
-                        case TimeoutRollbacked:
-                        case TimeoutRollbackFailed:
-                        case Finished:
-                            try {
-                                LOGGER.warn("Reloaded Session should NOT be " + globalStatus + ", xid = " + globalSession.getXid());
-                                ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
+        Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
+        if (allSessions != null && !allSessions.isEmpty()) {
+            allSessions.forEach(globalSession -> {
+                GlobalStatus globalStatus = globalSession.getStatus();
+                switch (globalStatus) {
+                    case UnKnown:
+                    case Committed:
+                    case CommitFailed:
+                    case Rollbacked:
+                    case RollbackFailed:
+                    case TimeoutRollbacked:
+                    case TimeoutRollbackFailed:
+                    case Finished:
+                        try {
+                            LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalStatus, globalSession.getXid());
+                            ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
+                            if (LOGGER.isInfoEnabled()) {
                                 LOGGER.info("Remove global session succeeded, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
-                            } catch (Exception e) {
-                                LOGGER.error("Remove the global session failed, xid = " + globalSession.getXid() + ", status = " + globalSession.getStatus(), e);
                             }
-                            break;
-                        case AsyncCommitting:
-                            if (storeMode == StoreMode.FILE) {
+                        } catch (Exception e) {
+                            LOGGER.error("Remove global session failed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus(), e);
+                        }
+                        break;
+                    case AsyncCommitting:
+                        if (storeMode == StoreMode.FILE) {
+                            try {
+                                globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
+                                getAsyncCommittingSessionManager().addGlobalSession(globalSession);
+                            } catch (TransactionException e) {
+                                throw new ShouldNeverHappenException(e);
+                            }
+                        }
+                        break;
+                    default: {
+                        if (storeMode == StoreMode.FILE) {
+                            ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
+                            branchSessions.forEach(branchSession -> {
                                 try {
-                                    globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-                                    getAsyncCommittingSessionManager().addGlobalSession(globalSession);
+                                    branchSession.lock();
                                 } catch (TransactionException e) {
                                     throw new ShouldNeverHappenException(e);
                                 }
-                            }
-                            break;
-                        default: {
-                            if (storeMode == StoreMode.FILE) {
-                                ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-                                branchSessions.forEach(branchSession -> {
+                            });
+
+                            switch (globalStatus) {
+                                case Committing:
+                                case CommitRetrying:
                                     try {
-                                        branchSession.lock();
+                                        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
+                                        getRetryCommittingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
                                     }
-                                });
-
-                                switch (globalStatus) {
-                                    case Committing:
-                                    case CommitRetrying:
-                                        try {
-                                            globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-                                            getRetryCommittingSessionManager().addGlobalSession(globalSession);
-                                        } catch (TransactionException e) {
-                                            throw new ShouldNeverHappenException(e);
-                                        }
-                                        break;
-                                    case Rollbacking:
-                                    case RollbackRetrying:
-                                    case TimeoutRollbacking:
-                                    case TimeoutRollbackRetrying:
-                                        try {
-                                            globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-                                            getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-                                        } catch (TransactionException e) {
-                                            throw new ShouldNeverHappenException(e);
-                                        }
-                                        break;
-                                    case Begin:
-                                        globalSession.setActive(true);
-                                        break;
-                                    default:
-                                        throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
-                                }
+                                    break;
+                                case Rollbacking:
+                                case RollbackRetrying:
+                                case TimeoutRollbacking:
+                                case TimeoutRollbackRetrying:
+                                    try {
+                                        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
+                                        getRetryRollbackingSessionManager().addGlobalSession(globalSession);
+                                    } catch (TransactionException e) {
+                                        throw new ShouldNeverHappenException(e);
+                                    }
+                                    break;
+                                case Begin:
+                                    globalSession.setActive(true);
+                                    break;
+                                default:
+                                    throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
-                            break;
                         }
+                        break;
                     }
-                });
-            }
+                }
+            });
         }
     }
 
