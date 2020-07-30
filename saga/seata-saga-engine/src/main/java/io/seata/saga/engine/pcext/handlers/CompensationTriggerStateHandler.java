@@ -18,7 +18,6 @@ package io.seata.saga.engine.pcext.handlers;
 import java.util.List;
 import java.util.Stack;
 
-import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateInstruction;
