@@ -75,24 +75,29 @@ public class RedisLocker extends AbstractLocker {
                 locks =
                     locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
+            List<String> existedKeyList = new ArrayList<>();
+            locks.forEach(lockDO -> {
+                existedKeyList.add(getLockKey(lockDO.getRowKey()));
+            });
+            List<String> lockList = jedis.mget(existedKeyList.toArray(new String[0]));
             Pipeline pipeline = jedis.pipelined();
             List<String> readyKeys = new ArrayList<>();
-            for (LockDO lock : locks) {
-                String key = getLockKey(lock.getRowKey());
-                pipeline.setnx(key, JSON.toJSONString(lock));
-                readyKeys.add(key);
+            for (int i = 0; i < locks.size(); i++) {
+                String key = getLockKey(locks.get(i).getRowKey());
+                String existedKey = lockList.get(i);
+                if (existedKey == null) {
+                    pipeline.setnx(key, JSON.toJSONString(locks.get(i)));
+                    readyKeys.add(key);
+                } else {
+                    LockDO existed = JSON.parseObject(existedKey, LockDO.class);
+                    if (!StringUtils.equals(existed.getXid(), locks.get(i).getXid())) {
+                        pipeline.setnx(key, JSON.toJSONString(locks.get(i)));
+                        readyKeys.add(key);
+                    }
+                }
             }
-            // check reentrant lock
-            List<String> lockList = jedis.mget(readyKeys.toArray(new String[0]));
-            for (int i = 0; i < lockList.size(); i++) {
-                if (lockList.get(i) == null) {
-                    continue;
-                }
-                LockDO currentLock = locks.get(i);
-                LockDO existed = JSON.parseObject(lockList.get(i), LockDO.class);
-                if (StringUtils.equals(existed.getXid(), currentLock.getXid())) {
-                    return true;
-                }
+            if (CollectionUtils.isEmpty(readyKeys)) {
+                return true;
             }
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
