@@ -22,9 +22,9 @@ import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.ChannelManager;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
+import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * process RM client registry message.
  * <p>
- * message type:
+ * process message type:
  * {@link RegisterRMRequest}
  *
  * @author zhangchenghui.dev@gmail.com
@@ -80,7 +80,7 @@ public class RegRmProcessor implements RemotingProcessor {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        remotingServer.sendResponse(rpcMessage, ctx.channel(), response);
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());

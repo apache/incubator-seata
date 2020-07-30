@@ -32,6 +32,8 @@ import io.netty.util.internal.PlatformDependent;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportProtocolType;
+import io.seata.core.rpc.TransportServerType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
