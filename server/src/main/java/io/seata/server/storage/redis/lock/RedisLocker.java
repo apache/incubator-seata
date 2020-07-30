@@ -91,8 +91,7 @@ public class RedisLocker extends AbstractLocker {
                 } else {
                     LockDO existed = JSON.parseObject(existedKey, LockDO.class);
                     if (!StringUtils.equals(existed.getXid(), locks.get(i).getXid())) {
-                        pipeline.setnx(key, JSON.toJSONString(locks.get(i)));
-                        readyKeys.add(key);
+                        return false;
                     }
                 }
             }
