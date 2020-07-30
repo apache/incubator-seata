@@ -82,10 +82,10 @@ public class RedisLocker extends AbstractLocker {
             List<String> lockList = jedis.mget(existedKeyList.toArray(new String[0]));
             Pipeline pipeline = jedis.pipelined();
             List<String> readyKeys = new ArrayList<>();
-            for (int i = 0; i < locks.size(); i++) {
-                String key = getLockKey(locks.get(i).getRowKey());
+            for (int i = 0; i < existedKeyList.size(); i++) {
                 String existedKey = lockList.get(i);
                 if (existedKey == null) {
+                    String key = existedKeyList.get(i);
                     pipeline.setnx(key, JSON.toJSONString(locks.get(i)));
                     readyKeys.add(key);
                 } else {
