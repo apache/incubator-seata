@@ -146,7 +146,6 @@ public class DefaultCore implements Core {
         // just lock changeStatus
 
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
-            // the lock should release after branch commit
             // Highlight: Firstly, close the session, then no more branch can be registered.
             globalSession.closeAndClean();
             if (globalSession.getStatus() == GlobalStatus.Begin) {
