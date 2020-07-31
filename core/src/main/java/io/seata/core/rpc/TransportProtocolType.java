@@ -27,10 +27,6 @@ public enum TransportProtocolType {
     TCP("tcp"),
 
     /**
-     * Udt transport protocol type.
-     */
-    UDT("udt"),
-    /**
      * Unix domain socket transport protocol type.
      */
     UNIX_DOMAIN_SOCKET("unix-domain-socket");
