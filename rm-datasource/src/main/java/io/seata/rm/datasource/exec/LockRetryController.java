@@ -17,6 +17,8 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.context.GlobalLockConfigHolder;
+import io.seata.core.model.GlobalLockConfig;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
 import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
@@ -32,13 +34,31 @@ public class LockRetryController {
     private static int LOCK_RETRY_TIMES =
         ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, DEFAULT_CLIENT_LOCK_RETRY_TIMES);
 
-    private int lockRetryInternal = LOCK_RETRY_INTERNAL;
-    private int lockRetryTimes = LOCK_RETRY_TIMES;
+    private int lockRetryInternal;
+    private int lockRetryTimes;
 
     /**
      * Instantiates a new Lock retry controller.
      */
     public LockRetryController() {
+        int retryInternal = LOCK_RETRY_INTERNAL;
+        int retryTimes = LOCK_RETRY_TIMES;
+
+        GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+        if (config != null) {
+            int configInternal = config.getLockRetryInternal();
+            if (configInternal > 0) {
+                retryInternal = configInternal;
+            }
+
+            int configTimes = config.getLockRetryTimes();
+            if (configTimes >= 0) {
+                retryTimes = configTimes;
+            }
+        }
+
+        this.lockRetryInternal = retryInternal;
+        this.lockRetryTimes = retryTimes;
     }
 
     /**

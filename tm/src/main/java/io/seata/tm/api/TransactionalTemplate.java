@@ -18,8 +18,10 @@ package io.seata.tm.api;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
@@ -56,7 +58,7 @@ public class TransactionalTemplate {
         // 1.1 get or create a transaction
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
-        // 1.2 Handle the Transaction propatation and the branchType
+        // 1.2 Handle the Transaction propagation and the branchType
         Propagation propagation = txInfo.getPropagation();
         SuspendedResourcesHolder suspendedResourcesHolder = null;
         try {
@@ -91,20 +93,18 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
+            GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
 
             try {
-
                 // 2. begin transaction
                 beginTransaction(txInfo, tx);
 
                 Object rs = null;
                 try {
-
                     // Do Your Business
                     rs = business.execute();
 
                 } catch (Throwable ex) {
-
                     // 3.the needed business exception to rollback.
                     completeTransactionAfterThrowing(txInfo, tx, ex);
                     throw ex;
@@ -116,21 +116,33 @@ public class TransactionalTemplate {
                 return rs;
             } finally {
                 //5. clear
+                resumeGlobalLockConfig(previousConfig);
                 triggerAfterCompletion();
                 cleanUp();
             }
         } finally {
             tx.resume(suspendedResourcesHolder);
         }
-
     }
 
     public boolean existingTransaction() {
         return StringUtils.isNotEmpty(RootContext.getXID());
-
     }
 
+    private GlobalLockConfig replaceGlobalLockConfig(TransactionInfo info) {
+        GlobalLockConfig myConfig = new GlobalLockConfig();
+        myConfig.setLockRetryInternal(info.getLockRetryInternal());
+        myConfig.setLockRetryTimes(info.getLockRetryTimes());
+        return GlobalLockConfigHolder.setAndReturnPrevious(myConfig);
+    }
 
+    private void resumeGlobalLockConfig(GlobalLockConfig config) {
+        if (config != null) {
+            GlobalLockConfigHolder.setAndReturnPrevious(config);
+        } else {
+            GlobalLockConfigHolder.remove();
+        }
+    }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
         //roll back
