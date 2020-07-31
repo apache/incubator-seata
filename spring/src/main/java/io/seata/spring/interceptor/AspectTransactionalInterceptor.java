@@ -17,13 +17,13 @@ package io.seata.spring.interceptor;
 
 import java.lang.reflect.Method;
 
+import io.seata.spring.annotation.AspectTransactional;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
-import io.seata.spring.annotation.AtTransactional;
 import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.spring.util.GlobalTransactionalCheck;
 import io.seata.tm.api.FailureHandler;
@@ -31,19 +31,19 @@ import io.seata.tm.api.FailureHandler;
 /**
  * @author funkye
  */
-public class AtGlobalTransactionalInterceptor extends GlobalInterceptor implements MethodInterceptor {
+public class AspectTransactionalInterceptor extends GlobalInterceptor implements MethodInterceptor {
     private final FailureHandler failureHandler;
-    private final AtTransactional atTransactional;
-    private static final AtTransactional DEFAULT_AT_TRANSACTIONAL = new AtTransactional();
+    private final AspectTransactional aspectTransactional;
+    private static final AspectTransactional DEFAULT_AT_TRANSACTIONAL = new AspectTransactional();
 
-    public AtGlobalTransactionalInterceptor(FailureHandler failureHandler, AtTransactional atTransactional) {
+    public AspectTransactionalInterceptor(FailureHandler failureHandler, AspectTransactional aspectTransactional) {
         this.failureHandler = null == failureHandler ? DEFAULT_FAIL_HANDLER : failureHandler;
-        this.atTransactional = null == atTransactional ? DEFAULT_AT_TRANSACTIONAL : atTransactional;
+        this.aspectTransactional = null == aspectTransactional ? DEFAULT_AT_TRANSACTIONAL : aspectTransactional;
     }
 
-    public AtGlobalTransactionalInterceptor() {
+    public AspectTransactionalInterceptor() {
         this.failureHandler = DEFAULT_FAIL_HANDLER;
-        this.atTransactional = DEFAULT_AT_TRANSACTIONAL;
+        this.aspectTransactional = DEFAULT_AT_TRANSACTIONAL;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class AtGlobalTransactionalInterceptor extends GlobalInterceptor implemen
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             if (null == globalTransactionalAnnotation && !GlobalTransactionalCheck.localDisable()) {
-                return handleGlobalTransaction.runTransaction(invocation, atTransactional, failureHandler,
+                return handleGlobalTransaction.runTransaction(invocation, aspectTransactional, failureHandler,
                     transactionalTemplate);
             }
         }

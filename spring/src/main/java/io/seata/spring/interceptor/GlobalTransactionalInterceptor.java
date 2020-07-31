@@ -58,9 +58,8 @@ public class GlobalTransactionalInterceptor extends GlobalInterceptor implements
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
             if (!GlobalTransactionalCheck.localDisable()) {
                 if (globalTransactionalAnnotation != null) {
-                    return handleGlobalTransaction
-                        .runTransaction(methodInvocation, globalTransactionalAnnotation, failureHandler,
-                            transactionalTemplate);
+                    return handleGlobalTransaction.runTransaction(methodInvocation, globalTransactionalAnnotation,
+                        failureHandler, transactionalTemplate);
                 } else if (globalLockAnnotation != null) {
                     return handleGlobalLock(methodInvocation);
                 }

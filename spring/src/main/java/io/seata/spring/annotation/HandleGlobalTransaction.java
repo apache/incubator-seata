@@ -82,7 +82,7 @@ public class HandleGlobalTransaction {
 
     private TransactionInfo getInfo(Object globalTrxAnno, Method method) {
         TransactionInfo transactionInfo = new TransactionInfo();
-        AtTransactional globalTrx = convertAtTransactional(globalTrxAnno);
+        AspectTransactional globalTrx = convertAtTransactional(globalTrxAnno);
         transactionInfo.setTimeOut(globalTrx.getTimeoutMills());
         String name = globalTrx.getName();
         if (StringUtils.isNullOrEmpty(name)) {
@@ -121,22 +121,22 @@ public class HandleGlobalTransaction {
         return sb.append(")").toString();
     }
 
-    private AtTransactional convertAtTransactional(Object globalTrxAnno) {
-        if (globalTrxAnno instanceof AtTransactional) {
-            return (AtTransactional)globalTrxAnno;
+    private AspectTransactional convertAtTransactional(Object globalTrxAnno) {
+        if (globalTrxAnno instanceof AspectTransactional) {
+            return (AspectTransactional)globalTrxAnno;
         }
 
         if (globalTrxAnno instanceof GlobalTransactional) {
             GlobalTransactional globalTransactional = (GlobalTransactional)globalTrxAnno;
-            AtTransactional atTransactional = new AtTransactional();
-            atTransactional.setName(globalTransactional.name());
-            atTransactional.setNoRollbackFor(globalTransactional.noRollbackFor());
-            atTransactional.setPropagation(globalTransactional.propagation());
-            atTransactional.setTimeoutMills(globalTransactional.timeoutMills());
-            atTransactional.setNoRollbackForClassName(globalTransactional.noRollbackForClassName());
-            atTransactional.setRollbackFor(globalTransactional.rollbackFor());
-            atTransactional.setRollbackForClassName(globalTransactional.rollbackForClassName());
-            return atTransactional;
+            AspectTransactional aspectTransactional = new AspectTransactional();
+            aspectTransactional.setName(globalTransactional.name());
+            aspectTransactional.setNoRollbackFor(globalTransactional.noRollbackFor());
+            aspectTransactional.setPropagation(globalTransactional.propagation());
+            aspectTransactional.setTimeoutMills(globalTransactional.timeoutMills());
+            aspectTransactional.setNoRollbackForClassName(globalTransactional.noRollbackForClassName());
+            aspectTransactional.setRollbackFor(globalTransactional.rollbackFor());
+            aspectTransactional.setRollbackForClassName(globalTransactional.rollbackForClassName());
+            return aspectTransactional;
         }
 
         return null;

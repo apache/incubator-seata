@@ -21,7 +21,7 @@ import io.seata.tm.api.transaction.TransactionInfo;
 /**
  * @author funkye
  */
-public class AtTransactional {
+public class AspectTransactional {
     /**
      * Global transaction timeoutMills in MILLISECONDS.
      *
@@ -71,9 +71,9 @@ public class AtTransactional {
      */
     private Propagation propagation = Propagation.REQUIRED;
 
-    public AtTransactional() {}
+    public AspectTransactional() {}
 
-    public AtTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
+    public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
         String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
         Propagation propagation) {
         this.timeoutMills = timeoutMills;
