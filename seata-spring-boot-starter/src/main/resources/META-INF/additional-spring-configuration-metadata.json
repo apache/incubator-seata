@@ -1,0 +1,116 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "seata.data-source-proxy-mode",
+      "type": "java.lang.String",
+      "description": "data source proxy mode.",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
+      "defaultValue": "AT"
+    }
+  ],
+  "hints": [
+    {
+      "name": "seata.config.type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.config.ConfigType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.registry.type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.discovery.registry.RegistryType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.data-source-proxy-mode",
+      "values": [
+        {
+          "value": "AT",
+          "description": "the default mode."
+        },
+        {
+          "value": "XA"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.rm.saga-json-parser",
+      "values": [
+        {
+          "value": "fastjson",
+          "description": "the default value."
+        },
+        {
+          "value": "jackson"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.undo.log-serialization",
+      "values": [
+        {
+          "value": "jackson",
+          "description": "the default value."
+        },
+        {
+          "value": "fastjson"
+        }
+      ]
+    },
+    {
+      "name": "seata.transport.type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.core.rpc.TransportProtocolType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.transport.server",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.core.rpc.TransportServerType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.transport.serialization",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.core.serializer.SerializerType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.transport.compressor",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.core.compressor.CompressorType"
+          }
+        }
+      ]
+    }
+  ]
+}
