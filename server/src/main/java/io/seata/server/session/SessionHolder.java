@@ -72,13 +72,15 @@ public class SessionHolder {
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
 
+    //region init session manager, reload and revise data
+
     /**
      * Init.
      *
      * @param mode the store mode: file, db
      * @throws IOException the io exception
      */
-    public static void init(String mode) throws IOException {
+    public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         }
@@ -119,6 +121,8 @@ public class SessionHolder {
         }
         reloadAndRevise(storeMode);
     }
+
+    //region Reload and revise
 
     /**
      * Reload and revise.
@@ -198,6 +202,16 @@ public class SessionHolder {
         }
     }
 
+    private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
+        branchSessions.forEach(branchSession -> {
+            try {
+                branchSession.lock();
+            } catch (TransactionException e) {
+                throw new ShouldNeverHappenException(e);
+            }
+        });
+    }
+
     private static void queueToRetryCommit(GlobalSession globalSession) {
         try {
             globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
@@ -216,15 +230,11 @@ public class SessionHolder {
         }
     }
 
-    private static void lockBranchSessions(ArrayList<BranchSession> branchSessions) {
-        branchSessions.forEach(branchSession -> {
-            try {
-                branchSession.lock();
-            } catch (TransactionException e) {
-                throw new ShouldNeverHappenException(e);
-            }
-        });
-    }
+    //endregion
+
+    //endregion
+
+    //region get session manager
 
     /**
      * Gets root session manager.
@@ -273,6 +283,8 @@ public class SessionHolder {
         }
         return RETRY_ROLLBACKING_SESSION_MANAGER;
     }
+
+    //endregion
 
     /**
      * Find global session.
