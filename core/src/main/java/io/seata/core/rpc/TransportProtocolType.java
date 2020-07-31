@@ -43,4 +43,20 @@ public enum TransportProtocolType {
     TransportProtocolType(String name) {
         this.name = name;
     }
+
+    /**
+     * Gets type.
+     *
+     * @param name the name
+     * @return the type
+     */
+    public static TransportProtocolType getType(String name) {
+        name = name.trim().replace('-', '_');
+        for (TransportProtocolType b : TransportProtocolType.values()) {
+            if (b.name().equalsIgnoreCase(name)) {
+                return b;
+            }
+        }
+        throw new IllegalArgumentException("unknown type:" + name);
+    }
 }
