@@ -49,11 +49,11 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
             return invocation.proceed();
         }
 
-        DataSource dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
         Method method = invocation.getMethod();
         Object[] args = invocation.getArguments();
         Method m = BeanUtils.findDeclaredMethod(dataSourceProxyClazz, method.getName(), method.getParameterTypes());
         if (m != null) {
+            DataSource dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
             return m.invoke(dataSourceProxy, args);
         } else {
             return invocation.proceed();
