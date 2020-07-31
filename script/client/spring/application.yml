@@ -13,6 +13,7 @@ seata:
       table-meta-check-enable: false
       report-success-enable: false
       saga-branch-register-enable: false
+      saga-json-parser: fastjson
       lock:
         retry-interval: 10
         retry-times: 30
