@@ -36,7 +36,8 @@
       "name": "seata.data-source-proxy-mode",
       "values": [
         {
-          "value": "AT"
+          "value": "AT",
+          "description": "the default mode."
         },
         {
           "value": "XA"
@@ -47,7 +48,8 @@
       "name": "seata.client.rm.saga-json-parser",
       "values": [
         {
-          "value": "fastjson"
+          "value": "fastjson",
+          "description": "the default value."
         },
         {
           "value": "jackson"
@@ -58,10 +60,11 @@
       "name": "seata.client.undo.log-serialization",
       "values": [
         {
-          "value": "fastjson"
+          "value": "jackson",
+          "description": "the default value."
         },
         {
-          "value": "jackson"
+          "value": "fastjson"
         }
       ]
     },
