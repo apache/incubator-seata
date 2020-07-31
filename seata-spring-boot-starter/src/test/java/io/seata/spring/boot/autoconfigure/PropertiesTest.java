@@ -249,6 +249,7 @@ public class PropertiesTest {
         assertNull(context.getBean(SeataProperties.class).getApplicationId());
         assertEquals("null-seata-service-group", context.getBean(SeataProperties.class).getTxServiceGroup());
         assertTrue(context.getBean(SeataProperties.class).isEnableAutoDataSourceProxy());
+        assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
         assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
 
     }
