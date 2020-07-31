@@ -80,6 +80,8 @@ public class DefaultValues {
     public static final String DEFAULT_TC_CLUSTER = "default";
     public static final String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
+    public static final String DEFAULT_DATA_SOURCE_PROXY_MODE = "AT";
+
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
     public static final String DEFAULT_RETRY_STRATEGY = "I,5s,5m|-,7d";
