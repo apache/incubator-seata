@@ -17,6 +17,9 @@ package io.seata.core.constants;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import static io.seata.core.constants.AutoDefaultValues.autoDefaultSagaJsonParser;
+import static io.seata.core.constants.AutoDefaultValues.autoDefaultUndoLogSerialization;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -52,7 +55,7 @@ public class DefaultValues {
 
     public static final boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
     public static final boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
-    public static final String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
+    public static final String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = autoDefaultUndoLogSerialization();
     public static final boolean DEFAULT_ONLY_CARE_UPDATE_COLUMNS = true;
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
@@ -88,7 +91,7 @@ public class DefaultValues {
     public static final String SERVER_DEFAULT_STORE_MODE = "file";
     public static final long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
-    public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
+    public static final String DEFAULT_SAGA_JSON_PARSER = autoDefaultSagaJsonParser();
 
     public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 }

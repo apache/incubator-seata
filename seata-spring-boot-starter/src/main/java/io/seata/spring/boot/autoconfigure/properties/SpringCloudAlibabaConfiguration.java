@@ -32,8 +32,10 @@ import org.springframework.context.ApplicationContextAware;
 public class SpringCloudAlibabaConfiguration implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudAlibabaConfiguration.class);
-    private static final String SPRING_APPLICATION_NAME_KEY = "spring.application.name";
+
+    public static final String SPRING_APPLICATION_NAME_KEY = "spring.application.name";
     private static final String DEFAULT_SPRING_CLOUD_SERVICE_GROUP_POSTFIX = "-seata-service-group";
+
     private String applicationId;
     private String txServiceGroup;
     private ApplicationContext applicationContext;
