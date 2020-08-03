@@ -146,25 +146,26 @@ public class DefaultCore implements Core {
         // just lock changeStatus
 
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
-            // the lock should release after branch commit
             // Highlight: Firstly, close the session, then no more branch can be registered.
             globalSession.closeAndClean();
             if (globalSession.getStatus() == GlobalStatus.Begin) {
-                globalSession.changeStatus(GlobalStatus.Committing);
-                return true;
+                if (globalSession.canBeCommittedAsync()) {
+                    globalSession.asyncCommit();
+                    return false;
+                } else {
+                    globalSession.changeStatus(GlobalStatus.Committing);
+                    return true;
+                }
             }
             return false;
         });
-        if (!shouldCommit) {
-            return globalSession.getStatus();
-        }
-        if (globalSession.canBeCommittedAsync()) {
-            globalSession.asyncCommit();
-            return GlobalStatus.Committed;
-        } else {
+
+        if (shouldCommit) {
             doGlobalCommit(globalSession, false);
+            return globalSession.getStatus();
+        } else {
+            return globalSession.getStatus() == GlobalStatus.AsyncCommitting ? GlobalStatus.Committed : globalSession.getStatus();
         }
-        return globalSession.getStatus();
     }
 
     @Override
