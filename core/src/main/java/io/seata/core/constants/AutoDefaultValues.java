@@ -20,7 +20,10 @@ import io.seata.common.util.ClassUtils;
 /**
  * @author wang.liang
  */
-abstract class AutoDefaultValues {
+class AutoDefaultValues {
+
+    private AutoDefaultValues() {
+    }
 
     public static String autoDefaultSagaJsonParser() {
         if (ClassUtils.hasFastjson()) {

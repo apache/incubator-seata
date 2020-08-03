@@ -18,7 +18,10 @@ package io.seata.common.util;
 /**
  * @author wang.liang
  */
-public abstract class ClassUtils {
+public class ClassUtils {
+
+    private ClassUtils() {
+    }
 
     public static boolean hasFastjson() {
         return isPresent("com.alibaba.fastjson.JSON");
