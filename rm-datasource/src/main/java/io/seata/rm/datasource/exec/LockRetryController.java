@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
@@ -29,36 +30,17 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TI
  * @author sharajava
  */
 public class LockRetryController {
-    private static int LOCK_RETRY_INTERNAL =
-        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, DEFAULT_CLIENT_LOCK_RETRY_INTERVAL);
-    private static int LOCK_RETRY_TIMES =
-        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, DEFAULT_CLIENT_LOCK_RETRY_TIMES);
 
     private int lockRetryInternal;
+
     private int lockRetryTimes;
 
     /**
      * Instantiates a new Lock retry controller.
      */
     public LockRetryController() {
-        int retryInternal = LOCK_RETRY_INTERNAL;
-        int retryTimes = LOCK_RETRY_TIMES;
-
-        GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
-        if (config != null) {
-            int configInternal = config.getLockRetryInternal();
-            if (configInternal > 0) {
-                retryInternal = configInternal;
-            }
-
-            int configTimes = config.getLockRetryTimes();
-            if (configTimes >= 0) {
-                retryTimes = configTimes;
-            }
-        }
-
-        this.lockRetryInternal = retryInternal;
-        this.lockRetryTimes = retryTimes;
+        this.lockRetryInternal = getLockRetryInternal();
+        this.lockRetryTimes = getLockRetryTimes();
     }
 
     /**
@@ -76,5 +58,33 @@ public class LockRetryController {
             Thread.sleep(lockRetryInternal);
         } catch (InterruptedException ignore) {
         }
+    }
+
+    private int getLockRetryInternal() {
+        // get customized config first
+        GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+        if (config != null) {
+            int configInternal = config.getLockRetryInternal();
+            if (configInternal > 0) {
+                return configInternal;
+            }
+        }
+        // if there is no customized config, use global config instead
+        Configuration configuration = ConfigurationFactory.getInstance();
+        return configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, DEFAULT_CLIENT_LOCK_RETRY_INTERVAL);
+    }
+
+    private int getLockRetryTimes() {
+        // get customized config first
+        GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+        if (config != null) {
+            int configTimes = config.getLockRetryTimes();
+            if (configTimes >= 0) {
+                return configTimes;
+            }
+        }
+        // if there is no customized config, use global config instead
+        Configuration configuration = ConfigurationFactory.getInstance();
+        return configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, DEFAULT_CLIENT_LOCK_RETRY_TIMES);
     }
 }
