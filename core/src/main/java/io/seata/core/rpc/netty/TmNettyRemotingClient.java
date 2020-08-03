@@ -84,26 +84,30 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     /**
      * Gets instance.
-     *
      * @return the instance
      */
-    public static TmNettyRemotingClient getInstance() {
-        if (instance == null) {
-            synchronized (TmNettyRemotingClient.class) {
-                if (instance == null) {
-                    NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                        nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
-                        KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                        new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
+    public static TmNettyRemotingClient getInstance(){
+        return SingletonTmNettyRemotingClient.INSTANCE.getInstance();
+    }
+
+    private enum SingletonTmNettyRemotingClient{
+        INSTANCE;
+        private final TmNettyRemotingClient instance;
+        SingletonTmNettyRemotingClient() {
+            NettyClientConfig nettyClientConfig = new NettyClientConfig();
+            final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                    nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+                    KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
+                    new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
-                        RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
-                }
-            }
+                    RejectedPolicies.runsOldestTaskPolicy());
+            instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
         }
-        return instance;
+
+        private TmNettyRemotingClient getInstance(){
+            return instance;
+        }
     }
 
     /**
