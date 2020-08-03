@@ -86,11 +86,11 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * Gets instance.
      * @return the instance
      */
-    public static TmNettyRemotingClient getInstance(){
+    public static TmNettyRemotingClient getInstance() {
         return SingletonTmNettyRemotingClient.INSTANCE.getInstance();
     }
 
-    private enum SingletonTmNettyRemotingClient{
+    private enum SingletonTmNettyRemotingClient {
         /**
          * instance
          */
