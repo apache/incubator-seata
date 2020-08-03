@@ -111,7 +111,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
             instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
         }
 
-        private TmNettyRemotingClient getInstance(){
+        private TmNettyRemotingClient getInstance() {
             return instance;
         }
     }
