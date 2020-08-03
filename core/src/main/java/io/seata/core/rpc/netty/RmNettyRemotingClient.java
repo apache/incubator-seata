@@ -35,7 +35,6 @@ import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
 import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -43,7 +42,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
 /**
@@ -95,24 +93,33 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     /**
      * Gets instance.
-     *
      * @return the instance
      */
     public static RmNettyRemotingClient getInstance() {
-        if (instance == null) {
-            synchronized (RmNettyRemotingClient.class) {
-                if (instance == null) {
-                    NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                        nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
-                        KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                        new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
+        return RmNettyRemotingClient.SingletonRmNettyRemotingClient.INSTANCE.getInstance();
+    }
+
+    private enum SingletonRmNettyRemotingClient {
+        /**
+         * instance
+         */
+        INSTANCE;
+        /**
+         * RmNettyRemotingClient Instance
+         */
+        private final RmNettyRemotingClient instance;
+        SingletonRmNettyRemotingClient() {
+            NettyClientConfig nettyClientConfig = new NettyClientConfig();
+            final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                    nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
+                    KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
+                    new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
-                    instance = new RmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
-                }
-            }
+            instance = new RmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
         }
-        return instance;
+        private RmNettyRemotingClient getInstance() {
+            return instance;
+        }
     }
 
     /**
