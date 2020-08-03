@@ -91,7 +91,13 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     private enum SingletonTmNettyRemotingClient{
+        /**
+         * instance
+         */
         INSTANCE;
+        /**
+         * TmNettyRemotingClient Instance
+         */
         private final TmNettyRemotingClient instance;
         SingletonTmNettyRemotingClient() {
             NettyClientConfig nettyClientConfig = new NettyClientConfig();
