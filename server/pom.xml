@@ -205,6 +205,8 @@
                                     <extraArgument>-verbose:gc</extraArgument>
                                     <!--netty-->
                                     <extraArgument>-Dio.netty.leakDetectionLevel=advanced</extraArgument>
+                                    <!--run by *.bat or *.sh-->
+                                    <extraArgument>-Drun.by-startup=true</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                             <platforms>

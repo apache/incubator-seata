@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
+ * @author xingfudeshi@gmail.com
  * @author wang.liang
  */
 public class ContainerHelper {
@@ -57,6 +58,17 @@ public class ContainerHelper {
             }
         }
         return false;
+    }
+    /**
+     * Judge if application is run in windows with seata-server.bat.
+     *
+     * @return If application is run in windows with seata-server.bat.
+     */
+    public static boolean isRunningInWindowsWithBat() {
+        String osName = System.getProperty("os.name");
+        String runByStartup = System.getProperty("run.by-startup");
+        return osName != null && osName.toLowerCase().startsWith("win")
+                && runByStartup != null && runByStartup.equalsIgnoreCase("true");
     }
 
     /**
