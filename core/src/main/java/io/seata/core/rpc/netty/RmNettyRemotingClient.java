@@ -75,8 +75,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
             // Found one or more resources that were registered before initialization
             if (resourceManager!=null
-                    && resourceManager.getManagedResources().size() >0
-                    && StringUtils.isNotEmpty(transactionServiceGroup) ){
+                    && !resourceManager.getManagedResources().isEmpty()
+                    && StringUtils.isNotBlank(transactionServiceGroup) ){
                 getClientChannelManager().reconnect(transactionServiceGroup);
             }
         }
