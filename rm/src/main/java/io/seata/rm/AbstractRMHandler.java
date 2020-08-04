@@ -31,6 +31,8 @@ import io.seata.core.protocol.transaction.RMInboundHandler;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.rm.hook.GlobalTransactionHook;
+import io.seata.rm.hook.GlobalTransactionHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,6 +106,16 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             LOGGER.info("Branch commit result: " + status);
         }
 
+        if( BranchStatus.PhaseTwo_Committed == status){
+            for(GlobalTransactionHook hook : GlobalTransactionHookManager.getHooks(xid)){
+                try{
+                    hook.afterCommit();
+                }catch (Exception e){
+                    LOGGER.error("execute global commit callback fail:{}",e.getMessage(),e);
+                }
+            }
+        }
+
     }
 
     /**
@@ -128,7 +140,17 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         response.setBranchId(branchId);
         response.setBranchStatus(status);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Branch Rollbacked result: " + status);
+            LOGGER.info("Branch global rollback result: " + status);
+        }
+
+        if( BranchStatus.PhaseTwo_Rollbacked == status){
+            for(GlobalTransactionHook hook : GlobalTransactionHookManager.getHooks(xid)){
+                try{
+                    hook.afterRollback();
+                }catch (Exception e){
+                    LOGGER.error("execute callback fail:{}",e.getMessage(),e);
+                }
+            }
         }
     }
 
