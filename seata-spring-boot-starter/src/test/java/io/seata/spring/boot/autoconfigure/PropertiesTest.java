@@ -203,6 +203,7 @@ public class PropertiesTest {
     public void testRegistryNacosProperties() {
         assertEquals("localhost", context.getBean(RegistryNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
+        assertEquals("SEATA_GROUP", context.getBean(RegistryNacosProperties.class).getGroup());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getUsername());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getPassword());
@@ -248,6 +249,7 @@ public class PropertiesTest {
         assertNull(context.getBean(SeataProperties.class).getApplicationId());
         assertEquals("null-seata-service-group", context.getBean(SeataProperties.class).getTxServiceGroup());
         assertTrue(context.getBean(SeataProperties.class).isEnableAutoDataSourceProxy());
+        assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
         assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
 
     }

@@ -85,7 +85,12 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                 }
             }
         } else {
-            throw new TransactionException("Unknown Resource for XA resource " + resourceId + " " + resource);
+            LOGGER.error("Unknown Resource for XA resource " + resourceId + " " + resource);
+            if (committed) {
+                return BranchStatus.PhaseTwo_CommitFailed_Unretryable;
+            } else {
+                return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
+            }
         }
     }
 }

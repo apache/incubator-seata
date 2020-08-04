@@ -18,6 +18,7 @@ package io.seata.core.rpc;
 import io.netty.channel.Channel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.NettyClientConfig;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
 import java.util.concurrent.ExecutorService;
@@ -33,43 +34,42 @@ import java.util.concurrent.TimeoutException;
 public interface RemotingClient {
 
     /**
-     * Send msg with response object.
+     * client send sync request.
+     * In this request, if {@link NettyClientConfig#isEnableClientBatchSendRequest} is enabled,
+     * the message will be sent in batches.
      *
-     * @param msg     the msg
-     * @param timeout the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
+     * @param msg transaction message {@link io.seata.core.protocol}
+     * @return server result message
+     * @throws TimeoutException
      */
-    Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException;
+    Object sendSyncRequest(Object msg) throws TimeoutException;
 
     /**
-     * Send msg with response object.
+     * client send sync request.
      *
-     * @param serverAddress the server address
-     * @param msg           the msg
-     * @param timeout       the timeout
-     * @return the object
-     * @throws TimeoutException the timeout exception
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @return server result message
+     * @throws TimeoutException
      */
-    Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException;
+    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
 
     /**
-     * Send msg with response object.
+     * client send async request.
      *
-     * @param msg the msg
-     * @return the object
-     * @throws TimeoutException the timeout exception
+     * @param channel client channel
+     * @param msg     transaction message {@link io.seata.core.protocol}
      */
-    Object sendMsgWithResponse(Object msg) throws TimeoutException;
+    void sendAsyncRequest(Channel channel, Object msg);
 
     /**
-     * Send response.
+     * client send async response.
      *
-     * @param request       the msg id
-     * @param serverAddress the server address
-     * @param msg           the msg
+     * @param serverAddress server address
+     * @param rpcMessage    rpc message from server request
+     * @param msg           transaction message {@link io.seata.core.protocol}
      */
-    void sendResponse(RpcMessage request, String serverAddress, Object msg);
+    void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg);
 
     /**
      * On register msg success.

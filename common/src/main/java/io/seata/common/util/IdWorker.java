@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 package io.seata.common.util;
-
-import java.util.concurrent.ThreadLocalRandom;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @author funkye
@@ -144,11 +144,22 @@ public class IdWorker {
         if (idWorker == null) {
             synchronized (IdWorker.class) {
                 if (idWorker == null) {
-                    init(ThreadLocalRandom.current().nextLong(1024));
+                    init(initWorkerId());
                 }
             }
         }
         return idWorker;
+    }
+
+    public static long initWorkerId() {
+        InetAddress address;
+        try {
+            address = InetAddress.getLocalHost();
+        } catch (final UnknownHostException e) {
+            throw new IllegalStateException("Cannot get LocalHost InetAddress, please check your network!",e);
+        }
+        byte[] ipAddressByteArray = address.getAddress();
+        return ((ipAddressByteArray[ipAddressByteArray.length - 2] & 0B11) << Byte.SIZE) + (ipAddressByteArray[ipAddressByteArray.length - 1] & 0xFF);
     }
 
     public static void init(Long serverNodeId) {

@@ -21,6 +21,8 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.parser.JsonParser;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -149,6 +151,45 @@ public class StateMachineDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
         Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testSimpleScriptTaskStateMachineWithLayout() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "designerSimpleScriptTaskStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
+
+
+        start = System.currentTimeMillis();
+
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+
+        start = System.currentTimeMillis();
+        paramMap.put("scriptThrowException", true);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
         Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
 
@@ -317,7 +358,8 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson);
         System.out.println(graphJson);
 
@@ -331,7 +373,7 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
 
-        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson2);
         System.out.println(graphJson2);
     }
@@ -384,7 +426,8 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson);
         System.out.println(graphJson);
 
@@ -397,7 +440,7 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
 
-        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst, jsonParser);
         Assertions.assertNotNull(graphJson2);
         System.out.println(graphJson2);
     }

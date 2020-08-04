@@ -41,4 +41,5 @@ public final class ConfigurationKeys {
      * The constant FILE_ROOT_TYPE.
      */
     public static final String FILE_ROOT_TYPE = "type";
+
 }

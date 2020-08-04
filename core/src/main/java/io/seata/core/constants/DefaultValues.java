@@ -15,6 +15,8 @@
  */
 package io.seata.core.constants;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -78,7 +80,15 @@ public class DefaultValues {
     public static final String DEFAULT_TC_CLUSTER = "default";
     public static final String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
+    public static final String DEFAULT_DATA_SOURCE_PROXY_MODE = "AT";
+
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
+    public static final int SERVER_DEFAULT_PORT = 8091;
+    public static final String SERVER_DEFAULT_STORE_MODE = "file";
+    public static final long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
+    public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
+
+    public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 }

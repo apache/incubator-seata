@@ -57,7 +57,7 @@ public class MockWebServer {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                if (null != serverSocket) {
+                if (serverSocket != null) {
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
@@ -123,9 +123,6 @@ public class MockWebServer {
         return map;
     }
 
-    public static void main(String[] args) {
-        new MockWebServer().start(8081);
-    }
 
     public static Map<String, Object> getUrlParams(String param) {
         Map<String, Object> map = new HashMap<String, Object>(0);

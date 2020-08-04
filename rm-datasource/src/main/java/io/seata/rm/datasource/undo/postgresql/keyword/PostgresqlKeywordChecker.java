@@ -361,7 +361,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
-        if (null != fieldOrTableName) {
+        if (fieldOrTableName != null) {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
@@ -371,25 +371,13 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     @Override
     public boolean checkEscape(String fieldOrTableName) {
         boolean check = check(fieldOrTableName);
-        if (!check && containsUppercase(fieldOrTableName)) {
+        if (!check && !containsUppercase(fieldOrTableName)) {
             // postgresql
             // we are recommend table name and column name must lowercase.
             // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? replace(fieldOrTableName) : fieldOrTableName;
-    }
-
-    private String replace(String fieldOrTableName) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\"").append(fieldOrTableName).append("\"");
-        String name = builder.toString();
-        return name;
     }
 
     private static boolean containsUppercase(String colName) {
