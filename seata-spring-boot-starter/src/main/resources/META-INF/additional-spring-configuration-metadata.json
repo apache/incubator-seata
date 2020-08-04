@@ -8,7 +8,7 @@
       "deprecation": {
         "level": "warning",
         "replacement": "seata.application-id",
-        "reason": "It may be removed in a future release."
+        "reason": "It may be removed in a future release, please configure to 'seata.application-id'."
       }
     },
     {
@@ -18,7 +18,7 @@
       "deprecation": {
         "level": "warning",
         "replacement": "seata.tx-service-group",
-        "reason": "It may be removed in a future release."
+        "reason": "It may be removed in a future release, please configure to 'seata.tx-service-group'."
       }
     },
     {
