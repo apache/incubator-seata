@@ -15,6 +15,7 @@
  */
 package io.seata.server.env;
 
+import io.netty.util.internal.PlatformDependent;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 
@@ -59,16 +60,19 @@ public class ContainerHelper {
         }
         return false;
     }
+
     /**
      * Judge if application is run in windows with seata-server.bat.
      *
      * @return If application is run in windows with seata-server.bat.
      */
     public static boolean isRunningInWindowsWithBat() {
-        String osName = System.getProperty("os.name");
+        if (!PlatformDependent.isWindows()) {
+            return false;
+        }
+
         String runByStartup = System.getProperty("run.by-startup");
-        return osName != null && osName.toLowerCase().startsWith("win")
-                && runByStartup != null && runByStartup.equalsIgnoreCase("true");
+        return runByStartup != null && runByStartup.equalsIgnoreCase("true");
     }
 
     /**
