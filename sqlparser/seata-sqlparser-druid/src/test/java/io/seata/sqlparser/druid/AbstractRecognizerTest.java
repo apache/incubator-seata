@@ -13,31 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.sqlparser.druid;
 
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+import java.util.List;
+
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
- * The interface Register check auth handler.
+ * The type Abstract my sql recognizer test.
  *
- * @author slievrly
+ * @author hanwen created at 2019-01-25
  */
-public interface RegisterCheckAuthHandler {
+public abstract class AbstractRecognizerTest {
 
     /**
-     * Reg transaction manager check auth boolean.
+     * Gets sql statement.
      *
-     * @param request the request
-     * @return the boolean
+     * @param sql the sql
+     * @return the sql statement
      */
-    boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
+    public SQLStatement getSQLStatement(String sql) {
+        List<SQLStatement> stats = SQLUtils.parseStatements(sql, getDbType());
+        return stats.get(0);
+    }
 
-    /**
-     * Reg resource manager check auth boolean.
-     *
-     * @param request the request
-     * @return the boolean
-     */
-    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
+    public abstract String getDbType();
+
 }

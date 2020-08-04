@@ -17,6 +17,7 @@ package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
 import io.seata.common.util.StringUtils;
+import io.seata.core.rpc.netty.ChannelUtil;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

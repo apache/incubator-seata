@@ -18,9 +18,10 @@ package io.seata.saga.engine.db;
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RpcServer;
-import io.seata.core.rpc.netty.ShutdownHook;
+import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.ParameterParser;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
@@ -39,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractServerTest {
 
 
-    private static RpcServer rpcServer;
+    private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -60,15 +61,16 @@ public abstract class AbstractServerTest {
 
                     System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-                    rpcServer = new RpcServer(workingThreads);
+                    nettyServer = new NettyRemotingServer(workingThreads);
                     //server port
-                    rpcServer.setListenPort(parameterParser.getPort());
+                    nettyServer.setListenPort(parameterParser.getPort());
+                    UUIDGenerator.init(parameterParser.getServerNode());
                     //log store mode : file、db
                     SessionHolder.init(parameterParser.getStoreMode());
 
-                    DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+                    DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
                     coordinator.init();
-                    rpcServer.setHandler(coordinator);
+                    nettyServer.setHandler(coordinator);
                     // register ShutdownHook
                     ShutdownHook.getInstance().addDisposable(coordinator);
 
@@ -78,9 +80,9 @@ public abstract class AbstractServerTest {
                     } else {
                         XID.setIpAddress(NetUtil.getLocalIp());
                     }
-                    XID.setPort(rpcServer.getListenPort());
+                    XID.setPort(nettyServer.getListenPort());
 
-                    rpcServer.init();
+                    nettyServer.init();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -90,8 +92,8 @@ public abstract class AbstractServerTest {
     }
 
     protected static final void stopSeataServer() throws InterruptedException {
-        if(rpcServer != null){
-            rpcServer.destroy();
+        if(nettyServer != null){
+            nettyServer.destroy();
             Thread.sleep(5000);
         }
     }

@@ -13,23 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.core.rpc;
 
-import io.netty.channel.Channel;
-import io.netty.channel.pool.AbstractChannelPoolHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterTMRequest;
 
 /**
- * The type Default channel pool handler.
+ * The interface Register check auth handler.
  *
  * @author slievrly
  */
-public class DefaultChannelPoolHandler extends AbstractChannelPoolHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChannelPoolHandler.class);
+public interface RegisterCheckAuthHandler {
 
-    @Override
-    public void channelCreated(Channel ch) throws Exception {
+    /**
+     * Reg transaction manager check auth boolean.
+     *
+     * @param request the request
+     * @return the boolean
+     */
+    boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
 
-    }
+    /**
+     * Reg resource manager check auth boolean.
+     *
+     * @param request the request
+     * @return the boolean
+     */
+    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
 }
