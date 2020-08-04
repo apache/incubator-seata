@@ -46,6 +46,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -66,8 +67,12 @@ public class PropertiesTest {
     @BeforeAll
     public static void initContext() {
         context = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
+
         context.registerBeanDefinition("springCloudAlibabaConfiguration", BeanDefinitionBuilder.genericBeanDefinition(SpringCloudAlibabaConfiguration.class).getBeanDefinition());
-        context.registerBeanDefinition("seataProperties", BeanDefinitionBuilder.genericBeanDefinition(SeataProperties.class).getBeanDefinition());
+
+        BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SeataProperties.class).getBeanDefinition();
+        beanDefinition.setPrimary(true);
+        context.registerBeanDefinition("seataProperties", beanDefinition);
     }
 
     @Test
@@ -95,7 +100,7 @@ public class PropertiesTest {
         ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
         Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
         Map<String, String> grouplist = serviceProperties.getGrouplist();
-        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
+        assertEquals("default", vgroupMapping.get("null-seata-service-group"));
         assertEquals("127.0.0.1:8091", grouplist.get("default"));
         assertFalse(serviceProperties.isEnableDegrade());
         assertFalse(serviceProperties.isDisableGlobalTransaction());
