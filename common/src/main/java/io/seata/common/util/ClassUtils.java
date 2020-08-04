@@ -55,10 +55,6 @@ public class ClassUtils {
         return cl;
     }
 
-    public static Class<?> forName(String name) throws ClassNotFoundException {
-        return forName(name, null);
-    }
-
     public static Class<?> forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
         if (name == null) {
             throw new IllegalArgumentException("Name must not be null");
@@ -83,6 +79,10 @@ public class ClassUtils {
 
             throw e;
         }
+    }
+
+    public static Class<?> forName(String name) throws ClassNotFoundException {
+        return forName(name, null);
     }
 
     public static boolean isPresent(String className, ClassLoader classLoader) {
