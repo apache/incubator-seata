@@ -26,8 +26,6 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -37,8 +35,6 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
-
-    private KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -64,7 +60,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
             DatabaseMetaData dbmd = connection.getMetaData();
-            tableName = keywordChecker.checkAndReplace(tableName);
             return resultSetMetaToSchema(dbmd, tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
