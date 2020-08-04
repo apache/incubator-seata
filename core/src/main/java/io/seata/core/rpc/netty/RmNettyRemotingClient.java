@@ -74,9 +74,9 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             super.init();
 
             // Found one or more resources that were registered before initialization
-            if (resourceManager!=null
+            if (resourceManager != null
                     && !resourceManager.getManagedResources().isEmpty()
-                    && StringUtils.isNotBlank(transactionServiceGroup) ){
+                    && StringUtils.isNotBlank(transactionServiceGroup)) {
                 getClientChannelManager().reconnect(transactionServiceGroup);
             }
         }
@@ -187,7 +187,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     public void registerResource(String resourceGroupId, String resourceId) {
 
         // Resource registration cannot be performed until the RM client is initialized
-        if (StringUtils.isBlank(transactionServiceGroup)){
+        if (StringUtils.isBlank(transactionServiceGroup)) {
             return;
         }
 
