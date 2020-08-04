@@ -1,7 +1,2 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.seata.spring.boot.autoconfigure.SeataAutoConfiguration
-
-# Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
-io.seata.spring.boot.autoconfigure.environment.SeataDefaultPropertiesEnvironmentPostProcessor
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.seata.spring.boot.autoconfigure.SeataAutoConfiguration

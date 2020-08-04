@@ -2,6 +2,26 @@
   "groups": [],
   "properties": [
     {
+      "name": "spring.cloud.alibaba.seata.application-id",
+      "type": "java.lang.String",
+      "description": "the application id.",
+      "deprecation": {
+        "level": "warning",
+        "replacement": "seata.application-id",
+        "reason": "It may be removed in a future release."
+      }
+    },
+    {
+      "name": "spring.cloud.alibaba.seata.tx-service-group",
+      "type": "java.lang.String",
+      "description": "the tx-service-group.",
+      "deprecation": {
+        "level": "warning",
+        "replacement": "seata.tx-service-group",
+        "reason": "It may be removed in a future release."
+      }
+    },
+    {
       "name": "seata.data-source-proxy-mode",
       "type": "java.lang.String",
       "description": "data source proxy mode.",
