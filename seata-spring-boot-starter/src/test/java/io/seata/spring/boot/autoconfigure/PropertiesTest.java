@@ -148,7 +148,7 @@ public class PropertiesTest {
     @Test
     public void testConfigApolloProperties() {
         assertEquals("seata-server", context.getBean(ConfigApolloProperties.class).getAppId());
-        assertEquals("http://192.168.1.204:8801", context.getBean(ConfigApolloProperties.class).getApolloMeta());
+        assertEquals("http://localhost:8801", context.getBean(ConfigApolloProperties.class).getApolloMeta());
     }
 
     @Test
@@ -168,7 +168,7 @@ public class PropertiesTest {
 
     @Test
     public void testConfigNacosProperties() {
-        assertEquals("localhost", context.getBean(ConfigNacosProperties.class).getServerAddr());
+        assertEquals("127.0.0.1:8848", context.getBean(ConfigNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(ConfigNacosProperties.class).getNamespace());
     }
 
@@ -199,14 +199,14 @@ public class PropertiesTest {
 
     @Test
     public void testRegistryEurekaProperties() {
-        assertEquals("default", context.getBean(RegistryEurekaProperties.class).getApplication());
+        assertEquals("seata-server", context.getBean(RegistryEurekaProperties.class).getApplication());
         assertEquals("http://localhost:8761/eureka", context.getBean(RegistryEurekaProperties.class).getServiceUrl());
         assertEquals("1", context.getBean(RegistryEurekaProperties.class).getWeight());
     }
 
     @Test
     public void testRegistryNacosProperties() {
-        assertEquals("localhost", context.getBean(RegistryNacosProperties.class).getServerAddr());
+        assertEquals("127.0.0.1:8848", context.getBean(RegistryNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
         assertEquals("SEATA_GROUP", context.getBean(RegistryNacosProperties.class).getGroup());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
@@ -232,7 +232,7 @@ public class PropertiesTest {
     @Test
     public void testRegistrySofaProperties() {
         assertEquals("127.0.0.1:9603", context.getBean(RegistrySofaProperties.class).getServerAddr());
-        assertEquals("default", context.getBean(RegistrySofaProperties.class).getApplication());
+        assertEquals("seata-server", context.getBean(RegistrySofaProperties.class).getApplication());
         assertEquals("DEFAULT_ZONE", context.getBean(RegistrySofaProperties.class).getRegion());
         assertEquals("DefaultDataCenter", context.getBean(RegistrySofaProperties.class).getDatacenter());
         assertEquals("default", context.getBean(RegistrySofaProperties.class).getCluster());
