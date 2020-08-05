@@ -17,8 +17,8 @@ package io.seata.common;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static io.seata.core.constants.AutoDefaultValues.autoDefaultSagaJsonParser;
-import static io.seata.core.constants.AutoDefaultValues.autoDefaultUndoLogSerialization;
+import static io.seata.common.AutoDefaultValues.autoDefaultSagaJsonParser;
+import static io.seata.common.AutoDefaultValues.autoDefaultUndoLogSerialization;
 
 /**
  * @author xingfudeshi@gmail.com
