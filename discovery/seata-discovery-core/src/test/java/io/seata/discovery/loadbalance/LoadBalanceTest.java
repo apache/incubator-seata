@@ -33,6 +33,8 @@ import java.util.stream.Stream;
  */
 public class LoadBalanceTest {
 
+    private static final String XID = "XID";
+
     /**
      * Test random load balance select.
      *
@@ -100,7 +102,7 @@ public class LoadBalanceTest {
         InetSocketAddress socketAddress = addresses.get(size - 1);
         LoadBalance loadBalance = new LeastActiveLoadBalance();
         for (int i = 0; i < runs; i++) {
-            InetSocketAddress selectAddress = loadBalance.select(addresses);
+            InetSocketAddress selectAddress = loadBalance.select(addresses, XID);
             Assertions.assertEquals(selectAddress, socketAddress);
         }
         RpcStatus.beginCount(socketAddress.toString());
@@ -133,7 +135,7 @@ public class LoadBalanceTest {
         }
         try {
             for (int i = 0; i < runs; i++) {
-                InetSocketAddress selectAddress = loadBalance.select(addresses, "XID");
+                InetSocketAddress selectAddress = loadBalance.select(addresses, XID);
                 counter.get(selectAddress).incrementAndGet();
             }
         } catch (Exception e) {
