@@ -126,26 +126,35 @@ public class FileConfiguration extends AbstractConfiguration {
     private File getConfigFile(String name) {
         if (name == null) {
             throw new IllegalArgumentException("name can't be null");
-        } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-            String filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-            URL resource = this.getClass().getClassLoader().getResource(name);
-            if (resource == null) {
-                for (String s : FileConfigFactory.getSuffixSet()) {
-                    resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                    if (resource != null) {
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("The configuration file used is {}", resource.getPath());
-                        }
-                        return new File(resource.getPath());
+        }
+        String filePath = null;
+        boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
+        if (filePathCustom) {
+            filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
+        } else {
+            // projectDir first
+            filePath = this.getClass().getClassLoader().getResource("").getPath() + name;
+        }
+
+        File targetFile = new File(filePath);
+        if (!targetFile.exists()) {
+            for (String s : FileConfigFactory.getSuffixSet()) {
+                targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                if (targetFile.exists()) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("The configuration file used is {}", targetFile.getPath());
                     }
+                    return targetFile;
                 }
-            } else {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("The configuration file used is {}", name);
-                }
-                return new File(resource.getPath());
             }
         } else {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("The configuration file used is {}", name);
+            }
+            return targetFile;
+        }
+
+        if (!filePathCustom) {
             URL resource = this.getClass().getClassLoader().getResource(name);
             if (resource == null) {
                 for (String s : FileConfigFactory.getSuffixSet()) {
@@ -164,6 +173,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 return new File(resource.getPath());
             }
         }
+
         return null;
     }
 
