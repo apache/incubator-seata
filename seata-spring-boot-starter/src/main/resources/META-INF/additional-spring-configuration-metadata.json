@@ -69,7 +69,7 @@
       "values": [
         {
           "value": "fastjson",
-          "description": "the default value."
+          "description": "the default parser."
         },
         {
           "value": "jackson"
@@ -81,10 +81,16 @@
       "values": [
         {
           "value": "jackson",
-          "description": "the default value."
+          "description": "the default serialization."
         },
         {
           "value": "fastjson"
+        },
+        {
+          "value": "kryo"
+        },
+        {
+          "value": "protostuff"
         }
       ]
     },
