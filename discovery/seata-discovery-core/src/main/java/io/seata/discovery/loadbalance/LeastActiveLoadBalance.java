@@ -30,7 +30,7 @@ import io.seata.common.rpc.RpcStatus;
 public class LeastActiveLoadBalance extends AbstractLoadBalance {
 
     @Override
-    protected <T> T doSelect(List<T> invokers) {
+    protected <T> T doSelect(List<T> invokers, String xid) {
         int length = invokers.size();
         int leastActive = -1;
         int leastCount = 0;
