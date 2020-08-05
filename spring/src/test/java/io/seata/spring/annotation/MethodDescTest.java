@@ -18,7 +18,7 @@ package io.seata.spring.annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import io.seata.common.exception.FrameworkException;
-import io.seata.core.constants.DefaultValues;
+import io.seata.common.DefaultValues;
 import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -21,7 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.seata.core.constants.DefaultValues;
+import io.seata.common.DefaultValues;
 import io.seata.tm.api.transaction.Propagation;
 
 /**
