@@ -200,7 +200,9 @@ public class AsyncWorker implements ResourceManagerInbound {
             } catch (Throwable e) {
                 LOGGER.error(e.getMessage(), e);
                 try {
-                    conn.rollback();
+                    if (conn != null) {
+                        conn.rollback();
+                    }
                 } catch (SQLException rollbackEx) {
                     LOGGER.warn("Failed to rollback JDBC resource while deleting undo_log ", rollbackEx);
                 }
