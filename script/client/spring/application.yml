@@ -69,7 +69,7 @@ seata:
       server-addr: http://localhost:2379
     nacos:
       namespace:
-      serverAddr: 127.0.0.1:8848
+      server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
       username: ""
       password: ""
@@ -84,7 +84,7 @@ seata:
     consul:
       server-addr: 127.0.0.1:8500
     etcd3:
-      serverAddr: http://localhost:2379
+      server-addr: http://localhost:2379
     eureka:
       application: seata-server
       weight: 1
@@ -92,7 +92,7 @@ seata:
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
-      group : "SEATA_GROUP"
+      group: SEATA_GROUP
       namespace:
       username: ""
       password: ""
