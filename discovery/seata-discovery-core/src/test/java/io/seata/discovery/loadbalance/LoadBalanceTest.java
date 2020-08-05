@@ -66,6 +66,25 @@ public class LoadBalanceTest {
     }
 
     /**
+     * Test consistent hash load load balance select.
+     *
+     * @param addresses the addresses
+     */
+    @ParameterizedTest
+    @MethodSource("addressProvider")
+    public void testConsistentHashLoadBalance_select(List<InetSocketAddress> addresses) {
+        int runs = 10000;
+        int selected = 0;
+        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new ConsistentHashLoadBalance());
+        for (InetSocketAddress address : counter.keySet()) {
+            if (counter.get(address).get() > 0) {
+                selected++;
+            }
+        }
+        Assertions.assertEquals(1, selected, "selected must be equal to 1");
+    }
+
+    /**
      * Test least active load balance select.
      *
      * @param addresses the addresses
@@ -114,7 +133,7 @@ public class LoadBalanceTest {
         }
         try {
             for (int i = 0; i < runs; i++) {
-                InetSocketAddress selectAddress = loadBalance.select(addresses);
+                InetSocketAddress selectAddress = loadBalance.select(addresses, "XID");
                 counter.get(selectAddress).incrementAndGet();
             }
         } catch (Exception e) {
