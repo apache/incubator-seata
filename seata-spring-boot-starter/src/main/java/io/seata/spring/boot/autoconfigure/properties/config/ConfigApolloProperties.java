@@ -27,7 +27,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_
 @ConfigurationProperties(prefix = CONFIG_APOLLO_PREFIX)
 public class ConfigApolloProperties {
     private String appId = "seata-server";
-    private String apolloMeta = "http://192.168.1.204:8801";
+    private String apolloMeta = "http://localhost:8801";
     private String namespace = "application";
 
     public String getAppId() {
