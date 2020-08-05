@@ -4,7 +4,7 @@
 import http.client
 import sys
 
-if len(sys.argv) != 2:
+if len(sys.argv) <= 2:
     print ('python nacos-config.py nacosAddr')
     exit()
 
