@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
@@ -75,13 +77,33 @@ public class RedisLocker extends AbstractLocker {
                 locks =
                     locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
+            List<String> existedKeyList = new ArrayList<>();
+            locks.forEach(lockDO -> {
+                existedKeyList.add(getLockKey(lockDO.getRowKey()));
+            });
+            List<String> lockList = jedis.mget(existedKeyList.toArray(new String[0]));
+            Map<String, String> map = new HashMap<>(existedKeyList.size(), 1);
+            for (int i = 0; i < existedKeyList.size(); i++) {
+                String existedValue = lockList.get(i);
+                if (existedValue == null) {
+                    String key = existedKeyList.get(i);
+                    map.put(key, JSON.toJSONString(locks.get(i)));
+                } else {
+                    LockDO existed = JSON.parseObject(existedValue, LockDO.class);
+                    if (!StringUtils.equals(existed.getXid(), locks.get(i).getXid())) {
+                        return false;
+                    }
+                }
+            }
+            if (map.isEmpty()) {
+                return true;
+            }
             Pipeline pipeline = jedis.pipelined();
             List<String> readyKeys = new ArrayList<>();
-            for (LockDO lock : locks) {
-                String key = getLockKey(lock.getRowKey());
-                pipeline.setnx(key, JSON.toJSONString(lock));
+            map.forEach((key, value) -> {
+                pipeline.setnx(key, value);
                 readyKeys.add(key);
-            }
+            });
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
                 Long result = (long)results.get(i);
