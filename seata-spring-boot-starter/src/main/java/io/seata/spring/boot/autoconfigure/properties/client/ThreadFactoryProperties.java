@@ -42,7 +42,7 @@ public class ThreadFactoryProperties {
     private int clientSelectorThreadSize = DEFAULT_SELECTOR_THREAD_SIZE;
     private String clientWorkerThreadPrefix = DEFAULT_WORKER_THREAD_PREFIX;
     /**
-     * netty boss thread size,will not be used for UDT
+     * netty boss thread size
      */
     private int bossThreadSize = DEFAULT_BOSS_THREAD_SIZE;
     /**

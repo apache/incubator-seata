@@ -29,11 +29,11 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
 @ConfigurationProperties(prefix = TRANSPORT_PREFIX)
 public class TransportProperties {
     /**
-     * tcp udt unix-domain-socket
+     * tcp, unix-domain-socket
      */
     private String type = "TCP";
     /**
-     * NIO NATIVE
+     * NIO, NATIVE
      */
     private String server = "NIO";
     /**
