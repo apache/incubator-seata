@@ -161,7 +161,22 @@ public class DefaultCore implements Core {
         });
 
         if (shouldCommit) {
-            doGlobalCommit(globalSession, false);
+            List<BranchSession> atBranchSessions = globalSession.takeOutATBranchSessions();
+            if (CollectionUtils.isNotEmpty(atBranchSessions)) {
+                boolean success;
+                try {
+                    success = doGlobalCommit(globalSession, false);
+                } finally {
+                    globalSession.putBackATBranchSessions(atBranchSessions);
+                }
+
+                if (success) {
+                    globalSession.asyncCommit();
+                    return GlobalStatus.Committed;
+                }
+            } else {
+                doGlobalCommit(globalSession, false);
+            }
             return globalSession.getStatus();
         } else {
             return globalSession.getStatus() == GlobalStatus.AsyncCommitting ? GlobalStatus.Committed : globalSession.getStatus();
@@ -230,7 +245,7 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        if (success) {
+        if (success && globalSession.isAllowEndCommitted()) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event

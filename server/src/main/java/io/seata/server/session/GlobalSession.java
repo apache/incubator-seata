@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -74,6 +75,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private volatile boolean active = true;
 
+    private boolean allowEndCommitted = true;
+
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
@@ -113,6 +116,44 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             }
         }
         return true;
+    }
+
+    /**
+     * Take out AT branch sessions.
+     *
+     * @return the AT branch sessions
+     */
+    public ArrayList<BranchSession> takeOutATBranchSessions() {
+        ArrayList<BranchSession> atBranchSessions = new ArrayList<>();
+
+        BranchSession branchSession;
+        for (int i = 0; i < branchSessions.size(); i++) {
+            branchSession = branchSessions.get(i);
+            if (branchSession.getBranchType() == BranchType.AT) {
+                branchSessions.remove(i);
+                i--;
+                atBranchSessions.add(branchSession);
+            }
+        }
+
+        if (atBranchSessions.size() > 0) {
+            allowEndCommitted = false;
+        }
+
+        return atBranchSessions;
+    }
+
+    /**
+     * Put back AT branch sessions.
+     *
+     * @param atBranchSessions the AT branch sessions
+     */
+    public void putBackATBranchSessions(List<BranchSession> atBranchSessions) {
+        if (atBranchSessions == null) {
+            return;
+        }
+        branchSessions.addAll(atBranchSessions);
+        allowEndCommitted = true;
     }
 
     /**
@@ -179,6 +220,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public boolean isActive() {
         return active;
+    }
+
+    public boolean isAllowEndCommitted() {
+        return allowEndCommitted;
     }
 
     @Override
