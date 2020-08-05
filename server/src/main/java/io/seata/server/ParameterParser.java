@@ -25,8 +25,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
 
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
-import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_PORT;
-import static io.seata.core.constants.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
  * The type Parameter parser.
