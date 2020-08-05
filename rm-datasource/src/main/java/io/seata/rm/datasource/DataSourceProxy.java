@@ -32,7 +32,7 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 
 /**
  * The type Data source proxy.
