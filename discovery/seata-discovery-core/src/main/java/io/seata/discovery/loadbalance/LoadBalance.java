@@ -29,8 +29,9 @@ public interface LoadBalance {
      *
      * @param <T>      the type parameter
      * @param invokers the invokers
+     * @param xid      the xid
      * @return the t
      * @throws Exception the exception
      */
-    <T> T select(List<T> invokers) throws Exception;
+    <T> T select(List<T> invokers, String xid) throws Exception;
 }

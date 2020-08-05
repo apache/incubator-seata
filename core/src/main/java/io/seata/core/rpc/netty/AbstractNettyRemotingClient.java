@@ -15,6 +15,20 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -27,6 +41,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
@@ -34,6 +49,10 @@ import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchReportRequest;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
@@ -42,18 +61,6 @@ import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -130,7 +137,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
-        String serverAddress = loadBalance(getTransactionServiceGroup());
+        String serverAddress = loadBalance(getTransactionServiceGroup(), msg);
         int timeoutMillis = NettyClientConfig.getRpcRequestTimeout();
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
 
@@ -244,12 +251,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return clientChannelManager;
     }
 
-    private String loadBalance(String transactionServiceGroup) {
+    private String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
             @SuppressWarnings("unchecked")
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -257,6 +264,26 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             throw new FrameworkException(NoAvailableService);
         }
         return NetUtil.toStringAddress(address);
+    }
+
+    private String getXid(Object msg) {
+        String xid = "";
+        if (msg instanceof AbstractGlobalEndRequest) {
+            xid = ((AbstractGlobalEndRequest) msg).getXid();
+        } else if (msg instanceof GlobalBeginRequest) {
+            xid = ((GlobalBeginRequest) msg).getTransactionName();
+        } else if (msg instanceof BranchRegisterRequest) {
+            xid = ((BranchRegisterRequest) msg).getXid();
+        } else if (msg instanceof BranchReportRequest) {
+            xid = ((BranchReportRequest) msg).getXid();
+        } else {
+            try {
+                Field field = msg.getClass().getDeclaredField("xid");
+                xid = String.valueOf(field.get(msg));
+            } catch (Exception ignore) {
+            }
+        }
+        return StringUtils.isBlank(xid) ? String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) : xid;
     }
 
     private String getThreadPrefix() {
