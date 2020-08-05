@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
 /**
  * The type Async worker.
@@ -200,7 +200,9 @@ public class AsyncWorker implements ResourceManagerInbound {
             } catch (Throwable e) {
                 LOGGER.error(e.getMessage(), e);
                 try {
-                    conn.rollback();
+                    if (conn != null) {
+                        conn.rollback();
+                    }
                 } catch (SQLException rollbackEx) {
                     LOGGER.warn("Failed to rollback JDBC resource while deleting undo_log ", rollbackEx);
                 }
