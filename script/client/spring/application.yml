@@ -30,7 +30,7 @@ seata:
       log-table: undo_log
       only-care-update-columns: true
     log:
-      exceptionRate: 100
+      exception-rate: 100
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -106,7 +106,7 @@ seata:
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
-      addressWaitTime: 3000
+      address-wait-time: 3000
       application: seata-server
     zk:
       server-addr: 127.0.0.1:2181
