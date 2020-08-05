@@ -94,7 +94,7 @@ public class IdWorker {
      *
      * @return SnowflakeId
      */
-    public long nextId() {
+    public synchronized long nextId() {
         long timestamp = timeGen();
 
         if (timestamp < lastTimestamp) {
@@ -102,17 +102,16 @@ public class IdWorker {
                 "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
         }
 
-        synchronized (this) {
-            if (lastTimestamp == timestamp) {
-                sequence = (sequence + 1) & sequenceMask;
-                if (sequence == 0) {
-                    timestamp = tilNextMillis(lastTimestamp);
-                }
-            } else {
-                sequence = 0L;
+        if (lastTimestamp == timestamp) {
+            sequence = (sequence + 1) & sequenceMask;
+            if (sequence == 0) {
+                timestamp = tilNextMillis(lastTimestamp);
             }
-            lastTimestamp = timestamp;
+        } else {
+            sequence = 0L;
         }
+        lastTimestamp = timestamp;
+
         return ((timestamp - twepoch) << timestampLeftShift) | (workerId << workerIdShift) | sequence;
     }
 
