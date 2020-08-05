@@ -19,10 +19,10 @@ import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
  * The type Netty client config.

@@ -18,7 +18,7 @@ package io.seata.spring.boot.autoconfigure.properties.client;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 
 /**

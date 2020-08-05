@@ -43,7 +43,7 @@ import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_LOCK_DB_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 
 /**
  * The type Data base lock store.

@@ -36,6 +36,8 @@ import java.util.stream.Stream;
  */
 public class LoadBalanceFactoryTest {
 
+    private static final String XID = "XID";
+
     /**
      * Test get registry.
      *
@@ -53,7 +55,7 @@ public class LoadBalanceFactoryTest {
         registryService.register(address1);
         registryService.register(address2);
         List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
+        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
         Assertions.assertNotNull(balanceAddress);
     }
 
@@ -89,7 +91,7 @@ public class LoadBalanceFactoryTest {
         registryService.register(address1);
         registryService.register(address2);
         List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
+        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
         Assertions.assertNotNull(balanceAddress);
         //wait trigger testUnRegistry
         TimeUnit.SECONDS.sleep(30);
@@ -110,7 +112,7 @@ public class LoadBalanceFactoryTest {
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
         List<InetSocketAddress> addressList = new ArrayList<>();
         addressList.add(address);
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
+        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
         Assertions.assertEquals(address, balanceAddress);
     }
 

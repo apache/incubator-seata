@@ -39,8 +39,8 @@ import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
+import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 
 /**
  * The type Log store data base dao.

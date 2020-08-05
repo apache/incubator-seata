@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.constants;
+package io.seata.common;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -91,4 +91,7 @@ public class DefaultValues {
     public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
     public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
+
+    public static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    public static final int VIRTUAL_NODES_DEFAULT = 10;
 }

@@ -21,7 +21,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
+import static io.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 
 /**
  * @author jsbxyyx

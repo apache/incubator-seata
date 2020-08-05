@@ -18,7 +18,7 @@ package io.seata.rm.datasource.undo;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
 
 /**
  * @author Geng Zhang

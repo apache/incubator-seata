@@ -22,10 +22,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
-import static io.seata.core.constants.DefaultValues.DEFAULT_GROUPLIST;
-import static io.seata.core.constants.DefaultValues.DEFAULT_TC_CLUSTER;
-import static io.seata.core.constants.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_GROUPLIST;
+import static io.seata.common.DefaultValues.DEFAULT_TC_CLUSTER;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
 /**

@@ -81,6 +81,10 @@ seata:
       password: ""
   registry:
     type: file
+    load-balance: RandomLoadBalance
+    load-balance-virtual-nodes: 10
+    file:
+      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
     etcd3:

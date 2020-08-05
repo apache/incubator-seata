@@ -15,7 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure.properties;
 
-import io.seata.core.constants.DefaultValues;
+import io.seata.common.DefaultValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
