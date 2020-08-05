@@ -86,6 +86,7 @@ seata:
     etcd3:
       serverAddr: http://localhost:2379
     eureka:
+      application: seata-server
       weight: 1
       service-url: http://localhost:8761/eureka
     nacos:
@@ -106,7 +107,7 @@ seata:
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
       addressWaitTime: 3000
-      application: default
+      application: seata-server
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
