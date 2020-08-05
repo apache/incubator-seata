@@ -19,7 +19,7 @@ import io.seata.common.util.IOUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.DefaultValues;
+import io.seata.common.DefaultValues;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
