@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.core.rpc;
 
 /**
  * The enum Transport server type.
@@ -37,5 +37,20 @@ public enum TransportServerType {
 
     TransportServerType(String name) {
         this.name = name;
+    }
+
+    /**
+     * Gets type.
+     *
+     * @param name the name
+     * @return the type
+     */
+    public static TransportServerType getType(String name) {
+        for (TransportServerType b : TransportServerType.values()) {
+            if (b.name().equalsIgnoreCase(name)) {
+                return b;
+            }
+        }
+        throw new IllegalArgumentException("unknown type:" + name);
     }
 }

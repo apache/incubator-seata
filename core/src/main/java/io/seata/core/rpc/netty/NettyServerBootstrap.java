@@ -46,9 +46,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.1.0
  */
-public class RpcServerBootstrap implements RemotingBootstrap {
+public class NettyServerBootstrap implements RemotingBootstrap {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerBootstrap.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyServerBootstrap.class);
     private final ServerBootstrap serverBootstrap = new ServerBootstrap();
     private final EventLoopGroup eventLoopGroupWorker;
     private final EventLoopGroup eventLoopGroupBoss;
@@ -57,7 +57,7 @@ public class RpcServerBootstrap implements RemotingBootstrap {
     private int listenPort;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    public RpcServerBootstrap(NettyServerConfig nettyServerConfig) {
+    public NettyServerBootstrap(NettyServerConfig nettyServerConfig) {
 
         this.nettyServerConfig = nettyServerConfig;
         if (NettyServerConfig.enableEpoll()) {
