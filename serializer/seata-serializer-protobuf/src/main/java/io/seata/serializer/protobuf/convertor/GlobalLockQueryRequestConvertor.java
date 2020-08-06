@@ -42,11 +42,14 @@ public class GlobalLockQueryRequestConvertor
         final String applicationData = globalLockQueryRequest.getApplicationData();
         final String lockKey = globalLockQueryRequest.getLockKey();
         BranchRegisterRequestProto branchRegisterRequestProto = BranchRegisterRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setApplicationData(
-                applicationData == null ? "" : applicationData).setBranchType(
-                BranchTypeProto.valueOf(globalLockQueryRequest.getBranchType().name())).setLockKey(
-                lockKey == null ? "" : lockKey).setResourceId(globalLockQueryRequest.getResourceId()).setXid(
-                globalLockQueryRequest.getXid()).build();
+            .setAbstractTransactionRequest(abstractTransactionRequestProto)
+            .setApplicationData(applicationData == null ? "" : applicationData)
+            .setBranchType(BranchTypeProto.valueOf(globalLockQueryRequest.getBranchType().name()))
+            .setCanBeCommittedAsync(globalLockQueryRequest.isCanBeCommittedAsync())
+            .setLockKey(lockKey == null ? "" : lockKey)
+            .setResourceId(globalLockQueryRequest.getResourceId())
+            .setXid(globalLockQueryRequest.getXid())
+            .build();
 
         GlobalLockQueryRequestProto result = GlobalLockQueryRequestProto.newBuilder().setBranchRegisterRequest(
             branchRegisterRequestProto).build();
@@ -60,6 +63,7 @@ public class GlobalLockQueryRequestConvertor
         BranchRegisterRequestProto branchRegisterRequestProto = globalLockQueryRequestProto.getBranchRegisterRequest();
         branchRegisterRequest.setApplicationData(branchRegisterRequestProto.getApplicationData());
         branchRegisterRequest.setBranchType(BranchType.valueOf(branchRegisterRequestProto.getBranchType().name()));
+        branchRegisterRequest.setCanBeCommittedAsync(Boolean.TRUE.equals(branchRegisterRequestProto.getCanBeCommittedAsync()));
         branchRegisterRequest.setLockKey(branchRegisterRequestProto.getLockKey());
         branchRegisterRequest.setResourceId(branchRegisterRequestProto.getResourceId());
         branchRegisterRequest.setXid(branchRegisterRequestProto.getXid());

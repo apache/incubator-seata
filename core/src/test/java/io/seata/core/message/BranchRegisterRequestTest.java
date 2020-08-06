@@ -33,6 +33,7 @@ public class BranchRegisterRequestTest {
         BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
         branchRegisterRequest.setXid("127.0.0.1:8091:1249853");
         branchRegisterRequest.setBranchType(BranchType.AT);
+        branchRegisterRequest.setCanBeCommittedAsync(true);
         branchRegisterRequest.setResourceId("resource1");
         branchRegisterRequest.setLockKey("lock_key_1");
         Assertions.assertEquals("xid=127.0.0.1:8091:1249853,branchType=AT,resourceId=resource1,lockKey=lock_key_1",

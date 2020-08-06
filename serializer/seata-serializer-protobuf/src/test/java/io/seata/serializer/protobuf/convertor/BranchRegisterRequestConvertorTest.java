@@ -33,6 +33,7 @@ public class BranchRegisterRequestConvertorTest {
         BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
         branchRegisterRequest.setApplicationData("data");
         branchRegisterRequest.setBranchType(BranchType.AT);
+        branchRegisterRequest.setCanBeCommittedAsync(true);
         branchRegisterRequest.setLockKey("localKey");
         branchRegisterRequest.setResourceId("resourceId");
         branchRegisterRequest.setXid("xid");
@@ -46,6 +47,7 @@ public class BranchRegisterRequestConvertorTest {
         assertThat(real.getApplicationData()).isEqualTo(branchRegisterRequest.getApplicationData());
         assertThat(real.getXid()).isEqualTo(branchRegisterRequest.getXid());
         assertThat(real.getBranchType()).isEqualTo(branchRegisterRequest.getBranchType());
+        assertThat(real.isCanBeCommittedAsync()).isEqualTo(branchRegisterRequest.isCanBeCommittedAsync());
         assertThat(real.getLockKey()).isEqualTo(branchRegisterRequest.getLockKey());
         assertThat(real.getResourceId()).isEqualTo(branchRegisterRequest.getResourceId());
     }

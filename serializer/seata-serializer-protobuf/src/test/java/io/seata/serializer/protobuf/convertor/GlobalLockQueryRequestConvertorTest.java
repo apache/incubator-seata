@@ -33,6 +33,7 @@ public class GlobalLockQueryRequestConvertorTest {
         GlobalLockQueryRequest globalLockQueryRequest = new GlobalLockQueryRequest();
         globalLockQueryRequest.setApplicationData("data");
         globalLockQueryRequest.setBranchType(BranchType.AT);
+        globalLockQueryRequest.setCanBeCommittedAsync(true);
         globalLockQueryRequest.setLockKey("localKey");
         globalLockQueryRequest.setResourceId("resourceId");
         globalLockQueryRequest.setXid("xid");
@@ -46,6 +47,7 @@ public class GlobalLockQueryRequestConvertorTest {
         assertThat(real.getApplicationData()).isEqualTo(globalLockQueryRequest.getApplicationData());
         assertThat(real.getXid()).isEqualTo(globalLockQueryRequest.getXid());
         assertThat(real.getBranchType()).isEqualTo(globalLockQueryRequest.getBranchType());
+        assertThat(real.isCanBeCommittedAsync()).isEqualTo(globalLockQueryRequest.isCanBeCommittedAsync());
         assertThat(real.getLockKey()).isEqualTo(globalLockQueryRequest.getLockKey());
         assertThat(real.getResourceId()).isEqualTo(globalLockQueryRequest.getResourceId());
     }

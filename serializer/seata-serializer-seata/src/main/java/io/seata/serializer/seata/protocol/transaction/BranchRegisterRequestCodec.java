@@ -39,6 +39,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
 
         String xid = branchRegisterRequest.getXid();
         BranchType branchType = branchRegisterRequest.getBranchType();
+        boolean canBeCommittedAsync = branchRegisterRequest.isCanBeCommittedAsync();
         String resourceId = branchRegisterRequest.getResourceId();
         String lockKey = branchRegisterRequest.getLockKey();
         String applicationData = branchRegisterRequest.getApplicationData();
@@ -62,10 +63,14 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         } else {
             out.writeShort((short)0);
         }
+
         // 2. Branch Type
         out.writeByte(branchType.ordinal());
 
-        // 3. Resource Id
+        // 3. Can Be Committed Async
+        out.writeByte(canBeCommittedAsync ? (byte) 1 : (byte) 0);
+
+        // 4. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
             out.writeShort((short)bs.length);
@@ -76,7 +81,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             out.writeShort((short)0);
         }
 
-        // 4. Lock Key
+        // 5. Lock Key
         if (lockKey != null) {
             out.writeInt(lockKeyBytes.length);
             if (lockKeyBytes.length > 0) {
@@ -86,7 +91,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             out.writeInt(0);
         }
 
-        //5. applicationData
+        // 6. applicationData
         if (applicationData != null) {
             out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
@@ -107,7 +112,10 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             in.get(bs);
             branchRegisterRequest.setXid(new String(bs, UTF8));
         }
+
         branchRegisterRequest.setBranchType(BranchType.get(in.get()));
+        branchRegisterRequest.setCanBeCommittedAsync(in.get() > 0);
+
         short len = in.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];

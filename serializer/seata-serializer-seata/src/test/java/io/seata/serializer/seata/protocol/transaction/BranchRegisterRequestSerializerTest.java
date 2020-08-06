@@ -41,6 +41,7 @@ public class BranchRegisterRequestSerializerTest {
     public void test_codec(){
         BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
         branchRegisterRequest.setBranchType(BranchType.AT);
+        branchRegisterRequest.setCanBeCommittedAsync(true);
         branchRegisterRequest.setApplicationData("abc");
         branchRegisterRequest.setLockKey("a:1,b:2");
         branchRegisterRequest.setResourceId("124");
@@ -51,6 +52,7 @@ public class BranchRegisterRequestSerializerTest {
         BranchRegisterRequest branchRegisterRequest2 = seataSerializer.deserialize(bytes);
 
         assertThat(branchRegisterRequest2.getBranchType()).isEqualTo(branchRegisterRequest.getBranchType());
+        assertThat(branchRegisterRequest2.isCanBeCommittedAsync()).isEqualTo(branchRegisterRequest.isCanBeCommittedAsync());
         assertThat(branchRegisterRequest2.getApplicationData()).isEqualTo(branchRegisterRequest.getApplicationData());
         assertThat(branchRegisterRequest2.getLockKey()).isEqualTo(branchRegisterRequest.getLockKey());
         assertThat(branchRegisterRequest2.getResourceId()).isEqualTo(branchRegisterRequest.getResourceId());
