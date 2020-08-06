@@ -26,4 +26,9 @@ public final class SqlParserType {
      * The constant SQL_PARSER_TYPE_DRUID.
      */
     public static final String SQL_PARSER_TYPE_DRUID = "druid";
+
+    /**
+     * The constant SQL_PARSER_TYPE_ANTLR.
+     */
+    public static final String SQL_PARSER_TYPE_ANTLR = "antlr";
 }
