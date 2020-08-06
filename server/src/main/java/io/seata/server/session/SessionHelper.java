@@ -29,8 +29,9 @@ public class SessionHelper {
 
     private SessionHelper() {}
 
-    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId, String lockKeys, String clientId) {
-        return newBranchByGlobal(globalSession, branchType, resourceId, null, lockKeys, clientId);
+    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
+            boolean canBeCommittedAsync, String resourceId, String lockKeys, String clientId) {
+        return newBranchByGlobal(globalSession, branchType, canBeCommittedAsync, resourceId, null, lockKeys, clientId);
     }
 
     /**
@@ -43,14 +44,15 @@ public class SessionHelper {
      * @param clientId      the client id
      * @return the branch session
      */
-    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
-            String applicationData, String lockKeys, String clientId) {
+    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
+            boolean canBeCommittedAsync, String resourceId, String applicationData, String lockKeys, String clientId) {
         BranchSession branchSession = new BranchSession();
 
         branchSession.setXid(globalSession.getXid());
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(UUIDGenerator.generateUUID());
         branchSession.setBranchType(branchType);
+        branchSession.setCanBeCommittedAsync(canBeCommittedAsync);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);
         branchSession.setClientId(clientId);

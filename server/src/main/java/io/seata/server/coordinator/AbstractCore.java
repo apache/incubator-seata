@@ -66,14 +66,14 @@ public abstract class AbstractCore implements Core {
     public abstract BranchType getHandleBranchType();
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+    public Long branchRegister(BranchType branchType, boolean canBeCommittedAsync, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-            BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
-                    applicationData, lockKeys, clientId);
+            BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, canBeCommittedAsync,
+                    resourceId, applicationData, lockKeys, clientId);
             branchSessionLock(globalSession, branchSession);
             try {
                 globalSession.addBranch(branchSession);

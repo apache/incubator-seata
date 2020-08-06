@@ -321,9 +321,10 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setString(4, branchTransactionDO.getResourceGroupId());
             ps.setString(5, branchTransactionDO.getResourceId());
             ps.setString(6, branchTransactionDO.getBranchType());
-            ps.setInt(7, branchTransactionDO.getStatus());
-            ps.setString(8, branchTransactionDO.getClientId());
-            ps.setString(9, branchTransactionDO.getApplicationData());
+            ps.setString(7, branchTransactionDO.getBranchType());
+            ps.setInt(8, branchTransactionDO.getStatus());
+            ps.setString(9, branchTransactionDO.getClientId());
+            ps.setString(10, branchTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -432,6 +433,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         branchTransactionDO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
         branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
         branchTransactionDO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
+        branchTransactionDO.setCanBeCommittedAsync("1".equals(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CAN_BE_COMMITTED_ASYNC)));
         branchTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
         branchTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
         branchTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));

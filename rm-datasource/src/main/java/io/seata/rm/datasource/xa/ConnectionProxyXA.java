@@ -130,7 +130,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long branchId = 0L;
             try {
                 // 1. register branch to TC then get the branchId
-                branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
+                branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, false, resource.getResourceId(), null, xid, null,
                     null);
             } catch (TransactionException te) {
                 cleanXABranchContext();

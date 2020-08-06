@@ -46,22 +46,25 @@ public abstract class AbstractResourceManager implements ResourceManager {
     /**
      * registry branch record
      *
-     * @param branchType the branch type
-     * @param resourceId the resource id
-     * @param clientId   the client id
-     * @param xid        the xid
-     * @param lockKeys   the lock keys
-     * @return
+     * @param branchType          the branch type
+     * @param canBeCommittedAsync
+     * @param resourceId          the resource id
+     * @param clientId            the client id
+     * @param xid                 the xid
+     * @param applicationData     the application data
+     * @param lockKeys            the lock keys
+     * @return the branch id
      * @throws TransactionException
      */
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, boolean canBeCommittedAsync, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
+            request.setCanBeCommittedAsync(canBeCommittedAsync);
             request.setApplicationData(applicationData);
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);

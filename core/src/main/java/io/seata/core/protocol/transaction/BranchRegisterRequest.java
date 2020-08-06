@@ -30,6 +30,8 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
 
     private BranchType branchType = BranchType.AT;
 
+    private boolean canBeCommittedAsync;
+
     private String resourceId;
 
     private String lockKey;
@@ -70,6 +72,25 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
      */
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
+    }
+
+    /**
+     * Gets can be committed async.
+     *
+     * @return the can be committed async
+     */
+    public boolean isCanBeCommittedAsync() {
+        return canBeCommittedAsync;
+    }
+
+    /**
+     * Sets can be committed async.
+     *
+     * @param canBeCommittedAsync the can be committed async
+     */
+    public BranchRegisterRequest setCanBeCommittedAsync(boolean canBeCommittedAsync) {
+        this.canBeCommittedAsync = canBeCommittedAsync;
+        return this;
     }
 
     /**

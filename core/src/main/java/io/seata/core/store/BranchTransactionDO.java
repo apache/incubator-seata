@@ -39,6 +39,8 @@ public class BranchTransactionDO {
 
     private String branchType;
 
+    private Boolean canBeCommittedAsync;
+
     private Integer status = BranchStatus.Unknown.getCode();
 
     private String clientId;
@@ -155,6 +157,15 @@ public class BranchTransactionDO {
      */
     public void setBranchType(String branchType) {
         this.branchType = branchType;
+    }
+
+    public Boolean getCanBeCommittedAsync() {
+        return canBeCommittedAsync;
+    }
+
+    public BranchTransactionDO setCanBeCommittedAsync(Boolean canBeCommittedAsync) {
+        this.canBeCommittedAsync = canBeCommittedAsync;
+        return this;
     }
 
     /**

@@ -36,7 +36,7 @@ public @interface TwoPhaseBusinessAction {
      *
      * @return the string
      */
-    String name() ;
+    String name();
 
     /**
      * commit methed name
@@ -51,5 +51,12 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
+
+    /**
+     * can be committed async
+     *
+     * @return the boolean
+     */
+    boolean canBeCommittedAsync() default false;
 
 }

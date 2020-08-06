@@ -22,17 +22,18 @@ CREATE INDEX idx_transaction_id ON public.global_table (transaction_id);
 -- the table to store BranchSession data
 CREATE TABLE IF NOT EXISTS public.branch_table
 (
-    branch_id         BIGINT       NOT NULL,
-    xid               VARCHAR(128) NOT NULL,
-    transaction_id    BIGINT,
-    resource_group_id VARCHAR(32),
-    resource_id       VARCHAR(256),
-    branch_type       VARCHAR(8),
-    status            SMALLINT,
-    client_id         VARCHAR(64),
-    application_data  VARCHAR(2000),
-    gmt_create        TIMESTAMP(6),
-    gmt_modified      TIMESTAMP(6),
+    branch_id              BIGINT       NOT NULL,
+    xid                    VARCHAR(128) NOT NULL,
+    transaction_id         BIGINT,
+    resource_group_id      VARCHAR(32),
+    resource_id            VARCHAR(256),
+    branch_type            VARCHAR(8),
+    can_be_committed_async SMALLINT,
+    status                 SMALLINT,
+    client_id              VARCHAR(64),
+    application_data       VARCHAR(2000),
+    gmt_create             TIMESTAMP(6),
+    gmt_modified           TIMESTAMP(6),
     CONSTRAINT pk_branch_table PRIMARY KEY (branch_id)
 );
 

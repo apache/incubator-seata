@@ -60,6 +60,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchType branchType;
 
+    private boolean canBeCommittedAsync;
+
     private BranchStatus status = BranchStatus.Unknown;
 
     private String clientId;
@@ -178,6 +180,25 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     /**
+     * Gets can be committed async.
+     *
+     * @return the can be committed async
+     */
+    public boolean isCanBeCommittedAsync() {
+        return canBeCommittedAsync;
+    }
+
+    /**
+     * Sets can be committed async.
+     *
+     * @param canBeCommittedAsync the can be committed async
+     */
+    public BranchSession setCanBeCommittedAsync(Boolean canBeCommittedAsync) {
+        this.canBeCommittedAsync = canBeCommittedAsync == null ? false : canBeCommittedAsync;
+        return this;
+    }
+
+    /**
      * Gets status.
      *
      * @return the status
@@ -261,7 +282,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean canBeCommittedAsync() {
-        return branchType != BranchType.TCC && branchType != BranchType.XA;
+        return canBeCommittedAsync || (branchType != BranchType.TCC && branchType != BranchType.XA);
     }
 
     /**
@@ -303,6 +324,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         byte[] xidBytes = xid != null ? xid.getBytes() : null;
 
         byte branchTypeByte = branchType != null ? (byte) branchType.ordinal() : -1;
+
+        byte canBeCommittedAsyncByte = canBeCommittedAsync ? (byte) 1 : (byte) 0;
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 
@@ -372,6 +395,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put(branchTypeByte);
 
+        byteBuffer.put(canBeCommittedAsyncByte);
+
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
@@ -394,7 +419,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + (clientIdBytes == null ? 0 : clientIdBytes.length)
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
-            + 1; //branchType
+            + 1 //branchType
+            + 1;//canBeCommittedAsync
         return size;
     }
 
@@ -446,8 +472,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (branchTypeId >= 0) {
             this.branchType = BranchType.values()[branchTypeId];
         }
+        int canBeCommittedAsync = byteBuffer.get();
+        this.canBeCommittedAsync = canBeCommittedAsync > 1;
         this.status = BranchStatus.get(byteBuffer.get());
-
     }
-
 }

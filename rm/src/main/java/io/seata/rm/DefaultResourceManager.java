@@ -90,10 +90,10 @@ public class DefaultResourceManager implements ResourceManager {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId,
+    public Long branchRegister(BranchType branchType, boolean canBeCommittedAsync, String resourceId,
                                String clientId, String xid, String applicationData, String lockKeys)
         throws TransactionException {
-        return getResourceManager(branchType).branchRegister(branchType, resourceId, clientId, xid, applicationData,
+        return getResourceManager(branchType).branchRegister(branchType, canBeCommittedAsync, resourceId, clientId, xid, applicationData,
             lockKeys);
     }
 

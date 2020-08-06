@@ -114,8 +114,8 @@ public class ActionInterceptorHandler {
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
-            Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,
-                applicationContextStr, null);
+            Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC,
+                businessAction.canBeCommittedAsync(), actionName, null, xid, applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
             String msg = String.format("TCC branch Register error, xid: %s", xid);

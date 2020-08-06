@@ -41,6 +41,8 @@ public class TCCResource implements Resource {
 
     private Method commitMethod;
 
+    private boolean canBeCommittedAsync;
+
     private String rollbackMethodName;
 
     private Method rollbackMethod;
@@ -157,6 +159,25 @@ public class TCCResource implements Resource {
      */
     public void setCommitMethod(Method commitMethod) {
         this.commitMethod = commitMethod;
+    }
+
+    /**
+     * Gets can be committed async.
+     *
+     * @return the can be committed async
+     */
+    public boolean isCanBeCommittedAsync() {
+        return canBeCommittedAsync;
+    }
+
+    /**
+     * Sets can be committed async.
+     *
+     * @param canBeCommittedAsync the can be committed async
+     */
+    public TCCResource setCanBeCommittedAsync(boolean canBeCommittedAsync) {
+        this.canBeCommittedAsync = canBeCommittedAsync;
+        return this;
     }
 
     /**

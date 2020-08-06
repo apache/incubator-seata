@@ -85,7 +85,7 @@ public class SessionStoreTest {
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
-            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
+            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, true, RESOURCE_ID,
                     "ta:1,2;tb:3", "xxx");
             branchSession1.setXid(xid);
             branchSession1.lock();
@@ -168,7 +168,7 @@ public class SessionStoreTest {
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
-            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
+            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, true, RESOURCE_ID,
                     "ta:1", "xxx");
             Assertions.assertTrue(branchSession1.lock());
             globalSession.addBranch(branchSession1);
@@ -224,7 +224,7 @@ public class SessionStoreTest {
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
-            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
+            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, true, RESOURCE_ID,
                     "ta:1", "xxx");
             branchSession1.lock();
             globalSession.addBranch(branchSession1);
@@ -285,7 +285,7 @@ public class SessionStoreTest {
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
-            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
+            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, true, RESOURCE_ID,
                     "ta:1", "xxx");
             branchSession1.lock();
             globalSession.addBranch(branchSession1);
@@ -346,7 +346,7 @@ public class SessionStoreTest {
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             globalSession.begin();
 
-            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
+            BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, true, RESOURCE_ID,
                     "ta:1", "xxx");
             branchSession1.lock();
             globalSession.addBranch(branchSession1);

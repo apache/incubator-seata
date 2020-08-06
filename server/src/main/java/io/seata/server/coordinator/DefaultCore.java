@@ -92,9 +92,9 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+    public Long branchRegister(BranchType branchType, boolean canBeCommittedAsync, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
-        return getCore(branchType).branchRegister(branchType, resourceId, clientId, xid,
+        return getCore(branchType).branchRegister(branchType, canBeCommittedAsync, resourceId, clientId, xid,
             applicationData, lockKeys);
     }
 

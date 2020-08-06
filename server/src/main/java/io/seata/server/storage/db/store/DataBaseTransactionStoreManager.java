@@ -248,6 +248,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         branchSession.setApplicationData(branchTransactionDO.getApplicationData());
         branchSession.setBranchId(branchTransactionDO.getBranchId());
         branchSession.setBranchType(BranchType.valueOf(branchTransactionDO.getBranchType()));
+        branchSession.setCanBeCommittedAsync(branchTransactionDO.getCanBeCommittedAsync());
         branchSession.setResourceId(branchTransactionDO.getResourceId());
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
