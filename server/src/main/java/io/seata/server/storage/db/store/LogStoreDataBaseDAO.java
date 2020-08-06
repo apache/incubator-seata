@@ -321,7 +321,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setString(4, branchTransactionDO.getResourceGroupId());
             ps.setString(5, branchTransactionDO.getResourceId());
             ps.setString(6, branchTransactionDO.getBranchType());
-            ps.setString(7, branchTransactionDO.getBranchType());
+            ps.setInt(7, Boolean.TRUE.equals(branchTransactionDO.getCanBeCommittedAsync()) ? 1 : 0);
             ps.setInt(8, branchTransactionDO.getStatus());
             ps.setString(9, branchTransactionDO.getClientId());
             ps.setString(10, branchTransactionDO.getApplicationData());
