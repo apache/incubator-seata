@@ -18,8 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties.client;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
 /**
@@ -29,11 +29,11 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
 @ConfigurationProperties(prefix = TRANSPORT_PREFIX)
 public class TransportProperties {
     /**
-     * tcp udt unix-domain-socket
+     * tcp, unix-domain-socket
      */
     private String type = "TCP";
     /**
-     * NIO NATIVE
+     * NIO, NATIVE
      */
     private String server = "NIO";
     /**

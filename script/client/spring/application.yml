@@ -3,6 +3,7 @@ seata:
   application-id: applicationName
   tx-service-group: my_test_tx_group
   enable-auto-data-source-proxy: true
+  data-source-proxy-mode: AT
   use-jdk-proxy: false
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
@@ -12,6 +13,7 @@ seata:
       table-meta-check-enable: false
       report-success-enable: false
       saga-branch-register-enable: false
+      saga-json-parser: fastjson
       lock:
         retry-interval: 10
         retry-times: 30
@@ -63,6 +65,7 @@ seata:
       apollo-meta: http://192.168.1.204:8801
       app-id: seata-server
       namespace: application
+      apollo-accesskey-secret: ""
     etcd3:
       server-addr: http://localhost:2379
     nacos:
@@ -79,6 +82,10 @@ seata:
       password: ""
   registry:
     type: file
+    load-balance: RandomLoadBalance
+    load-balance-virtual-nodes: 10
+    file:
+      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
     etcd3:
