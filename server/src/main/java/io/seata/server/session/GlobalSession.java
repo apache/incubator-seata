@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class GlobalSession implements SessionLifecycle, SessionStorable {
+public class GlobalSession implements SessionLifecycle, SessionStorable, AsyncableCommitted {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSession.class);
 
@@ -109,9 +109,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the boolean
      */
+    @Override
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
+            if (!branchSession.canBeCommittedAsync()) {
                 return false;
             }
         }
@@ -119,12 +120,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * Take out AT branch sessions.
+     * Take out branch sessions that can be committed async.
      *
-     * @return the AT branch sessions
+     * @return the branch sessions that can be committed async
      */
-    public ArrayList<BranchSession> takeOutATBranchSessions() {
-        ArrayList<BranchSession> atBranchSessions = new ArrayList<>();
+    public ArrayList<BranchSession> takeOutBranchSessionsCanBeCommittedAsync() {
+        ArrayList<BranchSession> branchSessionsCanBeCommittedAsync = new ArrayList<>();
 
         BranchSession branchSession;
         for (int i = 0; i < branchSessions.size(); i++) {
@@ -132,27 +133,27 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             if (branchSession.getBranchType() == BranchType.AT) {
                 branchSessions.remove(i);
                 i--;
-                atBranchSessions.add(branchSession);
+                branchSessionsCanBeCommittedAsync.add(branchSession);
             }
         }
 
-        if (atBranchSessions.size() > 0) {
+        if (branchSessionsCanBeCommittedAsync.size() > 0) {
             allowEndCommitted = false;
         }
 
-        return atBranchSessions;
+        return branchSessionsCanBeCommittedAsync;
     }
 
     /**
-     * Put back AT branch sessions.
+     * Put back branch sessions that can be committed async.
      *
-     * @param atBranchSessions the AT branch sessions
+     * @param branchSessionsCanBeCommittedAsync the branch sessions that can be committed async
      */
-    public void putBackATBranchSessions(List<BranchSession> atBranchSessions) {
-        if (atBranchSessions == null) {
+    public void putBackBranchSessionsCanBeCommittedAsync(List<BranchSession> branchSessionsCanBeCommittedAsync) {
+        if (branchSessionsCanBeCommittedAsync == null) {
             return;
         }
-        branchSessions.addAll(atBranchSessions);
+        branchSessions.addAll(branchSessionsCanBeCommittedAsync);
         allowEndCommitted = true;
     }
 

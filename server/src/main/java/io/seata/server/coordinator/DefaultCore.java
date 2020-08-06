@@ -161,13 +161,13 @@ public class DefaultCore implements Core {
         });
 
         if (shouldCommit) {
-            List<BranchSession> atBranchSessions = globalSession.takeOutATBranchSessions();
-            if (CollectionUtils.isNotEmpty(atBranchSessions)) {
+            List<BranchSession> branchSessionsCanBeCommittedAsync = globalSession.takeOutBranchSessionsCanBeCommittedAsync();
+            if (CollectionUtils.isNotEmpty(branchSessionsCanBeCommittedAsync)) {
                 boolean success;
                 try {
                     success = doGlobalCommit(globalSession, false);
                 } finally {
-                    globalSession.putBackATBranchSessions(atBranchSessions);
+                    globalSession.putBackBranchSessionsCanBeCommittedAsync(branchSessionsCanBeCommittedAsync);
                 }
 
                 if (success) {
