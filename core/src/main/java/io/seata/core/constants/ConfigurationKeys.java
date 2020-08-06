@@ -38,6 +38,11 @@ public class ConfigurationKeys {
     public static final String STORE_MODE = STORE_PREFIX + "mode";
 
     /**
+     * The constant STORE_PUBLIC_KEY.
+     */
+    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+
+    /**
      * The constant STORE_FILE_PREFIX
      */
     public static final String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
@@ -233,11 +238,6 @@ public class ConfigurationKeys {
      * The constant STORE_DB_LOG_QUERY_LIMIT.
      */
     public static final String STORE_DB_LOG_QUERY_LIMIT = STORE_DB_PREFIX + "queryLimit";
-
-    /**
-     * The constant STORE_DB_PUBLIC_KER.
-     */
-    public static final String STORE_DB_PUBLIC_KEY = STORE_DB_PREFIX + "publicKey";
 
     /**
      * The constant LOCK_DB_TABLE.

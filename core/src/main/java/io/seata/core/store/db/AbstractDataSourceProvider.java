@@ -252,7 +252,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getPublicKey() {
-        return CONFIG.getConfig(ConfigurationKeys.STORE_DB_PUBLIC_KEY);
+        return CONFIG.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
     }
 
 }
