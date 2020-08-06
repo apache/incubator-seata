@@ -78,7 +78,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
                         MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<>(),
                         new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
-                    config.addChangeListener((changeEvent) -> {
+                    config.addChangeListener(changeEvent -> {
                         for (String key : changeEvent.changedKeys()) {
                             if (!LISTENER_SERVICE_MAP.containsKey(key)) {
                                 continue;
