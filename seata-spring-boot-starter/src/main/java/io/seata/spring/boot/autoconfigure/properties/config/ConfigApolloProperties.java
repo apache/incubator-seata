@@ -29,6 +29,7 @@ public class ConfigApolloProperties {
     private String appId = "seata-server";
     private String apolloMeta = "http://192.168.1.204:8801";
     private String namespace = "application";
+    private String apolloAccesskeySecret = "";
 
     public String getAppId() {
         return appId;
@@ -56,4 +57,14 @@ public class ConfigApolloProperties {
         this.namespace = namespace;
         return this;
     }
+
+    public String getApolloAccesskeySecret() {
+        return apolloAccesskeySecret;
+    }
+
+    public ConfigApolloProperties setApolloAccesskeySecret(String apolloAccesskeySecret) {
+        this.apolloAccesskeySecret = apolloAccesskeySecret;
+        return this;
+    }
+
 }
