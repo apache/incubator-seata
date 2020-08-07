@@ -1,4 +1,4 @@
-// Generated from E:/seata/seata/sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/antlr\MySqlParser.g4 by ANTLR 4.8
+// Generated from E:/1/seata/sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/antlr\MySqlParser.g4 by ANTLR 4.8
 package io.seata.sqlparser.antlr.mysql.parser;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 

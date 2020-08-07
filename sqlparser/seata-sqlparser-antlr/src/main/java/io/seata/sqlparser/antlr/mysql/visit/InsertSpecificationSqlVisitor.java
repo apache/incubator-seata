@@ -15,9 +15,9 @@
  */
 package io.seata.sqlparser.antlr.mysql.visit;
 
+import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
-import io.seata.sqlparser.antlr.mysql.MySqlContext;
 
 import java.util.Arrays;
 import java.util.List;

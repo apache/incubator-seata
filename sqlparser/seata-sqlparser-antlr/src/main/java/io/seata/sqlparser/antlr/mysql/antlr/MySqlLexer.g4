@@ -97,7 +97,7 @@ FETCH:                               'FETCH';
 FOR:                                 'FOR';
 FORCE:                               'FORCE';
 FOREIGN:                             'FOREIGN';
-FROM:                                'FROM';
+FROM:                                ' FROM ';
 FULLTEXT:                            'FULLTEXT';
 GENERATED:                           'GENERATED';
 GET:                                 'GET';

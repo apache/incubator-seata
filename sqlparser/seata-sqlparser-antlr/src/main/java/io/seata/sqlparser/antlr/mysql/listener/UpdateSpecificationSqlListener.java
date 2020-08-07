@@ -15,9 +15,9 @@
  */
 package io.seata.sqlparser.antlr.mysql.listener;
 
+import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
-import io.seata.sqlparser.antlr.mysql.MySqlContext;
 
 /**
  * @author houzhi

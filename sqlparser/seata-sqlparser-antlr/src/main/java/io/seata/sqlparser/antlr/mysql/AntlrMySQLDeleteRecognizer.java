@@ -16,9 +16,9 @@
 package io.seata.sqlparser.antlr.mysql;
 
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.SQLUpdateRecognizer;
-import io.seata.sqlparser.antlr.mysql.listener.UpdateSpecificationSqlListener;
+import io.seata.sqlparser.antlr.mysql.listener.DeleteSpecificationSqlListener;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
@@ -28,36 +28,20 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
+public class AntlrMySQLDeleteRecognizer implements SQLDeleteRecognizer {
 
     private MySqlContext sqlContext;
 
-    public AntlrMySQLUpdateRecognizer(String sql) {
+    public AntlrMySQLDeleteRecognizer(String sql) {
         MySqlLexer mySqlLexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
         CommonTokenStream commonTokenStream = new CommonTokenStream(mySqlLexer);
         MySqlParser parser2 = new MySqlParser(commonTokenStream);
         MySqlParser.RootContext root = parser2.root();
         ParseTreeWalker walker2 = new ParseTreeWalker();
         sqlContext = new MySqlContext();
-        walker2.walk(new UpdateSpecificationSqlListener(sqlContext), root);
+        walker2.walk(new DeleteSpecificationSqlListener(sqlContext), root);
     }
 
-    @Override
-    public List<String> getUpdateColumns() {
-
-        List<MySqlContext.SQL> updateFoColumnNames = sqlContext.getUpdateFoColumnNames();
-        List<String> String = new ArrayList<>();
-        for (MySqlContext.SQL sql : updateFoColumnNames) {
-            String.add(sql.getUpdateColumn());
-        }
-        return String;
-    }
-
-    @Override
-    public List<Object> getUpdateValues() {
-
-        return null;
-    }
 
     @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
@@ -71,7 +55,7 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.UPDATE;
+        return SQLType.DELETE;
     }
 
     @Override

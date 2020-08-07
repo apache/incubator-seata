@@ -24,11 +24,11 @@ import java.util.List;
 /**
  * @author houzhi
  */
-public class QuerySpecificationSqlListener extends MySqlParserBaseListener {
+public class SelectSpecificationSqlListener extends MySqlParserBaseListener {
 
     private MySqlContext sqlQueryContext;
 
-    public QuerySpecificationSqlListener(MySqlContext sqlQueryContext) {
+    public SelectSpecificationSqlListener(MySqlContext sqlQueryContext) {
         this.sqlQueryContext = sqlQueryContext;
     }
 

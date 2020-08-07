@@ -1,4 +1,4 @@
-package io.seata.sqlparser.druid;
+package io.seata.sqlparser.antlr;
 
 import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.listener.DeleteSpecificationSqlListener;

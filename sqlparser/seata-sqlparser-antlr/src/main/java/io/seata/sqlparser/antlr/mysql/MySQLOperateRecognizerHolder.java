@@ -29,12 +29,12 @@ import io.seata.sqlparser.util.JdbcConstants;
 public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql) {
-        return null;
+        return new AntlrMySQLDeleteRecognizer(sql);
     }
 
     @Override
     public SQLRecognizer getInsertRecognizer(String sql) {
-        return null;
+        return new AntlrMySQLInsertRecognizer(sql);
     }
 
     @Override
@@ -44,6 +44,6 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql) {
-        return null;
+        return new AntlrMySQLSelectRecognizer(sql);
     }
 }
