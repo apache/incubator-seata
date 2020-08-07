@@ -36,7 +36,8 @@ public class CoreHelper {
      * @return the allow end committed
      */
     static boolean isAllowEndCommitted() {
-        return Boolean.TRUE.equals(ALLOW_END_COMMITTED.get());
+        Boolean isAllowEndCommitted = ALLOW_END_COMMITTED.get();
+        return isAllowEndCommitted == null || isAllowEndCommitted.booleanValue();
     }
 
     /**
