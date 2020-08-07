@@ -261,7 +261,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean canBeCommittedAsync() {
-        return branchType != BranchType.TCC && branchType != BranchType.XA;
+        return branchType == BranchType.AT;
     }
 
     /**
