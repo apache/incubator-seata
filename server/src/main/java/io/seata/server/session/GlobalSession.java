@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -128,11 +129,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable, Asyncab
         ArrayList<BranchSession> branchSessionsCanBeCommittedAsync = new ArrayList<>();
 
         BranchSession branchSession;
-        for (int i = 0; i < branchSessions.size(); i++) {
-            branchSession = branchSessions.get(i);
+        Iterator<BranchSession> iter = branchSessions.iterator();
+        while (iter.hasNext()) {
+            branchSession = iter.next();
             if (branchSession.getBranchType() == BranchType.AT) {
-                branchSessions.remove(i);
-                i--;
+                iter.remove();
                 branchSessionsCanBeCommittedAsync.add(branchSession);
             }
         }
