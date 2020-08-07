@@ -17,6 +17,7 @@ package io.seata.spring.annotation.datasource;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -38,7 +39,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy)) {
+        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && !(bean instanceof DataSourceProxyXA)) {
             //only put and init proxy, not return proxy.
             DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
         }
@@ -47,7 +48,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        if (bean instanceof DataSourceProxy) {
+        if (bean instanceof DataSourceProxy || bean instanceof DataSourceProxyXA) {
             throw new ShouldNeverHappenException("Auto proxy of DataSource can't be enabled as you've created a DataSourceProxy bean." +
                     "Please consider removing DataSourceProxy bean or disabling auto proxy of DataSource.");
         }

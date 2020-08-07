@@ -45,20 +45,20 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)) {
             //register seataDataSourceBeanPostProcessor bean def
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
-                    .genericBeanDefinition(SeataDataSourceBeanPostProcessor.class)
-                    .addConstructorArgValue(dataSourceProxyMode)
-                    .getBeanDefinition();
+                .genericBeanDefinition(SeataDataSourceBeanPostProcessor.class)
+                .addConstructorArgValue(dataSourceProxyMode)
+                .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR, beanDefinition);
         }
 
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)) {
             //register seataAutoDataSourceProxyCreator bean def
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
-                    .genericBeanDefinition(SeataAutoDataSourceProxyCreator.class)
-                    .addConstructorArgValue(useJdkProxy)
-                    .addConstructorArgValue(excludes)
-                    .addConstructorArgValue(dataSourceProxyMode)
-                    .getBeanDefinition();
+                .genericBeanDefinition(SeataAutoDataSourceProxyCreator.class)
+                .addConstructorArgValue(useJdkProxy)
+                .addConstructorArgValue(excludes)
+                .addConstructorArgValue(dataSourceProxyMode)
+                .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR, beanDefinition);
         }
     }
