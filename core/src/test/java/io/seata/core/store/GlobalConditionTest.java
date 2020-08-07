@@ -31,6 +31,7 @@ import static io.seata.core.store.GlobalTableField.TIMEOUT;
  * @author wang.liang
  */
 public class GlobalConditionTest {
+    private static final String DEFAULT_XID = "1234567890";
 
     @Test
     public void test_isMatch() throws InterruptedException {
@@ -38,31 +39,37 @@ public class GlobalConditionTest {
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
 
-        // condition1: statuses
+        // condition: xid
+        condition.setXid(DEFAULT_XID);
+        Assertions.assertFalse(condition.isMatch(obj));
+        obj.setXid(DEFAULT_XID);
+        Assertions.assertTrue(condition.isMatch(obj));
+
+        // condition: statuses
         condition.setStatuses(GlobalStatus.Finished);
         obj.setStatus(GlobalStatus.Begin.getCode());
         Assertions.assertFalse(condition.isMatch(obj));
         condition.setStatuses(GlobalStatus.Begin);
         Assertions.assertTrue(condition.isMatch(obj));
 
-        // condition2: isTimeoutData
-        condition.setNotTimeoutDataCondition();
+        // condition: isTimeoutData
+        condition.setTimeoutData(false);
         obj.setBeginTime(System.currentTimeMillis());
         obj.setTimeout(10);
         Assertions.assertTrue(condition.isMatch(obj));
         Thread.sleep(12);
         Assertions.assertFalse(condition.isMatch(obj));
-        condition.setTimeoutDataCondition();
+        condition.setTimeoutData(true);
         Assertions.assertTrue(condition.isMatch(obj));
 
-        // condition3: overTimeAliveMills
+        // condition: overTimeAliveMills
         condition.setOverTimeAliveMills(10);
         obj.setBeginTime(System.currentTimeMillis());
         Assertions.assertFalse(condition.isMatch(obj));
         Thread.sleep(12);
         Assertions.assertTrue(condition.isMatch(obj));
 
-        // condition4: minGmtModified
+        // condition: minGmtModified
         condition.setMinGmtModified(new Date());
         obj.setGmtModified(null);
         Assertions.assertFalse(condition.isMatch(obj));
@@ -79,7 +86,7 @@ public class GlobalConditionTest {
         GlobalCondition condition = new GlobalCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
-        condition.setTimeoutDataCondition();
+        condition.setTimeoutData(true);
 
         List<GlobalTransactionDO> list = new ArrayList<>();
 
@@ -89,20 +96,25 @@ public class GlobalConditionTest {
         obj.setTimeout(100);
         list.add(obj);
 
-        // do filter
+        // do count
         int count1 = condition.doCount(list);
+        // do filter
         List<GlobalTransactionDO> list1 = condition.doFilter(list);
         Assertions.assertEquals(count1, 0);
         Assertions.assertEquals(list1.size(), 0);
 
         Thread.sleep(102);
+        // do count
         count1 = condition.doCount(list);
+        // do filter
         list1 = condition.doFilter(list);
         Assertions.assertEquals(count1, 0);
         Assertions.assertEquals(list1.size(), 0);
 
         condition.setStatuses(GlobalStatus.Begin);
+        // do count
         count1 = condition.doCount(list);
+        // do filter
         list1 = condition.doFilter(list);
         Assertions.assertEquals(count1, 1);
         Assertions.assertEquals(list1.size(), 1);

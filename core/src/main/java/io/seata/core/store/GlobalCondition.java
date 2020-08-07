@@ -16,6 +16,7 @@
 package io.seata.core.store;
 
 import io.seata.common.util.ComparableUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.model.GlobalStatus;
 
 import java.util.Date;
@@ -40,6 +41,11 @@ import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_XID;
 public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     //region Fields
+
+    /**
+     * condition: xid = ?
+     */
+    protected String xid;
 
     /**
      * condition: status in (?, ?, ..., ?)
@@ -154,6 +160,12 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
         }
 
         // where
+        // xid = ?
+        if (StringUtils.isNotBlank(xid)) {
+            if (!xid.equals(globalTransaction.getXid())) {
+                return false; // un match
+            }
+        }
         // status in (?, ?, ?)
         if (statuses != null && statuses.length > 0) {
             if (!this.hasStatus(globalTransaction.getStatus())) {
@@ -240,44 +252,49 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     //region Gets and Sets
 
+    public String getXid() {
+        return xid;
+    }
+
+    public GlobalCondition setXid(String xid) {
+        this.xid = xid;
+        return this;
+    }
+
     public GlobalStatus[] getStatuses() {
         return statuses;
     }
 
-    public void setStatuses(GlobalStatus... statuses) {
+    public GlobalCondition setStatuses(GlobalStatus... statuses) {
         this.statuses = statuses;
+        return this;
     }
 
-    public Boolean getIsTimeoutData() {
+    public Boolean getTimeoutData() {
         return isTimeoutData;
     }
 
-    public void setTimeoutDataCondition() {
-        this.isTimeoutData = true;
-    }
-
-    public void setNotTimeoutDataCondition() {
-        this.isTimeoutData = false;
-    }
-
-    public void clearTimeoutDataCondition() {
-        this.isTimeoutData = null;
+    public GlobalCondition setTimeoutData(Boolean timeoutData) {
+        isTimeoutData = timeoutData;
+        return this;
     }
 
     public long getOverTimeAliveMills() {
         return overTimeAliveMills;
     }
 
-    public void setOverTimeAliveMills(long overTimeAliveMills) {
+    public GlobalCondition setOverTimeAliveMills(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
+        return this;
     }
 
     public Date getMinGmtModified() {
         return minGmtModified;
     }
 
-    public void setMinGmtModified(Date minGmtModified) {
+    public GlobalCondition setMinGmtModified(Date minGmtModified) {
         this.minGmtModified = minGmtModified;
+        return this;
     }
 
     //region Special Gets and Sets
@@ -287,15 +304,16 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      *
      * @param sortFields the sort fields
      */
-    public void setSortFields(GlobalTableField... sortFields) {
+    public GlobalCondition setSortFields(GlobalTableField... sortFields) {
         if (sortFields.length == 0) {
-            return;
+            return this;
         }
         SortParam[] sortParams = new SortParam[sortFields.length];
         for (int i = 0, l = sortFields.length; i < l; ++i) {
             sortParams[i] = new SortParam(sortFields[i].getFieldName());
         }
         super.setSortParams(sortParams);
+        return this;
     }
 
     //endregion
