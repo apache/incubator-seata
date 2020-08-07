@@ -30,9 +30,13 @@ import java.util.List;
  */
 public class AntlrIsolationTest {
 
-    // private final static String TEST_SQL = "UPDATE t1 SET name = ';' WHERE id = 'id1';UPDATE t2 SET name = 'name1' WHERE id = 'id1';";
+     private final static String TEST_SQL = "UPDATE t1 SET name = ';' WHERE id = 'id1';UPDATE t2 SET name = 'name1' WHERE id = 'id1';";
 
-    private final static String TEST_SQL = "DELETE FROM t1 WHERE id = 'id1'";
+    // private final static String TEST_SQL = "DELETE FROM t1 WHERE id = 'id1'";
+
+    // private final static String TEST_SQL = "INSERT INTO t1 (name) VALUES ('name1')";
+
+    //private final static String TEST_SQL = "SELECT name,age,phone FROM t1 WHERE id = 'id1' FOR UPDATE";
 
     @Test
     public void testAntlrIsolation() {
