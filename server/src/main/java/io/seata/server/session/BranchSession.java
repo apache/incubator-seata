@@ -474,5 +474,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
         this.canBeCommittedAsync = byteBuffer.get() > 0;
         this.status = BranchStatus.get(byteBuffer.get());
+
     }
+
 }
