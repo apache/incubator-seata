@@ -15,12 +15,14 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyWrapper;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
+
+import javax.sql.DataSource;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * the type data source proxy holder
@@ -29,7 +31,7 @@ import io.seata.rm.datasource.xa.DataSourceProxyXA;
  */
 public class DataSourceProxyHolder {
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private ConcurrentHashMap<DataSource, DataSource> dataSourceProxyMap;
+    private ConcurrentHashMap<DataSource, DataSourceProxyWrapper> dataSourceProxyMap;
 
     private DataSourceProxyHolder() {
         dataSourceProxyMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
@@ -59,13 +61,25 @@ public class DataSourceProxyHolder {
     /**
      * Put dataSource
      *
-     * @param originalDataSource  the original data source
+     * @param dataSource          the data source
      * @param dataSourceProxyMode the data source proxy mode
      * @return dataSourceProxy
      */
-    public DataSource putDataSource(DataSource originalDataSource, String dataSourceProxyMode) {
-        return this.dataSourceProxyMap.computeIfAbsent(originalDataSource,
-                BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode) ? DataSourceProxyXA::new : DataSourceProxy::new);
+    public DataSource putDataSource(DataSource dataSource, String dataSourceProxyMode) {
+        DataSource originalDataSource;
+        Function<? super DataSource, ? extends DataSourceProxyWrapper> mappingFunction;
+
+        if (dataSource instanceof DataSourceProxyWrapper) {
+            DataSourceProxyWrapper dataSourceProxy = ((DataSourceProxyWrapper) dataSource);
+            originalDataSource = dataSourceProxy.getTargetDataSource();
+            mappingFunction = (ds) -> dataSourceProxy;
+        } else {
+            originalDataSource = dataSource;
+            mappingFunction = BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)
+                    ? DataSourceProxyXA::new : DataSourceProxy::new;
+        }
+
+        return this.dataSourceProxyMap.computeIfAbsent(originalDataSource, mappingFunction);
     }
 
     /**

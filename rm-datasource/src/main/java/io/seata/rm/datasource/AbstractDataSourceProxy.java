@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  *
  * @author sharajava
  */
-public abstract class AbstractDataSourceProxy implements DataSource {
+public abstract class AbstractDataSourceProxy implements DataSource, DataSourceProxyWrapper {
 
     /**
      * The Target data source.
@@ -47,6 +47,7 @@ public abstract class AbstractDataSourceProxy implements DataSource {
      *
      * @return the target data source
      */
+    @Override
     public DataSource getTargetDataSource() {
         return targetDataSource;
     }
