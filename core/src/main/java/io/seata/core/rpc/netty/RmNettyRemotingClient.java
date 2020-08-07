@@ -252,7 +252,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (serverAddress) -> {
+        return serverAddress -> {
             String resourceIds = getMergedResourceKeys();
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);

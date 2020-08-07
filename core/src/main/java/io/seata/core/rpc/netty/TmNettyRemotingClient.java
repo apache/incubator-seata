@@ -159,7 +159,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (severAddress) -> {
+        return severAddress -> {
             RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
             return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
