@@ -194,7 +194,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      * @param canBeCommittedAsync the can be committed async
      */
     public BranchSession setCanBeCommittedAsync(Boolean canBeCommittedAsync) {
-        this.canBeCommittedAsync = canBeCommittedAsync == null ? false : canBeCommittedAsync;
+        this.canBeCommittedAsync = Boolean.TRUE.equals(canBeCommittedAsync);
         return this;
     }
 
@@ -282,7 +282,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean canBeCommittedAsync() {
-        return canBeCommittedAsync || (branchType != BranchType.TCC && branchType != BranchType.XA);
+        return canBeCommittedAsync || branchType == BranchType.AT;
     }
 
     /**

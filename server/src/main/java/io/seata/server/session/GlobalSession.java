@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -75,8 +74,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable, Asyncab
 
     private volatile boolean active = true;
 
-    private boolean allowEndCommitted = true;
-
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
@@ -117,44 +114,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable, Asyncab
             }
         }
         return true;
-    }
-
-    /**
-     * Take out branch sessions that can be committed async.
-     *
-     * @return the branch sessions that can be committed async
-     */
-    public ArrayList<BranchSession> takeOutBranchSessionsCanBeCommittedAsync() {
-        ArrayList<BranchSession> branchSessionsCanBeCommittedAsync = new ArrayList<>();
-
-        BranchSession branchSession;
-        for (int i = 0; i < branchSessions.size(); i++) {
-            branchSession = branchSessions.get(i);
-            if (branchSession.getBranchType() == BranchType.AT) {
-                branchSessions.remove(i);
-                i--;
-                branchSessionsCanBeCommittedAsync.add(branchSession);
-            }
-        }
-
-        if (branchSessionsCanBeCommittedAsync.size() > 0) {
-            allowEndCommitted = false;
-        }
-
-        return branchSessionsCanBeCommittedAsync;
-    }
-
-    /**
-     * Put back branch sessions that can be committed async.
-     *
-     * @param branchSessionsCanBeCommittedAsync the branch sessions that can be committed async
-     */
-    public void putBackBranchSessionsCanBeCommittedAsync(List<BranchSession> branchSessionsCanBeCommittedAsync) {
-        if (branchSessionsCanBeCommittedAsync == null) {
-            return;
-        }
-        branchSessions.addAll(branchSessionsCanBeCommittedAsync);
-        allowEndCommitted = true;
     }
 
     /**
@@ -221,10 +180,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable, Asyncab
     @Override
     public boolean isActive() {
         return active;
-    }
-
-    public boolean isAllowEndCommitted() {
-        return allowEndCommitted;
     }
 
     @Override

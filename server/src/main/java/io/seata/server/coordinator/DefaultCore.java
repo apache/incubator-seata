@@ -161,22 +161,7 @@ public class DefaultCore implements Core {
         });
 
         if (shouldCommit) {
-            List<BranchSession> branchSessionsCanBeCommittedAsync = globalSession.takeOutBranchSessionsCanBeCommittedAsync();
-            if (CollectionUtils.isNotEmpty(branchSessionsCanBeCommittedAsync)) {
-                boolean success;
-                try {
-                    success = doGlobalCommit(globalSession, false);
-                } finally {
-                    globalSession.putBackBranchSessionsCanBeCommittedAsync(branchSessionsCanBeCommittedAsync);
-                }
-
-                if (success) {
-                    globalSession.asyncCommit();
-                    return GlobalStatus.Committed;
-                }
-            } else {
-                doGlobalCommit(globalSession, false);
-            }
+            doGlobalCommit(globalSession, false);
             return globalSession.getStatus();
         } else {
             return globalSession.getStatus() == GlobalStatus.AsyncCommitting ? GlobalStatus.Committed : globalSession.getStatus();
@@ -245,7 +230,7 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        if (success && globalSession.isAllowEndCommitted()) {
+        if (success) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
