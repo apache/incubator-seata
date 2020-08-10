@@ -37,7 +37,7 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_RETRY_STRATEGY;
+import static io.seata.common.DefaultValues.DEFAULT_RETRY_STRATEGY;
 
 /**
  * The type Branch session.
