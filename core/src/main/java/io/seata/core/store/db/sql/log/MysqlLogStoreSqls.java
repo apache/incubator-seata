@@ -19,7 +19,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.Pageable;
 
-import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
+import static io.seata.common.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * Database log store mysql sql
