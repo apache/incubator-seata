@@ -22,7 +22,7 @@ import io.seata.core.store.Pageable;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
+import static io.seata.common.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * Database log store oracle sql
