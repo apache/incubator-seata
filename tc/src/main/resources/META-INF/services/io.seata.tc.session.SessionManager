@@ -1,3 +1,2 @@
-io.seata.tc.storage.file.session.FileSessionManager
 io.seata.tc.storage.db.session.DataBaseSessionManager
 io.seata.tc.storage.redis.session.RedisSessionManager
