@@ -161,23 +161,13 @@ public class DefaultCore implements Core {
         });
 
         if (shouldCommit) {
-            List<BranchSession> branchSessionsCanBeCommittedAsync = CoreHelper.takeOutBranchSessionsCanBeCommittedAsync(globalSession.getBranchSessions());
-            if (CollectionUtils.isNotEmpty(branchSessionsCanBeCommittedAsync)) {
-                boolean success;
-                try {
-                    success = doGlobalCommit(globalSession, false);
-                } finally {
-                    CoreHelper.putBackBranchSessionsCanBeCommittedAsync(globalSession.getBranchSessions(), branchSessionsCanBeCommittedAsync);
-                }
-
-                if (success) {
-                    globalSession.asyncCommit();
-                    return GlobalStatus.Committed;
-                }
+            boolean success = doGlobalCommit(globalSession, false);
+            if (success && !globalSession.getBranchSessions().isEmpty()) {
+                globalSession.asyncCommit();
+                return GlobalStatus.Committed;
             } else {
-                doGlobalCommit(globalSession, false);
+                return globalSession.getStatus();
             }
-            return globalSession.getStatus();
         } else {
             return globalSession.getStatus() == GlobalStatus.AsyncCommitting ? GlobalStatus.Committed : globalSession.getStatus();
         }
@@ -193,12 +183,19 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
+            boolean canBeCommittedAsyncGlobalSession = globalSession.canBeCommittedAsync();
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
+                // if not retrying, skip the canBeCommittedAsync branches
+                if (!retrying && branchSession.canBeCommittedAsync()) {
+                    continue;
+                }
+
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
                     continue;
                 }
+
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
 
@@ -207,7 +204,7 @@ public class DefaultCore implements Core {
                             globalSession.removeBranch(branchSession);
                             continue;
                         case PhaseTwo_CommitFailed_Unretryable:
-                            if (globalSession.canBeCommittedAsync()) {
+                            if (canBeCommittedAsyncGlobalSession) {
                                 LOGGER.error(
                                     "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
                                 continue;
@@ -221,7 +218,7 @@ public class DefaultCore implements Core {
                                 globalSession.queueToRetryCommit();
                                 return false;
                             }
-                            if (globalSession.canBeCommittedAsync()) {
+                            if (canBeCommittedAsyncGlobalSession) {
                                 LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
                                     branchSession.getBranchId(), branchStatus);
                                 continue;
@@ -245,7 +242,7 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        if (success && CoreHelper.isAllowEndCommitted()) {
+        if (success && globalSession.getBranchSessions().isEmpty()) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
