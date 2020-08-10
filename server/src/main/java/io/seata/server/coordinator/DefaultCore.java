@@ -183,7 +183,6 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            boolean canBeCommittedAsyncGlobalSession = globalSession.canBeCommittedAsync();
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
@@ -195,7 +194,6 @@ public class DefaultCore implements Core {
                     globalSession.removeBranch(branchSession);
                     continue;
                 }
-
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
 
@@ -204,7 +202,7 @@ public class DefaultCore implements Core {
                             globalSession.removeBranch(branchSession);
                             continue;
                         case PhaseTwo_CommitFailed_Unretryable:
-                            if (canBeCommittedAsyncGlobalSession) {
+                            if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error(
                                     "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
                                 continue;
@@ -218,7 +216,7 @@ public class DefaultCore implements Core {
                                 globalSession.queueToRetryCommit();
                                 return false;
                             }
-                            if (canBeCommittedAsyncGlobalSession) {
+                            if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
                                     branchSession.getBranchId(), branchStatus);
                                 continue;
