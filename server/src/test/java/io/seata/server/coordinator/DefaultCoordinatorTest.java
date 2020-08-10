@@ -26,6 +26,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -113,7 +114,7 @@ public class DefaultCoordinatorTest {
         GlobalSession globalSession = null;
         try {
             xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-            Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+            Long branchId = core.branchRegister(BranchType.AT, CommitType.AsyncCommit, resourceId, clientId, xid, applicationData, lockKeys_1);
             globalSession = SessionHolder.findGlobalSession(xid);
             result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
@@ -144,7 +145,7 @@ public class DefaultCoordinatorTest {
     public void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
 
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, CommitType.AsyncCommit, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         Assertions.assertNotNull(branchId);
 
@@ -161,7 +162,7 @@ public class DefaultCoordinatorTest {
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, CommitType.AsyncCommit, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -188,7 +189,7 @@ public class DefaultCoordinatorTest {
         NoSuchFieldException, IllegalAccessException {
         defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, CommitType.AsyncCommit, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -249,7 +250,7 @@ public class DefaultCoordinatorTest {
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, CommitType.AsyncCommit, resourceId, clientId, xid, applicationData, lockKeys_2);
         return Stream.of(
             Arguments.of(xid, branchId)
         );

@@ -110,7 +110,7 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void branchRegisterTest(String xid) throws Exception {
-        core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
+        core.branchRegister(BranchType.AT, CommitType.AsyncCommit, resourceId, clientId, xid, "abc", lockKeys_1);
         globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
     }
@@ -312,7 +312,7 @@ public class DefaultCoreTest {
      */
     static Stream<Arguments> xidAndBranchIdProvider() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, null, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, CommitType.AsyncCommit, resourceId, clientId, xid, null, lockKeys_2);
         Assertions.assertNotNull(xid);
         Assertions.assertTrue(branchId != 0);
         return Stream.of(

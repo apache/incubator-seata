@@ -26,6 +26,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
@@ -235,7 +236,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (!context.hasUndoLog() || context.getLockKeysBuffer().isEmpty()) {
             return;
         }
-        Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
+        Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, CommitType.AsyncCommit, getDataSourceProxy().getResourceId(),
             null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
     }

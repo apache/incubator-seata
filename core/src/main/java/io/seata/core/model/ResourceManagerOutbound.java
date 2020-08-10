@@ -41,24 +41,6 @@ public interface ResourceManagerOutbound {
         TransactionException;
 
     /**
-     * Branch register long.
-     *
-     * @param branchType the branch type
-     * @param resourceId the resource id
-     * @param clientId   the client id
-     * @param xid        the xid
-     * @param applicationData the context
-     * @param lockKeys   the lock keys
-     * @return the long
-     * @throws TransactionException the transaction exception
-     */
-    default Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
-            TransactionException {
-        CommitType commitType = branchType == BranchType.AT ? CommitType.AsyncCommit : CommitType.SyncCommit;
-        return branchRegister(branchType, commitType, resourceId, clientId, xid, applicationData, lockKeys);
-    }
-
-    /**
      * Branch report.
      *
      * @param branchType      the branch type
