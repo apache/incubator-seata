@@ -172,7 +172,7 @@ public class DefaultCoreTest {
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.AT,
             new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
-        core.doGlobalCommit(globalSession, false);
+        core.doGlobalCommit(globalSession, true);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
 
@@ -192,7 +192,7 @@ public class DefaultCoreTest {
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
-        core.doGlobalCommit(globalSession, false);
+        core.doGlobalCommit(globalSession, true);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
     }
 
@@ -212,7 +212,7 @@ public class DefaultCoreTest {
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
-        core.doGlobalCommit(globalSession, false);
+        core.doGlobalCommit(globalSession, true);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
     }
 
