@@ -113,7 +113,7 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public long branchRegister(String resourceId, String clientId, String xid, String applicationData, String lockKeys)
         throws TransactionException {
-        return DefaultResourceManager.get().branchRegister(BranchType.SAGA, false, resourceId, clientId, xid, applicationData,
+        return DefaultResourceManager.get().branchRegister(BranchType.SAGA, resourceId, clientId, xid, applicationData,
             lockKeys);
     }
 

@@ -17,6 +17,7 @@ package io.seata.server.session;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 
@@ -30,8 +31,8 @@ public class SessionHelper {
     private SessionHelper() {}
 
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
-            boolean canBeCommittedAsync, String resourceId, String lockKeys, String clientId) {
-        return newBranchByGlobal(globalSession, branchType, canBeCommittedAsync, resourceId, null, lockKeys, clientId);
+            CommitType commitType, String resourceId, String lockKeys, String clientId) {
+        return newBranchByGlobal(globalSession, branchType, commitType, resourceId, null, lockKeys, clientId);
     }
 
     /**
@@ -45,14 +46,14 @@ public class SessionHelper {
      * @return the branch session
      */
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
-            boolean canBeCommittedAsync, String resourceId, String applicationData, String lockKeys, String clientId) {
+            CommitType commitType, String resourceId, String applicationData, String lockKeys, String clientId) {
         BranchSession branchSession = new BranchSession();
 
         branchSession.setXid(globalSession.getXid());
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(UUIDGenerator.generateUUID());
         branchSession.setBranchType(branchType);
-        branchSession.setCanBeCommittedAsync(canBeCommittedAsync);
+        branchSession.setCommitType(commitType);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);
         branchSession.setClientId(clientId);

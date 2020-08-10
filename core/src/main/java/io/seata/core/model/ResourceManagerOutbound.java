@@ -27,18 +27,36 @@ public interface ResourceManagerOutbound {
     /**
      * Branch register long.
      *
-     * @param branchType          the branch type
-     * @param canBeCommittedAsync the can be committed async
-     * @param resourceId          the resource id
-     * @param clientId            the client id
-     * @param xid                 the xid
-     * @param applicationData     the context
-     * @param lockKeys            the lock keys
+     * @param branchType the branch type
+     * @param commitType the commit type
+     * @param resourceId the resource id
+     * @param clientId   the client id
+     * @param xid        the xid
+     * @param applicationData the context
+     * @param lockKeys   the lock keys
      * @return the long
      * @throws TransactionException the transaction exception
      */
-    Long branchRegister(BranchType branchType, boolean canBeCommittedAsync, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
+    Long branchRegister(BranchType branchType, CommitType commitType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
         TransactionException;
+
+    /**
+     * Branch register long.
+     *
+     * @param branchType the branch type
+     * @param resourceId the resource id
+     * @param clientId   the client id
+     * @param xid        the xid
+     * @param applicationData the context
+     * @param lockKeys   the lock keys
+     * @return the long
+     * @throws TransactionException the transaction exception
+     */
+    default Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
+            TransactionException {
+        CommitType commitType = branchType == BranchType.AT ? CommitType.AsyncCommit : CommitType.SyncCommit;
+        return branchRegister(branchType, commitType, resourceId, clientId, xid, applicationData, lockKeys);
+    }
 
     /**
      * Branch report.

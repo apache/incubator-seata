@@ -16,6 +16,7 @@
 package io.seata.core.protocol.transaction;
 
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
@@ -30,7 +31,7 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
 
     private BranchType branchType = BranchType.AT;
 
-    private boolean canBeCommittedAsync;
+    private CommitType commitType = CommitType.SyncCommit;
 
     private String resourceId;
 
@@ -75,21 +76,21 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
     }
 
     /**
-     * Gets can be committed async.
+     * Gets commit type.
      *
-     * @return the can be committed async
+     * @return the commit type
      */
-    public boolean isCanBeCommittedAsync() {
-        return canBeCommittedAsync;
+    public CommitType getCommitType() {
+        return commitType;
     }
 
     /**
-     * Sets can be committed async.
+     * Sets commit type.
      *
-     * @param canBeCommittedAsync the can be committed async
+     * @param commitType the commit type
      */
-    public BranchRegisterRequest setCanBeCommittedAsync(boolean canBeCommittedAsync) {
-        this.canBeCommittedAsync = canBeCommittedAsync;
+    public BranchRegisterRequest setCommitType(CommitType commitType) {
+        this.commitType = commitType;
         return this;
     }
 

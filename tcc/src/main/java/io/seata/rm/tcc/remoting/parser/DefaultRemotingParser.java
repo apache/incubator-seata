@@ -183,6 +183,7 @@ public class DefaultRemotingParser {
                         tccResource.setCommitMethod(ReflectionUtil
                             .getMethod(interfaceClass, twoPhaseBusinessAction.commitMethod(),
                                 new Class[] {BusinessActionContext.class}));
+                        tccResource.setCommitType(twoPhaseBusinessAction.commitType());
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
                         tccResource.setRollbackMethod(ReflectionUtil
                             .getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(),

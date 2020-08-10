@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.protobuf.convertor;
 
+import io.seata.core.model.CommitType;
 import io.seata.serializer.protobuf.generated.AbstractMessageProto;
 import io.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import io.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
@@ -44,7 +45,7 @@ public class BranchRegisterRequestConvertor implements PbConvertor<BranchRegiste
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
             .setApplicationData(applicationData == null ? "" : applicationData)
             .setBranchType(BranchTypeProto.valueOf(branchRegisterRequest.getBranchType().name()))
-            .setCanBeCommittedAsync(branchRegisterRequest.isCanBeCommittedAsync())
+            .setCommitType(branchRegisterRequest.getCommitType().getCode())
             .setLockKey(lockKey == null ? "" : lockKey)
             .setResourceId(resourceId == null ? "" : resourceId)
             .setXid(branchRegisterRequest.getXid())
@@ -57,7 +58,7 @@ public class BranchRegisterRequestConvertor implements PbConvertor<BranchRegiste
         BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
         branchRegisterRequest.setApplicationData(branchRegisterRequestProto.getApplicationData());
         branchRegisterRequest.setBranchType(BranchType.valueOf(branchRegisterRequestProto.getBranchType().name()));
-        branchRegisterRequest.setCanBeCommittedAsync(Boolean.TRUE.equals(branchRegisterRequestProto.getCanBeCommittedAsync()));
+        branchRegisterRequest.setCommitType(CommitType.get(branchRegisterRequestProto.getCommitType()));
         branchRegisterRequest.setLockKey(branchRegisterRequestProto.getLockKey());
         branchRegisterRequest.setResourceId(branchRegisterRequestProto.getResourceId());
         branchRegisterRequest.setXid(branchRegisterRequestProto.getXid());

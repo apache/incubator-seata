@@ -189,8 +189,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
         response.setBranchId(
-            core.branchRegister(request.getBranchType(), request.isCanBeCommittedAsync(), request.getResourceId(),
-                rpcContext.getClientId(), request.getXid(), request.getApplicationData(), request.getLockKey()));
+            core.branchRegister(request.getBranchType(), request.getCommitType(), request.getResourceId(), rpcContext.getClientId(),
+                request.getXid(), request.getApplicationData(), request.getLockKey()));
     }
 
     @Override

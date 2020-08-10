@@ -113,7 +113,7 @@ public class DefaultCoordinatorTest {
         GlobalSession globalSession = null;
         try {
             xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-            Long branchId = core.branchRegister(BranchType.AT, true, resourceId, clientId, xid, applicationData, lockKeys_1);
+            Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
             globalSession = SessionHolder.findGlobalSession(xid);
             result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
@@ -144,7 +144,7 @@ public class DefaultCoordinatorTest {
     public void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
 
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, true, "abcd", clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         Assertions.assertNotNull(branchId);
 
@@ -161,7 +161,7 @@ public class DefaultCoordinatorTest {
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, true, "abcd", clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -188,7 +188,7 @@ public class DefaultCoordinatorTest {
         NoSuchFieldException, IllegalAccessException {
         defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, true, "abcd", clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -249,7 +249,7 @@ public class DefaultCoordinatorTest {
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, true, resourceId, clientId, xid, applicationData, lockKeys_2);
+        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
         return Stream.of(
             Arguments.of(xid, branchId)
         );

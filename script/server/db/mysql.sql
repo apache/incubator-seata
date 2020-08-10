@@ -22,18 +22,18 @@ CREATE TABLE IF NOT EXISTS `global_table`
 -- the table to store BranchSession data
 CREATE TABLE IF NOT EXISTS `branch_table`
 (
-    `branch_id`              BIGINT       NOT NULL,
-    `xid`                    VARCHAR(128) NOT NULL,
-    `transaction_id`         BIGINT,
-    `resource_group_id`      VARCHAR(32),
-    `resource_id`            VARCHAR(256),
-    `branch_type`            VARCHAR(8),
-    `can_be_committed_async` TINYINT,
-    `status`                 TINYINT,
-    `client_id`              VARCHAR(64),
-    `application_data`       VARCHAR(2000),
-    `gmt_create`             DATETIME(6),
-    `gmt_modified`           DATETIME(6),
+    `branch_id`         BIGINT       NOT NULL,
+    `xid`               VARCHAR(128) NOT NULL,
+    `transaction_id`    BIGINT,
+    `resource_group_id` VARCHAR(32),
+    `resource_id`       VARCHAR(256),
+    `branch_type`       VARCHAR(8),
+    `commit_type`       TINYINT,
+    `status`            TINYINT,
+    `client_id`         VARCHAR(64),
+    `application_data`  VARCHAR(2000),
+    `gmt_create`        DATETIME(6),
+    `gmt_modified`      DATETIME(6),
     PRIMARY KEY (`branch_id`),
     KEY `idx_xid` (`xid`)
 ) ENGINE = InnoDB

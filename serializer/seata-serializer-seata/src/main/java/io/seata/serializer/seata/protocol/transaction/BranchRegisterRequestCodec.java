@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 
 /**
@@ -39,7 +40,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
 
         String xid = branchRegisterRequest.getXid();
         BranchType branchType = branchRegisterRequest.getBranchType();
-        boolean canBeCommittedAsync = branchRegisterRequest.isCanBeCommittedAsync();
+        CommitType commitType = branchRegisterRequest.getCommitType();
         String resourceId = branchRegisterRequest.getResourceId();
         String lockKey = branchRegisterRequest.getLockKey();
         String applicationData = branchRegisterRequest.getApplicationData();
@@ -67,8 +68,8 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         // 2. Branch Type
         out.writeByte(branchType.ordinal());
 
-        // 3. Can Be Committed Async
-        out.writeByte(canBeCommittedAsync ? (byte) 1 : (byte) 0);
+        // 3. Commit Type
+        out.writeByte((byte)commitType.getCode());
 
         // 4. Resource Id
         if (resourceId != null) {
@@ -114,7 +115,8 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         }
 
         branchRegisterRequest.setBranchType(BranchType.get(in.get()));
-        branchRegisterRequest.setCanBeCommittedAsync(in.get() > 0);
+
+        branchRegisterRequest.setCommitType(CommitType.get(in.get()));
 
         short len = in.getShort();
         if (len > 0) {

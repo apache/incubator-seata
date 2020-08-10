@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import io.seata.core.model.CommitType;
 import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
@@ -60,7 +61,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchType branchType;
 
-    private boolean canBeCommittedAsync;
+    private CommitType commitType;
 
     private BranchStatus status = BranchStatus.Unknown;
 
@@ -180,21 +181,21 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     /**
-     * Gets can be committed async.
+     * Gets commit type.
      *
-     * @return the can be committed async
+     * @return the commit type
      */
-    public boolean isCanBeCommittedAsync() {
-        return canBeCommittedAsync;
+    public CommitType getCommitType() {
+        return commitType;
     }
 
     /**
-     * Sets can be committed async.
+     * Sets commit type.
      *
-     * @param canBeCommittedAsync the can be committed async
+     * @param commitType the commit type
      */
-    public BranchSession setCanBeCommittedAsync(Boolean canBeCommittedAsync) {
-        this.canBeCommittedAsync = Boolean.TRUE.equals(canBeCommittedAsync);
+    public BranchSession setCommitType(CommitType commitType) {
+        this.commitType = commitType;
         return this;
     }
 
@@ -282,7 +283,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean canBeCommittedAsync() {
-        return canBeCommittedAsync || branchType == BranchType.AT;
+        // includes: CommitType.AsyncCommit, CommitType.NoCommit, BranchType.AT
+        return CommitType.SyncCommit != commitType || branchType == BranchType.AT;
     }
 
     /**
@@ -325,7 +327,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte branchTypeByte = branchType != null ? (byte) branchType.ordinal() : -1;
 
-        byte canBeCommittedAsyncByte = canBeCommittedAsync ? (byte) 1 : (byte) 0;
+        byte commitTypeByte = commitType != null ? (byte) commitType.getCode() : -1;
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 
@@ -394,8 +396,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
 
         byteBuffer.put(branchTypeByte);
-
-        byteBuffer.put(canBeCommittedAsyncByte);
+        byteBuffer.put(commitTypeByte);
 
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
@@ -420,7 +421,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
             + 1 //branchType
-            + 1;//canBeCommittedAsync
+            + 1;//commitType
         return size;
     }
 
@@ -472,7 +473,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (branchTypeId >= 0) {
             this.branchType = BranchType.values()[branchTypeId];
         }
-        this.canBeCommittedAsync = byteBuffer.get() > 0;
+        int commitTypeId = byteBuffer.get();
+        if (commitTypeId >= 0) {
+            this.commitType = CommitType.get(commitTypeId);
+        }
         this.status = BranchStatus.get(byteBuffer.get());
 
     }

@@ -19,6 +19,7 @@ import java.util.Date;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
+import io.seata.core.model.CommitType;
 
 /**
  * branch transaction data object
@@ -39,7 +40,7 @@ public class BranchTransactionDO {
 
     private String branchType;
 
-    private Boolean canBeCommittedAsync;
+    private Integer commitType = CommitType.SyncCommit.getCode();
 
     private Integer status = BranchStatus.Unknown.getCode();
 
@@ -159,12 +160,22 @@ public class BranchTransactionDO {
         this.branchType = branchType;
     }
 
-    public Boolean getCanBeCommittedAsync() {
-        return canBeCommittedAsync;
+    /**
+     * Gets commit type.
+     *
+     * @return the commit type
+     */
+    public int getCommitType() {
+        return commitType;
     }
 
-    public BranchTransactionDO setCanBeCommittedAsync(Boolean canBeCommittedAsync) {
-        this.canBeCommittedAsync = canBeCommittedAsync;
+    /**
+     * Sets commit type.
+     *
+     * @param commitType the commit type
+     */
+    public BranchTransactionDO setCommitType(int commitType) {
+        this.commitType = commitType;
         return this;
     }
 

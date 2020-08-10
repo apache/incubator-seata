@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.core.model.CommitType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,9 +93,9 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, boolean canBeCommittedAsync, String resourceId, String clientId, String xid,
+    public Long branchRegister(BranchType branchType, CommitType commitType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
-        return getCore(branchType).branchRegister(branchType, canBeCommittedAsync, resourceId, clientId, xid,
+        return getCore(branchType).branchRegister(branchType, commitType, resourceId, clientId, xid,
             applicationData, lockKeys);
     }
 

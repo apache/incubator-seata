@@ -140,7 +140,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // xidBytes.size
                 + 1 // statusCode
                 + 1 // branchType
-                + 1;// canBeCommittedAsync
+                + 1;// commitType
         String xid = global.getXid();
         byte[] xidBytes = null;
         if (xid != null) {

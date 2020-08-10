@@ -18,6 +18,7 @@ package io.seata.rm.tcc;
 import java.lang.reflect.Method;
 
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.model.Resource;
 
 /**
@@ -41,7 +42,7 @@ public class TCCResource implements Resource {
 
     private Method commitMethod;
 
-    private boolean canBeCommittedAsync;
+    private CommitType commitType;
 
     private String rollbackMethodName;
 
@@ -162,21 +163,21 @@ public class TCCResource implements Resource {
     }
 
     /**
-     * Gets can be committed async.
+     * Gets commit type.
      *
-     * @return the can be committed async
+     * @return the commit type
      */
-    public boolean isCanBeCommittedAsync() {
-        return canBeCommittedAsync;
+    public CommitType getCommitType() {
+        return commitType;
     }
 
     /**
-     * Sets can be committed async.
+     * Sets commit type.
      *
-     * @param canBeCommittedAsync the can be committed async
+     * @param commitType the commit type
      */
-    public TCCResource setCanBeCommittedAsync(boolean canBeCommittedAsync) {
-        this.canBeCommittedAsync = canBeCommittedAsync;
+    public TCCResource setCommitType(CommitType commitType) {
+        this.commitType = commitType;
         return this;
     }
 

@@ -22,18 +22,18 @@ CREATE INDEX idx_transaction_id ON global_table (transaction_id);
 -- the table to store BranchSession data
 CREATE TABLE branch_table
 (
-    branch_id              NUMBER(19)    NOT NULL,
-    xid                    VARCHAR2(128) NOT NULL,
-    transaction_id         NUMBER(19),
-    resource_group_id      VARCHAR2(32),
-    resource_id            VARCHAR2(256),
-    branch_type            VARCHAR2(8),
-    can_be_committed_async NUMBER(1),
-    status                 NUMBER(3),
-    client_id              VARCHAR2(64),
-    application_data       VARCHAR2(2000),
-    gmt_create             TIMESTAMP(6),
-    gmt_modified           TIMESTAMP(6),
+    branch_id         NUMBER(19)    NOT NULL,
+    xid               VARCHAR2(128) NOT NULL,
+    transaction_id    NUMBER(19),
+    resource_group_id VARCHAR2(32),
+    resource_id       VARCHAR2(256),
+    branch_type       VARCHAR2(8),
+    commit_type       NUMBER(1),
+    status            NUMBER(3),
+    client_id         VARCHAR2(64),
+    application_data  VARCHAR2(2000),
+    gmt_create        TIMESTAMP(6),
+    gmt_modified      TIMESTAMP(6),
     PRIMARY KEY (branch_id)
 );
 
