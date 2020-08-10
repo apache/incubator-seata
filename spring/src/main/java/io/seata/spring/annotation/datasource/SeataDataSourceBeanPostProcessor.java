@@ -15,9 +15,7 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.DataSourceProxyWrapper;
-import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 

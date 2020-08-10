@@ -70,9 +70,9 @@ public class DataSourceProxyHolder {
         Function<? super DataSource, ? extends DataSourceProxyWrapper> mappingFunction;
 
         if (dataSource instanceof DataSourceProxyWrapper) {
-            DataSourceProxyWrapper dataSourceProxy = ((DataSourceProxyWrapper) dataSource);
+            DataSourceProxyWrapper dataSourceProxy = (DataSourceProxyWrapper) dataSource;
             originalDataSource = dataSourceProxy.getTargetDataSource();
-            mappingFunction = (ds) -> dataSourceProxy;
+            mappingFunction = ds -> dataSourceProxy;
         } else {
             originalDataSource = dataSource;
             mappingFunction = BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)
