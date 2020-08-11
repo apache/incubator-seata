@@ -90,14 +90,40 @@ public class DataBaseSessionManagerTest {
                 s.execute("drop table global_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE global_table ( xid varchar(96),  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            s.execute("CREATE TABLE global_table (" +
+                    "  xid                       varchar(96) primary key," +
+                    "  transaction_id            long," +
+                    "  status                    int," +
+                    "  application_id            varchar(32)," +
+                    "  transaction_service_group varchar(32)," +
+                    "  transaction_name          varchar(128)," +
+                    "  timeout                   int," +
+                    "  begin_time                long," +
+                    "  application_data          varchar(500)," +
+                    "  gmt_create                timestamp(6)," +
+                    "  gmt_modified              timestamp(6)" +
+                    ")");
             System.out.println("create table global_table success.");
 
             try {
                 s.execute("drop table branch_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE branch_table ( xid varchar(96),  transaction_id long , branch_id long, resource_group_id varchar(32), resource_id varchar(32) ,lock_key varchar(64) ,branch_type varchar(32) ,commit_type int, status int , client_id varchar(128),  application_data varchar(500),  gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            s.execute("CREATE TABLE branch_table (" +
+                    "  branch_id         long primary key," +
+                    "  xid               varchar(96)," +
+                    "  transaction_id    long," +
+                    "  resource_group_id varchar(32)," +
+                    "  resource_id       varchar(32)," +
+                    "  lock_key          varchar(64)," +
+                    "  branch_type       varchar(32)," +
+                    "  commit_type       int," +
+                    "  status            int," +
+                    "  client_id         varchar(128)," +
+                    "  application_data  varchar(500)," +
+                    "  gmt_create        timestamp(6)," +
+                    "  gmt_modified      timestamp(6)" +
+                    ")");
             System.out.println("create table branch_table success.");
 
         } catch (Exception e) {
@@ -507,7 +533,7 @@ public class DataBaseSessionManagerTest {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                     "test", "test123", 100);
             xid2 = XID.generateXID(globalSession.getTransactionId());
-            globalSession.setXid(xid);
+            globalSession.setXid(xid2);
             globalSession.setTransactionId(146757978);
             globalSession.setBeginTime(System.currentTimeMillis());
             globalSession.setApplicationData("abc=878s");
