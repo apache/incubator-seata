@@ -190,17 +190,13 @@ public class DefaultCore implements Core {
                     continue;
                 }
 
-                // if no commit, remove this branch
-                if (branchSession.getCommitType() == CommitType.NoCommit) {
+                // if NoCommit or PhaseOne_Failed, remove the branches
+                if (branchSession.getCommitType() == CommitType.NoCommit
+                        || branchSession.getStatus() == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
                     continue;
                 }
 
-                BranchStatus currentStatus = branchSession.getStatus();
-                if (currentStatus == BranchStatus.PhaseOne_Failed) {
-                    globalSession.removeBranch(branchSession);
-                    continue;
-                }
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
 

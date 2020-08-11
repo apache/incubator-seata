@@ -283,8 +283,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean canBeCommittedAsync() {
-        // includes: CommitType.AsyncCommit, CommitType.NoCommit, BranchType.AT
-        return CommitType.SyncCommit != commitType || branchType == BranchType.AT;
+        // AsyncCommit, NoCommit, AT, PhaseOne_Failed
+        return commitType == CommitType.AsyncCommit || commitType == CommitType.NoCommit
+            || branchType == BranchType.AT || status == BranchStatus.PhaseOne_Failed;
     }
 
     /**
