@@ -190,6 +190,12 @@ public class DefaultCore implements Core {
                     continue;
                 }
 
+                // if no commit, remove this branch
+                if (branchSession.getCommitType() == CommitType.NoCommit) {
+                    globalSession.removeBranch(branchSession);
+                    continue;
+                }
+
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
