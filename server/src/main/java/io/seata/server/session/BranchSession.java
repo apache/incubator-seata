@@ -261,7 +261,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean canBeCommittedAsync() {
-        return branchType == BranchType.AT;
+        // AT, PhaseOne_Failed
+        return branchType == BranchType.AT || status == BranchStatus.PhaseOne_Failed;
     }
 
     /**
