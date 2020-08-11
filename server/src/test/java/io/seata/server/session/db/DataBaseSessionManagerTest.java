@@ -502,6 +502,7 @@ public class DataBaseSessionManagerTest {
     @Test
     public void test_findGlobalSessions() throws TransactionException, SQLException {
         String xid = null;
+        long branchId = 0;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                     "test", "test123", 100);
@@ -515,10 +516,10 @@ public class DataBaseSessionManagerTest {
             sessionManager.addGlobalSession(globalSession);
 
             BranchSession branchSession = new BranchSession();
-            branchSession.setBranchId(UUIDGenerator.generateUUID());
+            branchId = UUIDGenerator.generateUUID();
+            branchSession.setBranchId(branchId);
             branchSession.setXid(xid);
             branchSession.setTransactionId(globalSession.getTransactionId());
-            branchSession.setBranchId(1L);
             branchSession.setResourceGroupId("my_test_tx_group");
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
@@ -529,6 +530,7 @@ public class DataBaseSessionManagerTest {
             sessionManager.addBranchSession(globalSession, branchSession);
         }
         String xid2 = null;
+        long branchId2 = 0;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                     "test", "test123", 100);
@@ -542,10 +544,10 @@ public class DataBaseSessionManagerTest {
             sessionManager.addGlobalSession(globalSession);
 
             BranchSession branchSession = new BranchSession();
-            branchSession.setBranchId(UUIDGenerator.generateUUID());
+            branchId2 = UUIDGenerator.generateUUID();
+            branchSession.setBranchId(branchId2);
             branchSession.setXid(xid2);
             branchSession.setTransactionId(globalSession.getTransactionId());
-            branchSession.setBranchId(1L);
             branchSession.setResourceGroupId("my_test_tx_group");
             branchSession.setResourceId("tb_1");
             branchSession.setLockKey("t_1");
@@ -566,7 +568,7 @@ public class DataBaseSessionManagerTest {
         Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
         Assertions.assertEquals(1, globalSession_db.getReverseSortedBranches().size());
 
-        Assertions.assertNotNull(globalSession_db.getBranch(1L));
+        Assertions.assertNotNull(globalSession_db.getBranch(branchId));
 
         String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
         String delSql2 = "delete from branch_table where xid= '"+xid2+"'" + ";" + "delete from global_table where xid= '"+xid2+"'";
