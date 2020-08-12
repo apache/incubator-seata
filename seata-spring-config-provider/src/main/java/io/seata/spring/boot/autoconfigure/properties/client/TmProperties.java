@@ -18,7 +18,12 @@ package io.seata.spring.boot.autoconfigure.properties.client;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.DefaultValues.*;
+
+import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
+import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
+import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
+import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 
 /**
