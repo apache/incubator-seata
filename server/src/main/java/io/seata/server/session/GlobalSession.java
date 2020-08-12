@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class GlobalSession implements SessionLifecycle, SessionStorable, AsyncableCommitted {
+public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSession.class);
 
@@ -106,7 +106,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable, Asyncab
      *
      * @return the boolean
      */
-    @Override
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
             if (!branchSession.canBeCommittedAsync()) {

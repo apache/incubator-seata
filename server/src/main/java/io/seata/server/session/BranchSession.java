@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable, AsyncableCommitted {
+public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
@@ -259,9 +259,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return Long.compare(this.branchId, o.branchId);
     }
 
-    @Override
     public boolean canBeCommittedAsync() {
-        // AT, PhaseOne_Failed
         return branchType == BranchType.AT || status == BranchStatus.PhaseOne_Failed;
     }
 
