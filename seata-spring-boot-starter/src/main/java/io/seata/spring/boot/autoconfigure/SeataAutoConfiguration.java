@@ -38,18 +38,18 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 /**
  * @author xingfudeshi@gmail.com
  */
-@ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
+//@ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @Configuration
 @EnableConfigurationProperties({SeataProperties.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
-    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
-    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
-    public SpringApplicationContextProvider springApplicationContextProvider() {
-        return new SpringApplicationContextProvider();
-    }
+//    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
+//    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
+//    public SpringApplicationContextProvider springApplicationContextProvider() {
+//        return new SpringApplicationContextProvider();
+//    }
 
     @Bean(BEAN_NAME_FAILURE_HANDLER)
     @ConditionalOnMissingBean(FailureHandler.class)

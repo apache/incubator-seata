@@ -29,7 +29,7 @@
         <module>config</module>
         <module>core</module>
         <module>discovery</module>
-        <module>distribution</module>
+<!--        <module>distribution</module>-->
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
@@ -41,11 +41,12 @@
         <module>server</module>
         <module>spring</module>
         <module>tcc</module>
-        <module>test</module>
+<!--        <module>test</module>-->
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
         <module>seata-spring-boot-starter</module>
+        <module>seata-spring-config-provider</module>
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>

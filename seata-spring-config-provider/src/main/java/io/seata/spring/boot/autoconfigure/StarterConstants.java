@@ -15,32 +15,11 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import java.util.HashMap;
+import io.seata.spring.boot.autoconfigure.properties.client.*;
+import io.seata.spring.boot.autoconfigure.properties.config.*;
+import io.seata.spring.boot.autoconfigure.properties.registry.*;
 
-import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import java.util.HashMap;
 
 /**
  * @author xingfudeshi@gmail.com

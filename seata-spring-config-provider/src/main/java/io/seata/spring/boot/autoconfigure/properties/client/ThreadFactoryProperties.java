@@ -19,13 +19,7 @@ import io.seata.core.rpc.netty.NettyBaseConfig.WorkThreadMode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
-import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
-import static io.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
-import static io.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
-import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
-import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
-import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.*;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX_KEBAB_STYLE;
 
 /**
