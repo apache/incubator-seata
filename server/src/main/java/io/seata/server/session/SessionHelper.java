@@ -31,8 +31,21 @@ public class SessionHelper {
     private SessionHelper() {}
 
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
-            CommitType commitType, String resourceId, String lockKeys, String clientId) {
-        return newBranchByGlobal(globalSession, branchType, commitType, resourceId, null, lockKeys, clientId);
+            String resourceId, String lockKeys, String clientId) {
+        return newBranchByGlobal(globalSession, branchType, resourceId, null, lockKeys, clientId);
+    }
+
+    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
+            String resourceId, String applicationData, String lockKeys, String clientId) {
+        CommitType commitType;
+        if (branchType == BranchType.AT) {
+            commitType = CommitType.AsyncCommit;
+        } else if (branchType == BranchType.SAGA) {
+            commitType = CommitType.NoCommit;
+        } else {
+            commitType = CommitType.SyncCommit;
+        }
+        return newBranchByGlobal(globalSession, branchType, commitType, resourceId, applicationData, lockKeys, clientId);
     }
 
     /**

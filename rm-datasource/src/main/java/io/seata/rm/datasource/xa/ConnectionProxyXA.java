@@ -19,7 +19,6 @@ import com.alibaba.druid.util.JdbcUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.core.model.CommitType;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import org.slf4j.Logger;
@@ -131,7 +130,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long branchId = 0L;
             try {
                 // 1. register branch to TC then get the branchId
-                branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, CommitType.SyncCommit, resource.getResourceId(), null, xid, null,
+                branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
                     null);
             } catch (TransactionException te) {
                 cleanXABranchContext();

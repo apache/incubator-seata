@@ -33,7 +33,7 @@ public class Version {
      * The constant CURRENT.
      */
     private static final String CURRENT = "1.4.0-SNAPSHOT";
-    private static final String VERSION_1_4_0 = "1.4.0";
+    private static final String VERSION_0_7_1 = "0.7.1";
     private static final int MAX_VERSION_DOT = 3;
 
     /**
@@ -79,7 +79,7 @@ public class Version {
     public static void checkVersion(String version) throws IncompatibleVersionException {
         long current = convertVersion(CURRENT);
         long clientVersion = convertVersion(version);
-        long divideVersion = convertVersion(VERSION_1_4_0);
+        long divideVersion = convertVersion(VERSION_0_7_1);
         if ((current > divideVersion && clientVersion < divideVersion) || (current < divideVersion && clientVersion > divideVersion)) {
             throw new IncompatibleVersionException("incompatible client version:" + version);
         }

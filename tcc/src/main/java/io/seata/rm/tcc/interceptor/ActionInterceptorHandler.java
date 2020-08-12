@@ -21,6 +21,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.NetUtil;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -114,8 +115,9 @@ public class ActionInterceptorHandler {
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
+            CommitType commitType = businessAction.asyncCommit() ? CommitType.AsyncCommit : CommitType.SyncCommit;
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC,
-                businessAction.commitType(), actionName, null, xid, applicationContextStr, null);
+                commitType, actionName, null, xid, applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
             String msg = String.format("TCC branch Register error, xid: %s", xid);

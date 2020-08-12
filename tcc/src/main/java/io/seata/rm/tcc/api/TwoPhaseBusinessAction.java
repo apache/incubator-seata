@@ -15,8 +15,6 @@
  */
 package io.seata.rm.tcc.api;
 
-import io.seata.core.model.CommitType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -48,17 +46,16 @@ public @interface TwoPhaseBusinessAction {
     String commitMethod() default "commit";
 
     /**
-     * commit type
-     *
-     * @return the boolean
-     */
-    CommitType commitType() default CommitType.SyncCommit;
-
-    /**
      * rollback method name
      *
      * @return the string
      */
     String rollbackMethod() default "rollback";
 
+    /**
+     * two phase async commit
+     *
+     * @return the boolean
+     */
+    boolean asyncCommit() default false;
 }

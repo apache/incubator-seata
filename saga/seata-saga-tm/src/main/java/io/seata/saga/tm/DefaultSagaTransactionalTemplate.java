@@ -20,7 +20,6 @@ import java.util.List;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.core.model.CommitType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.ShutdownHook;
@@ -114,7 +113,7 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public long branchRegister(String resourceId, String clientId, String xid, String applicationData, String lockKeys)
         throws TransactionException {
-        return DefaultResourceManager.get().branchRegister(BranchType.SAGA, CommitType.NoCommit, resourceId, clientId, xid, applicationData,
+        return DefaultResourceManager.get().branchRegister(BranchType.SAGA, resourceId, clientId, xid, applicationData,
             lockKeys);
     }
 

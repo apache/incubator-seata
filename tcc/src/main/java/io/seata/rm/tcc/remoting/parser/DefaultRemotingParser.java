@@ -25,6 +25,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.core.model.CommitType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -183,7 +184,7 @@ public class DefaultRemotingParser {
                         tccResource.setCommitMethod(ReflectionUtil
                             .getMethod(interfaceClass, twoPhaseBusinessAction.commitMethod(),
                                 new Class[] {BusinessActionContext.class}));
-                        tccResource.setCommitType(twoPhaseBusinessAction.commitType());
+                        tccResource.setCommitType(twoPhaseBusinessAction.asyncCommit() ? CommitType.AsyncCommit : CommitType.SyncCommit);
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
                         tccResource.setRollbackMethod(ReflectionUtil
                             .getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(),

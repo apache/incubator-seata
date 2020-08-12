@@ -473,9 +473,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (branchTypeId >= 0) {
             this.branchType = BranchType.values()[branchTypeId];
         }
-        int commitTypeId = byteBuffer.get();
-        if (commitTypeId >= 0) {
-            this.commitType = CommitType.get(commitTypeId);
+        int commitTypeCode = byteBuffer.get();
+        if (commitTypeCode >= 0) {
+            this.commitType = CommitType.get(commitTypeCode);
         }
         this.status = BranchStatus.get(byteBuffer.get());
 
