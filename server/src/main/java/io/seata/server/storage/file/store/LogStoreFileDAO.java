@@ -244,16 +244,16 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     public List<GlobalSession> queryGlobalTransactionDO(GlobalCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
 
-        // where
-        // status in (?, ?, ?)
         if (condition.getStatuses() != null && condition.getStatuses().length > 0) {
+            // status in (?, ?, ?)
             for (GlobalStatus status : condition.getStatuses()) {
                 found.addAll(sessionMapByStatus.get(status));
             }
         } else {
             found.addAll(sessionMapByXid.values());
         }
-        // other where
+
+        // do query
         found = condition.doQuery(found);
 
         return found;
@@ -261,7 +261,6 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
 
     @Override
     public int countGlobalTransactionDO(GlobalCondition condition) {
-        // TODO:
         int pageIndexBak = condition.getPageIndex();
         int pageSizeBak = condition.getPageSize();
 
