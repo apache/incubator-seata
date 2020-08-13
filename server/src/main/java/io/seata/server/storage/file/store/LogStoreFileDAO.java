@@ -50,8 +50,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -138,7 +140,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     /**
      * The Session map by global status.
      */
-    private Map<GlobalStatus, List<GlobalSession>> sessionMapByStatus = new ConcurrentHashMap<>();
+    private Map<GlobalStatus, Set<GlobalSession>> sessionMapByStatus = new ConcurrentHashMap<>();
 
     //endregion
 
@@ -188,7 +190,7 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
 
         // init sessionMapByStatus
         for (GlobalStatus status : GlobalStatus.values()) {
-            this.sessionMapByStatus.put(status, Collections.synchronizedList(new ArrayList<>()));
+            this.sessionMapByStatus.put(status, Collections.synchronizedSet(new LinkedHashSet<>()));
         }
     }
 
@@ -362,33 +364,35 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
 
     //region Private
 
-    private void insertToSessionMap(GlobalSession globalTransactionDO) {
+    private synchronized void insertToSessionMap(GlobalSession globalTransactionDO) {
         // add to map by xid
         sessionMapByXid.put(globalTransactionDO.getXid(), globalTransactionDO);
-        // add to map by status
+        // add to map by status, and backup status
+        globalTransactionDO.copyToStatusInStore();
         sessionMapByStatus.get(globalTransactionDO.getStatus()).add(globalTransactionDO);
     }
 
-    private void updateToSessionMap(GlobalSession globalTransactionDO) {
-        if (CollectionUtils.isNotEmpty(globalTransactionDO.getStatusBakSet())) {
-            if (!sessionMapByStatus.get(globalTransactionDO.getStatus()).contains(globalTransactionDO)) {
-                sessionMapByStatus.get(globalTransactionDO.getStatus()).add(globalTransactionDO);
-            }
-            for (GlobalStatus status : globalTransactionDO.getStatusBakSet()) {
-                sessionMapByStatus.get(status).remove(globalTransactionDO);
-            }
-            globalTransactionDO.clearStatusBak();
+    private synchronized void updateToSessionMap(GlobalSession globalTransactionDO) {
+        if (globalTransactionDO.getStatus() == globalTransactionDO.getStatusInStore()) {
+            return;
         }
+
+        globalTransactionDO.copyToStatusInStore();
+        sessionMapByStatus.get(globalTransactionDO.getStatus()).add(globalTransactionDO);
+
+        sessionMapByStatus.get(globalTransactionDO.getStatusInStore()).remove(globalTransactionDO);
     }
 
-    private GlobalSession removeFromSessionMap(GlobalSession globalTransactionDO) {
+    private synchronized GlobalSession removeFromSessionMap(GlobalSession globalTransactionDO) {
         // remove from map by xid
         GlobalSession removedSession = sessionMapByXid.remove(globalTransactionDO.getXid());
         // remove from map by status
         sessionMapByStatus.get(globalTransactionDO.getStatus()).remove(globalTransactionDO);
-        for (GlobalStatus status : globalTransactionDO.getStatusBakSet()) {
-            sessionMapByStatus.get(status).remove(globalTransactionDO);
+        if (globalTransactionDO.getStatusInStore() != null
+                && globalTransactionDO.getStatusInStore() != globalTransactionDO.getStatus()) {
+            sessionMapByStatus.get(globalTransactionDO.getStatusInStore()).remove(globalTransactionDO);
         }
+        globalTransactionDO.clearStatusInStore();
         return removedSession;
     }
 
