@@ -17,7 +17,7 @@ package io.seata.spring.annotation.datasource;
 
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.DataSourceWrapper;
+import io.seata.rm.datasource.SeataDataSource;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
 
 import javax.sql.DataSource;
@@ -31,7 +31,7 @@ import java.util.function.Function;
  */
 public class DataSourceProxyHolder {
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private ConcurrentHashMap<DataSource, DataSourceWrapper> dataSourceProxyMap;
+    private ConcurrentHashMap<DataSource, SeataDataSource> dataSourceProxyMap;
 
     private DataSourceProxyHolder() {
         dataSourceProxyMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
@@ -67,10 +67,10 @@ public class DataSourceProxyHolder {
      */
     public DataSource putDataSource(DataSource dataSource, String dataSourceProxyMode) {
         DataSource originalDataSource;
-        Function<? super DataSource, ? extends DataSourceWrapper> mappingFunction;
+        Function<? super DataSource, ? extends SeataDataSource> mappingFunction;
 
-        if (dataSource instanceof DataSourceWrapper) {
-            DataSourceWrapper dataSourceProxy = (DataSourceWrapper) dataSource;
+        if (dataSource instanceof SeataDataSource) {
+            SeataDataSource dataSourceProxy = (SeataDataSource) dataSource;
             originalDataSource = dataSourceProxy.getTargetDataSource();
             mappingFunction = ds -> dataSourceProxy;
         } else {

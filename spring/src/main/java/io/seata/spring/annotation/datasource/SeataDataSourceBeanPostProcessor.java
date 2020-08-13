@@ -15,7 +15,7 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.rm.datasource.DataSourceWrapper;
+import io.seata.rm.datasource.SeataDataSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -43,12 +43,12 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource) {
-            if (!(bean instanceof DataSourceWrapper)) {
+            if (!(bean instanceof SeataDataSource)) {
                 //only put and init proxy, not return proxy.
                 DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
             } else {
-                //if wrapper, return original data source.
-                return ((DataSourceWrapper) bean).getTargetDataSource();
+                //if seata data source, return original data source.
+                return ((SeataDataSource) bean).getTargetDataSource();
             }
         }
         return bean;

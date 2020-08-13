@@ -18,7 +18,7 @@ package io.seata.rm;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.rm.datasource.DataSourceWrapper;
+import io.seata.rm.datasource.SeataDataSource;
 import io.seata.rm.datasource.xa.Holdable;
 import io.seata.rm.datasource.xa.Holder;
 
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author sharajava
  */
-public abstract class BaseDataSourceResource<T extends Holdable> implements DataSource, DataSourceWrapper, Resource, Holder<T> {
+public abstract class BaseDataSourceResource<T extends Holdable> implements DataSource, SeataDataSource, Resource, Holder<T> {
 
     protected DataSource dataSource;
 
