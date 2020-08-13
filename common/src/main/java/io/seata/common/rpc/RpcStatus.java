@@ -17,7 +17,7 @@ package io.seata.common.rpc;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class RpcStatus {
 
     private static final ConcurrentMap<String, RpcStatus> SERVICE_STATUS_MAP = new ConcurrentHashMap<>();
-    private final AtomicInteger active = new AtomicInteger();
+    private final AtomicLong active = new AtomicLong();
     private final LongAdder total = new LongAdder();
 
     private RpcStatus() {
@@ -78,7 +78,7 @@ public class RpcStatus {
      *
      * @return active
      */
-    public int getActive() {
+    public long getActive() {
         return active.get();
     }
 

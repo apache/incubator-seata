@@ -39,7 +39,6 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
-import io.seata.common.rpc.RpcStatus;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
@@ -390,7 +389,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             if (!(msg instanceof RpcMessage)) {
                 return;
             }
-            RpcStatus.endCount(ChannelUtil.getAddressFromChannel(ctx.channel()));
             processMessage(ctx, (RpcMessage) msg);
         }
 
@@ -463,12 +461,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.info(ctx + " will closed");
             }
             super.close(ctx, future);
-        }
-
-        @Override
-        public void flush(ChannelHandlerContext ctx) throws Exception {
-            RpcStatus.beginCount(ChannelUtil.getAddressFromChannel(ctx.channel()));
-            super.flush(ctx);
         }
     }
 }
