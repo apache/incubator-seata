@@ -209,7 +209,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkRowValues.put("id2",pkId2Values);
 
         String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
-        Assertions.assertEquals(" (id1,id2 ) in (  (?,?) , (?,?) , (?,?)  )",sql);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )",sql);
     }
 
     @Test
@@ -225,7 +225,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkRowValues.put("id1",pkId1Values);
 
         String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
-        Assertions.assertEquals(" (id1 ) in (  (?)  )",sql);
+        Assertions.assertEquals("(id1) in ( (?) )",sql);
     }
 }
 
