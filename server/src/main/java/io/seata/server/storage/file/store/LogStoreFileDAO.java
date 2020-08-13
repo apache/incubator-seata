@@ -253,7 +253,6 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
         } else {
             found.addAll(sessionMapByXid.values());
         }
-        condition.setStatuses((GlobalStatus[])null);
         // other where
         found = condition.doQuery(found);
 
