@@ -396,9 +396,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
 
         byteBuffer.put(branchTypeByte);
-        byteBuffer.put(commitTypeByte);
 
         byteBuffer.put((byte)status.getCode());
+
+        byteBuffer.put(commitTypeByte);
+
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -473,12 +475,12 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (branchTypeId >= 0) {
             this.branchType = BranchType.values()[branchTypeId];
         }
+        this.status = BranchStatus.get(byteBuffer.get());
+
         int commitTypeCode = byteBuffer.get();
         if (commitTypeCode >= 0) {
             this.commitType = CommitType.get(commitTypeCode);
         }
-        this.status = BranchStatus.get(byteBuffer.get());
-
     }
 
 }

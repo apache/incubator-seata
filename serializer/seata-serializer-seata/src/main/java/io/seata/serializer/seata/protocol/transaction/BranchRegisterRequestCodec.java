@@ -64,14 +64,10 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         } else {
             out.writeShort((short)0);
         }
-
         // 2. Branch Type
         out.writeByte(branchType.ordinal());
 
-        // 3. Commit Type
-        out.writeByte((byte)commitType.getCode());
-
-        // 4. Resource Id
+        // 3. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
             out.writeShort((short)bs.length);
@@ -82,7 +78,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             out.writeShort((short)0);
         }
 
-        // 5. Lock Key
+        // 4. Lock Key
         if (lockKey != null) {
             out.writeInt(lockKeyBytes.length);
             if (lockKeyBytes.length > 0) {
@@ -92,7 +88,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             out.writeInt(0);
         }
 
-        // 6. applicationData
+        //5. applicationData
         if (applicationData != null) {
             out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
@@ -101,6 +97,9 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         } else {
             out.writeInt(0);
         }
+
+        // 6. Commit Type
+        out.writeByte((byte) commitType.getCode());
     }
 
     @Override
@@ -113,11 +112,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             in.get(bs);
             branchRegisterRequest.setXid(new String(bs, UTF8));
         }
-
         branchRegisterRequest.setBranchType(BranchType.get(in.get()));
-
-        branchRegisterRequest.setCommitType(CommitType.get(in.get()));
-
         short len = in.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
@@ -138,6 +133,8 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             in.get(bs);
             branchRegisterRequest.setApplicationData(new String(bs, UTF8));
         }
+
+        branchRegisterRequest.setCommitType(CommitType.get(in.get()));
     }
 
 }
