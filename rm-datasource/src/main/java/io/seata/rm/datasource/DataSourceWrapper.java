@@ -18,11 +18,11 @@ package io.seata.rm.datasource;
 import javax.sql.DataSource;
 
 /**
- * The interface Data source proxy wrapper.
+ * The interface Data source wrapper.
  *
  * @author wang.liang
  */
-public interface DataSourceProxyWrapper extends DataSource {
+public interface DataSourceWrapper extends DataSource {
 
     /**
      * Gets target data source.
