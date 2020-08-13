@@ -100,7 +100,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
         try {
             //trigger before branch commit hooks
-            RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+            RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                 hook.beforeBranchCommit(branchType, xid, branchId);
             });
 
@@ -116,11 +116,11 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
             //trigger after branch commit hooks
             if (status == BranchStatus.PhaseTwo_Committed) {
-                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                     hook.afterBranchCommitted(branchType, xid, branchId);
                 });
             } else {
-                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                     hook.afterBranchCommitFailed(branchType, xid, branchId, status);
                 });
             }
@@ -131,7 +131,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             }
         } catch (Exception e) {
             //trigger after branch commit failed hooks
-            RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+            RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                 hook.afterBranchCommitException(branchType, xid, branchId, e);
             });
 
@@ -160,7 +160,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
         try {
             //trigger before branch rollback hooks
-            RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+            RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                 hook.beforeBranchRollback(branchType, xid, branchId);
             });
 
@@ -176,11 +176,11 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
             //trigger after branch rollback hooks
             if (status == BranchStatus.PhaseTwo_Rollbacked) {
-                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                     hook.afterBranchRollbacked(branchType, xid, branchId);
                 });
             } else {
-                RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+                RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                     hook.afterBranchRollbackFailed(branchType, xid, branchId, status);
                 });
             }
@@ -191,7 +191,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             }
         } catch (Exception e) {
             //trigger after branch rollback failed hooks
-            RMTransactionHookManager.triggerHooks(LOGGER, branchId, (hook) -> {
+            RMTransactionHookManager.triggerHooks(LOGGER, branchId, hook -> {
                 hook.afterBranchRollbackException(branchType, xid, branchId, e);
             });
 
