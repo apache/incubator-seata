@@ -75,7 +75,11 @@ public class DefaultCoreForEventBusTest {
             core.commit(xid);
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
-            Thread.sleep(1000);
+            int sleepMaxTime = 2000;
+            while (sleepMaxTime > 0 && subscriber.getEventCounters().get(GlobalStatus.Committed) == null) {
+                Thread.sleep(100);
+                sleepMaxTime -= 100;
+            }
 
             //check
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());

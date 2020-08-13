@@ -170,10 +170,6 @@ public class DefaultCore implements Core {
 
     @Override
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
-        if (globalSession.getStatus() == GlobalStatus.Committed) {
-            return true;
-        }
-
         boolean success = true;
         // start committing event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
