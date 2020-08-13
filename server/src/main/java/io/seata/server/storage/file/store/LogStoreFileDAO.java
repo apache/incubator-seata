@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
+import static io.seata.common.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * The type Log store file dao.

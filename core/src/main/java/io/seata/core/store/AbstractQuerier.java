@@ -20,7 +20,7 @@ import io.seata.common.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.seata.core.constants.DefaultValues.FIRST_PAGE_INDEX;
+import static io.seata.common.DefaultValues.FIRST_PAGE_INDEX;
 
 /**
  * @author wang.liang
