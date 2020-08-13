@@ -37,17 +37,19 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        if (bean instanceof DataSourceWrapper) {
-           return ((DataSourceWrapper) bean).getTargetDataSource();
-        }
         return bean;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource && !(bean instanceof DataSourceWrapper)) {
-            //only put and init proxy, not return proxy.
-            DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
+        if (bean instanceof DataSource) {
+            if (!(bean instanceof DataSourceWrapper)) {
+                //only put and init proxy, not return proxy.
+                DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
+            } else {
+                //if wrapper, return original data source.
+                return ((DataSourceWrapper) bean).getTargetDataSource();
+            }
         }
         return bean;
     }
