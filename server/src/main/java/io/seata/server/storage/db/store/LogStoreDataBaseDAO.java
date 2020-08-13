@@ -151,30 +151,6 @@ public class LogStoreDataBaseDAO extends AbstractLogStore<GlobalTransactionDO, B
     }
 
     @Override
-    public GlobalTransactionDO getGlobalTransactionDO(long transactionId) {
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryGlobalTransactionSQLByTransactionId(globalTable);
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = logStoreDataSource.getConnection();
-            conn.setAutoCommit(true);
-            ps = conn.prepareStatement(sql);
-            ps.setLong(1, transactionId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                return convertGlobalTransactionDO(rs);
-            } else {
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(e);
-        } finally {
-            IOUtil.close(rs, ps, conn);
-        }
-    }
-
-    @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalCondition condition) {
         List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;

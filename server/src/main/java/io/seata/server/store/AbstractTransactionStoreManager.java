@@ -103,14 +103,6 @@ public abstract class AbstractTransactionStoreManager<G extends GlobalTransactio
     }
 
     @Override
-    public GlobalSession readSession(long transactionId, boolean withBranchSessions) {
-        //global transaction
-        GlobalTransactionDO globalTransactionDO = logStore.getGlobalTransactionDO(transactionId);
-        //branch transactions
-        return this.loadBranchs(globalTransactionDO, withBranchSessions);
-    }
-
-    @Override
     public List<GlobalSession> readSession(GlobalCondition sessionCondition, boolean withBranchSessions) {
         if (sessionCondition.getPageSize() <= 0) {
             sessionCondition.setPageSize(logQueryLimit <= 0 ? DEFAULT_LOG_QUERY_LIMIT : logQueryLimit);

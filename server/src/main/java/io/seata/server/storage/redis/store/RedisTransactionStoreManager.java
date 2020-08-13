@@ -102,17 +102,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     @Override
-    public GlobalSession readSession(long transactionId, boolean withBranchSessions) {
-        if (super.logStore != null) {
-            return super.readSession(transactionId, withBranchSessions);
-        } else {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                return this.create(jedis).readSession(transactionId, withBranchSessions);
-            }
-        }
-    }
-
-    @Override
     public List<GlobalSession> readSession(GlobalCondition sessionCondition, boolean withBranchSessions) {
         if (super.logStore != null) {
             return super.readSession(sessionCondition, withBranchSessions);

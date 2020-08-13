@@ -151,7 +151,7 @@ public class LogStoreDataBaseDAOTest {
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
 
-        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.getGlobalTransactionDO(867978970L);
+        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.getGlobalTransactionDO("abc-123:676787978");
         Assertions.assertNotNull(globalTransactionDO_db);
 
         Assertions.assertEquals(globalTransactionDO_db.getXid(), globalTransactionDO_db.getXid());

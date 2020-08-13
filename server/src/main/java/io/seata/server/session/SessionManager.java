@@ -59,25 +59,6 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     GlobalSession getGlobalSession(String xid, boolean withBranchSessions);
 
     /**
-     * Get global session global session.
-     *
-     * @param transactionId the transaction id
-     * @return the global session
-     */
-    default GlobalSession getGlobalSession(long transactionId) {
-        return getGlobalSession(transactionId, true);
-    }
-
-    /**
-     * Get global session global session.
-     *
-     * @param transactionId      the transaction id
-     * @param withBranchSessions the withBranchSessions
-     * @return the global session
-     */
-    GlobalSession getGlobalSession(long transactionId, boolean withBranchSessions);
-
-    /**
      * Update global session.
      *
      * @param session the session

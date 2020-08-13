@@ -136,11 +136,6 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     private Map<String, GlobalSession> sessionMapByXid = new ConcurrentHashMap<>();
 
     /**
-     * The Session map by transaction id.
-     */
-    private Map<Long, GlobalSession> sessionMapByTransactionId = new ConcurrentHashMap<>();
-
-    /**
      * The Session map by global status.
      */
     private Map<GlobalStatus, List<GlobalSession>> sessionMapByStatus = new ConcurrentHashMap<>();
@@ -233,11 +228,6 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     @Override
     public GlobalSession getGlobalTransactionDO(String xid) {
         return sessionMapByXid.get(xid);
-    }
-
-    @Override
-    public GlobalSession getGlobalTransactionDO(long transactionId) {
-        return sessionMapByTransactionId.get(transactionId);
     }
 
     @Override
@@ -375,8 +365,6 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     private void insertToSessionMap(GlobalSession globalTransactionDO) {
         // add to map by xid
         sessionMapByXid.put(globalTransactionDO.getXid(), globalTransactionDO);
-        // add to map by transaction id
-        sessionMapByTransactionId.put(globalTransactionDO.getTransactionId(), globalTransactionDO);
         // add to map by status
         sessionMapByStatus.get(globalTransactionDO.getStatus()).add(globalTransactionDO);
     }
@@ -396,8 +384,6 @@ public class LogStoreFileDAO extends AbstractLogStore<GlobalSession, BranchSessi
     private GlobalSession removeFromSessionMap(GlobalSession globalTransactionDO) {
         // remove from map by xid
         GlobalSession removedSession = sessionMapByXid.remove(globalTransactionDO.getXid());
-        // remove from map by transaction id
-        sessionMapByTransactionId.remove(globalTransactionDO.getTransactionId());
         // remove from map by status
         sessionMapByStatus.get(globalTransactionDO.getStatus()).remove(globalTransactionDO);
         for (GlobalStatus status : globalTransactionDO.getStatusBakSet()) {

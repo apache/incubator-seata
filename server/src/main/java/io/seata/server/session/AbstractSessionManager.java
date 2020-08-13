@@ -77,11 +77,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public GlobalSession getGlobalSession(long transactionId, boolean withBranchSessions) {
-        return this.transactionStoreManager.readSession(transactionId, withBranchSessions);
-    }
-
-    @Override
     public List<GlobalSession> findGlobalSessions(GlobalCondition condition, boolean withBranchSessions) {
         return this.transactionStoreManager.readSession(condition, withBranchSessions);
     }

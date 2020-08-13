@@ -58,25 +58,6 @@ public interface TransactionStoreManager {
     GlobalSession readSession(String xid, boolean withBranchSessions);
 
     /**
-     * Read global session.
-     *
-     * @param transactionId the transaction id
-     * @return the global session
-     */
-    default GlobalSession readSession(long transactionId) {
-        return readSession(transactionId, true);
-    }
-
-    /**
-     * Read global session.
-     *
-     * @param transactionId      the transaction id
-     * @param withBranchSessions the withBranchSessions
-     * @return the global session
-     */
-    GlobalSession readSession(long transactionId, boolean withBranchSessions);
-
-    /**
      * Read session by condition.
      *
      * @param sessionCondition the session condition

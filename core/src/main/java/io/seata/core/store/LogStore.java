@@ -36,14 +36,6 @@ public interface LogStore<G extends GlobalTransactionModel, B extends BranchTran
     G getGlobalTransactionDO(String xid);
 
     /**
-     * Get global transaction do global transaction do.
-     *
-     * @param transactionId the transaction id
-     * @return the global transaction do
-     */
-    G getGlobalTransactionDO(long transactionId);
-
-    /**
      * Query global transaction do list.
      *
      * @param condition the condition

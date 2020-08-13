@@ -93,15 +93,6 @@ public class LogStoreRedisDAO extends AbstractLogStore<GlobalTransactionDO, Bran
     }
 
     @Override
-    public GlobalTransactionDO getGlobalTransactionDO(long transactionId) {
-        String globalSessionJson = jedis.get(getGlobalKeyByTransactionId(transactionId));
-        if (StringUtils.isBlank(globalSessionJson)) {
-            return null;
-        }
-        return JSON.parseObject(globalSessionJson, GlobalTransactionDO.class);
-    }
-
-    @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(GlobalCondition condition) {
         Set<String> keys = new HashSet<>();
         String cursor = INITIAL_CURSOR;
