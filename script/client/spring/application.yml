@@ -65,6 +65,7 @@ seata:
       apollo-meta: http://192.168.1.204:8801
       app-id: seata-server
       namespace: application
+      apollo-accesskey-secret: ""
     etcd3:
       server-addr: http://localhost:2379
     nacos:
