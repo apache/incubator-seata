@@ -32,11 +32,11 @@ public class LeastActiveLoadBalance extends AbstractLoadBalance {
     @Override
     protected <T> T doSelect(List<T> invokers, String xid) {
         int length = invokers.size();
-        int leastActive = -1;
+        long leastActive = -1;
         int leastCount = 0;
         int[] leastIndexes = new int[length];
         for (int i = 0; i < length; i++) {
-            int active = RpcStatus.getStatus(invokers.get(i).toString()).getActive();
+            long active = RpcStatus.getStatus(invokers.get(i).toString()).getActive();
             if (leastActive == -1 || active < leastActive) {
                 leastActive = active;
                 leastCount = 1;
