@@ -554,4 +554,9 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_UNDO_REDIS_CACHE_ENABLE = CLIENT_UNDO_REDIS_PREFIX + "cache.enable";
 
+    /**
+     * The constant CLIENT_UNDO_REDIS_QUERY_LIMIT.
+     */
+    public static final String CLIENT_UNDO_REDIS_QUERY_LIMIT = CLIENT_UNDO_REDIS_PREFIX + "queryLimit";
+
 }

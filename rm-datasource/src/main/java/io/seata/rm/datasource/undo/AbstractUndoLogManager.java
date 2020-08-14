@@ -25,6 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import io.seata.common.Constants;
 import io.seata.common.util.CollectionUtils;
@@ -50,6 +55,9 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
 public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUndoLogManager.class);
+
+    private static final ThreadPoolExecutor threadPoolExecutor =
+        new ThreadPoolExecutor(0, 10, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 
     protected enum State {
         /**
@@ -108,7 +116,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL)) {
-            UndoLogCache.remove(xid, branchId);
+            threadPoolExecutor.execute(() -> UndoLogCache.remove(xid, branchId));
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
@@ -132,7 +140,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
-        UndoLogCache.remove(xids);
+        threadPoolExecutor.execute(() -> UndoLogCache.remove(xids));
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -221,7 +229,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         String rollbackCtx = buildContext(parser.getName());
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
         Object[] objects = {xid, branchId, rollbackCtx, undoLogContent, State.Normal.getValue()};
-        UndoLogCache.put(objects);
+        threadPoolExecutor.execute(() -> UndoLogCache.put(objects));
     }
 
     /**
@@ -280,9 +288,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     int state = (int)cache[UndoLogCache.STATE];
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("xid {} branch {}, ignore {} undo_log", xid, branchId, state);
+                            LOGGER.info("xthreadPoolExecutor.execute(() ->id {} branch {}, ignore {} undo_log", xid, branchId, state);
                         }
-                        UndoLogCache.remove(xid, branchId);
+                        threadPoolExecutor.execute(() -> UndoLogCache.remove(xid, branchId));
                         return;
                     }
                     undo((String)cache[UndoLogCache.CONTEXT], (byte[])cache[UndoLogCache.ROLL_BACK_INFO],
