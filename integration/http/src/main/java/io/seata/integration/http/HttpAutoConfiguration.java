@@ -18,6 +18,7 @@ package io.seata.integration.http;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ import java.util.List;
  * @author wangxb
  */
 @Configuration
-public class HttpAutoConfiguration extends AbstractWebMvcConfigurer {
+public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
