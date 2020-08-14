@@ -29,6 +29,16 @@ seata:
       log-serialization: jackson
       log-table: undo_log
       only-care-update-columns: true
+      cache:
+        enable: false
+      redis:
+        host: 127.0.0.1
+        password:
+        database: 0
+        port: 6379
+        queryLimit: 100
+        minConn: 1
+        maxConn: 10
     log:
       exceptionRate: 100
   service:

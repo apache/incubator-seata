@@ -550,9 +550,9 @@ public class ConfigurationKeys {
     public static final String CLIENT_UNDO_REDIS_PASSWORD = CLIENT_UNDO_REDIS_PREFIX + "password";
 
     /**
-     * The constant CLIENT_UNDO_REDIS_CACHE_ENABLE.
+     * The constant CLIENT_UNDO_CACHE_ENABLE.
      */
-    public static final String CLIENT_UNDO_REDIS_CACHE_ENABLE = CLIENT_UNDO_REDIS_PREFIX + "cache.enable";
+    public static final String CLIENT_UNDO_CACHE_ENABLE = CLIENT_UNDO_PREFIX + "cache.enable";
 
     /**
      * The constant CLIENT_UNDO_REDIS_QUERY_LIMIT.
