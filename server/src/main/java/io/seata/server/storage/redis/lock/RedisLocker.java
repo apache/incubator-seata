@@ -54,7 +54,7 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String TRANSACTION_ID = "transactionId";
 
-    private static final String BRANCH_ID =  "branchId";
+    private static final String BRANCH_ID = "branchId";
 
     private static final String RESOURCE_ID = "resourceId";
 
@@ -76,7 +76,8 @@ public class RedisLocker extends AbstractLocker {
      */
     public RedisLocker() {
         logQueryLimit =
-            ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
+                ConfigurationFactory.getInstance()
+                        .getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     @Override
@@ -91,25 +92,26 @@ public class RedisLocker extends AbstractLocker {
             List<LockDO> needLockDOS = convertToLockDO(rowLocks);
             if (needLockDOS.size() >= 1) {
                 needLockDOS = needLockDOS.stream().
-                        filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+                        filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
+                        .collect(Collectors.toList());
             }
             List<String> needLockKeys = new ArrayList<>();
             needLockDOS.forEach(lockDO -> needLockKeys.add(buildLockKey(lockDO.getRowKey())));
 
             Pipeline pipeline1 = jedis.pipelined();
-            needLockKeys.stream().forEachOrdered(needLockKey-> pipeline1.hget(needLockKey,XID));
+            needLockKeys.stream().forEachOrdered(needLockKey -> pipeline1.hget(needLockKey, XID));
             List<Object> existedXidObjs = pipeline1.syncAndReturnAll();
-            List<String> existedXids = (List<String>)(List)existedXidObjs;
-            Map<String,LockDO> map = new HashMap<>(needLockKeys.size(),1);
+            List<String> existedXids = (List<String>) (List) existedXidObjs;
+            Map<String, LockDO> map = new HashMap<>(needLockKeys.size(), 1);
 
             String needLockXid = rowLocks.get(0).getXid();
-            for (int i = 0; i < needLockKeys.size(); i ++) {
+            for (int i = 0; i < needLockKeys.size(); i++) {
                 String existedXid = existedXids.get(i);
                 if (StringUtils.isEmpty(existedXid)) {
                     //If empty,we need to lock this row
-                    map.put(needLockKeys.get(i),needLockDOS.get(i));
+                    map.put(needLockKeys.get(i), needLockDOS.get(i));
                 } else {
-                    if (!StringUtils.equals(existedXid,needLockXid)) {
+                    if (!StringUtils.equals(existedXid, needLockXid)) {
                         //If not equals,means the rowkey is holding by another global transaction
                         return false;
                     }
@@ -123,14 +125,14 @@ public class RedisLocker extends AbstractLocker {
             List<String> readyKeys = new ArrayList<>();
             map.forEach((key, value) -> {
                 Map<String, String> lockMap = new HashMap<>(8);
-                lockMap.put(XID,value.getXid());
-                lockMap.put(TRANSACTION_ID,value.getTransactionId().toString());
-                lockMap.put(BRANCH_ID,value.getBranchId().toString());
-                lockMap.put(RESOURCE_ID,value.getResourceId());
-                lockMap.put(TABLE_NAME,value.getTableName());
-                lockMap.put(ROW_KEY,value.getRowKey());
-                lockMap.put(PK,value.getPk());
-                pipeline.hmset(key,lockMap);
+                lockMap.put(XID, value.getXid());
+                lockMap.put(TRANSACTION_ID, value.getTransactionId().toString());
+                lockMap.put(BRANCH_ID, value.getBranchId().toString());
+                lockMap.put(RESOURCE_ID, value.getResourceId());
+                lockMap.put(TABLE_NAME, value.getTableName());
+                lockMap.put(ROW_KEY, value.getRowKey());
+                lockMap.put(PK, value.getPk());
+                pipeline.hmset(key, lockMap);
                 readyKeys.add(key);
             });
             List<Object> results = pipeline.syncAndReturnAll();
@@ -150,8 +152,9 @@ public class RedisLocker extends AbstractLocker {
                 String[] rms = successList.toArray(new String[0]);
                 if (rms.length > 0) {
                     Pipeline pipeline2 = jedis.pipelined();
-                    Arrays.stream(rms).forEach(locKey->
-                        pipeline2.hdel(locKey,XID,TRANSACTION_ID,BRANCH_ID,RESOURCE_ID,TABLE_NAME,ROW_KEY,PK));
+                    Arrays.stream(rms).forEach(locKey ->
+                            pipeline2.hdel(locKey, XID, TRANSACTION_ID, BRANCH_ID, RESOURCE_ID,
+                                    TABLE_NAME, ROW_KEY, PK));
                     pipeline2.sync();
                 }
                 return false;
@@ -202,25 +205,26 @@ public class RedisLocker extends AbstractLocker {
                 List<String> delKeys = new ArrayList<>();
 
                 Pipeline pipelined = jedis.pipelined();
-                keys.stream().forEach(key->{
-                    pipelined.hmget(key,BRANCH_ID,ROW_KEY);
+                keys.stream().forEach(key -> {
+                    pipelined.hmget(key, BRANCH_ID, ROW_KEY);
                 });
                 List<Object> nestedArray = pipelined.syncAndReturnAll();
 
-                nestedArray.stream().forEach(arr->{
+                nestedArray.stream().forEach(arr -> {
                     List<String> branchIdAndRowKey = (List<String>) arr;
                     String branchId = branchIdAndRowKey.get(0);
                     String rowkey = branchIdAndRowKey.get(1);
-                    if(StringUtils.isNotEmpty(branchId)
-                            && branchIds.contains(Long.valueOf(branchId))){
+                    if (StringUtils.isNotEmpty(branchId)
+                            && branchIds.contains(Long.valueOf(branchId))) {
                         delKeys.add(buildLockKey(rowkey));
                     }
                 });
                 if (CollectionUtils.isNotEmpty(delKeys)) {
                     Pipeline pipelined1 = jedis.pipelined();
-                    delKeys.stream().forEach(delkey->{
-                        pipelined1.hdel(delkey,XID,TRANSACTION_ID,BRANCH_ID,RESOURCE_ID,TABLE_NAME,ROW_KEY,PK);
-                        pipelined1.lrem(lockListKey,0,delkey);
+                    delKeys.stream().forEach(delkey -> {
+                        pipelined1.hdel(delkey, XID, TRANSACTION_ID, BRANCH_ID, RESOURCE_ID,
+                                TABLE_NAME, ROW_KEY, PK);
+                        pipelined1.lrem(lockListKey, 0, delkey);
                     });
                     pipelined1.sync();
                 }
@@ -251,10 +255,10 @@ public class RedisLocker extends AbstractLocker {
 
             String xid = rowLocks.get(0).getXid();
             Pipeline pipeline = jedis.pipelined();
-            lockKeys.stream().forEach(key->pipeline.hget(key,XID));
+            lockKeys.stream().forEach(key -> pipeline.hget(key, XID));
             List<Object> existedRowLockXid = pipeline.syncAndReturnAll();
-            List<String> existedXids = (List<String>)(List)existedRowLockXid;
-            return existedXids.stream().allMatch(existedXid-> xid.equals(existedXid));
+            List<String> existedXids = (List<String>) (List) existedRowLockXid;
+            return existedXids.stream().allMatch(existedXid -> xid.equals(existedXid));
         }
     }
 
