@@ -274,6 +274,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_UNDO_PREFIX = "client.undo.";
 
     /**
+     * The constant CLIENT_UNDO_REDIS_PREFIX.
+     */
+    public static final String CLIENT_UNDO_REDIS_PREFIX = CLIENT_UNDO_PREFIX + "redis.";
+
+    /**
      * The constant TRANSACTION_UNDO_DATA_VALIDATION.
      */
     public static final String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
@@ -513,4 +518,35 @@ public class ConfigurationKeys {
      * The constant DATA_SOURCE_PROXY_MODE.
      */
     public static final String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
+
+    /**
+     * The constant CLIENT_UNDO_REDIS_HOST.
+     */
+    public static final String CLIENT_UNDO_REDIS_HOST = CLIENT_UNDO_REDIS_PREFIX + "host";
+
+    /**
+     * The constant CLIENT_UNDO_REDIS_MIN_CONN.
+     */
+    public static final String CLIENT_UNDO_REDIS_MIN_CONN = CLIENT_UNDO_REDIS_PREFIX + "minConn";
+
+    /**
+     * The constant CLIENT_UNDO_REDIS_PORT.
+     */
+    public static final String CLIENT_UNDO_REDIS_PORT = CLIENT_UNDO_REDIS_PREFIX + "port";
+
+    /**
+     * The constant CLIENT_UNDO_REDIS_MAX_CONN.
+     */
+    public static final String CLIENT_UNDO_REDIS_MAX_CONN = CLIENT_UNDO_REDIS_PREFIX + "maxConn";
+
+    /**
+     * The constant CLIENT_UNDO_REDIS_DATABASE.
+     */
+    public static final String CLIENT_UNDO_REDIS_DATABASE = CLIENT_UNDO_REDIS_PREFIX + "database";
+
+    /**
+     * The constant CLIENT_UNDO_REDIS_PASSWORD.
+     */
+    public static final String CLIENT_UNDO_REDIS_PASSWORD = CLIENT_UNDO_REDIS_PREFIX + "password";
+
 }
