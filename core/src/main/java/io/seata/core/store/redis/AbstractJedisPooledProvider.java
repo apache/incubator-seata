@@ -17,7 +17,6 @@ package io.seata.core.store.redis;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import redis.clients.jedis.JedisPool;
 
 /**
  * @author funkye
@@ -35,12 +34,5 @@ public abstract class AbstractJedisPooledProvider implements JedisPooledProvider
     protected static final int DATABASE = 0;
 
     protected static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
-
-    /**
-     * generate the JedisPool
-     * 
-     * @return JedisPool
-     */
-    public abstract JedisPool generate();
 
 }
