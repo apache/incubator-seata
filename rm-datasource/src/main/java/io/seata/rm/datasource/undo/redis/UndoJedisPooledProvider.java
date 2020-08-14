@@ -12,9 +12,6 @@
  */
 package io.seata.rm.datasource.undo.redis;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
