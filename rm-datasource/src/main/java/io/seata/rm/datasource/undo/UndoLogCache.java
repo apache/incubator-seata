@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.undo;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,6 +68,11 @@ public class UndoLogCache {
 
     public static void put(Object[] objects) {
         cache.put(getCacheKey((String)objects[XID], (Long)objects[BRANCH_ID]), objects);
+    }
+
+    public static void main(String[] args) {
+        String[] a={"1","2"};
+        System.out.println(JSON.parseObject(String.valueOf(a)).toString());
     }
 
 }

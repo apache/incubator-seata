@@ -38,7 +38,7 @@ public class CustomConfigurationForTest extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         return properties.getProperty(dataId, defaultValue);
     }
 

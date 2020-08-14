@@ -15,25 +15,18 @@
  */
 package io.seata.server;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Stream;
-
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import io.seata.common.util.NumberUtils;
+import io.seata.common.util.IdWorker;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.seata.server.env.ContainerHelper;
 
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
  * The type Parameter parser.
@@ -42,23 +35,8 @@ import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
  */
 public class ParameterParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
-
     private static final String PROGRAM_NAME
         = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
-
-    private static final int SERVER_DEFAULT_PORT = 8091;
-    private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final Long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
-
-    private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
-    private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
-    private static final String ENV_SERVER_NODE_KEY = "SERVER_NODE";
-    private static final String ENV_SEATA_PORT_KEY = "SEATA_PORT";
-    private static final String ENV_STORE_MODE_KEY = "STORE_MODE";
-    private static final String C_GROUP_PATH = "/proc/1/cgroup";
-    private static final String DOCKER_PATH = "/docker";
-    private static final String KUBEPODS_PATH = "/kubepods";
 
     @Parameter(names = "--help", help = true)
     private boolean help;
@@ -68,8 +46,8 @@ public class ParameterParser {
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
-    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
-    private Long serverNode = SERVER_DEFAULT_NODE;
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
+    private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
     private String seataEnv;
@@ -84,18 +62,12 @@ public class ParameterParser {
 
     private void init(String[] args) {
         try {
-            boolean inContainer = this.isRunningInContainer();
-
-            if (inContainer) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("The server is running in container.");
-                }
-
-                this.seataEnv = StringUtils.trimToNull(System.getenv(ENV_SYSTEM_KEY));
-                this.host = StringUtils.trimToNull(System.getenv(ENV_SEATA_IP_KEY));
-                this.serverNode = NumberUtils.toLong(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
-                this.port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
-                this.storeMode = StringUtils.trimToNull(System.getenv(ENV_STORE_MODE_KEY));
+            if (ContainerHelper.isRunningInContainer()) {
+                this.seataEnv = ContainerHelper.getEnv();
+                this.host = ContainerHelper.getHost();
+                this.port = ContainerHelper.getPort();
+                this.serverNode = ContainerHelper.getServerNode();
+                this.storeMode = ContainerHelper.getStoreMode();
             } else {
                 JCommander jCommander = JCommander.newBuilder().addObject(this).build();
                 jCommander.parse(args);
@@ -104,6 +76,9 @@ public class ParameterParser {
                     jCommander.usage();
                     System.exit(0);
                 }
+            }
+            if (this.serverNode == null) {
+                this.serverNode = IdWorker.initWorkerId();
             }
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
@@ -123,23 +98,6 @@ public class ParameterParser {
         e.getJCommander().setProgramName(PROGRAM_NAME);
         e.usage();
         System.exit(0);
-    }
-
-    /**
-     * Judge if application is run in container.
-     *
-     * @return If application is run in container
-     */
-    private Boolean isRunningInContainer() {
-        Path path = Paths.get(C_GROUP_PATH);
-        if (Files.exists(path)) {
-            try (Stream<String> stream = Files.lines(path)) {
-                return stream.anyMatch(line -> line.contains(DOCKER_PATH) || line.contains(KUBEPODS_PATH));
-            } catch (IOException e) {
-                LOGGER.error("Judge if running in container failed:{}", e.getMessage(), e);
-            }
-        }
-        return false;
     }
 
     /**

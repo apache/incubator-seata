@@ -4,6 +4,7 @@ const rules = [{
   test: /\.js$/,
   exclude: [
     path.resolve(__dirname, 'node_modules'),
+    path.resolve(__dirname, '../ggeditor/gg-editor-core/bundle.js'),
   ],
   use: {
     loader: 'babel-loader',

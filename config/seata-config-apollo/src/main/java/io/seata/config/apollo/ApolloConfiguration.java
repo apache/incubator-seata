@@ -31,6 +31,7 @@ import com.ctrip.framework.apollo.model.ConfigChange;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
@@ -52,8 +53,10 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
+    private static final String APOLLO_SECRET = "apolloAccesskeySecret";
     private static final String PROP_APP_ID = "app.id";
     private static final String PROP_APOLLO_META = "apollo.meta";
+    private static final String PROP_APOLLO_SECRET = "apollo.accesskey.secret";
     private static final String NAMESPACE = "namespace";
     private static final String DEFAULT_NAMESPACE = "application";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -67,15 +70,15 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     private ApolloConfiguration() {
         readyApolloConfig();
-        if (null == config) {
+        if (config == null) {
             synchronized (ApolloConfiguration.class) {
-                if (null == config) {
+                if (config == null) {
                     config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
                         MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<>(),
                         new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
-                    config.addChangeListener((changeEvent) -> {
+                    config.addChangeListener(changeEvent -> {
                         for (String key : changeEvent.changedKeys()) {
                             if (!LISTENER_SERVICE_MAP.containsKey(key)) {
                                 continue;
@@ -97,9 +100,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
      * @return the instance
      */
     public static ApolloConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ApolloConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new ApolloConfiguration();
                 }
             }
@@ -108,7 +111,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
@@ -139,7 +142,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (dataId == null || listener == null) {
             return;
         }
         LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
@@ -167,6 +170,12 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (!properties.containsKey(PROP_APOLLO_META)) {
             System.setProperty(PROP_APOLLO_META, FILE_CONFIG.getConfig(getApolloMetaFileKey()));
         }
+        if (!properties.containsKey(PROP_APOLLO_SECRET)) {
+            String secretKey = FILE_CONFIG.getConfig(getApolloSecretFileKey());
+            if (!StringUtils.isBlank(secretKey)) {
+                System.setProperty(PROP_APOLLO_SECRET, secretKey);
+            }
+        }
     }
 
     @Override
@@ -176,6 +185,10 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     private static String getApolloMetaFileKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
+    }
+
+    private static String getApolloSecretFileKey() {
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_SECRET);
     }
 
     private static String getApolloAppIdFileKey() {

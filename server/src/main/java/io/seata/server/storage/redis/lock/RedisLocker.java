@@ -22,7 +22,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
@@ -54,7 +57,6 @@ public class RedisLocker extends AbstractLocker {
 
     /**
      * Instantiates a new Redis locker.
-     *
      */
     public RedisLocker() {
         logQueryLimit =
@@ -75,13 +77,33 @@ public class RedisLocker extends AbstractLocker {
                 locks =
                     locks.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
+            List<String> existedKeyList = new ArrayList<>();
+            locks.forEach(lockDO -> {
+                existedKeyList.add(getLockKey(lockDO.getRowKey()));
+            });
+            List<String> lockList = jedis.mget(existedKeyList.toArray(new String[0]));
+            Map<String, String> map = new HashMap<>(existedKeyList.size(), 1);
+            for (int i = 0; i < existedKeyList.size(); i++) {
+                String existedValue = lockList.get(i);
+                if (existedValue == null) {
+                    String key = existedKeyList.get(i);
+                    map.put(key, JSON.toJSONString(locks.get(i)));
+                } else {
+                    LockDO existed = JSON.parseObject(existedValue, LockDO.class);
+                    if (!StringUtils.equals(existed.getXid(), locks.get(i).getXid())) {
+                        return false;
+                    }
+                }
+            }
+            if (map.isEmpty()) {
+                return true;
+            }
             Pipeline pipeline = jedis.pipelined();
             List<String> readyKeys = new ArrayList<>();
-            for (LockDO lock : locks) {
-                String key = getLockKey(lock.getRowKey());
-                pipeline.setnx(key, JSON.toJSONString(lock));
+            map.forEach((key, value) -> {
+                pipeline.setnx(key, value);
                 readyKeys.add(key);
-            }
+            });
             List<Object> results = pipeline.syncAndReturnAll();
             for (int i = 0; i < results.size(); i++) {
                 Long result = (long)results.get(i);
@@ -142,23 +164,26 @@ public class RedisLocker extends AbstractLocker {
             String lockListKey = getXidLockKey(xid);
             Set<String> keys = lRange(jedis, lockListKey);
             if (CollectionUtils.isNotEmpty(keys)) {
-                Pipeline pipeline = null;
-                Iterator<String> it = keys.iterator();
-                while (it.hasNext()) {
-                    String key = it.next();
-                    LockDO lock = JSON.parseObject(jedis.get(key), LockDO.class);
-                    for (int i = 0; i < branchIds.size(); i++) {
-                        if (null != lock && Objects.equals(lock.getBranchId(), branchIds.get(i))) {
-                            if (pipeline == null) {
-                                pipeline = jedis.pipelined();
-                            }
-                            pipeline.del(key);
-                            pipeline.lrem(lockListKey, 0, key);
+                List<String> delKeys = new ArrayList<>();
+                List<String> values = jedis.mget(keys.toArray(new String[0]));
+                for (String value : values) {
+                    Iterator<Long> it = branchIds.iterator();
+                    while (it.hasNext()) {
+                        Long branchId = it.next();
+                        LockDO lock = JSON.parseObject(value, LockDO.class);
+                        if (lock != null && Objects.equals(lock.getBranchId(), branchId)) {
+                            delKeys.add(getLockKey(lock.getRowKey()));
                             it.remove();
+                            break;
                         }
                     }
                 }
-                if (null != pipeline) {
+                if (CollectionUtils.isNotEmpty(delKeys)) {
+                    Pipeline pipeline = jedis.pipelined();
+                    pipeline.del(delKeys.toArray(new String[0]));
+                    for (String key : delKeys) {
+                        pipeline.lrem(lockListKey, 0, key);
+                    }
                     pipeline.sync();
                 }
             }
@@ -190,7 +215,7 @@ public class RedisLocker extends AbstractLocker {
             for (String rowlockJson : rowlockJsons) {
                 if (!StringUtils.isEmpty(rowlockJson)) {
                     LockDO lock = JSON.parseObject(rowlockJson, LockDO.class);
-                    if (null != lock && !Objects.equals(lock.getXid(), xid)) {
+                    if (lock != null && !Objects.equals(lock.getXid(), xid)) {
                         return false;
                     }
                 }

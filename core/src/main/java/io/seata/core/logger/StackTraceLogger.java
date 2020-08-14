@@ -19,7 +19,9 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
-import static io.seata.core.constants.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static io.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 
 /**
  * @author jsbxyyx
@@ -33,7 +35,7 @@ public final class StackTraceLogger {
     public static void info(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isInfoEnabled()) {
             int rate = getRate();
-            if (System.currentTimeMillis() % rate == 0) {
+            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
                 logger.info(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.info(format, args);
@@ -44,7 +46,7 @@ public final class StackTraceLogger {
     public static void warn(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isWarnEnabled()) {
             int rate = getRate();
-            if (System.currentTimeMillis() % rate == 0) {
+            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
                 logger.warn(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.warn(format, args);
@@ -55,7 +57,7 @@ public final class StackTraceLogger {
     public static void error(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isErrorEnabled()) {
             int rate = getRate();
-            if (System.currentTimeMillis() % rate == 0) {
+            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
                 logger.error(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
             } else {
                 logger.error(format, args);

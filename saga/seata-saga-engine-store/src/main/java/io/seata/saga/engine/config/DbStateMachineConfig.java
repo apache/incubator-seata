@@ -20,17 +20,23 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.util.StringUtils;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * DbStateMachineConfig
@@ -39,14 +45,33 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_R
  */
 public class DbStateMachineConfig extends DefaultStateMachineConfig implements DisposableBean {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbStateMachineConfig.class);
+
     private DataSource dataSource;
     private String applicationId;
     private String txServiceGroup;
     private String tablePrefix = "seata_";
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private boolean rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
-    private boolean sagaBranchRegisterEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
+    private boolean rmReportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+    private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+    private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
+
+
+    public DbStateMachineConfig() {
+        try {
+            Configuration configuration = ConfigurationFactory.getInstance();
+            if (configuration != null) {
+                this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+                this.sagaBranchRegisterEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
+                this.sagaJsonParser = configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER);
+                this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
+                this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Load SEATA configuration failed, use default configuration instead.", e);
+        }
+    }
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         try (Connection con = dataSource.getConnection()) {
@@ -67,6 +92,12 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             dbStateLogStore.setDbType(dbType);
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
             dbStateLogStore.setSeqGenerator(getSeqGenerator());
+
+            if (StringUtils.hasLength(sagaJsonParser)) {
+                ParamsSerializer paramsSerializer = new ParamsSerializer();
+                paramsSerializer.setJsonParserName(sagaJsonParser);
+                dbStateLogStore.setParamsSerializer(paramsSerializer);
+            }
 
             if (sagaTransactionalTemplate == null) {
                 DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate
@@ -160,5 +191,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
         this.rmReportSuccessEnable = rmReportSuccessEnable;
+    }
+
+    public String getSagaJsonParser() {
+        return sagaJsonParser;
+    }
+
+    public void setSagaJsonParser(String sagaJsonParser) {
+        this.sagaJsonParser = sagaJsonParser;
     }
 }

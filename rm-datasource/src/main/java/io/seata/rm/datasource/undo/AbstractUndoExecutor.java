@@ -33,7 +33,9 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -44,7 +46,10 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The type Abstract undo executor.
@@ -63,13 +68,13 @@ public abstract class AbstractUndoExecutor {
      * template of check sql
      * TODO support multiple primary key
      */
-    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";
+    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s FOR UPDATE";
 
     /**
      * Switch of undo data validation
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
-        .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
+            .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
 
     /**
      * The Sql undo log.
@@ -117,15 +122,15 @@ public abstract class AbstractUndoExecutor {
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                Field pkValue = null;
+                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, getDbType(conn));
                 for (Field field : undoRow.getFields()) {
-                    if (field.getKeyType() == KeyType.PRIMARY_KEY) {
-                        pkValue = field;
-                    } else {
+                    if (field.getKeyType() != KeyType.PRIMARY_KEY) {
                         undoValues.add(field);
                     }
                 }
-                undoPrepare(undoPST, undoValues, pkValue);
+
+                undoPrepare(undoPST, undoValues, pkValueList);
+
                 undoPST.executeUpdate();
             }
 
@@ -142,13 +147,13 @@ public abstract class AbstractUndoExecutor {
     /**
      * Undo prepare.
      *
-     * @param undoPST    the undo pst
-     * @param undoValues the undo values
-     * @param pkValue    the pk value
+     * @param undoPST     the undo pst
+     * @param undoValues  the undo values
+     * @param pkValueList the pk value
      * @throws SQLException the sql exception
      */
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
-        throws SQLException {
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
+            throws SQLException {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
@@ -190,12 +195,15 @@ public abstract class AbstractUndoExecutor {
                 undoPST.setObject(undoIndex, value, type);
             }
         }
-        // PK is at last one.
-        // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-        // UPDATE a SET x=?, y=?, z=? WHERE pk = ?
-        // DELETE FROM a WHERE pk = ?
-        undoIndex++;
-        undoPST.setObject(undoIndex, pkValue.getValue(), pkValue.getType());
+        // PK is always at last.
+        // INSERT INTO a (x, y, z, pk1,pk2) VALUES (?, ?, ?, ? ,?)
+        // UPDATE a SET x=?, y=?, z=? WHERE pk1 in (?) and pk2 in (?)
+        // DELETE FROM a WHERE pk1 in (?) and pk2 in (?)
+        for (Field pkField : pkValueList) {
+            undoIndex++;
+            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+        }
+
     }
 
     /**
@@ -223,7 +231,7 @@ public abstract class AbstractUndoExecutor {
         if (beforeEqualsAfterResult.getResult()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop rollback because there is no data change " +
-                    "between the before data snapshot and the after data snapshot.");
+                        "between the before data snapshot and the after data snapshot.");
             }
             // no need continue undo.
             return false;
@@ -241,7 +249,7 @@ public abstract class AbstractUndoExecutor {
             if (beforeEqualsCurrentResult.getResult()) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Stop rollback because there is no data change " +
-                        "between the before data snapshot and the current data snapshot.");
+                            "between the before data snapshot and the current data snapshot.");
                 }
                 // no need continue undo.
                 return false;
@@ -253,9 +261,9 @@ public abstract class AbstractUndoExecutor {
                 }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("check dirty datas failed, old and new data are not equal," +
-                        "tableName:[" + sqlUndoLog.getTableName() + "]," +
-                        "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
-                        "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
+                            "tableName:[" + sqlUndoLog.getTableName() + "]," +
+                            "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
+                            "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
                 }
                 throw new SQLException("Has dirty records when undo.");
             }
@@ -273,31 +281,37 @@ public abstract class AbstractUndoExecutor {
     protected TableRecords queryCurrentRecords(Connection conn) throws SQLException {
         TableRecords undoRecords = getUndoRows();
         TableMeta tableMeta = undoRecords.getTableMeta();
-        String pkName = tableMeta.getPkName();
-        int pkType = tableMeta.getColumnMeta(pkName).getDataType();
+        //the order of element matters
+        List<String> pkNameList = tableMeta.getPrimaryKeyOnlyName();
 
         // pares pk values
-        Object[] pkValues = parsePkValues(getUndoRows());
-        if (pkValues.length == 0) {
+        Map<String, List<Field>> pkRowValues = parsePkValues(getUndoRows());
+        if (pkRowValues.size() == 0) {
             return TableRecords.empty(tableMeta);
         }
-        StringBuilder replace = new StringBuilder();
-        for (int i = 0; i < pkValues.length; i++) {
-            replace.append("?,");
-        }
         // build check sql
-        String dbType = getDbType(conn);
+        String firstKey = pkRowValues.keySet().stream().findFirst().get();
+        int pkRowSize = pkRowValues.get(firstKey).size();
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
-            tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
+                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
         TableRecords currentRecords;
         try {
             statement = conn.prepareStatement(checkSQL);
-            for (int i = 1; i <= pkValues.length; i++) {
-                statement.setObject(i, pkValues[i - 1], pkType);
+            int paramIndex = 1;
+            int rowSize = pkRowValues.get(pkNameList.get(0)).size();
+            for (int r = 0; r < rowSize; r++) {
+                for (int c = 0; c < pkNameList.size(); c++) {
+                    List<Field> pkColumnValueList = pkRowValues.get(pkNameList.get(c));
+                    Field field = pkColumnValueList.get(r);
+                    int dataType = tableMeta.getColumnMeta(field.getName()).getDataType();
+                    statement.setObject(paramIndex, field.getValue(), dataType);
+                    paramIndex++;
+                }
             }
+
             checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
         } finally {
@@ -306,27 +320,56 @@ public abstract class AbstractUndoExecutor {
         return currentRecords;
     }
 
+    protected List<Field> getOrderedPkList(TableRecords image, Row row, String dbType) {
+        List<Field> pkFields = new ArrayList<>();
+        // To ensure the order of the pk, the order should based on getPrimaryKeyOnlyName.
+        List<String> pkColumnNameListByOrder = image.getTableMeta().getPrimaryKeyOnlyName();
+        List<String> pkColumnNameListNoOrder = row.primaryKeys()
+                .stream()
+                .map(e -> ColumnUtils.delEscape(e.getName(), dbType))
+                .collect(Collectors.toList());
+        pkColumnNameListByOrder.forEach(pkName -> {
+            int pkIndex = pkColumnNameListNoOrder.indexOf(pkName);
+            if (pkIndex != -1) {
+                // add PK to the last of the list.
+                pkFields.add(row.primaryKeys().get(pkIndex));
+            }
+        });
+        return pkFields;
+    }
+
+
     /**
-     * Parse pk values object [ ].
+     * Parse pk values Field List.
      *
      * @param records the records
-     * @return the object [ ]
+     * @return List<List < Field>>   each element represents a row. And inside a row list contains pk columns(Field).
      */
-    protected Object[] parsePkValues(TableRecords records) {
-        String pkName = records.getTableMeta().getPkName();
-        List<Row> undoRows = records.getRows();
-        Object[] pkValues = new Object[undoRows.size()];
-        for (int i = 0; i < undoRows.size(); i++) {
-            List<Field> fields = undoRows.get(i).getFields();
+    protected Map<String, List<Field>> parsePkValues(TableRecords records) {
+        return parsePkValues(records.getRows(), records.getTableMeta().getPrimaryKeyOnlyName());
+    }
+
+    /**
+     * Parse pk values Field List.
+     *
+     * @param rows       pk rows
+     * @param pkNameList pk column name
+     * @return List<List   <   Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     */
+    protected Map<String, List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
+        List<Field> pkFieldList = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            List<Field> fields = rows.get(i).getFields();
             if (fields != null) {
                 for (Field field : fields) {
-                    if (StringUtils.equalsIgnoreCase(pkName, field.getName())) {
-                        pkValues[i] = field.getValue();
+                    if (pkNameList.stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {
+                        pkFieldList.add(field);
                     }
                 }
             }
         }
-        return pkValues;
+        Map<String, List<Field>> pkValueMap = pkFieldList.stream().collect(Collectors.groupingBy(Field::getName));
+        return pkValueMap;
     }
 
     /**
