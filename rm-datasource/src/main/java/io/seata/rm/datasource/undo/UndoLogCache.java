@@ -16,7 +16,9 @@
 package io.seata.rm.datasource.undo;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.store.redis.JedisPooledFactory;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +43,12 @@ public class UndoLogCache {
     public static final int ROLL_BACK_INFO = 3;
 
     public static final int STATE = 4;
+
+    static {
+        boolean cacheEnable =
+            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_UNDO_REDIS_CACHE_ENABLE, false);
+        JedisPooledFactory.ACTIVATE_NAME = "undo";
+    }
 
     public static Object[] get(String xid, Long branchId) {
         return cache.get(getCacheKey(xid, branchId));
@@ -69,10 +77,5 @@ public class UndoLogCache {
     public static void put(Object[] objects) {
         cache.put(getCacheKey((String)objects[XID], (Long)objects[BRANCH_ID]), objects);
     }
-
-    public static void main(String[] args) {
-        String[] a={"1","2"};
-        System.out.println(JSON.parseObject(String.valueOf(a)).toString());
-    }
-
+    
 }

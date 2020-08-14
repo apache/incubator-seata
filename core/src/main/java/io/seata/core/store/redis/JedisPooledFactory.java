@@ -28,7 +28,7 @@ public class JedisPooledFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JedisPooledFactory.class);
 
-    public static final String ACTIVATE_NAME = "store";
+    public static String ACTIVATE_NAME = "store";
 
     private static volatile JedisPool instance = null;
 
