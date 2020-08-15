@@ -33,13 +33,14 @@ public class JedisPooledFactory {
     private static volatile JedisPool instance = null;
 
     public static JedisPool getJedisPoolInstance(JedisPool... jedisPool) {
-        if (jedisPool != null && jedisPool.length > 0) {
-            return jedisPool[0];
-        }
         if (instance == null) {
             synchronized (JedisPooledFactory.class) {
                 if (instance == null) {
-                    instance = buildJedisPool();
+                    if (jedisPool != null && jedisPool.length > 0) {
+                        instance = jedisPool[0];
+                    } else {
+                        instance = buildJedisPool();
+                    }
                 }
             }
         }

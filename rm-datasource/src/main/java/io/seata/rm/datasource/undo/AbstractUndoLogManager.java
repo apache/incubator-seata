@@ -226,9 +226,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
         String rollbackCtx = buildContext(parser.getName());
-        insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
         Object[] objects = {xid, branchId, rollbackCtx, branchUndoLog, State.Normal.getValue()};
-        UndoLogCache.put(objects);
+        ASYN_REDIS_THREAD.execute(()->UndoLogCache.put(objects));
+        insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
     }
 
     /**
@@ -248,17 +248,19 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
         for (; ; ) {
             try {
-                conn = dataSourceProxy.getPlainConnection();
-
-                // The entire undo process should run in a local transaction.
-                if (originalAutoCommit = conn.getAutoCommit()) {
-                    conn.setAutoCommit(false);
-                }
 
                 boolean exists = false;
                 // Find UNDO LOG
                 Object[] cache = UndoLogCache.get(xid, branchId);
                 if (cache == null) {
+                    if (conn == null) {
+                        conn = dataSourceProxy.getPlainConnection();
+                        // The entire undo process should run in a local transaction.
+                        if (originalAutoCommit = conn.getAutoCommit()) {
+                            conn.setAutoCommit(false);
+                        }
+                    }
+
                     selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);
                     selectPST.setLong(1, branchId);
                     selectPST.setString(2, xid);
@@ -283,6 +285,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
                     }
                 } else {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("undo_log success hit the redis cache ");
+                    }
                     exists = true;
                     int state = (int)cache[UndoLogCache.STATE];
                     if (!canUndo(state)) {
@@ -291,6 +296,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         }
                         ASYN_REDIS_THREAD.execute(() -> UndoLogCache.remove(xid, branchId));
                         return;
+                    }
+                    if (conn == null) {
+                        conn = dataSourceProxy.getPlainConnection();
+                        // The entire undo process should run in a local transaction.
+                        if (originalAutoCommit = conn.getAutoCommit()) {
+                            conn.setAutoCommit(false);
+                        }
                     }
                     undo((String)cache[UndoLogCache.CONTEXT], (byte[])cache[UndoLogCache.ROLL_BACK_INFO],
                         dataSourceProxy, conn);
