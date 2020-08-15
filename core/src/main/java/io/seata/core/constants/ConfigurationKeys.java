@@ -451,7 +451,6 @@ public class ConfigurationKeys {
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
-<<<<<<< HEAD
      * The constant STORE_MONGO_USERNAME.
      */
     public static final String STORE_MONGO_USERNAME = STORE_MONGO_PREFIX + "username";
