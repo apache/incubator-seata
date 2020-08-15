@@ -51,13 +51,13 @@ public class MongoLocker extends AbstractLocker {
             for (Document document : list) {
                 FindIterable<Document> documents = collection.find(document);
                 for (Document doc : documents) {
-                    Object org_xid = doc.get("xid");
-                    if (org_xid != null && !String.valueOf(org_xid).equalsIgnoreCase(xid)) {
+                    Object orgXid = doc.get("xid");
+                    if (orgXid != null && !String.valueOf(orgXid).equalsIgnoreCase(xid)) {
                         return false;
                     } else {
-                        String raw_lock = String.valueOf(doc.get("row_key"));
+                        String rawLock = String.valueOf(doc.get("row_key"));
                         for (RowLock rowLock : rowLocks) {
-                            if (raw_lock.equals(rowLock.getRowKey())) {
+                            if (rawLock.equals(rowLock.getRowKey())) {
                                 rowLocks.remove(rowLock);
                                 break;
                             }
