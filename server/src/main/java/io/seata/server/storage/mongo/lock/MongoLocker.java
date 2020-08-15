@@ -47,11 +47,12 @@ public class MongoLocker extends AbstractLocker {
         MongoCollection<Document> collection = MongoPooledFactory.getLockCollection();
         List<Document> list = convertDocumentByRowKey(convertToLockDO(rowLocks));
         try {
+            String xid = rowLocks.get(0).getXid();
             for (Document document : list) {
                 FindIterable<Document> documents = collection.find(document);
                 for (Document doc : documents) {
                     Object org_xid = doc.get("xid");
-                    if (org_xid != null && !String.valueOf(org_xid).equals(rowLocks.get(0).getXid())) {
+                    if (org_xid != null && !String.valueOf(org_xid).equalsIgnoreCase(xid)) {
                         return false;
                     } else {
                         String raw_lock = String.valueOf(doc.get("row_key"));
