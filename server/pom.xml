@@ -120,6 +120,11 @@
             <artifactId>mongo-java-driver</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.fakemongo</groupId>
+            <artifactId>fongo</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

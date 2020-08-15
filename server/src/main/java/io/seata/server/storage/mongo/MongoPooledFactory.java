@@ -67,31 +67,33 @@ public class MongoPooledFactory {
      *
      * @return mongoClient
      */
-    private static MongoClient getMongoPoolInstance() {
+    public static MongoClient getMongoPoolInstance(MongoClient... client) {
         if (mongoClient == null) {
             synchronized (MongoPooledFactory.class) {
                 if (mongoClient == null) {
-                    MongoClientOptions.Builder build = new MongoClientOptions.Builder();
-                    build.connectionsPerHost(50);
-                    build.maxWaitTime(1000 * 60 * 2);
-                    build.connectTimeout(1000 * 60 * 1);
-                    MongoClientOptions mongoClientOptions = build.build();
-                    build.threadsAllowedToBlockForConnectionMultiplier(50);
-                    ServerAddress serverAddress =
-                        new ServerAddress(CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_HOST, HOST),
-                            CONFIGURATION.getInt(ConfigurationKeys.STORE_MONGO_PORT, PORT));
-                    List<ServerAddress> address = new ArrayList<ServerAddress>();
-                    address.add(serverAddress);
-                    DEFAULT_DB_NAME =
-                        CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_DATA_BASE_NAME, DEFAULT_DB_NAME);
-                    MongoCredential credential = MongoCredential.createScramSha1Credential(
-                        CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_USERNAME, USERNAME), DEFAULT_DB_NAME,
-                        CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_PASSWORD, PASSWORD).toCharArray());
-                    List<MongoCredential> credentials = new ArrayList<MongoCredential>();
-                    credentials.add(credential);
-                    mongoClient = new MongoClient(address, credentials, mongoClientOptions);
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("initialization of the build mongo db connection pool is complete");
+                    if (client != null && client.length > 0) {
+                        mongoClient = client[0];
+                    } else {
+                        MongoClientOptions.Builder build = new MongoClientOptions.Builder();
+                        build.connectionsPerHost(50);
+                        build.maxWaitTime(1000 * 60 * 2);
+                        build.connectTimeout(1000 * 60 * 1);
+                        MongoClientOptions mongoClientOptions = build.build();
+                        build.threadsAllowedToBlockForConnectionMultiplier(50);
+                        ServerAddress serverAddress =
+                            new ServerAddress(CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_HOST, HOST),
+                                CONFIGURATION.getInt(ConfigurationKeys.STORE_MONGO_PORT, PORT));
+                        List<ServerAddress> address = new ArrayList<ServerAddress>();
+                        address.add(serverAddress);
+                        DEFAULT_DB_NAME =
+                            CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_DATA_BASE_NAME, DEFAULT_DB_NAME);
+                        MongoCredential credential = MongoCredential.createScramSha1Credential(
+                            CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_USERNAME, USERNAME), DEFAULT_DB_NAME,
+                            CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_PASSWORD, PASSWORD).toCharArray());
+                        mongoClient = new MongoClient(address, credential, mongoClientOptions);
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("initialization of the build mongo db connection pool is complete");
+                        }
                     }
                 }
             }
