@@ -107,7 +107,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <protobuf-maven-plugin.version>0.5.0</protobuf-maven-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
-        <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
 
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
@@ -336,11 +336,10 @@
                                 <phase>validate</phase>
                                 <configuration>
                                     <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
+                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
                                     <encoding>UTF-8</encoding>
                                     <consoleOutput>true</consoleOutput>
                                     <failsOnError>true</failsOnError>
-                                    <excludes>**/generated/**/*</excludes>
-                                    <excludes>io/seata/integration/grpc/interceptor/</excludes>
                                 </configuration>
                                 <goals>
                                     <goal>checkstyle</goal>

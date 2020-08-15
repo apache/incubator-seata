@@ -29,49 +29,65 @@ import io.seata.rm.datasource.sql.struct.Field;
  */
 public class SqlGenerateUtils {
 
+    private static final int MAX_IN_SIZE = 1000;
+
     private SqlGenerateUtils() {
 
     }
 
+    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType)
+        throws SQLException {
+        return buildWhereConditionByPKs(pkNameList, rowSize, dbType, MAX_IN_SIZE);
+
+    }
     /**
-     * each pk is a condition.the result will like :" (id,userCode) in ((?,?) (?,?))"
+     * each pk is a condition.the result will like :" (id,userCode) in ((?,?),(?,?)) or (id,userCode) in ((?,?),(?,?)
+     * ) or (id,userCode) in ((?,?))"
      * Build where condition by pks string.
      *
      * @param pkNameList pk column name list
      * @param rowSize    the row size of records
      * @param dbType     the type of database
+     * @param maxInSize  the max in size
      * @return return where condition sql string.the sql can search all related records not just one.
      * @throws SQLException the sql exception
      */
-    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType)
+    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType, int maxInSize)
         throws SQLException {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
-
-        whereStr.append(" (");
-        for (int i = 0; i < pkNameList.size(); i++) {
-            if (i > 0) {
-                whereStr.append(",");
+        int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
+        for (int batch = 0; batch < batchSize; batch++) {
+            if (batch > 0) {
+                whereStr.append(" or ");
             }
-            whereStr.append(ColumnUtils.addEscape(pkNameList.get(i), dbType));
-        }
-        whereStr.append(" ) in ( ");
-
-        for (int i = 0; i < rowSize; i++) {
-            //each row is a bracket
-            if (i > 0) {
-                whereStr.append(",");
-            }
-            whereStr.append(" (");
-            for (int x = 0; x < pkNameList.size(); x++) {
-                if (x > 0) {
+            whereStr.append("(");
+            for (int i = 0; i < pkNameList.size(); i++) {
+                if (i > 0) {
                     whereStr.append(",");
                 }
-                whereStr.append("?");
+                whereStr.append(ColumnUtils.addEscape(pkNameList.get(i), dbType));
             }
-            whereStr.append(") ");
+            whereStr.append(") in ( ");
+
+            int eachSize = (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize)
+                : maxInSize;
+            for (int i = 0; i < eachSize; i++) {
+                //each row is a bracket
+                if (i > 0) {
+                    whereStr.append(",");
+                }
+                whereStr.append("(");
+                for (int x = 0; x < pkNameList.size(); x++) {
+                    if (x > 0) {
+                        whereStr.append(",");
+                    }
+                    whereStr.append("?");
+                }
+                whereStr.append(")");
+            }
+            whereStr.append(" )");
         }
-        whereStr.append(" )");
 
         return whereStr.toString();
     }
