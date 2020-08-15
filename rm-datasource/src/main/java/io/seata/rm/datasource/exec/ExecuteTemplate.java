@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
@@ -22,7 +23,6 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -56,7 +56,7 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizers     the sql recognizer list
+     * @param sqlRecognizers    the sql recognizer list
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
@@ -68,15 +68,16 @@ public class ExecuteTemplate {
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
 
-        if (!shouldExecuteInATMode()) {
+        if (!RootContext.requireGlobalLock() && !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-        if (sqlRecognizers == null) {
+        String dbType = statementProxy.getConnectionProxy().getDbType();
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
             sqlRecognizers = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+                    dbType);
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
@@ -86,7 +87,9 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
@@ -118,16 +121,4 @@ public class ExecuteTemplate {
         return rs;
     }
 
-    private static boolean shouldExecuteInATMode() {
-        if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
-            return false;
-        }
-        if (RootContext.inGlobalTransaction()) {
-            String branchType = RootContext.getBranchType();
-            if (StringUtils.equals(BranchType.TCC.name(), branchType) || StringUtils.equals(BranchType.SAGA.name(), branchType)) {
-                return false;
-            }
-        }
-        return true;
-    }
 }

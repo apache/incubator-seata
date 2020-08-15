@@ -35,7 +35,12 @@ public enum StoreMode {
     /**
      * mongo store
      */
-    MONGO("mongo");
+    MONGO("mongo"),
+
+    /**
+     * redis store
+     */
+    REDIS("redis");
 
     private String name;
 

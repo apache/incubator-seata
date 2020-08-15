@@ -124,6 +124,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_SAGA_BRANCH_REGISTER_ENABLE = CLIENT_RM_PREFIX + "sagaBranchRegisterEnable";
 
     /**
+     * The constant CLIENT_SAGA_JSON_PARSER.
+     */
+    public static final String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
@@ -168,6 +173,11 @@ public class ConfigurationKeys {
      * The constant STORE_MONGO_PREFIX.
      */
     public static final String STORE_MONGO_PREFIX = "store.mongo.";
+
+    /**
+     * The constant STORE_REDIS_PREFIX.
+     */
+    public static final String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
@@ -233,6 +243,11 @@ public class ConfigurationKeys {
      * The constant LOCK_DB_TABLE.
      */
     public static final String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
+
+    /**
+     * The constant SERVER_PORT.
+     */
+    public static final String SERVER_PORT = SERVER_PREFIX + "port";
 
     /**
      * The constant RECOVERY_PREFIX.
@@ -436,6 +451,7 @@ public class ConfigurationKeys {
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
+<<<<<<< HEAD
      * The constant STORE_MONGO_USERNAME.
      */
     public static final String STORE_MONGO_USERNAME = STORE_MONGO_PREFIX + "username";
@@ -461,6 +477,41 @@ public class ConfigurationKeys {
     public static final String STORE_MONGO_DATA_BASE_NAME = STORE_MONGO_PREFIX + "databaseName";
 
     /**
+     * The constant STORE_REDIS_HOST.
+     */
+    public static final String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+
+    /**
+     * The constant STORE_MIN_Conn.
+     */
+    public static final String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
+
+    /**
+     * The constant STORE_REDIS_PORT.
+     */
+    public static final String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+
+    /**
+     * The constant STORE_REDIS_MAX_CONN.
+     */
+    public static final String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
+
+    /**
+     * The constant STORE_REDIS_DATABASE.
+     */
+    public static final String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
+
+    /**
+     * The constant STORE_REDIS_PASSWORD.
+     */
+    public static final String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
+
+    /**
+     * The constant STORE_REDIS_QUERY_LIMIT.
+     */
+    public static final String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
+
+    /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
     public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
@@ -474,4 +525,23 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
 
+    /**
+     * The constant SERVER_ENABLE_CHECK_AUTH.
+     */
+    public static final String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
+
+    /**
+     * The constant APPLICATION_ID.
+     */
+    public static final String APPLICATION_ID = "applicationId";
+
+    /**
+     * The constant TX_SERVICE_GROUP.
+     */
+    public static final String TX_SERVICE_GROUP = "txServiceGroup";
+
+    /**
+     * The constant DATA_SOURCE_PROXY_MODE.
+     */
+    public static final String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 }

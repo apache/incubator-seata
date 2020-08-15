@@ -75,7 +75,7 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file, db
+     * @param mode the store mode: file, db, redis ,mongo
      * @throws IOException the io exception
      */
     public static void init(String mode) throws IOException {
@@ -107,7 +107,6 @@ public class SessionHolder {
                 StoreMode.FILE.getName(), new Class[] {String.class, String.class},
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
         } else if (StoreMode.MONGO.equals(storeMode)) {
-            // mongo store
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.MONGO.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.MONGO.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
@@ -115,6 +114,14 @@ public class SessionHolder {
                 StoreMode.MONGO.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
                 StoreMode.MONGO.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+        } else if (StoreMode.REDIS.equals(storeMode)) {
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.REDIS.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.REDIS.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                StoreMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
