@@ -60,7 +60,7 @@ public class MongoLockManagerTest {
         branchSession.setBranchId(204565);
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:3,4;t2:4,5");
-        Assertions.assertTrue(lockManager.acquireLock(branchSession));
+        Assertions.assertTrue(lockManager.releaseLock(branchSession));
     }
 
     @Test

@@ -195,6 +195,5 @@ public class MongoSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public void reload() {
-    }
+    public void reload() {}
 }

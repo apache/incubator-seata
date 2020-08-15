@@ -44,15 +44,37 @@ public class MongoLocker extends AbstractLocker {
             // no lock
             return true;
         }
-        List<Document> successList = new ArrayList<>();
         MongoCollection<Document> collection = MongoPooledFactory.getLockCollection();
+        List<Document> list = convertDocumentByRowKey(convertToLockDO(rowLocks));
+        try {
+            for (Document document : list) {
+                FindIterable<Document> documents = collection.find(document);
+                for (Document doc : documents) {
+                    Object org_xid = doc.get("xid");
+                    if (org_xid != null && !String.valueOf(org_xid).equals(rowLocks.get(0).getXid())) {
+                        return false;
+                    } else {
+                        String raw_lock = String.valueOf(doc.get("row_key"));
+                        for (RowLock rowLock : rowLocks) {
+                            if (raw_lock.equals(rowLock.getRowKey())) {
+                                rowLocks.remove(rowLock);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("isLockable error, locks:{}", CollectionUtils.toString(rowLocks), e);
+        }
+        List<Document> successList = new ArrayList<>();
         List<Document> docs = convertDocument(convertToLockDO(rowLocks));
         for (Document doc : docs) {
             try {
                 collection.insertOne(doc);
                 successList.add(doc);
             } catch (Exception e) {
-                LOGGER.error("acquireLock fail:{}",e.getMessage());
+                LOGGER.error("acquireLock fail:{}", e.getMessage());
                 for (Document document : successList) {
                     collection.deleteOne(document);
                 }
@@ -149,11 +171,15 @@ public class MongoLocker extends AbstractLocker {
     private List<Document> convertDocumentByRowKey(List<LockDO> locks) {
         List<Document> docs = new ArrayList<>();
         for (LockDO lock : locks) {
-            Document doc = new Document();
-            doc.put("row_key", lock.getRowKey());
-            docs.add(doc);
+            docs.add(convertDocumentByRowKey(lock));
         }
         return docs;
+    }
+
+    private Document convertDocumentByRowKey(LockDO lock) {
+        Document doc = new Document();
+        doc.put("row_key", lock.getRowKey());
+        return doc;
     }
 
     private List<Document> convertDocumentByXid(String xid, List<Long> branchIds) {

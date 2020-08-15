@@ -95,7 +95,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             collection.deleteOne(new Document("branch_id", convertBranchTransactionDO.getBranchId()));
             return true;
         } catch (Exception e) {
-            LOGGER.error("deleteBranchTransactionDO fail : {}",e.getMessage());
+            LOGGER.error("deleteBranchTransactionDO fail : {}", e.getMessage());
             return false;
         }
     }
@@ -106,7 +106,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             collection.insertOne(convertDocumentByBranch(convertBranchTransactionDO));
             return true;
         } catch (Exception e) {
-            LOGGER.error("insertBranchTransactionDO fail : {}",e.getMessage());
+            LOGGER.error("insertBranchTransactionDO fail : {}", e.getMessage());
             return false;
         }
     }
@@ -115,10 +115,10 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
         try {
             MongoCollection<Document> collection = MongoPooledFactory.getBranchCollection();
             collection.updateOne(new Document("branch_id", convertBranchTransactionDO.getBranchId()),
-                new Document("$set",convertDocumentByBranch(convertBranchTransactionDO)));
+                new Document("$set", convertDocumentByBranch(convertBranchTransactionDO)));
             return true;
         } catch (Exception e) {
-            LOGGER.error("updateBranchTransactionDO fail : {}",e.getMessage());
+            LOGGER.error("updateBranchTransactionDO fail : {}", e.getMessage());
             return false;
         }
     }
@@ -129,7 +129,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             collection.deleteOne(new Document("xid", convertGlobalTransactionDO.getXid()));
             return true;
         } catch (Exception e) {
-            LOGGER.error("deleteGlobalTransactionDO fail : {}",e.getMessage());
+            LOGGER.error("deleteGlobalTransactionDO fail : {}", e.getMessage());
             return false;
         }
     }
@@ -140,7 +140,7 @@ public class MongoTransactionStoreManager extends AbstractTransactionStoreManage
             collection.insertOne(convertDocumentByGlobal(convertGlobalTransactionDO));
             return true;
         } catch (Exception e) {
-            LOGGER.error("insertGlobalTransactionDO fail : {}",e.getMessage());
+            LOGGER.error("insertGlobalTransactionDO fail : {}", e.getMessage());
             return false;
         }
     }
