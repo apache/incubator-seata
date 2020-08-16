@@ -78,6 +78,7 @@ public class MongoPooledFactory {
                         build.connectionsPerHost(50);
                         build.maxWaitTime(1000 * 60 * 2);
                         build.connectTimeout(1000 * 60 * 1);
+                        build.threadsAllowedToBlockForConnectionMultiplier(50);
                         MongoClientOptions mongoClientOptions = build.build();
                         ServerAddress serverAddress =
                             new ServerAddress(CONFIGURATION.getConfig(ConfigurationKeys.STORE_MONGO_HOST, HOST),
