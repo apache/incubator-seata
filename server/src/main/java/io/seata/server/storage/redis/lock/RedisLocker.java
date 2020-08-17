@@ -168,12 +168,11 @@ public class RedisLocker extends AbstractLocker {
                 List<String> values = jedis.mget(keys.toArray(new String[0]));
                 for (String value : values) {
                     Iterator<Long> it = branchIds.iterator();
+                    LockDO lock = JSON.parseObject(value, LockDO.class);
                     while (it.hasNext()) {
                         Long branchId = it.next();
-                        LockDO lock = JSON.parseObject(value, LockDO.class);
                         if (lock != null && Objects.equals(lock.getBranchId(), branchId)) {
                             delKeys.add(getLockKey(lock.getRowKey()));
-                            it.remove();
                             break;
                         }
                     }
