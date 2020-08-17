@@ -114,9 +114,7 @@ public class UndoLogCache {
                     } while (!INITIAL_CURSOR.equals(cursor));
                 });
                 if (CollectionUtils.isNotEmpty(keys)) {
-                    Pipeline pipeline = jedis.pipelined();
-                    pipeline.del(keys.toArray(new String[0]));
-                    pipeline.sync();
+                    jedis.del(keys.toArray(new String[0]));
                 }
             }
         }
@@ -128,8 +126,10 @@ public class UndoLogCache {
                 String key = getCacheKey((String)objects[XID], (Long)objects[BRANCH_ID]);
                 BranchUndoLog branchUndoLog = (BranchUndoLog)objects[3];
                 objects[ROLL_BACK_INFO] = JSON.toJSONString(branchUndoLog);
-                jedis.set(key, JSON.toJSONString(objects));
-                jedis.expire(key, 60);
+                Pipeline pipeline = jedis.pipelined();
+                pipeline.set(key, JSON.toJSONString(objects));
+                pipeline.expire(key, 60);
+                pipeline.sync();
             }
         }
     }
