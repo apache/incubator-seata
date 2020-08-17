@@ -26,22 +26,44 @@ class AutoDefaultValues {
     }
 
     public static String autoDefaultSagaJsonParser() {
-        if (ClassUtils.hasFastjson()) {
+        if (hasFastjson()) {
             return "fastjson";
         }
-        if (ClassUtils.hasJackson()) {
+        if (hasJackson()) {
             return "jackson";
         }
         return "fastjson";
     }
 
     public static String autoDefaultUndoLogSerialization() {
-        if (ClassUtils.hasJackson()) {
+        if (hasJackson()) {
             return "jackson";
         }
-        if (ClassUtils.hasFastjson()) {
+        if (hasFastjson()) {
             return "fastjson";
         }
+        if (hasKryo()) {
+            return "kryo";
+        }
+        if (hasProtostuff()) {
+            return "protostuff";
+        }
         return "jackson";
+    }
+
+    private static boolean hasFastjson() {
+        return ClassUtils.isPresent("com.alibaba.fastjson.JSON");
+    }
+
+    private static boolean hasJackson() {
+        return ClassUtils.isPresent("com.fasterxml.jackson.core.JsonParser");
+    }
+
+    private static boolean hasKryo() {
+        return ClassUtils.isPresent("com.esotericsoftware.kryo.Kryo");
+    }
+
+    private static boolean hasProtostuff() {
+        return ClassUtils.isPresent("io.protostuff.Schema");
     }
 }

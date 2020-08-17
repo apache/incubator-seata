@@ -23,15 +23,6 @@ public class ClassUtils {
     private ClassUtils() {
     }
 
-    public static boolean hasFastjson() {
-        return isPresent("com.alibaba.fastjson.JSON");
-    }
-
-    public static boolean hasJackson() {
-        return isPresent("com.fasterxml.jackson.core.JsonParser");
-    }
-
-
     //region primary utils
 
     public static ClassLoader getDefaultClassLoader() {

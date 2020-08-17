@@ -29,16 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ClassUtilsTest {
 
     @Test
-    public void test_hasFastjson() {
-        assertThat(ClassUtils.hasFastjson()).isFalse();
-    }
-
-    @Test
-    public void test_hasJackson() {
-        assertThat(ClassUtils.hasJackson()).isFalse();
-    }
-
-    @Test
     public void test_getDefaultClassLoader() {
         assertThat(ClassUtils.getDefaultClassLoader()).isNotNull();
     }
