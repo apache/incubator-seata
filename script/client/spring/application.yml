@@ -8,7 +8,7 @@ seata:
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
-      async-commit-buffer-limit: 1000
+      async-commit-buffer-limit: 10000
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: false
@@ -59,6 +59,8 @@ seata:
     enable-client-batch-send-request: true
   config:
     type: file
+    file:
+      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
     apollo:
@@ -69,7 +71,7 @@ seata:
     etcd3:
       server-addr: http://localhost:2379
     nacos:
-      namespace:
+      namespace: ""
       server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
       username: ""
@@ -101,14 +103,14 @@ seata:
       server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
       cluster: default
-      namespace:
+      namespace: ""
       username: ""
       password: ""
     redis:
       server-addr: localhost:6379
       cluster: default
       db: 0
-      password:
+      password: ""
       timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
