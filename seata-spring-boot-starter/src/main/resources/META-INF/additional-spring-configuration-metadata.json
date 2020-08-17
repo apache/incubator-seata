@@ -151,12 +151,6 @@
       "defaultValue": 100
     },
     {
-      "name": "seata.service.enable-degrade",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties",
-      "defaultValue": false
-    },
-    {
       "name": "seata.service.disable-global-transaction",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties",
