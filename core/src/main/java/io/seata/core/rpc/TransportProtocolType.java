@@ -47,7 +47,7 @@ public enum TransportProtocolType {
      * @return the type
      */
     public static TransportProtocolType getType(String name) {
-        name = name.trim().replace('-', '_');
+        name = name != null ? name.trim().replace('-', '_') : null;
         for (TransportProtocolType b : TransportProtocolType.values()) {
             if (b.name().equalsIgnoreCase(name)) {
                 return b;
