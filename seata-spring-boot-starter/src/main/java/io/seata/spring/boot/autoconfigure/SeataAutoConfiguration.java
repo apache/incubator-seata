@@ -162,7 +162,7 @@ public class SeataAutoConfiguration {
     @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = {"enableAutoDataSourceProxy", "enable-auto-data-source-proxy"}, havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean(SeataDataSourceBeanPostProcessor.class)
     public SeataDataSourceBeanPostProcessor seataDataSourceBeanPostProcessor(SeataProperties seataProperties) {
-        return new SeataDataSourceBeanPostProcessor(seataProperties.getDataSourceProxyMode());
+        return new SeataDataSourceBeanPostProcessor(seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
     }
 
     @Bean(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)

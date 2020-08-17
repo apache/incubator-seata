@@ -20,6 +20,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The type seata data source bean post processor
@@ -29,9 +31,11 @@ import javax.sql.DataSource;
  */
 public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
+    private final List<String> excludes;
     private final String dataSourceProxyMode;
 
-    public SeataDataSourceBeanPostProcessor(String dataSourceProxyMode) {
+    public SeataDataSourceBeanPostProcessor(String[] excludes, String dataSourceProxyMode) {
+        this.excludes = Arrays.asList(excludes);
         this.dataSourceProxyMode = dataSourceProxyMode;
     }
 
@@ -42,7 +46,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource) {
+        if (bean instanceof DataSource && !excludes.contains(bean.getClass().getName())) {
             //only put and init proxy, not return proxy.
             DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
 
