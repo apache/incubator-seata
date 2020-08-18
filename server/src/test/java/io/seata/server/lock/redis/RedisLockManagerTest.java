@@ -16,6 +16,7 @@
 
 package io.seata.server.lock.redis;
 
+import io.seata.server.storage.redis.lock.RedisLockManager;
 import java.io.IOException;
 
 import org.junit.jupiter.api.AfterAll;
@@ -29,7 +30,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
-import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.lock.RedisLocker;
 import redis.clients.jedis.JedisPool;
@@ -100,7 +100,7 @@ public class RedisLockManagerTest {
         server = null;
     }
 
-    public static class RedisLockManagerForTest extends FileLockManager {
+    public static class RedisLockManagerForTest extends RedisLockManager {
 
         public RedisLockManagerForTest() {}
 
