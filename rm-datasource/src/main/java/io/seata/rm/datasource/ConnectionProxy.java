@@ -193,7 +193,14 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void doCommit() throws SQLException {
         if (context.inGlobalTransaction()) {
-            processGlobalTransactionCommit();
+            try {
+                processGlobalTransactionCommit();
+            } finally {
+                if (IS_REPORT_SUCCESS_ENABLE) {
+                    report(true);
+                }
+                context.reset();
+            }
         } else if (context.isGlobalLockRequire()) {
             processLocalCommitWithGlobalLocks();
         } else {
@@ -225,10 +232,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             report(false);
             throw new SQLException(ex);
         }
-        if (IS_REPORT_SUCCESS_ENABLE) {
-            report(true);
-        }
-        context.reset();
     }
 
     private void register() throws TransactionException {
