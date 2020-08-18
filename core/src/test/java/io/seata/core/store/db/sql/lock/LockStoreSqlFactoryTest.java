@@ -18,7 +18,6 @@ package io.seata.core.store.db.sql.lock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * the Lock Store Sql Factory Test
  *
