@@ -196,10 +196,12 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             try {
                 processGlobalTransactionCommit();
             } finally {
-                if (IS_REPORT_SUCCESS_ENABLE) {
-                    report(true);
+                if (LockRetryPolicy.LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
+                    if (IS_REPORT_SUCCESS_ENABLE) {
+                        report(true);
+                    }
+                    context.reset();
                 }
-                context.reset();
             }
         } else if (context.isGlobalLockRequire()) {
             processLocalCommitWithGlobalLocks();
