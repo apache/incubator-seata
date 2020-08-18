@@ -59,8 +59,6 @@ seata:
     enable-client-batch-send-request: true
   config:
     type: file
-    file:
-      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
     apollo:
@@ -86,8 +84,6 @@ seata:
     type: file
     load-balance: RandomLoadBalance
     load-balance-virtual-nodes: 10
-    file:
-      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
       cluster: default
