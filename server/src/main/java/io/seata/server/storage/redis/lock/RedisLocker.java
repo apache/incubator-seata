@@ -126,7 +126,8 @@ public class RedisLocker extends AbstractLocker {
                 } else {
                     if (!StringUtils.equals(existedLockInfo.get(0), needLockXid)) {
                         //If not equals,means the rowkey is holding by another global transaction
-                        LOGGER.error("Acquire lock failed,Global lock on [{}:{}] is holding by xid {} branchId {}",
+                        LOGGER.error(
+                                "Acquire lock failed,Global lock on [{}:{}] is holding by xid {} branchId {}",
                                 existedLockInfo.get(1), existedLockInfo.get(2),
                                 existedLockInfo.get(0), existedLockInfo.get(3));
                         return false;
@@ -156,7 +157,7 @@ public class RedisLocker extends AbstractLocker {
             Set<String> successSet = new HashSet<>();
             for (int i = 0; i < partitions.size(); i++) {
                 String key = readyKeys.get(i);
-                if (partitions.contains(FAILED)) {
+                if (partitions.get(i).contains(FAILED)) {
                     status = FAILED;
                 } else {
                     successSet.add(key);
