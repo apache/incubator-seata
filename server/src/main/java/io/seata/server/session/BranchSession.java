@@ -259,6 +259,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return Long.compare(this.branchId, o.branchId);
     }
 
+    public boolean canBeCommittedAsync() {
+        return branchType == BranchType.AT || status == BranchStatus.PhaseOne_Failed;
+    }
+
     /**
      * Gets lock holder.
      *
