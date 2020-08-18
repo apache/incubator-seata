@@ -13,13 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock.db.sql.lock;
+package io.seata.core.store.db.sql.lock;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.seata.core.store.db.sql.lock.LockStoreSql;
-import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 
 /**
  * the Lock Store Sql Factory Test
