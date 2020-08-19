@@ -121,10 +121,11 @@ public class TransactionalTemplate {
             ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
     }
 
-    private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx,Propagation propagation) throws TransactionalExecutor.ExecutionException {
+    private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx, Propagation propagation)
+        throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeBegin();
-            tx.begin(txInfo.getTimeOut(), txInfo.getName(),propagation);
+            tx.begin(txInfo.getTimeOut(), txInfo.getName(), propagation);
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
