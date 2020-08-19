@@ -15,9 +15,18 @@
  */
 package io.seata.rm.datasource.undo;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import com.alibaba.fastjson.JSON;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -33,111 +42,112 @@ import redis.clients.jedis.ScanResult;
  */
 public class UndoLogCache {
 
-    private static final String DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX = "UNDO_LOG_CACHE_KEY_XID_";
+    private String undoLogCacheKeyXid = "UNDO_LOG_CACHE_KEY_XID_";
 
-    private static final String DEFAULT_BRANCH_ID_PREFIX = "BRANCH_ID_";
+    private String branchIdPrefix = "BRANCH_ID_";
 
-    private static final String MATCH = "*";
+    private String match = "*";
 
-    private static boolean cacheEnable = false;
+    public static final String XID = "xid";
 
-    private static final int XID = 0;
+    public static final String BRANCH_ID = "branch_id";
 
-    private static final int BRANCH_ID = 1;
+    private String initialCursor = "0";
 
-    private static final String INITIAL_CURSOR = "0";
+    public static final String CONTEXT = "context";
 
-    public static final int CONTEXT = 2;
+    public static final String ROLL_BACK_INFO = "roll_back_info";
 
-    public static final int ROLL_BACK_INFO = 3;
+    public static final String STATE = "state";
 
-    public static final int STATE = 4;
-
-    private static UndoLogParser parser;
+    private ObjectMapper mapper;
 
     /**
      * The query limit.
      */
-    private static int logQueryLimit =
-        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_UNDO_REDIS_QUERY_LIMIT, 100);;
+    private int logQueryLimit;
 
-    static {
-        cacheEnable =
-            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_UNDO_CACHE_ENABLE, cacheEnable);
-        if (cacheEnable) {
-            parser = UndoLogParserFactory.getInstance();
-            JedisPooledFactory.ACTIVATE_NAME = "undo";
-        }
+    public UndoLogCache() {
+        logQueryLimit = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_UNDO_REDIS_QUERY_LIMIT, 100);
+        mapper = new ObjectMapper();
+        JedisPooledFactory.ACTIVATE_NAME = "undo";
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        mapper.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
+
     }
 
-    public static Object[] get(String xid, Long branchId) {
-        if (cacheEnable) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                String value = jedis.get(getCacheKey(xid, branchId));
-                if (StringUtils.isNotBlank(value)) {
-                    Object[] objects = JSON.parseObject(value, Object[].class);
-                    if (objects != null && objects.length > 0) {
-                        BranchUndoLog branchUndoLog = JSON.parseObject((String)objects[3], BranchUndoLog.class);
-                        objects[ROLL_BACK_INFO] = parser.encode(branchUndoLog);
-                        return objects;
-                    }
+    public Map<String, Object> get(String xid, Long branchId) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String value = jedis.get(getCacheKey(xid, branchId));
+            if (StringUtils.isNotBlank(value)) {
+                Map<String, Object> objects = null;
+                try {
+                    objects = (Map<String, Object>)mapper.readValue(value, Map.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (objects != null && objects.size() > 0) {
+                    return objects;
                 }
             }
         }
         return null;
     }
 
-    public static void remove(String xid, Long branchId) {
-        if (cacheEnable) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                jedis.del(getCacheKey(xid, branchId));
+    public void remove(String xid, Long branchId) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            jedis.del(getCacheKey(xid, branchId));
+        }
+    }
+
+    public void remove(Set<String> xids) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Set<String> keys = new HashSet<>();
+            xids.forEach(xid -> {
+                String cursor = initialCursor;
+                ScanParams params = new ScanParams();
+                params.count(logQueryLimit);
+                StringBuilder sb = new StringBuilder();
+                sb.append(undoLogCacheKeyXid).append(xid).append(match);
+                params.match(sb.toString());
+                ScanResult<String> scans;
+                do {
+                    scans = jedis.scan(cursor, params);
+                    keys.addAll(scans.getResult());
+                    cursor = scans.getCursor();
+                } while (!initialCursor.equals(cursor));
+            });
+            if (CollectionUtils.isNotEmpty(keys)) {
+                jedis.del(keys.toArray(new String[0]));
             }
         }
     }
 
-    public static void remove(Set<String> xids) {
-        if (cacheEnable) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                Set<String> keys = new HashSet<>();
-                xids.forEach(xid -> {
-                    String cursor = INITIAL_CURSOR;
-                    ScanParams params = new ScanParams();
-                    params.count(logQueryLimit);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX).append(xid).append(MATCH);
-                    params.match(sb.toString());
-                    ScanResult<String> scans;
-                    do {
-                        scans = jedis.scan(cursor, params);
-                        keys.addAll(scans.getResult());
-                        cursor = scans.getCursor();
-                    } while (!INITIAL_CURSOR.equals(cursor));
-                });
-                if (CollectionUtils.isNotEmpty(keys)) {
-                    jedis.del(keys.toArray(new String[0]));
-                }
-            }
+    public void put(Map<String, Object> objects) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            String key = getCacheKey((String)objects.get(XID), (Long)objects.get(BRANCH_ID));
+            Pipeline pipeline = jedis.pipelined();
+            pipeline.set(key, mapper.writeValueAsString(objects));
+            pipeline.expire(key, 60);
+            pipeline.sync();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
     }
 
-    public static void put(Object[] objects) {
-        if (cacheEnable) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                String key = getCacheKey((String)objects[XID], (Long)objects[BRANCH_ID]);
-                BranchUndoLog branchUndoLog = (BranchUndoLog)objects[3];
-                objects[ROLL_BACK_INFO] = JSON.toJSONString(branchUndoLog);
-                Pipeline pipeline = jedis.pipelined();
-                pipeline.set(key, JSON.toJSONString(objects));
-                pipeline.expire(key, 60);
-                pipeline.sync();
-            }
-        }
-    }
-
-    private static String getCacheKey(String xid, Long branchId) {
+    private String getCacheKey(String xid, Long branchId) {
         StringBuilder sb = new StringBuilder();
-        sb.append(DEFAULT_UNDO_LOG_CACHE_KEY_XID_PREFIX).append(xid).append(DEFAULT_BRANCH_ID_PREFIX).append(branchId);
+        sb.append(undoLogCacheKeyXid).append(xid).append(branchIdPrefix).append(branchId);
         return sb.toString();
+    }
+
+    public static UndoLogCache getInstance() {
+        return UndoLogCacheHolder.INSTANCE;
+    }
+
+    private static class UndoLogCacheHolder {
+        private static final UndoLogCache INSTANCE = new UndoLogCache();
     }
 
 }

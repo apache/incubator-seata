@@ -104,6 +104,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         SERIALIZER_LOCAL.remove();
     }
 
+    private static boolean CACHE_ENABLE = false;
+
+    static {
+        CACHE_ENABLE =
+            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_UNDO_CACHE_ENABLE, CACHE_ENABLE);
+    }
+
     /**
      * Delete undo log.
      *
@@ -115,7 +122,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL)) {
-            ASYN_REDIS_THREAD.execute(() -> UndoLogCache.remove(xid, branchId));
+            ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().remove(xid, branchId));
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
@@ -139,7 +146,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
-        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.remove(xids));
+        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().remove(xids));
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -226,8 +233,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
         String rollbackCtx = buildContext(parser.getName());
-        Object[] objects = {xid, branchId, rollbackCtx, branchUndoLog, State.Normal.getValue()};
-        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.put(objects));
+        if (CACHE_ENABLE) {
+            Map<String, Object> undoLog = new HashMap<>();
+            undoLog.put(UndoLogCache.XID, xid);
+            undoLog.put(UndoLogCache.BRANCH_ID, branchId);
+            undoLog.put(UndoLogCache.CONTEXT, rollbackCtx);
+            undoLog.put(UndoLogCache.ROLL_BACK_INFO, undoLogContent);
+            undoLog.put(UndoLogCache.STATE, State.Normal.getValue());
+            ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().put(undoLog));
+        }
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
     }
 
@@ -251,7 +265,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
                 boolean exists = false;
                 // Find UNDO LOG
-                Object[] cache = UndoLogCache.get(xid, branchId);
+                Map<String, Object> cache = CACHE_ENABLE ? UndoLogCache.getInstance().get(xid, branchId) : null;
                 if (cache == null) {
                     if (conn == null) {
                         conn = dataSourceProxy.getPlainConnection();
@@ -289,12 +303,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         LOGGER.debug("undo_log success hit the redis cache ");
                     }
                     exists = true;
-                    int state = (int)cache[UndoLogCache.STATE];
+                    int state = (int)cache.get(UndoLogCache.STATE);
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("xASYN_REDIS_THREAD.execute(() ->id {} branch {}, ignore {} undo_log", xid, branchId, state);
+                            LOGGER.info("xASYN_REDIS_THREAD.execute(() ->id {} branch {}, ignore {} undo_log", xid,
+                                branchId, state);
                         }
-                        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.remove(xid, branchId));
+                        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().remove(xid, branchId));
                         return;
                     }
                     if (conn == null) {
@@ -304,7 +319,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             conn.setAutoCommit(false);
                         }
                     }
-                    undo((String)cache[UndoLogCache.CONTEXT], (byte[])cache[UndoLogCache.ROLL_BACK_INFO],
+                    undo((String)cache.get(UndoLogCache.CONTEXT), (byte[])cache.get(UndoLogCache.ROLL_BACK_INFO),
                         dataSourceProxy, conn);
                 }
 
