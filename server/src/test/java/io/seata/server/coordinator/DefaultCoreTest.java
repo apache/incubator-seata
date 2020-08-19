@@ -166,11 +166,11 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitCommitTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.XA, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.XA,
             new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
@@ -206,11 +206,11 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitExpTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.XA, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.XA,
                 new MockCore(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
