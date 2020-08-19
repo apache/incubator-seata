@@ -161,7 +161,7 @@ public class RedisLocker extends AbstractLocker {
             String xidLockKey = buildXidLockKey(needLockXid);
             StringJoiner lockKeysString = new StringJoiner(SEMICOLON);
             needLockKeys.stream().forEach(lockKey -> lockKeysString.add(lockKey));
-            jedis.hsetnx(xidLockKey, branchId.toString(), lockKeysString.toString());
+            jedis.hset(xidLockKey, branchId.toString(), lockKeysString.toString());
             return true;
         }
     }
@@ -230,7 +230,6 @@ public class RedisLocker extends AbstractLocker {
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
         if (CollectionUtils.isEmpty(rowLocks)) {
-            // no lock
             return true;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
@@ -244,7 +243,7 @@ public class RedisLocker extends AbstractLocker {
             Pipeline pipeline = jedis.pipelined();
             lockKeys.stream().forEach(key -> pipeline.hget(key, XID));
             List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
-            return existedXids.stream().allMatch(existedXid -> xid.equals(existedXid));
+            return existedXids.stream().allMatch(existedXid -> (existedXid == null || xid.equals(existedXid)));
         }
     }
 
