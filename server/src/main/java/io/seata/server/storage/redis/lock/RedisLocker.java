@@ -243,7 +243,7 @@ public class RedisLocker extends AbstractLocker {
             Pipeline pipeline = jedis.pipelined();
             lockKeys.stream().forEach(key -> pipeline.hget(key, XID));
             List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
-            return existedXids.stream().allMatch(existedXid -> (existedXid == null || xid.equals(existedXid)));
+            return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
         }
     }
 
