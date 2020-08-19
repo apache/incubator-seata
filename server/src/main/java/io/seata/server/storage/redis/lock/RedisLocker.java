@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
@@ -46,8 +44,6 @@ import redis.clients.jedis.Pipeline;
  * @author wangzhongxiang
  */
 public class RedisLocker extends AbstractLocker {
-
-    private static final Integer DEFAULT_QUERY_LIMIT = 100;
 
     private static final Integer SUCCEED = 1;
 
@@ -71,19 +67,10 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String ROW_KEY = "rowKey";
 
-
-    /**
-     * The query limit.
-     */
-    private int logQueryLimit;
-
     /**
      * Instantiates a new Redis locker.
      */
     public RedisLocker() {
-        logQueryLimit =
-                ConfigurationFactory.getInstance()
-                        .getInt(ConfigurationKeys.STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     @Override
