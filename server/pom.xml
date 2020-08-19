@@ -175,7 +175,7 @@
                         <unix>.sh</unix>
                         <windows>.bat</windows>
                     </binFileExtensions>
-                    <assembleDirectory>../distribution</assembleDirectory>
+                    <assembleDirectory>../distribution/seata-server-${revision}</assembleDirectory>
                     <logsDirectory>logs</logsDirectory>
                     <programs>
                         <program>
