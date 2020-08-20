@@ -33,8 +33,6 @@ public final class ConfigurationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
 
-    private static final String DEFAULT_CONFIG_NAME = "file.conf";
-
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
@@ -117,7 +115,7 @@ public final class ConfigurationFactory {
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
                 ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
-            String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId, DEFAULT_CONFIG_NAME);
+            String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
