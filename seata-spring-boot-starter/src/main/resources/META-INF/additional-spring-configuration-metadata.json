@@ -294,7 +294,7 @@
         {
           "name": "class-reference",
           "parameters": {
-            "target": "java.lang.Object"
+            "target": "javax.sql.DataSource"
           }
         }
       ]
