@@ -47,29 +47,4 @@ public class SerializerFactory {
         CODEC_MAP.putIfAbsent(serializerType, codecImpl);
         return codecImpl;
     }
-
-    /**
-     * Encode byte [ ].
-     *
-     * @param <T>   the type parameter
-     * @param serializeCode the serializeCode
-     * @param t     the t
-     * @return the byte [ ]
-     */
-    public static <T> byte[] encode(byte serializeCode, T t) {
-        return getSerializer(serializeCode).serialize(t);
-    }
-
-    /**
-     * Decode t.
-     *
-     * @param <T>   the type parameter
-     * @param codec the code
-     * @param bytes the bytes
-     * @return the t
-     */
-    public static <T> T decode(byte codec, byte[] bytes) {
-        return getSerializer(codec).deserialize(bytes);
-    }
-
 }
