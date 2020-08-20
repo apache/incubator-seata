@@ -43,8 +43,8 @@ public class SerializerFactory {
         if (CODEC_MAP.get(serializerType) != null) {
             return CODEC_MAP.get(serializerType);
         }
-        Serializer codecImpl = EnhancedServiceLoader.load(Serializer.class, serializerType.name());
-        CODEC_MAP.putIfAbsent(serializerType, codecImpl);
-        return codecImpl;
+        Serializer serializerImpl = EnhancedServiceLoader.load(Serializer.class, serializerType.name());
+        CODEC_MAP.putIfAbsent(serializerType, serializerImpl);
+        return serializerImpl;
     }
 }
