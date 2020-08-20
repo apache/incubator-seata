@@ -62,12 +62,12 @@ seata:
     consul:
       server-addr: 127.0.0.1:8500
     apollo:
-      apollo-meta: http://localhost:8801
+      apollo-meta: http://127.0.0.1:8801
       app-id: seata-server
       namespace: application
       apollo-accesskey-secret: ""
     etcd3:
-      server-addr: http://localhost:2379
+      server-addr: http://127.0.0.1:2379
     nacos:
       namespace: ""
       server-addr: 127.0.0.1:8848
@@ -88,12 +88,12 @@ seata:
       server-addr: 127.0.0.1:8500
       cluster: default
     etcd3:
-      server-addr: http://localhost:2379
+      server-addr: http://127.0.0.1:2379
       cluster: default
     eureka:
       application: seata-server
       weight: 1
-      service-url: http://localhost:8761/eureka
+      service-url: http://127.0.0.1:8761/eureka
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -103,7 +103,7 @@ seata:
       username: ""
       password: ""
     redis:
-      server-addr: localhost:6379
+      server-addr: 127.0.0.1:6379
       cluster: default
       db: 0
       password: ""

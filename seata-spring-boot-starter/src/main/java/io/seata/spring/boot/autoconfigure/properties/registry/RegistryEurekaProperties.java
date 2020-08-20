@@ -26,7 +26,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREK
 @Component
 @ConfigurationProperties(prefix = REGISTRY_EUREKA_PREFIX)
 public class RegistryEurekaProperties {
-    private String serviceUrl = "http://localhost:8761/eureka";
+    private String serviceUrl = "http://127.0.0.1:8761/eureka";
     private String application = "seata-server";
     private String weight = "1";
 

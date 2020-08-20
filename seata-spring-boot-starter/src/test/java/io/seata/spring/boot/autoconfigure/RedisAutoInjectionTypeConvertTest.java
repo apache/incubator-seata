@@ -46,7 +46,7 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @Bean
     RegistryRedisProperties registryRedisProperties() {
-        return new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        return new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("127.0.0.1:123456");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class RedisAutoInjectionTypeConvertTest {
             EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
         assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
         assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
-        assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
+        assertEquals("127.0.0.1:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
     }
 
     @AfterAll
