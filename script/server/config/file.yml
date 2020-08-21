@@ -3,7 +3,7 @@
 store:
 
   ## store mode: file、db、redis
-  model: file
+  mode: file
   ## file store property
   file:
     ## store location dir

@@ -51,7 +51,7 @@ registry:
     addressWaitTime: 3000
   
   file:
-    name: file.conf
+    name: file.yml
   
 
 
@@ -86,6 +86,6 @@ config:
     serverAddr: http://localhost:2379
   
   file:
-    name: file.conf
+    name: file.yml
   
 
