@@ -27,7 +27,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * The type Delete executor.
@@ -61,10 +60,12 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
-        String whereCondition = buildWhereCondition(visitor, paramAppenderList);
+        String orgSql = visitor.getOriginalSQL();
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE ").append(whereCondition);
+        this.buildWhereCondition(visitor, paramAppenderList);
+        String where = " WHERE ";
+        if (orgSql.contains(where)) {
+            suffix.append(orgSql.substring(orgSql.lastIndexOf(where)));
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
@@ -78,4 +79,10 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         return TableRecords.empty(getTableMeta());
     }
+
+    public static void main(String[] args) {
+        String sql = "delete a where (two = 0) order by two limit 1";
+        System.out.println(sql.substring(sql.lastIndexOf("WHERE")));
+    }
+
 }
