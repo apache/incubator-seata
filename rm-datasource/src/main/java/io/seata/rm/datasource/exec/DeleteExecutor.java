@@ -62,7 +62,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String orgSql = visitor.getOriginalSQL();
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        this.buildWhereCondition(visitor, paramAppenderList);
+        this.getParamAppenderList(paramAppenderList);
         String where = " WHERE ";
         if (orgSql.contains(where)) {
             suffix.append(orgSql.substring(orgSql.lastIndexOf(where)));
