@@ -157,16 +157,18 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     public ArrayList<List<Object>> getParamAppenderList(ArrayList<List<Object>> paramAppenderList) {
-        ParametersHolder parametersHolder = (ParametersHolder)statementProxy;
-        Map<Integer, ArrayList<Object>> oneParamValues = parametersHolder.getParameters();
-        if (paramAppenderList.isEmpty()) {
-            oneParamValues.forEach((k, v) -> paramAppenderList.add(new ArrayList<>()));
-        }
-        int j = 0;
-        for (ArrayList<Object> v : oneParamValues.values()) {
-            List<Object> list = paramAppenderList.get(j);
-            v.forEach(i -> list.add(i instanceof Null ? null : i));
-            j++;
+        if (statementProxy instanceof ParametersHolder) {
+            ParametersHolder parametersHolder = (ParametersHolder)statementProxy;
+            Map<Integer, ArrayList<Object>> oneParamValues = parametersHolder.getParameters();
+            if (paramAppenderList.isEmpty()) {
+                oneParamValues.forEach((k, v) -> paramAppenderList.add(new ArrayList<>()));
+            }
+            int j = 0;
+            for (ArrayList<Object> v : oneParamValues.values()) {
+                List<Object> list = paramAppenderList.get(j);
+                v.forEach(i -> list.add(i instanceof Null ? null : i));
+                j++;
+            }
         }
         return paramAppenderList;
     }
