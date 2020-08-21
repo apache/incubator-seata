@@ -122,7 +122,8 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
 
         TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
-        execSQL("delete from table_name where id in (12345, 12346);");
+        execSQL("delete from table_name where id in (12345, 12346) limit 2;");
+        execSQL("delete from table_name where id in (12345, 12346) limit 1;");
 
         TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
