@@ -73,9 +73,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
         }
-
-        // init listenPort in constructor so that getListenPort() will always get the exact port
-        setListenPort(nettyServerConfig.getDefaultListenPort());
     }
 
     /**
