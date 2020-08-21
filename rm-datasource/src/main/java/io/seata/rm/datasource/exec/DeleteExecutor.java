@@ -80,9 +80,4 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return TableRecords.empty(getTableMeta());
     }
 
-    public static void main(String[] args) {
-        String sql = "delete a where (two = 0) order by two limit 1";
-        System.out.println(sql.substring(sql.lastIndexOf("WHERE")));
-    }
-
 }
