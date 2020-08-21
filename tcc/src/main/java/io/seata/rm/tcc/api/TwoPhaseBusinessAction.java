@@ -53,9 +53,9 @@ public @interface TwoPhaseBusinessAction {
     String rollbackMethod() default "rollback";
 
     /**
-     * two phase async commit
+     * two phase commit type
      *
-     * @return the boolean
+     * @return the commit type
      */
-    boolean asyncCommit() default false;
+    TCCCommitType commitType() default TCCCommitType.SyncCommit;
 }

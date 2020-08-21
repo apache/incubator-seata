@@ -32,10 +32,17 @@ public enum CommitType {
      */
     AsyncCommit(1),
 
+    // This type will be provided later
+    ///**
+    // * The lazy commit.
+    // */
+    //LazyCommit(2),
+
     /**
      * The no commit.
      */
-    NoCommit(2);
+    NoCommit(3),
+    ;
 
     private int code;
 
@@ -75,5 +82,21 @@ public enum CommitType {
             }
         }
         throw new IllegalArgumentException("unknown type:" + code);
+    }
+
+    /**
+     * Get the default by branch type
+     *
+     * @param branchType the branch type
+     * @return the default commit type
+     */
+    public static CommitType getDefault(BranchType branchType) {
+        if (branchType == BranchType.AT) {
+            return AsyncCommit;
+        } else if (branchType == BranchType.SAGA) {
+            return NoCommit;
+        } else {
+            return SyncCommit;
+        }
     }
 }

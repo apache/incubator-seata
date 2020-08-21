@@ -115,7 +115,7 @@ public class ActionInterceptorHandler {
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
-            CommitType commitType = businessAction.asyncCommit() ? CommitType.AsyncCommit : CommitType.SyncCommit;
+            CommitType commitType = businessAction.commitType().getCommitType();
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC,
                 commitType, actionName, null, xid, applicationContextStr, null);
             return String.valueOf(branchId);

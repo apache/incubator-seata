@@ -54,14 +54,7 @@ public interface ResourceManagerOutbound {
      */
     default Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
             TransactionException {
-        CommitType commitType;
-        if (branchType == BranchType.AT) {
-            commitType = CommitType.AsyncCommit;
-        } else if (branchType == BranchType.SAGA) {
-            commitType = CommitType.NoCommit;
-        } else {
-            commitType = CommitType.SyncCommit;
-        }
+        CommitType commitType = CommitType.getDefault(branchType);
         return branchRegister(branchType, commitType, resourceId, clientId, xid, applicationData, lockKeys);
     }
 

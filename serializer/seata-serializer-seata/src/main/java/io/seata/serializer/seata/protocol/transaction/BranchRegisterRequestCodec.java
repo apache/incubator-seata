@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
@@ -134,7 +135,14 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             branchRegisterRequest.setApplicationData(new String(bs, UTF8));
         }
 
-        branchRegisterRequest.setCommitType(CommitType.get(in.get()));
+        try {
+            branchRegisterRequest.setCommitType(CommitType.get(in.get()));
+        } catch (BufferUnderflowException e) {
+            // If current request is sent by a older version client.
+            // Handle the exception and set the default commitType.
+            CommitType commitType = CommitType.getDefault(branchRegisterRequest.getBranchType());
+            branchRegisterRequest.setCommitType(commitType);
+        }
     }
 
 }

@@ -37,14 +37,7 @@ public class SessionHelper {
 
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType,
             String resourceId, String applicationData, String lockKeys, String clientId) {
-        CommitType commitType;
-        if (branchType == BranchType.AT) {
-            commitType = CommitType.AsyncCommit;
-        } else if (branchType == BranchType.SAGA) {
-            commitType = CommitType.NoCommit;
-        } else {
-            commitType = CommitType.SyncCommit;
-        }
+        CommitType commitType = CommitType.getDefault(branchType);
         return newBranchByGlobal(globalSession, branchType, commitType, resourceId, applicationData, lockKeys, clientId);
     }
 
