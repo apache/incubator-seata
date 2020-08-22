@@ -36,7 +36,14 @@ public @interface TwoPhaseBusinessAction {
      *
      * @return the string
      */
-    String name() ;
+    String name();
+
+    /**
+     * commit type
+     *
+     * @return the commit type
+     */
+    TCCCommitType commitType() default TCCCommitType.SyncCommit;
 
     /**
      * commit methed name
@@ -51,11 +58,4 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
-
-    /**
-     * two phase commit type
-     *
-     * @return the commit type
-     */
-    TCCCommitType commitType() default TCCCommitType.SyncCommit;
 }
