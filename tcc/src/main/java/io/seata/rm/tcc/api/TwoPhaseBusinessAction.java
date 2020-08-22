@@ -58,4 +58,5 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
+
 }
