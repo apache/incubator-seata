@@ -131,7 +131,7 @@ public class SessionHolder {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
         }
 
-        // There is a remove operation in the following code, so new ArrayList
+        // There is a remove operation in the following code, it will affect the file mode, so new ArrayList
         List<GlobalSession> allSessions = new ArrayList<>(ROOT_SESSION_MANAGER.allSessions());
         if (allSessions != null && !allSessions.isEmpty()) {
             allSessions.forEach(globalSession -> {
