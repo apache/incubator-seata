@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The type Session holder.
@@ -130,7 +131,8 @@ public class SessionHolder {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
         }
 
-        Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
+        // There is a remove operation in the following code, so new ArrayList
+        List<GlobalSession> allSessions = new ArrayList<>(ROOT_SESSION_MANAGER.allSessions());
         if (allSessions != null && !allSessions.isEmpty()) {
             allSessions.forEach(globalSession -> {
                 GlobalStatus globalStatus = globalSession.getStatus();
