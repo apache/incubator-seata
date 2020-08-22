@@ -152,9 +152,9 @@ public class SessionHolder {
                         }
                         break;
                     default: {
-                        lockBranchSessions(globalSession.getSortedBranches());
-
                         if (storeMode == StoreMode.FILE) {
+                            lockBranchSessions(globalSession.getSortedBranches());
+
                             switch (globalStatus) {
                                 case Committing:
                                 case CommitRetrying:
@@ -185,7 +185,7 @@ public class SessionHolder {
             LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
             ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Remove global session succeeded, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
+                LOGGER.info("Remove global session succeed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
             }
         } catch (Exception e) {
             LOGGER.error("Remove global session failed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus(), e);
