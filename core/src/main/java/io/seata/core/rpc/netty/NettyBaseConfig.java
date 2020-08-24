@@ -38,7 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
 /**
  * The type Netty base config.
@@ -112,7 +112,7 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
+        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
         String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
@@ -121,7 +121,7 @@ public class NettyBaseConfig {
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
-        TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
+        TRANSPORT_SERVER_TYPE = TransportServerType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
             case NIO:
                 if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
