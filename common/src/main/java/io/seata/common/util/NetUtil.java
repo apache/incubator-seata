@@ -129,7 +129,7 @@ public class NetUtil {
      */
     public static String getLocalHost() {
         InetAddress address = getLocalAddress();
-        return address == null ? "127.0.0.1" : address.getHostName();
+        return address == null ? "localhost" : address.getHostName();
     }
 
     /**
