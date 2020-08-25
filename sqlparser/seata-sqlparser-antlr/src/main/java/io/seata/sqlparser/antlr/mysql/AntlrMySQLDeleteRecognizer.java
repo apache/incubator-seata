@@ -28,6 +28,11 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AntlrMySQLDeleteRecognizer
+ *
+ * @author zhihou
+ */
 public class AntlrMySQLDeleteRecognizer implements SQLDeleteRecognizer {
 
     private MySqlContext sqlContext;

@@ -28,6 +28,11 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AntlrMySQLUpdateRecognizer
+ *
+ * @author zhihou
+ */
 public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 
     private MySqlContext sqlContext;

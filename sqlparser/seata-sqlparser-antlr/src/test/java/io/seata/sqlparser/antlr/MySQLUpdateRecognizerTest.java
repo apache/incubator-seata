@@ -23,8 +23,7 @@ public class MySQLUpdateRecognizerTest {
     @Test
     public void updateRecognizerTest_0() {
 
-       // String sql = "UPDATE t1 SET name = 'name1' WHERE id = 'id1'";
-        String sql = "UPDATE t1 SET name = 'name1' WHERE id = 'id1';UPDATE t1 SET name = 'name1' WHERE id = 'id1';";
+        String sql = "UPDATE t1 SET name = 'name1' WHERE id = 'id1';UPDATE t1 SET name = 'name1' WHERE id = 123;";
 
         MySqlLexer lexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
 
@@ -39,10 +38,10 @@ public class MySQLUpdateRecognizerTest {
         walker.walk(new UpdateSpecificationSqlListener(mySqlContext), rootContext);
 
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        //Assertions.assertEquals(1, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals(2, mySqlContext.getUpdateForValues().size());
         Assertions.assertEquals("id", mySqlContext.getUpdateForWhereColumnNames().get(0).getUpdateWhereColumnName());
         Assertions.assertEquals("name", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
-//        Assertions.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
+        Assertions.assertEquals("id=123", mySqlContext.getWhereCondition());
     }
 
     /**

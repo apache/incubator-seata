@@ -15,15 +15,15 @@
  */
 package io.seata.sqlparser.antlr.mysql.visit;
 
-
 import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
 
 /**
- * @author houzhi
+ * StatementSqlVisitor
+ *
+ * @author zhihou
  */
-
 public class StatementSqlVisitor extends MySqlParserBaseVisitor<MySqlContext> {
 
     private MySqlContext mySqlContext;

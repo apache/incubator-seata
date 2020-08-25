@@ -17,21 +17,6 @@ import org.junit.jupiter.api.Test;
  */
 public class MySQLSelectForUpdateRecognizerForListenerTest {
 
-//    /**
-//     * Select for update recognizer test 0.
-//     */
-//    @Test
-//    public void selectForUpdateRecognizerTest() {
-//
-//        String sql = "UPDATE T1 SET NAME = ';' WHERE ID = 'id1';UPDATE T2 SET NAME = 'name2' WHERE ID = 'id1';";
-//
-//        MySQLUpdateRecognizerImpl mySQLSelectRecognizer = new MySQLUpdateRecognizerImpl();
-//        List<MySqlContext> table = mySQLSelectRecognizer.table(sql);
-//
-//        Assertions.assertEquals("T2", table.get(1).tableName);
-//    }
-
-
     /**
      * Select for update recognizer test 0.
      */
@@ -55,7 +40,6 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         Assertions.assertEquals("t1", listenerSqlContext.getTableName());
         Assertions.assertEquals("id='id1'", listenerSqlContext.getWhereCondition());
     }
-
 
     /**
      * Select for update recognizer test 1.
@@ -81,7 +65,6 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         Assertions.assertEquals("phone", listenerSqlContext.getQueryColumnNames().get(2).getColumnName());
         Assertions.assertEquals("id='id1'", listenerSqlContext.getWhereCondition());
     }
-
 
     /**
      * Select for update recognizer test 1.
@@ -110,7 +93,6 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         Assertions.assertEquals("id", mySqlContext.getQueryWhereColumnNames().get(0).getQueryWhereColumnName());
         Assertions.assertEquals("'id'", mySqlContext.getQueryWhereValColumnNames().get(0).getQueryWhereValColumnName());
     }
-
 
     /**
      * Select for update recognizer test 1.
@@ -167,7 +149,6 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         Assertions.assertEquals("101", mySqlContext.getQueryWhereValColumnNames().get(1).getQueryWhereValColumnName());
         Assertions.assertEquals("id IN (100,101)", mySqlContext.getWhereCondition());
     }
-
 
     /**
      * Select for update recognizer test 1.

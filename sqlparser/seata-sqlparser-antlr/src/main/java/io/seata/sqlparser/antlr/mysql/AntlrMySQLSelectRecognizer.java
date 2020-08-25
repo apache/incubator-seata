@@ -28,6 +28,11 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * AntlrMySQLSelectRecognizer
+ *
+ * @author zhihou
+ */
 public class AntlrMySQLSelectRecognizer implements SQLSelectRecognizer {
 
     private MySqlContext sqlContext;

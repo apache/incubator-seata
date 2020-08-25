@@ -106,22 +106,4 @@ public class MySQLInsertRecognizerTest {
         Assertions.assertEquals(Arrays.asList("name5", "name6"), visitorSqlContext.getInsertForValColumnNames().get(2));
     }
 
-
-//    INSERT ALL INTO ord_order_z_flow
-//            (FLOW_ID, order_Id)
-//    VALUES
-//            ('123456577123457', '123456577123454') INTO ord_order_z_flow
-//  (FLOW_ID, order_Id)
-//    VALUES
-//            ('123456577123458', '123456577123454') INTO ord_order_z_flow
-//  (FLOW_ID, order_Id)
-//    VALUES
-//            ('123456577123459', '123456577123454') INTO ord_order_z_flow
-//  (FLOW_ID, order_Id)
-//    VALUES
-//            ('123456577123460', '123456577123454') INTO ord_order_z_flow
-//  (FLOW_ID, order_Id)
-//    VALUES
-//            ('123456577123461', '123456577123454')
-//    SELECT 1 FROM DUAL)
 }

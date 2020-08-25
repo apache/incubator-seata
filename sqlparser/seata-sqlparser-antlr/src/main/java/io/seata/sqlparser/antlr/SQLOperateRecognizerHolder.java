@@ -20,7 +20,7 @@ import io.seata.sqlparser.SQLRecognizer;
 /**
  * The interface SQLOperateRecognizerHolder
  *
- * @author: Zhi Hou
+ * @author zhihou
  */
 public interface SQLOperateRecognizerHolder {
 

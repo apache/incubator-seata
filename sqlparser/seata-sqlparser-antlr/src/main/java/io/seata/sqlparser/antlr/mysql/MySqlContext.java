@@ -19,83 +19,85 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author houzhi
+ * MySqlContext
+ *
+ * @author zhihou
  */
 public class MySqlContext {
 
     /**
-     * 表名
+     * Table Name
      */
     public String tableName;
 
     /**
-     * 插入条数
+     * Number of inserts
      */
     public Integer insertRows;
 
     /**
-     * where条件
+     * Where condition
      */
     private String whereCondition;
 
     /**
-     * 查询列名集合
+     * Query column name collection
      */
     public List<SQL> queryColumnNames = new ArrayList<>();
 
     /**
-     * where 查询列名条件集合
+     * Conditional query column name collection
      */
     public List<SQL> queryWhereColumnNames = new ArrayList<>();
 
     /**
-     * where 查询列名对应值集合
+     * Conditional query column name corresponding value collection
      */
     public List<SQL> queryWhereValColumnNames = new ArrayList<>();
 
     /**
-     * 查询列名集合
+     * Query column name collection
      */
     public List<SQL> insertColumnNames = new ArrayList<>();
 
     /**
-     * 插入列表对象值集合
+     * Insert the value set corresponding to the column name
      */
     public List<List<String>> insertForValColumnNames = new ArrayList<>();
 
     /**
-     * 删除条件列表集合
+     * Delete condition column name set
      */
     public List<SQL> deleteForWhereColumnNames = new ArrayList<>();
 
     /**
-     * 删除列表对象值集合
+     * Conditional delete column name object value collection
      */
     public List<SQL> deleteForWhereValColumnNames = new ArrayList<>();
 
     /**
-     * 更新条件列表集合
+     * Conditional update condition column name object collection
      */
     public List<SQL> updateForWhereColumnNames = new ArrayList<>();
 
     /**
-     * 更新列表对象值集合
+     * Conditional update column name object value collection
      */
     public List<SQL> updateForWhereValColumnNames = new ArrayList<>();
 
     /**
-     * 更新列表对象值集合
+     * Update column name object value collection
      */
     public List<SQL> updateFoColumnNames = new ArrayList<>();
 
 
     /**
-     * 更新列表对象值集合
+     * Update object value collection
      */
     public List<SQL> updateForValues = new ArrayList<>();
 
     /**
-     * sql信息
+     * sql object information collection
      */
     public List<SQL> sqlInfos = new ArrayList<>();
 

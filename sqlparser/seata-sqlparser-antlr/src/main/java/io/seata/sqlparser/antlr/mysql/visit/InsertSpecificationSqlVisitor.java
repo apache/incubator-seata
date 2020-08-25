@@ -23,7 +23,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author houzhi
+ * InsertSpecificationSqlVisitor
+ *
+ * @author zhihou
  */
 public class InsertSpecificationSqlVisitor extends MySqlParserBaseVisitor<MySqlContext> {
 

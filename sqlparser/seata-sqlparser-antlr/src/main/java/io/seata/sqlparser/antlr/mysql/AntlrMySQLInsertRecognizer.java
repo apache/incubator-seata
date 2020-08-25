@@ -26,6 +26,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * AntlrMySQLInsertRecognizer
+ *
+ * @author zhihou
+ */
 public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
     private MySqlContext sqlContext;
