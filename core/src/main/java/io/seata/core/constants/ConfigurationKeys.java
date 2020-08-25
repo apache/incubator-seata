@@ -466,6 +466,11 @@ public class ConfigurationKeys {
     public static final String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
 
     /**
+     * the constant STORE_REDIS_MAX_TOTAL
+     */
+    public static final String STORE_REDIS_MAX_TOTAL = STORE_REDIS_PREFIX + "maxTotal";
+
+    /**
      * The constant STORE_REDIS_DATABASE.
      */
     public static final String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
