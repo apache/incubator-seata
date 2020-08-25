@@ -124,6 +124,9 @@
         <!-- for jdbc driver when package  -->
         <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
         <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
+
+        <!-- for antlr4  -->
+        <antlr4.version>4.8</antlr4.version>
     </properties>
 
     <!--test-->
