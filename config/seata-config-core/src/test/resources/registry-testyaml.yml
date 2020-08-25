@@ -6,3 +6,6 @@ config:
   type: file
   file:
     name: file-testyaml.conf
+    # for test
+    testBlank: ''
+    testNull:

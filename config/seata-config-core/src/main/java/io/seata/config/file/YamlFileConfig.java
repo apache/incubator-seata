@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * @author wangwei-ying
  */
-@LoadLevel(name = FileConfigFactory.YAML_TYPE, order = 1,scope = Scope.PROTOTYPE)
+@LoadLevel(name = FileConfigFactory.YAML_TYPE, order = 1, scope = Scope.PROTOTYPE)
 public class YamlFileConfig implements FileConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YamlFileConfig.class);
@@ -57,7 +57,8 @@ public class YamlFileConfig implements FileConfig {
                     return null;
                 }
             }
-            return String.valueOf(config.get(dataId[dataId.length - 1]));
+            Object value = config.get(dataId[dataId.length - 1]);
+            return value == null ? null : String.valueOf(value);
         } catch (Exception e) {
             LOGGER.warn("get config data error" + path, e);
             return null;
