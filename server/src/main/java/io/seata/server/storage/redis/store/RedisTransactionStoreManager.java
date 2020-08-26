@@ -15,28 +15,28 @@
  */
 package io.seata.server.storage.redis.store;
 
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_STATUS;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID;
-import static io.seata.core.constants.ServerTableColumnsName.BRANCH_TABLE_XID;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_STATUS;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP;
-import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_BRANCH_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_BRANCH_TYPE;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_CLIENT_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_CREATE;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_RESOURCE_GROUP_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_RESOURCE_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_TRANSACTION_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_APPLICATION_DATA;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_APPLICATION_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_BEGIN_TIME;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_CREATE;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TIMEOUT;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_NAME;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_SERVICE_GROUP;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 
 import io.seata.common.util.BeanUtils;
 import io.seata.server.storage.SessionConverter;
@@ -70,16 +70,16 @@ import redis.clients.jedis.Pipeline;
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     /**the prefix of the branchs transaction*/
-    private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA_XID_BRANCHS_";
+    private static final String REDIS_SEATA_BRANCHES_PREFIX = "SEATA_BRANCHES_";
     
     /**the prefix of the branch transaction*/
-    private static final String DEFAULT_REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
+    private static final String REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
 
     /**global transaction id PREFIX*/
-    private static final String DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX = "SEATA_TRANSACTION_ID_GLOBAL_";
+    private static final String REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
 
     /**the prefix of the seata status*/
-    private static final String SEATA_STATUS_PREFIX = "SEATA_STATUS_";
+    private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -126,17 +126,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            pipelined.hset(branchKey, BRANCH_TABLE_XID,branchTransactionDO.getXid());
-            pipelined.hset(branchKey, BRANCH_TABLE_TRANSACTION_ID,String.valueOf(branchTransactionDO.getTransactionId()));
-            pipelined.hset(branchKey, BRANCH_TABLE_BRANCH_ID,String.valueOf(branchTransactionDO.getBranchId()));
-            pipelined.hset(branchKey, BRANCH_TABLE_RESOURCE_GROUP_ID,branchTransactionDO.getResourceGroupId());
-            pipelined.hset(branchKey, BRANCH_TABLE_RESOURCE_ID,branchTransactionDO.getResourceId());
-            pipelined.hset(branchKey, BRANCH_TABLE_BRANCH_TYPE,branchTransactionDO.getBranchType());
-            pipelined.hset(branchKey, BRANCH_TABLE_STATUS,String.valueOf(branchTransactionDO.getStatus()));
-            pipelined.hset(branchKey, BRANCH_TABLE_CLIENT_ID,branchTransactionDO.getClientId());
-            pipelined.hset(branchKey, BRANCH_TABLE_GMT_CREATE,String.valueOf((new Date()).getTime()));
-            pipelined.hset(branchKey, BRANCH_TABLE_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            pipelined.hset(branchKey, BRANCH_TABLE_APPLICATION_DATA,
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_XID,branchTransactionDO.getXid());
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_TRANSACTION_ID,String.valueOf(branchTransactionDO.getTransactionId()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_BRANCH_ID,String.valueOf(branchTransactionDO.getBranchId()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_RESOURCE_GROUP_ID,branchTransactionDO.getResourceGroupId());
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_RESOURCE_ID,branchTransactionDO.getResourceId());
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_BRANCH_TYPE,branchTransactionDO.getBranchType());
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_CLIENT_ID,branchTransactionDO.getClientId());
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_GMT_CREATE,String.valueOf((new Date()).getTime()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_APPLICATION_DATA,
                     StringUtils.isEmpty(branchTransactionDO.getApplicationData()) ? "" :
                             branchTransactionDO.getApplicationData());
             pipelined.lpush(branchListKey,branchKey);
@@ -162,13 +162,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String xid = jedis.hget(branchKey, BRANCH_TABLE_XID);
+            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
             if (StringUtils.isEmpty(xid)) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
             Pipeline pipelined = jedis.pipelined();
-            pipelined.hset(branchKey, BRANCH_TABLE_STATUS,String.valueOf(branchTransactionDO.getStatus()));
-            pipelined.hset(branchKey, BRANCH_TABLE_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
+            pipelined.hset(branchKey, REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
             pipelined.sync();
             return true;
         } catch (Exception ex) {
@@ -181,17 +181,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            pipelined.hset(globalKey,GLOBAL_TABLE_XID,globalTransactionDO.getXid());
-            pipelined.hset(globalKey,GLOBAL_TABLE_TRANSACTION_ID,String.valueOf(globalTransactionDO.getTransactionId()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_STATUS,String.valueOf(globalTransactionDO.getStatus()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_APPLICATION_ID,globalTransactionDO.getApplicationId());
-            pipelined.hset(globalKey,GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP,globalTransactionDO.getTransactionServiceGroup());
-            pipelined.hset(globalKey,GLOBAL_TABLE_TRANSACTION_NAME,globalTransactionDO.getTransactionName());
-            pipelined.hset(globalKey,GLOBAL_TABLE_TIMEOUT,String.valueOf(globalTransactionDO.getTimeout()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_BEGIN_TIME,String.valueOf(globalTransactionDO.getBeginTime()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_GMT_CREATE,String.valueOf((new Date()).getTime()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_APPLICATION_DATA,
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_XID,globalTransactionDO.getXid());
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_TRANSACTION_ID,String.valueOf(globalTransactionDO.getTransactionId()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_APPLICATION_ID,globalTransactionDO.getApplicationId());
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_TRANSACTION_SERVICE_GROUP,globalTransactionDO.getTransactionServiceGroup());
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_TRANSACTION_NAME,globalTransactionDO.getTransactionName());
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_TIMEOUT,String.valueOf(globalTransactionDO.getTimeout()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_BEGIN_TIME,String.valueOf(globalTransactionDO.getBeginTime()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_GMT_CREATE,String.valueOf((new Date()).getTime()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_APPLICATION_DATA,
                     StringUtils.isEmpty(globalTransactionDO.getApplicationData()) ? "":
                     globalTransactionDO.getApplicationData());
             pipelined.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
@@ -215,10 +215,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String xid = globalTransactionDO.getXid();
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String previousStatus = jedis.hget(globalKey, GLOBAL_TABLE_STATUS);
+            String previousStatus = jedis.hget(globalKey, REDIS_KEY_GLOBAL_STATUS);
             Pipeline pipelined = jedis.pipelined();
-            pipelined.hset(globalKey,GLOBAL_TABLE_STATUS,String.valueOf(globalTransactionDO.getStatus()));
-            pipelined.hset(globalKey,GLOBAL_TABLE_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
+            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
             pipelined.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
             pipelined.lpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
             pipelined.sync();
@@ -361,21 +361,21 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private String buildBranchListKeyByXid(String xid) {
-        return DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX + xid;
+        return REDIS_SEATA_BRANCHES_PREFIX + xid;
     }
 
     private String buildGlobalKeyByTransactionId(Long transactionId) {
-        return DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + transactionId;
+        return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
     }
     private String buildGlobalKeyByTransactionId(String transactionId) {
-        return DEFAULT_SEATA_TRANSACTION_ID_GLOBAL_PREFIX + transactionId;
+        return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
     }
 
     private String buildBranchKey(Long branchId) {
-        return DEFAULT_REDIS_SEATA_BRANCH_PREFIX + branchId;
+        return REDIS_SEATA_BRANCH_PREFIX + branchId;
     }
 
     private String buildGlobalStatus(Integer status){
-        return SEATA_STATUS_PREFIX + status;
+        return REDIS_SEATA_STATUS_PREFIX + status;
     }
 }

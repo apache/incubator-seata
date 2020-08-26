@@ -247,6 +247,30 @@ public class BranchTransactionDO {
         this.gmtModified = gmtModified;
     }
 
+    /**
+     * Sets transactionId
+     * @param transactionId the transactionId
+     */
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    /**
+     * Sets branchId
+     * @param branchId the branchId
+     */
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
+    }
+
+    /**
+     * Sets branchId
+      * @param status the  status
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return StringUtils.toString(this);
