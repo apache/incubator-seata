@@ -42,9 +42,9 @@ public class Constants {
     public static final String DBKEYS_SPLIT_CHAR = ",";
 
     /**
-     * The constant ;
+     * The constant ROW_LOCK_KEY_SPLIT_CHAR.
      */
-    public static final String SEMICOLON = ";";
+    public static final String ROW_LOCK_KEY_SPLIT_CHAR = ";";
 
     /**
      * the start time of transaction

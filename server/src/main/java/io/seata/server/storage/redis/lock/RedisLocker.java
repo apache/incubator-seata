@@ -15,7 +15,7 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import static io.seata.common.Constants.SEMICOLON;
+import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -49,9 +49,9 @@ public class RedisLocker extends AbstractLocker {
 
     private static final Integer FAILED = 0;
 
-    private static final String DEFAULT_REDIS_SEATA_LOCK_PREFIX = "SEATA_LOCK_";
+    private static final String DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX = "SEATA_ROW_LOCK_";
 
-    private static final String DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX = "SEATA_LOCK_XID_";
+    private static final String DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX = "SEATA_GLOBAL_LOCK";
 
     private static final String XID = "xid";
 
@@ -146,7 +146,7 @@ public class RedisLocker extends AbstractLocker {
                 return false;
             }
             String xidLockKey = buildXidLockKey(needLockXid);
-            StringJoiner lockKeysString = new StringJoiner(SEMICOLON);
+            StringJoiner lockKeysString = new StringJoiner(ROW_LOCK_KEY_SPLIT_CHAR);
             needLockKeys.stream().forEach(lockKey -> lockKeysString.add(lockKey));
             jedis.hset(xidLockKey, branchId.toString(), lockKeysString.toString());
             return true;
@@ -193,8 +193,8 @@ public class RedisLocker extends AbstractLocker {
                 pipelined.hdel(xidLockKey, branchIdsArray);
                 rowKeys.stream().forEach(rowKeyStr -> {
                     if (StringUtils.isNotEmpty(rowKeyStr)) {
-                        if (rowKeyStr.contains(SEMICOLON)) {
-                            String[] keys = rowKeyStr.split(SEMICOLON);
+                        if (rowKeyStr.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
+                            String[] keys = rowKeyStr.split(ROW_LOCK_KEY_SPLIT_CHAR);
                             pipelined.del(keys);
                         } else {
                             pipelined.del(rowKeyStr);
@@ -235,11 +235,11 @@ public class RedisLocker extends AbstractLocker {
     }
 
     private String buildXidLockKey(String xid) {
-        return DEFAULT_REDIS_SEATA_LOCK_XID_PREFIX + xid;
+        return DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid;
     }
 
     private String buildLockKey(String rowKey) {
-        return DEFAULT_REDIS_SEATA_LOCK_PREFIX + rowKey;
+        return DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX + rowKey;
     }
 
 }
