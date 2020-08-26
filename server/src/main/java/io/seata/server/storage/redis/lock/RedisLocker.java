@@ -84,7 +84,7 @@ public class RedisLocker extends AbstractLocker {
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> needLockDOS = convertToLockDO(rowLocks);
-            if (needLockDOS.size() > 0) {
+            if (CollectionUtils.isNotEmpty(needLockDOS)) {
                 needLockDOS = needLockDOS.stream().
                         filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
                         .collect(Collectors.toList());
