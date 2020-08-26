@@ -72,7 +72,7 @@ public class BranchTransactionDO {
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 
@@ -90,7 +90,7 @@ public class BranchTransactionDO {
      *
      * @return the branch id
      */
-    public long getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
@@ -162,7 +162,7 @@ public class BranchTransactionDO {
      *
      * @return the status
      */
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 

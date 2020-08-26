@@ -56,7 +56,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String xid;
 
-    private long transactionId;
+    private Long transactionId;
 
     private volatile GlobalStatus status;
 
@@ -66,9 +66,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String transactionName;
 
-    private int timeout;
+    private Integer timeout;
 
-    private long beginTime;
+    private Long beginTime;
 
     private String applicationData;
 
@@ -323,7 +323,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 
@@ -404,7 +404,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the timeout
      */
-    public int getTimeout() {
+    public Integer getTimeout() {
         return timeout;
     }
 
@@ -413,7 +413,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @return the begin time
      */
-    public long getBeginTime() {
+    public Long getBeginTime() {
         return beginTime;
     }
 

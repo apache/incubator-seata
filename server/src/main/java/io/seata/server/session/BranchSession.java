@@ -48,9 +48,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String xid;
 
-    private long transactionId;
+    private Long transactionId;
 
-    private long branchId;
+    private Long branchId;
 
     private String resourceGroupId;
 
@@ -200,7 +200,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 
@@ -218,7 +218,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @return the branch id
      */
-    public long getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
