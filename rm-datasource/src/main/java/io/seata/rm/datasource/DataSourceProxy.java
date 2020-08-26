@@ -50,18 +50,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String dbType;
 
     /**
-     * Enable the table meta checker
-     */
-    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
-
-    /**
      * Table meta checker interval
      */
     private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
-
-    private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("tableMetaChecker", 1, true));
 
     /**
      * Instantiates a new Data source proxy.
@@ -80,7 +71,18 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
         super(targetDataSource);
-        init(targetDataSource, resourceGroupId);
+        if(Seata.EWELL_SEATA_STATE_IS_ON) {
+            init(targetDataSource, resourceGroupId);
+        } else {
+            this.resourceGroupId = resourceGroupId;
+            try (Connection connection = targetDataSource.getConnection()) {
+                jdbcUrl = connection.getMetaData().getURL();
+                dbType = com.alibaba.druid.util.JdbcUtils.getDbType(jdbcUrl, null);
+            } catch (SQLException e) {
+                throw new IllegalStateException("can not init dataSource", e);
+            }
+
+        }
     }
 
     private void init(DataSource dataSource, String resourceGroupId) {
@@ -91,18 +93,21 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
-        if(Seata.EWELL_SEATA_STATE_IS_ON) {
+
             DefaultResourceManager.get().registerResource(this);
-        }
-        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaExcutor.scheduleAtFixedRate(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
-                        .refresh(connection, DataSourceProxy.this.getResourceId());
-                } catch (Exception ignore) {
-                }
-            }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
-        }
+            boolean enableTableMetaCheckerEnable = ConfigurationFactory.getInstance().getBoolean( ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
+
+            if (enableTableMetaCheckerEnable) {
+                ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
+                    new NamedThreadFactory("tableMetaChecker", 1, true));
+                tableMetaExcutor.scheduleAtFixedRate(() -> {
+                    try (Connection connection = dataSource.getConnection()) {
+                        TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
+                            .refresh(connection, DataSourceProxy.this.getResourceId());
+                    } catch (Exception ignore) {
+                    }
+                }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
+            }
     }
 
     /**

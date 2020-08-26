@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.core.constants.Seata;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
@@ -49,13 +50,18 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
+    private static  int REPORT_RETRY_COUNT = 0;
 
-    public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+    public static  boolean IS_REPORT_SUCCESS_ENABLE = false;
 
-    private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
+    private  static LockRetryPolicy  LOCK_RETRY_POLICY = new LockRetryPolicy();
+
+    static {
+        if(Seata.EWELL_SEATA_STATE_IS_ON) {
+            REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
+            IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+        }
+    }
 
     /**
      * Instantiates a new Connection proxy.
@@ -188,10 +194,14 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void doCommit() throws SQLException {
-        if (context.inGlobalTransaction()) {
-            processGlobalTransactionCommit();
-        } else if (context.isGlobalLockRequire()) {
-            processLocalCommitWithGlobalLocks();
+        if(Seata.EWELL_SEATA_STATE_IS_ON) {
+            if (context.inGlobalTransaction()) {
+                processGlobalTransactionCommit();
+            } else if (context.isGlobalLockRequire()) {
+                processLocalCommitWithGlobalLocks();
+            } else {
+                targetConnection.commit();
+            }
         } else {
             targetConnection.commit();
         }
@@ -240,7 +250,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void rollback() throws SQLException {
         targetConnection.rollback();
-        if (context.inGlobalTransaction() && context.isBranchRegistered()) {
+        if (Seata.EWELL_SEATA_STATE_IS_ON && context.inGlobalTransaction() && context.isBranchRegistered()) {
             report(false);
         }
         context.reset();
@@ -275,8 +285,13 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public static class LockRetryPolicy {
-        protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
-            .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
+        protected static  boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = true;
+
+        static {
+            if(Seata.EWELL_SEATA_STATE_IS_ON) {
+                LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
+            }
+        }
 
         public <T> T execute(Callable<T> callable) throws Exception {
             if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
