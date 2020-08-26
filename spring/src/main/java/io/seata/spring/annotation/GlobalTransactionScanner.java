@@ -272,12 +272,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         return advised.getAdvisors().length - 1;
     }
 
-    public static void main(String[] args) {
-        String s1 = "a";
-        String s2 = "b";
-        System.out.println(s1.compareTo(s2));
-    }
-
     private boolean existsAnnotation(Class<?>[] classes) {
         if (CollectionUtils.isNotEmpty(classes)) {
             for (Class<?> clazz : classes) {
