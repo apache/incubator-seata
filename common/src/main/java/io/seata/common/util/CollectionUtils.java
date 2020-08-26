@@ -35,6 +35,15 @@ public class CollectionUtils {
     /**
      * Is empty boolean.
      *
+     * @param map the map
+     * @return the boolean
+     */
+    public static boolean isEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
+    /**
+     * Is empty boolean.
+     *
      * @param col the col
      * @return the boolean
      */

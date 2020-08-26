@@ -1,0 +1,105 @@
+package io.seata.common.util;
+
+import io.seata.common.exception.NotSupportYetException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Date;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * The bean utils
+ *
+ * @author wangzhongxiang
+ */
+public class BeanUtils {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BeanUtils.class);
+
+    public static String beanToString(Object o) {
+        if (o == null) {
+            return null;
+        }
+
+        Field[] fields = o.getClass().getDeclaredFields();
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[");
+        for (Field field : fields) {
+            Object val = null;
+            try {
+                val = ReflectionUtil.getFieldValue(o, field.getName());
+            } catch (NoSuchFieldException e) {
+                LOGGER.warn(e.getMessage(), e);
+            } catch (IllegalAccessException e) {
+                LOGGER.warn(e.getMessage(), e);
+            }
+            if (val != null) {
+                buffer.append(field.getName()).append("=").append(val).append(", ");
+            }
+        }
+        if (buffer.length() > 2) {
+            buffer.delete(buffer.length() - 2, buffer.length());
+        }
+        buffer.append("]");
+        return buffer.toString();
+    }
+
+    /**
+     * map to object
+     *
+     * @param map the map
+     * @param clazz the Object class
+     * @return the object
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    public static Object mapToObject(Map<String,String> map,Class<?> clazz) {
+        if (CollectionUtils.isEmpty(map)) {
+            return null;
+        }
+        try {
+            Object instance = clazz.newInstance();
+            Field[] fields = instance.getClass().getDeclaredFields();
+            for(Field field : fields){
+                int modifiers = field.getModifiers();
+                if(Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)){
+                    continue;
+                }
+                boolean accessible = field.isAccessible();
+                field.setAccessible(true);
+                Class<?> type = field.getType();
+                if (type == Date.class) {
+                    if (!StringUtils.isEmpty(map.get(field.getName()))) {
+                        field.set(instance,new Date(Long.valueOf(map.get(field.getName()))));
+                    }
+                } else if (type == Long.class) {
+                    if (!StringUtils.isEmpty(map.get(field.getName()))) {
+                        field.set(instance,Long.valueOf(map.get(field.getName())));
+                    }
+                } else if (type == Integer.class) {
+                    if (!StringUtils.isEmpty(map.get(field.getName()))) {
+                        field.set(instance,Integer.valueOf(map.get(field.getName())));
+                    }
+                } else if (type == Double.class) {
+                    if (!StringUtils.isEmpty(map.get(field.getName()))) {
+                        field.set(instance,Double.valueOf(map.get(field.getName())));
+                    }
+                } else if (type == String.class) {
+                    if (!StringUtils.isEmpty(map.get(field.getName()))) {
+                        field.set(instance,map.get(field.getName()));
+                    }
+                }
+                field.setAccessible(accessible);
+            }
+            return instance;
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new NotSupportYetException("map to "+clazz.toString() + " failed:"+e.getMessage());
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            throw new NotSupportYetException("map to "+clazz.toString() + " failed:"+e.getMessage());
+        }
+    }
+
+}
