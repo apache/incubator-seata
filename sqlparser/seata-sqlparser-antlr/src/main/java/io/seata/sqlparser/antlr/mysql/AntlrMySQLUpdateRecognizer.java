@@ -46,8 +46,6 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
         sqlContext = new MySqlContext();
         sqlContext.setOriginalSQL(mySqlContext.getOriginalSQL());
         walker2.walk(new UpdateSpecificationSqlListener(sqlContext), root);
-        String originalSQL = getOriginalSQL();
-        System.out.println(originalSQL);
     }
 
     @Override
