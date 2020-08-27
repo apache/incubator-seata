@@ -15,13 +15,11 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import java.util.HashMap;
-
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.SeataSagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
@@ -43,6 +41,8 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+
+import java.util.HashMap;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -101,7 +101,7 @@ public class StarterConstants {
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
-            put(SAGA_ASYNC_THREAD_POOL_PREFIX, SeataSagaAsyncThreadPoolProperties.class);
+            put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
 
             put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);

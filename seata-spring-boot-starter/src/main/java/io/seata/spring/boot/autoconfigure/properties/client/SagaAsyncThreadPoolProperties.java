@@ -13,18 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties;
+package io.seata.spring.boot.autoconfigure.properties.client;
 
 import io.seata.spring.boot.autoconfigure.StarterConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * Saga state machine async thread pool properties.
  *
  * @author wang.liang
  */
+@Component
 @ConfigurationProperties(StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX)
-public class SeataSagaAsyncThreadPoolProperties {
+public class SagaAsyncThreadPoolProperties {
 
     /**
      * core pool size.

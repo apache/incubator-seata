@@ -146,12 +146,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             stateMachineRepository.setDefaultTenantId(defaultTenantId);
             this.stateMachineRepository = stateMachineRepository;
         }
-        //stateMachineRepository may be overridden, so move `xxx.registryByResources()` here.
+        //stateMachineRepository may be overridden, so move `stateMachineRepository.registryByResources()` here.
         if (autoRegisterResources && ArrayUtils.isNotEmpty(resources)) {
             try {
                 Resource[] resources = ResourceUtil.getResources(this.resources);
                 stateMachineRepository.registryByResources(resources, defaultTenantId);
-                this.resources = null; // clear resources
             } catch (IOException e) {
                 LOGGER.error("Load State Language Resources failed.", e);
             }
