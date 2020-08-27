@@ -56,18 +56,18 @@ class AntlrMySQLRecognizerFactory implements SQLRecognizerFactory {
         List<SQLRecognizer> recognizers = null;
         SQLRecognizer recognizer = null;
 
-        for(MySqlContext.SQL sql : sqlInfos){
+        for (MySqlContext.SQL sql : sqlInfos) {
 
             SQLOperateRecognizerHolder recognizerHolder =
                     SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-            if(sql.getSqlType() == SQLType.UPDATE.value()){
-                recognizer = recognizerHolder.getUpdateRecognizer(sql.getSql());
-            }else if(sql.getSqlType() == SQLType.INSERT.value()){
-                recognizer = recognizerHolder.getInsertRecognizer(sql.getSql());
-            }else if(sql.getSqlType() == SQLType.DELETE.value()){
-                recognizer = recognizerHolder.getDeleteRecognizer(sql.getSql());
-            }else if(sql.getSqlType() == SQLType.SELECT.value()){
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql.getSql());
+            if (sql.getSqlType() == SQLType.UPDATE.value()) {
+                recognizer = recognizerHolder.getUpdateRecognizer(mySqlContext, sql.getSql());
+            } else if (sql.getSqlType() == SQLType.INSERT.value()) {
+                recognizer = recognizerHolder.getInsertRecognizer(mySqlContext, sql.getSql());
+            } else if (sql.getSqlType() == SQLType.DELETE.value()) {
+                recognizer = recognizerHolder.getDeleteRecognizer(mySqlContext, sql.getSql());
+            } else if (sql.getSqlType() == SQLType.SELECT.value()) {
+                recognizer = recognizerHolder.getSelectForUpdateRecognizer(mySqlContext, sql.getSql());
             }
 
             if (recognizer != null) {

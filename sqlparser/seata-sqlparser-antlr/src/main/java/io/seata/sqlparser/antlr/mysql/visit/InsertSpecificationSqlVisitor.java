@@ -61,8 +61,10 @@ public class InsertSpecificationSqlVisitor extends MySqlParserBaseVisitor<MySqlC
                 str = text.replace("'", "");
             } else if (text.contains("\"")) {
                 str = text.replace("\"", "");
+            }else {
+                str = text;
             }
-            if (!str.isEmpty()) {
+            if (!str.isEmpty() && !str.contains("'") && !str.contains("\"")) {
                 mySqlContext.addForInsertValColumnName(Arrays.asList(str.split(",")));
             }
         }

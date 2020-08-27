@@ -26,8 +26,7 @@ public class MySQLInsertRecognizerTest {
     @Test
     public void insertRecognizerTest_0() {
 
-        String sql = "INSERT INTO t1 (name) VALUES ('name1')";
-
+        String sql = "INSERT INTO t1 (id) VALUES (1)";
         MySqlLexer lexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
 
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -41,9 +40,9 @@ public class MySQLInsertRecognizerTest {
         visitor.visit(rootContext);
 
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
-        Assertions.assertEquals(Collections.singletonList("name"), Arrays.asList(visitorSqlContext.getInsertColumnNames().get(0).getInsertColumnName()));
+        Assertions.assertEquals(Collections.singletonList("id"), Arrays.asList(visitorSqlContext.getInsertColumnNames().get(0).getInsertColumnName()));
         Assertions.assertEquals(1, visitorSqlContext.insertRows);
-        Assertions.assertEquals(Collections.singletonList("name1"), visitorSqlContext.getInsertForValColumnNames().get(0));
+        Assertions.assertEquals(Arrays.asList("1"), visitorSqlContext.getInsertForValColumnNames().get(0));
     }
 
     /**

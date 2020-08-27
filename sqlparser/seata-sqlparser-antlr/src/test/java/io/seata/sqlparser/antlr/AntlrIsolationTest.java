@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class AntlrIsolationTest {
 
-    private final static String TEST_SQL = "SELECT name,age,phone FROM t1 WHERE id = 'id1' FOR UPDATE";
+    String TEST_SQL = "UPDATE t1 SET name = 'name1' WHERE id = 'id1';UPDATE t2 SET name = 'name1' WHERE id = 123;";
 
     @Test
     public void testAntlrIsolation() {

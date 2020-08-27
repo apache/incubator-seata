@@ -16,6 +16,7 @@
 package io.seata.sqlparser.antlr;
 
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.antlr.mysql.MySqlContext;
 
 /**
  * The interface SQLOperateRecognizerHolder
@@ -30,7 +31,7 @@ public interface SQLOperateRecognizerHolder {
      * @param sql the sql
      * @return the delete recognizer
      */
-    SQLRecognizer getDeleteRecognizer(String sql);
+    SQLRecognizer getDeleteRecognizer(MySqlContext mySqlContext,String sql);
 
     /**
      * Get insert recognizer
@@ -38,7 +39,7 @@ public interface SQLOperateRecognizerHolder {
      * @param sql the sql
      * @return the insert recognizer
      */
-    SQLRecognizer getInsertRecognizer(String sql);
+    SQLRecognizer getInsertRecognizer(MySqlContext mySqlContext,String sql);
 
     /**
      * Get update recognizer
@@ -46,7 +47,7 @@ public interface SQLOperateRecognizerHolder {
      * @param sql the sql
      * @return the update recognizer
      */
-    SQLRecognizer getUpdateRecognizer(String sql);
+    SQLRecognizer getUpdateRecognizer(MySqlContext mySqlContext,String sql);
 
     /**
      * Get SelectForUpdate recognizer
@@ -54,6 +55,6 @@ public interface SQLOperateRecognizerHolder {
      * @param sql the sql
      * @return the SelectForUpdate recognizer
      */
-    SQLRecognizer getSelectForUpdateRecognizer(String sql);
+    SQLRecognizer getSelectForUpdateRecognizer(MySqlContext mySqlContext,String sql);
 
 }

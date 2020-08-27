@@ -34,8 +34,8 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
+
 
 </project>

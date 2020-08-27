@@ -23,8 +23,10 @@ import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * AntlrMySQLInsertRecognizer
@@ -35,7 +37,7 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
     private MySqlContext sqlContext;
 
-    public AntlrMySQLInsertRecognizer(String sql) {
+    public AntlrMySQLInsertRecognizer(MySqlContext mySqlContext, String sql) {
 
         MySqlLexer lexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
 
@@ -45,6 +47,7 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
         MySqlParser.RootContext rootContext = parser.root();
         sqlContext = new MySqlContext();
+        sqlContext.setOriginalSQL(mySqlContext.getOriginalSQL());
         StatementSqlVisitor visitor = new StatementSqlVisitor(sqlContext);
         visitor.visit(rootContext);
     }
@@ -67,17 +70,27 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
     @Override
     public String getOriginalSQL() {
-        return null;
+        return sqlContext.getOriginalSQL();
     }
 
     @Override
     public boolean insertColumnsIsEmpty() {
+
+        List<MySqlContext.SQL> insertColumnNames = sqlContext.getInsertColumnNames();
+
+        if (insertColumnNames.isEmpty()) return true;
+
         return false;
     }
 
     @Override
     public List<String> getInsertColumns() {
-        return null;
+
+        List<MySqlContext.SQL> insertColumnNames = sqlContext.getInsertColumnNames();
+
+        if (insertColumnNames.isEmpty()) return new ArrayList<>();
+
+        return insertColumnNames.stream().map(insertColumns -> insertColumns.getColumnName()).collect(Collectors.toList());
     }
 
     @Override

@@ -101,6 +101,11 @@ public class MySqlContext {
      */
     public List<SQL> sqlInfos = new ArrayList<>();
 
+    /**
+     * originalSQL
+     */
+    private String originalSQL;
+
     public void addSqlInfo(SQL sql) {
         sqlInfos.add(sql);
     }
@@ -361,5 +366,13 @@ public class MySqlContext {
 
     public List<SQL> getSqlInfos() {
         return sqlInfos;
+    }
+
+    public String getOriginalSQL() {
+        return originalSQL;
+    }
+
+    public void setOriginalSQL(String originalSQL) {
+        this.originalSQL = originalSQL;
     }
 }

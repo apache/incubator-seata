@@ -37,6 +37,7 @@ public class SqlSpecificationListener extends MySqlParserBaseListener {
     public void enterSqlStatements(MySqlParser.SqlStatementsContext ctx) {
 
         List<MySqlParser.SqlStatementContext> sqlStatementContexts = ctx.sqlStatement();
+        sqlQueryContext.setOriginalSQL(ctx.getText());
 
         MySqlContext.SQL sql = null;
 
