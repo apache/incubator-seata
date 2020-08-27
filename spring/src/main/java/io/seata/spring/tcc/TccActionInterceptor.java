@@ -41,7 +41,7 @@ import java.util.Map;
 public class TccActionInterceptor implements MethodInterceptor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
-    private static final int ORDER_NUM = Ordered.LOWEST_PRECEDENCE;
+    private static final int ORDER_NUM = Ordered.HIGHEST_PRECEDENCE + 1000;
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
