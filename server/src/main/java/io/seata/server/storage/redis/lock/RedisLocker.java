@@ -15,8 +15,6 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
-
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,6 +34,8 @@ import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+
+import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 
 /**
  * The redis lock store operation
@@ -84,7 +84,7 @@ public class RedisLocker extends AbstractLocker {
 
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<LockDO> needLockDOS = convertToLockDO(rowLocks);
-            if (CollectionUtils.isNotEmpty(needLockDOS)) {
+            if (needLockDOS.size() > 1) {
                 needLockDOS = needLockDOS.stream().
                         filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
                         .collect(Collectors.toList());
