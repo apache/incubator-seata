@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @author wang.liang
  */
 @Configuration
-@ConditionalOnProperty(prefix = StarterConstants.SAGA_PREFIX, name = "enabled")
+@ConditionalOnProperty({StarterConstants.SEATA_PREFIX + ".enabled", StarterConstants.SAGA_PREFIX + ".enabled"})
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, SeataAutoConfiguration.class})
 public class SeataSagaAutoConfiguration {
 
