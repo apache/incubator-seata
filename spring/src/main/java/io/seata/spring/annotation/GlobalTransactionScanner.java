@@ -237,21 +237,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 } else {
                     AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
                     Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                    // add the advisor to the advised by the order value
-                    Integer avrOrder;
+                    int pos;
                     for (Advisor avr : advisor) {
-                        avrOrder = OrderUtil.getOrder(avr);
-                        if (avrOrder == null || avrOrder == Ordered.LOWEST_PRECEDENCE) {
-                            advised.addAdvisor(avr);
-                        } else if (avrOrder == Ordered.HIGHEST_PRECEDENCE) {
-                            advised.addAdvisor(0, avr);
+                        // Find the pos based on the advisor's order, and add to advisors by pos
+                        pos = findAddAdvisorPos(advised, avr);
+                        if (pos >= 0) {
+                            advised.addAdvisor(pos, avr);
                         } else {
-                            int pos = getAddAdvisorPos(advised, avr, avrOrder);
-                            if (pos >= 0) {
-                                advised.addAdvisor(pos, avr);
-                            } else {
-                                advised.addAdvisor(avr);
-                            }
+                            advised.addAdvisor(avr);
                         }
                     }
                 }
@@ -263,7 +256,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
     }
 
-    private int getAddAdvisorPos(AdvisedSupport advised, Advisor avr, int avrOrder) {
+    private int findAddAdvisorPos(AdvisedSupport advised, Advisor avr) {
+        Integer avrOrder = OrderUtil.getOrder(avr);
+        if (avrOrder == null || avrOrder == Ordered.LOWEST_PRECEDENCE) {
+            return -1;
+        } else if (avrOrder == Ordered.HIGHEST_PRECEDENCE) {
+            return 0;
+        }
+
         Advice avc = avr.getAdvice();
         boolean mustHigherThenTransactional = false;
         if (avc instanceof SeataInterceptor) {
@@ -275,12 +275,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
             advisor = advised.getAdvisors()[i];
             order = OrderUtil.getOrder(advisor);
+            // If the order is null, or lower then avrOrder, or ( equals to avrOrder && avrClassName less than advisorClassName), returns current i.
             if (order == null || order > avrOrder ||
                     (order == avrOrder && avr.getClass().getSimpleName().compareTo(advisor.getClass().getSimpleName()) <= 0)) {
                 return i;
             } else {
                 // If avr's order must higher then transactional's order and current advice is TransactionInterceptor.
-                // Reset avr's order to `order - 1`, and return current i.
+                // Reset avr's order to `order - 1`, and returns current i.
                 if (mustHigherThenTransactional && advisor.getAdvice() != null
                         && advisor.getAdvice().getClass().getSimpleName().equalsIgnoreCase("TransactionInterceptor")) {
                     int newOrder = order > Integer.MIN_VALUE ? order - 1 : Integer.MIN_VALUE;
