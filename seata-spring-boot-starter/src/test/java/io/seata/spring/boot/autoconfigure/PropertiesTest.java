@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
@@ -123,6 +124,7 @@ public class PropertiesTest {
     public void testTmProperties() {
         assertEquals(DEFAULT_TM_COMMIT_RETRY_COUNT, context.getBean(TmProperties.class).getCommitRetryCount());
         assertEquals(DEFAULT_TM_ROLLBACK_RETRY_COUNT, context.getBean(TmProperties.class).getRollbackRetryCount());
+        assertEquals(DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, context.getBean(TmProperties.class).getDefaultGlobalTransactionTimeout());
     }
 
     @Test

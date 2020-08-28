@@ -18,8 +18,8 @@ package io.seata.spring.annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.DefaultValues;
 import io.seata.core.context.RootContext;
-import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -53,7 +53,7 @@ public class MethodDescTest {
         Assertions.assertEquals(transactional.timeoutMills(), 300000);
         method = null;
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
-        Assertions.assertEquals(transactional.timeoutMills(), TransactionInfo.DEFAULT_TIME_OUT * 2);
+        Assertions.assertEquals(transactional.timeoutMills(), DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT * 2);
         targetClass = null;
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertNull(transactional);
@@ -133,7 +133,7 @@ public class MethodDescTest {
     /**
      * the type mock business
      */
-    @GlobalTransactional(timeoutMills = TransactionInfo.DEFAULT_TIME_OUT * 2)
+    @GlobalTransactional(timeoutMills = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT * 2)
     private static class MockBusiness {
         @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
         public String doBiz(String msg) {

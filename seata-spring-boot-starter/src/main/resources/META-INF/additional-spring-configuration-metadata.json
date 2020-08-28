@@ -7,6 +7,12 @@
       "description": "data source proxy mode.",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
       "defaultValue": "AT"
+    },
+    {
+      "name": "seata.client.tm.default-global-transaction-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": 60000
     }
   ],
   "hints": [
