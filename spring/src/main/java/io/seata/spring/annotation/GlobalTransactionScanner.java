@@ -289,9 +289,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (mustBeHigherThanTransactional && advisor.getAdvice() != null
                     && advisor.getAdvice().getClass().getSimpleName().equalsIgnoreCase("TransactionInterceptor")) {
                 int higherOrder = OrderUtil.higher(order, 1);
-                LOGGER.warn("The {}'s order({}) is lower than {}'s order({}), reset {}'s order to {}.",
-                        avc.getClass().getSimpleName(), avrOrder, advisor.getAdvice().getClass().getSimpleName(),
-                        avc.getClass().getSimpleName(), order, higherOrder);
+                LOGGER.warn("The {}'s order {} is lower than {}'s order {} , reset {}'s order to {}.",
+                        avc.getClass().getSimpleName(), avrOrder, advisor.getAdvice().getClass().getSimpleName(), order,
+                        avc.getClass().getSimpleName(), higherOrder);
                 ((SeataInterceptor) avc).setOrder(higherOrder);
                 return i;
             }
