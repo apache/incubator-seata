@@ -139,6 +139,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
 
     /**
+     * The constant TCC_ACTION_INTERCEPTOR_ORDER.
+     */
+    public static final String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
+
+    /**
      * The constant CLIENT_TM_PREFIX.
      */
     public static final String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
@@ -498,6 +503,11 @@ public class ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
+     */
+    public static final String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
      * The constant SERVER_ENABLE_CHECK_AUTH.

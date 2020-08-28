@@ -7,6 +7,18 @@
       "description": "data source proxy mode.",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
       "defaultValue": "AT"
+    },
+    {
+      "name": "seata.client.tm.interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": -2147482648
+    },
+    {
+      "name": "seata.client.rm.tcc-action-interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": -2147482648
     }
   ],
   "hints": [

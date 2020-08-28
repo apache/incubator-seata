@@ -24,6 +24,7 @@ import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
+import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 
 /**
@@ -37,6 +38,7 @@ public class TmProperties {
     private boolean degradeCheck = DEFAULT_TM_DEGRADE_CHECK;
     private int degradeCheckAllowTimes = DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
     private int degradeCheckPeriod = DEFAULT_TM_DEGRADE_CHECK_PERIOD;
+    private int interceptorOrder = TM_INTERCEPTOR_ORDER;
 
     public int getCommitRetryCount() {
         return commitRetryCount;
@@ -80,5 +82,14 @@ public class TmProperties {
 
     public void setDegradeCheckAllowTimes(int degradeCheckAllowTimes) {
         this.degradeCheckAllowTimes = degradeCheckAllowTimes;
+    }
+
+    public int getInterceptorOrder() {
+        return interceptorOrder;
+    }
+
+    public TmProperties setInterceptorOrder(int interceptorOrder) {
+        this.interceptorOrder = interceptorOrder;
+        return this;
     }
 }

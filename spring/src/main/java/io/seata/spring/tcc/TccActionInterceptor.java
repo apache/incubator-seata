@@ -16,7 +16,9 @@
 package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -33,6 +35,8 @@ import org.springframework.core.Ordered;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import static io.seata.core.constants.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
+
 /**
  * TCC Interceptor
  *
@@ -41,7 +45,8 @@ import java.util.Map;
 public class TccActionInterceptor implements MethodInterceptor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
-    private static final int ORDER_NUM = Ordered.HIGHEST_PRECEDENCE + 1000;
+    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
+            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 

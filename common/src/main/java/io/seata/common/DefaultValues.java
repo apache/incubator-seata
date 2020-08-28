@@ -94,4 +94,7 @@ public class DefaultValues {
 
     public static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
     public static final int VIRTUAL_NODES_DEFAULT = 10;
+
+    public static final int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+    public static final int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
 }

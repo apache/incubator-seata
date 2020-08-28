@@ -14,6 +14,7 @@ seata:
       report-success-enable: false
       saga-branch-register-enable: false
       saga-json-parser: fastjson
+      tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
       lock:
         retry-interval: 10
         retry-times: 30
@@ -24,6 +25,7 @@ seata:
       degrade-check-allow-times: 10
       commit-retry-count: 5
       rollback-retry-count: 5
+      interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
     undo:
       data-validation: true
       log-serialization: jackson

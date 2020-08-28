@@ -50,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 
@@ -58,22 +57,24 @@ import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
+import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
 
 /**
  * The type Global transactional interceptor.
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, Ordered {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, SeataOrdered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
-    private static final int ORDER_NUM = Ordered.HIGHEST_PRECEDENCE + 1000;
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
+    private int order;
+
     private static int degradeCheckPeriod;
     private static volatile boolean degradeCheck;
     private static int degradeCheckAllowTimes;
@@ -93,6 +94,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
             DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+        this.order = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.TM_INTERCEPTOR_ORDER, TM_INTERCEPTOR_ORDER);
         degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
             DEFAULT_TM_DEGRADE_CHECK);
         if (degradeCheck) {
@@ -293,6 +295,11 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     @Override
     public int getOrder() {
-        return ORDER_NUM;
+        return order;
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
     }
 }
