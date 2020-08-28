@@ -9,15 +9,21 @@
       "defaultValue": "AT"
     },
     {
-      "name": "seata.client.tm.interceptor-order",
-      "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
-      "defaultValue": -2147482648
-    },
-    {
       "name": "seata.client.rm.tcc-action-interceptor-order",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": -2147482648
+    },
+    {
+      "name": "seata.client.tm.default-global-transaction-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": 60000
+    },
+    {
+      "name": "seata.client.tm.interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
       "defaultValue": -2147482648
     }
   ],

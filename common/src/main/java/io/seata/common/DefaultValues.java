@@ -75,6 +75,7 @@ public class DefaultValues {
 
     public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
+    public static final int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
     public static final String DEFAULT_TX_GROUP = "my_test_tx_group";
     public static final String DEFAULT_TC_CLUSTER = "default";
