@@ -18,11 +18,23 @@ package io.seata.spring.annotation;
 import org.springframework.core.Ordered;
 
 /**
- * The interface Seata ordered.
+ * The interface Seata interceptor.
  *
  * @author wang.liang
  */
-public interface SeataOrdered extends Ordered {
+public interface SeataInterceptor extends Ordered {
 
+    /**
+     * Sets order.
+     *
+     * @param order the order
+     */
     void setOrder(int order);
+
+    /**
+     * Must Higher then transactional.
+     *
+     * @return the boolean
+     */
+    boolean mustHigherThenTransactional();
 }

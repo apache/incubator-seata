@@ -64,7 +64,7 @@ import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, SeataOrdered {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, SeataInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -301,5 +301,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     @Override
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public boolean mustHigherThenTransactional() {
+        return true;
     }
 }
