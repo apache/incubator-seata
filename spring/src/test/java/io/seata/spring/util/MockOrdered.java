@@ -30,6 +30,6 @@ public class MockOrdered implements Ordered {
 
     @Override
     public int getOrder() {
-        return 0;
+        return order;
     }
 }

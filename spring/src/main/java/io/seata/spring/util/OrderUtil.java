@@ -41,4 +41,64 @@ public class OrderUtil {
 
         return OrderUtils.getOrder(obj.getClass());
     }
+
+    /**
+     * Is lower than.
+     *
+     * @param orderSource the order source
+     * @param orderTarget the order target
+     * @return the boolean
+     */
+    public static boolean lowerThan(int orderSource, int orderTarget) {
+        return orderSource > orderTarget;
+    }
+
+    /**
+     * Is higher than.
+     *
+     * @param orderSource the order source
+     * @param orderTarget the order target
+     * @return the boolean
+     */
+    public static boolean higherThan(int orderSource, int orderTarget) {
+        return orderSource < orderTarget;
+    }
+
+    /**
+     * Lower.
+     *
+     * @param orderSource the order source
+     * @param offset      the offset
+     * @return the lower order
+     */
+    public static int lower(int orderSource, int offset) {
+        if (offset <= 0) {
+            throw new IllegalArgumentException("offset must be greater than 0");
+        }
+
+        if (Ordered.LOWEST_PRECEDENCE - offset < orderSource) {
+            return Ordered.LOWEST_PRECEDENCE;
+        }
+
+        return orderSource + offset;
+    }
+
+    /**
+     * Higher.
+     *
+     * @param orderSource the order source
+     * @param offset      the offset
+     * @return the higher order
+     */
+    public static int higher(int orderSource, int offset) {
+        if (offset <= 0) {
+            throw new IllegalArgumentException("offset must be greater than 0");
+        }
+
+        if (Ordered.HIGHEST_PRECEDENCE + offset > orderSource) {
+            return Ordered.HIGHEST_PRECEDENCE;
+        }
+
+        return orderSource - offset;
+    }
 }

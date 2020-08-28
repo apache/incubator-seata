@@ -336,7 +336,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     @Override
-    public boolean mustHigherThenTransactional() {
+    public boolean mustBeHigherThanTransactional() {
         return true;
     }
 }

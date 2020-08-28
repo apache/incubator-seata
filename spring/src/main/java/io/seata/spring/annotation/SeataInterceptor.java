@@ -32,9 +32,9 @@ public interface SeataInterceptor extends Ordered {
     void setOrder(int order);
 
     /**
-     * Must Higher then transactional.
+     * Must be higher than transactional.
      *
      * @return the boolean
      */
-    boolean mustHigherThenTransactional();
+    boolean mustBeHigherThanTransactional();
 }

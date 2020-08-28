@@ -265,9 +265,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
 
         Advice avc = avr.getAdvice();
-        boolean mustHigherThenTransactional = false;
+        boolean mustBeHigherThanTransactional = false;
         if (avc instanceof SeataInterceptor) {
-            mustHigherThenTransactional = ((SeataInterceptor) avc).mustHigherThenTransactional();
+            mustBeHigherThanTransactional = ((SeataInterceptor) avc).mustBeHigherThanTransactional();
         }
 
         Integer order;
@@ -275,22 +275,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
             advisor = advised.getAdvisors()[i];
             order = OrderUtil.getOrder(advisor);
-            // If the order is null, or lower then avrOrder, or ( equals to avrOrder && avrClassName less than advisorClassName), returns current i.
-            if (order == null || order > avrOrder ||
-                    (order == avrOrder && avr.getClass().getSimpleName().compareTo(advisor.getClass().getSimpleName()) <= 0)) {
+            // If current advisor's order is null, or lower than avrOrder,
+            // or ( equals to avrOrder && avrClassName less than advisorClassName), returns current i.
+            if (order == null || OrderUtil.lowerThan(order, avrOrder) ||
+                    (order.equals(avrOrder) && avr.getClass().getSimpleName().compareTo(advisor.getClass().getSimpleName()) <= 0)) {
                 return i;
-            } else {
-                // If avr's order must higher then transactional's order and current advice is TransactionInterceptor.
-                // Reset avr's order to `order - 1`, and returns current i.
-                if (mustHigherThenTransactional && advisor.getAdvice() != null
-                        && advisor.getAdvice().getClass().getSimpleName().equalsIgnoreCase("TransactionInterceptor")) {
-                    int newOrder = order > Integer.MIN_VALUE ? order - 1 : Integer.MIN_VALUE;
-                    LOGGER.warn("The {}'s order({}) is lower then {}'s order({}), reset {}'s order to {}.",
+            }
+            // If avr's order must be higher than transactional's order, and current advice is TransactionInterceptor.
+            // Reset avr's order to `order - 1`, and returns current i.
+            else if (mustBeHigherThanTransactional && advisor.getAdvice() != null
+                    && advisor.getAdvice().getClass().getSimpleName().equalsIgnoreCase("TransactionInterceptor")) {
+                int higherOrder = OrderUtil.higher(order, 1);
+                LOGGER.warn("The {}'s order({}) is lower than {}'s order({}), reset {}'s order to {}.",
                         avc.getClass().getSimpleName(), avrOrder, advisor.getAdvice().getClass().getSimpleName(),
-                        avc.getClass().getSimpleName(), order, newOrder);
-                    ((SeataInterceptor) avc).setOrder(newOrder);
-                    return i;
-                }
+                        avc.getClass().getSimpleName(), order, higherOrder);
+                ((SeataInterceptor) avc).setOrder(higherOrder);
+                return i;
             }
         }
         return -1;
