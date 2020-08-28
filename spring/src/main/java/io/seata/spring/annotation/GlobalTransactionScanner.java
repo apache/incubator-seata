@@ -248,7 +248,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         } else {
                             boolean mustBeforeTransactionInterceptor = avr.getAdvice() instanceof GlobalTransactionalInterceptor;
                             int pos = getAddAdvisorPos(advised, avr, avrOrder, mustBeforeTransactionInterceptor);
-                            advised.addAdvisor(pos, avr);
+                            if (pos >= 0) {
+                                advised.addAdvisor(pos, avr);
+                            } else {
+                                advised.addAdvisor(avr);
+                            }
                         }
                     }
                 }
@@ -283,7 +287,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 return i;
             }
         }
-        return advised.getAdvisors().length - 1;
+        return -1;
     }
 
     private boolean existsAnnotation(Class<?>[] classes) {
