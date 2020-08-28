@@ -264,26 +264,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             return 0;
         }
 
+        // get mustBeHigherThanTransactional
         Advice avc = avr.getAdvice();
         boolean mustBeHigherThanTransactional = false;
         if (avc instanceof SeataInterceptor) {
             mustBeHigherThanTransactional = ((SeataInterceptor) avc).mustBeHigherThanTransactional();
         }
 
-        Integer order;
         Advisor advisor;
+        Integer order;
         for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
             advisor = advised.getAdvisors()[i];
             order = OrderUtil.getOrder(advisor);
+
             // If current advisor's order is null, or lower than avrOrder,
             // or ( equals to avrOrder && avrClassName less than advisorClassName), returns current i.
             if (order == null || OrderUtil.lowerThan(order, avrOrder) ||
                     (order.equals(avrOrder) && avr.getClass().getSimpleName().compareTo(advisor.getClass().getSimpleName()) <= 0)) {
                 return i;
             }
+
             // If avr's order must be higher than transactional's order, and current advice is TransactionInterceptor.
             // Reset avr's order to `order - 1`, and returns current i.
-            else if (mustBeHigherThanTransactional && advisor.getAdvice() != null
+            if (mustBeHigherThanTransactional && advisor.getAdvice() != null
                     && advisor.getAdvice().getClass().getSimpleName().equalsIgnoreCase("TransactionInterceptor")) {
                 int higherOrder = OrderUtil.higher(order, 1);
                 LOGGER.warn("The {}'s order({}) is lower than {}'s order({}), reset {}'s order to {}.",

@@ -56,7 +56,7 @@ public class OrderUtilTest {
     public void test_lower() {
         assertThat(OrderUtil.lower(1, 1)).isEqualTo(2);
         assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE - 1, 2)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
-        assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE, 2)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
+        assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE, 1)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> OrderUtil.lower(1, -1));
     }
@@ -65,7 +65,7 @@ public class OrderUtilTest {
     public void test_higher() {
         assertThat(OrderUtil.higher(1, 1)).isEqualTo(0);
         assertThat(OrderUtil.higher(Ordered.HIGHEST_PRECEDENCE + 1, 2)).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
-        assertThat(OrderUtil.higher(Ordered.HIGHEST_PRECEDENCE, 2)).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
+        assertThat(OrderUtil.higher(Ordered.HIGHEST_PRECEDENCE, 1)).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> OrderUtil.higher(1, -1));
     }
