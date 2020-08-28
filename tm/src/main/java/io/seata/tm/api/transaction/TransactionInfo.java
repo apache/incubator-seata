@@ -24,8 +24,6 @@ import io.seata.common.util.CollectionUtils;
  */
 public final class TransactionInfo implements Serializable {
 
-    public static final int DEFAULT_TIME_OUT = 60000;
-
     private int timeOut;
 
     private String name;

@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionHook;
-import io.seata.tm.api.transaction.TransactionInfo;
+import io.seata.common.DefaultValues;
 
 /**
  * The interface Global transactional.
@@ -35,10 +35,11 @@ public @interface GlobalTransactional {
 
     /**
      * Global transaction timeoutMills in MILLISECONDS.
+     * If client.tm.default-global-transaction-timeout is configured, It will replace the DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT.
      *
      * @return timeoutMills in MILLISECONDS.
      */
-    int timeoutMills() default TransactionInfo.DEFAULT_TIME_OUT;
+    int timeoutMills() default DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 
     /**
      * Given name of the global transaction instance.
