@@ -276,9 +276,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     && advisor.getAdvice().getClass().getSimpleName().equalsIgnoreCase("TransactionInterceptor")) {
                 Advice avi = avr.getAdvice();
                 if (avi instanceof SeataOrdered) {
-                    LOGGER.warn("The order of '{}' is higher then '{}', reset the order to value {}.",
-                            avi.getClass().getSimpleName(), advisor.getAdvice().getClass().getSimpleName(), order);
-                    ((SeataOrdered) avi).setOrder(order);
+                    LOGGER.warn("The order({}) of '{}' is lower then the order({}) of '{}', reset the order to {}.",
+                            avrOrder, avi.getClass().getSimpleName(), order, advisor.getAdvice().getClass().getSimpleName(), order - 1);
+                    ((SeataOrdered) avi).setOrder(order - 1);
                 }
                 return i;
             }
