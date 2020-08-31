@@ -56,6 +56,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     }
 
     protected Connection getConnectionProxy(Connection connection) throws SQLException {
+        if (!RootContext.inGlobalTransaction()) {
+            return connection;
+        }
         Connection physicalConn = connection;
         if (connection instanceof PooledConnection) {
             physicalConn = ((PooledConnection)connection).getConnection();
