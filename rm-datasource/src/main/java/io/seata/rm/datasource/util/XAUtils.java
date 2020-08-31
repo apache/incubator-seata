@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.util;
 
+import com.alibaba.druid.proxy.jdbc.ConnectionProxy;
 import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
@@ -56,6 +57,10 @@ public class XAUtils {
             } catch (XAException xae) {
                 throw new SQLException("create xaConnection error", xae);
             }
+        }
+
+        if (physicalConn instanceof ConnectionProxy) {
+            physicalConn = ((ConnectionProxy)physicalConn).getRawObject();
         }
 
         if (JdbcUtils.MYSQL.equals(dbType) || JdbcUtils.MARIADB.equals(dbType)) {
