@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.util;
 
-import com.alibaba.druid.proxy.jdbc.ConnectionProxy;
 import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
