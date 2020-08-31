@@ -19,6 +19,9 @@ import java.util.Map;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.DefaultValues;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +53,9 @@ public class RootContext {
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
+
+    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
 
     /**
      * Gets xid.
@@ -129,8 +135,8 @@ public class RootContext {
             if (StringUtils.isNotBlank(branchType)) {
                 return branchType;
             }
-            //default branchType is AT
-            return BranchType.AT.name();
+            //default branchType is the dataSourceProxyMode
+            return BranchType.XA.name().equalsIgnoreCase(DATA_SOURCE_PROXY_MODE) ? BranchType.XA.name() : BranchType.AT.name();
         }
         return null;
     }
