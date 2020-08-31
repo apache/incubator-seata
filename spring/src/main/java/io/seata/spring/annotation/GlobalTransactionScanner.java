@@ -283,7 +283,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         boolean isTransactionInterceptor;
         for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
             otherAdvisor = advised.getAdvisors()[i];
-            isTransactionInterceptor = otherAdvisor.getAdvice().getClass().getSimpleName().equals("TransactionInterceptor");
+            isTransactionInterceptor = "TransactionInterceptor".equals(otherAdvisor.getAdvice().getClass().getSimpleName());
 
             // If current otherAdvisor is lower or equals than seataAdvisor
             if (OrderUtil.lowerOrEquals(otherAdvisor, seataAdvisor)) {
