@@ -44,7 +44,6 @@ public class DataSourceProxyXATest {
     @Test
     public void testGetConnection() throws SQLException {
         // Mock
-        RootContext.bind("test");
         Driver driver = Mockito.mock(Driver.class);
         JDBC4MySQLConnection connection = Mockito.mock(JDBC4MySQLConnection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
@@ -57,6 +56,9 @@ public class DataSourceProxyXATest {
         druidDataSource.setDriver(driver);
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+        Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+        RootContext.bind("test");
+        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
 
         Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
