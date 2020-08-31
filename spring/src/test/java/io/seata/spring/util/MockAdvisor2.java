@@ -13,35 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.spring.util;
 
+import org.aopalliance.aop.Advice;
+import org.springframework.aop.Advisor;
 import org.springframework.core.Ordered;
 
 /**
- * The interface Seata interceptor.
- *
  * @author wang.liang
  */
-public interface SeataInterceptor extends Ordered {
+public class MockAdvisor2 implements Advisor, Ordered {
 
-    /**
-     * Sets order.
-     *
-     * @param order the order
-     */
-    void setOrder(int order);
+    private Integer order;
+    private Advice advice;
 
-    /**
-     * Must be lower than transactional.
-     *
-     * @return the boolean
-     */
-    boolean mustBeLowerThanTransactional();
+    public MockAdvisor2(Integer order, Advice advice) {
+        this.order = order;
+        this.advice = advice;
+    }
 
-    /**
-     * Must be higher than transactional.
-     *
-     * @return the boolean
-     */
-    boolean mustBeHigherThanTransactional();
+    @Override
+    public int getOrder() {
+        return order;
+    }
+
+    @Override
+    public Advice getAdvice() {
+        return advice;
+    }
+
+    @Override
+    public boolean isPerInstance() {
+        return false;
+    }
 }

@@ -17,12 +17,14 @@ package io.seata.spring.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.Advisor;
 import org.springframework.core.Ordered;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type OrderUtil test
+ *
  * @author wang.liang
  */
 public class OrderUtilTest {
@@ -37,19 +39,57 @@ public class OrderUtilTest {
         assertThat(OrderUtil.getOrder(new MockAnnotationOrdered())).isEqualTo(1);
 
         // no order
-        assertThat(OrderUtil.getOrder(new Object())).isNull();
+        assertThat(OrderUtil.getOrder(new Object())).isEqualTo(Ordered.LOWEST_PRECEDENCE);
     }
 
     @Test
-    public void test_lowerThen() {
+    public void test_lowerThan() {
         assertThat(OrderUtil.lowerThan(Ordered.LOWEST_PRECEDENCE, Ordered.HIGHEST_PRECEDENCE)).isTrue();
         assertThat(OrderUtil.lowerThan(1, 0)).isTrue();
+        assertThat(OrderUtil.lowerThan(1, 1)).isFalse();
+        assertThat(OrderUtil.lowerOrEquals(1, 1)).isTrue();
+
+        assertThat(OrderUtil.lowerThan(String.class, Integer.class)).isTrue(); // S is bigger than I, so String is lower than Integer.
+        assertThat(OrderUtil.lowerThan(String.class, String.class)).isFalse();
+        assertThat(OrderUtil.lowerOrEquals(String.class, String.class)).isTrue();
+
+        Advisor advisor11 = new MockAdvisor1(1, new MockAdvice1());
+        Advisor advisor12 = new MockAdvisor1(1, new MockAdvice2());
+        Advisor advisor21 = new MockAdvisor1(2, new MockAdvice1());
+        Advisor advisor22 = new MockAdvisor1(2, new MockAdvice2());
+        assertThat(OrderUtil.lowerThan(advisor11, advisor11)).isFalse();
+        assertThat(OrderUtil.lowerThan(advisor12, advisor11)).isTrue();
+        assertThat(OrderUtil.lowerThan(advisor21, advisor12)).isTrue();
+        assertThat(OrderUtil.lowerThan(advisor22, advisor21)).isTrue();
+        assertThat(OrderUtil.lowerOrEquals(advisor11, advisor11)).isTrue();
+        assertThat(OrderUtil.lowerOrEquals(advisor21, advisor11)).isTrue();
+        assertThat(OrderUtil.lowerOrEquals(advisor12, advisor11)).isTrue();
+        assertThat(OrderUtil.lowerOrEquals(advisor22, advisor21)).isTrue();
     }
 
     @Test
-    public void test_higherThen() {
+    public void test_higherThan() {
         assertThat(OrderUtil.higherThan(Ordered.HIGHEST_PRECEDENCE, Ordered.LOWEST_PRECEDENCE)).isTrue();
         assertThat(OrderUtil.higherThan(0, 1)).isTrue();
+        assertThat(OrderUtil.higherThan(1, 1)).isFalse();
+        assertThat(OrderUtil.higherOrEquals(1, 1)).isTrue();
+
+        assertThat(OrderUtil.higherThan(Integer.class, String.class)).isTrue(); // I is smaller than S, so String is higher than Integer.
+        assertThat(OrderUtil.higherThan(String.class, String.class)).isFalse();
+        assertThat(OrderUtil.higherOrEquals(String.class, String.class)).isTrue();
+
+        Advisor advisor11 = new MockAdvisor1(1, new MockAdvice1());
+        Advisor advisor12 = new MockAdvisor1(1, new MockAdvice2());
+        Advisor advisor21 = new MockAdvisor1(2, new MockAdvice1());
+        Advisor advisor22 = new MockAdvisor1(2, new MockAdvice2());
+        assertThat(OrderUtil.higherThan(advisor11, advisor11)).isFalse();
+        assertThat(OrderUtil.higherThan(advisor11, advisor12)).isTrue();
+        assertThat(OrderUtil.higherThan(advisor12, advisor21)).isTrue();
+        assertThat(OrderUtil.higherThan(advisor21, advisor22)).isTrue();
+        assertThat(OrderUtil.higherOrEquals(advisor11, advisor11)).isTrue();
+        assertThat(OrderUtil.higherOrEquals(advisor11, advisor21)).isTrue();
+        assertThat(OrderUtil.higherOrEquals(advisor11, advisor12)).isTrue();
+        assertThat(OrderUtil.higherOrEquals(advisor21, advisor22)).isTrue();
     }
 
     @Test
