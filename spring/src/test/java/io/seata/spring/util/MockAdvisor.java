@@ -22,12 +22,12 @@ import org.springframework.core.Ordered;
 /**
  * @author wang.liang
  */
-public class MockAdvisor2 implements Advisor, Ordered {
+public class MockAdvisor implements Advisor, Ordered {
 
     private Integer order;
     private Advice advice;
 
-    public MockAdvisor2(Integer order, Advice advice) {
+    public MockAdvisor(Integer order, Advice advice) {
         this.order = order;
         this.advice = advice;
     }

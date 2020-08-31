@@ -53,10 +53,10 @@ public class OrderUtilTest {
         assertThat(OrderUtil.lowerThan(String.class, String.class)).isFalse();
         assertThat(OrderUtil.lowerOrEquals(String.class, String.class)).isTrue();
 
-        Advisor advisor11 = new MockAdvisor1(1, new MockAdvice1());
-        Advisor advisor12 = new MockAdvisor1(1, new MockAdvice2());
-        Advisor advisor21 = new MockAdvisor1(2, new MockAdvice1());
-        Advisor advisor22 = new MockAdvisor1(2, new MockAdvice2());
+        Advisor advisor11 = new MockAdvisor(1, new MockAdvice1());
+        Advisor advisor12 = new MockAdvisor(1, new MockAdvice2());
+        Advisor advisor21 = new MockAdvisor(2, new MockAdvice1());
+        Advisor advisor22 = new MockAdvisor(2, new MockAdvice2());
         assertThat(OrderUtil.lowerThan(advisor11, advisor11)).isFalse();
         assertThat(OrderUtil.lowerThan(advisor12, advisor11)).isTrue();
         assertThat(OrderUtil.lowerThan(advisor21, advisor12)).isTrue();
@@ -78,10 +78,10 @@ public class OrderUtilTest {
         assertThat(OrderUtil.higherThan(String.class, String.class)).isFalse();
         assertThat(OrderUtil.higherOrEquals(String.class, String.class)).isTrue();
 
-        Advisor advisor11 = new MockAdvisor1(1, new MockAdvice1());
-        Advisor advisor12 = new MockAdvisor1(1, new MockAdvice2());
-        Advisor advisor21 = new MockAdvisor1(2, new MockAdvice1());
-        Advisor advisor22 = new MockAdvisor1(2, new MockAdvice2());
+        Advisor advisor11 = new MockAdvisor(1, new MockAdvice1());
+        Advisor advisor12 = new MockAdvisor(1, new MockAdvice2());
+        Advisor advisor21 = new MockAdvisor(2, new MockAdvice1());
+        Advisor advisor22 = new MockAdvisor(2, new MockAdvice2());
         assertThat(OrderUtil.higherThan(advisor11, advisor11)).isFalse();
         assertThat(OrderUtil.higherThan(advisor11, advisor12)).isTrue();
         assertThat(OrderUtil.higherThan(advisor12, advisor21)).isTrue();
