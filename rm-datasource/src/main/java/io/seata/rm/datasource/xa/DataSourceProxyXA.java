@@ -59,6 +59,17 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         if (!RootContext.inGlobalTransaction()) {
             return connection;
         }
+        return getConnectionProxyXA(connection);
+
+    }
+
+    @Override
+    protected Connection getConnectionProxyXA() throws SQLException {
+        Connection connection = dataSource.getConnection();
+        return getConnectionProxyXA(connection);
+    }
+
+    private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection;
         if (connection instanceof PooledConnection) {
             physicalConn = ((PooledConnection)connection).getConnection();
@@ -67,6 +78,6 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
-
     }
+
 }
