@@ -18,6 +18,7 @@ package io.seata.rm.xa;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
+import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.Assertions;
@@ -43,6 +44,7 @@ public class DataSourceProxyXATest {
     @Test
     public void testGetConnection() throws SQLException {
         // Mock
+        RootContext.bind("test");
         Driver driver = Mockito.mock(Driver.class);
         JDBC4MySQLConnection connection = Mockito.mock(JDBC4MySQLConnection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
