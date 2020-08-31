@@ -59,10 +59,6 @@ public class XAUtils {
             }
         }
 
-        if (physicalConn instanceof ConnectionProxy) {
-            physicalConn = ((ConnectionProxy)physicalConn).getRawObject();
-        }
-
         if (JdbcUtils.MYSQL.equals(dbType) || JdbcUtils.MARIADB.equals(dbType)) {
             return MySqlUtils.createXAConnection(driver, physicalConn);
         }

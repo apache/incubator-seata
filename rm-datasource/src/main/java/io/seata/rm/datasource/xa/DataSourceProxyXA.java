@@ -56,10 +56,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     }
 
     protected Connection getConnectionProxy(Connection connection) throws SQLException {
-        Connection physicalConn = connection;
-        if (connection instanceof PooledConnection) {
-            physicalConn = ((PooledConnection)connection).getConnection();
-        }
+        Connection physicalConn = connection.unwrap(Connection.class);
         XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
