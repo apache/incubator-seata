@@ -21,7 +21,6 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
 
 import javax.sql.DataSource;
-import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
