@@ -34,8 +34,15 @@ import java.sql.SQLException;
  */
 public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
+    private boolean areDruid;
+
     public DataSourceProxyXA(DataSource dataSource) {
         this(dataSource, DEFAULT_RESOURCE_GROUP_ID);
+        try {
+            Class.forName("com.alibaba.druid.proxy.jdbc.ConnectionProxy");
+            areDruid = true;
+        } catch (Exception e) {
+        }
     }
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
@@ -61,8 +68,10 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         if (connection instanceof PooledConnection) {
             physicalConn = ((PooledConnection)connection).getConnection();
         }
-        if (physicalConn instanceof ConnectionProxy) {
-            physicalConn = ((ConnectionProxy)physicalConn).getRawObject();
+        if (areDruid) {
+            if (physicalConn instanceof ConnectionProxy) {
+                physicalConn = ((ConnectionProxy)physicalConn).getRawObject();
+            }
         }
         XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
         ConnectionProxyXA connectionProxyXA =
