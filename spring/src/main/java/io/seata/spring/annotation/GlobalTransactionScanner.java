@@ -287,7 +287,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
             // If current otherAdvisor is lower or equals than seataAdvisor
             if (OrderUtil.lowerOrEquals(otherAdvisor, seataAdvisor)) {
-                // If isTransaction && must be lower than transactional, reset seataOrder to lower order, and returns i+1
+                // If isTransactionInterceptor && must be lower than transactional, reset seataOrder to lower order, and returns i+1
                 if (isTransactionInterceptor && mustBeLowerThanTransactional) {
                     int transactionOrder = OrderUtil.getOrder(otherAdvisor);
                     int newSeataOrder = OrderUtil.lower(transactionOrder, 1);
@@ -302,7 +302,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return i;
                 }
             } else {
-                // If isTransaction && must be higher than transactional, reset seataOrder to higher order, and returns current i.
+                // If isTransactionInterceptor && must be higher than transactional, reset seataOrder to higher order, and returns current i.
                 if (isTransactionInterceptor && mustBeHigherThanTransactional) {
                     int otherOrder = OrderUtil.getOrder(otherAdvisor);
                     int newSeataOrder = OrderUtil.higher(otherOrder, 1);
