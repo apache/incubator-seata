@@ -78,6 +78,7 @@ public interface DefaultValues {
 
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
+    int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
     String DEFAULT_TX_GROUP = "my_test_tx_group";
     String DEFAULT_TC_CLUSTER = "default";
