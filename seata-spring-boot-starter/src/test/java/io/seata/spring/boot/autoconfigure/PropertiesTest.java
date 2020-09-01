@@ -18,7 +18,6 @@ package io.seata.spring.boot.autoconfigure;
 import java.util.Map;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
@@ -46,8 +45,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
@@ -68,12 +65,6 @@ public class PropertiesTest {
     @BeforeAll
     public static void initContext() {
         context = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
-
-        context.registerBeanDefinition("springCloudAlibabaConfiguration", BeanDefinitionBuilder.genericBeanDefinition(SpringCloudAlibabaConfiguration.class).getBeanDefinition());
-
-        BeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SeataProperties.class).getBeanDefinition();
-        beanDefinition.setPrimary(true);
-        context.registerBeanDefinition("seataProperties", beanDefinition);
     }
 
     @Test

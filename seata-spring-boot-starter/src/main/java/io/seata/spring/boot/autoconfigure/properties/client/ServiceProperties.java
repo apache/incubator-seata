@@ -25,7 +25,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
@@ -39,7 +38,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX
  */
 @Component
 @ConfigurationProperties(prefix = SERVICE_PREFIX)
-@EnableConfigurationProperties({SeataProperties.class, RegistryProperties.class})
 public class ServiceProperties implements InitializingBean {
     /**
      * vgroup->rgroup

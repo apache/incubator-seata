@@ -91,24 +91,6 @@
       "defaultValue": true
     },
     {
-      "name": "seata.client.tm.degrade-check",
-      "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
-      "defaultValue": false
-    },
-    {
-      "name": "seata.client.tm.degrade-check-period",
-      "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
-      "defaultValue": 2000
-    },
-    {
-      "name": "seata.client.tm.degrade-check-allow-times",
-      "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
-      "defaultValue": 10
-    },
-    {
       "name": "seata.client.tm.commit-retry-count",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
@@ -125,6 +107,24 @@
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
       "defaultValue": 60000
+    },
+    {
+      "name": "seata.client.tm.degrade-check",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.client.tm.degrade-check-period",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": 2000
+    },
+    {
+      "name": "seata.client.tm.degrade-check-allow-times",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": 10
     },
     {
       "name": "seata.client.undo.data-validation",
