@@ -73,7 +73,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                     LOGGER.info(xaBranchXid + " was rolled back.");
                     return BranchStatus.PhaseTwo_Rollbacked;
                 }
-            }catch (XAException | SQLException sqle) {
+            } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
                     if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
                         if (committed) {
