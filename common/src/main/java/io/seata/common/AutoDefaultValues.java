@@ -64,6 +64,6 @@ class AutoDefaultValues {
     }
 
     private static boolean hasProtostuff() {
-        return ClassUtils.isPresent("io.protostuff.Schema");
+        return ClassUtils.isPresent("io.protostuff.ProtostuffIOUtil");
     }
 }
