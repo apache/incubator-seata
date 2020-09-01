@@ -73,7 +73,16 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                     LOGGER.info(xaBranchXid + " was rolled back.");
                     return BranchStatus.PhaseTwo_Rollbacked;
                 }
-            } catch (XAException | SQLException sqle) {
+            }catch (XAException | SQLException sqle) {
+                if (sqle instanceof XAException) {
+                    if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
+                        if (committed) {
+                            return BranchStatus.PhaseTwo_Committed;
+                        } else {
+                            return BranchStatus.PhaseTwo_Rollbacked;
+                        }
+                    }
+                }
                 if (committed) {
                     LOGGER.info(xaBranchXid + " commit failed since " + sqle.getMessage(), sqle);
                     // FIXME: case of PhaseTwo_CommitFailed_Unretryable
