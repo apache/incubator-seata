@@ -81,6 +81,7 @@ public class DefaultValues {
 
     public static final String DEFAULT_TX_GROUP = "my_test_tx_group";
     public static final String DEFAULT_TC_CLUSTER = "default";
+    public static final String DEFAULT_TC_APPLICATION_NAME = "seata-server";
     public static final String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
     public static final String DEFAULT_DATA_SOURCE_PROXY_MODE = "AT";

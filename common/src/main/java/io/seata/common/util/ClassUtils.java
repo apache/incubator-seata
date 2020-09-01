@@ -23,8 +23,6 @@ public class ClassUtils {
     private ClassUtils() {
     }
 
-    //region primary utils
-
     public static ClassLoader getDefaultClassLoader() {
         ClassLoader cl = null;
 
@@ -89,6 +87,4 @@ public class ClassUtils {
     public static boolean isPresent(String className) {
         return isPresent(className, null);
     }
-
-    //endregion
 }

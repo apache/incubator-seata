@@ -86,25 +86,20 @@ seata:
     load-balance-virtual-nodes: 10
     consul:
       server-addr: 127.0.0.1:8500
-      cluster: default
     etcd3:
       server-addr: http://127.0.0.1:2379
-      cluster: default
     eureka:
-      application: seata-server
       weight: 1
       service-url: http://127.0.0.1:8761/eureka
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
-      cluster: default
       namespace: ""
       username: ""
       password: ""
     redis:
       server-addr: 127.0.0.1:6379
-      cluster: default
       db: 0
       password: ""
       timeout: 0
@@ -113,12 +108,10 @@ seata:
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
-      cluster: default
       address-wait-time: 3000
       application: seata-server
     zk:
       server-addr: 127.0.0.1:2181
-      cluster: default
       session-timeout: 6000
       connect-timeout: 2000
       username: ""
