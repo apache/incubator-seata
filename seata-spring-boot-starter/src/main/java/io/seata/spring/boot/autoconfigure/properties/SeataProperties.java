@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
  */
 @Component
 @ConfigurationProperties(prefix = SEATA_PREFIX)
-@EnableConfigurationProperties({SpringCloudAlibabaConfiguration.class})
+@EnableConfigurationProperties(SpringCloudAlibabaConfiguration.class)
 public class SeataProperties {
     /**
      * whether enable auto configuration
