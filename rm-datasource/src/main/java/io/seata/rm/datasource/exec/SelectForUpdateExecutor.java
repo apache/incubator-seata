@@ -25,6 +25,7 @@ import java.util.List;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLSelectRecognizer;
@@ -96,13 +97,11 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                         break;
                     }
 
-                    if (RootContext.inGlobalTransaction()) {
-                        //do as usual
+                    if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
+                        // do as usual
+                        // in @GlobalLock env, don't need to append key eithor,
+                        // but check lock hear, do the same thing as @GlobalTransactional env
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
-                    } else if (RootContext.requireGlobalLock()) {
-                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
-                        // not reentrant)
-                        statementProxy.getConnectionProxy().appendLockKey(lockKeys);
                     } else {
                         throw new RuntimeException("Unknown situation!");
                     }
@@ -113,7 +112,13 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         conn.rollback();
                     }
-                    lockRetryController.sleep(lce);
+
+                    // retry hear only when the config is true
+                    if (LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict()) {
+                        lockRetryController.sleep(lce);
+                    } else {
+                        throw new LockWaitTimeoutException("Global lock wait timeout", lce);
+                    }
                 }
             }
         } finally {

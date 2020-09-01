@@ -141,34 +141,4 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws SQLException the sql exception
      */
     protected abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
-
-    private static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
-        private final ConnectionProxy connection;
-
-        LockRetryPolicy(final ConnectionProxy connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public <T> T execute(Callable<T> callable) throws Exception {
-            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
-                return doRetryOnLockConflict(callable);
-            } else {
-                return callable.call();
-            }
-        }
-
-        @Override
-        protected void onException(Exception e) throws Exception {
-            ConnectionContext context = connection.getContext();
-            //UndoItems can't use the Set collection class to prevent ABA
-            context.getUndoItems().clear();
-            context.getLockKeysBuffer().clear();
-            connection.getTargetConnection().rollback();
-        }
-
-        public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
-            return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
-        }
-    }
 }
