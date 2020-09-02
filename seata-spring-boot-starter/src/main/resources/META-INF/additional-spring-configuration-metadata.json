@@ -9,6 +9,12 @@
       "defaultValue": "AT"
     },
     {
+      "name": "seata.client.tm.default-global-transaction-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": 60000
+    },
+    {
       "name": "seata.saga.enabled",
       "type": "java.lang.Boolean",
       "description": "Whether enable saga auto configuration.",
