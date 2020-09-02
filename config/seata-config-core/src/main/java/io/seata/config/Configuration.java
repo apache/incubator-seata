@@ -33,7 +33,7 @@ public interface Configuration {
      * @param timeoutMills the timeout mills
      * @return the short
      */
-    short getShort(String dataId, int defaultValue, long timeoutMills);
+    short getShort(String dataId, short defaultValue, long timeoutMills);
 
     /**
      * Gets short.
@@ -159,6 +159,33 @@ public interface Configuration {
      * @return the boolean
      */
     boolean getBoolean(String dataId);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the config
+     */
+    String[] getArray(String dataId, String[] defaultValue, long timeoutMills);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @return the config
+     */
+    String[] getArray(String dataId, String[] defaultValue);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId the data id
+     * @return the config
+     */
+    String[] getArray(String dataId);
 
     /**
      * Gets config.
