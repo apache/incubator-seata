@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSON;
 
 import io.seata.common.Constants;
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
@@ -43,7 +42,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     /**
      * TCC resource cache
      */
-    private Map<String, Resource> tccResourceCache = new ConcurrentHashMap<String, Resource>();
+    private Map<String, Resource> tccResourceCache = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new Tcc resource manager.
@@ -60,9 +59,6 @@ public class TCCResourceManager extends AbstractResourceManager {
     public void registerResource(Resource resource) {
         TCCResource tccResource = (TCCResource)resource;
         tccResourceCache.put(tccResource.getResourceId(), tccResource);
-        synchronized (RESOURCE_LOCK) {
-            RESOURCE_LOCK.notifyAll();
-        }
         super.registerResource(tccResource);
     }
 
@@ -87,34 +83,34 @@ public class TCCResourceManager extends AbstractResourceManager {
                                      String applicationData) throws TransactionException {
         TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
         if (tccResource == null) {
-            throw new ShouldNeverHappenException("TCC resource is not exist, resourceId:" + resourceId);
+            throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }
         Object targetTCCBean = tccResource.getTargetBean();
         Method commitMethod = tccResource.getCommitMethod();
         if (targetTCCBean == null || commitMethod == null) {
-            throw new ShouldNeverHappenException("TCC resource is not available, resourceId:" + resourceId);
+            throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
         try {
-            boolean result = false;
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
             Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
-            LOGGER.info(
-                "TCC resource commit result :" + ret + ", xid:" + xid + ", branchId:" + branchId + ", resourceId:"
-                    + resourceId);
+            LOGGER.info("TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
+            boolean result;
             if (ret != null) {
                 if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult)ret).isSuccess();
                 } else {
                     result = (boolean)ret;
                 }
+            } else {
+                result = true;
             }
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, t);
-            throw new FrameworkException(t, msg);
+            return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
     }
 
@@ -134,34 +130,34 @@ public class TCCResourceManager extends AbstractResourceManager {
                                        String applicationData) throws TransactionException {
         TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
         if (tccResource == null) {
-            throw new ShouldNeverHappenException("TCC resource is not exist, resourceId:" + resourceId);
+            throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }
         Object targetTCCBean = tccResource.getTargetBean();
         Method rollbackMethod = tccResource.getRollbackMethod();
         if (targetTCCBean == null || rollbackMethod == null) {
-            throw new ShouldNeverHappenException("TCC resource is not available, resourceId:" + resourceId);
+            throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
         try {
-            boolean result = false;
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
             Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
-            LOGGER.info(
-                "TCC resource rollback result :" + ret + ", xid:" + xid + ", branchId:" + branchId + ", resourceId:"
-                    + resourceId);
+            LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
+            boolean result;
             if (ret != null) {
                 if (ret instanceof TwoPhaseResult) {
                     result = ((TwoPhaseResult)ret).isSuccess();
                 } else {
                     result = (boolean)ret;
                 }
+            } else {
+                result = true;
             }
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, t);
-            throw new FrameworkException(t, msg);
+            return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
     }
 

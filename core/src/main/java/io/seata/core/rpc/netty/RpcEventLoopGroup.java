@@ -15,16 +15,16 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.concurrent.ThreadFactory;
-
 import io.netty.channel.EventLoopGroup;
+
+import java.util.concurrent.ThreadFactory;
 
 /**
  * The interface Rpc event loop group.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
+ * @author slievrly
  */
+@Deprecated
 public interface RpcEventLoopGroup {
 
     // EventLoopGroup WORKER_GROUP = new RpcEventLoopGroup() {

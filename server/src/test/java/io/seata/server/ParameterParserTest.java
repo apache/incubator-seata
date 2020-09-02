@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
  * The type parameter parser test
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/05/30
  */
 public class ParameterParserTest {
     private static ParameterParser parameterParser = null;

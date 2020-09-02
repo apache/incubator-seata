@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import io.seata.rm.datasource.DataSourceProxy;
+import java.sql.Connection;
 
 /**
  * The type Table meta cache.
@@ -28,17 +28,19 @@ public interface TableMetaCache {
     /**
      * Gets table meta.
      *
-     * @param dataSourceProxy the druid data source
+     * @param connection
      * @param tableName       the table name
+     * @param resourceId
      * @return the table meta
      */
-    TableMeta getTableMeta(DataSourceProxy dataSourceProxy, String tableName);
+    TableMeta getTableMeta(Connection connection, String tableName, String resourceId);
 
     /**
      * Clear the table meta cache
      *
-     * @param dataSourceProxy
+     * @param connection
+     * @param resourceId
      */
-    void refresh(DataSourceProxy dataSourceProxy);
+    void refresh(Connection connection, String resourceId);
 
 }

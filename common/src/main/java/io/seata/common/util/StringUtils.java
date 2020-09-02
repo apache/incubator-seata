@@ -15,6 +15,9 @@
  */
 package io.seata.common.util;
 
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -23,13 +26,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-import io.seata.common.Constants;
-import io.seata.common.exception.ShouldNeverHappenException;
-
 /**
  * The type String utils.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author Geng Zhang
  */
 public class StringUtils {
@@ -41,7 +41,7 @@ public class StringUtils {
      * empty string
      */
     public static final String EMPTY = "";
-    
+
     /**
      * Is empty boolean.
      *
@@ -133,7 +133,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
@@ -155,7 +155,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
@@ -220,11 +220,56 @@ public class StringUtils {
             sb.append("=");
             try {
                 Object f = field.get(obj);
-                sb.append(toString(f));
+                if (f.getClass() == obj.getClass()) {
+                    sb.append(f.toString());
+                } else {
+                    sb.append(toString(f));
+                }
             } catch (Exception e) {
             }
             sb.append(";");
         }
         return sb.toString();
+    }
+
+    /**
+     * Trim string to null if empty("").
+     *
+     * @param str the String to be trimmed, may be null
+     * @return the trimmed String
+     */
+    public static String trimToNull(final String str) {
+        final String ts = trim(str);
+        return isEmpty(ts) ? null : ts;
+    }
+
+    /**
+     * Trim string, or null if string is null.
+     *
+     * @param str the String to be trimmed, may be null
+     * @return the trimmed string, {@code null} if null String input
+     */
+    public static String trim(final String str) {
+        return str == null ? null : str.trim();
+    }
+
+    /**
+     * Checks if a CharSequence is empty ("") or null.
+     *
+     * @param cs the CharSequence to check, may be null
+     * @return {@code true} if the CharSequence is empty or null
+     */
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+
+    /**
+     * Checks if a CharSequence is not empty ("") and not null.
+     *
+     * @param cs the CharSequence to check, may be null
+     * @return {@code true} if the CharSequence is not empty and not null
+     */
+    public static boolean isNotEmpty(final CharSequence cs) {
+        return !isEmpty(cs);
     }
 }

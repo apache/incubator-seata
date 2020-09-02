@@ -15,19 +15,28 @@
  */
 package io.seata.saga.engine.config;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
-import io.seata.saga.engine.store.db.DbStateLangStore;
+import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
+import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * DbStateMachineConfig
@@ -38,24 +47,45 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbStateMachineConfig.class);
 
-    private static final int          DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
-
-    private DataSource                dataSource;
-    private String                    applicationId;
-    private String                    txServiceGroup;
-    private String                    tablePrefix           = "seata_";
-    private String                    dbType;
-    private int                       transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
+    private DataSource dataSource;
+    private String applicationId;
+    private String txServiceGroup;
+    private String tablePrefix = "seata_";
+    private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
+    private boolean rmReportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+    private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+    private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
+
+
+    public DbStateMachineConfig() {
+        try {
+            Configuration configuration = ConfigurationFactory.getInstance();
+            if (configuration != null) {
+                this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+                this.sagaBranchRegisterEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
+                this.sagaJsonParser = configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER);
+                this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
+                this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Load SEATA configuration failed, use default configuration instead.", e);
+        }
+    }
+
+    public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
+        try (Connection con = dataSource.getConnection()) {
+            DatabaseMetaData metaData = con.getMetaData();
+            return metaData.getDatabaseProductName();
+        }
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        super.afterPropertiesSet();
-
         dbType = getDbTypeFromDataSource(dataSource);
 
-        if(getStateLogStore() == null){
+        if (getStateLogStore() == null) {
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
             dbStateLogStore.setDataSource(dataSource);
             dbStateLogStore.setTablePrefix(tablePrefix);
@@ -63,9 +93,15 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
             dbStateLogStore.setSeqGenerator(getSeqGenerator());
 
-            if(sagaTransactionalTemplate == null){
-                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
-                defaultSagaTransactionalTemplate.setTimeout(transOperationTimeout);
+            if (StringUtils.hasLength(sagaJsonParser)) {
+                ParamsSerializer paramsSerializer = new ParamsSerializer();
+                paramsSerializer.setJsonParserName(sagaJsonParser);
+                dbStateLogStore.setParamsSerializer(paramsSerializer);
+            }
+
+            if (sagaTransactionalTemplate == null) {
+                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate
+                    = new DefaultSagaTransactionalTemplate();
                 defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
                 defaultSagaTransactionalTemplate.setApplicationId(applicationId);
                 defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
@@ -78,7 +114,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             setStateLogStore(dbStateLogStore);
         }
 
-        if(getStateLangStore() == null){
+        if (getStateLangStore() == null) {
             DbStateLangStore dbStateLangStore = new DbStateLangStore();
             dbStateLangStore.setDataSource(dataSource);
             dbStateLangStore.setTablePrefix(tablePrefix);
@@ -86,29 +122,14 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
             setStateLangStore(dbStateLangStore);
         }
+
+        super.afterPropertiesSet();//must execute after StateLangStore initialized
     }
 
     @Override
     public void destroy() throws Exception {
-        if((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)){
-            ((DisposableBean)sagaTransactionalTemplate).destroy();
-        }
-    }
-
-    public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
-            DatabaseMetaData metaData = con.getMetaData();
-            return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: " + e.getMessage(), e);
-                }
-            }
+        if ((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)) {
+            ((DisposableBean) sagaTransactionalTemplate).destroy();
         }
     }
 
@@ -156,11 +177,27 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         this.dbType = dbType;
     }
 
-    public int getTransOperationTimeout() {
-        return transOperationTimeout;
+    public boolean isRmReportSuccessEnable() {
+        return rmReportSuccessEnable;
     }
 
-    public void setTransOperationTimeout(int transOperationTimeout) {
-        this.transOperationTimeout = transOperationTimeout;
+    public boolean isSagaBranchRegisterEnable() {
+        return sagaBranchRegisterEnable;
+    }
+
+    public void setSagaBranchRegisterEnable(boolean sagaBranchRegisterEnable) {
+        this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
+    }
+
+    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
+        this.rmReportSuccessEnable = rmReportSuccessEnable;
+    }
+
+    public String getSagaJsonParser() {
+        return sagaJsonParser;
+    }
+
+    public void setSagaJsonParser(String sagaJsonParser) {
+        this.sagaJsonParser = sagaJsonParser;
     }
 }

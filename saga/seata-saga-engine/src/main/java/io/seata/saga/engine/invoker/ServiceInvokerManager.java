@@ -15,15 +15,13 @@
  */
 package io.seata.saga.engine.invoker;
 
-import io.seata.saga.engine.invoker.impl.SpringBeanServiceInvoker;
-import io.seata.saga.statelang.domain.DomainConstants;
-import org.springframework.util.StringUtils;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.saga.statelang.domain.DomainConstants;
+import org.springframework.util.StringUtils;
+
 /**
- *
  * Service Invoker Manager
  *
  * @author lorne.cl
@@ -32,18 +30,14 @@ public class ServiceInvokerManager {
 
     private Map<String, ServiceInvoker> serviceInvokerMap = new ConcurrentHashMap<>();
 
-    public ServiceInvokerManager(){
-        serviceInvokerMap.put(DomainConstants.SERVICE_TYPE_SPRING_BEAN, new SpringBeanServiceInvoker());
-    }
-
-    public ServiceInvoker getServiceInvoker(String serviceType){
-        if(StringUtils.isEmpty(serviceType)){
+    public ServiceInvoker getServiceInvoker(String serviceType) {
+        if (StringUtils.isEmpty(serviceType)) {
             serviceType = DomainConstants.SERVICE_TYPE_SPRING_BEAN;
         }
         return serviceInvokerMap.get(serviceType);
     }
 
-    public void putServiceInvoker(String serviceType, ServiceInvoker serviceInvoker){
+    public void putServiceInvoker(String serviceType, ServiceInvoker serviceInvoker) {
         serviceInvokerMap.put(serviceType, serviceInvoker);
     }
 

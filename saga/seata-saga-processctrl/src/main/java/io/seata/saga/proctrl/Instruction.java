@@ -23,4 +23,5 @@ package io.seata.saga.proctrl;
  * @author lorne.cl
  */
 public interface Instruction {
+
 }

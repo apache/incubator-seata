@@ -24,7 +24,6 @@ import static io.netty.buffer.Unpooled.buffer;
  * @author kaitithoma
  * @author Danaykap
  * 
- * @date 2019/05/13
  *
  */
 

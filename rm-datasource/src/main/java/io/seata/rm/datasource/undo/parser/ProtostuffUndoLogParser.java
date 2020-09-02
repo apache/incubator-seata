@@ -16,6 +16,8 @@
 package io.seata.rm.datasource.undo.parser;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.sql.Timestamp;
 
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
@@ -28,6 +30,7 @@ import io.protostuff.runtime.DefaultIdStrategy;
 import io.protostuff.runtime.Delegate;
 import io.protostuff.runtime.RuntimeEnv;
 import io.protostuff.runtime.RuntimeSchema;
+import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -38,20 +41,21 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  * @author Geng Zhang
  */
 @LoadLevel(name = ProtostuffUndoLogParser.NAME)
-public class ProtostuffUndoLogParser implements UndoLogParser {
+public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "protostuff";
 
-    private final static DefaultIdStrategy ID_STRATEGY = (DefaultIdStrategy)RuntimeEnv.ID_STRATEGY;
+    private final DefaultIdStrategy idStrategy = (DefaultIdStrategy) RuntimeEnv.ID_STRATEGY;
 
-    static {
-        ID_STRATEGY.registerDelegate(new DateDelegate());
-        ID_STRATEGY.registerDelegate(new TimestampDelegate());
-        ID_STRATEGY.registerDelegate(new SqlDateDelegate());
-        ID_STRATEGY.registerDelegate(new TimeDelegate());
+    private final Schema<BranchUndoLog> schema = RuntimeSchema.getSchema(BranchUndoLog.class, idStrategy);
+
+    @Override
+    public void init() {
+        idStrategy.registerDelegate(new DateDelegate());
+        idStrategy.registerDelegate(new TimestampDelegate());
+        idStrategy.registerDelegate(new SqlDateDelegate());
+        idStrategy.registerDelegate(new TimeDelegate());
     }
-
-    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class);
 
     @Override
     public String getName() {
@@ -60,7 +64,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] getDefaultContent() {
-        return new byte[0];
+        return encode(new BranchUndoLog());
     }
 
     @Override
@@ -69,7 +73,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         LinkedBuffer buffer = LinkedBuffer.allocate(512);
         // ser
         try {
-            return ProtostuffIOUtil.toByteArray(branchUndoLog, SCHEMA, buffer);
+            return ProtostuffIOUtil.toByteArray(branchUndoLog, schema, buffer);
         } finally {
             buffer.clear();
         }
@@ -80,8 +84,8 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         if (bytes.length == 0) {
             return new BranchUndoLog();
         }
-        BranchUndoLog fooParsed = SCHEMA.newMessage();
-        ProtostuffIOUtil.mergeFrom(bytes, fooParsed, SCHEMA);
+        BranchUndoLog fooParsed = schema.newMessage();
+        ProtostuffIOUtil.mergeFrom(bytes, fooParsed, schema);
         return fooParsed;
     }
 
@@ -94,7 +98,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public FieldType getFieldType() {
-            return FieldType.FIXED64;
+            return FieldType.BYTES;
         }
 
         @Override
@@ -104,17 +108,27 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
         @Override
         public java.sql.Timestamp readFrom(Input input) throws IOException {
-            return new java.sql.Timestamp(input.readFixed64());
+            ByteBuffer buffer = input.readByteBuffer();
+            long time = buffer.getLong();
+            int nanos = buffer.getInt();
+            buffer.flip();
+            java.sql.Timestamp timestamp = new Timestamp(time);
+            timestamp.setNanos(nanos);
+            return timestamp;
         }
 
         @Override
         public void writeTo(Output output, int number, java.sql.Timestamp value, boolean repeated) throws IOException {
-            output.writeFixed64(number, value.getTime(), repeated);
+            ByteBuffer buffer = ByteBuffer.allocate(12);
+            buffer.putLong(value.getTime());
+            buffer.putInt(value.getNanos());
+            buffer.flip();
+            output.writeBytes(number, buffer, repeated);
         }
 
         @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
-            output.writeFixed64(number, input.readFixed64(), repeated);
+            output.writeBytes(number, input.readByteBuffer(), repeated);
         }
     }
 

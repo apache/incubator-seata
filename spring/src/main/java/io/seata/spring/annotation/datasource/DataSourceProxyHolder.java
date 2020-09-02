@@ -15,20 +15,21 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.rm.datasource.DataSourceProxy;
-
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.core.model.BranchType;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.xa.DataSourceProxyXA;
 
 /**
  * the type data source proxy holder
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/08/23
  */
 public class DataSourceProxyHolder {
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private ConcurrentHashMap<DataSource, DataSourceProxy> dataSourceProxyMap;
+    private ConcurrentHashMap<DataSource, DataSource> dataSourceProxyMap;
 
     private DataSourceProxyHolder() {
         dataSourceProxyMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
@@ -38,7 +39,7 @@ public class DataSourceProxyHolder {
      * the type holder
      */
     private static class Holder {
-        private static DataSourceProxyHolder INSTANCE;
+        private static final DataSourceProxyHolder INSTANCE;
 
         static {
             INSTANCE = new DataSourceProxyHolder();
@@ -58,11 +59,13 @@ public class DataSourceProxyHolder {
     /**
      * Put dataSource
      *
-     * @param dataSource
+     * @param originalDataSource  the original data source
+     * @param dataSourceProxyMode the data source proxy mode
      * @return dataSourceProxy
      */
-    public DataSourceProxy putDataSource(DataSource dataSource) {
-        return this.dataSourceProxyMap.computeIfAbsent(dataSource, DataSourceProxy::new);
+    public DataSource putDataSource(DataSource originalDataSource, String dataSourceProxyMode) {
+        return this.dataSourceProxyMap.computeIfAbsent(originalDataSource,
+                BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode) ? DataSourceProxyXA::new : DataSourceProxy::new);
     }
 
     /**
@@ -71,7 +74,7 @@ public class DataSourceProxyHolder {
      * @param dataSource
      * @return dataSourceProxy
      */
-    public DataSourceProxy getDataSourceProxy(DataSource dataSource) {
+    public DataSource getDataSourceProxy(DataSource dataSource) {
         return this.dataSourceProxyMap.get(dataSource);
     }
 

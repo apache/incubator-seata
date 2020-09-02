@@ -1,0 +1,102 @@
+transport {
+  # tcp, unix-domain-socket
+  type = "TCP"
+  #NIO, NATIVE
+  server = "NIO"
+  #enable heartbeat
+  heartbeat = true
+  # the client batch send request enable
+  enableClientBatchSendRequest = false
+  #thread factory for netty
+  threadFactory {
+    bossThreadPrefix = "NettyBoss"
+    workerThreadPrefix = "NettyServerNIOWorker"
+    serverExecutorThreadPrefix = "NettyServerBizHandler"
+    shareBossWorker = false
+    clientSelectorThreadPrefix = "NettyClientSelector"
+    clientSelectorThreadSize = 1
+    clientWorkerThreadPrefix = "NettyClientWorkerThread"
+    # netty boss thread size
+    bossThreadSize = 1
+    #auto default pin or 8
+    workerThreadSize = "default"
+  }
+  shutdown {
+    # when destroy server, wait seconds
+    wait = 3
+  }
+  serialization = "seata"
+  compressor = "none"
+}
+
+## transaction log store, only used in server side
+store {
+  ## store mode: file、db
+  mode = "file"
+  ## file store property
+  file {
+    ## store location dir
+    dir = "sessionStore"
+    # branch session size , if exceeded first try compress lockkey, still exceeded throws exceptions
+    maxBranchSessionSize = 16384
+    # globe session size , if exceeded throws exceptions
+    maxGlobalSessionSize = 512
+    # file buffer size , if exceeded allocate new buffer
+    fileWriteBufferCacheSize = 16384
+    # when recover batch read size
+    sessionReloadReadSize = 100
+    # async, sync
+    flushDiskMode = async
+  }
+
+  ## database store property
+  db {
+    ## the implement of javax.sql.DataSource, such as DruidDataSource(druid)/BasicDataSource(dbcp) etc.
+    datasource = "druid"
+    ## mysql/oracle/postgresql/h2/oceanbase etc.
+    dbType = "mysql"
+    driverClassName = "com.mysql.jdbc.Driver"
+    url = "jdbc:mysql://127.0.0.1:3306/seata"
+    user = "mysql"
+    password = "mysql"
+    minConn = 5
+    maxConn = 30
+    globalTable = "global_table"
+    branchTable = "branch_table"
+    lockTable = "lock_table"
+    queryLimit = 100
+  }
+}
+## server configuration, only used in server side
+server {
+  recovery {
+    #schedule committing retry period in milliseconds
+    committingRetryPeriod = 1000
+    #schedule asyn committing retry period in milliseconds
+    asynCommittingRetryPeriod = 1000
+    #schedule rollbacking retry period in milliseconds
+    rollbackingRetryPeriod = 1000
+    #schedule timeout retry period in milliseconds
+    timeoutRetryPeriod = 1000
+  }
+  undo {
+    logSaveDays = 7
+    #schedule delete expired undo_log in milliseconds
+    logDeletePeriod = 86400000
+  }
+  #check auth
+  enableCheckAuth = true
+  #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
+  maxCommitRetryTimeout = "-1"
+  maxRollbackRetryTimeout = "-1"
+  rollbackRetryTimeoutUnlockEnable = false
+}
+
+## metrics configuration, only used in server side
+metrics {
+  enabled = false
+  registryType = "compact"
+  # multi exporters use comma divided
+  exporterList = "prometheus"
+  exporterPrometheusPort = 9898
+}

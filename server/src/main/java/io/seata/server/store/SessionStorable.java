@@ -18,7 +18,7 @@ package io.seata.server.store;
 /**
  * The interface Session storable.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface SessionStorable {
 

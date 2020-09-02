@@ -28,10 +28,12 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.HashMap;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  * The type Data compare utils.
@@ -39,6 +41,10 @@ import java.util.Objects;
  * @author Geng Zhang
  */
 public class DataCompareUtils {
+
+    private DataCompareUtils() {
+
+    }
 
     /**
      * Is field equals.
@@ -55,7 +61,7 @@ public class DataCompareUtils {
                 return Result.build(false);
             } else {
                 if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
-                    && f0.getType() == f1.getType()) {
+                        && f0.getType() == f1.getType()) {
                     if (f0.getValue() == null) {
                         return Result.build(f1.getValue() == null);
                     } else {
@@ -96,6 +102,12 @@ public class DataCompareUtils {
         if (f1Type == Types.DECIMAL && f1.getValue().getClass().equals(Integer.class)) {
             f1.setValue(new BigDecimal(f1.getValue().toString()));
         }
+        if (f0Type == Types.BIGINT && f0.getValue().getClass().equals(Integer.class)) {
+            f0.setValue(Long.parseLong(f0.getValue().toString()));
+        }
+        if (f1Type == Types.BIGINT && f1.getValue().getClass().equals(Integer.class)) {
+            f1.setValue(Long.parseLong(f1.getValue().toString()));
+        }
     }
 
     /**
@@ -113,7 +125,7 @@ public class DataCompareUtils {
                 return Result.build(false, null);
             }
             if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
-                && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
+                    && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
                 //when image is EmptyTableRecords, getTableMeta will throw an exception
                 if (CollectionUtils.isEmpty(beforeImage.getRows())) {
                     return Result.ok();
@@ -143,21 +155,23 @@ public class DataCompareUtils {
 
     private static Result<Boolean> compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         // old row to map
-        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPrimaryKeyOnlyName());
         // new row to map
-        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPrimaryKeyOnlyName());
         // compare data
-        for (String rowKey : oldRowsMap.keySet()) {
-            Map<String, Field> oldRow = oldRowsMap.get(rowKey);
-            Map<String, Field> newRow = newRowsMap.get(rowKey);
+        for (Map.Entry<String, Map<String, Field>> oldEntry : oldRowsMap.entrySet()) {
+            String key = oldEntry.getKey();
+            Map<String, Field> oldRow = oldEntry.getValue();
+            Map<String, Field> newRow = newRowsMap.get(key);
             if (newRow == null) {
-                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", rowKey);
+                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", key);
             }
-            for (String fieldName : oldRow.keySet()) {
-                Field oldField = oldRow.get(fieldName);
+            for (Map.Entry<String, Field> oldRowEntry : oldRow.entrySet()) {
+                String fieldName = oldRowEntry.getKey();
+                Field oldField = oldRowEntry.getValue();
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
-                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", rowKey, fieldName);
+                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
                 if (!oldEqualsNewFieldResult.getResult()) {
@@ -168,23 +182,33 @@ public class DataCompareUtils {
         return Result.ok();
     }
 
-    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, String primaryKey) {
+    public static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeyList) {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
+            //ensure the order of column
+            List<Field> rowFieldList = row.getFields().stream()
+                    .sorted(Comparator.comparing(Field::getName))
+                    .collect(Collectors.toList());
             // {uppercase fieldName : field}
             Map<String, Field> colsMap = new HashMap<>();
-            String rowKey = null;
-            for (int j = 0; j < row.getFields().size(); j++) {
-                Field field = row.getFields().get(j);
-                if (field.getName().equalsIgnoreCase(primaryKey)) {
-                    rowKey = String.valueOf(field.getValue());
+            StringBuilder rowKey = new StringBuilder();
+            boolean firstUnderline = false;
+            for (int j = 0; j < rowFieldList.size(); j++) {
+                Field field = rowFieldList.get(j);
+                if (primaryKeyList.stream().anyMatch(e -> field.getName().equals(e))) {
+                    if (firstUnderline && j > 0) {
+                        rowKey.append("_");
+                    }
+                    rowKey.append(String.valueOf(field.getValue()));
+                    firstUnderline = true;
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
             }
-            rowMap.put(rowKey, colsMap);
+            rowMap.put(rowKey.toString(), colsMap);
         }
         return rowMap;
     }
+
 
 }

@@ -22,9 +22,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * The interface Client message sender.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author slievrly
  */
+@Deprecated
 public interface ClientMessageSender {
     /**
      * Send msg with response object.

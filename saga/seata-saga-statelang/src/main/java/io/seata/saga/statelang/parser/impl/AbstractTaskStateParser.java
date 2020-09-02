@@ -15,19 +15,19 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.TaskState.ExceptionMatch;
 import io.seata.saga.statelang.domain.TaskState.Retry;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.ExceptionMatchImpl;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.RetryImpl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * AbstractTaskStateParser
+ *
  * @author lorne.cl
  */
 public abstract class AbstractTaskStateParser extends BaseStatePaser {
@@ -39,15 +39,16 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         Map<String, Object> nodeMap = (Map<String, Object>) node;
 
         state.setCompensateState((String) nodeMap.get("CompensateState"));
-        state.setForCompensation("true".equals(nodeMap.get("IsForCompensation")));
-        state.setForUpdate("true".equals(nodeMap.get("IsForUpdate")));
-        if("false".equals(nodeMap.get("IsPersist"))){
+        state.setForCompensation(Boolean.TRUE.equals(nodeMap.get("IsForCompensation")));
+        state.setForUpdate(Boolean.TRUE.equals(nodeMap.get("IsForUpdate")));
+        Object isPersist = nodeMap.get("IsPersist");
+        if (Boolean.FALSE.equals(isPersist)) {
             state.setPersist(false);
         }
 
-        Map<String, Object> retryMap = (Map<String, Object>) nodeMap.get("Retry");
-        if (retryMap != null) {
-            state.setRetry(parseRetry(retryMap));
+        List<Object> retryList = (List<Object>) nodeMap.get("Retry");
+        if (retryList != null) {
+            state.setRetry(parseRetry(retryList));
         }
 
         List<Object> catchList = (List<Object>) nodeMap.get("Catch");
@@ -71,12 +72,31 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         }
     }
 
-    protected Retry parseRetry(Map<String, Object> retryMap) {
-        RetryImpl retry = new RetryImpl();
-        retry.setIntervalSeconds(((Double) retryMap.get("IntervalSeconds")).intValue());
-        retry.setMaxAttempts(((Double) retryMap.get("MaxAttempts")).intValue());
-        retry.setBackoffRate(new BigDecimal((Double) retryMap.get("BackoffRate")));
-        return retry;
+    protected List<Retry> parseRetry(List<Object> retryList) {
+        if (retryList != null) {
+            List<Retry> retries = new ArrayList<>(retryList.size());
+            for (Object retryObj : retryList) {
+                Map<String, Object> retryMap = (Map<String, Object>) retryObj;
+                RetryImpl retry = new RetryImpl();
+                retry.setExceptions((List<String>) retryMap.get("Exceptions"));
+
+                Object intervalSeconds = retryMap.get("IntervalSeconds");
+                if (intervalSeconds != null && intervalSeconds instanceof Number) {
+                    retry.setIntervalSeconds(((Number) intervalSeconds).doubleValue());
+                }
+
+                retry.setMaxAttempts((Integer) retryMap.get("MaxAttempts"));
+
+                Object backoffRate = retryMap.get("BackoffRate");
+                if (backoffRate != null && backoffRate instanceof Number) {
+                    retry.setBackoffRate(((Number) backoffRate).doubleValue());
+                }
+
+                retries.add(retry);
+            }
+            return retries;
+        }
+        return new ArrayList<>(0);
     }
 
     protected List<ExceptionMatch> parseCatch(List<Object> catchList) {

@@ -15,8 +15,6 @@
  */
 package io.seata.metrics.exporter;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * Supported metrics exporter type
  *
@@ -26,13 +24,23 @@ public enum ExporterType {
     /**
      * Export metrics data to Prometheus
      */
-    Prometheus;
+    PROMETHEUS("prometheus");
+
+    private String name;
+
+    ExporterType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public static ExporterType getType(String name) {
-        if (Prometheus.name().equalsIgnoreCase(name)) {
-            return Prometheus;
+        if (PROMETHEUS.name().equalsIgnoreCase(name)) {
+            return PROMETHEUS;
         } else {
-            throw new NotSupportYetException("unsupported type:" + name);
+            throw new IllegalArgumentException("not support exporter type: " + name);
         }
     }
 }

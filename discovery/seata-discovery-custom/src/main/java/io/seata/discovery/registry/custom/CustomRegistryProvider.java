@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 public class CustomRegistryProvider implements RegistryProvider {
     private static final String FILE_CONFIG_KEY_PREFIX = "registry.custom.name";
 
-    private final String CUSTOM_NAME;
+    private final String customName;
 
     public CustomRegistryProvider() {
         String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(FILE_CONFIG_KEY_PREFIX);
@@ -43,11 +43,11 @@ public class CustomRegistryProvider implements RegistryProvider {
                 .anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
             throw new IllegalArgumentException(String.format("custom registry type name %s is not allowed", name));
         }
-        CUSTOM_NAME = name;
+        customName = name;
     }
 
     @Override
     public RegistryService provide() {
-        return EnhancedServiceLoader.load(RegistryProvider.class, CUSTOM_NAME).provide();
+        return EnhancedServiceLoader.load(RegistryProvider.class, customName).provide();
     }
 }

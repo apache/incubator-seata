@@ -20,7 +20,7 @@ package io.seata.core.exception;
  *
  * @author will
  */
-public class TmTransactionException extends GlobalTransactionException{
+public class TmTransactionException extends GlobalTransactionException {
 
     /**
      * Instantiates a new Transaction exception.
@@ -34,7 +34,7 @@ public class TmTransactionException extends GlobalTransactionException{
     /**
      * Instantiates a new Transaction exception.
      *
-     * @param code the code
+     * @param code  the code
      * @param cause the cause
      */
     public TmTransactionException(TransactionExceptionCode code, Throwable cause) {
@@ -53,7 +53,7 @@ public class TmTransactionException extends GlobalTransactionException{
     /**
      * Instantiates a new Transaction exception.
      *
-     * @param code the code
+     * @param code    the code
      * @param message the message
      */
     public TmTransactionException(TransactionExceptionCode code, String message) {
@@ -73,7 +73,7 @@ public class TmTransactionException extends GlobalTransactionException{
      * Instantiates a new Transaction exception.
      *
      * @param message the message
-     * @param cause the cause
+     * @param cause   the cause
      */
     public TmTransactionException(String message, Throwable cause) {
         super(message, cause);
@@ -82,9 +82,9 @@ public class TmTransactionException extends GlobalTransactionException{
     /**
      * Instantiates a new Transaction exception.
      *
-     * @param code the code
+     * @param code    the code
      * @param message the message
-     * @param cause the cause
+     * @param cause   the cause
      */
     public TmTransactionException(TransactionExceptionCode code, String message, Throwable cause) {
         super(code, message, cause);

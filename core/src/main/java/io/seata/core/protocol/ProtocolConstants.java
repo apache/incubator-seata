@@ -16,8 +16,8 @@
 package io.seata.core.protocol;
 
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.codec.CodecType;
-import io.seata.core.codec.CompressorType;
+import io.seata.core.serializer.SerializerType;
+import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ConfigurationKeys;
 
 /**
@@ -49,7 +49,7 @@ public class ProtocolConstants {
     /**
      * Message type: Request
      */
-    public static final byte MSGTYPE_RESQUEST = 0;
+    public static final byte MSGTYPE_RESQUEST_SYNC = 0;
     /**
      * Message type: Response
      */
@@ -73,10 +73,10 @@ public class ProtocolConstants {
     /**
      * Configured codec by user, default is SEATA
      * 
-     * @see CodecType#SEATA
+     * @see SerializerType#SEATA
      */
-    public static final byte CONFIGURED_CODEC = CodecType.getByName(ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, CodecType.SEATA.name())).getCode();
+    public static final byte CONFIGURED_CODEC = SerializerType.getByName(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name())).getCode();
 
     /**
      * Configured compressor by user, default is NONE

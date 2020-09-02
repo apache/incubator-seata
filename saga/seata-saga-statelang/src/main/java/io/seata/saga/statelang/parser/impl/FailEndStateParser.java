@@ -15,13 +15,15 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.FailEndState;
 import io.seata.saga.statelang.domain.impl.FailEndStateImpl;
 import io.seata.saga.statelang.parser.StateParser;
-import java.util.Map;
 
 /**
  * Failed end state parser
+ *
  * @author lorne.cl
  */
 public class FailEndStateParser extends BaseStatePaser implements StateParser<FailEndState> {

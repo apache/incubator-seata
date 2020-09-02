@@ -15,29 +15,29 @@
  */
 package io.seata.saga.engine.pcext;
 
-
-import io.seata.common.exception.FrameworkException;
-import io.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
-import io.seata.saga.engine.pcext.handlers.CompensationTriggerStateHandler;
-import io.seata.saga.engine.pcext.handlers.FailEndStateHandler;
-import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
-import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
-import io.seata.saga.engine.pcext.handlers.SucceedEndStateHandler;
-import io.seata.saga.engine.pcext.interceptors.ServiceTaskHandlerInterceptor;
-import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.handler.ProcessHandler;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.State;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.exception.FrameworkException;
+import io.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
+import io.seata.saga.engine.pcext.handlers.CompensationTriggerStateHandler;
+import io.seata.saga.engine.pcext.handlers.FailEndStateHandler;
+import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
+import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
+import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
+import io.seata.saga.engine.pcext.handlers.SucceedEndStateHandler;
+import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.proctrl.handler.ProcessHandler;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.State;
+
 /**
  * StateMachine ProcessHandler
  *
- * @see ProcessHandler
  * @author lorne.cl
+ * @see ProcessHandler
  */
 public class StateMachineProcessHandler implements ProcessHandler {
 
@@ -52,8 +52,8 @@ public class StateMachineProcessHandler implements ProcessHandler {
         StateHandler stateHandler = stateHandlers.get(stateType);
 
         List<StateHandlerInterceptor> interceptors = null;
-        if (stateHandler instanceof InterceptibleStateHandler) {
-            interceptors = ((InterceptibleStateHandler) stateHandler).getInterceptors();
+        if (stateHandler instanceof InterceptableStateHandler) {
+            interceptors = ((InterceptableStateHandler)stateHandler).getInterceptors();
         }
 
         List<StateHandlerInterceptor> executedInterceptors = null;
@@ -84,21 +84,16 @@ public class StateMachineProcessHandler implements ProcessHandler {
 
     }
 
-    public void initDefaultHandlers(){
-        if(stateHandlers.size() == 0){
+    public void initDefaultHandlers() {
+        if (stateHandlers.size() == 0) {
 
-            //ServiceTask
-            ServiceTaskStateHandler serviceTaskStateHandler = new ServiceTaskStateHandler();
-            List<StateHandlerInterceptor> stateHandlerInterceptors = new ArrayList<>(1);
-            stateHandlerInterceptors.add(new ServiceTaskHandlerInterceptor());
-            serviceTaskStateHandler.setInterceptors(stateHandlerInterceptors);
-            stateHandlers.put(DomainConstants.STATE_TYPE_SERVICE_TASK, serviceTaskStateHandler);
+            stateHandlers.put(DomainConstants.STATE_TYPE_SERVICE_TASK, new ServiceTaskStateHandler());
 
-            stateHandlers.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, serviceTaskStateHandler);
+            stateHandlers.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, new ScriptTaskStateHandler());
 
-            SubStateMachineHandler subStateMachineHandler = new SubStateMachineHandler();
-            subStateMachineHandler.setInterceptors(stateHandlerInterceptors);
-            stateHandlers.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, subStateMachineHandler);
+            stateHandlers.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, new ServiceTaskStateHandler());
+
+            stateHandlers.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, new SubStateMachineHandler());
 
             stateHandlers.put(DomainConstants.STATE_TYPE_CHOICE, new ChoiceStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateHandler());

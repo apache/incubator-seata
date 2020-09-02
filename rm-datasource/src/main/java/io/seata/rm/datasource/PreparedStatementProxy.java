@@ -19,9 +19,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import io.seata.rm.datasource.exec.ExecuteTemplate;
-import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.sqlparser.ParametersHolder;
 
 /**
  * The type Prepared statement proxy.
@@ -32,7 +33,7 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy
     implements PreparedStatement, ParametersHolder {
 
     @Override
-    public ArrayList<Object>[] getParameters() {
+    public Map<Integer,ArrayList<Object>> getParameters() {
         return parameters;
     }
 
@@ -51,31 +52,16 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy
 
     @Override
     public boolean execute() throws SQLException {
-        return ExecuteTemplate.execute(this, new StatementCallback<Boolean, PreparedStatement>() {
-            @Override
-            public Boolean execute(PreparedStatement statement, Object... args) throws SQLException {
-                return statement.execute();
-            }
-        });
+        return ExecuteTemplate.execute(this, (statement, args) -> statement.execute());
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return ExecuteTemplate.execute(this, new StatementCallback<ResultSet, PreparedStatement>() {
-            @Override
-            public ResultSet execute(PreparedStatement statement, Object... args) throws SQLException {
-                return statement.executeQuery();
-            }
-        });
+        return ExecuteTemplate.execute(this, (statement, args) -> statement.executeQuery());
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return ExecuteTemplate.execute(this, new StatementCallback<Integer, PreparedStatement>() {
-            @Override
-            public Integer execute(PreparedStatement statement, Object... args) throws SQLException {
-                return statement.executeUpdate();
-            }
-        });
+        return ExecuteTemplate.execute(this, (statement, args) -> statement.executeUpdate());
     }
 }

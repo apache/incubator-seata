@@ -15,72 +15,106 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
+import java.util.Map;
 import io.seata.common.util.StringUtils;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.BaseState;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
+import io.seata.saga.statelang.parser.JsonParser;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
-import java.util.Map;
+import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * State machine language parser
+ *
  * @author lorne.cl
  */
 public class StateMachineParserImpl implements StateMachineParser {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineParserImpl.class);
+
+    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
+
     @Override
     public StateMachine parse(String json) {
 
-        Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType, Feature.OrderedField);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
+        if (jsonParser == null) {
+            throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+        }
+        Map<String, Object> node = jsonParser.parse(json, Map.class, true);
+        if (DesignerJsonTransformer.isDesignerJson(node)) {
+            node = DesignerJsonTransformer.toStandardJson(node);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("===== Transformed standard state language:\n{}", jsonParser.toJsonString(node, true));
+            }
+        }
+
         StateMachineImpl stateMachine = new StateMachineImpl();
-        stateMachine.setName((String)node.get("Name"));
-        stateMachine.setComment((String)node.get("Comment"));
-        stateMachine.setVersion((String)node.get("Version"));
-        stateMachine.setStartState((String)node.get("StartState"));
-        if("false".equals(node.get("IsPersist"))){
+        stateMachine.setName((String) node.get("Name"));
+        stateMachine.setComment((String) node.get("Comment"));
+        stateMachine.setVersion((String) node.get("Version"));
+        stateMachine.setStartState((String) node.get("StartState"));
+        String recoverStrategy = (String) node.get("RecoverStrategy");
+        if (StringUtils.isNotBlank(recoverStrategy)) {
+            stateMachine.setRecoverStrategy(RecoverStrategy.valueOf(recoverStrategy));
+        }
+        Object isPersist = node.get("IsPersist");
+        if (Boolean.FALSE.equals(isPersist)) {
             stateMachine.setPersist(false);
         }
 
-        Map<String, Object> statesNode = (Map<String, Object>)node.get("States");
-        for(String stateName : statesNode.keySet()){
-            Map<String, Object> stateNode = (Map<String, Object>)statesNode.get(stateName);
-            String stateType = (String)stateNode.get("Type");
+        Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
+        for (String stateName : statesNode.keySet()) {
+            Map<String, Object> stateNode = (Map<String, Object>) statesNode.get(stateName);
+            String stateType = (String) stateNode.get("Type");
             StateParser stateParser = StateParserFactory.getStateParser(stateType);
-            if(stateParser == null){
-                throw new IllegalArgumentException("State Type ["+stateType+"] is not support");
+            if (stateParser == null) {
+                throw new IllegalArgumentException("State Type [" + stateType + "] is not support");
             }
             State state = stateParser.parse(stateNode);
-            if(state instanceof BaseState){
-                ((BaseState)state).setName(stateName);
+            if (state instanceof BaseState) {
+                ((BaseState) state).setName(stateName);
             }
 
-            if(stateMachine.getState(stateName) != null){
-                throw new IllegalArgumentException("State[name:"+stateName+"] is already exists");
+            if (stateMachine.getState(stateName) != null) {
+                throw new IllegalArgumentException("State[name:" + stateName + "] is already exists");
             }
             stateMachine.putState(stateName, state);
         }
 
         Map<String, State> stateMap = stateMachine.getStates();
-        for(String name : stateMap.keySet()){
+        for (String name : stateMap.keySet()) {
             State state = stateMap.get(name);
-            if(state instanceof AbstractTaskState){
+            if (state instanceof AbstractTaskState) {
                 AbstractTaskState taskState = (AbstractTaskState) state;
-                if(StringUtils.isNotBlank(taskState.getCompensateState())){
+                if (StringUtils.isNotBlank(taskState.getCompensateState())) {
                     taskState.setForUpdate(true);
 
                     State compState = stateMap.get(taskState.getCompensateState());
-                    if(compState != null && compState instanceof AbstractTaskState){
-                        ((AbstractTaskState)compState).setForCompensation(true);
+                    if (compState != null && compState instanceof AbstractTaskState) {
+                        ((AbstractTaskState) compState).setForCompensation(true);
                     }
                 }
             }
         }
         return stateMachine;
+    }
+
+    public String getJsonParserName() {
+        return jsonParserName;
+    }
+
+    public void setJsonParserName(String jsonParserName) {
+        this.jsonParserName = jsonParserName;
     }
 }

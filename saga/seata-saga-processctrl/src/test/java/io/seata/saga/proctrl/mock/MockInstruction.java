@@ -18,7 +18,6 @@ package io.seata.saga.proctrl.mock;
 import io.seata.saga.proctrl.Instruction;
 
 /**
- *
  * @author lorne.cl
  */
 public class MockInstruction implements Instruction {
@@ -35,8 +34,6 @@ public class MockInstruction implements Instruction {
 
     @Override
     public String toString() {
-        return "MockInstruction{" +
-                "testString='" + testString + '\'' +
-                '}';
+        return "MockInstruction{" + "testString='" + testString + '\'' + '}';
     }
 }

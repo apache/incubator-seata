@@ -15,22 +15,28 @@
  */
 package io.seata.rm.datasource.undo;
 
+import java.sql.JDBCType;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Geng Zhang
  */
-public abstract class BaseUndoLogParserTest extends BaseH2Test{
+public abstract class BaseUndoLogParserTest extends BaseH2Test {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -90,12 +96,16 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test{
         SQLUndoLog sqlUndoLog11 = logList2.get(1);
         Assertions.assertEquals(sqlUndoLog00.getSqlType(), sqlUndoLog10.getSqlType());
         Assertions.assertEquals(sqlUndoLog00.getTableName(), sqlUndoLog10.getTableName());
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog00.getBeforeImage(), sqlUndoLog10.getBeforeImage()).getResult());
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog00.getAfterImage(), sqlUndoLog10.getAfterImage()).getResult());
+        Assertions.assertTrue(
+            DataCompareUtils.isRecordsEquals(sqlUndoLog00.getBeforeImage(), sqlUndoLog10.getBeforeImage()).getResult());
+        Assertions.assertTrue(
+            DataCompareUtils.isRecordsEquals(sqlUndoLog00.getAfterImage(), sqlUndoLog10.getAfterImage()).getResult());
         Assertions.assertEquals(sqlUndoLog01.getSqlType(), sqlUndoLog11.getSqlType());
         Assertions.assertEquals(sqlUndoLog01.getTableName(), sqlUndoLog11.getTableName());
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog01.getBeforeImage(), sqlUndoLog11.getBeforeImage()).getResult());
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog01.getAfterImage(), sqlUndoLog11.getAfterImage()).getResult());
+        Assertions.assertTrue(
+            DataCompareUtils.isRecordsEquals(sqlUndoLog01.getBeforeImage(), sqlUndoLog11.getBeforeImage()).getResult());
+        Assertions.assertTrue(
+            DataCompareUtils.isRecordsEquals(sqlUndoLog01.getAfterImage(), sqlUndoLog11.getAfterImage()).getResult());
     }
 
     @Test
@@ -146,4 +156,52 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test{
         LOGGER.info("elapsed time {} ms.", (end - start));
     }
 
+    @Test
+    void testDecodeDefaultContent() {
+        byte[] defaultContent = getParser().getDefaultContent();
+
+        BranchUndoLog branchUndoLog = getParser().decode(defaultContent);
+        Assertions.assertNotNull(branchUndoLog);
+        Assertions.assertNull(branchUndoLog.getXid());
+        Assertions.assertEquals(0L, branchUndoLog.getBranchId());
+        Assertions.assertNull(branchUndoLog.getSqlUndoLogs());
+    }
+
+    /**
+     * will check kryo、jackson、fastjson、protostuff timestamp encode and decode
+     */
+    @Test
+    public void testTimestampEncodeAndDecode() {
+
+        BranchUndoLog branchUndoLog = new BranchUndoLog();
+        branchUndoLog.setXid("192.168.0.1:8091:123456");
+        branchUndoLog.setBranchId(123457);
+        List<SQLUndoLog> sqlUndoLogs = new ArrayList<>();
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setBeforeImage(TableRecords.empty(new TableMeta()));
+        Row row = new Row();
+        Field field = new Field();
+        field.setName("gmt_create");
+        field.setKeyType(KeyType.PRIMARY_KEY);
+        field.setType(JDBCType.TIMESTAMP.getVendorTypeNumber());
+        Timestamp timestampEncode = new Timestamp(Integer.MAX_VALUE + 1L);
+        timestampEncode.setNanos(999999);
+        field.setValue(timestampEncode);
+        row.add(field);
+        TableRecords afterRecords = new TableRecords();
+        List<Row> rows = new ArrayList<>();
+        rows.add(row);
+        afterRecords.setRows(rows);
+        afterRecords.setTableMeta(new TableMeta());
+        afterRecords.setTableName("test");
+        sqlUndoLog.setAfterImage(afterRecords);
+        sqlUndoLogs.add(sqlUndoLog);
+        branchUndoLog.setSqlUndoLogs(sqlUndoLogs);
+        byte[] encode = getParser().encode(branchUndoLog);
+        BranchUndoLog decodeBranchLog = getParser().decode(encode);
+        Timestamp timestampDecode = (Timestamp)(decodeBranchLog.getSqlUndoLogs().get(0).getAfterImage().getRows().get(0)
+            .getFields().get(0).getValue());
+        Assertions.assertEquals(timestampEncode, timestampDecode);
+
+    }
 }

@@ -24,7 +24,6 @@ import io.seata.core.context.RootContext;
  *
  * @param <T>
  * @author deyou
- * @date 2019.03.07
  */
 public class GlobalLockTemplate<T> {
 
@@ -37,16 +36,21 @@ public class GlobalLockTemplate<T> {
      */
     public Object execute(Callable<T> business) throws Exception {
 
-        Object rs = null;
-        try {
-            // add global lock declare
+        Object rs;
+        //fix nested situation
+        boolean hasInGlobalLock = RootContext.requireGlobalLock();
+        // add global lock declare
+        if (!hasInGlobalLock) {
             RootContext.bindGlobalLockFlag();
-
+        }
+        try {
             // Do Your Business
             rs = business.call();
         } finally {
             //clean the global lock declare
-            RootContext.unbindGlobalLockFlag();
+            if (!hasInGlobalLock) {
+                RootContext.unbindGlobalLockFlag();
+            }
         }
 
         return rs;

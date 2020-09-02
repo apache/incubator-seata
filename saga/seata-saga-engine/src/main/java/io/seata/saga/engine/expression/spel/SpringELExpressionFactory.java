@@ -30,6 +30,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * SpringELExpression factory
+ *
  * @author lorne.cl
  */
 public class SpringELExpressionFactory implements ExpressionFactory, ApplicationContextAware {
@@ -40,8 +41,8 @@ public class SpringELExpressionFactory implements ExpressionFactory, Application
     @Override
     public Expression createExpression(String expression) {
         org.springframework.expression.Expression defaultExpression = parser.parseExpression(expression);
-        EvaluationContext evaluationContext = ((SpelExpression) defaultExpression).getEvaluationContext();
-        ((StandardEvaluationContext) evaluationContext).setBeanResolver(new AppContextBeanResolver());
+        EvaluationContext evaluationContext = ((SpelExpression)defaultExpression).getEvaluationContext();
+        ((StandardEvaluationContext)evaluationContext).setBeanResolver(new AppContextBeanResolver());
         return new SpringELExpression(defaultExpression);
     }
 

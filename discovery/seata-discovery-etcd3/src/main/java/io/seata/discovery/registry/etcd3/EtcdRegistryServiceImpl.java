@@ -34,13 +34,14 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +57,6 @@ import static io.netty.util.CharsetUtil.UTF_8;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/18
  */
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdRegistryServiceImpl.class);
@@ -111,9 +111,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @return instance
      */
     static EtcdRegistryServiceImpl getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (EtcdRegistryServiceImpl.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new EtcdRegistryServiceImpl();
                 }
             }
@@ -166,24 +166,19 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     @Override
     public void unsubscribe(String cluster, Watch.Listener listener) throws Exception {
         Set<Watch.Listener> subscribeSet = listenerMap.get(cluster);
-        if (null != subscribeSet) {
-            Set<Watch.Listener> newSubscribeSet = new HashSet<>();
-            for (Watch.Listener eventListener : subscribeSet) {
-                if (!eventListener.equals(listener)) {
-                    newSubscribeSet.add(eventListener);
-                }
-            }
+        if (subscribeSet != null) {
+            Set<Watch.Listener> newSubscribeSet = subscribeSet.stream()
+                    .filter(eventListener -> !eventListener.equals(listener))
+                    .collect(Collectors.toSet());
             listenerMap.put(cluster, newSubscribeSet);
         }
         watcherMap.remove(cluster).stop();
-
-
     }
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         final String cluster = getServiceGroup(key);
-        if (null == cluster) {
+        if (cluster == null) {
             return null;
         }
         if (!listenerMap.containsKey(cluster)) {
@@ -213,14 +208,15 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             });
 
         }
-        return clusterAddressMap.get(cluster).getValue();
+        Pair<Long, List<InetSocketAddress>> pair = clusterAddressMap.get(cluster);
+        return Objects.isNull(pair) ? Collections.emptyList() : pair.getValue();
     }
 
     @Override
     public void close() throws Exception {
-        if (null != lifeKeeper) {
+        if (lifeKeeper != null) {
             lifeKeeper.stop();
-            if (null != lifeKeeperFuture) {
+            if (lifeKeeperFuture != null) {
                 lifeKeeperFuture.get(3, TimeUnit.SECONDS);
             }
         }
@@ -234,12 +230,12 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @throws Exception
      */
     private void refreshCluster(String cluster) throws Exception {
-        if (null == cluster) {
+        if (cluster == null) {
             return;
         }
         //1.get all available registries
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
-        GetResponse getResponse = getClient().getKVClient().get(buildRegistryKeyPrefix(), getOption).get();
+        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix(cluster)).build();
+        GetResponse getResponse = getClient().getKVClient().get(buildRegistryKeyPrefix(cluster), getOption).get();
         //2.add to list
         List<InetSocketAddress> instanceList = getResponse.getKvs().stream().map(keyValue -> {
             String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
@@ -254,9 +250,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @return client
      */
     private Client getClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (EtcdRegistryServiceImpl.class) {
-                if (null == client) {
+                if (client == null) {
                     String testEndpoint = System.getProperty(TEST_ENDPONT);
                     if (StringUtils.isNotBlank(testEndpoint)) {
                         client = Client.builder().endpoints(testEndpoint).build();
@@ -270,24 +266,12 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     }
 
     /**
-     * get service group
-     *
-     * @param key
-     * @return clusterNameKey
-     */
-    private String getServiceGroup(String key) {
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
-    }
-
-    /**
      * get cluster name
      *
      * @return
      */
     private String getClusterName() {
-        String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
         return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 
@@ -318,8 +302,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key prefix
      */
-    private ByteSequence buildRegistryKeyPrefix() {
-        return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName(), UTF_8);
+    private ByteSequence buildRegistryKeyPrefix(String cluster) {
+        return ByteSequence.from(REGISTRY_KEY_PREFIX + cluster, UTF_8);
     }
 
     /**
@@ -401,13 +385,13 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         @Override
         public void run() {
             Watch watchClient = getClient().getWatchClient();
-            WatchOption.Builder watchOptionBuilder = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix());
+            WatchOption.Builder watchOptionBuilder = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix(cluster));
             Pair<Long /*revision*/, List<InetSocketAddress>> addressPair = clusterAddressMap.get(cluster);
             if (Objects.nonNull(addressPair)) {
                 // Maybe addressPair isn't newest now, but it's ok
                 watchOptionBuilder.withRevision(addressPair.getKey());
             }
-            this.watcher = watchClient.watch(buildRegistryKeyPrefix(), watchOptionBuilder.build(), this.listener);
+            this.watcher = watchClient.watch(buildRegistryKeyPrefix(cluster), watchOptionBuilder.build(), this.listener);
         }
 
         /**

@@ -13,12 +13,26 @@
             "Input": [
                 {
                     "fooInput": "$.[a]",
-                    "throwException": "$.[fooThrowException]"
+                    "throwException": "$.[fooThrowException]",
+                    "sleepTime": "$.[fooSleepTime]"
                 }
             ],
             "Output": {
                 "fooResult": "$.#root"
-            }
+            },
+            "Status": {
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "#root != null": "SU",
+                "#root == null": "FA"
+            },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "io.seata.saga.engine.mock.DemoException"
+                    ],
+                    "Next": "CompensationTrigger"
+                }
+            ]
         },
         "ChoiceState":{
             "Type": "Choice",
@@ -42,21 +56,22 @@
             "Input": [
                 {
                     "barInput": "$.[fooResult]",
-                    "throwException": "$.[barThrowException]"
+                    "throwException": "$.[barThrowException]",
+                    "sleepTime": "$.[barSleepTime]"
                 }
             ],
             "Output": {
                 "barResult": "$.#root"
             },
             "Status": {
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null": "SU",
-                "#root == null": "FA",
-                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN"
+                "#root == null": "FA"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.common.exception.FrameworkException"
+                        "io.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTrigger"
                 }

@@ -15,31 +15,30 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
-import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * @author guoyao
- * @date 2019-10-11
  */
 public class TableMetaCacheFactory {
 
-    private TableMetaCacheFactory() {}
+    private static final Map<String, TableMetaCache> TABLE_META_CACHE_MAP = new ConcurrentHashMap<>();
 
-    public static TableMetaCache getTableMetaCache(DataSourceProxy dataSourceProxy) {
-        return getTableMetaCache(dataSourceProxy.getDbType());
-    }
-
+    /**
+     * get table meta cache
+     *
+     * @param dbType the db type
+     * @return table meta cache
+     */
     public static TableMetaCache getTableMetaCache(String dbType) {
-        if (dbType.equals(JdbcConstants.MYSQL)) {
-            return MysqlTableMetaCache.getInstance();
-        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
-            return OracleTableMetaCache.getInstance();
-        } else {
-            throw new NotSupportYetException("not support dbType[" + dbType + "]");
+        if (TABLE_META_CACHE_MAP.get(dbType) != null) {
+            return TABLE_META_CACHE_MAP.get(dbType);
         }
+        TableMetaCache tableMetaCache = EnhancedServiceLoader.load(TableMetaCache.class, dbType);
+        TABLE_META_CACHE_MAP.putIfAbsent(dbType, tableMetaCache);
+        return tableMetaCache;
     }
 }

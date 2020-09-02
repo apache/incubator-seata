@@ -15,17 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -33,83 +22,99 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.ColumnUtils;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
+import io.seata.rm.datasource.sql.struct.IndexType;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The type Table meta cache.
  *
  * @author sharajava
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
-    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
-    private static volatile TableMetaCache tableMetaCache = null;
+    @Override
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
+        cacheKey.append(".");
+        //remove single quote and separate it to catalogName and tableName
+        String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
+        String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
-    private MysqlTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (MysqlTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new MysqlTableMetaCache();
-                }
-            }
+        DatabaseMetaData databaseMetaData = null;
+        try {
+            databaseMetaData = connection.getMetaData();
+        } catch (SQLException e) {
+            LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
+            return cacheKey.append(defaultTableName).toString();
         }
-        return tableMetaCache;
+
+        try {
+            //prevent duplicated cache key
+            if (databaseMetaData.supportsMixedCaseIdentifiers()) {
+                cacheKey.append(defaultTableName);
+            } else {
+                cacheKey.append(defaultTableName.toLowerCase());
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
+            return cacheKey.append(defaultTableName).toString();
+        }
+
+        return cacheKey.toString();
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(keywordChecker.checkAndReplace(tableName));
-            builder.append(" LIMIT 1");
-            rs = stmt.executeQuery(builder.toString());
-            ResultSetMetaData rsmd = rs.getMetaData();
-            DatabaseMetaData dbmd = conn.getMetaData();
-
-            return resultSetMetaToSchema(rsmd, dbmd, tableName);
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
+        String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
+        try (Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
 
-    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
+    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
         throws SQLException {
+        //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
+        /*
+         * use ResultSetMetaData to get the pure table name
+         * can avoid the problem below
+         *
+         * select * from account_tbl
+         * select * from account_TBL
+         * select * from `account_tbl`
+         * select * from account.account_tbl
+         */
+        String tableName = rsmd.getTableName(1);
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
 
-        ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
+        /*
+         * here has two different type to get the data
+         * make sure the table name was right
+         * 1. show full columns from xxx from xxx(normal)
+         * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
+         */
 
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -156,9 +161,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     if ("PRIMARY".equalsIgnoreCase(indexName)) {
                         index.setIndextype(IndexType.PRIMARY);
                     } else if (!index.isNonUnique()) {
-                        index.setIndextype(IndexType.Unique);
+                        index.setIndextype(IndexType.UNIQUE);
                     } else {
-                        index.setIndextype(IndexType.Normal);
+                        index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
 
@@ -167,15 +172,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
             }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
         }
         return tm;
     }
-
 }

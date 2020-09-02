@@ -17,10 +17,9 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Collection utils.
@@ -30,13 +29,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CollectionUtils {
 
+    private CollectionUtils() {
+    }
+
     /**
      * Is empty boolean.
      *
      * @param col the col
      * @return the boolean
      */
-    public static boolean isEmpty(Collection col) {
+    public static boolean isEmpty(Collection<?> col) {
         return !isNotEmpty(col);
     }
 
@@ -46,8 +48,8 @@ public class CollectionUtils {
      * @param col the col
      * @return the boolean
      */
-    public static boolean isNotEmpty(Collection col) {
-        return col != null && col.size() > 0;
+    public static boolean isNotEmpty(Collection<?> col) {
+        return col != null && !col.isEmpty();
     }
 
     /**
@@ -76,7 +78,7 @@ public class CollectionUtils {
      * @param col the col
      * @return the string
      */
-    public static String toString(Collection col) {
+    public static String toString(Collection<?> col) {
         if (isEmpty(col)) {
             return "";
         }
@@ -98,7 +100,7 @@ public class CollectionUtils {
      * @param col1 the col 1
      * @return the boolean
      */
-    public static boolean isSizeEquals(Collection col0, Collection col1) {
+    public static boolean isSizeEquals(Collection<?> col0, Collection<?> col1) {
         if (col0 == null) {
             return col1 == null;
         } else {
@@ -144,7 +146,7 @@ public class CollectionUtils {
         if (data == null) {
             return null;
         }
-        Map<String, String> map = new ConcurrentHashMap<>();
+        Map<String, String> map = new HashMap<>();
         if (StringUtils.isBlank(data)) {
             return map;
         }
@@ -172,13 +174,13 @@ public class CollectionUtils {
      * @return the list
      */
     public static List<String> toUpperList(List<String> sourceList) {
-        if (null == sourceList || sourceList.size() == 0) { return sourceList; }
+        if (isEmpty(sourceList)) { return sourceList; }
         List<String> destList = new ArrayList<>(sourceList.size());
         for (String element : sourceList) {
-            if (null != element) {
+            if (element != null) {
                 destList.add(element.toUpperCase());
             } else {
-                destList.add(element);
+                destList.add(null);
             }
         }
         return destList;

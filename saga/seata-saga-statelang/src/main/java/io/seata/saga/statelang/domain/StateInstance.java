@@ -26,30 +26,35 @@ public interface StateInstance {
 
     /**
      * id
+     *
      * @return
      */
     String getId();
 
     /**
      * set id
+     *
      * @param id
      */
     void setId(String id);
 
     /**
      * get Machine InstanceId
+     *
      * @return
      */
     String getMachineInstanceId();
 
     /**
      * set Machine InstanceId
+     *
      * @param machineInstanceId
      */
     void setMachineInstanceId(String machineInstanceId);
 
     /**
      * get name
+     *
      * @return
      */
     String getName();
@@ -63,126 +68,147 @@ public interface StateInstance {
 
     /**
      * get type
+     *
      * @return
      */
     String getType();
 
     /**
      * set type
+     *
      * @param type
      */
     void setType(String type);
 
     /**
      * get service name
+     *
      * @return
      */
     String getServiceName();
 
     /**
      * set service name
+     *
      * @param serviceName
      */
     void setServiceName(String serviceName);
 
     /**
      * get service method
+     *
      * @return
      */
     String getServiceMethod();
 
     /**
      * set service method
+     *
      * @param serviceMethod
      */
     void setServiceMethod(String serviceMethod);
 
     /**
      * get service type
+     *
      * @return
      */
     String getServiceType();
 
     /**
      * get service type
+     *
      * @param serviceType
      */
     void setServiceType(String serviceType);
 
     /**
      * get businessKey
+     *
      * @return
      */
     String getBusinessKey();
 
     /**
      * set business key
+     *
      * @param businessKey
      */
     void setBusinessKey(String businessKey);
 
     /**
      * get start time
+     *
      * @return
      */
     Date getGmtStarted();
 
     /**
      * set start time
+     *
      * @param gmtStarted
      */
     void setGmtStarted(Date gmtStarted);
 
     /**
      * get end time
+     *
      * @return
      */
     Date getGmtEnd();
 
     /**
      * set end time
+     *
      * @param gmtEnd
      */
     void setGmtEnd(Date gmtEnd);
 
     /**
      * Is this state task will update data?
+     *
      * @return
      */
     boolean isForUpdate();
 
     /**
      * setForUpdate
+     *
      * @param forUpdate
      */
     void setForUpdate(boolean forUpdate);
 
     /**
      * get exception
+     *
      * @return
      */
     Exception getException();
 
     /**
      * set exception
+     *
      * @param exception
      */
     void setException(Exception exception);
 
     /**
      * get input params
+     *
      * @return
      */
     Object getInputParams();
 
     /**
      * set inout params
+     *
      * @param inputParams
      */
     void setInputParams(Object inputParams);
 
     /**
      * get output params
+     *
      * @return
      */
     Object getOutputParams();

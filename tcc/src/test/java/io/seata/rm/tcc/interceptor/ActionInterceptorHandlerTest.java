@@ -47,7 +47,7 @@ public class ActionInterceptorHandlerTest {
     public void testBusinessActionContext() throws NoSuchMethodException {
         Method prepareMethod = TccAction.class.getDeclaredMethod("prepare",
                 BusinessActionContext.class, int.class, List.class, TccParam.class);
-        List list = new ArrayList();
+        List<Object> list = new ArrayList<>();
         list.add("b");
         TccParam tccParam = new TccParam (1, "abc@ali.com");
 

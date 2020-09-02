@@ -15,11 +15,11 @@
  */
 package io.seata.saga.engine.store;
 
+import java.util.List;
+
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-
-import java.util.List;
 
 /**
  * StateMachine engine log store
@@ -30,36 +30,42 @@ public interface StateLogStore {
 
     /**
      * Record state machine startup events
+     *
      * @param machineInstance
      */
     void recordStateMachineStarted(StateMachineInstance machineInstance, ProcessContext context);
 
     /**
      * Record status end event
+     *
      * @param machineInstance
      */
     void recordStateMachineFinished(StateMachineInstance machineInstance, ProcessContext context);
 
     /**
      * Record state machine restarted
+     *
      * @param machineInstance
      */
     void recordStateMachineRestarted(StateMachineInstance machineInstance, ProcessContext context);
 
     /**
      * Record state start execution event
+     *
      * @param stateInstance
      */
     void recordStateStarted(StateInstance stateInstance, ProcessContext context);
 
     /**
      * Record state execution end event
+     *
      * @param stateInstance
      */
     void recordStateFinished(StateInstance stateInstance, ProcessContext context);
 
     /**
      * Get state machine instance
+     *
      * @param stateMachineInstanceId
      * @return
      */
@@ -67,6 +73,7 @@ public interface StateLogStore {
 
     /**
      * Get state machine instance by businessKey
+     *
      * @param businessKey
      * @param tenantId
      * @return
@@ -75,6 +82,7 @@ public interface StateLogStore {
 
     /**
      * Query the list of state machine instances by parent id
+     *
      * @param parentId
      * @return
      */
@@ -82,6 +90,7 @@ public interface StateLogStore {
 
     /**
      * Get state instance
+     *
      * @param stateInstanceId
      * @param machineInstId
      * @return
@@ -90,6 +99,7 @@ public interface StateLogStore {
 
     /**
      * Get a list of state instances by state machine instance id
+     *
      * @param stateMachineInstanceId
      * @return
      */

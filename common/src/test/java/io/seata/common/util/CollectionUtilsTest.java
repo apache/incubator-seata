@@ -17,7 +17,7 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public class CollectionUtilsTest {
         Map<String, String> map = null;
         Assertions.assertNull(CollectionUtils.encodeMap(map));
 
-        map = new HashMap<>();
+        map = new LinkedHashMap<>();
         Assertions.assertEquals("", CollectionUtils.encodeMap(map));
         map.put("x", "1");
         Assertions.assertEquals("x=1", CollectionUtils.encodeMap(map));

@@ -15,11 +15,11 @@
  */
 package io.seata.saga.engine.store.utils;
 
+import java.lang.reflect.Field;
+
 import io.seata.common.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
 
 /**
  * Bean utils
@@ -30,15 +30,15 @@ public class BeanUtils {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BeanUtils.class);
 
-    public static String beanToString(Object o){
-        if(o == null){
+    public static String beanToString(Object o) {
+        if (o == null) {
             return null;
         }
 
         Field[] fields = o.getClass().getDeclaredFields();
         StringBuffer buffer = new StringBuffer();
         buffer.append("[");
-        for(Field field : fields){
+        for (Field field : fields) {
             Object val = null;
             try {
                 val = ReflectionUtil.getFieldValue(o, field.getName());
@@ -47,11 +47,11 @@ public class BeanUtils {
             } catch (IllegalAccessException e) {
                 LOGGER.warn(e.getMessage(), e);
             }
-            if(val != null){
+            if (val != null) {
                 buffer.append(field.getName()).append("=").append(val).append(", ");
             }
         }
-        if(buffer.length() > 2){
+        if (buffer.length() > 2) {
             buffer.delete(buffer.length() - 2, buffer.length());
         }
         buffer.append("]");

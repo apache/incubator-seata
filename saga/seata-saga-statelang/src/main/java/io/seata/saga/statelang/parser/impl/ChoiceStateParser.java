@@ -15,17 +15,19 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.ChoiceState;
 import io.seata.saga.statelang.domain.ChoiceState.Choice;
 import io.seata.saga.statelang.domain.impl.ChoiceStateImpl;
 import io.seata.saga.statelang.domain.impl.ChoiceStateImpl.ChoiceImpl;
 import io.seata.saga.statelang.parser.StateParser;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Single item selection state parser
+ *
  * @author lorne.cl
  */
 public class ChoiceStateParser extends BaseStatePaser implements StateParser<ChoiceState> {
@@ -39,7 +41,7 @@ public class ChoiceStateParser extends BaseStatePaser implements StateParser<Cho
         Map<String, Object> nodeMap = (Map<String, Object>)node;
         List<Object> choiceObjList = (List<Object>)nodeMap.get("Choices");
         List<Choice> choiceStateList = new ArrayList<>(choiceObjList.size());
-        for(Object choiceObj : choiceObjList){
+        for (Object choiceObj : choiceObjList) {
 
             Map<String, Object> choiceObjMap = (Map<String, Object>)choiceObj;
             ChoiceImpl choice = new ChoiceImpl();

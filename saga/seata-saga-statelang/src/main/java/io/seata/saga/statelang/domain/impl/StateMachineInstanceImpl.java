@@ -15,10 +15,6 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.StateMachineInstance;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -27,34 +23,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.saga.statelang.domain.ExecutionStatus;
+import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachineInstance;
+
 /**
  * state machine execution instance
+ *
  * @author lorne.cl
  */
 public class StateMachineInstanceImpl implements StateMachineInstance {
 
-    private String              id;
-    private String              machineId;
-    private String              tenantId;
-    private String              parentId;
-    private Date                gmtStarted;
-    private String              businessKey;
+    private String id;
+    private String machineId;
+    private String tenantId;
+    private String parentId;
+    private Date gmtStarted;
+    private String businessKey;
     private Map<String, Object> startParams = new HashMap<>();
-    private Object              serializedStartParams;
-    private Date                gmtEnd;
-    private Exception           exception;
-    private Object              serializedException;
+    private Object serializedStartParams;
+    private Date gmtEnd;
+    private Exception exception;
+    private Object serializedException;
     private Map<String, Object> endParams = new HashMap<>();
-    private Object              serializedEndParams;
-    private ExecutionStatus     status;
-    private ExecutionStatus     compensationStatus;
-    private boolean             isRunning;
-    private Date                gmtUpdated;
+    private Object serializedEndParams;
+    private ExecutionStatus status;
+    private ExecutionStatus compensationStatus;
+    private boolean isRunning;
+    private Date gmtUpdated;
     private Map<String, Object> context;
 
-    private StateMachine                     stateMachine;
-    private List<StateInstance>              stateList       = Collections.synchronizedList(new ArrayList<>());
-    private Map<String, StateInstance>       stateMap        = new ConcurrentHashMap<>();
+    private StateMachine stateMachine;
+    private List<StateInstance> stateList = Collections.synchronizedList(new ArrayList<>());
+    private Map<String, StateInstance> stateMap = new ConcurrentHashMap<>();
 
     @Override
     public String getId() {

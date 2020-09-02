@@ -15,13 +15,14 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -37,6 +38,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -106,13 +108,21 @@ public abstract class AbstractConnectionProxy implements Connection {
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         String dbType = getDbType();
         // support oracle 10.2+
-        PreparedStatement targetPreparedStatement;
-        SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
-        if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-            final String tableName = sqlRecognizer.getTableName();
-            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getDataSourceProxy(), tableName);
-            targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{ tableMeta.getPkName() });
-        } else {
+        PreparedStatement targetPreparedStatement = null;
+        if (StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
+            List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
+            if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
+                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
+                            sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
+                    String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
+                    tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
+                    targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
+                }
+            }
+        }
+        if (targetPreparedStatement == null) {
             targetPreparedStatement = getTargetConnection().prepareStatement(sql);
         }
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);

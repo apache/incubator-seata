@@ -24,6 +24,7 @@ public interface Serializer<S, T> {
 
     /**
      * serialize
+     *
      * @param object
      * @return
      */
@@ -31,6 +32,7 @@ public interface Serializer<S, T> {
 
     /**
      * deserialize
+     *
      * @param obj
      * @return
      */

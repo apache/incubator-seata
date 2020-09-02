@@ -19,12 +19,14 @@ import io.seata.saga.statelang.domain.State;
 
 /**
  * State Parser
+ *
  * @author lorne.cl
  */
 public interface StateParser<T extends State> {
 
     /**
      * Parse an object (such as Json) into a State model
+     *
      * @param node
      * @return
      */

@@ -15,48 +15,54 @@
  */
 package io.seata.saga.statelang.domain;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
 /**
  * A state used to execute a task
+ *
  * @author lorne.cl
  */
 public interface TaskState extends State {
 
     /**
      * get compensate state
+     *
      * @return
      */
     String getCompensateState();
 
     /**
-     * Is this state is used to compensate an other state，default false
+     * Is this state is used to compensate an other state, default false
+     *
      * @return
      */
     boolean isForCompensation();
 
     /**
      * Is this state will update data? default false
+     *
      * @return
      */
     boolean isForUpdate();
 
     /**
      * retry strategy
+     *
      * @return
      */
-    Retry getRetry();
+    List<Retry> getRetry();
 
     /**
      * exception handling strategy
+     *
      * @return
      */
     List<ExceptionMatch> getCatches();
 
     /**
      * Execution state determination rule
+     *
      * @return
      */
     Map<String, String> getStatus();
@@ -67,22 +73,45 @@ public interface TaskState extends State {
     interface Retry {
 
         /**
-         * getIntervalSeconds
+         * exceptions
+         *
          * @return
          */
-        int getIntervalSeconds();
+        List<String> getExceptions();
+
+        /**
+         * exception classes
+         *
+         * @return
+         */
+        List<Class<? extends Exception>> getExceptionClasses();
+
+        /**
+         * set exception classes
+         * @param exceptionClasses
+         */
+        void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
+
+        /**
+         * getIntervalSeconds
+         *
+         * @return
+         */
+        double getIntervalSeconds();
 
         /**
          * getMaxAttempts
+         *
          * @return
          */
         int getMaxAttempts();
 
         /**
-         * get BackoffRate，default 1
+         * get BackoffRate, default 1
+         *
          * @return
          */
-        BigDecimal getBackoffRate();
+        double getBackoffRate();
     }
 
     /**
@@ -92,18 +121,27 @@ public interface TaskState extends State {
 
         /**
          * exceptions
+         *
          * @return
          */
         List<String> getExceptions();
 
         /**
          * exception classes
+         *
          * @return
          */
         List<Class<? extends Exception>> getExceptionClasses();
 
         /**
+         * set exception classes
+         * @param exceptionClasses
+         */
+        void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
+
+        /**
          * next state name
+         *
          * @return
          */
         String getNext();
@@ -116,18 +154,21 @@ public interface TaskState extends State {
 
         /**
          * status
+         *
          * @return
          */
         ExecutionStatus getStatus();
 
         /**
          * expression
+         *
          * @return
          */
         String getExpression();
 
         /**
          * expression type, default(SpringEL)|exception
+         *
          * @return
          */
         String getExpressionType();

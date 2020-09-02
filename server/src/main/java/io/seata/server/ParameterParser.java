@@ -18,23 +18,25 @@ package io.seata.server;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import io.seata.common.util.IdWorker;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.server.env.ContainerHelper;
 
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
  * The type Parameter parser.
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/05/30
  */
 public class ParameterParser {
-    private static final String PROGRAM_NAME = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
-    private static final int SERVER_DEFAULT_PORT = 8091;
-    private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final int SERVER_DEFAULT_NODE = 1;
+
+    private static final String PROGRAM_NAME
+        = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
     @Parameter(names = "--help", help = true)
     private boolean help;
@@ -44,11 +46,11 @@ public class ParameterParser {
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
-    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
-    private int serverNode = SERVER_DEFAULT_NODE;
-    @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.", order = 5)
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
+    private Long serverNode;
+    @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
+        order = 5)
     private String seataEnv;
-
     /**
      * Instantiates a new Parameter parser.
      *
@@ -60,18 +62,30 @@ public class ParameterParser {
 
     private void init(String[] args) {
         try {
-            JCommander jCommander = JCommander.newBuilder().addObject(this).build();
-            jCommander.parse(args);
-            if (help) {
-                jCommander.setProgramName(PROGRAM_NAME);
-                jCommander.usage();
-                System.exit(0);
+            if (ContainerHelper.isRunningInContainer()) {
+                this.seataEnv = ContainerHelper.getEnv();
+                this.host = ContainerHelper.getHost();
+                this.port = ContainerHelper.getPort();
+                this.serverNode = ContainerHelper.getServerNode();
+                this.storeMode = ContainerHelper.getStoreMode();
+            } else {
+                JCommander jCommander = JCommander.newBuilder().addObject(this).build();
+                jCommander.parse(args);
+                if (help) {
+                    jCommander.setProgramName(PROGRAM_NAME);
+                    jCommander.usage();
+                    System.exit(0);
+                }
+            }
+            if (this.serverNode == null) {
+                this.serverNode = IdWorker.initWorkerId();
             }
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
-            if(StringUtils.isBlank(storeMode)){
-                storeMode= ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+            if (StringUtils.isBlank(storeMode)) {
+                storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
+                    SERVER_DEFAULT_STORE_MODE);
             }
         } catch (ParameterException e) {
             printError(e);
@@ -127,7 +141,7 @@ public class ParameterParser {
      *
      * @return the server node
      */
-    public int getServerNode() {
+    public Long getServerNode() {
         return serverNode;
     }
 
@@ -139,4 +153,5 @@ public class ParameterParser {
     public String getSeataEnv() {
         return seataEnv;
     }
+
 }

@@ -18,7 +18,7 @@ package io.seata.common.exception;
 /**
  * The type Should never happen exception.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ShouldNeverHappenException extends RuntimeException {
 

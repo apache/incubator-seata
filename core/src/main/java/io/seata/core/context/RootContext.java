@@ -15,19 +15,28 @@
  */
 package io.seata.core.context;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import java.util.Map;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 
 /**
  * The type Root context.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RootContext {
+
+    private RootContext() {
+
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
 
@@ -36,9 +45,17 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
+    /**
+     * The constant KEY_BRANCH_TYPE
+     */
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
+
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
+
+    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
 
     /**
      * Gets xid.
@@ -46,7 +63,11 @@ public class RootContext {
      * @return the xid
      */
     public static String getXID() {
-        return CONTEXT_HOLDER.get(KEY_XID);
+        String xid = CONTEXT_HOLDER.get(KEY_XID);
+        if (StringUtils.isNotBlank(xid)) {
+            return xid;
+        }
+        return null;
     }
 
     /**
@@ -56,7 +77,7 @@ public class RootContext {
      */
     public static void bind(String xid) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind " + xid);
+            LOGGER.debug("bind {}", xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
     }
@@ -82,7 +103,7 @@ public class RootContext {
     public static String unbind() {
         String xid = CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind " + xid);
+            LOGGER.debug("unbind {} ", xid);
         }
         return xid;
     }
@@ -101,6 +122,49 @@ public class RootContext {
      */
     public static boolean inGlobalTransaction() {
         return CONTEXT_HOLDER.get(KEY_XID) != null;
+    }
+
+    /**
+     * get the branch type
+     *
+     * @return the branch type String
+     */
+    public static String getBranchType() {
+        if (inGlobalTransaction()) {
+            String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+            if (StringUtils.isNotBlank(branchType)) {
+                return branchType;
+            }
+            //default branchType is the dataSourceProxyMode
+            return BranchType.XA.name().equalsIgnoreCase(DATA_SOURCE_PROXY_MODE) ? BranchType.XA.name() : BranchType.AT.name();
+        }
+        return null;
+    }
+
+    /**
+     * bind branch type
+     *
+     * @param branchType the branch type
+     */
+    public static void bindBranchType(BranchType branchType) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("bind branch type {}", branchType);
+        }
+
+        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, branchType.name());
+    }
+
+    /**
+     * unbind branch type
+     *
+     * @return the previous branch type string
+     */
+    public static String unbindBranchType() {
+        String unbindBranchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind branch type {}", unbindBranchType);
+        }
+        return unbindBranchType;
     }
 
     /**
@@ -126,7 +190,7 @@ public class RootContext {
      *
      * @return
      */
-    public static Map<String, String> entries(){
+    public static Map<String, String> entries() {
         return CONTEXT_HOLDER.entries();
     }
 }

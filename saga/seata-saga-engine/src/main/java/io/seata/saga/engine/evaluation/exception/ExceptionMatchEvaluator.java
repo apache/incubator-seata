@@ -15,11 +15,12 @@
  */
 package io.seata.saga.engine.evaluation.exception;
 
+import java.util.Map;
+
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.statelang.domain.DomainConstants;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -43,21 +44,20 @@ public class ExceptionMatchEvaluator implements Evaluator {
     public boolean evaluate(Map<String, Object> variables) {
 
         Object eObj = variables.get(getRootObjectName());
-        if(eObj!=null && (eObj instanceof Exception)
-                && StringUtils.hasText(exceptionString)){
+        if (eObj != null && (eObj instanceof Exception) && StringUtils.hasText(exceptionString)) {
 
             Exception e = (Exception)eObj;
 
             String exceptionClassName = e.getClass().getName();
-            if(exceptionClassName.equals(exceptionString)){
+            if (exceptionClassName.equals(exceptionString)) {
                 return true;
             }
             try {
-                if(exceptionClass.isAssignableFrom(e.getClass())){
+                if (exceptionClass.isAssignableFrom(e.getClass())) {
                     return true;
                 }
             } catch (Exception e1) {
-                LOGGER.error("Exception Match failed. expression[ "+ exceptionString +"]",e1);
+                LOGGER.error("Exception Match failed. expression[{}]", exceptionString, e1);
             }
         }
 
@@ -73,17 +73,15 @@ public class ExceptionMatchEvaluator implements Evaluator {
         this.exceptionString = exceptionString;
         try {
             this.exceptionClass = (Class<Exception>)Class.forName(exceptionString);
-        }
-        catch (ClassNotFoundException e) {
-            throw new EngineExecutionException(e, exceptionString + " is not a Exception Class", FrameworkErrorCode.NotExceptionClass);
+        } catch (ClassNotFoundException e) {
+            throw new EngineExecutionException(e, exceptionString + " is not a Exception Class",
+                FrameworkErrorCode.NotExceptionClass);
         }
     }
-
 
     public Class<Exception> getExceptionClass() {
         return exceptionClass;
     }
-
 
     public void setExceptionClass(Class<Exception> exceptionClass) {
         this.exceptionClass = exceptionClass;

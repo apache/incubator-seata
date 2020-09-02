@@ -17,12 +17,12 @@ package io.seata.rm.datasource.mock;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.Properties;
 
 /**
  * Mock connection
  * @author will
- * @date 2019/8/14
  */
 public class MockConnection extends com.alibaba.druid.mock.MockConnection {
 
@@ -42,6 +42,21 @@ public class MockConnection extends com.alibaba.druid.mock.MockConnection {
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
         return new MockDatabaseMetaData(this);
+    }
+
+    @Override
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+
+    }
+
+    @Override
+    public void rollback() {
+
+    }
+
+    @Override
+    public void rollback(Savepoint savepoint) {
+
     }
 
     @Override

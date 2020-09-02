@@ -18,9 +18,9 @@ package io.seata.core.rpc;
 /**
  * The interface Remoting service.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/5
+ * @author slievrly
  */
+@Deprecated
 public interface RemotingService {
     /**
      * Start.

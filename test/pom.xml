@@ -65,6 +65,11 @@
             <artifactId>seata-saga-engine-store</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
@@ -93,12 +98,14 @@
             <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-        </dependency>
-        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
@@ -117,7 +124,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-codec-seata</artifactId>
+            <artifactId>seata-serializer-seata</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

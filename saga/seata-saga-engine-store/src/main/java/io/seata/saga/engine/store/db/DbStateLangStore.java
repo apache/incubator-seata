@@ -15,16 +15,18 @@
  */
 package io.seata.saga.engine.store.db;
 
-import io.seata.saga.engine.store.StateLangStore;
-import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.StateMachine.Status;
-import io.seata.saga.statelang.domain.impl.StateMachineImpl;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
+
+import io.seata.common.util.StringUtils;
+import io.seata.saga.engine.store.StateLangStore;
+import io.seata.saga.statelang.domain.RecoverStrategy;
+import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachine.Status;
+import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 
 /**
  * State language definition store in DB
@@ -41,14 +43,16 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
 
     @Override
     public StateMachine getStateMachineById(String stateMachineId) {
-        return selectOne(stateLangStoreSqls.getGetStateMachineByIdSql(dbType), RESULT_SET_TO_STATE_MACHINE, stateMachineId);
+        return selectOne(stateLangStoreSqls.getGetStateMachineByIdSql(dbType), RESULT_SET_TO_STATE_MACHINE,
+            stateMachineId);
     }
 
     @Override
     public StateMachine getLastVersionStateMachine(String stateMachineName, String tenantId) {
 
-        List<StateMachine> list = selectList(stateLangStoreSqls.getQueryStateMachinesByNameAndTenantSql(dbType), RESULT_SET_TO_STATE_MACHINE, stateMachineName, tenantId);
-        if(list != null && list.size() > 0){
+        List<StateMachine> list = selectList(stateLangStoreSqls.getQueryStateMachinesByNameAndTenantSql(dbType),
+            RESULT_SET_TO_STATE_MACHINE, stateMachineName, tenantId);
+        if (list != null && list.size() > 0) {
             return list.get(0);
         }
         return null;
@@ -56,7 +60,14 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
 
     @Override
     public boolean storeStateMachine(StateMachine stateMachine) {
-        return executeUpdate(stateLangStoreSqls.getInsertStateMachineSql(dbType), STATE_MACHINE_TO_STATEMENT, stateMachine) > 0;
+        return executeUpdate(stateLangStoreSqls.getInsertStateMachineSql(dbType), STATE_MACHINE_TO_STATEMENT,
+            stateMachine) > 0;
+    }
+
+    @Override
+    public void setTablePrefix(String tablePrefix) {
+        super.setTablePrefix(tablePrefix);
+        this.stateLangStoreSqls = new StateLangStoreSqls(tablePrefix);
     }
 
     private static class ResultSetToStateMachine implements ResultSetToObject<StateMachine> {
@@ -71,7 +82,10 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
             stateMachine.setContent(resultSet.getString("content"));
             stateMachine.setGmtCreate(resultSet.getTimestamp("gmt_create"));
             stateMachine.setType(resultSet.getString("type"));
-            stateMachine.setRecoverStrategy(resultSet.getString("recover_strategy"));
+            String recoverStrategy = resultSet.getString("recover_strategy");
+            if (StringUtils.isNotBlank(recoverStrategy)) {
+                stateMachine.setRecoverStrategy(RecoverStrategy.valueOf(recoverStrategy));
+            }
             stateMachine.setTenantId(resultSet.getString("tenant_id"));
             stateMachine.setStatus(Status.valueOf(resultSet.getString("status")));
             return stateMachine;
@@ -90,14 +104,8 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
             statement.setString(7, stateMachine.getVersion());
             statement.setString(8, stateMachine.getType());
             statement.setString(9, stateMachine.getContent());
-            statement.setString(10, stateMachine.getRecoverStrategy());
+            statement.setString(10, stateMachine.getRecoverStrategy() != null ? stateMachine.getRecoverStrategy().name() : null);
             statement.setString(11, stateMachine.getComment());
         }
-    }
-
-    @Override
-    public void setTablePrefix(String tablePrefix) {
-        super.setTablePrefix(tablePrefix);
-        this.stateLangStoreSqls = new StateLangStoreSqls(tablePrefix);
     }
 }

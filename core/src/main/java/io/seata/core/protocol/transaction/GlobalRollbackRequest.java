@@ -21,7 +21,7 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Global rollback request.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class GlobalRollbackRequest extends AbstractGlobalEndRequest {
     @Override

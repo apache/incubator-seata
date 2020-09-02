@@ -15,9 +15,10 @@
  */
 package io.seata.saga.engine.expression;
 
-import io.seata.common.util.StringUtils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.util.StringUtils;
 
 /**
  * Expression factory manager
@@ -30,8 +31,8 @@ public class ExpressionFactoryManager {
 
     private Map<String, ExpressionFactory> expressionFactoryMap = new ConcurrentHashMap<>();
 
-    public ExpressionFactory getExpressionFactory(String expressionType){
-        if(StringUtils.isBlank(expressionType)){
+    public ExpressionFactory getExpressionFactory(String expressionType) {
+        if (StringUtils.isBlank(expressionType)) {
             expressionType = DEFAULT_EXPRESSION_TYPE;
         }
         return expressionFactoryMap.get(expressionType);
@@ -42,7 +43,7 @@ public class ExpressionFactoryManager {
         this.expressionFactoryMap.putAll(expressionFactoryMap);
     }
 
-    public void putExpressionFactory(String type, ExpressionFactory factory){
+    public void putExpressionFactory(String type, ExpressionFactory factory) {
         this.expressionFactoryMap.put(type, factory);
     }
 }

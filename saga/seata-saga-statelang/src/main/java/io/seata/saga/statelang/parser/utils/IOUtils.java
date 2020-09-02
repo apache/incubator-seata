@@ -25,21 +25,20 @@ import java.io.Writer;
 /**
  * IOUtils
  * copy from commons-io
+ *
  * @author lorne.cl
  */
 public class IOUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
-    public static String toString(InputStream input, String encoding)
-            throws IOException {
+    public static String toString(InputStream input, String encoding) throws IOException {
         StringWriter sw = new StringWriter();
         copy(input, sw, encoding);
         return sw.toString();
     }
 
-    public static void copy(InputStream input, Writer output, String encoding)
-            throws IOException {
+    public static void copy(InputStream input, Writer output, String encoding) throws IOException {
         if (encoding == null) {
             copy(input, output);
         } else {
@@ -48,8 +47,7 @@ public class IOUtils {
         }
     }
 
-    public static void copy(InputStream input, Writer output)
-            throws IOException {
+    public static void copy(InputStream input, Writer output) throws IOException {
         InputStreamReader in = new InputStreamReader(input);
         copy(in, output);
     }

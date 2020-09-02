@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
+import java.util.Map;
 
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
@@ -23,10 +24,9 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.FailEndState;
 
-import java.util.Map;
-
 /**
  * FailEndState Handler
+ *
  * @author lorne.cl
  */
 public class FailEndStateHandler implements StateHandler {
@@ -37,8 +37,9 @@ public class FailEndStateHandler implements StateHandler {
         context.setVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG, true);
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        FailEndState state = (FailEndState) instruction.getState(context);
-        Map<String, Object> contextVariables = (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+        FailEndState state = (FailEndState)instruction.getState(context);
+        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
         contextVariables.put(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_CODE, state.getErrorCode());
         contextVariables.put(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_MSG, state.getMessage());
     }

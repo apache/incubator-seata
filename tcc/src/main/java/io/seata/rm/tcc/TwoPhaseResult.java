@@ -27,7 +27,7 @@ public class TwoPhaseResult {
     /**
      * is Success ?
      */
-    private boolean isSuccess = false;
+    private boolean isSuccess;
 
     /**
      * result message

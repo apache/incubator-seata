@@ -15,12 +15,6 @@
  */
 package io.seata.saga.engine.store.db;
 
-import io.seata.common.exception.StoreException;
-import io.seata.saga.engine.store.utils.BeanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,8 +23,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.sql.DataSource;
+
+import io.seata.common.exception.StoreException;
+import io.seata.saga.engine.store.utils.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Abstract store
+ *
  * @author lorne.cl
  */
 public class AbstractStore {
@@ -43,28 +45,38 @@ public class AbstractStore {
 
     protected String tablePrefix;
 
-    protected <T> T selectOne(String sql, ResultSetToObject<T> resultSetToObject, Object... args){
+    public static void closeSilent(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                LOGGER.info(e.getMessage(), e);
+            }
+        }
+    }
+
+    protected <T> T selectOne(String sql, ResultSetToObject<T> resultSetToObject, Object... args) {
         Connection connection = null;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Preparing SQL statement: {}", sql);
             }
 
             stmt = connection.prepareStatement(sql);
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
             }
 
-            for(int i = 0; i < args.length; i++){
-                stmt.setObject(i+1, args[i]);
+            for (int i = 0; i < args.length; i++) {
+                stmt.setObject(i + 1, args[i]);
             }
             resultSet = stmt.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 return resultSetToObject.toObject(resultSet);
             }
         } catch (SQLException e) {
@@ -77,29 +89,29 @@ public class AbstractStore {
         return null;
     }
 
-    protected <T> List<T> selectList(String sql, ResultSetToObject<T> resultSetToObject, Object... args){
+    protected <T> List<T> selectList(String sql, ResultSetToObject<T> resultSetToObject, Object... args) {
         Connection connection = null;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Preparing SQL: {}", sql);
             }
 
             stmt = connection.prepareStatement(sql);
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
             }
 
-            for(int i = 0; i < args.length; i++){
-                stmt.setObject((i+1), args[i]);
+            for (int i = 0; i < args.length; i++) {
+                stmt.setObject(i + 1, args[i]);
             }
             resultSet = stmt.executeQuery();
             List<T> list = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 list.add(resultSetToObject.toObject(resultSet));
             }
             return list;
@@ -112,25 +124,25 @@ public class AbstractStore {
         }
     }
 
-    protected <T> int executeUpdate(String sql, ObjectToStatement<T> objectToStatement, T o){
+    protected <T> int executeUpdate(String sql, ObjectToStatement<T> objectToStatement, T o) {
         Connection connection = null;
         PreparedStatement stmt = null;
         try {
             connection = dataSource.getConnection();
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Preparing SQL: {}", sql);
             }
 
             stmt = connection.prepareStatement(sql);
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("setting params to PreparedStatement: {}", BeanUtils.beanToString(o));
             }
 
             objectToStatement.toStatement(o, stmt);
             int count = stmt.executeUpdate();
-            if(!connection.getAutoCommit()){
+            if (!connection.getAutoCommit()) {
                 connection.commit();
             }
             return count;
@@ -142,27 +154,27 @@ public class AbstractStore {
         }
     }
 
-    protected int executeUpdate(String sql, Object... args){
+    protected int executeUpdate(String sql, Object... args) {
         Connection connection = null;
         PreparedStatement stmt = null;
         try {
             connection = dataSource.getConnection();
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Preparing SQL: {}", sql);
             }
 
             stmt = connection.prepareStatement(sql);
 
-            if(LOGGER.isDebugEnabled()){
+            if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
             }
 
-            for(int i = 0; i < args.length; i++){
-                stmt.setObject((i+1), args[i]);
+            for (int i = 0; i < args.length; i++) {
+                stmt.setObject(i + 1, args[i]);
             }
             int count = stmt.executeUpdate();
-            if(!connection.getAutoCommit()){
+            if (!connection.getAutoCommit()) {
                 connection.commit();
             }
             return count;
@@ -171,26 +183,6 @@ public class AbstractStore {
         } finally {
             closeSilent(stmt);
             closeSilent(connection);
-        }
-    }
-
-    protected interface ResultSetToObject<T> {
-
-        T toObject(ResultSet resultSet) throws SQLException;
-    }
-
-    protected interface ObjectToStatement<T> {
-
-        void toStatement(T o, PreparedStatement statement) throws SQLException;
-    }
-
-    public static void closeSilent(AutoCloseable closeable){
-        if(closeable != null){
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                LOGGER.info(e.getMessage(), e);
-            }
         }
     }
 
@@ -204,5 +196,15 @@ public class AbstractStore {
 
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
+    }
+
+    protected interface ResultSetToObject<T> {
+
+        T toObject(ResultSet resultSet) throws SQLException;
+    }
+
+    protected interface ObjectToStatement<T> {
+
+        void toStatement(T o, PreparedStatement statement) throws SQLException;
     }
 }

@@ -52,6 +52,11 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
     }
 
     @Override
+    public GlobalTransaction reloadTransaction(String xid) throws ExecutionException, TransactionException {
+        return new MockGlobalTransaction(xid, GlobalStatus.UnKnown);
+    }
+
+    @Override
     public void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus) throws ExecutionException {
 
     }
@@ -65,11 +70,6 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
     @Override
     public void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         
-    }
-
-    @Override
-    public int getTimeout() {
-        return 60000;
     }
 
     @Override

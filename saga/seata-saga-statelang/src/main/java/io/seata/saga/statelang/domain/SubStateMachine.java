@@ -17,13 +17,15 @@ package io.seata.saga.statelang.domain;
 
 /**
  * SubStateMachine
- * @see TaskState
+ *
  * @author lorne.cl
+ * @see TaskState
  */
 public interface SubStateMachine extends TaskState {
 
     /**
      * state machine name
+     *
      * @return
      */
     String getStateMachineName();

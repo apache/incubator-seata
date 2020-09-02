@@ -55,15 +55,14 @@ public class ActionInterceptorHandler {
      */
     public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        Map<String, Object> ret = new HashMap<String, Object>(16);
+        Map<String, Object> ret = new HashMap<>(4);
 
         //TCC name
         String actionName = businessAction.name();
         BusinessActionContext actionContext = new BusinessActionContext();
         actionContext.setXid(xid);
-        //set action anme
+        //set action name
         actionContext.setActionName(actionName);
-        //TODO services
 
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);
@@ -110,7 +109,7 @@ public class ActionInterceptorHandler {
         actionContext.setActionContext(context);
 
         //init applicationData
-        Map<String, Object> applicationContext = new HashMap<String, Object>(4);
+        Map<String, Object> applicationContext = new HashMap<>(4);
         applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
@@ -119,7 +118,7 @@ public class ActionInterceptorHandler {
                 applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
-            String msg = "TCC branch Register error, xid:" + xid;
+            String msg = String.format("TCC branch Register error, xid: %s", xid);
             LOGGER.error(msg, t);
             throw new FrameworkException(t, msg);
         }
@@ -167,20 +166,21 @@ public class ActionInterceptorHandler {
      * @return map map
      */
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
-        Map<String, Object> context = new HashMap<String, Object>(8);
+        Map<String, Object> context = new HashMap<>(8);
 
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
-                    if (null == arguments[i]) {
+                    if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
                     Object paramObject = arguments[i];
                     int index = param.index();
                     //List, get by index
                     if (index >= 0) {
+                        @SuppressWarnings("unchecked")
                         Object targetParam = ((List<Object>)paramObject).get(index);
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));

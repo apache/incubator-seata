@@ -15,8 +15,9 @@
  */
 package io.seata.saga.proctrl.eventing;
 
-import io.seata.common.exception.FrameworkException;
 import java.util.List;
+
+import io.seata.common.exception.FrameworkException;
 
 /**
  * Event bus
@@ -36,6 +37,7 @@ public interface EventBus<E> {
 
     /**
      * get event consumers
+     *
      * @param clazz
      * @return
      */

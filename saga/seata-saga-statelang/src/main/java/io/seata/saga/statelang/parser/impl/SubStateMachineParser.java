@@ -15,16 +15,17 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.ServiceTaskState;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import io.seata.saga.statelang.parser.StateParser;
 import org.springframework.util.StringUtils;
 
-import java.util.Map;
-
 /**
  * SubStateMachineParser
+ *
  * @author lorne.cl
  */
 public class SubStateMachineParser extends AbstractTaskStateParser implements StateParser<SubStateMachine> {
@@ -39,9 +40,10 @@ public class SubStateMachineParser extends AbstractTaskStateParser implements St
         Map<String, Object> nodeMap = (Map<String, Object>)node;
         subStateMachine.setStateMachineName((String)nodeMap.get("StateMachineName"));
 
-        if(StringUtils.isEmpty(subStateMachine.getCompensateState())){
+        if (StringUtils.isEmpty(subStateMachine.getCompensateState())) {
             //build default SubStateMachine compensate state
-            CompensateSubStateMachineStateParser compensateSubStateMachineStateParser = new CompensateSubStateMachineStateParser();
+            CompensateSubStateMachineStateParser compensateSubStateMachineStateParser
+                = new CompensateSubStateMachineStateParser();
             ServiceTaskState subStateMachineCompenState = compensateSubStateMachineStateParser.parse(null);
             subStateMachine.setCompensateStateObject(subStateMachineCompenState);
             subStateMachine.setCompensateState(subStateMachineCompenState.getName());

@@ -20,6 +20,7 @@ import io.seata.saga.statelang.domain.FailEndState;
 
 /**
  * FailEndState
+ *
  * @author lorne.cl
  */
 public class FailEndStateImpl extends BaseState implements FailEndState {

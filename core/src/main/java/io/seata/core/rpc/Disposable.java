@@ -18,7 +18,6 @@ package io.seata.core.rpc;
 /**
  *
  * @author 563868273@qq.com
- * @date 2019/3/29
  */
 public interface Disposable {
 

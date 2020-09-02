@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Net util test.
  *
  * @author Otis.z
- * @date 2019 /2/26
  */
 public class NetUtilTest {
 
@@ -132,7 +131,6 @@ public class NetUtilTest {
         r = r | (Long.parseLong(split[1]) << 32);
         r = r | (Long.parseLong(split[2]) << 24);
         r = r | (Long.parseLong(split[3]) << 16);
-        r = r | 0;
         assertThat(NetUtil.toLong("127.0.0.1")).isEqualTo(r);
 
     }

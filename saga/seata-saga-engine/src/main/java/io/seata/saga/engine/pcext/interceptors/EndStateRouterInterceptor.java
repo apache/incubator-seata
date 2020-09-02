@@ -15,8 +15,11 @@
  */
 package io.seata.saga.engine.pcext.interceptors;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.pcext.InterceptableStateRouter;
 import io.seata.saga.engine.pcext.StateRouterInterceptor;
+import io.seata.saga.engine.pcext.routers.EndStateRouter;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
@@ -24,8 +27,10 @@ import io.seata.saga.statelang.domain.State;
 
 /**
  * EndStateRouter Interceptor
+ *
  * @author lorne.cl
  */
+@LoadLevel(name = "EndState", order = 100)
 public class EndStateRouterInterceptor implements StateRouterInterceptor {
 
     @Override
@@ -34,7 +39,13 @@ public class EndStateRouterInterceptor implements StateRouterInterceptor {
     }
 
     @Override
-    public void postRoute(ProcessContext context, State state, Instruction instruction, Exception e) throws EngineExecutionException {
+    public void postRoute(ProcessContext context, State state, Instruction instruction, Exception e)
+        throws EngineExecutionException {
         EngineUtils.endStateMachine(context);
+    }
+
+    @Override
+    public boolean match(Class<? extends InterceptableStateRouter> clazz) {
+        return clazz != null && EndStateRouter.class.isAssignableFrom(clazz);
     }
 }

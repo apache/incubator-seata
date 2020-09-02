@@ -18,7 +18,6 @@ package io.seata.rm.datasource.sql.struct;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.seata.common.exception.NotSupportYetException;
 
 /**
  * The type Row.
@@ -70,12 +69,9 @@ public class Row {
     public List<Field> primaryKeys() {
         List<Field> pkFields = new ArrayList<>();
         for (Field field : fields) {
-            if (KeyType.PrimaryKey == field.getKeyType()) {
+            if (KeyType.PRIMARY_KEY == field.getKeyType()) {
                 pkFields.add(field);
             }
-        }
-        if (pkFields.size() > 1) {
-            throw new NotSupportYetException("Multi-PK");
         }
         return pkFields;
     }
@@ -88,7 +84,7 @@ public class Row {
     public List<Field> nonPrimaryKeys() {
         List<Field> nonPkFields = new ArrayList<>();
         for (Field field : fields) {
-            if (KeyType.PrimaryKey != field.getKeyType()) {
+            if (KeyType.PRIMARY_KEY != field.getKeyType()) {
                 nonPkFields.add(field);
             }
         }

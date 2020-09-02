@@ -15,6 +15,12 @@
  */
 package io.seata.saga.proctrl;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.seata.saga.proctrl.eventing.impl.AsyncEventBus;
 import io.seata.saga.proctrl.eventing.impl.DirectEventBus;
 import io.seata.saga.proctrl.eventing.impl.ProcessCtrlEventConsumer;
@@ -31,20 +37,15 @@ import io.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 /**
  * ProcessController Tests
+ *
  * @author lorne.cl
  */
 public class ProcessControllerTests {
 
     @Test
-    public void testSimpleProcessCtrl(){
+    public void testSimpleProcessCtrl() {
 
         try {
             ProcessCtrlEventPublisher processCtrlEventPublisher = buildEventPublisher();
@@ -62,7 +63,7 @@ public class ProcessControllerTests {
     }
 
     @Test
-    public void testSimpleProcessCtrlAsync(){
+    public void testSimpleProcessCtrlAsync() {
 
         try {
             ProcessCtrlEventPublisher processCtrlEventPublisher = buildAsyncEventPublisher();
@@ -104,7 +105,8 @@ public class ProcessControllerTests {
         processCtrlEventConsumer.setProcessController(processorController);
 
         AsyncEventBus asyncEventBus = new AsyncEventBus();
-        asyncEventBus.setThreadPoolExecutor(new ThreadPoolExecutor(1, 5, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()));
+        asyncEventBus.setThreadPoolExecutor(
+            new ThreadPoolExecutor(1, 5, 5000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()));
 
         asyncEventPublisher.setEventBus(asyncEventBus);
 

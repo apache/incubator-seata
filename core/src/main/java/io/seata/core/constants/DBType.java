@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
  * database type
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 public enum DBType {
 

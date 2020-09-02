@@ -20,9 +20,9 @@ import io.netty.channel.Channel;
 /**
  * The interface Channel event listener.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
+ * @author slievrly
  */
+@Deprecated
 public interface ChannelEventListener {
     /**
      * On channel connect.

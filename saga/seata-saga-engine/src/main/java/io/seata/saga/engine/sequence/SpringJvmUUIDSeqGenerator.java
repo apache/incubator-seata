@@ -15,13 +15,14 @@
  */
 package io.seata.saga.engine.sequence;
 
+import java.util.List;
+
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
 
-import java.util.List;
-
 /**
  * Based On Spring AlternativeJdkIdGenerator
+ *
  * @author lorne.cl
  */
 public class SpringJvmUUIDSeqGenerator implements SeqGenerator {
@@ -31,8 +32,8 @@ public class SpringJvmUUIDSeqGenerator implements SeqGenerator {
     @Override
     public String generate(String entity, String ruleName, List<Object> shardingParameters) {
         String uuid = idGenerator.generateId().toString();
-        StringBuffer buf = new StringBuffer(uuid.length()-4);
-        for(String seg : uuid.split("-")){
+        StringBuffer buf = new StringBuffer(uuid.length() - 4);
+        for (String seg : uuid.split("-")) {
             buf.append(seg);
         }
         return buf.toString();

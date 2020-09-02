@@ -21,7 +21,6 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessRouter;
 
 /**
- *
  * @author lorne.cl
  */
 public class MockProcessRouter implements ProcessRouter {
@@ -29,15 +28,13 @@ public class MockProcessRouter implements ProcessRouter {
     @Override
     public Instruction route(ProcessContext context) throws FrameworkException {
         System.out.println("MockProcessRouter.route executed. context: " + context);
-        MockInstruction instruction  = context.getInstruction(MockInstruction.class);
-        if(instruction != null){
-            if("one".equals(instruction.getTestString())){
+        MockInstruction instruction = context.getInstruction(MockInstruction.class);
+        if (instruction != null) {
+            if ("one".equals(instruction.getTestString())) {
                 instruction.setTestString("two");
-            }
-            else if("two".equals(instruction.getTestString())){
+            } else if ("two".equals(instruction.getTestString())) {
                 instruction.setTestString("three");
-            }
-            else{
+            } else {
                 instruction.setTestString(null);
                 return null;//end process
             }

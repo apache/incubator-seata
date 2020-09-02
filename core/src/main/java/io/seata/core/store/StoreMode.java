@@ -19,33 +19,46 @@ package io.seata.core.store;
  * transaction log store mode
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 public enum StoreMode {
 
     /**
      * file store
      */
-    FILE,
+    FILE("file"),
 
     /**
      * database store
      */
-    DB;
+    DB("db"),
 
     /**
-     * Valueof store mode.
-     *
-     * @param mode the mode
+     * redis store
+     */
+    REDIS("redis");
+
+    private String name;
+
+    StoreMode(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * get value of store mode
+     * @param name the mode name
      * @return the store mode
      */
-    public static StoreMode valueof(String mode) {
-        for (StoreMode sm : values()) {
-            if (sm.name().equalsIgnoreCase(mode)) {
+    public static StoreMode get(String name) {
+        for (StoreMode sm : StoreMode.class.getEnumConstants()) {
+            if (sm.name.equalsIgnoreCase(name)) {
                 return sm;
             }
         }
-        throw new IllegalArgumentException("unknown store mode:" + mode);
+        throw new IllegalArgumentException("unknown store mode:" + name);
     }
 
 }

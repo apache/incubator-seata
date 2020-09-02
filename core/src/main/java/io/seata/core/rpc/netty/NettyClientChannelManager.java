@@ -27,16 +27,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Netty client pool manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
  */
 class NettyClientChannelManager {
@@ -90,7 +91,7 @@ class NettyClientChannelManager {
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null) {
             channelToServer = getExistAliveChannel(channelToServer, serverAddress);
-            if (null != channelToServer) {
+            if (channelToServer != null) {
                 return channelToServer;
             }
         }
@@ -110,11 +111,11 @@ class NettyClientChannelManager {
      * @param serverAddress server address
      */
     void releaseChannel(Channel channel, String serverAddress) {
-        if (null == channel || null == serverAddress) { return; }
+        if (channel == null || serverAddress == null) { return; }
         try {
             synchronized (channelLocks.get(serverAddress)) {
                 Channel ch = channels.get(serverAddress);
-                if (null == ch) {
+                if (ch == null) {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
                     return;
                 }
@@ -139,7 +140,7 @@ class NettyClientChannelManager {
      * @param channel channel
      */
     void destroyChannel(String serverAddress, Channel channel) {
-        if (null == channel) { return; }
+        if (channel == null) { return; }
         try {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
@@ -159,11 +160,14 @@ class NettyClientChannelManager {
         List<String> availList = null;
         try {
             availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception exx) {
-            LOGGER.error("Failed to get available servers: {}", exx.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
+            return;
         }
         if (CollectionUtils.isEmpty(availList)) {
-            LOGGER.error("no available server to connect.");
+            String serviceGroup = RegistryFactory.getInstance()
+                                                 .getServiceGroup(transactionServiceGroup);
+            LOGGER.error("no available service '{}' found, please make sure registry config correct", serviceGroup);
             return;
         }
         for (String serverAddress : availList) {
@@ -180,7 +184,7 @@ class NettyClientChannelManager {
     }
     
     void registerChannel(final String serverAddress, final Channel channel) {
-        if (null != channels.get(serverAddress) && channels.get(serverAddress).isActive()) {
+        if (channels.get(serverAddress) != null && channels.get(serverAddress).isActive()) {
             return;
         }
         channels.put(serverAddress, channel);
@@ -195,7 +199,7 @@ class NettyClientChannelManager {
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
             NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-            if (null != previousPoolKey && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
+            if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
                 RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
                 ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
             }
@@ -209,15 +213,15 @@ class NettyClientChannelManager {
     }
     
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
-        List<String> availList = new ArrayList<>();
-        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
-            transactionServiceGroup);
-        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
-            for (InetSocketAddress address : availInetSocketAddressList) {
-                availList.add(NetUtil.toStringAddress(address));
-            }
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
+                                                                            .lookup(transactionServiceGroup);
+        if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            return Collections.emptyList();
         }
-        return availList;
+
+        return availInetSocketAddressList.stream()
+                                         .map(NetUtil::toStringAddress)
+                                         .collect(Collectors.toList());
     }
     
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {
@@ -232,7 +236,7 @@ class NettyClientChannelManager {
                     LOGGER.error(exx.getMessage());
                 }
                 rmChannel = channels.get(serverAddress);
-                if (null != rmChannel && rmChannel.isActive()) {
+                if (rmChannel != null && rmChannel.isActive()) {
                     return rmChannel;
                 }
             }

@@ -16,18 +16,25 @@
 package io.seata.rm.datasource.sql.struct;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.sql.serial.SerialArray;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
+import javax.sql.rowset.serial.SerialJavaObject;
+import javax.sql.rowset.serial.SerialRef;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.JDBCType;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
+import java.util.Map;
 
 /**
  * The type Table records.
@@ -128,19 +135,20 @@ public class TableRecords {
     /**
      * Pk rows list.
      *
-     * @return the list
+     * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
      */
-    public List<Field> pkRows() {
-        final String pkName = getTableMeta().getPkName();
-        List<Field> pkRows = new ArrayList<>();
+    public List<Map<String,Field>> pkRows() {
+        final Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
+        List<Map<String,Field>> pkRows = new ArrayList<>();
         for (Row row : rows) {
             List<Field> fields = row.getFields();
+            Map<String,Field> rowMap = new HashMap<>(3);
             for (Field field : fields) {
-                if (field.getName().equalsIgnoreCase(pkName)) {
-                    pkRows.add(field);
-                    break;
+                if (primaryKeyMap.containsKey(field.getName())) {
+                    rowMap.put(field.getName(),field);
                 }
             }
+            pkRows.add(rowMap);
         }
         return pkRows;
     }
@@ -182,26 +190,47 @@ public class TableRecords {
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
                 ColumnMeta col = tmeta.getColumnMeta(colName);
+                int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
-                    field.setKeyType(KeyType.PrimaryKey);
+                if (tmeta.getPrimaryKeyMap().containsKey(colName)) {
+                    field.setKeyType(KeyType.PRIMARY_KEY);
                 }
-                field.setType(col.getDataType());
+                field.setType(dataType);
                 // mysql will not run in this code
                 // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
-                if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
+                if (dataType == JDBCType.BLOB.getVendorTypeNumber()) {
                     Blob blob = resultSet.getBlob(i);
                     if (blob != null) {
                         field.setValue(new SerialBlob(blob));
                     }
-
-                } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
+                } else if (dataType == JDBCType.CLOB.getVendorTypeNumber()) {
                     Clob clob = resultSet.getClob(i);
-                    if (clob != null){
+                    if (clob != null) {
                         field.setValue(new SerialClob(clob));
                     }
+                } else if (dataType == JDBCType.ARRAY.getVendorTypeNumber()) {
+                    Array array = resultSet.getArray(i);
+                    if (array != null) {
+                        field.setValue(new SerialArray(array));
+                    }
+                } else if (dataType == JDBCType.REF.getVendorTypeNumber()) {
+                    Ref ref = resultSet.getRef(i);
+                    if (ref != null) {
+                        field.setValue(new SerialRef(ref));
+                    }
+                } else if (dataType == JDBCType.DATALINK.getVendorTypeNumber()) {
+                    java.net.URL url = resultSet.getURL(i);
+                    if (url != null) {
+                        field.setValue(new SerialDatalink(url));
+                    }
+                } else if (dataType == JDBCType.JAVA_OBJECT.getVendorTypeNumber()) {
+                    Object object = resultSet.getObject(i);
+                    if (object != null) {
+                        field.setValue(new SerialJavaObject(object));
+                    }
                 } else {
+                    // JDBCType.DISTINCT, JDBCType.STRUCT etc...
                     field.setValue(resultSet.getObject(i));
                 }
 
@@ -230,7 +259,7 @@ public class TableRecords {
         }
 
         @Override
-        public List<Field> pkRows() {
+        public List<Map<String,Field>> pkRows() {
             return new ArrayList<>();
         }
 

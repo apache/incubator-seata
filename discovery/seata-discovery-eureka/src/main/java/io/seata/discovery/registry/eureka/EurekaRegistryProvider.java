@@ -21,7 +21,6 @@ import io.seata.discovery.registry.RegistryProvider;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/12
  */
 @LoadLevel(name = "Eureka", order = 1)
 public class EurekaRegistryProvider implements RegistryProvider {

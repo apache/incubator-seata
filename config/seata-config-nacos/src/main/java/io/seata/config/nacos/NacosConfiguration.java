@@ -15,49 +15,64 @@
  */
 package io.seata.config.nacos;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
-import com.alibaba.nacos.api.config.listener.Listener;
+import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * The type Nacos configuration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /2/1
+ * @author slievrly
  */
-public class NacosConfiguration extends AbstractConfiguration<Listener> {
+public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
-    private static final String SEATA_GROUP = "SEATA_GROUP";
+    private static final String DEFAULT_GROUP = "SEATA_GROUP";
+    private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+    private static final String ENDPOINT_KEY = "endpoint";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
+    private static final String USER_NAME = "username";
+    private static final String PASSWORD = "password";
+    private static final String ACCESS_KEY = "accessKey";
+    private static final String SECRET_KEY = "secretKey";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
+    private static final int MAP_INITIAL_CAPACITY = 8;
+    private ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> configListenersMap
+        = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
     /**
      * Get instance of NacosConfiguration
      *
-     * @return
+     * @return instance
      */
     public static NacosConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (NacosConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new NacosConfiguration();
                 }
             }
@@ -68,8 +83,8 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     /**
      * Instantiates a new Nacos configuration.
      */
-    public NacosConfiguration() {
-        if (null == configService) {
+    private NacosConfiguration() {
+        if (configService == null) {
             try {
                 configService = NacosFactory.createConfigService(getConfigProperties());
             } catch (NacosException e) {
@@ -79,13 +94,13 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
         }
         try {
-            value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
+            value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -96,7 +111,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.publishConfig(dataId, SEATA_GROUP, content);
+            result = configService.publishConfig(dataId, getNacosGroup(), content);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -112,7 +127,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.removeConfig(dataId, SEATA_GROUP);
+            result = configService.removeConfig(dataId, getNacosGroup());
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -120,61 +135,150 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     }
 
     @Override
-    public void addConfigListener(String dataId, Listener listener) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (dataId == null || listener == null) {
+            return;
+        }
         try {
-            configService.addListener(dataId, SEATA_GROUP, listener);
-        } catch (NacosException exx) {
-            LOGGER.error(exx.getErrMsg());
+            configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
+            NacosListener nacosListener = new NacosListener(dataId, listener);
+            configListenersMap.get(dataId).put(listener, nacosListener);
+            configService.addListener(dataId, getNacosGroup(), nacosListener);
+        } catch (Exception exx) {
+            LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
         }
     }
 
     @Override
-    public void removeConfigListener(String dataId, Listener listener) {
-        configService.removeListener(dataId, SEATA_GROUP, listener);
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (configChangeListeners == null || listener == null) {
+            return;
+        }
+        for (ConfigurationChangeListener entry : configChangeListeners) {
+            if (listener.equals(entry)) {
+                NacosListener nacosListener = null;
+                if (configListenersMap.containsKey(dataId)) {
+                    nacosListener = configListenersMap.get(dataId).get(listener);
+                    configListenersMap.get(dataId).remove(entry);
+                }
+                if (nacosListener != null) {
+                    configService.removeListener(dataId, getNacosGroup(), nacosListener);
+                }
+                break;
+            }
+        }
     }
 
     @Override
-    public List<Listener> getConfigListeners(String dataId) {
-        throw new NotSupportYetException("not support getConfigListeners");
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
+        if (configListenersMap.containsKey(dataId)) {
+            return configListenersMap.get(dataId).keySet();
+        } else {
+            return null;
+        }
     }
 
     private static Properties getConfigProperties() {
         Properties properties = new Properties();
-        if (null != System.getProperty(PRO_SERVER_ADDR_KEY)) {
+        if (System.getProperty(ENDPOINT_KEY) != null) {
+            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
+            properties.put(ACCESS_KEY, Objects.toString(System.getProperty(ACCESS_KEY), ""));
+            properties.put(SECRET_KEY, Objects.toString(System.getProperty(SECRET_KEY), ""));
+        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
-            if (null != address) {
+            if (address != null) {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
         }
 
-        if (null != System.getProperty(PRO_NAMESPACE_KEY)) {
+        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
             properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
         } else {
             String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
-            if (null == namespace) {
+            if (namespace == null) {
                 namespace = DEFAULT_NAMESPACE;
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
+            : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
+                : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+            }
         }
         return properties;
     }
 
     private static String getNacosNameSpaceFileKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + PRO_NAMESPACE_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
     }
 
     private static String getNacosAddrFileKey() {
-        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-            + PRO_SERVER_ADDR_KEY;
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
+    }
+
+    private static String getNacosGroupKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
+    }
+
+    private static String getNacosUserName() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
+            USER_NAME);
+    }
+
+    private static String getNacosPassword() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
+            PASSWORD);
+    }
+
+    private static String getNacosGroup() {
+        return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
 
     @Override
     public String getTypeName() {
         return CONFIG_TYPE;
+    }
+
+    /**
+     * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination
+     */
+    public static class NacosListener extends AbstractSharedListener {
+        private final String dataId;
+        private final ConfigurationChangeListener listener;
+
+        /**
+         * Instantiates a new Nacos listener.
+         *
+         * @param dataId   the data id
+         * @param listener the listener
+         */
+        public NacosListener(String dataId, ConfigurationChangeListener listener) {
+            this.dataId = dataId;
+            this.listener = listener;
+        }
+
+        /**
+         * Gets target listener.
+         *
+         * @return the target listener
+         */
+        public ConfigurationChangeListener getTargetListener() {
+            return this.listener;
+        }
+
+        @Override
+        public void innerReceive(String dataId, String group, String configInfo) {
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
+                .setNamespace(group);
+            listener.onProcessEvent(event);
+        }
     }
 }

@@ -25,31 +25,36 @@ import java.util.List;
 public interface ServiceTaskState extends TaskState {
 
     /**
-     * Service type，such as SpringBean、SOFA RPC，default is StringBean
+     * Service type: such as SpringBean, SOFA RPC, default is StringBean
+     *
      * @return
      */
     String getServiceType();
 
     /**
      * service name
+     *
      * @return
      */
     String getServiceName();
 
     /**
      * service method
+     *
      * @return
      */
     String getServiceMethod();
 
     /**
      * service method
+     *
      * @return
      */
     List<String> getParameterTypes();
 
     /**
      * Is it necessary to persist the service execution log? default is true
+     *
      * @return
      */
     boolean isPersist();

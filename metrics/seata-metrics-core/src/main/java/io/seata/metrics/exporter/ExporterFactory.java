@@ -45,9 +45,9 @@ public class ExporterFactory {
                 try {
                     exporterType = ExporterType.getType(exporterTypeName);
                     exporters.add(
-                        EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).name()));
+                        EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).getName()));
                 } catch (Exception exx) {
-                    LOGGER.error("not support metrics exporter type: " + exporterTypeName, exx);
+                    LOGGER.error("not support metrics exporter type: {}",exporterTypeName, exx);
                 }
             }
         }
