@@ -59,8 +59,11 @@ import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Transaction;
 
 /**
  * The redis transaction store manager
@@ -69,6 +72,8 @@ import redis.clients.jedis.Pipeline;
  * @author wangzhongxiang 
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManager.class);
 
     /**the prefix of the branchs transaction*/
     private static final String REDIS_SEATA_BRANCHES_PREFIX = "SEATA_BRANCHES_";
@@ -83,6 +88,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     private static volatile RedisTransactionStoreManager instance;
+
+    private static final String OK = "OK";
 
     /**
      * Get the instance.
@@ -126,11 +133,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Pipeline pipelined = jedis.pipelined();
-            pipelined.hmset(branchKey,branchTransactionDOToMap(branchTransactionDO));
-            pipelined.lpush(branchListKey,branchKey);
-            pipelined.sync();
-            return true;
+            String hmset = jedis.hmset(branchKey, branchTransactionDOToMap(branchTransactionDO));
+            if (OK.equalsIgnoreCase(hmset)) {
+                Long lpush = jedis.lpush(branchListKey, branchKey);
+                if (lpush > 0) {
+                    return true;
+                } else {
+                    jedis.del(branchKey);
+                    return false;
+                }
+            } else {
+                return false;
+            }
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -138,11 +152,24 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
-        String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            jedis.del(branchKey);
-            jedis.lrem(branchListKey,0,branchKey);
-            return true;
+            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
+            if (StringUtils.isEmpty(xid)) {
+                return true;
+            }
+            String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
+            Long lrem = jedis.lrem(branchListKey, 0, branchKey);
+            if (lrem > 0) {
+                Long del = jedis.del(branchKey);
+                if (del == 1) {
+                    return true;
+                } else {
+                    jedis.lpush(branchListKey,branchKey);
+                    return false;
+                }
+            }else {
+                return false;
+            }
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -151,29 +178,40 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
-            if (StringUtils.isEmpty(xid)) {
+            String previousBranchStatus = jedis.hget(branchKey, REDIS_KEY_BRANCH_STATUS);
+            if (StringUtils.isEmpty(previousBranchStatus)) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
-            Pipeline pipelined = jedis.pipelined();
-            pipelined.hset(branchKey, REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
-            pipelined.hset(branchKey, REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            pipelined.sync();
-            return true;
+            Map<String,String> map = new HashMap<>(2);
+            map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
+            map.put(REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            String hmset = jedis.hmset(branchKey, map);
+            if (OK.equalsIgnoreCase(hmset)) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
-
     }
 
     private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Pipeline pipelined = jedis.pipelined();
-            pipelined.hmset(globalKey,globalTransactionDOToMap(globalTransactionDO));
-            pipelined.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
-            pipelined.sync();
-            return true;
+            String hmset = jedis.hmset(globalKey, globalTransactionDOToMap(globalTransactionDO));
+            if (OK.equalsIgnoreCase(hmset)) {
+                Long lpush = jedis.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),
+                        globalTransactionDO.getXid());
+                if (lpush > 0) {
+                    return true;
+                } else {
+                    jedis.hdel(globalKey);
+                    return false;
+                }
+            } else {
+                return false;
+            }
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -182,9 +220,27 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            jedis.del(globalKey);
-            jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0,globalTransactionDO.getXid());
-            return true;
+            String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
+            if (StringUtils.isEmpty(xid)) {
+                LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
+                        globalTransactionDO.getXid());
+                return true;
+            }
+            Long lrem = jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0,
+                    globalTransactionDO.getXid());
+            if (lrem > 0) {
+                Long del = jedis.del(globalKey);
+                if (del > 0) {
+                    return true;
+                } else {
+                    jedis.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } catch (Exception ex) {
+            throw new StoreException(ex);
         }
     }
 
@@ -193,13 +249,40 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String previousStatus = jedis.hget(globalKey, REDIS_KEY_GLOBAL_STATUS);
-            Pipeline pipelined = jedis.pipelined();
-            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
-            pipelined.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            pipelined.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
-            pipelined.lpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
-            pipelined.sync();
-            return true;
+            if (StringUtils.isEmpty(previousStatus)) {
+                throw new StoreException("Global transaction is not exist, update global transaction failed.");
+            }
+            String previousGmtModified = jedis.hget(globalKey, REDIS_KEY_GLOBAL_GMT_MODIFIED);
+            Transaction multi = jedis.multi();
+            multi.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
+            multi.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
+            multi.lpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
+            List<Object> exec = multi.exec();
+            long hset1 = (long)exec.get(0);
+            long hset2 = (long)exec.get(1);
+            long lrem  = (long)exec.get(2);
+            long lpush = (long)exec.get(3);
+            if (hset1 == 1 && hset2 == 1 && lrem > 0 && lpush > 0) {
+                return true;
+            } else {
+                // If someone failed, the succeed operations need rollback
+                if (hset1 == 1) {
+                    jedis.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,previousStatus);
+                }
+                if (hset2 == 1) {
+                    jedis.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
+                }
+                if (lrem > 0) {
+                    jedis.lpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);
+                }
+                if (lpush > 0) {
+                    jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0,xid);
+                }
+                return false;
+            }
+        } catch (Exception ex) {
+            throw new StoreException(ex);
         }
     }
 
