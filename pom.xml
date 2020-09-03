@@ -124,9 +124,6 @@
         <!-- for jdbc driver when package  -->
         <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
         <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
-
-        <!-- for antlr4  -->
-        <antlr4.version>4.8</antlr4.version>
     </properties>
 
     <!--test-->
@@ -272,7 +269,9 @@
                                     <failOnMissing>false</failOnMissing>
                                     <licenseMerges>
                                         <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
-                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software License, Version 2.0
+                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License
+                                            v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software
+                                            License, Version 2.0
                                         </licenseMerge>
                                         <licenseMerge>The MIT License|MIT License</licenseMerge>
                                         <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
@@ -339,7 +338,8 @@
                                 <phase>validate</phase>
                                 <configuration>
                                     <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
+                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml
+                                    </suppressionsLocation>
                                     <encoding>UTF-8</encoding>
                                     <consoleOutput>true</consoleOutput>
                                     <failsOnError>true</failsOnError>
@@ -370,7 +370,8 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>${protobuf-maven-plugin.version}</version>
                 <configuration>
-                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/io/seata/protocol/transcation/</protoSourceRoot>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/io/seata/protocol/transcation/
+                    </protoSourceRoot>
                     <protocArtifact>
                         com.google.protobuf:protoc:3.3.0:exe:${os.detected.classifier}
                     </protocArtifact>
@@ -418,6 +419,9 @@
                     </rulesets>
                     <excludes>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/antlr/mysql/parser/*.*</exclude>
+                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
