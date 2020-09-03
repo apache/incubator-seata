@@ -53,8 +53,8 @@ public class TransactionalTemplate {
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
-        // 1.1 get or create a transaction
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        // 1.1 get a transaction
+        GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 
         // 1.2 Handle the Transaction propatation and the branchType
         Propagation propagation = txInfo.getPropagation();
@@ -62,10 +62,15 @@ public class TransactionalTemplate {
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
-                    suspendedResourcesHolder = tx.suspend(true);
+                    if (tx != null) {
+                        suspendedResourcesHolder = tx.suspend(true);
+                    }
                     return business.execute();
                 case REQUIRES_NEW:
-                    suspendedResourcesHolder = tx.suspend(true);
+                    if (tx != null) {
+                        suspendedResourcesHolder = tx.suspend(true);
+                    }
+                    tx = GlobalTransactionContext.createNew();
                     break;
                 case SUPPORTS:
                     if (!existingTransaction()) {
@@ -91,13 +96,16 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
+            if (tx == null) {
+                tx = GlobalTransactionContext.createNew();
+            }
 
             try {
 
-                // 2. begin transaction
+                // 2. begin transaction if the tx role is Launcher
                 beginTransaction(txInfo, tx);
 
-                Object rs = null;
+                Object rs;
                 try {
 
                     // Do Your Business
@@ -120,7 +128,9 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            tx.resume(suspendedResourcesHolder);
+            if (tx != null) {
+                tx.resume(suspendedResourcesHolder);
+            }
         }
 
     }
