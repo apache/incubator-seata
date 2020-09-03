@@ -18,13 +18,14 @@ package io.seata.core.rpc.netty.v1;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.serializer.Serializer;
-import io.seata.core.serializer.SerializerFactory;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +138,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 frame.readBytes(bs);
                 Compressor compressor = CompressorFactory.getCompressor(compressorType);
                 bs = compressor.decompress(bs);
-                Serializer serializer = SerializerFactory.getSerializer(codecType);
+                Serializer serializer = EnhancedServiceLoader.load(Serializer.class, SerializerType.getByCode(rpcMessage.getCodec()).name());
                 rpcMessage.setBody(serializer.deserialize(bs));
             }
         }
