@@ -15,29 +15,6 @@
  */
 package io.seata.server.storage.redis.store;
 
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_BRANCH_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_BRANCH_TYPE;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_CLIENT_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_CREATE;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_RESOURCE_GROUP_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_RESOURCE_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_TRANSACTION_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_APPLICATION_DATA;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_APPLICATION_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_BEGIN_TIME;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_CREATE;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TIMEOUT;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_ID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_NAME;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_SERVICE_GROUP;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
-
 import io.seata.common.util.BeanUtils;
 import io.seata.server.storage.SessionConverter;
 import java.util.ArrayList;
@@ -65,6 +42,29 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
 
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_BRANCH_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_BRANCH_TYPE;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_CLIENT_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_CREATE;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_RESOURCE_GROUP_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_RESOURCE_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_TRANSACTION_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_APPLICATION_DATA;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_APPLICATION_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_BEGIN_TIME;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_CREATE;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TIMEOUT;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_ID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_NAME;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_TRANSACTION_SERVICE_GROUP;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
+
 /**
  * The redis transaction store manager
  *
@@ -81,10 +81,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**the prefix of the branch transaction*/
     private static final String REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
 
-    /**global transaction id PREFIX*/
+    /**the prefix of the global transaction*/
     private static final String REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
 
-    /**the prefix of the seata status*/
+    /**the prefix of the global transaction status*/
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     private static volatile RedisTransactionStoreManager instance;
@@ -167,9 +167,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     jedis.lpush(branchListKey,branchKey);
                     return false;
                 }
-            }else {
-                return false;
             }
+            return false;
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -188,9 +187,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             String hmset = jedis.hmset(branchKey, map);
             if (OK.equalsIgnoreCase(hmset)) {
                 return true;
-            } else {
-                return false;
             }
+            return false;
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -209,9 +207,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     jedis.hdel(globalKey);
                     return false;
                 }
-            } else {
-                return false;
             }
+            return false;
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -236,9 +233,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     jedis.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
                     return false;
                 }
-            } else {
-                return false;
             }
+            return false;
         } catch (Exception ex) {
             throw new StoreException(ex);
         }
@@ -252,6 +248,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (StringUtils.isEmpty(previousStatus)) {
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
+            //Defensive watch to prevent other TC server operating concurrently,Fail fast
+            jedis.watch(globalKey);
             String previousGmtModified = jedis.hget(globalKey, REDIS_KEY_GLOBAL_GMT_MODIFIED);
             Transaction multi = jedis.multi();
             multi.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
@@ -396,7 +394,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis,String xid){
+    private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis,String xid) {
         List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
         String branchListKey = buildBranchListKeyByXid(xid);
         List<String> branchKeys = jedis.lrange(branchListKey, 0, -1);
@@ -404,7 +402,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         if (CollectionUtils.isNotEmpty(branchKeys)) {
             branchKeys.stream().forEachOrdered(branchKey -> pipeline.hgetAll(branchKey));
             List<Object> branchInfos = pipeline.syncAndReturnAll();
-            for (Object branchInfo : branchInfos){
+            for (Object branchInfo : branchInfos) {
                 if (branchInfo != null) {
                     Map<String, String> branchInfoMap = (Map<String, String>) branchInfo;
                     BranchTransactionDO branchTransactionDO =
@@ -421,7 +419,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
 
-    private Map<String,String> branchTransactionDOToMap(BranchTransactionDO branchTransactionDO){
+    private Map<String,String> branchTransactionDOToMap(BranchTransactionDO branchTransactionDO) {
         Map<String,String> map = new HashMap<>(16);
         map.put(REDIS_KEY_BRANCH_XID,branchTransactionDO.getXid());
         map.put(REDIS_KEY_BRANCH_TRANSACTION_ID,String.valueOf(branchTransactionDO.getTransactionId()));
@@ -439,7 +437,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return map;
     }
 
-    private Map<String,String> globalTransactionDOToMap(GlobalTransactionDO globalTransactionDO){
+    private Map<String,String> globalTransactionDOToMap(GlobalTransactionDO globalTransactionDO) {
         Map<String,String> map = new HashMap<>(16);
         map.put(REDIS_KEY_GLOBAL_XID,globalTransactionDO.getXid());
         map.put(REDIS_KEY_GLOBAL_TRANSACTION_ID,String.valueOf(globalTransactionDO.getTransactionId()));
@@ -452,7 +450,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         map.put(REDIS_KEY_GLOBAL_GMT_CREATE,String.valueOf((new Date()).getTime()));
         map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
         map.put(REDIS_KEY_GLOBAL_APPLICATION_DATA,
-                StringUtils.isEmpty(globalTransactionDO.getApplicationData()) ? "":
+                StringUtils.isEmpty(globalTransactionDO.getApplicationData()) ? "" :
                         globalTransactionDO.getApplicationData());
         return map;
     }
@@ -472,7 +470,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return REDIS_SEATA_BRANCH_PREFIX + branchId;
     }
 
-    private String buildGlobalStatus(Integer status){
+    private String buildGlobalStatus(Integer status) {
         return REDIS_SEATA_STATUS_PREFIX + status;
     }
 }
