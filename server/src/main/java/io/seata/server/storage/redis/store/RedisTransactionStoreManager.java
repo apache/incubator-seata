@@ -135,8 +135,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String hmset = jedis.hmset(branchKey, branchTransactionDOToMap(branchTransactionDO));
             if (OK.equalsIgnoreCase(hmset)) {
-                Long lpush = jedis.lpush(branchListKey, branchKey);
-                if (lpush > 0) {
+                Long rpush = jedis.rpush(branchListKey, branchKey);
+                if (rpush > 0) {
                     return true;
                 } else {
                     jedis.del(branchKey);
@@ -164,7 +164,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 if (del == 1) {
                     return true;
                 } else {
-                    jedis.lpush(branchListKey,branchKey);
+                    jedis.rpush(branchListKey,branchKey);
                     return false;
                 }
             }
@@ -199,9 +199,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String hmset = jedis.hmset(globalKey, globalTransactionDOToMap(globalTransactionDO));
             if (OK.equalsIgnoreCase(hmset)) {
-                Long lpush = jedis.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),
+                Long rpush = jedis.rpush(buildGlobalStatus(globalTransactionDO.getStatus()),
                         globalTransactionDO.getXid());
-                if (lpush > 0) {
+                if (rpush > 0) {
                     return true;
                 } else {
                     jedis.hdel(globalKey);
@@ -230,7 +230,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 if (del > 0) {
                     return true;
                 } else {
-                    jedis.lpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
+                    jedis.rpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
                     return false;
                 }
             }
@@ -255,13 +255,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             multi.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
             multi.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
             multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
-            multi.lpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
+            multi.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
             List<Object> exec = multi.exec();
             long hset1 = (long)exec.get(0);
             long hset2 = (long)exec.get(1);
             long lrem  = (long)exec.get(2);
-            long lpush = (long)exec.get(3);
-            if (hset1 == 1 && hset2 == 1 && lrem > 0 && lpush > 0) {
+            long rpush = (long)exec.get(3);
+            if (hset1 == 1 && hset2 == 1 && lrem > 0 && rpush > 0) {
                 return true;
             } else {
                 // If someone failed, the succeed operations need rollback
@@ -272,9 +272,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     jedis.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
                 }
                 if (lrem > 0) {
-                    jedis.lpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);
+                    jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);
                 }
-                if (lpush > 0) {
+                if (rpush > 0) {
                     jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0,xid);
                 }
                 return false;
