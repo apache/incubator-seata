@@ -27,6 +27,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * AntlrMySQLUpdateRecognizer
@@ -62,12 +63,18 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
     @Override
     public List<Object> getUpdateValues() {
 
-        return null;
+        List<MySqlContext.SQL> updateForValues = sqlContext.getUpdateForValues();
+
+        if (updateForValues.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return updateForValues.stream().map(updateValues -> updateValues.getUpdateValue()).collect(Collectors.toList());
     }
 
     @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        return null;
+        return sqlContext.getWhereCondition();
     }
 
     @Override
