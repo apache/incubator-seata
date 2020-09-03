@@ -60,7 +60,6 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
             return connection;
         }
         return getConnectionProxyXA(connection);
-
     }
 
     @Override
