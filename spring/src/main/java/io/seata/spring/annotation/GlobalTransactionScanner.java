@@ -271,11 +271,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
         // Get mustBeLowerThanTransactional, mustBeHigherThanTransactional
         Advice seataAdvice = seataAdvisor.getAdvice();
-        boolean mustBeLowerThanTransactional = false;
-        boolean mustBeHigherThanTransactional = false;
+        SeataInterceptorPosition position = SeataInterceptorPosition.Any;
         if (seataAdvice instanceof SeataInterceptor) {
-            mustBeLowerThanTransactional = ((SeataInterceptor) seataAdvice).mustBeLowerThanTransactional();
-            mustBeHigherThanTransactional = ((SeataInterceptor) seataAdvice).mustBeHigherThanTransactional();
+            position = ((SeataInterceptor) seataAdvice).getPosition();
         }
 
         // Find position
@@ -288,7 +286,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             // If current otherAdvisor is lower or equals than seataAdvisor
             if (OrderUtil.lowerOrEquals(otherAdvisor, seataAdvisor)) {
                 // If isTransactionInterceptor && must be lower than transactional, reset seataOrder to lower order, and returns i+1
-                if (isTransactionInterceptor && mustBeLowerThanTransactional) {
+                if (isTransactionInterceptor && position == SeataInterceptorPosition.AfterTransaction) {
                     int transactionOrder = OrderUtil.getOrder(otherAdvisor);
                     int newSeataOrder = OrderUtil.lower(transactionOrder, 1);
                     LOGGER.warn("The {}'s order '{}' is higher than {}'s order '{}' , reset {}'s order to higher order '{}'.",
@@ -303,7 +301,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
             } else {
                 // If isTransactionInterceptor && must be higher than transactional, reset seataOrder to higher order, and returns current i.
-                if (isTransactionInterceptor && mustBeHigherThanTransactional) {
+                if (isTransactionInterceptor && position == SeataInterceptorPosition.BeforeTransaction) {
                     int otherOrder = OrderUtil.getOrder(otherAdvisor);
                     int newSeataOrder = OrderUtil.higher(otherOrder, 1);
                     LOGGER.warn("The {}'s order '{}' is lower than {}'s order '{}' , reset {}'s order to lower order '{}'.",

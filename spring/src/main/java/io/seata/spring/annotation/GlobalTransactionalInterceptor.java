@@ -336,12 +336,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     @Override
-    public boolean mustBeLowerThanTransactional() {
-        return false;
-    }
-
-    @Override
-    public boolean mustBeHigherThanTransactional() {
-        return true;
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.BeforeTransaction;
     }
 }
