@@ -33,6 +33,8 @@ public abstract class AbstractJedisPooledProvider implements JedisPooledProvider
 
     protected static final int DATABASE = 0;
 
+    protected static final int MAXTOTAL = 100;
+
     protected static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
 }

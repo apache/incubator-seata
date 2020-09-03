@@ -37,6 +37,7 @@ public class UndoJedisPooledProvider extends AbstractJedisPooledProvider {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.CLIENT_UNDO_REDIS_MIN_CONN, MINCONN));
         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.CLIENT_UNDO_REDIS_MAX_CONN, MAXCONN));
+        poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.CLIENT_UNDO_REDIS_MAX_TOTAL, MAXTOTAL));
         JedisPool jedisPool =
             new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.CLIENT_UNDO_REDIS_HOST, HOST),
                 CONFIGURATION.getInt(ConfigurationKeys.CLIENT_UNDO_REDIS_PORT, PORT), 60000, password,
