@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
  * @author slievrly
  */
 public class Constants {
+
     /**
      * The constant IP_PORT_SPLIT_CHAR.
      */
@@ -40,8 +41,15 @@ public class Constants {
      */
     public static final String DBKEYS_SPLIT_CHAR = ",";
 
-    /** the start time of transaction */
-    public static final String START_TIME  = "start-time";
+    /**
+     * The constant ROW_LOCK_KEY_SPLIT_CHAR.
+     */
+    public static final String ROW_LOCK_KEY_SPLIT_CHAR = ";";
+
+    /**
+     * the start time of transaction
+     */
+    public static final String START_TIME = "start-time";
 
     /**
      * app name
@@ -102,7 +110,7 @@ public class Constants {
      * default charset name
      */
     public static final String DEFAULT_CHARSET_NAME = "UTF-8";
-    
+
     /**
      * default charset is utf-8
      */
