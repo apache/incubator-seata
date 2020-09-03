@@ -249,27 +249,28 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
             //Defensive watch to prevent other TC server operating concurrently,Fail fast
-            jedis.watch(globalKey);
+            //jedis.watch(globalKey);
             String previousGmtModified = jedis.hget(globalKey, REDIS_KEY_GLOBAL_GMT_MODIFIED);
             Transaction multi = jedis.multi();
-            multi.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
-            multi.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            Map<String,String> map = new HashMap<>(2);
+            map.put(REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
+            map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            multi.hmset(globalKey,map);
             multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
             multi.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
             List<Object> exec = multi.exec();
-            long hset1 = (long)exec.get(0);
-            long hset2 = (long)exec.get(1);
-            long lrem  = (long)exec.get(2);
-            long rpush = (long)exec.get(3);
-            if (hset1 == 1 && hset2 == 1 && lrem > 0 && rpush > 0) {
+            String hmset = exec.get(0).toString();
+            long lrem  = (long)exec.get(1);
+            long rpush = (long)exec.get(2);
+            if (OK.equalsIgnoreCase(hmset) && lrem > 0 && rpush > 0) {
                 return true;
             } else {
                 // If someone failed, the succeed operations need rollback
-                if (hset1 == 1) {
-                    jedis.hset(globalKey,REDIS_KEY_GLOBAL_STATUS,previousStatus);
-                }
-                if (hset2 == 1) {
-                    jedis.hset(globalKey,REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
+                if (OK.equalsIgnoreCase(hmset)) {
+                    Map<String,String> mapPrevious = new HashMap<>(2);
+                    mapPrevious.put(REDIS_KEY_GLOBAL_STATUS,previousStatus);
+                    mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
+                    jedis.hmset(globalKey,mapPrevious);
                 }
                 if (lrem > 0) {
                     jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);

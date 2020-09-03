@@ -103,6 +103,7 @@ public class RedisSeesionManagerTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
+        branchSession.setClientId("storage-server:192.168.158.80:11934");
         sessionManager.addBranchSession(session, branchSession);
         sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
@@ -129,6 +130,7 @@ public class RedisSeesionManagerTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
+        branchSession.setClientId("storage-server:192.168.158.80:11934");
         sessionManager.addBranchSession(globalSession,branchSession);
     }
 
@@ -153,6 +155,7 @@ public class RedisSeesionManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
+        branchSession.setClientId("storage-server:192.168.158.80:11934");
         sessionManager.addBranchSession(globalSession, branchSession);
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
