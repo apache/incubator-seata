@@ -78,8 +78,9 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
         List<MySqlContext.SQL> insertColumnNames = sqlContext.getInsertColumnNames();
 
-        if (insertColumnNames.isEmpty()) return true;
-
+        if (insertColumnNames.isEmpty()) {
+            return true;
+        }
         return false;
     }
 
@@ -88,7 +89,9 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
         List<MySqlContext.SQL> insertColumnNames = sqlContext.getInsertColumnNames();
 
-        if (insertColumnNames.isEmpty()) return new ArrayList<>();
+        if (insertColumnNames.isEmpty()) {
+            return new ArrayList<>();
+        }
 
         return insertColumnNames.stream().map(insertColumns -> insertColumns.getColumnName()).collect(Collectors.toList());
     }
