@@ -109,9 +109,9 @@ public class BeanUtils {
             }
             return instance;
         } catch (IllegalAccessException e) {
-            throw new NotSupportYetException("map to "+clazz.toString() + " failed:"+e.getMessage());
+            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage());
         } catch (InstantiationException e) {
-            throw new NotSupportYetException("map to "+clazz.toString() + " failed:"+e.getMessage());
+            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage());
         }
     }
 
