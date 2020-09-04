@@ -39,7 +39,7 @@ import redis.clients.jedis.JedisPoolConfig;
 /**
  * @author funkye
  */
-public class RedisSeesionManagerTest {
+public class RedisSessionManagerTest {
     private static RedisServer server = null;
     private static SessionManager sessionManager = null;
 
