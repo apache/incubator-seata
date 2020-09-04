@@ -63,8 +63,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String orgSql = visitor.getOriginalSQL();
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         this.getParamAppenderList(paramAppenderList);
-        String where = " WHERE ";
-        if (orgSql.contains(where)) {
+        String where = " where ";
+        if (orgSql.toLowerCase().contains(where)) {
             suffix.append(orgSql.substring(orgSql.lastIndexOf(where)));
         }
         suffix.append(" FOR UPDATE");
