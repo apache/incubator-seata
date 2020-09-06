@@ -248,8 +248,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (StringUtils.isEmpty(previousStatus)) {
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
-            //Defensive watch to prevent other TC server operating concurrently,Fail fast
-            //jedis.watch(globalKey);
+            // Defensive watch to prevent other TC server operating concurrently,Fail fast
+            jedis.watch(globalKey);
             String previousGmtModified = jedis.hget(globalKey, REDIS_KEY_GLOBAL_GMT_MODIFIED);
             Transaction multi = jedis.multi();
             Map<String,String> map = new HashMap<>(2);
@@ -267,10 +267,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             } else {
                 // If someone failed, the succeed operations need rollback
                 if (OK.equalsIgnoreCase(hmset)) {
-                    Map<String,String> mapPrevious = new HashMap<>(2);
-                    mapPrevious.put(REDIS_KEY_GLOBAL_STATUS,previousStatus);
-                    mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
-                    jedis.hmset(globalKey,mapPrevious);
+                    // Defensive watch to prevent other TC server operating concurrently,give up this operate
+                    jedis.watch(globalKey);
+                    String xid2 = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
+                    if (StringUtils.isNotEmpty(xid2)) {
+                        Map<String,String> mapPrevious = new HashMap<>(2);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_STATUS,previousStatus);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
+                        jedis.multi();
+                        multi.hmset(globalKey,mapPrevious);
+                        multi.exec();
+                    }
                 }
                 if (lrem > 0) {
                     jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);
@@ -425,7 +432,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         map.put(REDIS_KEY_BRANCH_XID,branchTransactionDO.getXid());
         map.put(REDIS_KEY_BRANCH_TRANSACTION_ID,String.valueOf(branchTransactionDO.getTransactionId()));
         map.put(REDIS_KEY_BRANCH_BRANCH_ID,String.valueOf(branchTransactionDO.getBranchId()));
-        map.put(REDIS_KEY_BRANCH_RESOURCE_GROUP_ID,branchTransactionDO.getResourceGroupId());
+        map.put(REDIS_KEY_BRANCH_RESOURCE_GROUP_ID,
+                StringUtils.isEmpty(branchTransactionDO.getResourceGroupId()) ? "" : branchTransactionDO.getResourceGroupId());
         map.put(REDIS_KEY_BRANCH_RESOURCE_ID,branchTransactionDO.getResourceId());
         map.put(REDIS_KEY_BRANCH_BRANCH_TYPE,branchTransactionDO.getBranchType());
         map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
