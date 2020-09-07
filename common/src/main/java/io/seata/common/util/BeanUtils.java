@@ -19,6 +19,7 @@ import io.seata.common.exception.NotSupportYetException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,10 +67,8 @@ public class BeanUtils {
      * @param map the map
      * @param clazz the Object class
      * @return the object
-     * @throws IllegalAccessException
-     * @throws InstantiationException
      */
-    public static Object mapToObject(Map<String,String> map,Class<?> clazz) {
+    public static Object mapToObject(Map<String, String> map, Class<?> clazz) {
         if (CollectionUtils.isEmpty(map)) {
             return null;
         }
@@ -86,33 +85,70 @@ public class BeanUtils {
                 Class<?> type = field.getType();
                 if (type == Date.class) {
                     if (!StringUtils.isEmpty(map.get(field.getName()))) {
-                        field.set(instance,new Date(Long.valueOf(map.get(field.getName()))));
+                        field.set(instance, new Date(Long.valueOf(map.get(field.getName()))));
                     }
                 } else if (type == Long.class) {
                     if (!StringUtils.isEmpty(map.get(field.getName()))) {
-                        field.set(instance,Long.valueOf(map.get(field.getName())));
+                        field.set(instance, Long.valueOf(map.get(field.getName())));
                     }
                 } else if (type == Integer.class) {
                     if (!StringUtils.isEmpty(map.get(field.getName()))) {
-                        field.set(instance,Integer.valueOf(map.get(field.getName())));
+                        field.set(instance, Integer.valueOf(map.get(field.getName())));
                     }
                 } else if (type == Double.class) {
                     if (!StringUtils.isEmpty(map.get(field.getName()))) {
-                        field.set(instance,Double.valueOf(map.get(field.getName())));
+                        field.set(instance, Double.valueOf(map.get(field.getName())));
                     }
                 } else if (type == String.class) {
                     if (!StringUtils.isEmpty(map.get(field.getName()))) {
-                        field.set(instance,map.get(field.getName()));
+                        field.set(instance, map.get(field.getName()));
                     }
                 }
                 field.setAccessible(accessible);
             }
             return instance;
         } catch (IllegalAccessException e) {
-            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage());
+            throw new NotSupportYetException(
+                    "map to " + clazz.toString() + " failed:" + e.getMessage(), e);
         } catch (InstantiationException e) {
-            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage());
+            throw new NotSupportYetException(
+                    "map to " + clazz.toString() + " failed:" + e.getMessage(), e);
         }
+    }
+
+
+    /**
+     * object to map
+     *
+     * @param object the object
+     * @return the map
+     */
+    public static Map<String, String> objectToMap(Object object) {
+        if (object == null) {
+            return null;
+        }
+        Map<String, String> map = new HashMap<>(16);
+        Field[] fields = object.getClass().getDeclaredFields();
+        try {
+            for (Field field : fields) {
+                boolean accessible = field.isAccessible();
+                field.setAccessible(true);
+                if (field.getType() == Date.class) {
+                    Date date = (Date) field.get(object);
+                    if (date != null) {
+                        map.put(field.getName(), String.valueOf(date.getTime()));
+                    }
+                } else {
+                    map.put(field.getName(),
+                            field.get(object) == null ? "" : field.get(object).toString());
+                }
+                field.setAccessible(accessible);
+            }
+        } catch (IllegalAccessException e) {
+            throw new NotSupportYetException(
+                    "object " + object.getClass().toString() + " to map failed:" + e.getMessage());
+        }
+        return map;
     }
 
 }

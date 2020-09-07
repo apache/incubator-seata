@@ -30,22 +30,32 @@ import org.junit.jupiter.api.Test;
 public class BeanUtilsTest {
 
     @Test
-    public void testMapToObject(){
-        Map<String,String> map = new HashMap<>();
+    public void testMapToObject() {
+        Map<String, String> map = new HashMap<>();
         Date date = new Date();
-        map.put("xid","192.166.166.11:9010:12423424234234");
-        map.put("transactionId","12423424234234");
-        map.put("status","2");
-        map.put("test","22.22");
-        map.put("gmtCreate",String.valueOf(date.getTime()));
+        map.put("xid", "192.166.166.11:9010:12423424234234");
+        map.put("transactionId", "12423424234234");
+        map.put("status", "2");
+        map.put("test", "22.22");
+        map.put("gmtCreate", String.valueOf(date.getTime()));
         BranchDO branchDO =
-                (BranchDO)BeanUtils.mapToObject(map, BranchDO.class);
-        Assertions.assertEquals("192.166.166.11:9010:12423424234234",branchDO.getXid());
-        Assertions.assertEquals(12423424234234L,branchDO.getTransactionId());
-        Assertions.assertEquals(2,branchDO.getStatus());
-        Assertions.assertEquals(new Date(date.getTime()),branchDO.getGmtCreate());
-
+                (BranchDO) BeanUtils.mapToObject(map, BranchDO.class);
+        Assertions.assertEquals(map.get("xid"), branchDO.getXid());
+        Assertions.assertEquals(Long.valueOf(map.get("transactionId")), branchDO.getTransactionId());
+        Assertions.assertEquals(Integer.valueOf(map.get("status")), branchDO.getStatus());
+        Assertions.assertEquals(Double.valueOf(map.get("test")), branchDO.getTest());
+        Assertions.assertEquals(new Date(date.getTime()), branchDO.getGmtCreate());
     }
 
+    @Test
+    public void testObjectToMap() {
+        BranchDO branchDO = new BranchDO("xid123123", 123L, 1, 2.2, new Date());
+        Map<String, String> map = BeanUtils.objectToMap(branchDO);
+        Assertions.assertEquals(branchDO.getXid(), map.get("xid"));
+        Assertions.assertEquals(branchDO.getTransactionId(), Long.valueOf(map.get("transactionId")));
+        Assertions.assertEquals(branchDO.getStatus(), Integer.valueOf(map.get("status")));
+        Assertions.assertEquals(branchDO.getTest(), Double.valueOf(map.get("test")));
+        Assertions.assertEquals(branchDO.getGmtCreate().toString(), map.get("gmtCreate"));
+    }
 
 }

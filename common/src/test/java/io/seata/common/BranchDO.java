@@ -32,4 +32,16 @@ public class BranchDO {
     public Date getGmtCreate() {
         return gmtCreate;
     }
+
+    public BranchDO() {
+    }
+
+    public BranchDO(String xid, Long transactionId, Integer status, Double test,
+            Date gmtCreate) {
+        this.xid = xid;
+        this.transactionId = transactionId;
+        this.status = status;
+        this.test = test;
+        this.gmtCreate = gmtCreate;
+    }
 }
