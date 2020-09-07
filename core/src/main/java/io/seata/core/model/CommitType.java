@@ -32,16 +32,10 @@ public enum CommitType {
      */
     AsyncCommit(1),
 
-    // This type will be provided later
-    ///**
-    // * The lazy commit.
-    // */
-    //LazyCommit(2),
-
     /**
      * The no commit.
      */
-    NoCommit(3),
+    NoCommit(2),
     ;
 
     private int code;
