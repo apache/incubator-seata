@@ -55,7 +55,7 @@ public class BeanUtilsTest {
         Assertions.assertEquals(branchDO.getTransactionId(), Long.valueOf(map.get("transactionId")));
         Assertions.assertEquals(branchDO.getStatus(), Integer.valueOf(map.get("status")));
         Assertions.assertEquals(branchDO.getTest(), Double.valueOf(map.get("test")));
-        Assertions.assertEquals(branchDO.getGmtCreate().toString(), map.get("gmtCreate"));
+        Assertions.assertEquals(branchDO.getGmtCreate().getTime(),Long.valueOf(map.get("gmtCreate")));
     }
 
 }
