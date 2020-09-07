@@ -61,13 +61,6 @@ public class SessionConverterTest {
         Assertions.assertEquals(globalTransactionDO.getTimeout(),globalSession.getTimeout());
         Assertions.assertEquals(globalTransactionDO.getBeginTime(),globalSession.getBeginTime());
         Assertions.assertEquals(globalTransactionDO.getApplicationData(),globalSession.getApplicationData());
-
-        Assertions.assertEquals("192.168.158.80:8091:39372760251957248",globalSession.getXid());
-        Assertions.assertEquals(39372760251957248L,globalSession.getTransactionId());
-        Assertions.assertEquals(GlobalStatus.Begin,globalSession.getStatus());
-        Assertions.assertEquals(60,globalSession.getTimeout());
-        Assertions.assertEquals(now,globalSession.getBeginTime());
-        Assertions.assertEquals(date,globalTransactionDO.getGmtCreate());
     }
 
     @Test
