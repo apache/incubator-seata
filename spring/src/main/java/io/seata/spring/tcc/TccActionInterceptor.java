@@ -27,6 +27,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -36,9 +37,10 @@ import java.util.Map;
  *
  * @author zhangsen
  */
-public class TccActionInterceptor implements MethodInterceptor {
+public class TccActionInterceptor implements MethodInterceptor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
+    private static final int ORDER_NUM = Ordered.LOWEST_PRECEDENCE;
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
@@ -137,5 +139,10 @@ public class TccActionInterceptor implements MethodInterceptor {
             //jdk/cglib proxy
             return SpringProxyUtils.getTargetInterface(proxyBean);
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER_NUM;
     }
 }

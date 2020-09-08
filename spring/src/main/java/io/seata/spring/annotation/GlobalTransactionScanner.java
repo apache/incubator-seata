@@ -29,6 +29,7 @@ import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.tcc.TccActionInterceptor;
+import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
@@ -48,6 +49,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
@@ -232,8 +234,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 } else {
                     AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
                     Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
+                    // add the advisor to the advised by the order value
+                    Integer avrOrder;
                     for (Advisor avr : advisor) {
-                        advised.addAdvisor(0, avr);
+                        avrOrder = OrderUtil.getOrder(avr);
+                        if (avrOrder == null || avrOrder == Ordered.LOWEST_PRECEDENCE) {
+                            advised.addAdvisor(avr);
+                        } else if (avrOrder == Ordered.HIGHEST_PRECEDENCE) {
+                            advised.addAdvisor(0, avr);
+                        } else {
+                            int pos = getAddAdvisorPos(advised, avr, avrOrder);
+                            advised.addAdvisor(pos, avr);
+                        }
                     }
                 }
                 PROXYED_SET.add(beanName);
@@ -242,6 +254,20 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         } catch (Exception exx) {
             throw new RuntimeException(exx);
         }
+    }
+
+    private int getAddAdvisorPos(AdvisedSupport advised, Advisor avr, int avrOrder) {
+        Integer order;
+        Advisor advisor;
+        for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
+            advisor = advised.getAdvisors()[i];
+            order = OrderUtil.getOrder(advisor);
+            if (order == null || order > avrOrder ||
+                    (order == avrOrder && avr.getClass().getSimpleName().compareTo(advisor.getClass().getSimpleName()) != 1)) {
+                return i;
+            }
+        }
+        return advised.getAdvisors().length - 1;
     }
 
     private boolean existsAnnotation(Class<?>[] classes) {

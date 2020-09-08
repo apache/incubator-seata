@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.Ordered;
 import org.springframework.util.ClassUtils;
 
 import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
@@ -49,9 +50,10 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANS
  *
  * @author slievrly
  */
-public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor {
+public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
+    private static final int ORDER_NUM = Ordered.HIGHEST_PRECEDENCE + 1000;
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
@@ -185,5 +187,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER_NUM;
     }
 }
