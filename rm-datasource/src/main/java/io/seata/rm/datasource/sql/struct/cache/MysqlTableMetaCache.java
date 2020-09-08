@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Objects;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -140,7 +141,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
-            while (vsColumns.next()) {
+            while (Objects.nonNull(vsColumns) && vsColumns.next()) {
                 String columnName = vsColumns.getString("COLUMN_NAME");
                 int dataType = vsColumns.getInt("DATA_TYPE");
                 ColumnMeta col = tm.getAllColumns().get(columnName);
