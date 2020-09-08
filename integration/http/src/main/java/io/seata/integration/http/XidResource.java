@@ -16,6 +16,7 @@
 package io.seata.integration.http;
 
 import io.seata.core.context.RootContext;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public class XidResource {
 
     public static void cleanXid(String rpcXid) {
         String xid = RootContext.getXID();
-        if (xid != null) {
+        if (xid != null && StringUtils.isNotEmpty(rpcXid)) {
             String unbindXid = RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("unbind[{}] from RootContext", unbindXid);
