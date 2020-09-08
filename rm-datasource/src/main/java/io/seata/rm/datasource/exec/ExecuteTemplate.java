@@ -92,31 +92,24 @@ public class ExecuteTemplate {
         if (!Seata.EWELL_SEATA_STATE_IS_ON || (!RootContext.requireGlobalLock()&& !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType()))) {
             String dbType = statementProxy.getConnectionProxy().getDbType();
             if (CollectionUtils.isEmpty(sqlRecognizers)) {
-                sqlRecognizers = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    dbType);
+                sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(), dbType);
             }
-            if (sqlRecognizer != null && "true".equals(System.getProperty("dataTrace"))) {
-                NoSeata executor = null;
+            if (sqlRecognizers != null && "true".equals(System.getProperty("dataTrace"))) {
+                NoSeata<T> executor;
                 if (sqlRecognizers.size() == 1) {
                     SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                     switch (sqlRecognizer.getSQLType()) {
                         case INSERT:
-                            executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
-                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                            executor = new InsertExecutorNoSeata<>(statementProxy, statementCallback, sqlRecognizer);
                             break;
                         case UPDATE:
-                            executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            executor = new UpdateExecutorNoSeata<>(statementProxy, statementCallback, sqlRecognizer);
                             break;
                         case DELETE:
-                            executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                            break;
-                        case SELECT_FOR_UPDATE:
-                            executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            executor = new DeleteExecutorNoSeata<>(statementProxy, statementCallback, sqlRecognizer);
                             break;
                         default:
-                            executor = new PlainExecutor<>(statementProxy, statementCallback);
+                            executor = null;
                             break;
                     }
                 } else {
