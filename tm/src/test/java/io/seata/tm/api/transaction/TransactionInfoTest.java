@@ -32,6 +32,7 @@ public class TransactionInfoTest {
     private static final String IO_EXCEPTION_SHORT_NAME = "IOException";
     private static final String NAME = "test";
     private static final int TIME_OUT = 30000;
+    private static final String PROPAGATION = Propagation.REQUIRED.name();
 
 
     /**
@@ -41,6 +42,7 @@ public class TransactionInfoTest {
     public void testFieldGetSetFromJson() {
         String fromJson = "{\n" +
                 "\t\"name\":\""+ NAME +"\",\n" +
+                "\t\"propagation\":\""+ PROPAGATION +"\",\n"+
                 "\t\"rollbackRules\":[{\n" +
                 "\t\t\"exceptionName\":\""+ IllegalStateException.class.getName() +"\"\n" +
                 "\t},{\n" +

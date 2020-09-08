@@ -12,3 +12,5 @@ CREATE TABLE IF NOT EXISTS public.undo_log
     CONSTRAINT pk_undo_log PRIMARY KEY (id),
     CONSTRAINT ux_undo_log UNIQUE (xid, branch_id)
 );
+
+CREATE SEQUENCE IF NOT EXISTS undo_log_id_seq INCREMENT BY 1 MINVALUE 1 ;

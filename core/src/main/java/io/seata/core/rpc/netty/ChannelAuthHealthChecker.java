@@ -25,6 +25,7 @@ import io.netty.util.concurrent.Future;
  *
  * @author slievrly
  */
+@Deprecated
 public interface ChannelAuthHealthChecker extends ChannelHealthChecker {
     /**
      * The constant ACTIVE.

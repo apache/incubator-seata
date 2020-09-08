@@ -47,6 +47,38 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.1.1</version>
+                        <executions>
+                            <execution>
+                                <id>copy-mysql</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>mysql</groupId>
+                                            <artifactId>mysql-connector-java</artifactId>
+                                            <version>${mysql.jdbc.version}</version>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>mysql</groupId>
+                                            <artifactId>mysql-connector-java</artifactId>
+                                            <version>${mysql8.jdbc.version}</version>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>
+                                        ${basedir}/lib/jdbc
+                                    </outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>3.0.0</version>
                         <configuration>

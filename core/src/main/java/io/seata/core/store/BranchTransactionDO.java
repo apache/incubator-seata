@@ -29,9 +29,9 @@ public class BranchTransactionDO {
 
     private String xid;
 
-    private long transactionId;
+    private Long transactionId;
 
-    private long branchId;
+    private Long branchId;
 
     private String resourceGroupId;
 
@@ -39,7 +39,7 @@ public class BranchTransactionDO {
 
     private String branchType;
 
-    private int status = BranchStatus.Unknown.getCode();
+    private Integer status = BranchStatus.Unknown.getCode();
 
     private String clientId;
 

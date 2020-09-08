@@ -30,11 +30,8 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleKeywordChecker implements KeywordChecker {
-    private static Set<String> keywordSet;
 
-    static {
-        keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
-    }
+    private Set<String> keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
 
     /**
      * oracle keyword
@@ -495,7 +492,7 @@ public class OracleKeywordChecker implements KeywordChecker {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
-        if (null != fieldOrTableName) {
+        if (fieldOrTableName != null) {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
@@ -512,12 +509,6 @@ public class OracleKeywordChecker implements KeywordChecker {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
-        //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
     }
 
     private static boolean isUppercase(String fieldOrTableName) {

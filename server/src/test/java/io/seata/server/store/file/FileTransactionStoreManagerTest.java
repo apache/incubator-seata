@@ -19,10 +19,11 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionManager;
-import io.seata.server.session.file.FileBasedSessionManager;
+import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionWriteStore;
+import io.seata.server.storage.file.TransactionWriteStore;
+import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -66,7 +67,7 @@ public class FileTransactionStoreManagerTest {
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
         } finally {
-            if (null != fileTransactionStoreManager) {
+            if (fileTransactionStoreManager != null) {
                 fileTransactionStoreManager.shutdown();
             }
             Assertions.assertTrue(seataFile.delete());
@@ -78,7 +79,7 @@ public class FileTransactionStoreManagerTest {
         File seataFile = Files.newTemporaryFile();
         Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
-        FileBasedSessionManager sessionManager = null;
+        FileSessionManager sessionManager = null;
         FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
             List<GlobalSession> timeoutSessions = new ArrayList<>();
@@ -105,7 +106,7 @@ public class FileTransactionStoreManagerTest {
                 seataFile.getAbsolutePath(), sessionManagerMock);
             Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileTransactionStoreManager));
 
-            sessionManager = new FileBasedSessionManager(seataFile.getName(), seataFile.getParent());
+            sessionManager = new FileSessionManager(seataFile.getName(), seataFile.getParent());
             sessionManager.reload();
             Collection<GlobalSession> globalSessions = sessionManager.allSessions();
             Assertions.assertNotNull(globalSessions);
@@ -118,10 +119,10 @@ public class FileTransactionStoreManagerTest {
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
-            if (null != fileTransactionStoreManager) {
+            if (fileTransactionStoreManager != null) {
                 fileTransactionStoreManager.shutdown();
             }
-            if (null != sessionManager) {
+            if (sessionManager != null) {
                 sessionManager.destroy();
             }
             Assertions.assertTrue(seataFile.delete());

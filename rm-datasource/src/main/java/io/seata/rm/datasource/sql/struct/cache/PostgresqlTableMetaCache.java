@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -22,15 +26,7 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * The type Table meta cache.
@@ -39,8 +35,6 @@ import java.sql.Statement;
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
-
-    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -64,21 +58,13 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        Statement stmt = null;
         try {
-            stmt = connection.createStatement();
             DatabaseMetaData dbmd = connection.getMetaData();
-            tableName = keywordChecker.checkAndReplace(tableName);
             return resultSetMetaToSchema(dbmd, tableName);
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
         }
     }
 
@@ -100,11 +86,23 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
          * select * from "Select"
          * select * from "Sel""ect"
          * select * from "Sel'ect"
+         * select * from TEST.test
+         * select * from test.TEST
+         * select * from "Test".test
+         * select * from "Test"."Select"
          */
-        if (null != schemaName) {
-            schemaName = schemaName.replaceAll("(^\")|(\"$)", "");
+        if (schemaName != null) {
+            if (schemaName.startsWith("\"") && schemaName.endsWith("\"")) {
+                schemaName = schemaName.replaceAll("(^\")|(\"$)", "");
+            } else {
+                schemaName = schemaName.toLowerCase();
+            }
         }
-        tableName = tableName.replaceAll("(^\")|(\"$)", "");
+        if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
+            tableName = tableName.replaceAll("(^\")|(\"$)", "");
+        } else {
+            tableName = tableName.toLowerCase();
+        }
 
         try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -125,7 +123,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setColumnDef(rsColumns.getString("COLUMN_DEF"));
                 col.setSqlDataType(rsColumns.getInt("SQL_DATA_TYPE"));
                 col.setSqlDatetimeSub(rsColumns.getInt("SQL_DATETIME_SUB"));
-                col.setCharOctetLength(rsColumns.getInt("CHAR_OCTET_LENGTH"));
+                col.setCharOctetLength(rsColumns.getObject("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));

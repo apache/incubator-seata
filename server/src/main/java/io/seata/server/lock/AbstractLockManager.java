@@ -47,13 +47,13 @@ public abstract class AbstractLockManager implements LockManager {
         }
         String lockKey = branchSession.getLockKey();
         if (StringUtils.isNullOrEmpty(lockKey)) {
-            //no lock
+            // no lock
             return true;
         }
-        //get locks of branch
+        // get locks of branch
         List<RowLock> locks = collectRowLocks(branchSession);
         if (CollectionUtils.isEmpty(locks)) {
-            //no lock
+            // no lock
             return true;
         }
         return getLocker(branchSession).acquireLock(locks);
@@ -75,6 +75,10 @@ public abstract class AbstractLockManager implements LockManager {
 
     @Override
     public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
+        if (StringUtils.isBlank(lockKey)) {
+            // no lock
+            return true;
+        }
         List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
         try {
             return getLocker().isLockable(locks);
@@ -105,9 +109,7 @@ public abstract class AbstractLockManager implements LockManager {
      * @param branchSession the branch session
      * @return the locker
      */
-    protected Locker getLocker(BranchSession branchSession) {
-        return LockerFactory.get(branchSession);
-    }
+    protected abstract Locker getLocker(BranchSession branchSession);
 
     /**
      * Collect row locks list.`

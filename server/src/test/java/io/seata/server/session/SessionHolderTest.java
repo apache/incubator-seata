@@ -48,7 +48,7 @@ public class SessionHolderTest {
         if (rootSessionFile.exists()) {
             rootSessionFile.delete();
         }
-        final String mode = StoreMode.FILE.toString();
+        final String mode = StoreMode.FILE.getName();
         SessionHolder.init(mode);
         try {
             final File actual = new File(pathname);

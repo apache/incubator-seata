@@ -29,9 +29,9 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockerFactory;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -55,12 +55,12 @@ public abstract class AbstractCore implements Core {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractCore.class);
 
-    protected LockManager lockManager = LockerFactory.getLockManager();
+    protected LockManager lockManager = LockerManagerFactory.getLockManager();
 
-    protected ServerMessageSender messageSender;
+    protected RemotingServer remotingServer;
 
-    public AbstractCore(ServerMessageSender messageSender) {
-        this.messageSender = messageSender;
+    public AbstractCore(RemotingServer remotingServer) {
+        this.remotingServer = remotingServer;
     }
 
     public abstract BranchType getHandleBranchType();
@@ -69,7 +69,7 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        return globalSession.lockAndExecute(() -> {
+        return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
@@ -83,17 +83,19 @@ public abstract class AbstractCore implements Core {
                         .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
                                 branchSession.getBranchId()), ex);
             }
-            LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(),
-                    branchSession.getBranchId());
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
+                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+            }
             return branchSession.getBranchId();
         });
     }
 
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
         if (!globalSession.isActive()) {
-            throw new GlobalTransactionException(GlobalTransactionNotActive, String
-                    .format("Could not register branch into global session xid = %s status = %s",
-                            globalSession.getXid(), globalSession.getStatus()));
+            throw new GlobalTransactionException(GlobalTransactionNotActive, String.format(
+                "Could not register branch into global session xid = %s status = %s, cause by globalSession not active",
+                globalSession.getXid(), globalSession.getStatus()));
         }
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
@@ -115,7 +117,7 @@ public abstract class AbstractCore implements Core {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid, withBranchSessions);
         if (globalSession == null) {
             throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist,
-                    String.format("Could not found global transaction xid = %s", xid));
+                    String.format("Could not found global transaction xid = %s, may be has finished.", xid));
         }
         return globalSession;
     }
@@ -132,8 +134,10 @@ public abstract class AbstractCore implements Core {
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
 
-        LOGGER.info("Successfully branch report xid = {}, branchId = {}", globalSession.getXid(),
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Report branch status successfully, xid = {}, branchId = {}", globalSession.getXid(),
                 branchSession.getBranchId());
+        }
     }
 
     @Override
@@ -161,7 +165,7 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
                                             BranchSession branchSession) throws IOException, TimeoutException {
-        BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(
+        BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }
@@ -185,7 +189,7 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                               BranchSession branchSession) throws IOException, TimeoutException {
-        BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(
+        BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }

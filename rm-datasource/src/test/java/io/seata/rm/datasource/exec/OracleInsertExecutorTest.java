@@ -19,11 +19,12 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,7 +64,10 @@ public class OracleInsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private InsertExecutor insertExecutor;
+    private OracleInsertExecutor insertExecutor;
+
+    private final int pkIndex = 0;
+    private HashMap<String, Integer> pkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -77,7 +80,11 @@ public class OracleInsertExecutorTest {
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        pkIndexMap = new HashMap<String, Integer>() {{
+            put(ID_COLUMN, pkIndex);
+        }};
     }
 
     @Test
@@ -85,16 +92,16 @@ public class OracleInsertExecutorTest {
         mockInsertColumns();
         SqlSequenceExpr expr = mockParametersPkWithSeq();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
         List<Object> pkValuesSeq = new ArrayList<>();
         pkValuesSeq.add(PK_VALUE);
 
         doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr);
-        doReturn(0).when(insertExecutor).getPkIndex();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
 
-        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        Map<String,List<Object>> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         verify(insertExecutor).getPkValuesBySequence(expr);
-        Assertions.assertEquals(pkValuesByColumn, pkValuesSeq);
+        Assertions.assertEquals(pkValuesByColumn.get(ID_COLUMN), pkValuesSeq);
     }
 
     @Test
@@ -102,15 +109,12 @@ public class OracleInsertExecutorTest {
         mockInsertColumns();
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValuesAuto = new ArrayList<>();
-        pkValuesAuto.add(PK_VALUE);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));;
+        doReturn(Arrays.asList(new Object[]{PK_VALUE})).when(insertExecutor).getGeneratedKeys();
+        Map<String,List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
 
-        doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
-        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-
-        verify(insertExecutor).getPkValuesByAuto();
-        Assertions.assertEquals(pkValuesByAuto, pkValuesAuto);
+        verify(insertExecutor).getGeneratedKeys();
+        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE}));
     }
 
     @Test
@@ -122,7 +126,7 @@ public class OracleInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
 
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 
@@ -131,23 +135,22 @@ public class OracleInsertExecutorTest {
         doReturn(map).when(tableMeta).getPrimaryKeyMap();
 
         ResultSet rs = mock(ResultSet.class);
-        Statement statement = mock(Statement.class);
-        doReturn(statement).when(statementProxy).getTargetStatement();
-        doReturn(rs).when(statement).getGeneratedKeys();
+        doReturn(rs).when(statementProxy).getGeneratedKeys();
         doReturn(false).when(rs).next();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
-            insertExecutor.getPkValuesByAuto();
+            insertExecutor.getGeneratedKeys();
         });
 
-        int pkIndex = 0;
-        doReturn(pkIndex).when(insertExecutor).getPkIndex();
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             insertExecutor.getPkValuesByColumn();
         });
 
     }
+
+
 
     private List<String> mockInsertColumns() {
         List<String> columns = new ArrayList<>();
@@ -161,7 +164,7 @@ public class OracleInsertExecutorTest {
 
     private SqlSequenceExpr mockParametersPkWithSeq() {
         SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(expr);
         ArrayList arrayList1 = new ArrayList<>();
@@ -170,22 +173,22 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
 
         return expr;
     }
 
     private void mockParametersPkWithAuto() {
-        ArrayList<Object>[] paramters = new ArrayList[4];
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -194,22 +197,22 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters[0] = arrayList0;
-        paramters[1] = arrayList1;
-        paramters[2] = arrayList2;
-        paramters[3] = arrayList3;
+        paramters.put(1, arrayList0);
+        paramters.put(2, arrayList1);
+        paramters.put(3, arrayList2);
+        paramters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
     private void mockStatementInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
 
 

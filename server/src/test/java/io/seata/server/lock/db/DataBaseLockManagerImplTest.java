@@ -18,11 +18,12 @@ package io.seata.server.lock.db;
 import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
-import io.seata.core.store.db.LockStoreDataBaseDAO;
-import io.seata.server.lock.DefaultLockManager;
+import io.seata.server.storage.db.lock.LockStoreDataBaseDAO;
+import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.lock.LockManager;
+import io.seata.server.storage.db.lock.DataBaseLocker;
 import io.seata.server.session.BranchSession;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -257,7 +258,7 @@ public class DataBaseLockManagerImplTest {
         }
     }
 
-    public static class DBLockManagerForTest extends DefaultLockManager {
+    public static class DBLockManagerForTest extends FileLockManager {
 
         protected LockStoreDataBaseDAO lockStore;
 
@@ -266,7 +267,7 @@ public class DataBaseLockManagerImplTest {
         }
 
         @Override
-        protected Locker getLocker(BranchSession branchSession) {
+        public Locker getLocker(BranchSession branchSession) {
             DataBaseLocker locker =  new DataBaseLocker();
             locker.setLockStore(lockStore);
             return locker;

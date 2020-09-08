@@ -19,7 +19,11 @@ import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
 import io.seata.core.constants.Seata;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
 import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
@@ -36,6 +40,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.lang.time.DateFormatUtils;
+import java.util.List;
 
 /**
  * The type Execute template.
@@ -66,14 +71,14 @@ public class ExecuteTemplate {
      *
      * @param <T>               the type parameter
      * @param <S>               the type parameter
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizers    the sql recognizer list
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
      * @param args              the args
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
+    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
@@ -84,29 +89,38 @@ public class ExecuteTemplate {
         }
 
         //如果配置是seata.enabled=false则关闭分布式事务
-        if (!Seata.EWELL_SEATA_STATE_IS_ON || (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock())) {
-            if (sqlRecognizer == null) {
-                try {
-                    sqlRecognizer = SQLVisitorFactory.get(statementProxy.getTargetSQL(), statementProxy.getConnectionProxy().getDbType());
-                } catch (Throwable t) {
-
-                }
+        if (!Seata.EWELL_SEATA_STATE_IS_ON || (!RootContext.requireGlobalLock()&& !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType()))) {
+            String dbType = statementProxy.getConnectionProxy().getDbType();
+            if (CollectionUtils.isEmpty(sqlRecognizers)) {
+                sqlRecognizers = SQLVisitorFactory.get(
+                    statementProxy.getTargetSQL(),
+                    dbType);
             }
             if (sqlRecognizer != null && "true".equals(System.getProperty("dataTrace"))) {
                 NoSeata executor = null;
-                switch (sqlRecognizer.getSQLType()) {
-                    case INSERT:
-                        executor = new InsertExecutorNoSeata<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                        break;
-                    case UPDATE:
-                        executor = new UpdateExecutorNoSeata<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                        break;
-                    case DELETE:
-                        executor = new DeleteExecutorNoSeata<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                        break;
-                    default:
-                        executor = null;
-                        break;
+                if (sqlRecognizers.size() == 1) {
+                    SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                    switch (sqlRecognizer.getSQLType()) {
+                        case INSERT:
+                            executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                            break;
+                        case UPDATE:
+                            executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            break;
+                        case DELETE:
+                            executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            break;
+                        case SELECT_FOR_UPDATE:
+                            executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            break;
+                        default:
+                            executor = new PlainExecutor<>(statementProxy, statementCallback);
+                            break;
+                    }
+                } else {
+                    executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
                 }
                 if (executor != null) {
                     //保存数据前后镜像
@@ -147,31 +161,39 @@ public class ExecuteTemplate {
             }
         }
 
-        if (sqlRecognizer == null) {
-            sqlRecognizer = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+        String dbType = statementProxy.getConnectionProxy().getDbType();
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
+            sqlRecognizers = SQLVisitorFactory.get(
+                statementProxy.getTargetSQL(),
+                dbType);
         }
         Executor<T> executor;
-        if (sqlRecognizer == null) {
+        if (CollectionUtils.isEmpty(sqlRecognizers)) {
             executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
-            switch (sqlRecognizer.getSQLType()) {
-                case INSERT:
-                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case UPDATE:
-                    executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case DELETE:
-                    executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                default:
-                    executor = new PlainExecutor<>(statementProxy, statementCallback);
-                    break;
+            if (sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                switch (sqlRecognizer.getSQLType()) {
+                    case INSERT:
+                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                            new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                            new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                        break;
+                    case UPDATE:
+                        executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case DELETE:
+                        executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case SELECT_FOR_UPDATE:
+                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    default:
+                        executor = new PlainExecutor<>(statementProxy, statementCallback);
+                        break;
+                }
+            } else {
+                executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
             }
         }
         T rs;

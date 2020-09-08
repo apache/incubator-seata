@@ -22,7 +22,7 @@ import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,6 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
 
 
 /**
@@ -105,8 +106,8 @@ public abstract class BaseH2Test {
 
     protected static TableMeta mockTableMeta() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("ID");
-        Mockito.when(tableMeta.getEscapePkName("h2")).thenReturn("`ID`");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"ID"}));
+        Mockito.when(tableMeta.getEscapePkNameList("h2")).thenReturn(Arrays.asList(new String[]{"ID"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
         ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
         Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);

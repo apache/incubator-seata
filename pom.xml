@@ -55,9 +55,6 @@
     <name>Seata Parent POM ${project.version}</name>
     <url>http://seata.io</url>
     <description>top seata project pom.xml file</description>
-    <prerequisites>
-        <maven>3.6.0</maven>
-    </prerequisites>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -69,7 +66,7 @@
         <developer>
             <id>Seata</id>
             <name>Seata</name>
-            <url>http://seata.io</url>
+            <url>https://seata.io</url>
         </developer>
     </developers>
 
@@ -91,8 +88,8 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.1.0-SNAPSHOT</revision>
-        <co.faao.speed.version>6.1.6-SNAPSHOT</co.faao.speed.version>
+        <revision>1.3.0-SNAPSHOT</revision>
+        <co.faao.speed.version>6.3.0-SNAPSHOT</co.faao.speed.version>
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -121,6 +118,12 @@
         <!-- for docker image-->
         <image.publish.skip>true</image.publish.skip>
         <image.tags>latest</image.tags>
+
+        <checkstyle.skip>true</checkstyle.skip>
+        <license.skip>true</license.skip>
+        <!-- for jdbc driver when package  -->
+        <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+        <mysql8.jdbc.version>8.0.19</mysql8.jdbc.version>
     </properties>
 
     <!--test-->
@@ -429,68 +432,26 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>${license-maven-plugin.version}</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
+                        <id>enforce-maven</id>
                         <goals>
-                            <goal>remove</goal>
-                            <goal>format</goal>
+                            <goal>enforce</goal>
                         </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <quiet>true</quiet>
-                    <header>${user.dir}/style/copyright</header>
-                    <includes>
-                        <include>**/src/main/java/**</include>
-                        <include>**/src/test/java/**</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/generated/**</exclude>
-                    </excludes>
-                    <strictCheck>true</strictCheck>
-                    <mapping>
-                        <java>SLASHSTAR_STYLE</java>
-                    </mapping>
-                </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
-                <!--<version>${maven-checkstyle-plugin.version}</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>validate</id>-->
-                        <!--<phase>validate</phase>-->
-                        <!--<configuration>-->
-                            <!--<configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>-->
-                            <!--<encoding>UTF-8</encoding>-->
-                            <!--<consoleOutput>true</consoleOutput>-->
-                            <!--<failsOnError>true</failsOnError>-->
-                            <!--<failOnViolation>false</failOnViolation>-->
-                            <!--<excludes>**/generated/**/*</excludes>-->
-                            <!--<excludes>io/seata/integration/grpc/interceptor/</excludes>-->
-                        <!--</configuration>-->
-                        <!--<goals>-->
-                            <!--<goal>check</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <name>Nexus Release Repository</name>
-            <url>http://192.168.150.59:8081/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+
 </project>

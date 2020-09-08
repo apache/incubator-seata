@@ -16,6 +16,7 @@
 package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -76,9 +77,9 @@ public class TccActionInterceptor implements MethodInterceptor, Ordered {
         if (businessAction != null) {
             //save the xid
             String xid = RootContext.getXID();
-            //clear the context
-            RootContext.unbind();
-            RootContext.bindInterceptorType(xid, BranchType.TCC);
+            //save the previous branchType
+            String previousBranchType = RootContext.getBranchType();
+            RootContext.bindBranchType(BranchType.TCC);
             try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
@@ -86,10 +87,13 @@ public class TccActionInterceptor implements MethodInterceptor, Ordered {
                         invocation::proceed);
                 //return the final result
                 return ret.get(Constants.TCC_METHOD_RESULT);
-            } finally {
-                //recovery the context
-                RootContext.unbindInterceptorType();
-                RootContext.bind(xid);
+            }
+            finally {
+                RootContext.unbindBranchType();
+                //restore the TCC branchType if exists
+                if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
+                    RootContext.bindBranchType(BranchType.TCC);
+                }
             }
         }
         return invocation.proceed();
@@ -102,8 +106,8 @@ public class TccActionInterceptor implements MethodInterceptor, Ordered {
      * @return the action interface method
      */
     protected Method getActionInterfaceMethod(MethodInvocation invocation) {
+        Class<?> interfaceType = null;
         try {
-            Class<?> interfaceType;
             if (remotingDesc == null) {
                 interfaceType = getProxyInterface(invocation.getThis());
             } else {
@@ -118,6 +122,11 @@ public class TccActionInterceptor implements MethodInterceptor, Ordered {
             }
             return interfaceType.getMethod(invocation.getMethod().getName(),
                 invocation.getMethod().getParameterTypes());
+        } catch (NoSuchMethodException e) {
+            if (interfaceType != null && !invocation.getMethod().getName().equals("toString")) {
+                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
+            }
+            return invocation.getMethod();
         } catch (Exception e) {
             LOGGER.warn("get Method from interface failed", e);
             return invocation.getMethod();

@@ -32,6 +32,7 @@ public class DomainConstants {
     public static final String STATE_TYPE_COMPENSATION_TRIGGER = "CompensationTrigger";
     public static final String STATE_TYPE_SUB_STATE_MACHINE = "SubStateMachine";
     public static final String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
+    public static final String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
     /**
      * State Types
      **/
@@ -88,5 +89,7 @@ public class DomainConstants {
     public static final String EVALUATOR_TYPE_EXCEPTION = "Exception";
 
     public static final String SEPERATOR_PARENT_ID      = ":";
+
+    public static final String DEFAULT_JSON_PARSER      = "fastjson";
 
 }

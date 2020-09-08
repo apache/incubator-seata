@@ -47,6 +47,10 @@ public class SeataProperties {
      * Whether use JDK proxy instead of CGLIB proxy
      */
     private boolean useJdkProxy = false;
+    /**
+     * Specifies which datasource bean are not eligible for auto-proxying
+     */
+    private String[] excludesForAutoProxying = {};
 
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
@@ -61,7 +65,7 @@ public class SeataProperties {
     }
 
     public String getApplicationId() {
-        if (null == applicationId) {
+        if (applicationId == null) {
             applicationId = springCloudAlibabaConfiguration.getApplicationId();
         }
         return applicationId;
@@ -73,7 +77,7 @@ public class SeataProperties {
     }
 
     public String getTxServiceGroup() {
-        if (null == txServiceGroup) {
+        if (txServiceGroup == null) {
             txServiceGroup = springCloudAlibabaConfiguration.getTxServiceGroup();
         }
         return txServiceGroup;
@@ -99,6 +103,15 @@ public class SeataProperties {
 
     public SeataProperties setUseJdkProxy(boolean useJdkProxy) {
         this.useJdkProxy = useJdkProxy;
+        return this;
+    }
+
+    public String[] getExcludesForAutoProxying() {
+        return excludesForAutoProxying;
+    }
+
+    public SeataProperties setExcludesForAutoProxying(String[] excludesForAutoProxying) {
+        this.excludesForAutoProxying = excludesForAutoProxying;
         return this;
     }
 }

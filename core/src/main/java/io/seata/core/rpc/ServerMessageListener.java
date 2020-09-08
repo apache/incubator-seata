@@ -17,13 +17,13 @@ package io.seata.core.rpc;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
 
 /**
  * The interface Server message listener.
  *
  * @author slievrly
  */
+@Deprecated
 public interface ServerMessageListener {
 
     /**
