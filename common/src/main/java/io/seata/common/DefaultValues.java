@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.constants;
+package io.seata.common;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -75,10 +75,13 @@ public class DefaultValues {
 
     public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
+    public static final int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
     public static final String DEFAULT_TX_GROUP = "my_test_tx_group";
     public static final String DEFAULT_TC_CLUSTER = "default";
     public static final String DEFAULT_GROUPLIST = "127.0.0.1:8091";
+
+    public static final String DEFAULT_DATA_SOURCE_PROXY_MODE = "AT";
 
     public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
@@ -89,4 +92,7 @@ public class DefaultValues {
     public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
     public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
+
+    public static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    public static final int VIRTUAL_NODES_DEFAULT = 10;
 }

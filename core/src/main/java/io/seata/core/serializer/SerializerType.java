@@ -49,6 +49,13 @@ public enum SerializerType {
      * Math.pow(2, 3)
      */
     FST((byte)0x8),
+
+    /**
+     * The hessian.
+     * <p>
+     * Math.pow(2, 4)
+     */
+    HESSIAN((byte)0x16),
     ;
 
     private final byte code;
