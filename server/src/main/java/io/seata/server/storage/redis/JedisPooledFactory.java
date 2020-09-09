@@ -15,6 +15,10 @@
  */
 package io.seata.server.storage.redis;
 
+import io.seata.common.Constants;
+import io.seata.common.util.CollectionUtils;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +26,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -72,8 +77,8 @@ public class JedisPooledFactory {
                         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
                         poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, MAXTOTAL));
                         jedisPool =
-                            new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
-                                CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,
+                            new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST, HOST),
+                                CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT, PORT), 60000, password,
                                 CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                     }
                     if (LOGGER.isInfoEnabled()) {
@@ -92,6 +97,30 @@ public class JedisPooledFactory {
      */
     public static Jedis getJedisInstance() {
         return getJedisPoolInstance().getResource();
+    }
+
+    /**
+     * parse the nodes string like:127.0.0.1:6379;127.0.0.1:6380;127.0.0.1:6381;127.0.0.1:6382;127.0.0.1:6383;127.0.0.1:6384
+     *
+     * @param nodes the nodes String
+     * @return List<HostAndPort>
+     */
+    public List<HostAndPort> getHostAndPorts(String nodes) {
+        if (StringUtils.isEmpty(nodes)) {
+            return null;
+        }
+        List<HostAndPort> list = new ArrayList<>();
+        String[] nodesArr = nodes.split(Constants.REDIS_CLUSTER_NODES_SPLIT_CHAR);
+        if (CollectionUtils.isNotEmpty(nodesArr)) {
+            for (String hostAndPortStr : nodesArr) {
+                if (StringUtils.isNotEmpty(hostAndPortStr)) {
+                    String[] hostAndPortArr = hostAndPortStr.split(Constants.IP_PORT_SPLIT_CHAR);
+                    HostAndPort hostAndPort = new HostAndPort(hostAndPortArr[0], Integer.valueOf(hostAndPortArr[1]));
+                    list.add(hostAndPort);
+                }
+            }
+        }
+        return list;
     }
 
 }

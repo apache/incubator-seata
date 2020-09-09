@@ -180,6 +180,16 @@ public class ConfigurationKeys {
     public static final String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
+     * The constant STORE_REDIS_SINGLE_PREFIX.
+     */
+    public static final String STORE_REDIS_SINGLE_PREFIX = "store.redis.single.";
+
+    /**
+     * The constant STORE_REDIS_CLUSTER_PREFIX.
+     */
+    public static final String STORE_REDIS_CLUSTER_PREFIX = "store.redis.cluster.";
+
+    /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
     public static final String STORE_DB_GLOBAL_TABLE = STORE_DB_PREFIX + "globalTable";
@@ -451,19 +461,34 @@ public class ConfigurationKeys {
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
-     * The constant STORE_REDIS_HOST.
+     * The constant STORE_REDIS_MODE.
      */
-    public static final String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+    public static final String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
+
+    /**
+     * The constant STORE_REDIS_SINGLE_HOST.
+     */
+    public static final String STORE_REDIS_SINGLE_HOST = STORE_REDIS_SINGLE_PREFIX + "host";
+
+    /**
+     * The constant STORE_REDIS_SINGLE_PORT.
+     */
+    public static final String STORE_REDIS_SINGLE_PORT = STORE_REDIS_SINGLE_PREFIX + "port";
+
+    /**
+     * The constant STORE_REDIS_CLUSTER_NODES.
+     */
+    public static final String STORE_REDIS_CLUSTER_NODES = STORE_REDIS_CLUSTER_PREFIX + "nodes";
+
+    /**
+     * The constant STORE_REDIS_CLUSTER_MAXREDIRECTIONS.
+     */
+    public static final String STORE_REDIS_CLUSTER_MAXREDIRECTIONS = STORE_REDIS_CLUSTER_PREFIX + "maxRedirections";
 
     /**
      * The constant STORE_MIN_Conn.
      */
     public static final String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
-
-    /**
-     * The constant STORE_REDIS_PORT.
-     */
-    public static final String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
 
     /**
      * The constant STORE_REDIS_MAX_CONN.
