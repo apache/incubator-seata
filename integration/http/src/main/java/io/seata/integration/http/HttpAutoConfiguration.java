@@ -15,6 +15,7 @@
  */
 package io.seata.integration.http;
 
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -42,6 +43,7 @@ import java.util.List;
  * @author wangxb
  */
 @Configuration
+@Conditional(HttpCondition.class)
 public class HttpAutoConfiguration implements WebMvcConfigurer {
 
 
