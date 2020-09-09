@@ -45,7 +45,7 @@ public class HttpCondition implements Condition {
         try {
             clazz = this.getClass().getClassLoader().loadClass(className);
         } catch (Throwable e) {
-            throw new RuntimeException("Error setting class" + e, e);
+            throw new RuntimeException("Error setting clazz" + e, e);
         }
     }
 }
