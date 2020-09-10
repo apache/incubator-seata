@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 public class SessionConverterTest {
 
     @Test
-    public void testConvertGlobalSession() {
+    public void testConvertGlobalSessionNotNull() {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         Date date = new Date();
         long now = date.getTime();
@@ -64,7 +64,14 @@ public class SessionConverterTest {
     }
 
     @Test
-    public void testConvertBranchSession() {
+    public void testConvertGlobalSessionNull() {
+        GlobalTransactionDO globalTransactionDO = null;
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
+        Assertions.assertNull(globalSession);
+    }
+
+    @Test
+    public void testConvertBranchSessionNotNull() {
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
         Date date = new Date();
         branchTransactionDO.setXid("192.168.158.80:8091:39372760251957248");
@@ -92,7 +99,14 @@ public class SessionConverterTest {
     }
 
     @Test
-    public void testConvertGlobalTransactionDO() {
+    public void testConvertBranchSessionNull() {
+        BranchTransactionDO branchTransactionDO = null;
+        BranchSession branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
+        Assertions.assertNull(branchSession);
+    }
+
+    @Test
+    public void testConvertGlobalTransactionDONotNull() {
         Date date = new Date();
         long now = date.getTime();
         GlobalSession globalSession = new GlobalSession("application1","fsp_tx","createOrder",60);
@@ -113,11 +127,20 @@ public class SessionConverterTest {
         Assertions.assertEquals(globalSession.getTimeout(),globalTransactionDO.getTimeout());
         Assertions.assertEquals(globalSession.getBeginTime(),globalTransactionDO.getBeginTime());
         Assertions.assertEquals(globalSession.getApplicationData(),globalTransactionDO.getApplicationData());
-
     }
 
     @Test
-    public void testConvertBranchTransactionDO() {
+    public void testConvertGlobalTransactionDONull() {
+        GlobalSession globalSession = null;
+        try {
+            SessionConverter.convertGlobalTransactionDO(globalSession);
+        } catch (Exception ex) {
+            Assertions.assertTrue(ex instanceof IllegalArgumentException);
+        }
+    }
+
+    @Test
+    public void testConvertBranchTransactionDONotNull() {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid("192.168.158.80:8091:39372760251957248");
         branchSession.setResourceId("jdbc:mysql://116.62.62.62/seata-storage");
@@ -139,5 +162,15 @@ public class SessionConverterTest {
         Assertions.assertEquals(branchSession.getClientId(),branchTransactionDO.getClientId());
         Assertions.assertEquals(branchSession.getStatus().getCode(),branchTransactionDO.getStatus());
         Assertions.assertEquals(branchSession.getApplicationData(),branchTransactionDO.getApplicationData());
+    }
+
+    @Test
+    public void testConvertBranchTransactionDONull() {
+        BranchSession branchSession = null;
+        try {
+            SessionConverter.convertBranchTransactionDO(branchSession);
+        } catch (Exception ex) {
+            Assertions.assertTrue(ex instanceof IllegalArgumentException);
+        }
     }
 }
