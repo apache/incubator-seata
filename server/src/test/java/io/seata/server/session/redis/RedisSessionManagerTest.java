@@ -240,8 +240,36 @@ public class RedisSessionManagerTest {
         Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
         condition.setTransactionId(null);
-        condition.setStatus(GlobalStatus.Begin);
         globalSessions = sessionManager.findGlobalSessions(condition);
+        Assertions.assertNull(globalSessions);
+    }
+
+    @Test
+    public void testReadSessionWithConditionStatus() throws TransactionException {
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
+        String xid = XID.generateXID(session.getTransactionId());
+        session.setXid(xid);
+        session.setTransactionId(session.getTransactionId());
+        session.setBeginTime(System.currentTimeMillis());
+        session.setApplicationData("abc=878s");
+        session.setStatus(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session);
+        BranchSession branchSession = new BranchSession();
+        branchSession.setBranchId(UUIDGenerator.generateUUID());
+        branchSession.setXid(xid);
+        branchSession.setTransactionId(session.getTransactionId());
+        branchSession.setBranchId(1L);
+        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceId("tb_1");
+        branchSession.setLockKey("t_1");
+        branchSession.setBranchType(BranchType.AT);
+        branchSession.setApplicationData("{\"data\":\"test\"}");
+        branchSession.setClientId("storage-server:192.168.158.80:11934");
+        sessionManager.addBranchSession(session, branchSession);
+
+        SessionCondition condition = new SessionCondition();
+        condition.setStatus(GlobalStatus.Begin);
+        List<GlobalSession> globalSessions = sessionManager.findGlobalSessions(condition);
         GlobalSession globalSession1 = globalSessions.stream()
                 .filter(globalSession -> globalSession.getXid().equals(session.getXid())).collect(Collectors.toList()).get(0);
         Assertions.assertEquals(session.getXid(),globalSession1.getXid());
@@ -261,10 +289,6 @@ public class RedisSessionManagerTest {
         Assertions.assertEquals(branchSession.getXid(),globalSession1.getBranchSessions().get(0).getXid());
         Assertions.assertEquals(branchSession.getBranchId(),globalSession1.getBranchSessions().get(0).getBranchId());
         Assertions.assertEquals(branchSession.getClientId(),globalSession1.getBranchSessions().get(0).getClientId());
-
-        condition.setStatuses(null);
-        globalSessions = sessionManager.findGlobalSessions(condition);
-        Assertions.assertNull(globalSessions);
     }
 
     @Test
