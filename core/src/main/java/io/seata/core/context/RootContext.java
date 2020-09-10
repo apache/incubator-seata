@@ -26,6 +26,8 @@ import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
 /**
  * The type Root context.
  *
@@ -77,7 +79,7 @@ public class RootContext {
      *
      * @param xid the xid
      */
-    public static void bind(String xid) {
+    public static void bind(@Nonnull String xid) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
         }
@@ -147,7 +149,7 @@ public class RootContext {
      *
      * @param branchType the branch type
      */
-    public static void bindBranchType(BranchType branchType) {
+    public static void bindBranchType(@Nonnull BranchType branchType) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind branch type {}", branchType);
         }

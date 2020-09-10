@@ -16,7 +16,6 @@
 package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
