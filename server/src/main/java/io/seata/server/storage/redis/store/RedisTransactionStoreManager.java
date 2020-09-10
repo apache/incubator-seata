@@ -333,7 +333,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 return null;
             }
             GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
-            List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
+            List<BranchTransactionDO> branchTransactionDOs = null;
             if (withBranchSessions) {
                 branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
             }
