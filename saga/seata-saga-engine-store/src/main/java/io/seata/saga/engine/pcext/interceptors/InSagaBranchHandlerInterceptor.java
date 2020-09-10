@@ -62,7 +62,7 @@ public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {
             if (previousXid != null) {
                 if (!StringUtils.equalsIgnoreCase(previousXid, xid)) {
                     LOGGER.warn("xid in change from {} to {}, Please don't use state machine engine in other global transaction.",
-                            previousXid, xid);
+                        previousXid, xid);
                 }
             }
         }
