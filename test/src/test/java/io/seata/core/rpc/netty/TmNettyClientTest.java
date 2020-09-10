@@ -51,6 +51,7 @@ public class TmNettyClientTest {
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
                 nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                nettyRemotingServer.setListenPort(8091);
                 UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
@@ -83,6 +84,7 @@ public class TmNettyClientTest {
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
                 nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                nettyRemotingServer.setListenPort(8091);
                 UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
@@ -107,6 +109,7 @@ public class TmNettyClientTest {
             public void run() {
                 NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
                 nettyRemotingServer.setHandler(new DefaultCoordinator(nettyRemotingServer));
+                nettyRemotingServer.setListenPort(8091);
                 UUIDGenerator.init(1L);
                 nettyRemotingServer.init();
             }
