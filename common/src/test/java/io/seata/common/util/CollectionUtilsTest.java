@@ -17,6 +17,7 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,5 +158,15 @@ public class CollectionUtilsTest {
 
         Assertions.assertEquals("", CollectionUtils.toString(emptyCollection));
         Assertions.assertEquals("[Foo,Bar]", CollectionUtils.toString(filledCollection));
+    }
+
+    @Test
+    public void testIsEmpty() {
+        Map<String,Object> map = new HashMap<>();
+        Assertions.assertTrue(CollectionUtils.isEmpty(map));
+        map.put("k","v");
+        Assertions.assertFalse(CollectionUtils.isEmpty(map));
+        map = null;
+        Assertions.assertTrue(CollectionUtils.isEmpty(map));
     }
 }
