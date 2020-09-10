@@ -15,7 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,13 +26,11 @@ import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author slievrly
  */
-@Disabled
 public class TmNettyClientTest {
 
     private static final ThreadPoolExecutor
@@ -67,11 +64,8 @@ public class TmNettyClientTest {
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
-
-        Method doConnectMethod = TmNettyRemotingClient.class.getDeclaredMethod("doConnect", String.class);
-        doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = (Channel) doConnectMethod.invoke(tmNettyRemotingClient, serverAddress);
+        Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
     }
 
@@ -103,9 +97,7 @@ public class TmNettyClientTest {
 
         tmNettyRemotingClient.init();
 
-        Method doConnectMethod = TmNettyRemotingClient.class.getDeclaredMethod("reconnect");
-        doConnectMethod.setAccessible(true);
-        doConnectMethod.invoke(tmNettyRemotingClient);
+        TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
     }
 
     @Test
@@ -126,10 +118,8 @@ public class TmNettyClientTest {
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         tmNettyRemotingClient.init();
 
-        Method doConnectMethod = TmNettyRemotingClient.class.getDeclaredMethod("doConnect", String.class);
-        doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = (Channel) doConnectMethod.invoke(tmNettyRemotingClient, serverAddress);
+        Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
 
         BranchRegisterRequest request = new BranchRegisterRequest();
