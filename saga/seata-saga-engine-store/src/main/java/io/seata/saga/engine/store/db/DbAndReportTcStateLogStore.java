@@ -112,7 +112,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     }
 
     protected void beginTransaction(StateMachineInstance machineInstance, ProcessContext context) {
-
         if (sagaTransactionalTemplate != null) {
 
             StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
@@ -150,7 +149,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     @Override
     public void recordStateMachineFinished(StateMachineInstance machineInstance, ProcessContext context) {
-
         if (machineInstance != null) {
             // save to db
             Map<String, Object> endParams = machineInstance.getEndParams();

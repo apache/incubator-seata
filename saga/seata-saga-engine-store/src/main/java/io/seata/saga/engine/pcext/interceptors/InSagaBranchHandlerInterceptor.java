@@ -22,15 +22,14 @@ import io.seata.core.model.BranchType;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
-import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
-import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.tm.api.GlobalTransaction;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * InSagaBranchHandler Interceptor
@@ -44,15 +43,18 @@ public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
-        return clazz != null &&
-                (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
-                        || SubStateMachineHandler.class.isAssignableFrom(clazz));
+        // This interceptor will intercept all types of InterceptableStateHandler
+        return clazz != null;
     }
 
     @Override
     public void preProcess(ProcessContext context) throws EngineExecutionException {
         // get xid
         String xid = this.getXidFromProcessContext(context);
+        if (StringUtils.isBlank(xid)) {
+            LOGGER.warn("There is no xid in the process context.");
+            return;
+        }
 
         // logger.warn if previousXid is not equals to xid
         if (LOGGER.isWarnEnabled()) {
@@ -60,7 +62,7 @@ public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {
             if (previousXid != null) {
                 if (!StringUtils.equalsIgnoreCase(previousXid, xid)) {
                     LOGGER.warn("xid in change from {} to {}, Please don't use state machine engine in other global transaction.",
-                        previousXid, xid);
+                            previousXid, xid);
                 }
             }
         }
@@ -95,9 +97,9 @@ public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {
             GlobalTransaction globalTransaction = (GlobalTransaction) contextVariable.get(DomainConstants.VAR_NAME_GLOBAL_TX);
             xid = globalTransaction.getXid();
         } else {
-            StateMachineInstance smi = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
-            if (smi != null) {
-                xid = smi.getId();
+            StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            if (stateMachineInstance != null) {
+                xid = stateMachineInstance.getId();
             }
         }
         return xid;
