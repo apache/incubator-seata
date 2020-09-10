@@ -25,8 +25,6 @@ import java.util.Set;
  */
 public final class TransactionInfo implements Serializable {
 
-    public static final int DEFAULT_TIME_OUT = 60000;
-
     private int timeOut;
 
     private String name;
