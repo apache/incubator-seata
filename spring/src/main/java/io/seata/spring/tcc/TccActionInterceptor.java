@@ -76,7 +76,7 @@ public class TccActionInterceptor implements MethodInterceptor {
             //save the xid
             String xid = RootContext.getXID();
             //save the previous branchType
-            String previousBranchType = RootContext.getBranchType();
+            BranchType previousBranchType = RootContext.getBranchType();
             RootContext.bindBranchType(BranchType.TCC);
             try {
                 Object[] methodArgs = invocation.getArguments();
@@ -87,10 +87,11 @@ public class TccActionInterceptor implements MethodInterceptor {
                 return ret.get(Constants.TCC_METHOD_RESULT);
             }
             finally {
-                RootContext.unbindBranchType();
                 //restore the TCC branchType if exists
-                if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
+                if (BranchType.TCC == previousBranchType) {
                     RootContext.bindBranchType(BranchType.TCC);
+                } else {
+                    RootContext.unbindBranchType();
                 }
             }
         }

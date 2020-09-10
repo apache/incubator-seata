@@ -109,7 +109,7 @@ public abstract class AbstractConnectionProxy implements Connection {
         String dbType = getDbType();
         // support oracle 10.2+
         PreparedStatement targetPreparedStatement = null;
-        if (StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
+        if (BranchType.AT == RootContext.getBranchType()) {
             List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
             if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);

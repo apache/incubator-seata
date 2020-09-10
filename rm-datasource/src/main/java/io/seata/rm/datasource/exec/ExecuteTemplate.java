@@ -68,7 +68,7 @@ public class ExecuteTemplate {
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
 
-        if (!RootContext.requireGlobalLock() && !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
+        if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
