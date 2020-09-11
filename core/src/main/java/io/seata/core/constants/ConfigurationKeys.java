@@ -511,6 +511,21 @@ public class ConfigurationKeys {
     public static final String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
 
     /**
+     * The constant STORE_REDIS_TIMEOUT.
+     */
+    public static final String STORE_REDIS_TIMEOUT = STORE_REDIS_PREFIX + "timeout";
+
+    /**
+     * The constant STORE_REDIS_SOTIMEOUT.
+     */
+    public static final String STORE_REDIS_SOTIMEOUT = STORE_REDIS_PREFIX + "soTimeout";
+
+    /**
+     * The constant STORE_REDIS_CONNECTION_TIMEOUT.
+     */
+    public static final String STORE_REDIS_CONNECTION_TIMEOUT = STORE_REDIS_PREFIX + "connectionTimeout";
+
+    /**
      * The constant STORE_REDIS_QUERY_LIMIT.
      */
     public static final String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
