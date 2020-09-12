@@ -60,7 +60,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @AfterAll
-    public static void destory () throws InterruptedException {
+    public static void destory() throws InterruptedException {
         stopSeataServer();
     }
 
