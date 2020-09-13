@@ -111,13 +111,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         conn.rollback();
                     }
-
-                    // retry hear only when the config is true
-                    if (LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict()) {
-                        lockRetryController.sleep(lce);
-                    } else {
-                        throw new LockWaitTimeoutException("Global lock wait timeout", lce);
-                    }
+                    // trigger retry
+                    lockRetryController.sleep(lce);
                 }
             }
         } finally {
