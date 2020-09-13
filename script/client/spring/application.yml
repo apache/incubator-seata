@@ -19,11 +19,12 @@ seata:
         retry-times: 30
         retry-policy-branch-rollback-on-conflict: true
     tm:
+      commit-retry-count: 5
+      rollback-retry-count: 5
+      default-global-transaction-timeout: 60000
       degrade-check: false
       degrade-check-period: 2000
       degrade-check-allow-times: 10
-      commit-retry-count: 5
-      rollback-retry-count: 5
     undo:
       data-validation: true
       log-serialization: jackson
@@ -65,6 +66,7 @@ seata:
       apollo-meta: http://192.168.1.204:8801
       app-id: seata-server
       namespace: application
+      apollo-accesskey-secret: ""
     etcd3:
       server-addr: http://localhost:2379
     nacos:
@@ -81,6 +83,10 @@ seata:
       password: ""
   registry:
     type: file
+    load-balance: RandomLoadBalance
+    load-balance-virtual-nodes: 10
+    file:
+      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
     etcd3:
