@@ -46,6 +46,8 @@ public class JedisPooledFactory {
 
     private static final int MAXCONN = 10;
 
+    private static final int MAXTOTAL = 100;
+
     private static final int DATABASE = 0;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
@@ -80,6 +82,7 @@ public class JedisPooledFactory {
                         JedisPoolConfig poolConfig = new JedisPoolConfig();
                         poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
                         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
+                        poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, MAXTOTAL));
                         jedisPool =
                             new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
                                 CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,
