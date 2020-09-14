@@ -51,7 +51,7 @@ public class RootContext {
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     /**
-     * The constant KEY_GLOBAL_LOCK_FLAG, GLOBAL_LOCK_FLAG_VALUE
+     * The constant KEY_GLOBAL_LOCK_FLAG, VALUE_GLOBAL_LOCK_FLAG
      */
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
     public static final Boolean VALUE_GLOBAL_LOCK_FLAG = true;
