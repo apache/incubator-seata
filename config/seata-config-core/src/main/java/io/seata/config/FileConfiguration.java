@@ -16,7 +16,8 @@
 package io.seata.config;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -124,56 +125,59 @@ public class FileConfiguration extends AbstractConfiguration {
     }
 
     private File getConfigFile(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("name can't be null");
-        }
-        String filePath = null;
-        boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
-        if (filePathCustom) {
-            filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-        } else {
-            // projectDir first
-            filePath = this.getClass().getClassLoader().getResource("").getPath() + name;
-        }
-
-        File targetFile = new File(filePath);
-        if (!targetFile.exists()) {
-            for (String s : FileConfigFactory.getSuffixSet()) {
-                targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                if (targetFile.exists()) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("The configuration file used is {}", targetFile.getPath());
-                    }
-                    return targetFile;
-                }
+        try {
+            if (name == null) {
+                throw new IllegalArgumentException("name can't be null");
             }
-        } else {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("The configuration file used is {}", name);
+            String filePath = null;
+            boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
+            if (filePathCustom) {
+                filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
+            } else {
+                // projectDir first
+                filePath = this.getClass().getClassLoader().getResource("").toURI().getPath() + name;
             }
-            return targetFile;
-        }
 
-        if (!filePathCustom) {
-            URL resource = this.getClass().getClassLoader().getResource(name);
-            if (resource == null) {
+            File targetFile = new File(filePath);
+            if (!targetFile.exists()) {
                 for (String s : FileConfigFactory.getSuffixSet()) {
-                    resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                    if (resource != null) {
+                    targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                    if (targetFile.exists()) {
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("The configuration file used is {}", resource.getPath());
+                            LOGGER.info("The configuration file used is {}", targetFile.getPath());
                         }
-                        return new File(resource.getPath());
+                        return targetFile;
                     }
                 }
             } else {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("The configuration file used is {}", name);
                 }
-                return new File(resource.getPath());
+                return targetFile;
             }
-        }
 
+            if (!filePathCustom) {
+                URI resource = this.getClass().getClassLoader().getResource(name).toURI();
+                if (resource == null) {
+                    for (String s : FileConfigFactory.getSuffixSet()) {
+                        resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s).toURI();
+                        if (resource != null) {
+                            if (LOGGER.isInfoEnabled()) {
+                                LOGGER.info("The configuration file used is {}", resource.getPath());
+                            }
+                            return new File(resource.getPath());
+                        }
+                    }
+                } else {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("The configuration file used is {}", name);
+                    }
+                    return new File(resource.getPath());
+                }
+            }
+        } catch (URISyntaxException e) {
+            LOGGER.error("file not found");
+        }
         return null;
     }
 
