@@ -13,8 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.http;
+package io.seata.spring.boot.autoconfigure;
 
+import io.seata.integration.http.HttpHandlerExceptionResolver;
+import io.seata.integration.http.TransactionPropagationIntercepter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerExceptionResolver;
