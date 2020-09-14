@@ -15,7 +15,7 @@
  */
 package io.seata.integration.http;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -29,7 +29,7 @@ import java.util.List;
  * @author wangxb
  */
 @Configuration
-@ConditionalOnBean(HttpExecutor.class)
+@ConditionalOnWebApplication
 public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
