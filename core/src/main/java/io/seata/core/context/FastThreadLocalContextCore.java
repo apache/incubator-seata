@@ -29,30 +29,30 @@ import java.util.Map;
 @LoadLevel(name = "FastThreadLocalContextCore", order = Integer.MIN_VALUE + 1)
 public class FastThreadLocalContextCore implements ContextCore {
 
-    private FastThreadLocal<Map<String, String>> fastThreadLocal = new FastThreadLocal<Map<String, String>>() {
+    private FastThreadLocal<Map<String, Object>> fastThreadLocal = new FastThreadLocal<Map<String, Object>>() {
         @Override
-        protected Map<String, String> initialValue() {
-            return new HashMap<String, String>();
+        protected Map<String, Object> initialValue() {
+            return new HashMap<>();
         }
     };
 
     @Override
-    public String put(String key, String value) {
+    public Object put(String key, Object value) {
         return fastThreadLocal.get().put(key, value);
     }
 
     @Override
-    public String get(String key) {
+    public Object get(String key) {
         return fastThreadLocal.get().get(key);
     }
 
     @Override
-    public String remove(String key) {
+    public Object remove(String key) {
         return fastThreadLocal.get().remove(key);
     }
 
     @Override
-    public Map<String, String> entries() {
+    public Map<String, Object> entries() {
         return fastThreadLocal.get();
     }
 }

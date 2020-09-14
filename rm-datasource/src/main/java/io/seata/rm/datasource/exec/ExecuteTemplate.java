@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.StringUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -67,8 +66,7 @@ public class ExecuteTemplate {
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
-
-        if (!RootContext.requireGlobalLock() && !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
+        if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }

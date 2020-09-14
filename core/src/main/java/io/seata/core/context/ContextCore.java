@@ -15,6 +15,7 @@
  */
 package io.seata.core.context;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -25,34 +26,37 @@ import java.util.Map;
 public interface ContextCore {
 
     /**
-     * Put string.
+     * Put value.
      *
      * @param key   the key
      * @param value the value
-     * @return the string
+     * @return the previous value associated with the key, or null if there was no mapping for the key
      */
-    String put(String key, String value);
+    @Nullable
+    Object put(String key, Object value);
 
     /**
-     * Get string.
+     * Get value.
      *
      * @param key the key
-     * @return the string
+     * @return the value
      */
-    String get(String key);
+    @Nullable
+    Object get(String key);
 
     /**
-     * Remove string.
+     * Remove value.
      *
      * @param key the key
-     * @return the string
+     * @return the removed value or null
      */
-    String remove(String key);
+    @Nullable
+    Object remove(String key);
 
     /**
      * entries
      *
-     * @return
+     * @return the key-value map
      */
-    Map<String, String> entries();
+    Map<String, Object> entries();
 }
