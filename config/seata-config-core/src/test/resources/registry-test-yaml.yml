@@ -5,7 +5,7 @@ registry:
 config:
   type: file
   file:
-    name: file-testyaml.conf
+    name: file-test-yaml.conf
     # for test
     testBlank: ''
     testNull:

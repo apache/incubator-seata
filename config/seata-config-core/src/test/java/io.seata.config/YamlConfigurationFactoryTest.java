@@ -31,10 +31,10 @@ class YamlConfigurationFactoryTest {
 
     @Test
     public void getInstance() {
-        System.setProperty(ENV_PROPERTY_KEY, "testyaml");
+        System.setProperty(ENV_PROPERTY_KEY, "test-yaml");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-testyaml.conf");
+        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-test-yaml.conf");
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testBlank"), "");
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testNull"), null);
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testExist"), null);

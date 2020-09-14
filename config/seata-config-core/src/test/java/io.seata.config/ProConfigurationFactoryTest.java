@@ -30,10 +30,10 @@ class ProConfigurationFactoryTest {
 
     @Test
     void getInstance() {
-        System.setProperty(ENV_PROPERTY_KEY, "testpro");
+        System.setProperty(ENV_PROPERTY_KEY, "test-pro");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-testpro.conf");
+        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-test-pro.conf");
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testBlank"), "");
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testNull"), null);
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testExist"), null);
