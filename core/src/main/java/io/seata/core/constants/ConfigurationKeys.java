@@ -153,6 +153,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_TM_ROLLBACK_RETRY_COUNT = CLIENT_TM_PREFIX + "rollbackRetryCount";
 
     /**
+     * The constant DEFAULT_GLOBAL_TRANSACTION_TIMEOUT.
+     */
+    public static final String DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = CLIENT_TM_PREFIX + "defaultGlobalTransactionTimeout";
+
+    /**
      * The constant SERIALIZE_FOR_RPC.
      */
     public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
@@ -494,6 +499,11 @@ public class ConfigurationKeys {
      * The constant STORE_REDIS_MAX_CONN.
      */
     public static final String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
+
+    /**
+     * the constant STORE_REDIS_MAX_TOTAL
+     */
+    public static final String STORE_REDIS_MAX_TOTAL = STORE_REDIS_PREFIX + "maxTotal";
 
     /**
      * The constant STORE_REDIS_DATABASE.
