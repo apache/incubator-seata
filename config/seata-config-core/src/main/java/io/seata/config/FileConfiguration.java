@@ -180,8 +180,8 @@ public class FileConfiguration extends AbstractConfiguration {
                     return new File(path);
                 }
             }
-        }catch (UnsupportedEncodingException e) {
-           LOGGER.error("file not found--"+e.getMessage(),e);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("file not found--" + e.getMessage(), e);
         }
         return null;
     }
