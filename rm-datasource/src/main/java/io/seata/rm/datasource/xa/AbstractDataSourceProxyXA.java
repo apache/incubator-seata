@@ -40,8 +40,10 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
         if (connectionProxyXA != null) {
             return connectionProxyXA;
         }
-        return (ConnectionProxyXA)getConnection();
+        return (ConnectionProxyXA)getConnectionProxyXA();
     }
+
+    protected abstract Connection getConnectionProxyXA() throws SQLException;
 
     /**
      * Force close the physical connection kept for XA branch of given XAXid.

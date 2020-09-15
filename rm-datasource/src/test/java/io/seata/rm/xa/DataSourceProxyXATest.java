@@ -18,6 +18,7 @@ package io.seata.rm.xa;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
+import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.Assertions;
@@ -55,6 +56,9 @@ public class DataSourceProxyXATest {
         druidDataSource.setDriver(driver);
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+        Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+        RootContext.bind("test");
+        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
 
         Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
