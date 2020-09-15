@@ -23,7 +23,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  *
  * @author zhihou
  */
-public class StatementSqlVisitor<T> extends MySqlParserBaseVisitor<Object> {
+public class StatementSqlVisitor extends MySqlParserBaseVisitor<StringBuilder> {
 
     private StringBuilder sb = new StringBuilder();
 
