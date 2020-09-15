@@ -54,7 +54,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
     private static final String APOLLO_SECRET = "apolloAccesskeySecret";
-    private static final String APOLLO_CLUSTER = "cluster";
+    private static final String APOLLO_CLUSTER = "seata";
     private static final String APOLLO_CONFIG_SERVICE = "apolloConfigService";
     private static final String PROP_APP_ID = "app.id";
     private static final String PROP_APOLLO_META = "apollo.meta";
