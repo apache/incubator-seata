@@ -54,9 +54,13 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
     private static final String APOLLO_SECRET = "apolloAccesskeySecret";
+    private static final String APOLLO_CLUSTER = "cluster";
+    private static final String APOLLO_CONFIG_SERVICE = "apolloConfigService";
     private static final String PROP_APP_ID = "app.id";
     private static final String PROP_APOLLO_META = "apollo.meta";
+    private static final String PROP_APOLLO_CONFIG_SERVICE = "apollo.configService";
     private static final String PROP_APOLLO_SECRET = "apollo.accesskey.secret";
+    private static final String PROP_APOLLO_CLUSTER = "apollo.cluster";
     private static final String NAMESPACE = "namespace";
     private static final String DEFAULT_NAMESPACE = "application";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -64,7 +68,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private ExecutorService configOperateExecutor;
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
     private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP
-        = new ConcurrentHashMap<>();
+            = new ConcurrentHashMap<>();
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfiguration instance;
 
@@ -75,9 +79,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
                 if (config == null) {
                     config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
-                        MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
+                            MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+                            new LinkedBlockingQueue<>(),
+                            new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
                     config.addChangeListener(changeEvent -> {
                         for (String key : changeEvent.changedKeys()) {
                             if (!LISTENER_SERVICE_MAP.containsKey(key)) {
@@ -85,7 +89,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
                             }
                             ConfigChange change = changeEvent.getChange(key);
                             ConfigurationChangeEvent event = new ConfigurationChangeEvent(key, change.getNamespace(),
-                                change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
+                                    change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
                             LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onProcessEvent(event));
                         }
                     });
@@ -117,12 +121,12 @@ public class ApolloConfiguration extends AbstractConfiguration {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-            timeoutMills);
+                timeoutMills);
         configOperateExecutor.submit(() -> {
             String result = config.getProperty(dataId, defaultValue);
             configFuture.setResult(result);
         });
-        return (String)configFuture.get();
+        return (String) configFuture.get();
     }
 
     @Override
@@ -176,6 +180,12 @@ public class ApolloConfiguration extends AbstractConfiguration {
                 System.setProperty(PROP_APOLLO_SECRET, secretKey);
             }
         }
+        if (!properties.containsKey(APOLLO_CLUSTER)) {
+            System.setProperty(PROP_APOLLO_CLUSTER, FILE_CONFIG.getConfig(getApolloCluster()));
+        }
+        if (!properties.containsKey(APOLLO_CONFIG_SERVICE)) {
+            System.setProperty(PROP_APOLLO_CONFIG_SERVICE, FILE_CONFIG.getConfig(getApolloConfigService()));
+        }
     }
 
     @Override
@@ -198,6 +208,15 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static String getApolloNamespaceKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, NAMESPACE);
     }
+
+    private static String getApolloCluster() {
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CLUSTER);
+    }
+
+    private static String getApolloConfigService() {
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CONFIG_SERVICE);
+    }
+
 
     private ConfigurationChangeType getChangeType(PropertyChangeType changeType) {
         switch (changeType) {
