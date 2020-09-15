@@ -18,6 +18,7 @@ package io.seata.sqlparser.antlr.mysql.listener;
 import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
+import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
 /**
  * @author houzhi
@@ -31,31 +32,52 @@ public class DeleteSpecificationSqlListener extends MySqlParserBaseListener {
     }
 
     @Override
-    public void enterTableName(MySqlParser.TableNameContext ctx) {
-
-        sqlQueryContext.setTableName(ctx.getText());
-        super.enterTableName(ctx);
+    public void enterAtomTableItem(MySqlParser.AtomTableItemContext ctx) {
+        MySqlParser.TableNameContext tableNameContext = ctx.tableName();
+        sqlQueryContext.setTableName(tableNameContext.getText());
+        MySqlParser.UidContext uid = ctx.uid();
+        sqlQueryContext.setTableAlias(uid.getText());
+        super.enterAtomTableItem(ctx);
     }
 
     @Override
     public void enterConstantExpressionAtom(MySqlParser.ConstantExpressionAtomContext ctx) {
-
         sqlQueryContext.addDeleteWhereValColumnNames(ctx.getText());
         super.enterConstantExpressionAtom(ctx);
     }
 
     @Override
     public void enterFullColumnNameExpressionAtom(MySqlParser.FullColumnNameExpressionAtomContext ctx) {
-
         sqlQueryContext.addDeleteWhereColumnNames(ctx.getText());
         super.enterFullColumnNameExpressionAtom(ctx);
     }
 
     @Override
     public void enterSingleDeleteStatement(MySqlParser.SingleDeleteStatementContext ctx) {
-
+        MySqlParser.TableNameContext tableNameContext = ctx.tableName();
+        sqlQueryContext.setTableName(tableNameContext.getText());
         MySqlParser.ExpressionContext expression = ctx.expression();
-        sqlQueryContext.setWhereCondition(expression.getText());
+        StatementSqlVisitor statementSqlVisitor = new StatementSqlVisitor();
+        String text = statementSqlVisitor.visit(expression).toString();
+        sqlQueryContext.setWhereCondition(text);
         super.enterSingleDeleteStatement(ctx);
     }
+
+    @Override
+    public void enterMultipleDeleteStatement(MySqlParser.MultipleDeleteStatementContext ctx) {
+        MySqlParser.ExpressionContext expression = ctx.expression();
+        StatementSqlVisitor statementSqlVisitor = new StatementSqlVisitor();
+        String text = statementSqlVisitor.visit(expression).toString();
+        sqlQueryContext.setWhereCondition(text);
+        super.enterMultipleDeleteStatement(ctx);
+    }
+
+    @Override
+    public void enterInPredicate(MySqlParser.InPredicateContext ctx) {
+        StatementSqlVisitor statementSqlVisitor = new StatementSqlVisitor();
+        String text = statementSqlVisitor.visit(ctx).toString();
+        sqlQueryContext.setWhereCondition(text);
+        super.enterInPredicate(ctx);
+    }
+
 }

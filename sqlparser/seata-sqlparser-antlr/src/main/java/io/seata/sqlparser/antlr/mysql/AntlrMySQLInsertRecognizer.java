@@ -20,7 +20,7 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
-import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
+import io.seata.sqlparser.antlr.mysql.visit.InsertStatementSqlVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.ArrayList;
@@ -37,21 +37,16 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
     private MySqlContext sqlContext;
 
-    public AntlrMySQLInsertRecognizer(MySqlContext mySqlContext, String sql) {
-
+    public AntlrMySQLInsertRecognizer(String sql) {
         MySqlLexer lexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
-
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-
         MySqlParser parser = new MySqlParser(tokenStream);
-
         MySqlParser.RootContext rootContext = parser.root();
         sqlContext = new MySqlContext();
-        sqlContext.setOriginalSQL(mySqlContext.getOriginalSQL());
-        StatementSqlVisitor visitor = new StatementSqlVisitor(sqlContext);
+        sqlContext.setOriginalSQL(sql);
+        InsertStatementSqlVisitor visitor = new InsertStatementSqlVisitor(sqlContext);
         visitor.visit(rootContext);
     }
-
 
     @Override
     public SQLType getSQLType() {
@@ -60,7 +55,7 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 
     @Override
     public String getTableAlias() {
-        return null;
+        return sqlContext.tableAlias;
     }
 
     @Override
@@ -81,7 +76,6 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
         if (insertColumnNames.isEmpty()) {
             return true;
         }
-
         return false;
     }
 

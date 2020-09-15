@@ -31,6 +31,11 @@ public class MySqlContext {
     public String tableName;
 
     /**
+     * Table Alias
+     */
+    public String tableAlias;
+
+    /**
      * Number of inserts
      */
     public Integer insertRows;
@@ -374,5 +379,13 @@ public class MySqlContext {
 
     public void setOriginalSQL(String originalSQL) {
         this.originalSQL = originalSQL;
+    }
+
+    public void setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+    }
+
+    public String getTableAlias() {
+        return tableAlias;
     }
 }

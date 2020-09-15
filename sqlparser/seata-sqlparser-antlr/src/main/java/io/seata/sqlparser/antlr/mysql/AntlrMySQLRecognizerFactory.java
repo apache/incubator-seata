@@ -17,15 +17,13 @@ package io.seata.sqlparser.antlr.mysql;
 
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
-import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.antlr.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.antlr.SQLOperateRecognizerHolderFactory;
-import io.seata.sqlparser.antlr.mysql.listener.SqlSpecificationListener;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
+import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,28 +44,29 @@ class AntlrMySQLRecognizerFactory implements SQLRecognizerFactory {
 
         MySqlParser parser = new MySqlParser(tokenStream);
 
-        MySqlParser.RootContext rootContext = parser.root();
-        MySqlContext mySqlContext = new MySqlContext();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(new SqlSpecificationListener(mySqlContext), rootContext);
+        MySqlParser.SqlStatementsContext sqlStatementsContext = parser.sqlStatements();
 
-        List<MySqlContext.SQL> sqlInfos = mySqlContext.getSqlInfos();
+        List<MySqlParser.SqlStatementContext> sqlStatementContexts = sqlStatementsContext.sqlStatement();
 
         List<SQLRecognizer> recognizers = null;
         SQLRecognizer recognizer = null;
 
-        for (MySqlContext.SQL sql : sqlInfos) {
+        for (MySqlParser.SqlStatementContext sql : sqlStatementContexts) {
+
+            StatementSqlVisitor visitor = new StatementSqlVisitor();
+
+            String originalSQL = visitor.visit(sql).toString();
 
             SQLOperateRecognizerHolder recognizerHolder =
                     SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-            if (sql.getSqlType() == SQLType.UPDATE.value()) {
-                recognizer = recognizerHolder.getUpdateRecognizer(mySqlContext, sql.getSql());
-            } else if (sql.getSqlType() == SQLType.INSERT.value()) {
-                recognizer = recognizerHolder.getInsertRecognizer(mySqlContext, sql.getSql());
-            } else if (sql.getSqlType() == SQLType.DELETE.value()) {
-                recognizer = recognizerHolder.getDeleteRecognizer(mySqlContext, sql.getSql());
-            } else if (sql.getSqlType() == SQLType.SELECT.value()) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(mySqlContext, sql.getSql());
+            if (sql.dmlStatement().updateStatement() != null) {
+                recognizer = recognizerHolder.getUpdateRecognizer(originalSQL);
+            } else if (sql.dmlStatement().insertStatement() != null) {
+                recognizer = recognizerHolder.getInsertRecognizer(originalSQL);
+            } else if (sql.dmlStatement().deleteStatement() != null) {
+                recognizer = recognizerHolder.getDeleteRecognizer(originalSQL);
+            } else if (sql.dmlStatement().selectStatement() != null) {
+                recognizer = recognizerHolder.getSelectForUpdateRecognizer(originalSQL);
             }
 
             if (recognizer != null) {

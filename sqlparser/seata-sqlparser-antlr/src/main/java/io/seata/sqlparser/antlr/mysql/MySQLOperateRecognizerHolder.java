@@ -27,23 +27,24 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {
+
     @Override
-    public SQLRecognizer getDeleteRecognizer(MySqlContext mySqlContext,String sql) {
-        return new AntlrMySQLDeleteRecognizer(mySqlContext,sql);
+    public SQLRecognizer getDeleteRecognizer(String sql) {
+        return new AntlrMySQLDeleteRecognizer(sql);
     }
 
     @Override
-    public SQLRecognizer getInsertRecognizer(MySqlContext mySqlContext,String sql) {
-        return new AntlrMySQLInsertRecognizer(mySqlContext,sql);
+    public SQLRecognizer getInsertRecognizer(String sql) {
+        return new AntlrMySQLInsertRecognizer(sql);
     }
 
     @Override
-    public SQLRecognizer getUpdateRecognizer(MySqlContext mySqlContext,String sql) {
-        return new AntlrMySQLUpdateRecognizer(mySqlContext,sql);
+    public SQLRecognizer getUpdateRecognizer(String sql) {
+        return new AntlrMySQLUpdateRecognizer(sql);
     }
 
     @Override
-    public SQLRecognizer getSelectForUpdateRecognizer(MySqlContext mySqlContext,String sql) {
-        return new AntlrMySQLSelectRecognizer(mySqlContext,sql);
+    public SQLRecognizer getSelectForUpdateRecognizer(String sql) {
+        return new AntlrMySQLSelectRecognizer(sql);
     }
 }

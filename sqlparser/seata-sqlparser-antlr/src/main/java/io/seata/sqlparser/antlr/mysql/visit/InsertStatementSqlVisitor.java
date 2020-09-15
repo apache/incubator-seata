@@ -13,29 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.antlr.mysql.stream;
+package io.seata.sqlparser.antlr.mysql.visit;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.IntStream;
+import io.seata.sqlparser.antlr.mysql.MySqlContext;
+import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
+import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
 
 /**
- * ANTLRNoCaseStringStream
+ * StatementSqlVisitor
  *
  * @author zhihou
  */
-public class ANTLRNoCaseStringStream extends ANTLRInputStream {
+public class InsertStatementSqlVisitor extends MySqlParserBaseVisitor<MySqlContext> {
 
-    public ANTLRNoCaseStringStream(String input) {
-        super(input);
+    private MySqlContext mySqlContext;
+
+    public InsertStatementSqlVisitor(MySqlContext mySqlContext) {
+        this.mySqlContext = mySqlContext;
     }
 
     @Override
-    public int LA(int i) {
-        int la = super.LA(i);
-        if (la == 0 || la == IntStream.EOF) {
-            return la;
-        } else {
-            return Character.toUpperCase(la);
-        }
+    public MySqlContext visitInsertStatement(MySqlParser.InsertStatementContext ctx) {
+        return new InsertSpecificationSqlVisitor(this.mySqlContext).visitInsertStatement(ctx);
     }
+
 }

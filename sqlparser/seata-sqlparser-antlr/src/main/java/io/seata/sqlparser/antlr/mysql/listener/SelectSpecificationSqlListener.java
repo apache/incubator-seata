@@ -18,6 +18,7 @@ package io.seata.sqlparser.antlr.mysql.listener;
 import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
+import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
 import java.util.List;
 
@@ -34,26 +35,44 @@ public class SelectSpecificationSqlListener extends MySqlParserBaseListener {
 
     @Override
     public void enterTableName(MySqlParser.TableNameContext ctx) {
-        String text = ctx.getText();
-        sqlQueryContext.setTableName(text);
+
+        sqlQueryContext.setTableName(ctx.getText());
         super.enterTableName(ctx);
     }
 
     @Override
+    public void enterAtomTableItem(MySqlParser.AtomTableItemContext ctx) {
+
+        MySqlParser.UidContext uid = ctx.uid();
+        if (uid != null) {
+            String text = uid.getText();
+            if (!text.isEmpty()) {
+                sqlQueryContext.setTableAlias(text);
+            }
+        }
+        super.enterAtomTableItem(ctx);
+    }
+
+    @Override
     public void enterFromClause(MySqlParser.FromClauseContext ctx) {
+
         MySqlParser.ExpressionContext whereExpr = ctx.whereExpr;
-        sqlQueryContext.setWhereCondition(whereExpr.getText());
+        StatementSqlVisitor statementSqlVisitor = new StatementSqlVisitor();
+        String text = statementSqlVisitor.visit(whereExpr).toString();
+        sqlQueryContext.setWhereCondition(text);
         super.enterFromClause(ctx);
     }
 
     @Override
     public void enterFullColumnNameExpressionAtom(MySqlParser.FullColumnNameExpressionAtomContext ctx) {
+
         sqlQueryContext.addQueryWhereColumnNames(ctx.getText());
         super.enterFullColumnNameExpressionAtom(ctx);
     }
 
     @Override
     public void enterConstantExpressionAtom(MySqlParser.ConstantExpressionAtomContext ctx) {
+
         sqlQueryContext.addQueryWhereValColumnNames(ctx.getText());
         super.enterConstantExpressionAtom(ctx);
     }
@@ -62,7 +81,6 @@ public class SelectSpecificationSqlListener extends MySqlParserBaseListener {
     public void enterSelectElements(MySqlParser.SelectElementsContext ctx) {
 
         List<MySqlParser.SelectElementContext> selectElementContexts = ctx.selectElement();
-
         for (MySqlParser.SelectElementContext selectElementContext : selectElementContexts) {
             sqlQueryContext.addQueryColumnNames(selectElementContext.getText());
         }

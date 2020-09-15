@@ -18,6 +18,7 @@ package io.seata.sqlparser.antlr.mysql.listener;
 import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
+import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
 /**
  * @author houzhi
@@ -34,28 +35,40 @@ public class UpdateSpecificationSqlListener extends MySqlParserBaseListener {
     @Override
     public void enterTableName(MySqlParser.TableNameContext ctx) {
 
-        String text = ctx.getText();
-        sqlQueryContext.setTableName(text);
+        sqlQueryContext.setTableName(ctx.getText());
         super.enterTableName(ctx);
     }
 
-
     @Override
     public void enterConstantExpressionAtomForUpdate(MySqlParser.ConstantExpressionAtomForUpdateContext ctx) {
+
         sqlQueryContext.addUpdateWhereValColumnNames(ctx.getText());
         super.enterConstantExpressionAtomForUpdate(ctx);
     }
 
     @Override
     public void enterFullColumnNameExpressionAtomForUpdate(MySqlParser.FullColumnNameExpressionAtomForUpdateContext ctx) {
+
         sqlQueryContext.addUpdateWhereColumnNames(ctx.getText());
         super.enterFullColumnNameExpressionAtomForUpdate(ctx);
     }
 
     @Override
     public void enterSingleUpdateStatement(MySqlParser.SingleUpdateStatementContext ctx) {
+
         MySqlParser.ExpressionForUpdateContext expressionForUpdateContext = ctx.expressionForUpdate();
-        sqlQueryContext.setWhereCondition(expressionForUpdateContext.getText());
+        StatementSqlVisitor statementSqlVisitor = new StatementSqlVisitor();
+        String text = statementSqlVisitor.visit(expressionForUpdateContext).toString();
+        sqlQueryContext.setWhereCondition(text);
+
+        MySqlParser.UidContext uid = ctx.uid();
+
+        if (uid != null) {
+            String alias = uid.getText();
+            if (!text.isEmpty()) {
+                sqlQueryContext.setTableAlias(alias);
+            }
+        }
         super.enterSingleUpdateStatement(ctx);
     }
 

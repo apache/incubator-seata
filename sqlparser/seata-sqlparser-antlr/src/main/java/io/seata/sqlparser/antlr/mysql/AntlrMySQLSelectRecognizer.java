@@ -37,17 +37,16 @@ public class AntlrMySQLSelectRecognizer implements SQLSelectRecognizer {
 
     private MySqlContext sqlContext;
 
-    public AntlrMySQLSelectRecognizer(MySqlContext mySqlContext, String sql) {
+    public AntlrMySQLSelectRecognizer(String sql) {
         MySqlLexer mySqlLexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
         CommonTokenStream commonTokenStream = new CommonTokenStream(mySqlLexer);
-        MySqlParser parser2 = new MySqlParser(commonTokenStream);
-        MySqlParser.RootContext root = parser2.root();
-        ParseTreeWalker walker2 = new ParseTreeWalker();
+        MySqlParser parser = new MySqlParser(commonTokenStream);
+        MySqlParser.RootContext root = parser.root();
+        ParseTreeWalker walker = new ParseTreeWalker();
         sqlContext = new MySqlContext();
-        sqlContext.setOriginalSQL(mySqlContext.getOriginalSQL());
-        walker2.walk(new SelectSpecificationSqlListener(sqlContext), root);
+        sqlContext.setOriginalSQL(sql);
+        walker.walk(new SelectSpecificationSqlListener(sqlContext), root);
     }
-
 
     @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
@@ -66,7 +65,7 @@ public class AntlrMySQLSelectRecognizer implements SQLSelectRecognizer {
 
     @Override
     public String getTableAlias() {
-        return null;
+        return sqlContext.tableAlias;
     }
 
     @Override

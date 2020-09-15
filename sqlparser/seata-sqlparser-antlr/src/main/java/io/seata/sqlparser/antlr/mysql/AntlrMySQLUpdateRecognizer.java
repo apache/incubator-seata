@@ -38,14 +38,14 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 
     private MySqlContext sqlContext;
 
-    public AntlrMySQLUpdateRecognizer(MySqlContext mySqlContext,String sql) {
+    public AntlrMySQLUpdateRecognizer(String sql) {
         MySqlLexer mySqlLexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
         CommonTokenStream commonTokenStream = new CommonTokenStream(mySqlLexer);
         MySqlParser parser2 = new MySqlParser(commonTokenStream);
         MySqlParser.RootContext root = parser2.root();
         ParseTreeWalker walker2 = new ParseTreeWalker();
         sqlContext = new MySqlContext();
-        sqlContext.setOriginalSQL(mySqlContext.getOriginalSQL());
+        sqlContext.setOriginalSQL(sql);
         walker2.walk(new UpdateSpecificationSqlListener(sqlContext), root);
     }
 
@@ -89,7 +89,7 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 
     @Override
     public String getTableAlias() {
-        return null;
+        return sqlContext.tableAlias;
     }
 
     @Override

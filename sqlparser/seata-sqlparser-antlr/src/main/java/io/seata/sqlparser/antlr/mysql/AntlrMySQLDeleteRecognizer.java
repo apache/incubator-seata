@@ -37,14 +37,14 @@ public class AntlrMySQLDeleteRecognizer implements SQLDeleteRecognizer {
 
     private MySqlContext sqlContext;
 
-    public AntlrMySQLDeleteRecognizer(MySqlContext mySqlContext,String sql) {
+    public AntlrMySQLDeleteRecognizer(String sql) {
         MySqlLexer mySqlLexer = new MySqlLexer(new ANTLRNoCaseStringStream(sql));
         CommonTokenStream commonTokenStream = new CommonTokenStream(mySqlLexer);
         MySqlParser parser2 = new MySqlParser(commonTokenStream);
         MySqlParser.RootContext root = parser2.root();
         ParseTreeWalker walker2 = new ParseTreeWalker();
         sqlContext = new MySqlContext();
-        sqlContext.setOriginalSQL(mySqlContext.getOriginalSQL());
+        sqlContext.setOriginalSQL(sql);
         walker2.walk(new DeleteSpecificationSqlListener(sqlContext), root);
     }
 
@@ -66,7 +66,7 @@ public class AntlrMySQLDeleteRecognizer implements SQLDeleteRecognizer {
 
     @Override
     public String getTableAlias() {
-        return null;
+        return sqlContext.tableAlias;
     }
 
     @Override

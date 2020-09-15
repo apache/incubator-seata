@@ -15,26 +15,54 @@
  */
 package io.seata.sqlparser.antlr.mysql.visit;
 
-import io.seata.sqlparser.antlr.mysql.MySqlContext;
-import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  * StatementSqlVisitor
  *
  * @author zhihou
  */
-public class StatementSqlVisitor extends MySqlParserBaseVisitor<MySqlContext> {
+public class StatementSqlVisitor<T> extends MySqlParserBaseVisitor<Object> {
 
-    private MySqlContext mySqlContext;
-
-    public StatementSqlVisitor(MySqlContext mySqlContext) {
-        this.mySqlContext = mySqlContext;
-    }
+    private StringBuilder sb = new StringBuilder();
 
     @Override
-    public MySqlContext visitInsertStatement(MySqlParser.InsertStatementContext ctx) {
-        return new InsertSpecificationSqlVisitor(this.mySqlContext).visitInsertStatement(ctx);
+    public StringBuilder visitTerminal(TerminalNode node) {
+        String text = node.getText();
+        if (text != null && !"".equals(text.trim())) {
+            if (shouldAddSpace(text.trim())) {
+                sb.append(" ");
+            }
+            sb.append(text);
+        }
+        return sb;
     }
+
+    private boolean shouldAddSpace(String text) {
+        if (sb.length() == 0) {
+            return false;
+        }
+        char lastChar = sb.charAt(sb.length() - 1);
+        switch (lastChar) {
+            case '.':
+            case ',':
+            case '(':
+                return false;
+            default:
+                break;
+        }
+
+        switch (text.charAt(0)) {
+            case '.':
+            case ',':
+            case ')':
+                return false;
+            default:
+                break;
+        }
+        return true;
+    }
+
 
 }

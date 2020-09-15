@@ -19,7 +19,7 @@ import io.seata.sqlparser.antlr.mysql.MySqlContext;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
-import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
+import io.seata.sqlparser.antlr.mysql.visit.InsertStatementSqlVisitor;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ public class MySQLInsertRecognizerTest {
         MySqlParser.RootContext rootContext = parser.root();
 
         MySqlContext visitorSqlContext = new MySqlContext();
-        StatementSqlVisitor visitor = new StatementSqlVisitor(visitorSqlContext);
+        InsertStatementSqlVisitor visitor = new InsertStatementSqlVisitor(visitorSqlContext);
         visitor.visit(rootContext);
 
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
@@ -77,7 +77,7 @@ public class MySQLInsertRecognizerTest {
         MySqlParser.RootContext rootContext = parser.root();
 
         MySqlContext visitorSqlContext = new MySqlContext();
-        StatementSqlVisitor visitor = new StatementSqlVisitor(visitorSqlContext);
+        InsertStatementSqlVisitor visitor = new InsertStatementSqlVisitor(visitorSqlContext);
         visitor.visit(rootContext);
 
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
@@ -105,7 +105,7 @@ public class MySQLInsertRecognizerTest {
         MySqlParser.RootContext rootContext = parser.root();
 
         MySqlContext visitorSqlContext = new MySqlContext();
-        StatementSqlVisitor visitor = new StatementSqlVisitor(visitorSqlContext);
+        InsertStatementSqlVisitor visitor = new InsertStatementSqlVisitor(visitorSqlContext);
         visitor.visit(rootContext);
 
 
