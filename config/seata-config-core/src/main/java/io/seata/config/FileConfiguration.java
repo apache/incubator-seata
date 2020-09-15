@@ -18,6 +18,7 @@ package io.seata.config;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -157,22 +158,22 @@ public class FileConfiguration extends AbstractConfiguration {
             }
 
             if (!filePathCustom) {
-                URI resource = this.getClass().getClassLoader().getResource(name).toURI();
+                URL resource = this.getClass().getClassLoader().getResource(name);
                 if (resource == null) {
                     for (String s : FileConfigFactory.getSuffixSet()) {
-                        resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s).toURI();
+                        resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
                         if (resource != null) {
                             if (LOGGER.isInfoEnabled()) {
                                 LOGGER.info("The configuration file used is {}", resource.getPath());
                             }
-                            return new File(resource.getPath());
+                            return new File(resource.toURI().getPath());
                         }
                     }
                 } else {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("The configuration file used is {}", name);
                     }
-                    return new File(resource.getPath());
+                    return new File(resource.toURI().getPath());
                 }
             }
         } catch (URISyntaxException e) {
