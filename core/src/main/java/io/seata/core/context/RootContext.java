@@ -133,7 +133,7 @@ public class RootContext {
      * @return the boolean
      */
     public static boolean inTccBranch() {
-        return BranchType.TCC.name().equalsIgnoreCase(getBranchType());
+        return BranchType.TCC == getBranchType();
     }
 
     /**
@@ -142,7 +142,7 @@ public class RootContext {
      * @return the boolean
      */
     public static boolean inSagaBranch() {
-        return BranchType.SAGA.name().equalsIgnoreCase(getBranchType());
+        return BranchType.SAGA == getBranchType();
     }
 
     /**
