@@ -167,7 +167,7 @@ class NettyClientChannelManager {
         if (CollectionUtils.isEmpty(availList)) {
             String serviceGroup = RegistryFactory.getInstance()
                                                  .getServiceGroup(transactionServiceGroup);
-            LOGGER.error("no available service '{}' found, please make sure registry config correct", serviceGroup);
+            LOGGER.error("no available service '{}' found in service group '{}', please make sure registry config correct", serviceGroup, transactionServiceGroup);
             return;
         }
         for (String serverAddress : availList) {
