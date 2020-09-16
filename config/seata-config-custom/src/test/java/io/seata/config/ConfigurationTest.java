@@ -92,15 +92,15 @@ public class ConfigurationTest {
         //array
         dataId = "array";
         splitCode = ",";
-        assertThat(Arrays.asList(configuration.getArray(dataId, splitCode))).hasSameElementsAs(Arrays.asList(ARRAY_VALUE));
+        assertThat(configuration.getArray(dataId, splitCode)).isEqualTo(ARRAY_VALUE);
         //assertThat(configuration.getArray(dataId + NULL_POSTFIX, splitCode)).isEmpty();
-        assertThat(Arrays.asList(configuration.getArray(dataId + NULL_POSTFIX, splitCode, DEFAULT_ARRAY_VALUE))).hasSameElementsAs(Arrays.asList(DEFAULT_ARRAY_VALUE));
+        assertThat(configuration.getArray(dataId + NULL_POSTFIX, splitCode, DEFAULT_ARRAY_VALUE)).isEqualTo(DEFAULT_ARRAY_VALUE);
 
         //list
         dataId = "list";
         splitCode = ";";
-        assertThat(configuration.getList(dataId, splitCode)).hasSameElementsAs(LIST_VALUE);
+        assertThat(configuration.getList(dataId, splitCode)).isEqualTo(LIST_VALUE);
         //assertThat(configuration.getList(dataId + NULL_POSTFIX, splitCode)).isEmpty();
-        assertThat(configuration.getList(dataId + NULL_POSTFIX, splitCode, DEFAULT_LIST_VALUE)).hasSameElementsAs(DEFAULT_LIST_VALUE);
+        assertThat(configuration.getList(dataId + NULL_POSTFIX, splitCode, DEFAULT_LIST_VALUE)).isEqualTo(DEFAULT_LIST_VALUE);
     }
 }
