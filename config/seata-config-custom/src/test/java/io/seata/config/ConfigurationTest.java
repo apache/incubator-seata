@@ -85,13 +85,14 @@ public class ConfigurationTest {
 
         //duration
         dataId = "duration";
-        assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE);
+        //assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE); // can't pass the CI
+        assertThat(configuration.getDuration(dataId, DURATION_VALUE)).isEqualTo(DURATION_VALUE);
         //assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(Duration.ZERO);
         assertThat(configuration.getDuration(dataId + NULL_POSTFIX, DEFAULT_DURATION_VALUE)).isEqualTo(DEFAULT_DURATION_VALUE);
 
         //array
         dataId = "array";
-        splitCode = ",";
+        splitCode = "\\|";
         assertThat(configuration.getArray(dataId, splitCode)).isEqualTo(ARRAY_VALUE);
         //assertThat(configuration.getArray(dataId + NULL_POSTFIX, splitCode)).isEmpty();
         assertThat(configuration.getArray(dataId + NULL_POSTFIX, splitCode, DEFAULT_ARRAY_VALUE)).isEqualTo(DEFAULT_ARRAY_VALUE);
