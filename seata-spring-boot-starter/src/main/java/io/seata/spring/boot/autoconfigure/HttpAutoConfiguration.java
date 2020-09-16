@@ -13,8 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.http;
+package io.seata.spring.boot.autoconfigure;
 
+import io.seata.integration.http.HttpHandlerExceptionResolver;
+import io.seata.integration.http.TransactionPropagationIntercepter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -28,6 +31,7 @@ import java.util.List;
  * @author wangxb
  */
 @Configuration
+@ConditionalOnWebApplication
 public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
@@ -39,4 +43,5 @@ public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
     public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
         exceptionResolvers.add(new HttpHandlerExceptionResolver());
     }
+
 }
