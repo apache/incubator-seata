@@ -16,6 +16,7 @@
 package io.seata.config;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,7 +34,7 @@ public interface Configuration {
      * @param timeoutMills the timeout mills
      * @return the short
      */
-    short getShort(String dataId, int defaultValue, long timeoutMills);
+    short getShort(String dataId, short defaultValue, long timeoutMills);
 
     /**
      * Gets short.
@@ -164,6 +165,66 @@ public interface Configuration {
      * Gets config.
      *
      * @param dataId       the data id
+     * @param splitChar    the split char
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the config
+     */
+    String[] getArray(String dataId, String splitChar, String[] defaultValue, long timeoutMills);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId       the data id
+     * @param splitChar    the split char
+     * @param defaultValue the default value
+     * @return the config
+     */
+    String[] getArray(String dataId, String splitChar, String[] defaultValue);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId    the data id
+     * @param splitChar the split char
+     * @return the config
+     */
+    String[] getArray(String dataId, String splitChar);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId       the data id
+     * @param splitChar    the split char
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the config
+     */
+    List<String> getList(String dataId, String splitChar, List<String> defaultValue, long timeoutMills);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId       the data id
+     * @param splitChar    the split char
+     * @param defaultValue the default value
+     * @return the config
+     */
+    List<String> getList(String dataId, String splitChar, List<String> defaultValue);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId    the data id
+     * @param splitChar the split char
+     * @return the config
+     */
+    List<String> getList(String dataId, String splitChar);
+
+    /**
+     * Gets config.
+     *
+     * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
      * @return the config
@@ -207,7 +268,6 @@ public interface Configuration {
     boolean putConfig(String dataId, String content, long timeoutMills);
 
     /**
-     *
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
@@ -293,5 +353,4 @@ public interface Configuration {
     default String getConfigFromSysPro(String dataId) {
         return System.getProperty(dataId);
     }
-
 }

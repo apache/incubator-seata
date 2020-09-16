@@ -16,7 +16,12 @@
 package io.seata.config;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import io.seata.common.util.DurationUtil;
+import io.seata.common.util.StringUtils;
 
 /**
  * The type Abstract configuration.
@@ -30,10 +35,22 @@ public abstract class AbstractConfiguration implements Configuration {
      */
     protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
 
+    /**
+     * The constant DEFAULT_VALUE_XXX.
+     */
+    protected static final short DEFAULT_VALUE_SHORT = (short) 0;
+    protected static final int DEFAULT_VALUE_INT = 0;
+    protected static final long DEFAULT_VALUE_LONG = 0L;
+    protected static final Duration DEFAULT_VALUE_DURATION = Duration.ZERO;
+    protected static final boolean DEFAULT_VALUE_BOOLEAN = false;
+    protected static final String[] DEFAULT_VALUE_ARRAY = new String[0];
+    protected static final List<String> DEFAULT_VALUE_LIST = Collections.EMPTY_LIST;
+
+
     @Override
-    public short getShort(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Short.parseShort(result);
+    public short getShort(String dataId, short defaultValue, long timeoutMills) {
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Short.parseShort(result);
     }
 
     @Override
@@ -43,13 +60,13 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public short getShort(String dataId) {
-        return getShort(dataId, (short) 0);
+        return getShort(dataId, DEFAULT_VALUE_SHORT);
     }
 
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Integer.parseInt(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Integer.parseInt(result);
     }
 
     @Override
@@ -59,13 +76,13 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public int getInt(String dataId) {
-        return getInt(dataId, 0);
+        return getInt(dataId, DEFAULT_VALUE_INT);
     }
 
     @Override
     public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Long.parseLong(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Long.parseLong(result);
     }
 
     @Override
@@ -75,12 +92,12 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public long getLong(String dataId) {
-        return getLong(dataId, 0L);
+        return getLong(dataId, DEFAULT_VALUE_LONG);
     }
 
     @Override
     public Duration getDuration(String dataId) {
-        return getDuration(dataId, Duration.ZERO);
+        return getDuration(dataId, DEFAULT_VALUE_DURATION);
     }
 
     @Override
@@ -90,14 +107,14 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
-        return DurationUtil.parse(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : DurationUtil.parse(result);
     }
 
     @Override
     public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Boolean.parseBoolean(result);
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : Boolean.parseBoolean(result);
     }
 
     @Override
@@ -107,7 +124,39 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public boolean getBoolean(String dataId) {
-        return getBoolean(dataId, false);
+        return getBoolean(dataId, DEFAULT_VALUE_BOOLEAN);
+    }
+
+    @Override
+    public String[] getArray(String dataId, String splitChar, String[] defaultValue, long timeoutMills) {
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : result.split(splitChar);
+    }
+
+    @Override
+    public String[] getArray(String dataId, String splitChar, String[] defaultValue) {
+        return getArray(dataId, splitChar, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    @Override
+    public String[] getArray(String dataId, String splitChar) {
+        return getArray(dataId, splitChar, DEFAULT_VALUE_ARRAY);
+    }
+
+    @Override
+    public List<String> getList(String dataId, String splitChar, List<String> defaultValue, long timeoutMills) {
+        String[] array = getArray(dataId, splitChar, null, timeoutMills);
+        return array == null || array.length == 0 ? defaultValue : Arrays.asList(array);
+    }
+
+    @Override
+    public List<String> getList(String dataId, String splitChar, List<String> defaultValue) {
+        return getList(dataId, splitChar, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    @Override
+    public List<String> getList(String dataId, String splitChar) {
+        return getList(dataId, splitChar, DEFAULT_VALUE_LIST);
     }
 
     @Override
