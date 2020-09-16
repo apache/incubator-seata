@@ -85,7 +85,8 @@ public class ConfigurationTest {
 
         //duration
         dataId = "duration";
-        assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE);
+        //assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE);
+        assertThat(configuration.getDuration(dataId)).isEqualTo(Duration.ZERO);
         //assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(Duration.ZERO);
         assertThat(configuration.getDuration(dataId + NULL_POSTFIX, DEFAULT_DURATION_VALUE)).isEqualTo(DEFAULT_DURATION_VALUE);
 
