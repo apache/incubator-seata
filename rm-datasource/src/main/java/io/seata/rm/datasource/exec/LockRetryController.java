@@ -15,14 +15,11 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
+import io.seata.common.DefaultValues;
+import io.seata.config.*;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.model.GlobalLockConfig;
-
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
 
 /**
  * The type Lock retry controller.
@@ -30,6 +27,13 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
  * @author sharajava
  */
 public class LockRetryController {
+
+    private static final GlobalConfig globalConfig = new GlobalConfig();
+
+    static {
+        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, globalConfig);
+        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, globalConfig);
+    }
 
     private int lockRetryInternal;
 
@@ -60,7 +64,7 @@ public class LockRetryController {
         }
     }
 
-    private int getLockRetryInternal() {
+    int getLockRetryInternal() {
         // get customized config first
         GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
         if (config != null) {
@@ -70,11 +74,10 @@ public class LockRetryController {
             }
         }
         // if there is no customized config, use global config instead
-        Configuration configuration = ConfigurationFactory.getInstance();
-        return configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, DEFAULT_CLIENT_LOCK_RETRY_INTERVAL);
+        return globalConfig.getGlobalLockRetryInternal();
     }
 
-    private int getLockRetryTimes() {
+    int getLockRetryTimes() {
         // get customized config first
         GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
         if (config != null) {
@@ -84,7 +87,50 @@ public class LockRetryController {
             }
         }
         // if there is no customized config, use global config instead
-        Configuration configuration = ConfigurationFactory.getInstance();
-        return configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, DEFAULT_CLIENT_LOCK_RETRY_TIMES);
+        return globalConfig.getGlobalLockRetryTimes();
+    }
+
+    static class GlobalConfig implements ConfigurationChangeListener {
+
+        private int globalLockRetryInternal;
+
+        private int globalLockRetryTimes;
+
+        private final int defaultRetryInternal = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
+        private final int defaultRetryTimes = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
+
+        public GlobalConfig() {
+            Configuration configuration = ConfigurationFactory.getInstance();
+            globalLockRetryInternal = configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, defaultRetryInternal);
+            globalLockRetryTimes = configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, defaultRetryTimes);
+        }
+
+        @Override
+        public void onChangeEvent(ConfigurationChangeEvent event) {
+            String dataId = event.getDataId();
+            String newValue = event.getNewValue();
+            if (ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL.equals(dataId)) {
+                globalLockRetryInternal = parseInt(newValue, defaultRetryInternal);
+            }
+            if (ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES.equals(dataId)) {
+                globalLockRetryTimes = parseInt(newValue, defaultRetryTimes);
+            }
+        }
+
+        private int parseInt(String value, int fallback) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                return fallback;
+            }
+        }
+
+        public int getGlobalLockRetryInternal() {
+            return globalLockRetryInternal;
+        }
+
+        public int getGlobalLockRetryTimes() {
+            return globalLockRetryTimes;
+        }
     }
 }
