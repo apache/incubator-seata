@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.DefaultValues;
+import io.seata.common.util.NumberUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
@@ -96,9 +97,9 @@ public class LockRetryController {
 
     static class GlobalConfig implements ConfigurationChangeListener {
 
-        private int globalLockRetryInternal;
+        private volatile int globalLockRetryInternal;
 
-        private int globalLockRetryTimes;
+        private volatile int globalLockRetryTimes;
 
         private int defaultRetryInternal = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
         private int defaultRetryTimes = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
@@ -114,18 +115,10 @@ public class LockRetryController {
             String dataId = event.getDataId();
             String newValue = event.getNewValue();
             if (ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL.equals(dataId)) {
-                globalLockRetryInternal = parseInt(newValue, defaultRetryInternal);
+                globalLockRetryInternal = NumberUtils.toInt(newValue, defaultRetryInternal);
             }
             if (ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES.equals(dataId)) {
-                globalLockRetryTimes = parseInt(newValue, defaultRetryTimes);
-            }
-        }
-
-        private int parseInt(String value, int fallback) {
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException e) {
-                return fallback;
+                globalLockRetryTimes = NumberUtils.toInt(newValue, defaultRetryTimes);
             }
         }
 
