@@ -18,6 +18,7 @@ package io.seata.server.logging.logback;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.pattern.CompositeConverter;
+import io.seata.server.env.ContainerHelper;
 import io.seata.server.logging.logback.ansi.AnsiColor;
 import io.seata.server.logging.logback.ansi.AnsiElement;
 import io.seata.server.logging.logback.ansi.AnsiOutput;
@@ -60,8 +61,18 @@ public class ColorConverter extends CompositeConverter<ILoggingEvent> {
         LEVELS = Collections.unmodifiableMap(ansiLevels);
     }
 
+    private final boolean isRunInWindowsWithBat;
+
+    public ColorConverter() {
+        isRunInWindowsWithBat = ContainerHelper.isRunningInWindowsWithBat();
+    }
+
     @Override
     protected String transform(ILoggingEvent event, String in) {
+        if (isRunInWindowsWithBat) {
+            return in;
+        }
+
         AnsiElement element = ELEMENTS.get(getFirstOption());
         if (element == null) {
             // Assume highlighting

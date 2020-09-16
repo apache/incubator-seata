@@ -15,6 +15,7 @@
  */
 package io.seata.server.env;
 
+import io.netty.util.internal.PlatformDependent;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
+ * @author xingfudeshi@gmail.com
  * @author wang.liang
  */
 public class ContainerHelper {
@@ -57,6 +59,20 @@ public class ContainerHelper {
             }
         }
         return false;
+    }
+
+    /**
+     * Judge if application is run in windows with seata-server.bat.
+     *
+     * @return If application is run in windows with seata-server.bat.
+     */
+    public static boolean isRunningInWindowsWithBat() {
+        if (!PlatformDependent.isWindows()) {
+            return false;
+        }
+
+        String runByStartup = System.getProperty("run.by-startup");
+        return runByStartup != null && runByStartup.equalsIgnoreCase("true");
     }
 
     /**
