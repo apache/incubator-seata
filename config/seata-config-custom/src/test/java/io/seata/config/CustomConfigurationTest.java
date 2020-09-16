@@ -27,7 +27,7 @@ public class CustomConfigurationTest {
     @Test
     public void testCustomConfigLoad() throws Exception {
         Configuration configuration = ConfigurationFactory.getInstance();
-        Assertions.assertTrue(null != configuration);
+        Assertions.assertNotNull(configuration);
         Properties properties;
         try (InputStream input = CustomConfigurationForTest.class.getClassLoader().getResourceAsStream("custom_for_test.properties")) {
             properties = new Properties();
