@@ -192,5 +192,4 @@ public interface ServerTableColumnsName {
      * The constant lock_table column name gmt_modified
      */
     String LOCK_TABLE_GMT_MODIFIED = "gmt_modified";
-
 }

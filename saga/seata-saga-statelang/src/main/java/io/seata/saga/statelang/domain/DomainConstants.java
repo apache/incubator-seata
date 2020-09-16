@@ -22,9 +22,7 @@ package io.seata.saga.statelang.domain;
  */
 public interface DomainConstants {
 
-    /**
-     * State Types
-     **/
+    //region State Types
     String STATE_TYPE_SERVICE_TASK = "ServiceTask";
     String STATE_TYPE_CHOICE = "Choice";
     String STATE_TYPE_FAIL = "Fail";
@@ -33,21 +31,15 @@ public interface DomainConstants {
     String STATE_TYPE_SUB_STATE_MACHINE = "SubStateMachine";
     String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
     String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
-    /**
-     * State Types
-     **/
+    //endregion
 
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
 
-    /**
-     * Service Types
-     **/
+    //region Service Types
     String SERVICE_TYPE_SPRING_BEAN = "SpringBean";
-    /** Service Types **/
+    //endregion
 
-    /**
-     * System Variables
-     **/
+    //region System Variables
     String VAR_NAME_STATEMACHINE_CONTEXT = "context";
     String VAR_NAME_INPUT_PARAMS = "inputParams";
     String VAR_NAME_OUTPUT_PARAMS = "outputParams";
@@ -76,6 +68,7 @@ public interface DomainConstants {
     String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
     String VAR_NAME_GLOBAL_TX = "_global_transaction_";
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
+    //endregion
 
     String OPERATION_NAME_START = "start";
     String OPERATION_NAME_FORWARD = "forward";
