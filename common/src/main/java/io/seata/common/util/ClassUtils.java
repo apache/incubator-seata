@@ -77,7 +77,7 @@ public class ClassUtils {
         return forName(name, null);
     }
 
-    private static Class<?> simpleForName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+    static Class<?> simpleForName(String name, ClassLoader classLoader) throws ClassNotFoundException {
         return classLoader != null ? classLoader.loadClass(name) : Class.forName(name);
     }
 

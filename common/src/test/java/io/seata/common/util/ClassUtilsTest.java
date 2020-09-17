@@ -45,6 +45,13 @@ public class ClassUtilsTest {
 
         Class<?> clazz = ClassUtils.forName("io.seata.common.XID", this.getClass().getClassLoader());
         assertThat(clazz).isEqualTo(XID.class);
+        clazz = ClassUtils.forName("io.seata.common.XID");
+        assertThat(clazz).isEqualTo(XID.class);
+
+        clazz = ClassUtils.simpleForName("io.seata.common.XID", this.getClass().getClassLoader());
+        assertThat(clazz).isEqualTo(XID.class);
+        clazz = ClassUtils.simpleForName("io.seata.common.XID", null);
+        assertThat(clazz).isEqualTo(XID.class);
     }
 
     @Test
