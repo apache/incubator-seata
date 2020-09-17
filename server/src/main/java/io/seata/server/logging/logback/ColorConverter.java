@@ -18,7 +18,7 @@ package io.seata.server.logging.logback;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.pattern.CompositeConverter;
-import io.seata.server.env.ContainerHelper;
+import io.netty.util.internal.PlatformDependent;
 import io.seata.server.logging.logback.ansi.AnsiColor;
 import io.seata.server.logging.logback.ansi.AnsiElement;
 import io.seata.server.logging.logback.ansi.AnsiOutput;
@@ -39,6 +39,8 @@ import java.util.Map;
 public class ColorConverter extends CompositeConverter<ILoggingEvent> {
 
     private static final Map<String, AnsiElement> ELEMENTS;
+
+    private static final String DISABLE_PROPERTY_NAME = "logback.color.disable-for-bat";
 
     static {
         Map<String, AnsiElement> ansiElements = new HashMap<String, AnsiElement>();
@@ -61,15 +63,17 @@ public class ColorConverter extends CompositeConverter<ILoggingEvent> {
         LEVELS = Collections.unmodifiableMap(ansiLevels);
     }
 
-    private final boolean isRunInWindowsWithBat;
+    private final boolean disable;
 
     public ColorConverter() {
-        isRunInWindowsWithBat = ContainerHelper.isRunningInWindowsWithBat();
+        //If is windows and run by seata-server.bat, then disable the color log.
+        disable = PlatformDependent.isWindows() && Boolean.parseBoolean(System.getProperty(DISABLE_PROPERTY_NAME));
     }
 
     @Override
     protected String transform(ILoggingEvent event, String in) {
-        if (isRunInWindowsWithBat) {
+        if (disable) {
+            //return the original log
             return in;
         }
 
