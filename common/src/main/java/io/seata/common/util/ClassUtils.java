@@ -15,6 +15,8 @@
  */
 package io.seata.common.util;
 
+import static io.seata.common.util.StringFormatUtils.DOT;
+
 /**
  * @author wang.liang
  */
@@ -56,8 +58,9 @@ public class ClassUtils {
         try {
             return simpleForName(name, classLoader);
         } catch (ClassNotFoundException e) {
-            int lastDotIndex = name.lastIndexOf(46);
+            int lastDotIndex = name.lastIndexOf(DOT);
             if (lastDotIndex != -1) {
+                // The last dot '.' replace to '$'
                 String innerClassName = name.substring(0, lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
 
                 try {
