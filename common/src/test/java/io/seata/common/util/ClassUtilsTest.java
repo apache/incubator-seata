@@ -35,8 +35,12 @@ public class ClassUtilsTest {
 
     @Test
     public void test_forName() throws ClassNotFoundException {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ClassUtils.forName(null);
+        });
+
         Assertions.assertThrows(ClassNotFoundException.class, () -> {
-            ClassUtils.forName("com.aaa.bbb.Aaaa", null);
+            ClassUtils.forName("com.aaa.bbb.Aaaa");
         });
 
         Class<?> clazz = ClassUtils.forName("io.seata.common.XID", this.getClass().getClassLoader());

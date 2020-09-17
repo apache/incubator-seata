@@ -28,7 +28,7 @@ public class ClassUtils {
 
         try {
             cl = Thread.currentThread().getContextClassLoader();
-        } catch (Throwable var3) {
+        } catch (Throwable ignored) {
         }
 
         if (cl == null) {
@@ -36,7 +36,7 @@ public class ClassUtils {
             if (cl == null) {
                 try {
                     cl = ClassLoader.getSystemClassLoader();
-                } catch (Throwable var2) {
+                } catch (Throwable ignored) {
                 }
             }
         }
@@ -54,15 +54,15 @@ public class ClassUtils {
         }
 
         try {
-            return classLoader != null ? classLoader.loadClass(name) : Class.forName(name);
+            return simpleForName(name, classLoader);
         } catch (ClassNotFoundException e) {
             int lastDotIndex = name.lastIndexOf(46);
             if (lastDotIndex != -1) {
                 String innerClassName = name.substring(0, lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
 
                 try {
-                    return classLoader != null ? classLoader.loadClass(innerClassName) : Class.forName(innerClassName);
-                } catch (ClassNotFoundException var8) {
+                    return simpleForName(innerClassName, classLoader);
+                } catch (ClassNotFoundException ignored) {
                 }
             }
 
@@ -72,6 +72,10 @@ public class ClassUtils {
 
     public static Class<?> forName(String name) throws ClassNotFoundException {
         return forName(name, null);
+    }
+
+    private static Class<?> simpleForName(String name, ClassLoader classLoader) throws ClassNotFoundException {
+        return classLoader != null ? classLoader.loadClass(name) : Class.forName(name);
     }
 
     public static boolean isPresent(String className, ClassLoader classLoader) {
