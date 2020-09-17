@@ -20,12 +20,12 @@ import io.seata.common.util.ClassUtils;
 /**
  * @author wang.liang
  */
-class AutoDefaultValues {
+final class AutoDefaultValues {
 
     private AutoDefaultValues() {
     }
 
-    public static String autoDefaultSagaJsonParser() {
+    static String autoDefaultSagaJsonParser() {
         if (hasFastjson()) {
             return "fastjson";
         }
@@ -35,7 +35,7 @@ class AutoDefaultValues {
         return "fastjson";
     }
 
-    public static String autoDefaultUndoLogSerialization() {
+    static String autoDefaultUndoLogSerialization() {
         if (hasJackson()) {
             return "jackson";
         }
@@ -51,19 +51,19 @@ class AutoDefaultValues {
         return "jackson";
     }
 
-    private static boolean hasFastjson() {
+    static boolean hasFastjson() {
         return ClassUtils.isPresent("com.alibaba.fastjson.JSON");
     }
 
-    private static boolean hasJackson() {
+    static boolean hasJackson() {
         return ClassUtils.isPresent("com.fasterxml.jackson.core.JsonParser");
     }
 
-    private static boolean hasKryo() {
+    static boolean hasKryo() {
         return ClassUtils.isPresent("com.esotericsoftware.kryo.Kryo");
     }
 
-    private static boolean hasProtostuff() {
+    static boolean hasProtostuff() {
         return ClassUtils.isPresent("io.protostuff.ProtostuffIOUtil");
     }
 }
