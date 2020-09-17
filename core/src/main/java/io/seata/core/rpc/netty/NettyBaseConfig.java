@@ -176,7 +176,7 @@ public class NettyBaseConfig {
 
     private static void raiseUnsupportedTransportError() throws RuntimeException {
         String errMsg = String.format("Unsupported provider type :[%s] for transport:[%s].", TRANSPORT_SERVER_TYPE,
-                TRANSPORT_PROTOCOL_TYPE);
+            TRANSPORT_PROTOCOL_TYPE);
         LOGGER.error(errMsg);
         throw new IllegalArgumentException(errMsg);
     }
