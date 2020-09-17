@@ -19,23 +19,27 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * The type TransportServerType test.
+ * The type TransportProtocolType test.
  *
  * @author wang.liang
  */
-class TransportServerTypeTest {
+class TransportProtocolTypeTest {
 
     @Test
     void test_getType() {
-        Assertions.assertEquals(TransportServerType.getType("NATIVE"), TransportServerType.NATIVE);
+        Assertions.assertEquals(TransportProtocolType.getType("tcp"), TransportProtocolType.TCP);
+        Assertions.assertEquals(TransportProtocolType.getType("TCP"), TransportProtocolType.TCP);
 
-        Assertions.assertEquals(TransportServerType.getType("NIO"), TransportServerType.NIO);
+        Assertions.assertEquals(TransportProtocolType.getType("UNIX_DOMAIN_SOCKET"), TransportProtocolType.UNIX_DOMAIN_SOCKET);
+        Assertions.assertEquals(TransportProtocolType.getType("unix_domain_socket"), TransportProtocolType.UNIX_DOMAIN_SOCKET);
+        Assertions.assertEquals(TransportProtocolType.getType("UNIX-DOMAIN-SOCKET"), TransportProtocolType.UNIX_DOMAIN_SOCKET);
+        Assertions.assertEquals(TransportProtocolType.getType("unix-domain-socket"), TransportProtocolType.UNIX_DOMAIN_SOCKET);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            TransportServerType.getType(null);
+            TransportProtocolType.getType(null);
         });
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            TransportServerType.getType("null");
+            TransportProtocolType.getType("null");
         });
     }
 }
