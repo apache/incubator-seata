@@ -62,6 +62,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author xingfudeshi@gmail.com
  */
 public class PropertiesTest {
+    private static final String TX_SERVICE_GROUP = "my_tx_group";
+
     private static AnnotationConfigApplicationContext context;
 
     @BeforeAll
@@ -92,7 +94,7 @@ public class PropertiesTest {
     }
 
     @Test
-    public void testServiceProperties() {
+    public void testServiceProperties() throws Exception {
         ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
         Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
         Map<String, String> grouplist = serviceProperties.getGrouplist();
@@ -100,6 +102,18 @@ public class PropertiesTest {
         assertEquals("127.0.0.1:8091", grouplist.get("default"));
         assertFalse(serviceProperties.isEnableDegrade());
         assertFalse(serviceProperties.isDisableGlobalTransaction());
+
+        //test case: coverage 'ServiceProperties.afterPropertiesSet()'
+        SeataProperties seataProperties = context.getBean(SeataProperties.class);
+        seataProperties.setTxServiceGroup(TX_SERVICE_GROUP);
+        serviceProperties.getVgroupMapping().clear();
+        serviceProperties.getGrouplist().clear();
+        serviceProperties.setSeataProperties(seataProperties);
+        serviceProperties.afterPropertiesSet();
+        assertEquals("default", vgroupMapping.get(TX_SERVICE_GROUP));
+        assertEquals("127.0.0.1:8091", grouplist.get("default"));
+        //clear
+        seataProperties.setTxServiceGroup(null);
     }
 
     @Test
@@ -181,7 +195,6 @@ public class PropertiesTest {
         assertEquals("127.0.0.1:2181", context.getBean(ConfigZooKeeperProperties.class).getServerAddr());
         assertEquals(6000L, context.getBean(ConfigZooKeeperProperties.class).getSessionTimeout());
         assertEquals(2000L, context.getBean(ConfigZooKeeperProperties.class).getConnectTimeout());
-
     }
 
     @Test
@@ -257,7 +270,6 @@ public class PropertiesTest {
         assertTrue(context.getBean(SeataProperties.class).isEnableAutoDataSourceProxy());
         assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
         assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
-
     }
 
     @AfterAll

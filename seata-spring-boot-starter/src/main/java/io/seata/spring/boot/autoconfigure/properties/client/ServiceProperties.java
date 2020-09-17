@@ -15,15 +15,15 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.seata.common.util.StringUtils;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GROUPLIST;
@@ -54,7 +54,6 @@ public class ServiceProperties implements InitializingBean {
      */
     private boolean disableGlobalTransaction = DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
-    @Autowired(required = false)
     private SeataProperties seataProperties;
 
 
@@ -90,6 +89,11 @@ public class ServiceProperties implements InitializingBean {
     public ServiceProperties setDisableGlobalTransaction(boolean disableGlobalTransaction) {
         this.disableGlobalTransaction = disableGlobalTransaction;
         return this;
+    }
+
+    @Autowired(required = false)
+    public void setSeataProperties(SeataProperties seataProperties) {
+        this.seataProperties = seataProperties;
     }
 
     @Override
