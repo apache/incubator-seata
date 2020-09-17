@@ -17,7 +17,6 @@ package io.seata.integration.http;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

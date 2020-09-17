@@ -156,9 +156,9 @@ public class DataCompareUtils {
 
     private static Result<Boolean> compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         // old row to map
-        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPrimaryKeyOnlyName());
         // new row to map
-        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPrimaryKeyOnlyName());
         // compare data
         for (Map.Entry<String, Map<String, Field>> oldEntry : oldRowsMap.entrySet()) {
             String key = oldEntry.getKey();

@@ -52,7 +52,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    public TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
@@ -75,7 +75,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         return TableRecords.empty(getTableMeta());
     }
 }

@@ -96,18 +96,18 @@ public final class ConfigurationFactory {
 
     private static Configuration buildConfiguration() {
         ConfigType configType;
-        String configTypeName;
+        String configTypeName = "";
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                    ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
             //no has  ,so  defalut file
-            if (StringUtils.isEmpty(configTypeName)) {
+            if (StringUtils.isBlank(configTypeName)) {
                 configTypeName = ConfigType.File.name();
             }
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
-            throw new NotSupportYetException("not support register type: " + configTypeName, e);
+            throw e;
         }
         Configuration extConfiguration = null;
         Configuration configuration;
@@ -117,7 +117,7 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             if(StringUtils.isEmpty(name)) {
                 name = "file.conf";
-                LOGGER.error("The config.file.name property configuration was not found, which defaults to file.conf  add by ccg  ewell");
+                LOGGER.warn("The config.file.name property configuration was not found, which defaults to file.conf  add by  ewell");
             }
              configuration = new FileConfiguration(name);
             try {

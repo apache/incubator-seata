@@ -22,6 +22,7 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
+import java.sql.SQLException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +47,14 @@ public class BaseTransactionalExecutorTest {
 
         BaseTransactionalExecutor<Object, Statement> baseTransactionalExecutor
                 = new BaseTransactionalExecutor<Object, Statement>(statementProxy, null, (SQLRecognizer) null) {
+            @Override public TableRecords beforeImage() throws SQLException {
+                return null;
+            }
+
+            @Override public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+                return null;
+            }
+
             @Override
             protected Object doExecute(Object... args) {
                 return null;

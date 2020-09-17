@@ -67,12 +67,12 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    public TableRecords beforeImage() throws SQLException {
         return TableRecords.empty(getTableMeta());
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         Map<String,List<Object>> pkValues = getPkValues();
         TableRecords afterImage = buildTableRecords(pkValues);
         if (afterImage == null) {

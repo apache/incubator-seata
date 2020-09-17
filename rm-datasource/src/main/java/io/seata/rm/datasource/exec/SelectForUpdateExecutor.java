@@ -145,4 +145,12 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();
     }
+
+    @Override public TableRecords beforeImage() throws SQLException {
+        return null;
+    }
+
+    @Override public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        return null;
+    }
 }

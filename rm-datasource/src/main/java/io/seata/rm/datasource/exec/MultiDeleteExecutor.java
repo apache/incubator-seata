@@ -44,7 +44,7 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    public TableRecords beforeImage() throws SQLException {
         if (sqlRecognizers.size() == 1) {
             DeleteExecutor executor = new DeleteExecutor(statementProxy, statementCallback, sqlRecognizers.get(0));
             return executor.beforeImage();
@@ -79,7 +79,7 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         return TableRecords.empty(getTableMeta(sqlRecognizers.get(0).getTableName()));
     }
 }

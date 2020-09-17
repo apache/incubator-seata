@@ -25,10 +25,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
-import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
-import io.seata.rm.datasource.exec.noseata.NoSeata;
-import io.seata.rm.datasource.exec.noseata.UpdateExecutorNoSeata;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
@@ -82,76 +78,14 @@ public class ExecuteTemplate {
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
-
         if (!ElasticsearchUtil.isStarted) {//在启动过程中执行的sql,直接执行。类似flyway执行
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
-
-        //如果配置是seata.enabled=false则关闭分布式事务
-        if (!Seata.EWELL_SEATA_STATE_IS_ON || (!RootContext.requireGlobalLock()&& !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType()))) {
-            String dbType = statementProxy.getConnectionProxy().getDbType();
-            if (CollectionUtils.isEmpty(sqlRecognizers)) {
-                sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(), dbType);
-            }
-            if (sqlRecognizers != null && "true".equals(System.getProperty("dataTrace"))) {
-                NoSeata<T> executor;
-                if (sqlRecognizers.size() == 1) {
-                    SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
-                    switch (sqlRecognizer.getSQLType()) {
-                        case INSERT:
-                            executor = new InsertExecutorNoSeata<>(statementProxy, statementCallback, sqlRecognizer);
-                            break;
-                        case UPDATE:
-                            executor = new UpdateExecutorNoSeata<>(statementProxy, statementCallback, sqlRecognizer);
-                            break;
-                        case DELETE:
-                            executor = new DeleteExecutorNoSeata<>(statementProxy, statementCallback, sqlRecognizer);
-                            break;
-                        default:
-                            executor = null;
-                            break;
-                    }
-                } else {
-                    executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
-                }
-                if (executor != null) {
-                    //保存数据前后镜像
-                    TableRecords beforeImage = null;
-                    try {
-                        beforeImage = executor.beforeImage();
-                    } catch (Throwable e) {
-
-                    }
-                    T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-
-                    try {
-                        TableRecords afterImage = executor.afterImage(beforeImage);
-                        SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizer, beforeImage, afterImage);
-                        //业务数据操作前后插入到es数据库
-                        String xid = String.valueOf(SeataXidWorker.xidWorker.getId());
-                        BranchUndoLog branchUndoLog = new BranchUndoLog();
-                        branchUndoLog.setXid(xid);
-                        branchUndoLog.setSqlUndoLogs(new ArrayList<SQLUndoLog>(Arrays.asList(sQLUndoLog)));
-                        branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
-                        branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(), "yyyy-MM-dd HH:mm:ss"));
-                        ElasticsearchUtil.addData(branchUndoLog);
-
-                        if (statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
-                            ElasticsearchUtil.commitData();
-                        }
-                    } catch (Throwable e) {
-
-                    }
-                    return result;
-                } else {
-                    // Just work as original statement
-                    return statementCallback.execute(statementProxy.getTargetStatement(), args);
-                }
-            } else {
-                // Just work as original statement
-                return statementCallback.execute(statementProxy.getTargetStatement(), args);
-            }
+        //没开启seata事务，没开启数据追踪
+        else if ((!Seata.EWELL_SEATA_STATE_IS_ON || (!RootContext.requireGlobalLock() && !StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType()))) && !"true".equals(System.getProperty("dataTrace"))) {
+            // Just work as original statement
+            return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
         String dbType = statementProxy.getConnectionProxy().getDbType();
@@ -162,7 +96,7 @@ public class ExecuteTemplate {
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            executor = new PlainExecutor<>(statementProxy, statementCallback);
+            return statementCallback.execute(statementProxy.getTargetStatement(), args);
         } else {
             if (sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
@@ -190,20 +124,27 @@ public class ExecuteTemplate {
             }
         }
         T rs;
-        try {
-            rs = executor.execute(args);
-        } catch (Throwable ex) {
-            if (!(ex instanceof SQLException)) {
-                // Turn other exception into SQLException
-                ex = new SQLException(ex);
+        //开启seata分布式事务
+        if(Seata.EWELL_SEATA_STATE_IS_ON  && (RootContext.requireGlobalLock() || StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType()))) {
+            try {
+                rs = executor.execute(args);
+            } catch (Throwable ex) {
+                if (!(ex instanceof SQLException)) {
+                    // Turn other exception into SQLException
+                    ex = new SQLException(ex);
+                }
+                throw (SQLException) ex;
             }
-            throw (SQLException) ex;
+
+        }
+        //数据追踪
+        else {
+            rs =  doTrake(sqlRecognizers,executor,statementProxy,statementCallback,args);
         }
         return rs;
     }
 
-    protected static SQLUndoLog buildUndoItem(SQLRecognizer sqlRecognizer, TableRecords beforeImage,
-        TableRecords afterImage) {
+    protected static SQLUndoLog buildUndoItem(SQLRecognizer sqlRecognizer, TableRecords beforeImage,TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = sqlRecognizer.getTableName();
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
@@ -213,4 +154,36 @@ public class ExecuteTemplate {
         sqlUndoLog.setAfterImage(afterImage);
         return sqlUndoLog;
     }
+
+    private static <T,S extends Statement> T doTrake(List<SQLRecognizer> sqlRecognizers,Executor<T> executor,StatementProxy<S> statementProxy,StatementCallback<T, S> statementCallback,Object... args) throws SQLException {
+        //保存数据前后镜像
+        TableRecords beforeImage = null;
+        try {
+            beforeImage = executor.beforeImage();
+        } catch (Throwable e) {
+
+        }
+        T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+
+        try {
+            TableRecords afterImage = executor.afterImage(beforeImage);
+            SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizers.get(0), beforeImage, afterImage);
+            //业务数据操作前后插入到es数据库
+            String xid = String.valueOf(SeataXidWorker.xidWorker.getId());
+            BranchUndoLog branchUndoLog = new BranchUndoLog();
+            branchUndoLog.setXid(xid);
+            branchUndoLog.setSqlUndoLogs(new ArrayList<SQLUndoLog>(Arrays.asList(sQLUndoLog)));
+            branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
+            branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(), "yyyy-MM-dd HH:mm:ss"));
+            ElasticsearchUtil.addData(branchUndoLog);
+
+            if (statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
+                ElasticsearchUtil.commitData();
+            }
+        } catch (Throwable e) {
+
+        }
+        return result;
+    }
+
 }

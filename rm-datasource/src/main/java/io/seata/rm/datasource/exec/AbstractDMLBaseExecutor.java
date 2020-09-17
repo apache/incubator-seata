@@ -131,7 +131,8 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @return the table records
      * @throws SQLException the sql exception
      */
-    protected abstract TableRecords beforeImage() throws SQLException;
+     @Override
+     public abstract TableRecords beforeImage() throws SQLException;
 
     /**
      * After image table records.
@@ -140,7 +141,8 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @return the table records
      * @throws SQLException the sql exception
      */
-    protected abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
+    @Override
+    public abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
 
     private static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
         private final ConnectionProxy connection;

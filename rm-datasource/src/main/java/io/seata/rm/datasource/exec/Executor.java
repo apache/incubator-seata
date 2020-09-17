@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import java.sql.SQLException;
+
 /**
  * The interface Executor.
  *
@@ -32,4 +35,8 @@ public interface Executor<T> {
      * @throws Throwable the throwable
      */
     T execute(Object... args) throws Throwable;
+
+    TableRecords beforeImage() throws SQLException;
+
+    TableRecords afterImage(TableRecords beforeImage) throws SQLException;
 }

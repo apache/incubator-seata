@@ -63,7 +63,7 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
      * @see io.seata.rm.datasource.sql.SQLVisitorFactory#get(String, String) validate sqlType
      */
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    public TableRecords beforeImage() throws SQLException {
         //group by sqlType
         multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(t -> t.getTableName()));
         AbstractDMLBaseExecutor<T, S> executor = null;
@@ -85,7 +85,7 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         AbstractDMLBaseExecutor<T, S> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {

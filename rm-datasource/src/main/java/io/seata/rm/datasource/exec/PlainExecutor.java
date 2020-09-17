@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import io.seata.rm.datasource.StatementProxy;
@@ -47,5 +49,13 @@ public class PlainExecutor<T, S extends Statement> implements Executor<T> {
     @Override
     public T execute(Object... args) throws Throwable {
         return statementCallback.execute(statementProxy.getTargetStatement(), args);
+    }
+
+    @Override public TableRecords beforeImage() throws SQLException {
+        return null;
+    }
+
+    @Override public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+        return null;
     }
 }

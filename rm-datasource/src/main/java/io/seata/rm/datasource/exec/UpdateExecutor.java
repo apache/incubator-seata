@@ -64,7 +64,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    public TableRecords beforeImage() throws SQLException {
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
         String selectSQL = buildBeforeImageSQL(tmeta, paramAppenderList);
@@ -98,7 +98,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         TableMeta tmeta = getTableMeta();
         if (beforeImage == null || beforeImage.size() == 0) {
             return TableRecords.empty(getTableMeta());
