@@ -23,8 +23,8 @@
     <conversionRule conversionWord="clr" converterClass="io.seata.server.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="io.seata.server.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
-    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"/>
-    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%t] %-40.40logger{39} : %m%n%wEx"/>
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%25.25t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"/>
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%30.30t] %-40.40logger{39} : %m%n%wEx"/>
 
     <property name="LOG_HOME" value="${user.home}/logs/seata"/>
 
@@ -38,10 +38,10 @@
 
     <!--ALL-->
     <appender name="ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/txc.${PORT}.all.log</file>
+        <file>${LOG_HOME}/seata-server.${PORT}.all.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/history/txc.${PORT}.all.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/seata-server.${PORT}.all.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>
@@ -60,10 +60,10 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <file>${LOG_HOME}/txc.${PORT}.warn.log</file>
+        <file>${LOG_HOME}/seata-server.${PORT}.warn.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/history/txc.${PORT}.warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/seata-server.${PORT}.warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>
@@ -82,10 +82,10 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <file>${LOG_HOME}/txc.${PORT}.error.log</file>
+        <file>${LOG_HOME}/seata-server.${PORT}.error.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/history/txc.${PORT}.error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/seata-server.${PORT}.error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>

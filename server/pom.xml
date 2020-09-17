@@ -205,6 +205,8 @@
                                     <extraArgument>-verbose:gc</extraArgument>
                                     <!--netty-->
                                     <extraArgument>-Dio.netty.leakDetectionLevel=advanced</extraArgument>
+                                    <!--log-->
+                                    <extraArgument>-Dlogback.color.disable-for-bat=true</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                             <platforms>
@@ -263,6 +265,8 @@
                             <jvmFlag>-verbose:gc</jvmFlag>
                             <!--netty-->
                             <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
+                            <!--log-->
+                            <jvmFlag>-Dlogback.color.disable-for-bat=true</jvmFlag>
                         </jvmFlags>
                         <labels>
                             <name>seata-server</name>
