@@ -15,9 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.seata.common.util.StringUtils;
 import io.seata.discovery.registry.RegistryType;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
@@ -27,10 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GROUPLIST;
 import static io.seata.common.DefaultValues.DEFAULT_TC_APPLICATION_NAME;
 import static io.seata.common.DefaultValues.DEFAULT_TC_CLUSTER;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
 /**
@@ -56,11 +57,12 @@ public class ServiceProperties implements InitializingBean {
      */
     private boolean disableGlobalTransaction = DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
-    @Autowired
+
     private SeataProperties seataProperties;
 
     @Autowired
     private RegistryProperties registryProperties;
+
 
     public Map<String, String> getVgroupMapping() {
         return vgroupMapping;
@@ -96,23 +98,44 @@ public class ServiceProperties implements InitializingBean {
         return this;
     }
 
+    @Autowired(required = false)
+    public void setSeataProperties(SeataProperties seataProperties) {
+        this.seataProperties = seataProperties;
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        String tcClusterValue = vgroupMapping.get(seataProperties.getTxServiceGroup());
-        if (StringUtils.isBlank(tcClusterValue)) {
-            // eureka default cluster is 'seata-server', other is 'default'
-            if (RegistryType.Eureka.name().equalsIgnoreCase(registryProperties.getType())) {
-                tcClusterValue = DEFAULT_TC_APPLICATION_NAME;
-            } else {
-                tcClusterValue = DEFAULT_TC_CLUSTER;
+        //Create the default cluster and grouplist for the txServiceGroup.
+        if (seataProperties != null) {
+            //The transaction service group
+            String txServiceGroup = seataProperties.getTxServiceGroup();
+
+            //When cluster is blank, create the default cluster.
+            String clusterValue = vgroupMapping.get(txServiceGroup);
+            if (StringUtils.isBlank(clusterValue)) {
+                clusterValue = this.getDefaultTcCluster();
+                vgroupMapping.put(txServiceGroup, clusterValue);
             }
-            vgroupMapping.put(seataProperties.getTxServiceGroup(), tcClusterValue);
+
+            //When grouplist is blank, create the default grouplist.
+            String grouplistValue = this.grouplist.get(clusterValue);
+            if (StringUtils.isBlank(grouplistValue)) {
+                grouplistValue = DEFAULT_GROUPLIST;
+                grouplist.put(clusterValue, grouplistValue);
+            }
         }
 
-        String grouplistValue = grouplist.get(tcClusterValue);
-        if (StringUtils.isBlank(grouplistValue)) {
-            grouplistValue = DEFAULT_GROUPLIST;
-            grouplist.put(tcClusterValue, grouplistValue);
+        if (vgroupMapping.isEmpty()) {
+            vgroupMapping.put(DEFAULT_TX_GROUP, DEFAULT_TC_CLUSTER);
         }
+        if (grouplist.isEmpty()) {
+            grouplist.put(DEFAULT_TC_CLUSTER, DEFAULT_GROUPLIST);
+        }
+    }
+
+    private String getDefaultTcCluster() {
+        // eureka default cluster is 'seata-server', other is 'default'
+        RegistryType registryType = RegistryType.getType(registryProperties.getType());
+        return RegistryType.Eureka == registryType ? DEFAULT_TC_APPLICATION_NAME : DEFAULT_TC_CLUSTER;
     }
 }

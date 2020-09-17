@@ -176,7 +176,7 @@ public class NettyBaseConfig {
 
     private static void raiseUnsupportedTransportError() throws RuntimeException {
         String errMsg = String.format("Unsupported provider type :[%s] for transport:[%s].", TRANSPORT_SERVER_TYPE,
-            TRANSPORT_PROTOCOL_TYPE);
+                TRANSPORT_PROTOCOL_TYPE);
         LOGGER.error(errMsg);
         throw new IllegalArgumentException(errMsg);
     }
@@ -225,12 +225,17 @@ public class NettyBaseConfig {
          * @return the mode by name
          */
         public static WorkThreadMode getModeByName(String name) {
-            for (WorkThreadMode mode : values()) {
-                if (mode.name().equalsIgnoreCase(name)) {
-                    return mode;
-                }
+            if (Auto.name().equalsIgnoreCase(name)) {
+                return Auto;
+            } else if (Pin.name().equalsIgnoreCase(name)) {
+                return Pin;
+            } else if (BusyPin.name().equalsIgnoreCase(name)) {
+                return BusyPin;
+            } else if (Default.name().equalsIgnoreCase(name)) {
+                return Default;
+            } else {
+                return null;
             }
-            return null;
         }
 
     }

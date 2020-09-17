@@ -20,137 +20,137 @@ package io.seata.core.constants;
  *
  * @author slievrly
  */
-public interface ConfigurationKeys {
+public class ConfigurationKeys {
 
     /**
      * The constant SERVICE_PREFIX.
      */
-    String SERVICE_PREFIX = "service.";
+    public static final String SERVICE_PREFIX = "service.";
 
     /**
      * The constant STORE_PREFIX.
      */
-    String STORE_PREFIX = "store.";
+    public static final String STORE_PREFIX = "store.";
 
     /**
      * The constant STORE_MODE.
      */
-    String STORE_MODE = STORE_PREFIX + "mode";
+    public static final String STORE_MODE = STORE_PREFIX + "mode";
 
     /**
      * The constant STORE_FILE_PREFIX
      */
-    String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
+    public static final String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
 
     /**
      * The constant STORE_FILE_DIR
      */
-    String STORE_FILE_DIR = STORE_FILE_PREFIX + "dir";
+    public static final String STORE_FILE_DIR = STORE_FILE_PREFIX + "dir";
 
     /**
      * The constant SERVICE_GROUP_MAPPING_PREFIX.
      */
-    String SERVICE_GROUP_MAPPING_PREFIX = SERVICE_PREFIX + "vgroupMapping.";
+    public static final String SERVICE_GROUP_MAPPING_PREFIX = SERVICE_PREFIX + "vgroupMapping.";
     /**
      * The constant GROUPLIST_POSTFIX.
      */
-    String GROUPLIST_POSTFIX = ".grouplist";
+    public static final String GROUPLIST_POSTFIX = ".grouplist";
     /**
      * The constant SERVER_NODE_SPLIT_CHAR.
      */
-    String SERVER_NODE_SPLIT_CHAR = System.getProperty("line.separator");
+    public static final String SERVER_NODE_SPLIT_CHAR = System.getProperty("line.separator");
 
     /**
      * The constant ENABLE_DEGRADE_POSTFIX.
      */
-    String ENABLE_DEGRADE_POSTFIX = "enableDegrade";
+    public static final String ENABLE_DEGRADE_POSTFIX = "enableDegrade";
 
     /**
      * The constant CLIENT_PREFIX.
      */
-    String CLIENT_PREFIX = "client.";
+    public static final String CLIENT_PREFIX = "client.";
 
     /**
      * The constant SERVER_PREFIX.
      */
-    String SERVER_PREFIX = "server.";
+    public static final String SERVER_PREFIX = "server.";
 
     /**
      * The constant TRANSPORT_PREFIX.
      */
-    String TRANSPORT_PREFIX = "transport.";
+    public static final String TRANSPORT_PREFIX = "transport.";
 
     /**
      * The constant CLIENT_RM_PREFIX.
      */
-    String CLIENT_RM_PREFIX = CLIENT_PREFIX + "rm.";
+    public static final String CLIENT_RM_PREFIX = CLIENT_PREFIX + "rm.";
 
     /**
      * The constant CLIENT_ASYNC_COMMIT_BUFFER_LIMIT.
      */
-    String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_RM_PREFIX + "asyncCommitBufferLimit";
+    public static final String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_RM_PREFIX + "asyncCommitBufferLimit";
     /**
      * The constant CLIENT_RM_LOCK_PREFIX.
      */
-    String CLIENT_RM_LOCK_PREFIX = CLIENT_RM_PREFIX + "lock.";
+    public static final String CLIENT_RM_LOCK_PREFIX = CLIENT_RM_PREFIX + "lock.";
 
     /**
      * The constant CLIENT_LOCK_RETRY_TIMES.
      */
-    String CLIENT_LOCK_RETRY_TIMES = CLIENT_RM_LOCK_PREFIX + "retryTimes";
+    public static final String CLIENT_LOCK_RETRY_TIMES = CLIENT_RM_LOCK_PREFIX + "retryTimes";
     /**
      * The constant CLIENT_LOCK_RETRY_INTERVAL.
      */
-    String CLIENT_LOCK_RETRY_INTERVAL = CLIENT_RM_LOCK_PREFIX + "retryInterval";
+    public static final String CLIENT_LOCK_RETRY_INTERVAL = CLIENT_RM_LOCK_PREFIX + "retryInterval";
     /**
      * The constant CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT.
      */
-    String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
+    public static final String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
 
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
      */
-    String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_FILE_PREFIX + "sessionReloadReadSize";
+    public static final String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_FILE_PREFIX + "sessionReloadReadSize";
 
     /**
      * The constant CLIENT_REPORT_SUCCESS_ENABLE.
      */
-    String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_RM_PREFIX + "reportSuccessEnable";
+    public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_RM_PREFIX + "reportSuccessEnable";
 
     /**
      * The constant CLIENT_SAGA_BRANCH_REGISTER_ENABLE.
      */
-    String CLIENT_SAGA_BRANCH_REGISTER_ENABLE = CLIENT_RM_PREFIX + "sagaBranchRegisterEnable";
+    public static final String CLIENT_SAGA_BRANCH_REGISTER_ENABLE = CLIENT_RM_PREFIX + "sagaBranchRegisterEnable";
 
     /**
      * The constant CLIENT_SAGA_JSON_PARSER.
      */
-    String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
+    public static final String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
-    String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
+    public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
 
     /**
      * The constant CLIENT_TABLE_META_CHECK_ENABLE.
      */
-    String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
+    public static final String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
 
     /**
      * The constant CLIENT_TM_PREFIX.
      */
-    String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
+    public static final String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
     /**
      * The constant CLIENT_TM_COMMIT_RETRY_TIMES.
      */
-    String CLIENT_TM_COMMIT_RETRY_COUNT = CLIENT_TM_PREFIX + "commitRetryCount";
+    public static final String CLIENT_TM_COMMIT_RETRY_COUNT = CLIENT_TM_PREFIX + "commitRetryCount";
 
     /**
      * The constant CLIENT_TM_ROLLBACK_RETRY_TIMES.
      */
-    String CLIENT_TM_ROLLBACK_RETRY_COUNT = CLIENT_TM_PREFIX + "rollbackRetryCount";
+    public static final String CLIENT_TM_ROLLBACK_RETRY_COUNT = CLIENT_TM_PREFIX + "rollbackRetryCount";
 
     /**
      * The constant DEFAULT_GLOBAL_TRANSACTION_TIMEOUT.
@@ -160,367 +160,367 @@ public interface ConfigurationKeys {
     /**
      * The constant SERIALIZE_FOR_RPC.
      */
-    String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
+    public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
 
     /**
      * The constant COMPRESSOR_FOR_RPC.
      *
      * @since 0.7.0
      */
-    String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
+    public static final String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
 
     /**
      * The constant STORE_DB_PREFIX.
      */
-    String STORE_DB_PREFIX = "store.db.";
+    public static final String STORE_DB_PREFIX = "store.db.";
 
     /**
      * The constant STORE_REDIS_PREFIX.
      */
-    String STORE_REDIS_PREFIX = "store.redis.";
+    public static final String STORE_REDIS_PREFIX = "store.redis.";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
-    String STORE_DB_GLOBAL_TABLE = STORE_DB_PREFIX + "globalTable";
+    public static final String STORE_DB_GLOBAL_TABLE = STORE_DB_PREFIX + "globalTable";
 
     /**
      * The constant STORE_DB_BRANCH_TABLE.
      */
-    String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
+    public static final String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
 
     /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
-    String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";
+    public static final String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";
 
     /**
      * The constant STORE_DB_TYPE.
      */
-    String STORE_DB_TYPE = STORE_DB_PREFIX + "dbType";
+    public static final String STORE_DB_TYPE = STORE_DB_PREFIX + "dbType";
 
     /**
      * The constant STORE_DB_DRIVER_CLASS_NAME.
      */
-    String STORE_DB_DRIVER_CLASS_NAME = STORE_DB_PREFIX + "driverClassName";
+    public static final String STORE_DB_DRIVER_CLASS_NAME = STORE_DB_PREFIX + "driverClassName";
 
     /**
      * The constant STORE_DB_MAX_WAIT.
      */
-    String STORE_DB_MAX_WAIT = STORE_DB_PREFIX + "maxWait";
+    public static final String STORE_DB_MAX_WAIT = STORE_DB_PREFIX + "maxWait";
 
     /**
      * The constant STORE_DB_URL.
      */
-    String STORE_DB_URL = STORE_DB_PREFIX + "url";
+    public static final String STORE_DB_URL = STORE_DB_PREFIX + "url";
 
     /**
      * The constant STORE_DB_USER.
      */
-    String STORE_DB_USER = STORE_DB_PREFIX + "user";
+    public static final String STORE_DB_USER = STORE_DB_PREFIX + "user";
 
     /**
      * The constant STORE_DB_PASSWORD.
      */
-    String STORE_DB_PASSWORD = STORE_DB_PREFIX + "password";
+    public static final String STORE_DB_PASSWORD = STORE_DB_PREFIX + "password";
 
     /**
      * The constant STORE_DB_MIN_CONN.
      */
-    String STORE_DB_MIN_CONN = STORE_DB_PREFIX + "minConn";
+    public static final String STORE_DB_MIN_CONN = STORE_DB_PREFIX + "minConn";
 
     /**
      * The constant STORE_DB_MAX_CONN.
      */
-    String STORE_DB_MAX_CONN = STORE_DB_PREFIX + "maxConn";
+    public static final String STORE_DB_MAX_CONN = STORE_DB_PREFIX + "maxConn";
 
     /**
      * The constant STORE_DB_LOG_QUERY_LIMIT.
      */
-    String STORE_DB_LOG_QUERY_LIMIT = STORE_DB_PREFIX + "queryLimit";
+    public static final String STORE_DB_LOG_QUERY_LIMIT = STORE_DB_PREFIX + "queryLimit";
 
     /**
      * The constant LOCK_DB_TABLE.
      */
-    String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
+    public static final String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
      * The constant SERVER_PORT.
      */
-    String SERVER_PORT = SERVER_PREFIX + "port";
+    public static final String SERVER_PORT = SERVER_PREFIX + "port";
 
     /**
      * The constant RECOVERY_PREFIX.
      */
-    String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
+    public static final String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
     /**
      * The constant COMMITING_RETRY_PERIOD.
      */
-    String COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "committingRetryPeriod";
+    public static final String COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "committingRetryPeriod";
 
     /**
      * The constant ASYN_COMMITING_RETRY_PERIOD.
      */
-    String ASYN_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asynCommittingRetryPeriod";
+    public static final String ASYN_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asynCommittingRetryPeriod";
 
     /**
      * The constant ROLLBACKING_RETRY_PERIOD.
      */
-    String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
+    public static final String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
      */
-    String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
+    public static final String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
 
     /**
      * The constant CLIENT_UNDO_PREFIX.
      */
-    String CLIENT_UNDO_PREFIX = "client.undo.";
+    public static final String CLIENT_UNDO_PREFIX = "client.undo.";
 
     /**
      * The constant TRANSACTION_UNDO_DATA_VALIDATION.
      */
-    String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
+    public static final String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
     /**
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
-    String TRANSACTION_UNDO_LOG_SERIALIZATION = CLIENT_UNDO_PREFIX + "logSerialization";
+    public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = CLIENT_UNDO_PREFIX + "logSerialization";
 
     /**
      * The constant TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS.
      */
-    String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
+    public static final String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
 
     /**
      * The constant METRICS_PREFIX.
      */
-    String METRICS_PREFIX = "metrics.";
+    public static final String METRICS_PREFIX = "metrics.";
 
     /**
      * The constant METRICS_ENABLED.
      */
-    String METRICS_ENABLED = "enabled";
+    public static final String METRICS_ENABLED = "enabled";
 
     /**
      * The constant METRICS_REGISTRY_TYPE.
      */
-    String METRICS_REGISTRY_TYPE = "registryType";
+    public static final String METRICS_REGISTRY_TYPE = "registryType";
 
     /**
      * The constant METRICS_EXPORTER_LIST.
      */
-    String METRICS_EXPORTER_LIST = "exporterList";
+    public static final String METRICS_EXPORTER_LIST = "exporterList";
     /**
      * The constant METRICS_EXPORTER_PROMETHEUS_PORT
      */
-    String METRICS_EXPORTER_PROMETHEUS_PORT = "exporterPrometheusPort";
+    public static final String METRICS_EXPORTER_PROMETHEUS_PORT = "exporterPrometheusPort";
 
     /**
      * The constant SERVER_UNDO_PREFIX.
      */
-    String SERVER_UNDO_PREFIX = SERVER_PREFIX + "undo.";
+    public static final String SERVER_UNDO_PREFIX = SERVER_PREFIX + "undo.";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_SAVE_DAYS.
      */
-    String TRANSACTION_UNDO_LOG_SAVE_DAYS = SERVER_UNDO_PREFIX + "logSaveDays";
+    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = SERVER_UNDO_PREFIX + "logSaveDays";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_DELETE_PERIOD
      */
-    String TRANSACTION_UNDO_LOG_DELETE_PERIOD = SERVER_UNDO_PREFIX + "logDeletePeriod";
+    public static final String TRANSACTION_UNDO_LOG_DELETE_PERIOD = SERVER_UNDO_PREFIX + "logDeletePeriod";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_TABLE
      */
-    String TRANSACTION_UNDO_LOG_TABLE = CLIENT_UNDO_PREFIX + "logTable";
+    public static final String TRANSACTION_UNDO_LOG_TABLE = CLIENT_UNDO_PREFIX + "logTable";
     /**
      * The constant CLIENT_LOG_PREFIX
      */
-    String CLIENT_LOG_PREFIX = CLIENT_PREFIX + "log.";
+    public static final String CLIENT_LOG_PREFIX = CLIENT_PREFIX + "log.";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_EXCEPTION_RATE
      */
-    String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_LOG_PREFIX + "exceptionRate";
+    public static final String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_LOG_PREFIX + "exceptionRate";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
      */
-    String MAX_COMMIT_RETRY_TIMEOUT = SERVER_PREFIX + "maxCommitRetryTimeout";
+    public static final String MAX_COMMIT_RETRY_TIMEOUT = SERVER_PREFIX + "maxCommitRetryTimeout";
 
     /**
      * The constant MAX_ROLLBACK_RETRY_TIMEOUT.
      */
-    String MAX_ROLLBACK_RETRY_TIMEOUT = SERVER_PREFIX + "maxRollbackRetryTimeout";
+    public static final String MAX_ROLLBACK_RETRY_TIMEOUT = SERVER_PREFIX + "maxRollbackRetryTimeout";
 
     /**
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
      */
-    String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
+    public static final String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
     /**
      * The constant TRANSPORT_TYPE
      */
-    String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";
+    public static final String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";
 
     /**
      * The constant TRANSPORT_SERVER
      */
-    String TRANSPORT_SERVER = TRANSPORT_PREFIX + "server";
+    public static final String TRANSPORT_SERVER = TRANSPORT_PREFIX + "server";
 
     /**
      * The constant TRANSPORT_HEARTBEAT
      */
-    String TRANSPORT_HEARTBEAT = TRANSPORT_PREFIX + "heartbeat";
+    public static final String TRANSPORT_HEARTBEAT = TRANSPORT_PREFIX + "heartbeat";
 
     /**
      * The constant THREAD_FACTORY_PREFIX
      */
-    String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + "threadFactory.";
+    public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + "threadFactory.";
 
     /**
      * The constant BOSS_THREAD_PREFIX
      */
-    String BOSS_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "bossThreadPrefix";
+    public static final String BOSS_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "bossThreadPrefix";
 
     /**
      * The constant WORKER_THREAD_PREFIX
      */
-    String WORKER_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "workerThreadPrefix";
+    public static final String WORKER_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "workerThreadPrefix";
 
     /**
      * The constant SERVER_EXECUTOR_THREAD_PREFIX
      */
-    String SERVER_EXECUTOR_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "serverExecutorThreadPrefix";
+    public static final String SERVER_EXECUTOR_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "serverExecutorThreadPrefix";
 
     /**
      * The constant SHARE_BOSS_WORKER
      */
-    String SHARE_BOSS_WORKER = THREAD_FACTORY_PREFIX + "shareBossWorker";
+    public static final String SHARE_BOSS_WORKER = THREAD_FACTORY_PREFIX + "shareBossWorker";
 
     /**
      * The constant CLIENT_SELECTOR_THREAD_PREFIX
      */
-    String CLIENT_SELECTOR_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientSelectorThreadPrefix";
+    public static final String CLIENT_SELECTOR_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientSelectorThreadPrefix";
 
     /**
      * The constant CLIENT_SELECTOR_THREAD_SIZE
      */
-    String CLIENT_SELECTOR_THREAD_SIZE = THREAD_FACTORY_PREFIX + "clientSelectorThreadSize";
+    public static final String CLIENT_SELECTOR_THREAD_SIZE = THREAD_FACTORY_PREFIX + "clientSelectorThreadSize";
 
     /**
      * The constant CLIENT_WORKER_THREAD_PREFIX
      */
-    String CLIENT_WORKER_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientWorkerThreadPrefix";
+    public static final String CLIENT_WORKER_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientWorkerThreadPrefix";
 
     /**
      * The constant BOSS_THREAD_SIZE
      */
-    String BOSS_THREAD_SIZE = THREAD_FACTORY_PREFIX + "bossThreadSize";
+    public static final String BOSS_THREAD_SIZE = THREAD_FACTORY_PREFIX + "bossThreadSize";
 
     /**
      * The constant WORKER_THREAD_SIZE
      */
-    String WORKER_THREAD_SIZE = THREAD_FACTORY_PREFIX + "workerThreadSize";
+    public static final String WORKER_THREAD_SIZE = THREAD_FACTORY_PREFIX + "workerThreadSize";
 
     /**
      * The constant SHUTDOWN_PREFIX
      */
-    String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + "shutdown.";
+    public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + "shutdown.";
 
     /**
      * The constant SHUTDOWN_WAIT
      */
-    String SHUTDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
+    public static final String SHUTDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
 
     /**
      * The constant ENABLE_CLIENT_BATCH_SEND_REQUEST
      */
-    String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
+    public static final String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
 
     /**
      * The constant DISABLE_GLOBAL_TRANSACTION.
      */
-    String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
+    public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
 
     /**
      * The constant SQL_PARSER_TYPE.
      */
-    String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
+    public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
      * The constant STORE_REDIS_HOST.
      */
-    String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+    public static final String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
 
     /**
      * The constant STORE_MIN_Conn.
      */
-    String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
+    public static final String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
 
     /**
      * The constant STORE_REDIS_PORT.
      */
-    String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+    public static final String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
 
     /**
      * The constant STORE_REDIS_MAX_CONN.
      */
-    String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
+    public static final String STORE_REDIS_MAX_CONN = STORE_REDIS_PREFIX + "maxConn";
 
     /**
      * the constant STORE_REDIS_MAX_TOTAL
      */
-    String STORE_REDIS_MAX_TOTAL = STORE_REDIS_PREFIX + "maxTotal";
+    public static final String STORE_REDIS_MAX_TOTAL = STORE_REDIS_PREFIX + "maxTotal";
 
     /**
      * The constant STORE_REDIS_DATABASE.
      */
-    String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
+    public static final String STORE_REDIS_DATABASE = STORE_REDIS_PREFIX + "database";
 
     /**
      * The constant STORE_REDIS_PASSWORD.
      */
-    String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
+    public static final String STORE_REDIS_PASSWORD = STORE_REDIS_PREFIX + "password";
 
     /**
      * The constant STORE_REDIS_QUERY_LIMIT.
      */
-    String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
+    public static final String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
 
     /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
-    String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
+    public static final String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
 
     /**
      * The constant CLIENT_DEGRADE_CHECK.
      */
-    String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
+    public static final String CLIENT_DEGRADE_CHECK = CLIENT_TM_PREFIX + "degradeCheck";
     /**
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
-    String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+    public static final String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
 
     /**
      * The constant SERVER_ENABLE_CHECK_AUTH.
      */
-    String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
+    public static final String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
 
     /**
      * The constant APPLICATION_ID.
      */
-    String APPLICATION_ID = "applicationId";
+    public static final String APPLICATION_ID = "applicationId";
 
     /**
      * The constant TX_SERVICE_GROUP.
      */
-    String TX_SERVICE_GROUP = "txServiceGroup";
+    public static final String TX_SERVICE_GROUP = "txServiceGroup";
 
     /**
      * The constant DATA_SOURCE_PROXY_MODE.
      */
-    String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
+    public static final String DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 }
