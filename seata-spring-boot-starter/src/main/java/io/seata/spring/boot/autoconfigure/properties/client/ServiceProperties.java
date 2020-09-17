@@ -19,9 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.seata.common.util.StringUtils;
-import io.seata.discovery.registry.RegistryType;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,7 +27,6 @@ import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GROUPLIST;
-import static io.seata.common.DefaultValues.DEFAULT_TC_APPLICATION;
 import static io.seata.common.DefaultValues.DEFAULT_TC_CLUSTER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
@@ -59,8 +56,6 @@ public class ServiceProperties implements InitializingBean {
     @Autowired
     private SeataProperties seataProperties;
 
-    @Autowired
-    private RegistryProperties registryProperties;
 
     public Map<String, String> getVgroupMapping() {
         return vgroupMapping;
@@ -101,9 +96,7 @@ public class ServiceProperties implements InitializingBean {
         //create default cluster, if blank
         String tcClusterValue = vgroupMapping.get(seataProperties.getTxServiceGroup());
         if (StringUtils.isBlank(tcClusterValue)) {
-            //eureka default cluster is 'seata-server', other is 'default'
-            RegistryType registryType = RegistryType.getType(registryProperties.getType());
-            tcClusterValue = RegistryType.Eureka == registryType ? DEFAULT_TC_APPLICATION : DEFAULT_TC_CLUSTER;
+            tcClusterValue = DEFAULT_TC_CLUSTER;
             vgroupMapping.put(seataProperties.getTxServiceGroup(), tcClusterValue);
         }
 
