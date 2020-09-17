@@ -96,7 +96,7 @@ public class PropertiesTest {
         ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
         Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
         Map<String, String> grouplist = serviceProperties.getGrouplist();
-        assertEquals("default", vgroupMapping.get("null-seata-service-group"));
+        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
         assertEquals("127.0.0.1:8091", grouplist.get("default"));
         assertFalse(serviceProperties.isEnableDegrade());
         assertFalse(serviceProperties.isDisableGlobalTransaction());
