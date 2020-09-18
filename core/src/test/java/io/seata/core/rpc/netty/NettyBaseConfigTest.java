@@ -15,20 +15,31 @@
  */
 package io.seata.core.rpc.netty;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * The type Netty base config test.
  *
  * @author slievrly
+ * @author wang.liang
  */
-public class NettyBaseConfigTest {
+class NettyBaseConfigTest {
     /**
      * Name.
      */
     @Test
-    public void name() {
+    void name() {
         NettyBaseConfig nettyBaseConfig = new NettyBaseConfig();
         System.out.print("test static .");
+    }
+
+    @Test
+    void test_enum_WorkThreadMode_getModeByName() {
+        for (NettyBaseConfig.WorkThreadMode value : NettyBaseConfig.WorkThreadMode.values()) {
+            Assertions.assertEquals(NettyBaseConfig.WorkThreadMode.getModeByName(value.name().toLowerCase()), value);
+        }
+        Assertions.assertNull(NettyBaseConfig.WorkThreadMode.getModeByName(null));
+        Assertions.assertNull(NettyBaseConfig.WorkThreadMode.getModeByName("null"));
     }
 }

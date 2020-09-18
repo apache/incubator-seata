@@ -20,40 +20,40 @@ package io.seata.core.constants;
  *
  * @author zjinlei
  */
-public class ClientTableColumnsName {
+public interface ClientTableColumnsName {
 
     /**
      * The constant undo_log column name xid
      */
-    public static final String UNDO_LOG_XID = "xid";
+    String UNDO_LOG_XID = "xid";
 
     /**
      * The constant undo_log column name branch_id
      */
-    public static final String UNDO_LOG_BRANCH_XID = "branch_id";
+    String UNDO_LOG_BRANCH_XID = "branch_id";
 
     /**
      * The constant undo_log column name context
      */
-    public static final String UNDO_LOG_CONTEXT = "context";
+    String UNDO_LOG_CONTEXT = "context";
 
     /**
      * The constant undo_log column name rollback_info
      */
-    public static final String UNDO_LOG_ROLLBACK_INFO = "rollback_info";
+    String UNDO_LOG_ROLLBACK_INFO = "rollback_info";
 
     /**
      * The constant undo_log column name log_status
      */
-    public static final String UNDO_LOG_LOG_STATUS = "log_status";
+    String UNDO_LOG_LOG_STATUS = "log_status";
 
     /**
      * The constant undo_log column name log_created
      */
-    public static final String UNDO_LOG_LOG_CREATED = "log_created";
+    String UNDO_LOG_LOG_CREATED = "log_created";
 
     /**
      * The constant undo_log column name log_modified
      */
-    public static final String UNDO_LOG_LOG_MODIFIED = "log_modified";
+    String UNDO_LOG_LOG_MODIFIED = "log_modified";
 }

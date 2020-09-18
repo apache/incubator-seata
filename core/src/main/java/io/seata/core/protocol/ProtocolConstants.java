@@ -24,58 +24,58 @@ import io.seata.core.constants.ConfigurationKeys;
  * @author Geng Zhang
  * @since 0.7.0
  */
-public class ProtocolConstants {
+public interface ProtocolConstants {
 
     /**
      * Magic code
      */
-    public static final byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
+    byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
 
     /**
      * Protocol version
      */
-    public static final byte VERSION = 1;
+    byte VERSION = 1;
 
     /**
      * Max frame length
      */
-    public static final int MAX_FRAME_LENGTH = 8 * 1024 * 1024;
+    int MAX_FRAME_LENGTH = 8 * 1024 * 1024;
 
     /**
      * HEAD_LENGTH of protocol v1
      */
-    public static final int V1_HEAD_LENGTH = 16;
+    int V1_HEAD_LENGTH = 16;
     
     /**
      * Message type: Request
      */
-    public static final byte MSGTYPE_RESQUEST_SYNC = 0;
+    byte MSGTYPE_RESQUEST_SYNC = 0;
     /**
      * Message type: Response
      */
-    public static final byte MSGTYPE_RESPONSE = 1;
+    byte MSGTYPE_RESPONSE = 1;
     /**
      * Message type: Request which no need response
      */
-    public static final byte MSGTYPE_RESQUEST_ONEWAY = 2;
+    byte MSGTYPE_RESQUEST_ONEWAY = 2;
     /**
      * Message type: Heartbeat Request
      */
-    public static final byte MSGTYPE_HEARTBEAT_REQUEST = 3;
+    byte MSGTYPE_HEARTBEAT_REQUEST = 3;
     /**
      * Message type: Heartbeat Response
      */
-    public static final byte MSGTYPE_HEARTBEAT_RESPONSE = 4;
+    byte MSGTYPE_HEARTBEAT_RESPONSE = 4;
 
-    // public static final byte MSGTYPE_NEGOTIATOR_REQUEST = 5;
-    // public static final byte MSGTYPE_NEGOTIATOR_RESPONSE = 6;
+    //byte MSGTYPE_NEGOTIATOR_REQUEST = 5;
+    //byte MSGTYPE_NEGOTIATOR_RESPONSE = 6;
 
     /**
      * Configured codec by user, default is SEATA
      * 
      * @see SerializerType#SEATA
      */
-    public static final byte CONFIGURED_CODEC = SerializerType.getByName(ConfigurationFactory.getInstance()
+    byte CONFIGURED_CODEC = SerializerType.getByName(ConfigurationFactory.getInstance()
             .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name())).getCode();
 
     /**
@@ -83,7 +83,6 @@ public class ProtocolConstants {
      *
      * @see CompressorType#NONE
      */
-    public static final byte CONFIGURED_COMPRESSOR = CompressorType.getByName(ConfigurationFactory.getInstance()
+    byte CONFIGURED_COMPRESSOR = CompressorType.getByName(ConfigurationFactory.getInstance()
             .getConfig(ConfigurationKeys.COMPRESSOR_FOR_RPC, CompressorType.NONE.name())).getCode();
-
 }

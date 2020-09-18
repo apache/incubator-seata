@@ -20,31 +20,30 @@ package io.seata.rm.tcc.remoting;
  *
  * @author zhangsen
  */
-public class Protocols {
+public interface Protocols {
 
     /**
      * sofa-rpc service
      */
-    public static final short SOFA_RPC = 2;
+    short SOFA_RPC = 2;
 
     /**
      * dubbo service
      */
-    public static final short DUBBO = 3;
+    short DUBBO = 3;
 
     /**
      * restful service
      */
-    public static final short RESTFUL = 4;
+    short RESTFUL = 4;
 
     /**
      * local bean
      */
-    public static final short IN_JVM = 5;
+    short IN_JVM = 5;
 
     /**
      * hsf service
      */
-    public static final short HSF = 8;
-
+    short HSF = 8;
 }

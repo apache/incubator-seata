@@ -20,76 +20,68 @@ package io.seata.saga.statelang.domain;
  *
  * @author lorne.cl
  */
-public class DomainConstants {
+public interface DomainConstants {
 
-    /**
-     * State Types
-     **/
-    public static final String STATE_TYPE_SERVICE_TASK = "ServiceTask";
-    public static final String STATE_TYPE_CHOICE = "Choice";
-    public static final String STATE_TYPE_FAIL = "Fail";
-    public static final String STATE_TYPE_SUCCEED = "Succeed";
-    public static final String STATE_TYPE_COMPENSATION_TRIGGER = "CompensationTrigger";
-    public static final String STATE_TYPE_SUB_STATE_MACHINE = "SubStateMachine";
-    public static final String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
-    public static final String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
-    /**
-     * State Types
-     **/
+    //region State Types
+    String STATE_TYPE_SERVICE_TASK = "ServiceTask";
+    String STATE_TYPE_CHOICE = "Choice";
+    String STATE_TYPE_FAIL = "Fail";
+    String STATE_TYPE_SUCCEED = "Succeed";
+    String STATE_TYPE_COMPENSATION_TRIGGER = "CompensationTrigger";
+    String STATE_TYPE_SUB_STATE_MACHINE = "SubStateMachine";
+    String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
+    String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
+    //endregion
 
-    public static final String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
+    String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
 
-    /**
-     * Service Types
-     **/
-    public static final String SERVICE_TYPE_SPRING_BEAN = "SpringBean";
-    /** Service Types **/
+    //region Service Types
+    String SERVICE_TYPE_SPRING_BEAN = "SpringBean";
+    //endregion
 
-    /**
-     * System Variables
-     **/
-    public static final String VAR_NAME_STATEMACHINE_CONTEXT = "context";
-    public static final String VAR_NAME_INPUT_PARAMS = "inputParams";
-    public static final String VAR_NAME_OUTPUT_PARAMS = "outputParams";
-    public static final String VAR_NAME_CURRENT_EXCEPTION = "currentException";//exception of current state
-    public static final String VAR_NAME_BUSINESSKEY = "_business_key_";
-    public static final String VAR_NAME_SUB_MACHINE_PARENT_ID = "_sub_machine_parent_id_";
-    public static final String VAR_NAME_CURRENT_CHOICE = "_current_choice_";
-    public static final String VAR_NAME_STATEMACHINE_ERROR_CODE = "_statemachine_error_code_";
-    public static final String VAR_NAME_STATEMACHINE_ERROR_MSG = "_statemachine_error_message_";
-    public static final String VAR_NAME_CURRENT_EXCEPTION_ROUTE = "_current_exception_route_";
-    public static final String VAR_NAME_STATEMACHINE = "_current_statemachine_";
-    public static final String VAR_NAME_STATEMACHINE_INST = "_current_statemachine_instance_";
-    public static final String VAR_NAME_STATEMACHINE_ENGINE = "_current_statemachine_engine_";
-    public static final String VAR_NAME_STATE_INST = "_current_state_instance_";
-    public static final String VAR_NAME_STATEMACHINE_CONFIG = "_statemachine_config_";
-    public static final String VAR_NAME_FAIL_END_STATE_FLAG = "_fail_end_state_flag_";
-    public static final String VAR_NAME_CURRENT_COMPENSATION_HOLDER = "_current_compensation_holder_";
-    public static final String VAR_NAME_RETRIED_STATE_INST_ID = "_retried_state_instance_id";
-    public static final String VAR_NAME_OPERATION_NAME = "_operation_name_";
-    public static final String VAR_NAME_ASYNC_CALLBACK = "_async_callback_";
-    public static final String VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE = "_is_compensating_";
-    public static final String VAR_NAME_IS_EXCEPTION_NOT_CATCH = "_is_exception_not_catch_";
-    public static final String VAR_NAME_PARENT_ID = "_parent_id_";
-    public static final String VAR_NAME_SUB_STATEMACHINE_EXEC_STATUE = "_sub_statemachine_execution_status_";
-    public static final String VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD = "_is_for_sub_statemachine_forward_";
-    public static final String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
-    public static final String VAR_NAME_GLOBAL_TX = "_global_transaction_";
-    public static final String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
+    //region System Variables
+    String VAR_NAME_STATEMACHINE_CONTEXT = "context";
+    String VAR_NAME_INPUT_PARAMS = "inputParams";
+    String VAR_NAME_OUTPUT_PARAMS = "outputParams";
+    String VAR_NAME_CURRENT_EXCEPTION = "currentException";//exception of current state
+    String VAR_NAME_BUSINESSKEY = "_business_key_";
+    String VAR_NAME_SUB_MACHINE_PARENT_ID = "_sub_machine_parent_id_";
+    String VAR_NAME_CURRENT_CHOICE = "_current_choice_";
+    String VAR_NAME_STATEMACHINE_ERROR_CODE = "_statemachine_error_code_";
+    String VAR_NAME_STATEMACHINE_ERROR_MSG = "_statemachine_error_message_";
+    String VAR_NAME_CURRENT_EXCEPTION_ROUTE = "_current_exception_route_";
+    String VAR_NAME_STATEMACHINE = "_current_statemachine_";
+    String VAR_NAME_STATEMACHINE_INST = "_current_statemachine_instance_";
+    String VAR_NAME_STATEMACHINE_ENGINE = "_current_statemachine_engine_";
+    String VAR_NAME_STATE_INST = "_current_state_instance_";
+    String VAR_NAME_STATEMACHINE_CONFIG = "_statemachine_config_";
+    String VAR_NAME_FAIL_END_STATE_FLAG = "_fail_end_state_flag_";
+    String VAR_NAME_CURRENT_COMPENSATION_HOLDER = "_current_compensation_holder_";
+    String VAR_NAME_RETRIED_STATE_INST_ID = "_retried_state_instance_id";
+    String VAR_NAME_OPERATION_NAME = "_operation_name_";
+    String VAR_NAME_ASYNC_CALLBACK = "_async_callback_";
+    String VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE = "_is_compensating_";
+    String VAR_NAME_IS_EXCEPTION_NOT_CATCH = "_is_exception_not_catch_";
+    String VAR_NAME_PARENT_ID = "_parent_id_";
+    String VAR_NAME_SUB_STATEMACHINE_EXEC_STATUE = "_sub_statemachine_execution_status_";
+    String VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD = "_is_for_sub_statemachine_forward_";
+    String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
+    String VAR_NAME_GLOBAL_TX = "_global_transaction_";
+    String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
+    //endregion
 
-    public static final String OPERATION_NAME_START = "start";
-    public static final String OPERATION_NAME_FORWARD = "forward";
-    public static final String OPERATION_NAME_COMPENSATE = "compensate";
+    String OPERATION_NAME_START = "start";
+    String OPERATION_NAME_FORWARD = "forward";
+    String OPERATION_NAME_COMPENSATE = "compensate";
 
-    public static final String SEQ_ENTITY_STATE_MACHINE = "STATE_MACHINE";
-    public static final String SEQ_ENTITY_STATE_MACHINE_INST = "STATE_MACHINE_INST";
-    public static final String SEQ_ENTITY_STATE_INST = "STATE_INST";
+    String SEQ_ENTITY_STATE_MACHINE = "STATE_MACHINE";
+    String SEQ_ENTITY_STATE_MACHINE_INST = "STATE_MACHINE_INST";
+    String SEQ_ENTITY_STATE_INST = "STATE_INST";
 
-    public static final String EXPRESSION_TYPE_SEQUENCE = "Sequence";
-    public static final String EVALUATOR_TYPE_EXCEPTION = "Exception";
+    String EXPRESSION_TYPE_SEQUENCE = "Sequence";
+    String EVALUATOR_TYPE_EXCEPTION = "Exception";
 
-    public static final String SEPERATOR_PARENT_ID      = ":";
+    String SEPERATOR_PARENT_ID      = ":";
 
-    public static final String DEFAULT_JSON_PARSER      = "fastjson";
-
+    String DEFAULT_JSON_PARSER      = "fastjson";
 }
