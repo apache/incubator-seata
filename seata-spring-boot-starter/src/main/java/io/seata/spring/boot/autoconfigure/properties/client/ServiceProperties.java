@@ -54,6 +54,7 @@ public class ServiceProperties implements InitializingBean {
      */
     private boolean disableGlobalTransaction = DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
+    @Autowired(required = false)
     private SeataProperties seataProperties;
 
 
@@ -91,7 +92,6 @@ public class ServiceProperties implements InitializingBean {
         return this;
     }
 
-    @Autowired(required = false)
     public void setSeataProperties(SeataProperties seataProperties) {
         this.seataProperties = seataProperties;
     }
