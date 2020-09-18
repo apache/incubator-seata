@@ -260,20 +260,24 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @return
      */
     private int findAddAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
-        int seataOrder = OrderUtil.getOrder(seataAdvisor);
-        if (seataOrder == Ordered.LOWEST_PRECEDENCE) {
-            // the last position
-            return advised.getAdvisors().length;
-        } else if (seataOrder == Ordered.HIGHEST_PRECEDENCE) {
-            // the first position
-            return 0;
-        }
-
         // Get mustBeLowerThanTransactional, mustBeHigherThanTransactional
         Advice seataAdvice = seataAdvisor.getAdvice();
         SeataInterceptorPosition position = SeataInterceptorPosition.Any;
         if (seataAdvice instanceof SeataInterceptor) {
             position = ((SeataInterceptor) seataAdvice).getPosition();
+        }
+
+        // Get order
+        int seataOrder = OrderUtil.getOrder(seataAdvisor);
+        // When the position is any, check lowest or highest.
+        if (SeataInterceptorPosition.Any == position) {
+            if (seataOrder == Ordered.LOWEST_PRECEDENCE) {
+                // the last position
+                return advised.getAdvisors().length;
+            } else if (seataOrder == Ordered.HIGHEST_PRECEDENCE) {
+                // the first position
+                return 0;
+            }
         }
 
         // Find position
