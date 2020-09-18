@@ -47,9 +47,12 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource && !excludes.contains(bean.getClass().getName())) {
-            //Only put and init proxy, not return proxy.
-            DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
+        if (bean instanceof DataSource) {
+            //When not in the excludes, put and init proxy.
+            if (!excludes.contains(bean.getClass().getName())) {
+                //Only put and init proxy, not return proxy.
+                DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
+            }
 
             //If is SeataDataSourceProxy, return the original data source.
             if (bean instanceof SeataDataSourceProxy) {

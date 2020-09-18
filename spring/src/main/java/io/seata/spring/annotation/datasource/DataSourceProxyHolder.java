@@ -17,7 +17,6 @@ package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -66,27 +65,19 @@ public class DataSourceProxyHolder {
      */
     public DataSource putDataSource(DataSource dataSource, BranchType dataSourceProxyMode) {
         DataSource originalDataSource;
-        Function<DataSource, SeataDataSourceProxy> mappingFunction;
-
         if (dataSource instanceof SeataDataSourceProxy) {
-            SeataDataSourceProxy dataSourceProxy = (SeataDataSourceProxy) dataSource;
-            originalDataSource = dataSourceProxy.getTargetDataSource();
-            mappingFunction = ds -> dataSourceProxy;
+            if ((BranchType.AT == dataSourceProxyMode && dataSource instanceof DataSourceProxy)
+                    || (BranchType.XA == dataSourceProxyMode && dataSource instanceof DataSourceProxyXA)) {
+                //It's already a proxy, return it directly.
+                return dataSource;
+            } else {
+                //Get the original data source.
+                originalDataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
+            }
         } else {
             originalDataSource = dataSource;
-            mappingFunction = BranchType.XA == dataSourceProxyMode ? DataSourceProxyXA::new : DataSourceProxy::new;
         }
-
-        return this.dataSourceProxyMap.computeIfAbsent(originalDataSource, mappingFunction);
-    }
-
-    /**
-     * Get dataSourceProxy
-     *
-     * @param dataSource
-     * @return dataSourceProxy
-     */
-    public DataSource getDataSourceProxy(DataSource dataSource) {
-        return this.dataSourceProxyMap.get(dataSource);
+        return this.dataSourceProxyMap.computeIfAbsent(originalDataSource,
+                BranchType.XA == dataSourceProxyMode ? DataSourceProxyXA::new : DataSourceProxy::new);
     }
 }
