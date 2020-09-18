@@ -99,10 +99,8 @@ public class ServiceProperties implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         //Create the default cluster and grouplist for the txServiceGroup.
-        if (seataProperties != null) {
-            //The transaction service group
-            String txServiceGroup = seataProperties.getTxServiceGroup();
-
+        String txServiceGroup = seataProperties.getTxServiceGroup();
+        if (seataProperties != null && StringUtils.isNotBlank(txServiceGroup)) {
             //When cluster is blank, create the default cluster.
             String clusterValue = vgroupMapping.get(txServiceGroup);
             if (StringUtils.isBlank(clusterValue)) {
