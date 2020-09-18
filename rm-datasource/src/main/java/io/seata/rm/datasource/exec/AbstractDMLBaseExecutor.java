@@ -16,6 +16,11 @@
 package io.seata.rm.datasource.exec;
 
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.AbstractConnectionProxy;
@@ -28,11 +33,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * The type Abstract dml base executor.
