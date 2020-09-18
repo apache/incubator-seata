@@ -22,105 +22,113 @@ import java.nio.charset.Charset;
  *
  * @author slievrly
  */
-public class Constants {
+public interface Constants {
+
     /**
      * The constant IP_PORT_SPLIT_CHAR.
      */
-    public static final String IP_PORT_SPLIT_CHAR = ":";
+    String IP_PORT_SPLIT_CHAR = ":";
     /**
      * The constant CLIENT_ID_SPLIT_CHAR.
      */
-    public static final String CLIENT_ID_SPLIT_CHAR = ":";
+    String CLIENT_ID_SPLIT_CHAR = ":";
     /**
      * The constant ENDPOINT_BEGIN_CHAR.
      */
-    public static final String ENDPOINT_BEGIN_CHAR = "/";
+    String ENDPOINT_BEGIN_CHAR = "/";
     /**
      * The constant DBKEYS_SPLIT_CHAR.
      */
-    public static final String DBKEYS_SPLIT_CHAR = ",";
+    String DBKEYS_SPLIT_CHAR = ",";
 
-    /** the start time of transaction */
-    public static final String START_TIME  = "start-time";
+    /**
+     * The constant ROW_LOCK_KEY_SPLIT_CHAR.
+     */
+    String ROW_LOCK_KEY_SPLIT_CHAR = ";";
+
+    /**
+     * the start time of transaction
+     */
+    String START_TIME = "start-time";
 
     /**
      * app name
      */
-    public static final String APP_NAME = "appName";
+    String APP_NAME = "appName";
 
     /**
      * TCC start time
      */
-    public static final String ACTION_START_TIME = "action-start-time";
+    String ACTION_START_TIME = "action-start-time";
 
     /**
      * TCC name
      */
-    public final static String ACTION_NAME = "actionName";
+    String ACTION_NAME = "actionName";
 
     /**
      * phase one method name
      */
-    public final static String PREPARE_METHOD = "sys::prepare";
+    String PREPARE_METHOD = "sys::prepare";
 
     /**
      * phase two commit method name
      */
-    public final static String COMMIT_METHOD = "sys::commit";
+    String COMMIT_METHOD = "sys::commit";
 
     /**
      * phase two rollback method name
      */
-    public final static String ROLLBACK_METHOD = "sys::rollback";
+    String ROLLBACK_METHOD = "sys::rollback";
 
     /**
      * host ip
      */
-    public final static String HOST_NAME = "host-name";
+    String HOST_NAME = "host-name";
 
     /**
      * The constant TCC_METHOD_RESULT.
      */
-    public final static String TCC_METHOD_RESULT = "result";
+    String TCC_METHOD_RESULT = "result";
 
     /**
      * The constant TCC_METHOD_ARGUMENTS.
      */
-    public final static String TCC_METHOD_ARGUMENTS = "arguments";
+    String TCC_METHOD_ARGUMENTS = "arguments";
 
     /**
      * transaction context
      */
-    public final static String TCC_ACTIVITY_CONTEXT = "activityContext";
+    String TCC_ACTIVITY_CONTEXT = "activityContext";
 
     /**
      * branch context
      */
-    public final static String TCC_ACTION_CONTEXT = "actionContext";
+    String TCC_ACTION_CONTEXT = "actionContext";
 
     /**
      * default charset name
      */
-    public static final String DEFAULT_CHARSET_NAME = "UTF-8";
-    
+    String DEFAULT_CHARSET_NAME = "UTF-8";
+
     /**
      * default charset is utf-8
      */
-    public static final Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_CHARSET_NAME);
+    Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_CHARSET_NAME);
     /**
      * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
      */
-    public static final String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
     /**
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
-    public static final String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
+    String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
     /**
      * The constant BEAN_NAME_FAILURE_HANDLER
      */
-    public static final String BEAN_NAME_FAILURE_HANDLER = "failureHandler";
+    String BEAN_NAME_FAILURE_HANDLER = "failureHandler";
     /**
      * The constant SAGA_TRANS_NAME_PREFIX
      */
-    public static final String SAGA_TRANS_NAME_PREFIX = "$Saga_";
+    String SAGA_TRANS_NAME_PREFIX = "$Saga_";
 }
