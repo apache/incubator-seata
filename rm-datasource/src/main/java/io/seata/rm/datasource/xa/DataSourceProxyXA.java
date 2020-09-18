@@ -17,6 +17,7 @@ package io.seata.rm.datasource.xa;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
 
@@ -37,6 +38,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     }
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
+        if (dataSource instanceof SeataDataSourceProxy) {
+            dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
+        }
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
