@@ -53,7 +53,7 @@ public class StarterConstants {
     public static final String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
 
-    public static final HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap(MAP_CAPACITY);
+    public static final HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
 
     /**
      * The following special keys need to be normalized.
