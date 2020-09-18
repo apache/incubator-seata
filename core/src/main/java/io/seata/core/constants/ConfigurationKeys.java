@@ -141,7 +141,7 @@ public interface ConfigurationKeys {
     /**
      * The constant TCC_ACTION_INTERCEPTOR_ORDER.
      */
-    public static final String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
+    String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
 
     /**
      * The constant CLIENT_TM_PREFIX.
@@ -512,7 +512,7 @@ public interface ConfigurationKeys {
     /**
      * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
      */
-    public static final String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
+    String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
      * The constant SERVER_ENABLE_CHECK_AUTH.
