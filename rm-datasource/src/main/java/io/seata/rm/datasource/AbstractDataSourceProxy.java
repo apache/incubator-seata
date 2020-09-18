@@ -26,12 +26,17 @@ import java.util.logging.Logger;
  *
  * @author sharajava
  */
-public abstract class AbstractDataSourceProxy implements DataSource, SeataDataSource {
+public abstract class AbstractDataSourceProxy implements SeataDataSourceProxy {
 
     /**
      * The Target data source.
      */
     protected DataSource targetDataSource;
+
+    /**
+     * Instantiates a new Abstract data source proxy.
+     */
+    public AbstractDataSourceProxy(){}
 
     /**
      * Instantiates a new Abstract data source proxy.

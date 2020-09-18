@@ -21,8 +21,9 @@ import javax.sql.DataSource;
  * The interface Seata data source.
  *
  * @author wang.liang
+ * @since 1.4.0
  */
-public interface SeataDataSource extends DataSource {
+public interface SeataDataSourceProxy extends DataSource {
 
     /**
      * Gets target data source.

@@ -15,7 +15,8 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.rm.datasource.SeataDataSource;
+import io.seata.core.model.BranchType;
+import io.seata.rm.datasource.SeataDataSourceProxy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -28,15 +29,16 @@ import java.util.List;
  *
  * @author xingfudeshi@gmail.com
  * @author wang.liang
+ * @since 1.4.0
  */
 public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     private final List<String> excludes;
-    private final String dataSourceProxyMode;
+    private final BranchType dataSourceProxyMode;
 
     public SeataDataSourceBeanPostProcessor(String[] excludes, String dataSourceProxyMode) {
         this.excludes = Arrays.asList(excludes);
-        this.dataSourceProxyMode = dataSourceProxyMode;
+        this.dataSourceProxyMode = BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode) ? BranchType.XA : BranchType.AT;
     }
 
     @Override
@@ -51,8 +53,8 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
             DataSourceProxyHolder.get().putDataSource((DataSource) bean, dataSourceProxyMode);
 
             //if seata data source, return original data source.
-            if (bean instanceof SeataDataSource) {
-                return ((SeataDataSource) bean).getTargetDataSource();
+            if (bean instanceof SeataDataSourceProxy) {
+                return ((SeataDataSourceProxy) bean).getTargetDataSource();
             }
         }
         return bean;

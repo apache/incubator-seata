@@ -15,9 +15,6 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -27,25 +24,32 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.beans.BeanUtils;
 
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+
 /**
  * @author xingfudeshi@gmail.com
  */
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
 
-    private final String dataSourceProxyMode;
+    private final BranchType dataSourceProxyMode;
     private final Class<? extends DataSource> dataSourceProxyClazz;
 
     public SeataAutoDataSourceProxyAdvice(String dataSourceProxyMode) {
-        this.dataSourceProxyMode = dataSourceProxyMode;
-        this.dataSourceProxyClazz = BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode) ?
-                DataSourceProxyXA.class : DataSourceProxy.class;
+        if (BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)) {
+            this.dataSourceProxyMode = BranchType.XA;
+            this.dataSourceProxyClazz = DataSourceProxyXA.class;
+        } else {
+            this.dataSourceProxyMode = BranchType.AT;
+            this.dataSourceProxyClazz = DataSourceProxy.class;
+        }
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         if (!RootContext.requireGlobalLock()
-                && !BranchType.AT.name().equalsIgnoreCase(RootContext.getBranchType())
-                && !BranchType.XA.name().equalsIgnoreCase(RootContext.getBranchType())) {
+                && BranchType.AT != RootContext.getBranchType()
+                && BranchType.XA != RootContext.getBranchType()) {
             return invocation.proceed();
         }
 
@@ -64,5 +68,4 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
     public Class<?>[] getInterfaces() {
         return new Class[]{SeataProxy.class};
     }
-
 }
