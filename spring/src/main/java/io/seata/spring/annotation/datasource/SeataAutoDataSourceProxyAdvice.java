@@ -15,7 +15,9 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.core.context.RootContext;
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
@@ -24,40 +26,27 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.beans.BeanUtils;
 
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-
 /**
  * @author xingfudeshi@gmail.com
  */
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
 
-    private final BranchType dataSourceProxyMode;
+    private final String dataSourceProxyMode;
     private final Class<? extends DataSource> dataSourceProxyClazz;
 
     public SeataAutoDataSourceProxyAdvice(String dataSourceProxyMode) {
-        if (BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)) {
-            this.dataSourceProxyMode = BranchType.XA;
-            this.dataSourceProxyClazz = DataSourceProxyXA.class;
-        } else {
-            this.dataSourceProxyMode = BranchType.AT;
-            this.dataSourceProxyClazz = DataSourceProxy.class;
-        }
+        this.dataSourceProxyMode = dataSourceProxyMode;
+        this.dataSourceProxyClazz = BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode) ?
+                DataSourceProxyXA.class : DataSourceProxy.class;
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        if (!RootContext.requireGlobalLock()
-                && BranchType.AT != RootContext.getBranchType()
-                && BranchType.XA != RootContext.getBranchType()) {
-            return invocation.proceed();
-        }
-
+        DataSource dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
         Method method = invocation.getMethod();
         Object[] args = invocation.getArguments();
         Method m = BeanUtils.findDeclaredMethod(dataSourceProxyClazz, method.getName(), method.getParameterTypes());
         if (m != null) {
-            DataSource dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
             return m.invoke(dataSourceProxy, args);
         } else {
             return invocation.proceed();
@@ -68,4 +57,5 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
     public Class<?>[] getInterfaces() {
         return new Class[]{SeataProxy.class};
     }
+
 }

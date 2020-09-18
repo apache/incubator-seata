@@ -81,10 +81,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * @param resourceGroupId  the resource group id
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
-        if (targetDataSource instanceof SeataDataSourceProxy) {
-            targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
-        }
-        this.targetDataSource = targetDataSource;
+        super(targetDataSource);
         init(targetDataSource, resourceGroupId);
     }
 
