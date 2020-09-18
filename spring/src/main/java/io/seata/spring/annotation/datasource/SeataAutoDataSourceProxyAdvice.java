@@ -15,6 +15,9 @@
  */
 package io.seata.spring.annotation.datasource;
 
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -23,9 +26,6 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.beans.BeanUtils;
-
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
 
 /**
  * @author xingfudeshi@gmail.com
