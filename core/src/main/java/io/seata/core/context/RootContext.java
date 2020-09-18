@@ -19,10 +19,14 @@ import java.util.Map;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.DefaultValues;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 
 /**
  * The type Root context.
@@ -32,7 +36,6 @@ import org.slf4j.LoggerFactory;
 public class RootContext {
 
     private RootContext() {
-
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
@@ -47,9 +50,16 @@ public class RootContext {
      */
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
+    /**
+     * The constant KEY_GLOBAL_LOCK_FLAG, VALUE_GLOBAL_LOCK_FLAG
+     */
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
+    public static final Boolean VALUE_GLOBAL_LOCK_FLAG = true;
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
+
+    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
 
     /**
      * Gets xid.
@@ -57,7 +67,7 @@ public class RootContext {
      * @return the xid
      */
     public static String getXID() {
-        String xid = CONTEXT_HOLDER.get(KEY_XID);
+        String xid = (String) CONTEXT_HOLDER.get(KEY_XID);
         if (StringUtils.isNotBlank(xid)) {
             return xid;
         }
@@ -69,7 +79,7 @@ public class RootContext {
      *
      * @param xid the xid
      */
-    public static void bind(String xid) {
+    public static void bind(@Nonnull String xid) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
         }
@@ -80,13 +90,12 @@ public class RootContext {
      * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL
      */
     public static void bindGlobalLockFlag() {
-
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Local Transaction Global Lock support enabled");
         }
 
         //just put something not null
-        CONTEXT_HOLDER.put(KEY_GLOBAL_LOCK_FLAG, KEY_GLOBAL_LOCK_FLAG);
+        CONTEXT_HOLDER.put(KEY_GLOBAL_LOCK_FLAG, VALUE_GLOBAL_LOCK_FLAG);
     }
 
     /**
@@ -95,7 +104,7 @@ public class RootContext {
      * @return the string
      */
     public static String unbind() {
-        String xid = CONTEXT_HOLDER.remove(KEY_XID);
+        String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind {} ", xid);
         }
@@ -103,7 +112,7 @@ public class RootContext {
     }
 
     public static void unbindGlobalLockFlag() {
-        String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
+        Boolean lockFlag = (Boolean) CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
         if (LOGGER.isDebugEnabled() && lockFlag != null) {
             LOGGER.debug("unbind global lock flag");
         }
@@ -123,14 +132,14 @@ public class RootContext {
      *
      * @return the branch type String
      */
-    public static String getBranchType() {
+    public static BranchType getBranchType() {
         if (inGlobalTransaction()) {
-            String branchType = CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
-            if (StringUtils.isNotBlank(branchType)) {
+            BranchType branchType = (BranchType) CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
+            if (branchType != null) {
                 return branchType;
             }
-            //default branchType is AT
-            return BranchType.AT.name();
+            //default branchType is the dataSourceProxyMode
+            return BranchType.XA.name().equalsIgnoreCase(DATA_SOURCE_PROXY_MODE) ? BranchType.XA : BranchType.AT;
         }
         return null;
     }
@@ -140,12 +149,12 @@ public class RootContext {
      *
      * @param branchType the branch type
      */
-    public static void bindBranchType(BranchType branchType) {
+    public static void bindBranchType(@Nonnull BranchType branchType) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind branch type {}", branchType);
         }
 
-        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, branchType.name());
+        CONTEXT_HOLDER.put(KEY_BRANCH_TYPE, branchType);
     }
 
     /**
@@ -153,8 +162,8 @@ public class RootContext {
      *
      * @return the previous branch type string
      */
-    public static String unbindBranchType() {
-        String unbindBranchType = CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
+    public static BranchType unbindBranchType() {
+        BranchType unbindBranchType = (BranchType) CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind branch type {}", unbindBranchType);
         }
@@ -182,9 +191,9 @@ public class RootContext {
     /**
      * entry map
      *
-     * @return
+     * @return the key-value map
      */
-    public static Map<String, String> entries() {
+    public static Map<String, Object> entries() {
         return CONTEXT_HOLDER.entries();
     }
 }

@@ -237,6 +237,21 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         throw new FrameworkException(errMsg);
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        initialized.getAndSet(false);
+        instance = null;
+    }
+
+    @Override
+    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+        return severAddress -> {
+            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
+            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
+        };
+    }
+
     private void registerProcessor() {
         // 1.registry TC response processor
         ClientOnResponseProcessor onResponseProcessor =

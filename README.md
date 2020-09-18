@@ -20,7 +20,7 @@ Naturally, data consistency will be guaranteed by the local transaction.
 
 ![Monolithic App](https://cdn.nlark.com/lark/0/2018/png/18862/1545296770244-4cedf37e-9dc6-4fc0-a97f-f4240b9d8640.png) 
 
-Things have changed in microservices architecture. The 3 modules mentioned above are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by the local transaction. 
+Things have changed in a microservices architecture. The 3 modules mentioned above are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by the local transaction. 
 
 **But how about the whole business logic scope?**
 
@@ -50,7 +50,7 @@ A typical lifecycle of Seata managed distributed transaction:
 
 1. TM asks TC to begin a new global transaction. TC generates an XID representing the global transaction.
 2. XID is propagated through microservices' invoke chain.
-3. RM register local transaction as a branch of the corresponding global transaction of XID to TC. 
+3. RM registers local transaction as a branch of the corresponding global transaction of XID to TC. 
 4. TM asks TC for committing or rollbacking the corresponding global transaction of XID.
 5. TC drives all branch transactions under the corresponding global transaction of XID to finish branch committing or rollbacking.
 
@@ -68,14 +68,14 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ##### Alibaba
 
-- **TXC**: Taobao Transaction Constructor. Alibaba middleware team start this project since 2014 to meet distributed transaction problem caused by application architecture change from monolithic to microservices.
+- **TXC**: Taobao Transaction Constructor. Alibaba middleware team started this project since 2014 to meet the distributed transaction problems caused by application architecture change from monolithic to microservices.
 - **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
-- **Fescar**: we start the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
+- **Fescar**: we started the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
 
 
 ##### Seata Community
 
-- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be renamed to Seata.
+- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction, and Fescar be renamed to Seata.
 
 
 
@@ -146,7 +146,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='Alibaba Group' height='40'  src='https://docs.alibabagroup.com/assets2/images/en/global/logo_header.png'  /img>
     <img alt='蚂蚁金服' height='40'  src='https://img.alicdn.com/tfs/TB1wuuCoET1gK0jSZFhXXaAtVXa-496-202.jpg'  /img>
     <img alt='阿里云' height='40'  src='https://img.alicdn.com/tfs/TB1Ly5oS3HqK1RjSZFPXXcwapXa-238-54.png'  /img>
-    <img alt='中航信' height='40'  src='http://www.travelsky.net/publish/main/images/logo.gif'  /img>
+    <img alt='中航信' height='40'  src='https://www.travelskyir.com/img/logo.gif'  /img>
     <img alt='中国铁塔' height='40'  src='https://www.china-tower.com/static/web/images/tower-logo.png'  /img>
     <img alt='滴滴' height='40'  src='https://website.didiglobal.com/dist/media/logo-zh.a7abd90d.svg'  /img>
 	<img alt='联通(浙江)' height='40'  src='https://img.alicdn.com/tfs/TB1hvabw9f2gK0jSZFPXXXsopXa-174-100.png'  /img>
@@ -155,7 +155,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='太极计算机' height='40'  src='https://img.alicdn.com/tfs/TB1.zqEoAL0gK0jSZFAXXcA9pXa-245-38.png'  /img>
     <img alt='政采云' height='40'  src='https://img.alicdn.com/tfs/TB1DDiCorY1gK0jSZTEXXXDQVXa-440-114.jpg'  /img>
     <img alt='浙江公安厅' height='40'  src='https://img.alicdn.com/tfs/TB1SXGzoxn1gK0jSZKPXXXvUXXa-426-180.jpg'  /img>
-    <img alt='特步' height='40'  src='https://www.xtep.com/images/logo.png'  /img>
+    <img alt='特步' height='40'  src='https://www.xtep.com/public/images/logo.png'  /img>
     <img alt='中通快递' height='40'  src='https://img.alicdn.com/tfs/TB1rCNSFxn1gK0jSZKPXXXvUXXa-172-31.png'  /img>
     <img alt='美的集团' height='40' src='https://img.alicdn.com/tfs/TB1cgvjwYj1gK0jSZFOXXc7GpXa-1040-282.png'  /img>    
     <img alt='浙江烟草' height='40'  src='https://img.alicdn.com/tfs/TB1e7Wiovb2gK0jSZK9XXaEgFXa-1028-160.jpg'  /img>
@@ -166,7 +166,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='求是创新健康' height='40'  src='http://www.truthai.cn/static/logo800.png'  /img>
     <img alt='TCL' height='40'  src='https://img.alicdn.com/tfs/TB1oHThw.Y1gK0jSZFCXXcwqXXa-214-200.png'  /img>
     <img alt='科蓝' height='40'  src='https://img.alicdn.com/tfs/TB1tuSyouT2gK0jSZFvXXXnFXXa-304-94.jpg'  /img>
-    <img alt='康美药业' height='40'  src='https://www.kanghehealth.com/images/logo.png'  /img>
+    <img alt='康美药业' height='40'  src='http://www.kangmei.com.cn/statics/images/kangmei/logo.png'  /img>
     <img alt='雁联' height='40'  src='https://img.alicdn.com/tfs/TB1c8iCouL2gK0jSZFmXXc7iXXa-428-102.jpg'  /img>
     <img alt='学两手' height='40'  src='https://img.xue2shou.com/g-xue2shou/website/0.8.2/static/logo.png'  /img>
     <img alt='衣二三' height='40'  src='https://img.alicdn.com/tfs/TB1OCGioCf2gK0jSZFPXXXsopXa-500-179.jpg'  /img>
@@ -174,7 +174,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='睿颐软件' height='40'  src='https://img.alicdn.com/tfs/TB143R4op67gK0jSZPfXXahhFXa-148-42.png'  /img>
     <img alt='有利网' height='40'  src='https://www.yooli.com/v2/local/img/common/logo.png?version=20191126190304'  /img>
     <img alt='赛维' height='40'  src='http://www.savor.com.cn/common/img/logo.png'  /img>
-    <img alt='安心保险' height='40'  src='https://query.95303.com/webins/images/logo.png'  /img>
+    <img alt='安心保险' height='40'  src='https://www.95303.com/img/header/logo_header.png'  /img>
     <img alt='科达科技' height='40'  src='https://img.alicdn.com/tfs/TB1JvOjouT2gK0jSZFvXXXnFXXa-386-146.jpg'  /img>
     <img alt='会分期' height='40'  src='https://img.alicdn.com/tfs/TB1ChKFoBr0gK0jSZFnXXbRRXXa-402-166.jpg'  /img>
     <img alt='会找房' height='40'  src='https://img.alicdn.com/tfs/TB1bNWFoBr0gK0jSZFnXXbRRXXa-398-336.jpg'  /img>
@@ -221,7 +221,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='商银信支付' height='40' src='https://img.alicdn.com/tfs/TB1rxndw4n1gK0jSZKPXXXvUXXa-150-68.png'   /img>
     <img alt='钛师傅云' height='40'  src='https://www.tsfyun.com/images/logo.png'  /img>
     <img alt='广州力生信息' height='40'  src='https://img.alicdn.com/tfs/TB1m0FcFuH2gK0jSZFEXXcqMpXa-139-48.png'  /img>
-    <img alt='杭州启舰科技有限公司' height='40'  src='http://www.qijian-tech.com/assets/onepage/img/logo/red.png'  /img>
+    <img alt='杭州启舰科技有限公司' height='40'  src='http://www.qijian-tech.com/img/logo.33134af4.png'  /img>
     <img alt='上海美浮特' height='40'  src='https://img.alicdn.com/tfs/TB1uUtaFuT2gK0jSZFvXXXnFXXa-370-45.jpg'  /img>    
     <img alt='杭州中威慧云医疗科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1iqo_FaL7gK0jSZFBXXXZZpXa-361-54.jpg'  /img> 
     <img alt='易族智汇（北京）' height='40'  src='http://www.javamall.com.cn/images/logonew.jpg'  /img> 
@@ -229,8 +229,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='F5未来商店' height='40'  src='https://cdn.f5-store.cn/front_end/common_images/logo.png'  /img>  
     <img alt='甄品信息科技' height='40'  src='https://img.alicdn.com/tfs/TB1SxJWFEY1gK0jSZFCXXcwqXXa-185-65.png'  /img>  
     <img alt='行云全球汇跨境电商（杭州分部）' height='40'  src='http://www.xyb2b.com/_nuxt/img/5e5584f.png'  /img>  
-    <img alt='世纪加华' height='40'  src='https://zhengxin-pub.bj.bcebos.com/logopic/a4ff4990e2ba2d57c90e8d16c649b952_fullsize.jpg?x-bce-process=image/resize,m_lfit,w_200'  /img>  
-    <img alt='海牛电子商务' height='40'  src='http://www.hainiuec.com/public/assets/addons/cms/img/company-logo.png'  /img>    
+    <img alt='世纪加华' height='40'  src='https://zhengxin-pub.bj.bcebos.com/logopic/a4ff4990e2ba2d57c90e8d16c649b952_fullsize.jpg?x-bce-process=image/resize,m_lfit,w_200'  /img>    
     <img alt='杭州华网信息' height='40'  src='https://img.alicdn.com/tfs/TB1FFX6FqL7gK0jSZFBXXXZZpXa-288-101.png'  /img>   
     <img alt='快陪练' height='40'  src='https://img.alicdn.com/tfs/TB1rhNRFAL0gK0jSZFtXXXQCXXa-321-96.png'  /img> 
     <img alt='西南石油大学' height='40'  src='https://dss2.bdstatic.com/6Ot1bjeh1BF3odCf/it/u=829617221,290823158&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=b0b603710dd0af061a278d11cfe327ae'  /img> 
