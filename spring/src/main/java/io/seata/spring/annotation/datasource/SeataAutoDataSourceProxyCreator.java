@@ -51,8 +51,8 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        return SeataProxy.class.isAssignableFrom(beanClass) ||
-            !DataSource.class.isAssignableFrom(beanClass) ||
+        return !DataSource.class.isAssignableFrom(beanClass) ||
+            SeataProxy.class.isAssignableFrom(beanClass) ||
             excludes.contains(beanClass.getName());
     }
 }
