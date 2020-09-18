@@ -20,46 +20,46 @@ package io.seata.metrics;
  *
  * @author zhengyangyong
  */
-public class IdConstants {
-    public static final String SEATA_TRANSACTION = "seata.transaction";
+public interface IdConstants {
+    String SEATA_TRANSACTION = "seata.transaction";
 
-    public static final String NAME_KEY = "name";
+    String NAME_KEY = "name";
 
-    public static final String ROLE_KEY = "role";
+    String ROLE_KEY = "role";
 
-    public static final String METER_KEY = "meter";
+    String METER_KEY = "meter";
 
-    public static final String STATISTIC_KEY = "statistic";
+    String STATISTIC_KEY = "statistic";
 
-    public static final String STATUS_KEY = "status";
+    String STATUS_KEY = "status";
 
-    public static final String ROLE_VALUE_TC = "tc";
+    String ROLE_VALUE_TC = "tc";
 
-    public static final String ROLE_VALUE_TM = "tm";
+    String ROLE_VALUE_TM = "tm";
 
-    public static final String ROLE_VALUE_RM = "rm";
+    String ROLE_VALUE_RM = "rm";
 
-    public static final String METER_VALUE_GAUGE = "gauge";
+    String METER_VALUE_GAUGE = "gauge";
 
-    public static final String METER_VALUE_COUNTER = "counter";
+    String METER_VALUE_COUNTER = "counter";
 
-    public static final String METER_VALUE_SUMMARY = "summary";
+    String METER_VALUE_SUMMARY = "summary";
 
-    public static final String METER_VALUE_TIMER = "timer";
+    String METER_VALUE_TIMER = "timer";
 
-    public static final String STATISTIC_VALUE_COUNT = "count";
+    String STATISTIC_VALUE_COUNT = "count";
 
-    public static final String STATISTIC_VALUE_TOTAL = "total";
+    String STATISTIC_VALUE_TOTAL = "total";
 
-    public static final String STATISTIC_VALUE_TPS = "tps";
+    String STATISTIC_VALUE_TPS = "tps";
 
-    public static final String STATISTIC_VALUE_MAX = "max";
+    String STATISTIC_VALUE_MAX = "max";
 
-    public static final String STATISTIC_VALUE_AVERAGE = "average";
+    String STATISTIC_VALUE_AVERAGE = "average";
 
-    public static final String STATUS_VALUE_ACTIVE = "active";
+    String STATUS_VALUE_ACTIVE = "active";
 
-    public static final String STATUS_VALUE_COMMITTED = "committed";
+    String STATUS_VALUE_COMMITTED = "committed";
 
-    public static final String STATUS_VALUE_ROLLBACKED = "rollbacked";
+    String STATUS_VALUE_ROLLBACKED = "rollbacked";
 }
