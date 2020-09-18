@@ -23,6 +23,7 @@ import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -115,6 +116,7 @@ public class TmNettyClientTest {
 
     @Test
     public void testSendMsgWithResponse() throws Exception {
+        SessionHolder.destroy();
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         new Thread(() -> {
