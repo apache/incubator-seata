@@ -27,6 +27,7 @@ client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
+client.tm.defaultGlobalTransactionTimeout=60000
 client.tm.degradeCheck=false
 client.tm.degradeCheckAllowTimes=10
 client.tm.degradeCheckPeriod=2000

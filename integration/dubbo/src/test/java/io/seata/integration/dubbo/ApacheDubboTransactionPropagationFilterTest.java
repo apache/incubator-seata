@@ -39,7 +39,7 @@ public class ApacheDubboTransactionPropagationFilterTest {
         RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, BranchType.SAGA.name());
         filter.invoke(new MockInvoker(() -> {
             assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.AT.name());
+            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.AT);
         }), null);
         assertThat(RootContext.unbind()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
@@ -49,7 +49,7 @@ public class ApacheDubboTransactionPropagationFilterTest {
         RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, BranchType.TCC.name());
         filter.invoke(new MockInvoker(() -> {
             assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.TCC.name());
+            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.TCC);
         }), null);
         assertThat(RootContext.unbind()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
@@ -61,9 +61,9 @@ public class ApacheDubboTransactionPropagationFilterTest {
         RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, BranchType.TCC.name());
         filter.invoke(new MockInvoker(() -> {
             assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.SAGA.name());
+            assertThat(RootContext.getBranchType()).isEqualTo(BranchType.SAGA);
         }), null);
         assertThat(RootContext.unbind()).isEqualTo(DEFAULT_XID);
-        assertThat(RootContext.unbindBranchType()).isEqualTo(BranchType.SAGA.name());
+        assertThat(RootContext.unbindBranchType()).isEqualTo(BranchType.SAGA);
     }
 }

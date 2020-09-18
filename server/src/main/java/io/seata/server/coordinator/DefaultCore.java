@@ -163,8 +163,13 @@ public class DefaultCore implements Core {
         });
 
         if (shouldCommit) {
-            doGlobalCommit(globalSession, false);
-            return globalSession.getStatus();
+            boolean success = doGlobalCommit(globalSession, false);
+            if (success && !globalSession.getBranchSessions().isEmpty()) {
+                globalSession.asyncCommit();
+                return GlobalStatus.Committed;
+            } else {
+                return globalSession.getStatus();
+            }
         } else {
             return globalSession.getStatus() == GlobalStatus.AsyncCommitting ? GlobalStatus.Committed : globalSession.getStatus();
         }
@@ -181,6 +186,10 @@ public class DefaultCore implements Core {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
+                // if not retrying, skip the canBeCommittedAsync branches
+                if (!retrying && branchSession.canBeCommittedAsync()) {
+                    continue;
+                }
                 if (retrying) {
                     LOGGER.info("retry commit: xid={}, branchId={}, retryCount={}",
                             branchSession.getXid(), branchSession.getBranchId(), branchSession.getRetryCount() + 1);
@@ -254,7 +263,7 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        if (success) {
+        if (success && globalSession.getBranchSessions().isEmpty()) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
