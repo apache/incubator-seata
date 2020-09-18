@@ -15,13 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Map;
-import java.util.Objects;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -40,8 +33,14 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * The type Base transactional executor.
@@ -250,11 +249,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
 
     /**
-     * get standard column name from user sql column name
+     * get standard pk column name from user sql column name
      *
      * @return
      */
-    protected String getStandardColumnName(String userColumnName) {
+    protected String getStandardPkColumnName(String userColumnName) {
         String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
         for (String cn : getTableMeta().getPrimaryKeyOnlyName()) {
             if (cn.toUpperCase().equals(newUserColumnName.toUpperCase())) {

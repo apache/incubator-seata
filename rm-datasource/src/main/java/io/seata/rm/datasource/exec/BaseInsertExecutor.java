@@ -15,16 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Objects;
-
 import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -44,8 +34,19 @@ import io.seata.sqlparser.struct.SqlSequenceExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * The Base Insert Executor.
+ *
  * @author jsbxyyx
  */
 public abstract class BaseInsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> implements InsertExecutor<T> {
@@ -73,7 +74,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        Map<String,List<Object>> pkValues = getPkValues();
+        Map<String, List<Object>> pkValues = getPkValues();
         TableRecords afterImage = buildTableRecords(pkValues);
         if (afterImage == null) {
             throw new SQLException("Failed to build after-image for insert");
@@ -92,6 +93,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * judge sql specify column
+     *
      * @return true: contains column. false: not contains column.
      */
     protected boolean containsColumns() {
@@ -100,10 +102,11 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * get pk index
+     *
      * @return the key is pk column name and the value is index of the pk column
      */
-    protected Map<String,Integer> getPkIndex() {
-        Map<String,Integer> pkIndexMap = new HashMap<>();
+    protected Map<String, Integer> getPkIndex() {
+        Map<String, Integer> pkIndexMap = new HashMap<>();
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
         if (CollectionUtils.isNotEmpty(insertColumns)) {
@@ -111,7 +114,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
                 String sqlColumnName = insertColumns.get(paramIdx);
                 if (containPK(sqlColumnName)) {
-                    pkIndexMap.put(getStandardColumnName(sqlColumnName),paramIdx);
+                    pkIndexMap.put(getStandardPkColumnName(sqlColumnName), paramIdx);
                 }
             }
             return pkIndexMap;
@@ -121,7 +124,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
             if (containPK(entry.getValue().getColumnName())) {
-                pkIndexMap.put(ColumnUtils.delEscape(entry.getValue().getColumnName(),getDbType()),pkIndex);
+                pkIndexMap.put(ColumnUtils.delEscape(entry.getValue().getColumnName(), getDbType()), pkIndex);
             }
         }
         return pkIndexMap;
@@ -130,23 +133,24 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * parse primary key value from statement.
+     *
      * @return
      */
-    protected Map<String,List<Object>> parsePkValuesFromStatement() {
+    protected Map<String, List<Object>> parsePkValuesFromStatement() {
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final Map<String, Integer> pkIndexMap = getPkIndex();
         if (pkIndexMap.isEmpty()) {
             throw new ShouldNeverHappenException("pkIndex is not found");
         }
-        Map<String,List<Object>> pkValuesMap = new HashMap<>();
+        Map<String, List<Object>> pkValuesMap = new HashMap<>();
         boolean ps = true;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
             List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             if (insertRows != null && !insertRows.isEmpty()) {
-                Map<Integer,ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
+                Map<Integer, ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
                 int totalPlaceholderNum = -1;
                 for (int i = 0; i < rowSize; i++) {
@@ -163,11 +167,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                             currentRowPlaceholderNum += 1;
                         }
                     }
-                    for (String pkKey:pkIndexMap.keySet())
-                    {
+                    for (String pkKey : pkIndexMap.keySet()) {
                         List pkValues = pkValuesMap.get(pkKey);
-                        if (Objects.isNull(pkValues))
-                        {
+                        if (Objects.isNull(pkValues)) {
                             pkValues = new ArrayList(rowSize);
                         }
                         int pkIndex = pkIndexMap.get(pkKey);
@@ -186,8 +188,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                         } else {
                             pkValues.add(pkValue);
                         }
-                        if (!pkValuesMap.containsKey(ColumnUtils.delEscape(pkKey, getDbType())))
-                        {
+                        if (!pkValuesMap.containsKey(ColumnUtils.delEscape(pkKey, getDbType()))) {
                             pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
                         }
                     }
@@ -197,7 +198,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             ps = false;
             List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             for (List<Object> row : insertRows) {
-                for (String pkKey:pkIndexMap.keySet()) {
+                for (String pkKey : pkIndexMap.keySet()) {
                     int pkIndex = pkIndexMap.get(pkKey);
                     List<Object> pkValues = pkValuesMap.get(pkKey);
                     if (Objects.isNull(pkValues)) {
@@ -220,6 +221,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
 
     /**
      * default get generated keys.
+     *
      * @return
      * @throws SQLException
      */
@@ -274,22 +276,20 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
      * check pk values for multi Pk
      * At most one null per row.
      * Method is not allowed.
+     *
      * @param pkValues
      * @return
      */
-    protected boolean checkPkValuesForMultiPk(Map<String,List<Object>> pkValues) {
+    protected boolean checkPkValuesForMultiPk(Map<String, List<Object>> pkValues) {
         Set<String> pkNames = pkValues.keySet();
-        if (pkNames.isEmpty())
-        {
+        if (pkNames.isEmpty()) {
             throw new ShouldNeverHappenException();
         }
         int rowSize = pkValues.get(pkNames.iterator().next()).size();
-        for (int i = 0;i < rowSize; i++)
-        {
+        for (int i = 0; i < rowSize; i++) {
             int n = 0;
             int m = 0;
-            for (String name : pkNames)
-            {
+            for (String name : pkNames) {
                 Object pkValue = pkValues.get(name).get(i);
                 if (pkValue instanceof Null) {
                     n++;
@@ -298,32 +298,30 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                     m++;
                 }
             }
-            if (n > 1)
-            {
+            if (n > 1) {
                 return false;
             }
-            if (m > 0)
-            {
+            if (m > 0) {
                 return false;
             }
         }
         return true;
     }
 
-    protected boolean checkPkValues(Map<String,List<Object>> pkValues, boolean ps) {
+    protected boolean checkPkValues(Map<String, List<Object>> pkValues, boolean ps) {
         Set<String> pkNames = pkValues.keySet();
         if (pkNames.size() == 1) {
-            return checkPkValuesForSinglePk(pkValues.get(pkNames.iterator().next()),ps);
-        }
-        else {
+            return checkPkValuesForSinglePk(pkValues.get(pkNames.iterator().next()), ps);
+        } else {
             return checkPkValuesForMultiPk(pkValues);
         }
     }
 
     /**
      * check pk values for single pk
+     *
      * @param pkValues
-     * @param ps true: is prepared statement. false: normal statement.
+     * @param ps       true: is prepared statement. false: normal statement.
      * @return true: support. false: not support.
      */
     protected boolean checkPkValuesForSinglePk(List<Object> pkValues, boolean ps) {
