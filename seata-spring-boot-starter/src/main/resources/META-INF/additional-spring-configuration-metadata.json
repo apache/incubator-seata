@@ -248,12 +248,6 @@
       "defaultValue": false
     },
     {
-      "name": "seata.client.rm.saga-json-parser",
-      "type": "java.lang.String",
-      "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
-      "defaultValue": "fastjson"
-    },
-    {
       "name": "seata.saga.state-machine.table-prefix",
       "type": "java.lang.String",
       "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
