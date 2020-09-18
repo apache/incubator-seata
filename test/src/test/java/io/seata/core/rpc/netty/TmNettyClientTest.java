@@ -21,10 +21,11 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.saga.engine.db.AbstractServerTest;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -34,11 +35,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author slievrly
  */
-public class TmNettyClientTest {
+public class TmNettyClientTest extends AbstractServerTest {
 
     public static ThreadPoolExecutor initMessageExecutor() {
         return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
                 new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+    }
+
+    @BeforeAll
+    public static void destory() throws InterruptedException {
+        stopSeataServer();
     }
 
     /**
@@ -116,7 +122,6 @@ public class TmNettyClientTest {
 
     @Test
     public void testSendMsgWithResponse() throws Exception {
-        SessionHolder.destroy();
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         new Thread(() -> {
