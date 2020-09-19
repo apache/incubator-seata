@@ -55,7 +55,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
-    private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
+    private final LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy(this);
 
     /**
      * Instantiates a new Connection proxy.
@@ -284,8 +284,19 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
             .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
 
+        protected final ConnectionProxy connection;
+
+        public LockRetryPolicy(ConnectionProxy connection) {
+            this.connection = connection;
+        }
+
         public <T> T execute(Callable<T> callable) throws Exception {
-            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
+            // the only case that not need to retry acquire lock hear is
+            //    LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == true && connection#autoCommit is false
+            // because it will retry acquire lock when AbstractDMLBaseExecutor#executeAutoCommitTrue
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT && !connection.getAutoCommit()) {
+                // LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == false
+                // or LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == false && autoCommit=false
                 return callable.call();
             } else {
                 return doRetryOnLockConflict(callable);
