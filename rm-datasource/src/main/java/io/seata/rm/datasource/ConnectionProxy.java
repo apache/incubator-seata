@@ -49,13 +49,14 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
+    private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
+
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
-    private final LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy(this);
 
     /**
      * Instantiates a new Connection proxy.
@@ -180,7 +181,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void commit() throws SQLException {
         try {
-            LOCK_RETRY_POLICY.execute(() -> {
+            lockRetryPolicy.execute(() -> {
                 doCommit();
                 return null;
             });
