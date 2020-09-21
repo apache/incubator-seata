@@ -15,8 +15,10 @@
  */
 package io.seata.spring.tcc;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import io.seata.common.Constants;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
@@ -33,10 +35,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
-import static io.seata.core.constants.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
 /**
  * TCC Interceptor
@@ -49,8 +48,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
-    private boolean disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                                                                 DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+    private boolean disable = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     /**
      * remoting bean info
