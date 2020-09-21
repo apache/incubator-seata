@@ -37,7 +37,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public Object getVariable(String name) {
-
         if (variables.containsKey(name)) {
             return variables.get(name);
         }

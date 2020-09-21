@@ -675,18 +675,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     }
 
     private void putLastStateToMap(Map<String, StateInstance> resultMap, StateInstance newState, String key) {
-
         if (!resultMap.containsKey(key)) {
-
             resultMap.put(key, newState);
         } else if (newState.getGmtEnd().after(resultMap.get(key).getGmtEnd())) {
-
             StateInstance oldState = resultMap.remove(key);
             oldState.setIgnoreStatus(true);
 
             resultMap.put(key, newState);
         } else {
-
             newState.setIgnoreStatus(true);
         }
     }

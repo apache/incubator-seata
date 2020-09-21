@@ -30,7 +30,7 @@ public class CompressorFactory {
     /**
      * The constant COMPRESSOR_MAP.
      */
-    protected static final Map<CompressorType, Compressor> COMPRESSOR_MAP = new ConcurrentHashMap<CompressorType, Compressor>();
+    protected static final Map<CompressorType, Compressor> COMPRESSOR_MAP = new ConcurrentHashMap<>();
 
     static {
         COMPRESSOR_MAP.put(CompressorType.NONE, new NoneCompressor());

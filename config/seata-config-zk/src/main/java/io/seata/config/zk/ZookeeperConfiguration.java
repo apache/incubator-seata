@@ -16,6 +16,7 @@
 package io.seata.config.zk;
 
 import java.lang.reflect.Constructor;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -195,8 +196,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             for (ConfigurationChangeListener entry : configChangeListeners) {
                 if (listener.equals(entry)) {
                     ZKListener zkListener = null;
-                    if (configListenersMap.containsKey(dataId)) {
-                        ConcurrentMap<ConfigurationChangeListener, ZKListener> configListeners = configListenersMap.get(dataId);
+                    Map<ConfigurationChangeListener, ZKListener> configListeners = configListenersMap.get(dataId);
+                    if (configListeners != null) {
                         zkListener = configListeners.get(listener);
                         configListeners.remove(entry);
                     }
@@ -211,8 +212,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        if (configListenersMap.containsKey(dataId)) {
-            return configListenersMap.get(dataId).keySet();
+        ConcurrentMap<ConfigurationChangeListener, ZKListener> configListeners = configListenersMap.get(dataId);
+        if (configListeners != null && !configListeners.isEmpty()) {
+            return configListeners.keySet();
         } else {
             return null;
         }

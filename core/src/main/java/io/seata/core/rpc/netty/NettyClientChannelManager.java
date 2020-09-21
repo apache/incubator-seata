@@ -184,8 +184,8 @@ class NettyClientChannelManager {
     }
 
     void registerChannel(final String serverAddress, final Channel channel) {
-        Channel currentChannel = channels.get(serverAddress);
-        if (currentChannel != null && currentChannel.isActive()) {
+        Channel channelToServer = channels.get(serverAddress);
+        if (channelToServer != null && channelToServer.isActive()) {
             return;
         }
         channels.put(serverAddress, channel);

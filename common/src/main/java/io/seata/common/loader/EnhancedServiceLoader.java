@@ -534,8 +534,8 @@ public class EnhancedServiceLoader {
         }
 
         private ExtensionDefinition getCachedExtensionDefinition(String activateName) {
-            if (nameToDefinitionsMap.containsKey(activateName)) {
-                List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
+            List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
+            if (CollectionUtils.isNotEmpty(definitions)) {
                 return definitions.get(definitions.size() - 1);
             }
             return null;

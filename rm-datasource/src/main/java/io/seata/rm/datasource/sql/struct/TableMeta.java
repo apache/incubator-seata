@@ -39,11 +39,11 @@ public class TableMeta {
      * key: column name
      */
 
-    private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    private Map<String, ColumnMeta> allColumns = new LinkedHashMap<>();
     /**
      * key: index name
      */
-    private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
+    private Map<String, IndexMeta> allIndexes = new LinkedHashMap<>();
 
     /**
      * Gets table name.
@@ -113,7 +113,7 @@ public class TableMeta {
      * @return the primary key map
      */
     public Map<String, ColumnMeta> getPrimaryKeyMap() {
-        Map<String, ColumnMeta> pk = new HashMap<String, ColumnMeta>();
+        Map<String, ColumnMeta> pk = new HashMap<>();
         for (Entry<String, IndexMeta> entry : allIndexes.entrySet()) {
             IndexMeta index = entry.getValue();
             if (index.getIndextype().value() == IndexType.PRIMARY.value()) {

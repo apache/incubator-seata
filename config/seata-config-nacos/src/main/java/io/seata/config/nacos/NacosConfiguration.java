@@ -15,6 +15,7 @@
  */
 package io.seata.config.nacos;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -158,8 +159,8 @@ public class NacosConfiguration extends AbstractConfiguration {
         for (ConfigurationChangeListener entry : configChangeListeners) {
             if (listener.equals(entry)) {
                 NacosListener nacosListener = null;
-                if (configListenersMap.containsKey(dataId)) {
-                    ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+                Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+                if (configListeners != null) {
                     nacosListener = configListeners.get(listener);
                     configListeners.remove(entry);
                 }
@@ -173,8 +174,9 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        if (configListenersMap.containsKey(dataId)) {
-            return configListenersMap.get(dataId).keySet();
+        Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+        if (configListeners != null && !configListeners.isEmpty()) {
+            return configListeners.keySet();
         } else {
             return null;
         }

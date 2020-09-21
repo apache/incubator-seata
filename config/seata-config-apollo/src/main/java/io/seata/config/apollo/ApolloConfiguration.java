@@ -31,6 +31,7 @@ import com.ctrip.framework.apollo.model.ConfigChange;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
@@ -151,10 +152,13 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (!LISTENER_SERVICE_MAP.containsKey(dataId) || listener == null) {
+        if (listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.get(dataId).remove(listener);
+        Set<ConfigurationChangeListener> configListeners = LISTENER_SERVICE_MAP.get(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            configListeners.remove(listener);
+        }
     }
 
     @Override

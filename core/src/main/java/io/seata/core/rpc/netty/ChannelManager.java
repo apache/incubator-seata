@@ -43,22 +43,19 @@ import java.util.concurrent.ConcurrentMap;
 public class ChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelManager.class);
-    private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS
-        = new ConcurrentHashMap<Channel, RpcContext>();
+    private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * resourceId -> applicationId -> ip -> port -> RpcContext
      */
-    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
-        RpcContext>>>>
-        RM_CHANNELS = new ConcurrentHashMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
-        RpcContext>>>>();
+    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String,
+        ConcurrentMap<Integer, RpcContext>>>> RM_CHANNELS = new ConcurrentHashMap<>();
 
     /**
      * ip+appname,port
      */
     private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
-        = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+        = new ConcurrentHashMap<>();
 
     /**
      * Is registered boolean.
@@ -207,8 +204,8 @@ public class ChannelManager {
      * @param channel the channel
      */
     public static void releaseRpcContext(Channel channel) {
-        if (IDENTIFIED_CHANNELS.containsKey(channel)) {
-            RpcContext rpcContext = getContextFromIdentified(channel);
+        RpcContext rpcContext = getContextFromIdentified(channel);
+        if (rpcContext != null) {
             rpcContext.release();
         }
     }
@@ -302,11 +299,9 @@ public class ChannelManager {
         ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap = applicationIdMap.get(targetApplicationId);
 
         if (ipMap != null && !ipMap.isEmpty()) {
-
             // Firstly, try to find the original channel through which the branch was registered.
             ConcurrentMap<Integer, RpcContext> portMapOnTargetIP = ipMap.get(targetIP);
             if (portMapOnTargetIP != null && !portMapOnTargetIP.isEmpty()) {
-
                 RpcContext exactRpcContext = portMapOnTargetIP.get(targetPort);
                 if (exactRpcContext != null) {
                     Channel channel = exactRpcContext.getChannel();

@@ -124,7 +124,7 @@ public class RpcContext {
      */
     public void holdInResourceManagerChannels(String resourceId, ConcurrentMap<Integer, RpcContext> portMap) {
         if (this.clientRMHolderMap == null) {
-            this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+            this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         portMap.put(clientPort, this);

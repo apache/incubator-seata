@@ -41,11 +41,10 @@ import io.seata.saga.statelang.domain.State;
  */
 public class StateMachineProcessHandler implements ProcessHandler {
 
-    private Map<String, StateHandler> stateHandlers = new ConcurrentHashMap<String, StateHandler>();
+    private Map<String, StateHandler> stateHandlers = new ConcurrentHashMap<>();
 
     @Override
     public void process(ProcessContext context) throws FrameworkException {
-
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         State state = instruction.getState(context);
         String stateType = state.getType();
@@ -73,7 +72,6 @@ public class StateMachineProcessHandler implements ProcessHandler {
             exception = e;
             throw e;
         } finally {
-
             if (executedInterceptors != null && executedInterceptors.size() > 0) {
                 for (int i = executedInterceptors.size() - 1; i >= 0; i--) {
                     StateHandlerInterceptor interceptor = executedInterceptors.get(i);
@@ -81,7 +79,6 @@ public class StateMachineProcessHandler implements ProcessHandler {
                 }
             }
         }
-
     }
 
     public void initDefaultHandlers() {

@@ -15,8 +15,6 @@
  */
 package io.seata.config;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -81,10 +79,15 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         return (Configuration)Enhancer.create(Configuration.class,
             (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(METHOD_PREFIX)
-                        && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                    && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
-                    Object result = CONFIG_CACHE.computeIfAbsent(rawDataId,
-                        key -> getConfig(method, originalConfiguration, args));
+                    Object result = CONFIG_CACHE.get(rawDataId);
+                    if (null == result) {
+                        result = method.invoke(originalConfiguration, args);
+                        if (result != null) {
+                            CONFIG_CACHE.put(rawDataId, result);
+                        }
+                    }
                     if (null != result && method.getReturnType().equals(String.class)) {
                         return String.valueOf(result);
                     }
@@ -92,14 +95,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 }
                 return method.invoke(originalConfiguration, args);
             });
-    }
-
-    private static Object getConfig(Method method, Configuration originalConfiguration, Object[] args) {
-        try {
-            return method.invoke(originalConfiguration, args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("get config failed", e);
-        }
     }
 
     private static class ConfigurationCacheInstance {

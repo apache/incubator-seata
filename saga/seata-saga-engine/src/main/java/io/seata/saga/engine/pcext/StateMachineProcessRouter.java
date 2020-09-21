@@ -40,7 +40,7 @@ import io.seata.saga.statelang.domain.StateMachine;
  */
 public class StateMachineProcessRouter implements ProcessRouter {
 
-    private Map<String, StateRouter> stateRouters = new ConcurrentHashMap<String, StateRouter>();
+    private Map<String, StateRouter> stateRouters = new ConcurrentHashMap<>();
 
     @Override
     public Instruction route(ProcessContext context) throws FrameworkException {

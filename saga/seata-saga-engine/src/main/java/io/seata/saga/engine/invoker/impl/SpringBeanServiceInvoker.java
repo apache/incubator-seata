@@ -140,17 +140,13 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
             try {
                 return invokeMethod(bean, method, args);
             } catch (Throwable e) {
-
                 Retry matchedRetryConfig = matchRetryConfig(state.getRetry(), e);
                 if (matchedRetryConfig == null) {
                     throw e;
                 }
 
-                if (!retryCountMap.containsKey(matchedRetryConfig)) {
-                    retryCountMap.put(matchedRetryConfig, new AtomicInteger(0));
-                }
-
-                AtomicInteger retryCount = retryCountMap.get(matchedRetryConfig);
+                AtomicInteger retryCount = retryCountMap.computeIfAbsent(matchedRetryConfig,
+                    key -> new AtomicInteger(0));
                 if (retryCount.intValue() >= matchedRetryConfig.getMaxAttempts()) {
                     throw e;
                 }

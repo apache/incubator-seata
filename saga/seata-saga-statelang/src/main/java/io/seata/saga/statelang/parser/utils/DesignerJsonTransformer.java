@@ -17,6 +17,7 @@ package io.seata.saga.statelang.parser.utils;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -74,11 +75,8 @@ public class DesignerJsonTransformer {
                 machineJsonObject.putAll((Map<String, Object>) propsObj.get("StateMachine"));
             }
         } else if (!"Catch".equals(type)) {
-            Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
-            if (states == null) {
-                states = new LinkedHashMap<>();
-                machineJsonObject.put("States", states);
-            }
+            Map<String, Object> states = (Map<String, Object>) machineJsonObject.computeIfAbsent("States",
+                key -> new LinkedHashMap<>());
 
             Map<String, Object> stateJsonObject = new LinkedHashMap<>();
             String stateId = (String) nodeObj.get("stateId");
@@ -251,7 +249,7 @@ public class DesignerJsonTransformer {
                 node.remove("color");
             }
             List<StateInstance> stateInstanceList = stateInstanceMapGroupByName.get(stateId);
-            if (stateInstanceList != null && stateInstanceList.size() > 0) {
+            if (CollectionUtils.isNotEmpty(stateInstanceList)) {
                 StateInstance stateInstance = null;
                 if (stateInstanceList.size() == 1) {
                     stateInstance = stateInstanceList.get(0);
