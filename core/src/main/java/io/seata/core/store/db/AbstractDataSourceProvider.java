@@ -152,10 +152,9 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
                         ClassLoader loader = new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
                         try {
                             loader.loadClass(MYSQL8_DRIVER_CLASS_NAME);
-                            loaders.putIfAbsent(MYSQL8_DRIVER_CLASS_NAME, loader);
                         } catch (ClassNotFoundException e) {
-                            loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
                         }
+                        loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
                     } catch (MalformedURLException ignore) {
                     }
                 });

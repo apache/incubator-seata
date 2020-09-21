@@ -45,7 +45,6 @@ public class DesignerJsonTransformer {
 
         List<Object> nodes = (List) designerJsonObject.get("nodes");
         if (nodes != null && nodes.size() > 0) {
-
             Map<String, Object> nodeMap = new LinkedHashMap<>(nodes.size());
 
             for (Object node : nodes) {
@@ -75,7 +74,6 @@ public class DesignerJsonTransformer {
                 machineJsonObject.putAll((Map<String, Object>) propsObj.get("StateMachine"));
             }
         } else if (!"Catch".equals(type)) {
-
             Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
             if (states == null) {
                 states = new LinkedHashMap<>();
@@ -116,7 +114,6 @@ public class DesignerJsonTransformer {
             Map<String, Object> targetNode = (Map<String, Object>) nodeMap.get(targetId);
 
             if (sourceNode != null) {
-
                 Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
                 Map<String, Object> sourceState = (Map<String, Object>) states.get((String) sourceNode.get("stateId"));
                 String targetStateId = (String) targetNode.get("stateId");
@@ -138,11 +135,8 @@ public class DesignerJsonTransformer {
                         throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask' or 'ScriptTask'");
                     }
                     Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
-                    List<Object> catches = (List<Object>) catchAttachedState.get("Catch");
-                    if (catches == null) {
-                        catches = new ArrayList<>();
-                        catchAttachedState.put("Catch", catches);
-                    }
+                    List<Object> catches = (List<Object>) catchAttachedState.computeIfAbsent("Catch",
+                            key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
                     if (edgeProps != null) {
@@ -152,19 +146,14 @@ public class DesignerJsonTransformer {
                         catches.add(catchObj);
                     }
                 } else if ("Choice".equals(sourceType)) {
-                    List<Object> choices = (List<Object>) sourceState.get("Choices");
-                    if (choices == null) {
-                        choices = new ArrayList<>();
-                        sourceState.put("Choices", choices);
-                    }
+                    List<Object> choices = (List<Object>) sourceState.computeIfAbsent("Choices",
+                            key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
                     if (edgeProps != null) {
-
                         if (Boolean.TRUE.equals(edgeProps.get("Default"))) {
                             sourceState.put("Default", targetStateId);
                         } else {
-                            //JSONObject choiceObj = new JSONObject(true);
                             Map<String, Object> choiceObj = new LinkedHashMap<>();
                             choiceObj.put("Expression", edgeProps.get("Expression"));
                             choiceObj.put("Next", targetStateId);
@@ -263,7 +252,6 @@ public class DesignerJsonTransformer {
             }
             List<StateInstance> stateInstanceList = stateInstanceMapGroupByName.get(stateId);
             if (stateInstanceList != null && stateInstanceList.size() > 0) {
-
                 StateInstance stateInstance = null;
                 if (stateInstanceList.size() == 1) {
                     stateInstance = stateInstanceList.get(0);

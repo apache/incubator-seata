@@ -180,8 +180,8 @@ public class FileConfiguration extends AbstractConfiguration {
         if (dataId == null || listener == null) {
             return;
         }
-        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
-        configListenersMap.get(dataId).add(listener);
+        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(listener);
         listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
         FileListener fileListener = new FileListener(dataId, listener);
         fileListener.onProcessEvent(new ConfigurationChangeEvent());
@@ -193,9 +193,10 @@ public class FileConfiguration extends AbstractConfiguration {
         if (dataId == null || configChangeListeners == null) {
             return;
         }
-        if (configListenersMap.containsKey(dataId)) {
-            configListenersMap.get(dataId).remove(listener);
-            if (configListenersMap.get(dataId).isEmpty()) {
+        Set<ConfigurationChangeListener> configListeners = configListenersMap.get(dataId);
+        if (configListeners != null) {
+            configListeners.remove(listener);
+            if (configListeners.isEmpty()) {
                 configListenersMap.remove(dataId);
                 listenedConfigMap.remove(dataId);
             }

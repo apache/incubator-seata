@@ -43,8 +43,8 @@ public class NamedThreadFactory implements ThreadFactory {
      * @param makeDaemons the make daemons
      */
     public NamedThreadFactory(String prefix, int totalSize, boolean makeDaemons) {
-        PREFIX_COUNTER.putIfAbsent(prefix, new AtomicInteger(0));
-        int prefixCounter = PREFIX_COUNTER.get(prefix).incrementAndGet();
+        int prefixCounter = PREFIX_COUNTER.computeIfAbsent(prefix, key -> new AtomicInteger(0))
+                .incrementAndGet();
         this.prefix = prefix + "_" + prefixCounter;
         this.makeDaemons = makeDaemons;
         this.totalSize = totalSize;

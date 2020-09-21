@@ -139,10 +139,10 @@ public class RpcContext {
      */
     public void holdInResourceManagerChannels(String resourceId, Integer clientPort) {
         if (this.clientRMHolderMap == null) {
-            this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+            this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
-        clientRMHolderMap.putIfAbsent(resourceId, new ConcurrentHashMap<Integer, RpcContext>());
-        ConcurrentMap<Integer, RpcContext> portMap = clientRMHolderMap.get(resourceId);
+        ConcurrentMap<Integer, RpcContext> portMap = clientRMHolderMap.computeIfAbsent(resourceId,
+                key -> new ConcurrentHashMap<>());
         portMap.put(clientPort, this);
     }
 

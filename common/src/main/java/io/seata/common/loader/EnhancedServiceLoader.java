@@ -217,12 +217,8 @@ public class EnhancedServiceLoader {
             if (type == null) {
                 throw new IllegalArgumentException("Enhanced Service type == null");
             }
-            InnerEnhancedServiceLoader<S> loader = (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.get(type);
-            if (loader == null) {
-                SERVICE_LOADERS.putIfAbsent(type, new InnerEnhancedServiceLoader<S>(type));
-                loader = (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.get(type);
-            }
-            return loader;
+            return (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.computeIfAbsent(type,
+                    key -> new InnerEnhancedServiceLoader<>(type));
         }
 
         /**
@@ -375,11 +371,7 @@ public class EnhancedServiceLoader {
                 throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
             if (Scope.SINGLETON.equals(definition.getScope())) {
-                Holder<Object> holder = definitionToInstanceMap.get(definition);
-                if (holder == null) {
-                    definitionToInstanceMap.putIfAbsent(definition, new Holder<>());
-                    holder = definitionToInstanceMap.get(definition);
-                }
+                Holder<Object> holder = definitionToInstanceMap.computeIfAbsent(definition, key -> new Holder<>());
                 Object instance = holder.get();
                 if (instance == null) {
                     synchronized (holder) {

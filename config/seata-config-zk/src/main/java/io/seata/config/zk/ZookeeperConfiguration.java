@@ -177,9 +177,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         }
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
         if (zkClient.exists(path)) {
-            configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             ZKListener zkListener = new ZKListener(path, listener);
-            configListenersMap.get(dataId).put(listener, zkListener);
+            configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+                    .put(listener, zkListener);
             zkClient.subscribeDataChanges(path, zkListener);
         }
     }
@@ -196,8 +196,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 if (listener.equals(entry)) {
                     ZKListener zkListener = null;
                     if (configListenersMap.containsKey(dataId)) {
-                        zkListener = configListenersMap.get(dataId).get(listener);
-                        configListenersMap.get(dataId).remove(entry);
+                        ConcurrentMap<ConfigurationChangeListener, ZKListener> configListeners = configListenersMap.get(dataId);
+                        zkListener = configListeners.get(listener);
+                        configListeners.remove(entry);
                     }
                     if (zkListener != null) {
                         zkClient.unsubscribeDataChanges(path, zkListener);

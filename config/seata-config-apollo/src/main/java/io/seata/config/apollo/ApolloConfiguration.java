@@ -145,8 +145,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (dataId == null || listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
-        LISTENER_SERVICE_MAP.get(dataId).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(listener);
     }
 
     @Override

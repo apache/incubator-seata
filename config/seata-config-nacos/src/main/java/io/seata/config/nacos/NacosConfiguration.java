@@ -140,9 +140,9 @@ public class NacosConfiguration extends AbstractConfiguration {
             return;
         }
         try {
-            configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             NacosListener nacosListener = new NacosListener(dataId, listener);
-            configListenersMap.get(dataId).put(listener, nacosListener);
+            configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+                    .put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
             LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
@@ -159,8 +159,9 @@ public class NacosConfiguration extends AbstractConfiguration {
             if (listener.equals(entry)) {
                 NacosListener nacosListener = null;
                 if (configListenersMap.containsKey(dataId)) {
-                    nacosListener = configListenersMap.get(dataId).get(listener);
-                    configListenersMap.get(dataId).remove(entry);
+                    ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+                    nacosListener = configListeners.get(listener);
+                    configListeners.remove(entry);
                 }
                 if (nacosListener != null) {
                     configService.removeListener(dataId, getNacosGroup(), nacosListener);

@@ -77,8 +77,9 @@ public class ChannelManager {
      * @return the get role from channel
      */
     public static NettyPoolKey.TransactionRole getRoleFromChannel(Channel channel) {
-        if (IDENTIFIED_CHANNELS.containsKey(channel)) {
-            return IDENTIFIED_CHANNELS.get(channel).getClientRole();
+        RpcContext context = IDENTIFIED_CHANNELS.get(channel);
+        if (context != null) {
+            return context.getClientRole();
         }
         return null;
     }
@@ -131,8 +132,8 @@ public class ChannelManager {
         rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
             + ChannelUtil.getClientIpFromChannel(channel);
-        TM_CHANNELS.putIfAbsent(clientIdentified, new ConcurrentHashMap<Integer, RpcContext>());
-        ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = TM_CHANNELS.get(clientIdentified);
+        ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = TM_CHANNELS.computeIfAbsent(clientIdentified,
+                key -> new ConcurrentHashMap<>());
         rpcContext.holdInClientChannels(clientIdentifiedMap);
     }
 

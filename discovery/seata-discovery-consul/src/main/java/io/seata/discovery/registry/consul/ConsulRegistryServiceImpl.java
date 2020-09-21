@@ -125,8 +125,8 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     @Override
     public void subscribe(String cluster, ConsulListener listener) throws Exception {
         //1.add listener to subscribe list
-        listenerMap.putIfAbsent(cluster, new HashSet<>());
-        listenerMap.get(cluster).add(listener);
+        listenerMap.computeIfAbsent(cluster, key -> new HashSet<>())
+                .add(listener);
         //2.get healthy services
         Response<List<HealthService>> response = getHealthyServices(cluster, -1, DEFAULT_WATCH_TIMEOUT);
         //3.get current consul index.
