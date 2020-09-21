@@ -218,7 +218,7 @@ public class EnhancedServiceLoader {
                 throw new IllegalArgumentException("Enhanced Service type == null");
             }
             return (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.computeIfAbsent(type,
-                    key -> new InnerEnhancedServiceLoader<>(type));
+                key -> new InnerEnhancedServiceLoader<>(type));
         }
 
         /**
