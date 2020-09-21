@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.db.store;
 
-import io.seata.server.storage.SessionConverter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,6 +39,7 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.storage.SessionConverter;
 
 /**
  * The type Database transaction store manager.
