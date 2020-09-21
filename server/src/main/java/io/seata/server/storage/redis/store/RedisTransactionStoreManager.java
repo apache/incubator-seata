@@ -304,8 +304,14 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             jedis.watch(globalKey);
             String previousStatus = jedis.hget(globalKey, REDIS_KEY_GLOBAL_STATUS);
             if (StringUtils.isEmpty(previousStatus)) {
+                jedis.unwatch();
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
+            if (previousStatus.equals(String.valueOf(globalTransactionDO.getStatus()))) {
+                jedis.unwatch();
+                return true;
+            }
+
             String previousGmtModified = jedis.hget(globalKey, REDIS_KEY_GLOBAL_GMT_MODIFIED);
             Transaction multi = jedis.multi();
             Map<String,String> map = new HashMap<>(2);
