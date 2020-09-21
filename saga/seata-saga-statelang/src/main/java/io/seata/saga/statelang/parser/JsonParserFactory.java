@@ -40,6 +40,6 @@ public class JsonParserFactory {
      */
     public static JsonParser getJsonParser(String name) {
         return INSTANCES.computeIfAbsent(name,
-                key -> EnhancedServiceLoader.load(JsonParser.class, name, Thread.currentThread().getContextClassLoader()));
+            key -> EnhancedServiceLoader.load(JsonParser.class, name, Thread.currentThread().getContextClassLoader()));
     }
 }

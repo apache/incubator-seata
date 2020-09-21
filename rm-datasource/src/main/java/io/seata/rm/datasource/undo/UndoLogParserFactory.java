@@ -57,6 +57,7 @@ public class UndoLogParserFactory {
      * @return the UndoLogParser
      */
     public static UndoLogParser getInstance(String name) {
-        return INSTANCES.computeIfAbsent(name, key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
+        return INSTANCES.computeIfAbsent(name,
+            key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
     }
 }

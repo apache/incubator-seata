@@ -53,7 +53,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     @Override
     public StateMachine getStateMachineById(String stateMachineId) {
         Item item = stateMachineMapById.computeIfAbsent(stateMachineId,
-                key -> new Item());
+            key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
             synchronized (item) {
                 if (item.getValue() == null && stateLangStore != null) {
@@ -81,7 +81,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     @Override
     public StateMachine getStateMachine(String stateMachineName, String tenantId) {
         Item item = stateMachineMapByNameAndTenant.computeIfAbsent(stateMachineName + "_" + tenantId,
-                key -> new Item());
+            key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
             synchronized (item) {
                 if (item.getValue() == null && stateLangStore != null) {

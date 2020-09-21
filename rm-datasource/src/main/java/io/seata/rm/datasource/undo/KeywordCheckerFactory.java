@@ -37,6 +37,6 @@ public class KeywordCheckerFactory {
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
         return KEYWORD_CHECKER_MAP.computeIfAbsent(dbType,
-                key -> EnhancedServiceLoader.load(KeywordChecker.class, dbType));
+            key -> EnhancedServiceLoader.load(KeywordChecker.class, dbType));
     }
 }

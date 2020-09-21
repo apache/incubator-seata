@@ -133,7 +133,7 @@ public class ChannelManager {
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
             + ChannelUtil.getClientIpFromChannel(channel);
         ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = TM_CHANNELS.computeIfAbsent(clientIdentified,
-                key -> new ConcurrentHashMap<>());
+            key -> new ConcurrentHashMap<>());
         rpcContext.holdInClientChannels(clientIdentifiedMap);
     }
 

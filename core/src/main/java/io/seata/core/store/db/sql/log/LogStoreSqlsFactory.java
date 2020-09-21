@@ -33,6 +33,6 @@ public class LogStoreSqlsFactory {
      */
     public static LogStoreSqls getLogStoreSqls(String dbType) {
         return LOG_STORE_SQLS_MAP.computeIfAbsent(dbType,
-                key -> EnhancedServiceLoader.load(LogStoreSqls.class, dbType.toLowerCase()));
+            key -> EnhancedServiceLoader.load(LogStoreSqls.class, dbType.toLowerCase()));
     }
 }

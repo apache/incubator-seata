@@ -154,7 +154,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             // put message into basketMap
             ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
             BlockingQueue<RpcMessage> basket = map.computeIfAbsent(serverAddress,
-                    key -> new LinkedBlockingQueue<>());
+                key -> new LinkedBlockingQueue<>());
             basket.offer(rpcMessage);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());

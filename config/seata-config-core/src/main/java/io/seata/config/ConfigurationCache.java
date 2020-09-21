@@ -84,7 +84,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                         && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String) args[0];
                     Object result = CONFIG_CACHE.computeIfAbsent(rawDataId,
-                            key -> getConfig(method, originalConfiguration, args));
+                        key -> getConfig(method, originalConfiguration, args));
                     if (result != null && method.getReturnType().equals(String.class)) {
                         return String.valueOf(result);
                     }

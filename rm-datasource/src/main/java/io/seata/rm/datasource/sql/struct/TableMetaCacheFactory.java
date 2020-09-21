@@ -35,6 +35,6 @@ public class TableMetaCacheFactory {
      */
     public static TableMetaCache getTableMetaCache(String dbType) {
         return TABLE_META_CACHE_MAP.computeIfAbsent(dbType,
-                key -> EnhancedServiceLoader.load(TableMetaCache.class, dbType));
+            key -> EnhancedServiceLoader.load(TableMetaCache.class, dbType));
     }
 }

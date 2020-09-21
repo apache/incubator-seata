@@ -39,7 +39,7 @@ public class LockStoreSqlFactory {
      */
     public static LockStoreSql getLogStoreSql(String dbType) {
         return LOCK_STORE_SQL_MAP.computeIfAbsent(dbType,
-                key -> EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase()));
+            key -> EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase()));
     }
 
 }

@@ -45,7 +45,7 @@ public class CompressorFactory {
     public static Compressor getCompressor(byte code) {
         CompressorType type = CompressorType.getByCode(code);
         return COMPRESSOR_MAP.computeIfAbsent(type,
-                key -> EnhancedServiceLoader.load(Compressor.class, type.name()));
+            key -> EnhancedServiceLoader.load(Compressor.class, type.name()));
     }
 
     /**

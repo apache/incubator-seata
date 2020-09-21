@@ -67,22 +67,22 @@ public class FileLocker extends AbstractLocker {
 
         ConcurrentMap<BucketLockMap, Set<String>> bucketHolder = branchSession.getLockHolder();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.computeIfAbsent(resourceId,
-                key -> new ConcurrentHashMap<>());
+            key -> new ConcurrentHashMap<>());
 
         for (RowLock lock : rowLocks) {
             String tableName = lock.getTableName();
             String pk = lock.getPk();
             ConcurrentMap<Integer, BucketLockMap> tableLockMap = dbLockMap.computeIfAbsent(tableName,
-                    key -> new ConcurrentHashMap<>());
+                key -> new ConcurrentHashMap<>());
 
             int bucketId = pk.hashCode() % BUCKET_PER_TABLE;
             BucketLockMap bucketLockMap = tableLockMap.computeIfAbsent(bucketId,
-                    key -> new BucketLockMap());
+                key -> new BucketLockMap());
             Long previousLockTransactionId = bucketLockMap.get().putIfAbsent(pk, transactionId);
             if (previousLockTransactionId == null) {
                 //No existing lock, and now locked by myself
                 Set<String> keysInHolder = bucketHolder.computeIfAbsent(bucketLockMap,
-                        key -> new ConcurrentSet<>());
+                    key -> new ConcurrentSet<>());
                 keysInHolder.add(pk);
             } else if (previousLockTransactionId == transactionId) {
                 // Locked by me before
