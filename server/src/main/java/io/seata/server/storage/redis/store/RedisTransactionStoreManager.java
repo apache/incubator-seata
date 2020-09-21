@@ -15,6 +15,7 @@
  */
 package io.seata.server.storage.redis.store;
 
+import io.seata.common.XID;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -363,7 +364,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public GlobalSession readSession(String xid, boolean withBranchSessions) {
-        String transactionId = xid.split(":")[2];
+        String transactionId = String.valueOf(XID.getTransactionId(xid));
         String globalKey = buildGlobalKeyByTransactionId(transactionId);
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Map<String, String> map  = jedis.hgetAll(globalKey);
