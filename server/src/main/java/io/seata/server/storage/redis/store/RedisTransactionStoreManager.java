@@ -137,7 +137,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     if (rpush > 0) {
                         jedis.lrem(branchListKey,0,branchKey);
                     }
-                    return false;
                 }
             }
             return false;
@@ -236,7 +235,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     if (rpush > 0) {
                         jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0, globalTransactionDO.getXid());
                     }
-                    return false;
                 }
             }
             return false;
@@ -282,7 +280,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         jedis.hmset(globalKey,globalTransactionDoMap);
                     }
                 }
-
             }
             return false;
         } catch (Exception ex) {
