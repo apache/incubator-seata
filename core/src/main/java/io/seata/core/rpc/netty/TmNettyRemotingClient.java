@@ -180,38 +180,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        initialized.getAndSet(false);
-        instance = null;
-    }
-
-    @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return severAddress -> {
-            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup, getExtraData());
-            return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
-        };
-    }
-
-    private String getExtraData() {
-        String ip = NetUtil.getLocalIp();
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String digestSource;
-        if (StringUtils.isEmpty(ip)) {
-            digestSource = transactionServiceGroup + ",127.0.0.1," + timestamp;
-        } else {
-            digestSource = transactionServiceGroup + "," + ip + "," + timestamp;
-        }
-        String digest = signer.sign(digestSource, secretKey);
-        StringBuilder sb = new StringBuilder();
-        sb.append(RegisterTMRequest.UDATA_AK).append(EXTRA_DATA_KV_CHAR).append(accessKey).append(EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_DIGEST).append(EXTRA_DATA_KV_CHAR).append(digest).append(EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
-        return sb.toString();
-    }
-
-    @Override
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
@@ -247,7 +215,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return severAddress -> {
-            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
+            RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup, getExtraData());
             return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
         };
     }
@@ -266,5 +234,22 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         // 2.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+    }
+
+    private String getExtraData() {
+        String ip = NetUtil.getLocalIp();
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String digestSource;
+        if (StringUtils.isEmpty(ip)) {
+            digestSource = transactionServiceGroup + ",127.0.0.1," + timestamp;
+        } else {
+            digestSource = transactionServiceGroup + "," + ip + "," + timestamp;
+        }
+        String digest = signer.sign(digestSource, secretKey);
+        StringBuilder sb = new StringBuilder();
+        sb.append(RegisterTMRequest.UDATA_AK).append(EXTRA_DATA_KV_CHAR).append(accessKey).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_DIGEST).append(EXTRA_DATA_KV_CHAR).append(digest).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
+        return sb.toString();
     }
 }
