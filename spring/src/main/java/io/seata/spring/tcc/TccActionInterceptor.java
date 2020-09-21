@@ -48,7 +48,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
-    private boolean disable = ConfigurationFactory.getInstance().getBoolean(
+    private volatile boolean disable = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
 
     /**
