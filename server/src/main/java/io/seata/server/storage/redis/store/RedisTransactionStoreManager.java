@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.redis.store;
 
-import io.seata.common.XID;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -33,6 +32,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
+import io.seata.common.XID;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
