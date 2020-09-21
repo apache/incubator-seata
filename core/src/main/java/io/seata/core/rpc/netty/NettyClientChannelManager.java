@@ -98,8 +98,7 @@ class NettyClientChannelManager {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("will connect to " + serverAddress);
         }
-        channelLocks.computeIfAbsent(serverAddress, key -> new Object());
-        synchronized (channelLocks.get(serverAddress)) {
+        synchronized (channelLocks.computeIfAbsent(serverAddress, key -> new Object())) {
             return doConnect(serverAddress);
         }
     }
