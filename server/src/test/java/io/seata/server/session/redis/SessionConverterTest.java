@@ -15,6 +15,9 @@
  */
 package io.seata.server.session.redis;
 
+import java.util.Date;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -23,9 +26,6 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
-import java.util.Date;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * The session converter utils
