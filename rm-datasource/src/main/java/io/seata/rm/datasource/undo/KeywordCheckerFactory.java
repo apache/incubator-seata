@@ -36,11 +36,7 @@ public class KeywordCheckerFactory {
      * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
-        if (KEYWORD_CHECKER_MAP.get(dbType) != null) {
-            return KEYWORD_CHECKER_MAP.get(dbType);
-        }
-        KeywordChecker tableMetaCache = EnhancedServiceLoader.load(KeywordChecker.class, dbType);
-        KEYWORD_CHECKER_MAP.putIfAbsent(dbType, tableMetaCache);
-        return tableMetaCache;
+        return KEYWORD_CHECKER_MAP.computeIfAbsent(dbType,
+                key -> EnhancedServiceLoader.load(KeywordChecker.class, dbType));
     }
 }

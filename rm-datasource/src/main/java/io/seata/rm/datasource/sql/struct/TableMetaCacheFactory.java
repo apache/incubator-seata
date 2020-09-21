@@ -34,11 +34,7 @@ public class TableMetaCacheFactory {
      * @return table meta cache
      */
     public static TableMetaCache getTableMetaCache(String dbType) {
-        if (TABLE_META_CACHE_MAP.get(dbType) != null) {
-            return TABLE_META_CACHE_MAP.get(dbType);
-        }
-        TableMetaCache tableMetaCache = EnhancedServiceLoader.load(TableMetaCache.class, dbType);
-        TABLE_META_CACHE_MAP.putIfAbsent(dbType, tableMetaCache);
-        return tableMetaCache;
+        return TABLE_META_CACHE_MAP.computeIfAbsent(dbType,
+                key -> EnhancedServiceLoader.load(TableMetaCache.class, dbType));
     }
 }

@@ -36,11 +36,7 @@ public class UndoExecutorHolderFactory {
      * @return the UndoExecutorGroup
      */
     public static UndoExecutorHolder getUndoExecutorHolder(String dbType) {
-        if (UNDO_EXECUTOR_HOLDER_MAP.get(dbType) != null) {
-            return UNDO_EXECUTOR_HOLDER_MAP.get(dbType);
-        }
-        UndoExecutorHolder undoExecutorHolder = EnhancedServiceLoader.load(UndoExecutorHolder.class, dbType);
-        UNDO_EXECUTOR_HOLDER_MAP.putIfAbsent(dbType, undoExecutorHolder);
-        return undoExecutorHolder;
+        return UNDO_EXECUTOR_HOLDER_MAP.computeIfAbsent(dbType,
+                key -> EnhancedServiceLoader.load(UndoExecutorHolder.class, dbType));
     }
 }
