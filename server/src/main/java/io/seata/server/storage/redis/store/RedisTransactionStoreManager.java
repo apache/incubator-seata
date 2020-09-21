@@ -303,7 +303,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             // Defensive watch to prevent other TC server operating concurrently,Fail fast
             jedis.watch(globalKey);
-            String previousStatus = jedis.hget(globalKey, REDIS_KEY_GLOBAL_STATUS);
+            List<String> statusAndGmtModified = jedis.hmget(globalKey, REDIS_KEY_GLOBAL_STATUS, REDIS_KEY_GLOBAL_GMT_MODIFIED);
+            String previousStatus = statusAndGmtModified.get(0);
             if (StringUtils.isEmpty(previousStatus)) {
                 jedis.unwatch();
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
@@ -313,7 +314,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 return true;
             }
 
-            String previousGmtModified = jedis.hget(globalKey, REDIS_KEY_GLOBAL_GMT_MODIFIED);
+            String previousGmtModified = statusAndGmtModified.get(1);
             Transaction multi = jedis.multi();
             Map<String,String> map = new HashMap<>(2);
             map.put(REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
