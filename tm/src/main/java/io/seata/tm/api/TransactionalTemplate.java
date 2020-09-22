@@ -54,7 +54,7 @@ public class TransactionalTemplate {
         // 1.1 Get current transaction, if not null, the tx role is 'GlobalTransactionRole.Participant'.
         GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 
-        // 1.2 Handle the transaction propatation.
+        // 1.2 Handle the transaction propagation.
         Propagation propagation = txInfo.getPropagation();
         SuspendedResourcesHolder suspendedResourcesHolder = null;
         try {
@@ -64,23 +64,23 @@ public class TransactionalTemplate {
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
-                    // execute without global transaction
+                    // execute without transaction
                     return business.execute();
                 case REQUIRES_NEW:
-                    // If transaction is existing, suspend it, and then begin new global transaction.
+                    // If transaction is existing, suspend it, and then begin new transaction.
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
                     break;
                 case SUPPORTS:
-                    // If transaction is not existing, execute without global transaction.
+                    // If transaction is not existing, execute without transaction.
                     if (tx == null) {
                         return business.execute();
                     }
                     break;
                 case REQUIRED:
-                    // If current transaction is existing, execute with current global transaction,
-                    // else begin new global transaction and execute with it.
+                    // If current transaction is existing, execute with current transaction,
+                    // else begin new transaction and execute with it.
                     break;
                 case NEVER:
                     // If transaction is not existing, throw exception.
@@ -89,7 +89,7 @@ public class TransactionalTemplate {
                                 String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
                                         ,RootContext.getXID()));
                     } else {
-                        // Execute without global transaction.
+                        // Execute without transaction.
                         return business.execute();
                     }
                 case MANDATORY:
@@ -102,13 +102,13 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
-            // 1.3 If null, create a global transaction with role 'GlobalTransactionRole.Launcher'.
+            // 1.3 If null, create a transaction with role 'GlobalTransactionRole.Launcher'.
             if (tx == null) {
                 tx = GlobalTransactionContext.createNew();
             }
 
             try {
-                // 2. If the tx role is 'GlobalTransactionRole.Launcher', begin global transaction,
+                // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
                 beginTransaction(txInfo, tx);
 
