@@ -150,7 +150,7 @@ public class RootContext {
      */
     public static void bindBranchType(@Nonnull BranchType branchType) {
         if (branchType == null) {
-           throw new IllegalArgumentException("branchType must be not null");
+            throw new IllegalArgumentException("branchType must be not null");
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind branch type {}", branchType);
