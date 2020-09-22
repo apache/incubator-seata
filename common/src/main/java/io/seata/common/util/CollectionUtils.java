@@ -15,6 +15,8 @@
  */
 package io.seata.common.util;
 
+import com.sun.istack.internal.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,6 +72,26 @@ public class CollectionUtils {
      */
     public static boolean isNotEmpty(Object[] array) {
         return array != null && array.length > 0;
+    }
+
+    /**
+     * Is empty boolean.
+     *
+     * @param map the map
+     * @return the boolean
+     */
+    public static boolean isEmpty(Map<?, ?> map) {
+        return !isNotEmpty(map);
+    }
+
+    /**
+     * Is not empty boolean.
+     *
+     * @param map the map
+     * @return the boolean
+     */
+    public static boolean isNotEmpty(Map<?, ?> map) {
+        return map != null && !map.isEmpty();
     }
 
     /**
@@ -174,7 +196,9 @@ public class CollectionUtils {
      * @return the list
      */
     public static List<String> toUpperList(List<String> sourceList) {
-        if (isEmpty(sourceList)) { return sourceList; }
+        if (isEmpty(sourceList)) {
+            return sourceList;
+        }
         List<String> destList = new ArrayList<>(sourceList.size());
         for (String element : sourceList) {
             if (element != null) {
@@ -184,5 +208,20 @@ public class CollectionUtils {
             }
         }
         return destList;
+    }
+
+    /**
+     * Get the last item.
+     *
+     * @param list the list
+     * @param <T>  the type of item
+     * @return the last item
+     */
+    @Nullable
+    public static <T> T getLastItem(List<T> list) {
+        if (isNotEmpty(list)) {
+            return list.get(list.size() - 1);
+        }
+        return null;
     }
 }

@@ -17,6 +17,7 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +29,48 @@ import org.junit.jupiter.api.Test;
  * The type Collection utils test.
  *
  * @author Geng Zhang
+ * @author wang.liang
  */
 public class CollectionUtilsTest {
+
+    /**
+     * Is size equals.
+     */
+    @Test
+    public void test_isEquals_isNotEquals() {
+        // case 1: null
+        List<String> list = null;
+        String[] array = null;
+        Map<Object, Object> map = null;
+        Assertions.assertTrue(CollectionUtils.isEmpty(list));
+        Assertions.assertTrue(CollectionUtils.isEmpty(array));
+        Assertions.assertTrue(CollectionUtils.isEmpty(map));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(list));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(array));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(map));
+
+        // case 2: empty
+        list = new ArrayList<>();
+        array = new String[0];
+        map = new HashMap<>();
+        Assertions.assertTrue(CollectionUtils.isEmpty(list));
+        Assertions.assertTrue(CollectionUtils.isEmpty(array));
+        Assertions.assertTrue(CollectionUtils.isEmpty(map));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(list));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(array));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(map));
+
+        // case 3: not empty
+        list.add("1");
+        array = new String[]{"1"};
+        map.put("test", "test");
+        Assertions.assertFalse(CollectionUtils.isEmpty(list));
+        Assertions.assertFalse(CollectionUtils.isEmpty(array));
+        Assertions.assertFalse(CollectionUtils.isEmpty(map));
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(list));
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(array));
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(map));
+    }
 
     /**
      * Is size equals.
@@ -112,7 +153,7 @@ public class CollectionUtilsTest {
         Assertions.assertEquals(CollectionUtils.toUpperList(sourceList), CollectionUtils.toUpperList(anotherList));
         anotherList.add("D");
         Assertions.assertTrue(
-            CollectionUtils.toUpperList(anotherList).containsAll(CollectionUtils.toUpperList(sourceList)));
+                CollectionUtils.toUpperList(anotherList).containsAll(CollectionUtils.toUpperList(sourceList)));
 
         List<String> listWithNull = new ArrayList<>();
         listWithNull.add("foo");
@@ -157,5 +198,21 @@ public class CollectionUtilsTest {
 
         Assertions.assertEquals("", CollectionUtils.toString(emptyCollection));
         Assertions.assertEquals("[Foo,Bar]", CollectionUtils.toString(filledCollection));
+    }
+
+    @Test
+    public void test_getLastItem() {
+        // case 1: null
+        Assertions.assertNull(CollectionUtils.getLastItem(null));
+
+        // case 2: empty list
+        List<String> emptyList = Collections.EMPTY_LIST;
+        Assertions.assertNull(CollectionUtils.getLastItem(emptyList));
+
+        // case 3: un empty list
+        List<String> list = new ArrayList<>();
+        list.add("Foo");
+        list.add("Bar");
+        Assertions.assertEquals("Bar", CollectionUtils.getLastItem(list));
     }
 }
