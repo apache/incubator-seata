@@ -134,7 +134,7 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            // If the global transaction is suspended, resume it.
+            // If the transaction is suspended, resume it.
             if (suspendedResourcesHolder != null) {
                 tx.resume(suspendedResourcesHolder);
             }
