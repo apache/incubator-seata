@@ -71,6 +71,8 @@ public class TransactionalTemplate {
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
+                    // Create new transaction with role 'GlobalTransactionRole.Launcher'.
+                    tx = GlobalTransactionContext.createNew();
                     break;
                 case SUPPORTS:
                     // If transaction is not existing, execute without transaction.
@@ -102,7 +104,7 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
-            // 1.3 If null, create a transaction with role 'GlobalTransactionRole.Launcher'.
+            // 1.3 If null, create new transaction with role 'GlobalTransactionRole.Launcher'.
             if (tx == null) {
                 tx = GlobalTransactionContext.createNew();
             }
