@@ -196,9 +196,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
-        if (suspendedResourcesHolder == null) {
-            return;
-        }
         String xid = suspendedResourcesHolder.getXid();
         if (StringUtils.isNotEmpty(xid)) {
             RootContext.bind(xid);

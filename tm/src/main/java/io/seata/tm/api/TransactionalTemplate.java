@@ -15,9 +15,7 @@
  */
 package io.seata.tm.api;
 
-
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
@@ -48,47 +46,55 @@ public class TransactionalTemplate {
      * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws Throwable {
-        // 1 get transactionInfo
+        // 1. Get transactionInfo
         TransactionInfo txInfo = business.getTransactionInfo();
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
-        // 1.1 get a transaction
+        // 1.1 Get current transaction, if not null, the tx role is 'GlobalTransactionRole.Participant'.
         GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 
-        // 1.2 Handle the Transaction propatation and the branchType
+        // 1.2 Handle the transaction propatation.
         Propagation propagation = txInfo.getPropagation();
         SuspendedResourcesHolder suspendedResourcesHolder = null;
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
+                    // If transaction is existing, suspend it.
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
+                    // execute without global transaction
                     return business.execute();
                 case REQUIRES_NEW:
+                    // If transaction is existing, suspend it, and then begin new global transaction.
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
-                    tx = GlobalTransactionContext.createNew();
                     break;
                 case SUPPORTS:
-                    if (!existingTransaction()) {
+                    // If transaction is not existing, execute without global transaction.
+                    if (tx == null) {
                         return business.execute();
                     }
                     break;
                 case REQUIRED:
+                    // If current transaction is existing, execute with current global transaction,
+                    // else begin new global transaction and execute with it.
                     break;
                 case NEVER:
-                    if (existingTransaction()) {
+                    // If transaction is not existing, throw exception.
+                    if (tx != null) {
                         throw new TransactionException(
                                 String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
                                         ,RootContext.getXID()));
                     } else {
+                        // Execute without global transaction.
                         return business.execute();
                     }
                 case MANDATORY:
-                    if (!existingTransaction()) {
+                    // If transaction is not existing, throw exception.
+                    if (tx != null) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
                     break;
@@ -96,24 +102,22 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
+            // 1.3 If null, create a global transaction with role 'GlobalTransactionRole.Launcher'.
             if (tx == null) {
                 tx = GlobalTransactionContext.createNew();
             }
 
             try {
-
-                // 2. begin transaction if the tx role is Launcher
+                // 2. If the tx role is 'GlobalTransactionRole.Launcher', begin global transaction,
+                //    else do nothing. Of course, the hooks will still be triggered.
                 beginTransaction(txInfo, tx);
 
                 Object rs;
                 try {
-
                     // Do Your Business
                     rs = business.execute();
-
                 } catch (Throwable ex) {
-
-                    // 3.the needed business exception to rollback.
+                    // 3. The needed business exception to rollback.
                     completeTransactionAfterThrowing(txInfo, tx, ex);
                     throw ex;
                 }
@@ -128,18 +132,12 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            if (tx != null) {
+            // If the global transaction is suspended, resume it.
+            if (suspendedResourcesHolder != null) {
                 tx.resume(suspendedResourcesHolder);
             }
         }
-
     }
-
-    public boolean existingTransaction() {
-        return StringUtils.isNotEmpty(RootContext.getXID());
-
-    }
-
 
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
@@ -268,5 +266,4 @@ public class TransactionalTemplate {
     private List<TransactionHook> getCurrentHooks() {
         return TransactionHookManager.getHooks();
     }
-
 }
