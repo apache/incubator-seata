@@ -17,13 +17,8 @@ package io.seata.rm.datasource.exec;
 
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
@@ -32,6 +27,8 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract dml base executor.
@@ -134,10 +131,8 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      *
      * @param orgSql
      * @param suffix
-     * @param paramAppenderList
      */
-    protected void allCondition(String orgSql, StringBuilder suffix, ArrayList<List<Object>> paramAppenderList) {
-        this.getParamAppenderList(paramAppenderList);
+    protected void allCondition(String orgSql, StringBuilder suffix) {
         String toLowerSql = orgSql.toLowerCase();
         if (toLowerSql.contains(WHERE)) {
             suffix.append(orgSql.substring(toLowerSql.indexOf(WHERE)));

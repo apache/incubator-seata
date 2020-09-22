@@ -61,7 +61,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        allCondition(visitor.getOriginalSQL(), suffix,paramAppenderList);
+        allCondition(visitor.getOriginalSQL(), suffix);
+        this.getParamAppenderList(paramAppenderList);
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tableMeta.getAllColumns().keySet()) {
