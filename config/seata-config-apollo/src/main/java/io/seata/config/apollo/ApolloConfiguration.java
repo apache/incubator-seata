@@ -113,8 +113,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
@@ -143,7 +143,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
         LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
@@ -152,10 +152,10 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        Set<ConfigurationChangeListener> configListeners = LISTENER_SERVICE_MAP.get(dataId);
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
         if (CollectionUtils.isNotEmpty(configListeners)) {
             configListeners.remove(listener);
         }

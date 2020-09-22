@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
@@ -110,8 +111,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         FutureTask<String> future = new FutureTask<>(() -> {
@@ -173,7 +174,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
@@ -187,24 +188,26 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if (zkClient.exists(path)) {
-            for (ConfigurationChangeListener entry : configChangeListeners) {
-                if (listener.equals(entry)) {
-                    ZKListener zkListener = null;
-                    Map<ConfigurationChangeListener, ZKListener> configListeners = configListenersMap.get(dataId);
-                    if (configListeners != null) {
-                        zkListener = configListeners.get(listener);
-                        configListeners.remove(entry);
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configChangeListeners)) {
+            String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+            if (zkClient.exists(path)) {
+                for (ConfigurationChangeListener entry : configChangeListeners) {
+                    if (listener.equals(entry)) {
+                        ZKListener zkListener = null;
+                        Map<ConfigurationChangeListener, ZKListener> configListeners = configListenersMap.get(dataId);
+                        if (configListeners != null) {
+                            zkListener = configListeners.get(listener);
+                            configListeners.remove(entry);
+                        }
+                        if (zkListener != null) {
+                            zkClient.unsubscribeDataChanges(path, zkListener);
+                        }
+                        break;
                     }
-                    if (zkListener != null) {
-                        zkClient.unsubscribeDataChanges(path, zkListener);
-                    }
-                    break;
                 }
             }
         }

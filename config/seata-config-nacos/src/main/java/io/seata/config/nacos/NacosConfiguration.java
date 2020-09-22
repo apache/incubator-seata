@@ -28,6 +28,7 @@ import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
@@ -96,8 +97,8 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         try {
@@ -137,7 +138,7 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
         try {
@@ -152,22 +153,24 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        for (ConfigurationChangeListener entry : configChangeListeners) {
-            if (listener.equals(entry)) {
-                NacosListener nacosListener = null;
-                Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
-                if (configListeners != null) {
-                    nacosListener = configListeners.get(listener);
-                    configListeners.remove(entry);
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configChangeListeners)) {
+            for (ConfigurationChangeListener entry : configChangeListeners) {
+                if (listener.equals(entry)) {
+                    NacosListener nacosListener = null;
+                    Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+                    if (configListeners != null) {
+                        nacosListener = configListeners.get(listener);
+                        configListeners.remove(entry);
+                    }
+                    if (nacosListener != null) {
+                        configService.removeListener(dataId, getNacosGroup(), nacosListener);
+                    }
+                    break;
                 }
-                if (nacosListener != null) {
-                    configService.removeListener(dataId, getNacosGroup(), nacosListener);
-                }
-                break;
             }
         }
     }
