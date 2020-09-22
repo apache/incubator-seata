@@ -15,23 +15,37 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.core.exception.TransactionException;
+import io.seata.tm.api.GlobalTransaction;
+
 /**
  * Holder for suspended resources to support propagation or nested logic.
  * Used by {@code suspend} and {@code resume}
  *
  * @author wangzhongxiang
+ * @author wang.liang
  */
 public class SuspendedResourcesHolder {
 
-    /**The xid*/
+    /**
+     * The xid
+     */
     private String xid;
 
+    /**
+     * The transaction
+     */
+    private GlobalTransaction tx;
 
-    public SuspendedResourcesHolder() {
-    }
-
-    public SuspendedResourcesHolder(String xid) {
+    public SuspendedResourcesHolder(String xid, GlobalTransaction tx) {
+        if (xid == null) {
+            throw new IllegalArgumentException("xid must be not null");
+        }
+        if (tx == null) {
+            throw new IllegalArgumentException("tx must be not null");
+        }
         this.xid = xid;
+        this.tx = tx;
     }
 
     public String getXid() {
@@ -40,5 +54,17 @@ public class SuspendedResourcesHolder {
 
     public void setXid(String xid) {
         this.xid = xid;
+    }
+
+    public GlobalTransaction getTx() {
+        return tx;
+    }
+
+    public void setTx(GlobalTransaction tx) {
+        this.tx = tx;
+    }
+
+    public void resume() throws TransactionException {
+        this.tx.resume(this);
     }
 }

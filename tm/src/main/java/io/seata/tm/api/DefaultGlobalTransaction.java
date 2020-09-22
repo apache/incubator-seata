@@ -98,8 +98,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         assertXIDNull();
-        if (RootContext.getXID() != null) {
-            throw new IllegalStateException();
+        String currentXid = RootContext.getXID();
+        if (currentXid != null) {
+            throw new IllegalStateException("Transaction already exists, can't begin a new transaction," +
+                    " currentXid = " + currentXid);
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
@@ -107,7 +109,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
-
     }
 
     @Override
@@ -135,14 +136,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            if (xid.equals(RootContext.getXID())) {
                 suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] commit status: {}", xid, status);
         }
-
     }
 
     @Override
@@ -171,7 +171,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            if (xid.equals(RootContext.getXID())) {
                 suspend(true);
             }
         }
@@ -183,21 +183,21 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
         String xid = RootContext.getXID();
-        if (StringUtils.isNotEmpty(xid) && unbindXid) {
+        if (xid != null && unbindXid) {
             RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction,xid = {}",xid);
+                LOGGER.debug("Suspending current transaction,xid = {}", xid);
             }
         } else {
             xid = null;
         }
-        return new SuspendedResourcesHolder(xid);
+        return new SuspendedResourcesHolder(xid, this);
     }
 
     @Override
     public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
         String xid = suspendedResourcesHolder.getXid();
-        if (StringUtils.isNotEmpty(xid)) {
+        if (StringUtils.isNotBlank(xid)) {
             RootContext.bind(xid);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Resumimg the transaction,xid = {}", xid);
@@ -232,7 +232,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+        if (xid.equals(RootContext.getXID())) {
             suspend(true);
         }
     }

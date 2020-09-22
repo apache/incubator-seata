@@ -40,10 +40,9 @@ public class ClientTransactionInterceptor implements ClientInterceptor {
 
         String xid = RootContext.getXID();
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
-
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
-                if (StringUtils.isNotBlank(xid)) {
+                if (xid != null) {
                     headers.put(GrpcHeaderKey.HEADER_KEY, xid);
                 }
                 super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {

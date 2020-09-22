@@ -64,34 +64,35 @@ public class TransactionalTemplate {
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
-                    // execute without transaction
+                    // Execute without transaction and return.
                     return business.execute();
                 case REQUIRES_NEW:
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (tx != null) {
                         suspendedResourcesHolder = tx.suspend(true);
+                        tx = null;
                     }
-                    // Create new transaction with role 'GlobalTransactionRole.Launcher'.
-                    tx = GlobalTransactionContext.createNew();
+                    // Continue and execute with new transaction
                     break;
                 case SUPPORTS:
                     // If transaction is not existing, execute without transaction.
                     if (tx == null) {
                         return business.execute();
                     }
+                    // Continue and execute with new transaction
                     break;
                 case REQUIRED:
                     // If current transaction is existing, execute with current transaction,
-                    // else begin new transaction and execute with it.
+                    // else continue and execute with new transaction.
                     break;
                 case NEVER:
                     // If transaction is not existing, throw exception.
                     if (tx != null) {
                         throw new TransactionException(
                                 String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
-                                        ,RootContext.getXID()));
+                                        , RootContext.getXID()));
                     } else {
-                        // Execute without transaction.
+                        // Execute without transaction and return.
                         return business.execute();
                     }
                 case MANDATORY:
@@ -99,6 +100,7 @@ public class TransactionalTemplate {
                     if (tx != null) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
+                    // Continue and execute with new transaction.
                     break;
                 default:
                     throw new TransactionException("Not Supported Propagation:" + propagation);
@@ -136,7 +138,7 @@ public class TransactionalTemplate {
         } finally {
             // If the transaction is suspended, resume it.
             if (suspendedResourcesHolder != null) {
-                tx.resume(suspendedResourcesHolder);
+                suspendedResourcesHolder.resume();
             }
         }
     }
