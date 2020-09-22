@@ -76,8 +76,8 @@ public class RootContext {
      * @param xid the xid
      */
     public static void bind(@Nonnull String xid) {
-        if (StringUtils.isEmpty(xid)) {
-            throw new IllegalArgumentException("xid must be not empty");
+        if (StringUtils.isBlank(xid)) {
+            throw new IllegalArgumentException("xid must be not blank");
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
