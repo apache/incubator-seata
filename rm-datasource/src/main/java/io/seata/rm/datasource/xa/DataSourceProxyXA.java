@@ -21,7 +21,6 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
 
 import javax.sql.DataSource;
-import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -56,14 +55,24 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     }
 
     protected Connection getConnectionProxy(Connection connection) throws SQLException {
-        Connection physicalConn = connection;
-        if (connection instanceof PooledConnection) {
-            physicalConn = ((PooledConnection)connection).getConnection();
+        if (!RootContext.inGlobalTransaction()) {
+            return connection;
         }
+        return getConnectionProxyXA(connection);
+    }
+
+    @Override
+    protected Connection getConnectionProxyXA() throws SQLException {
+        Connection connection = dataSource.getConnection();
+        return getConnectionProxyXA(connection);
+    }
+
+    private Connection getConnectionProxyXA(Connection connection) throws SQLException {
+        Connection physicalConn = connection.unwrap(Connection.class);
         XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
-
     }
+
 }
