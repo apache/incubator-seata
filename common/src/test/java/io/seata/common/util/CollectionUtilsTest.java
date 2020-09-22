@@ -201,18 +201,18 @@ public class CollectionUtilsTest {
     }
 
     @Test
-    public void test_getLastItem() {
+    public void test_getLast() {
         // case 1: null
-        Assertions.assertNull(CollectionUtils.getLastItem(null));
+        Assertions.assertNull(CollectionUtils.getLast(null));
 
         // case 2: empty list
         List<String> emptyList = Collections.EMPTY_LIST;
-        Assertions.assertNull(CollectionUtils.getLastItem(emptyList));
+        Assertions.assertNull(CollectionUtils.getLast(emptyList));
 
         // case 3: un empty list
         List<String> list = new ArrayList<>();
         list.add("Foo");
         list.add("Bar");
-        Assertions.assertEquals("Bar", CollectionUtils.getLastItem(list));
+        Assertions.assertEquals("Bar", CollectionUtils.getLast(list));
     }
 }

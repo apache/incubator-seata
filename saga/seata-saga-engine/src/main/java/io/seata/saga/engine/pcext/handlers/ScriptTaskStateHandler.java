@@ -16,6 +16,7 @@
 package io.seata.saga.engine.pcext.handlers;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
@@ -63,7 +64,6 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
 
         Object result;
         try {
-
             List<Object> input = (List<Object>) context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
 
             if (LOGGER.isDebugEnabled()) {
@@ -82,11 +82,11 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
 
             Bindings bindings = null;
             Map<String, Object> inputMap = null;
-            if (input != null && input.size() > 0 && input.get(0) instanceof Map) {
+            if (CollectionUtils.isNotEmpty(input) && input.get(0) instanceof Map) {
                 inputMap = (Map<String, Object>) input.get(0);
             }
             List<Object> inputExps = state.getInput();
-            if (inputExps != null && inputExps.size() > 0 && inputExps.get(0) instanceof Map) {
+            if (CollectionUtils.isNotEmpty(inputExps) && inputExps.get(0) instanceof Map) {
                 Map<String, Object> inputExpMap = (Map<String, Object>) inputExps.get(0);
                 if (inputExpMap.size() > 0) {
                     bindings = new SimpleBindings();

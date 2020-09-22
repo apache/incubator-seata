@@ -26,6 +26,7 @@ import java.util.Map;
 
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -628,15 +629,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     @Override
     public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
-
         List<StateInstance> stateInstanceList = selectList(
                 stateLogStoreSqls.getQueryStateInstancesByMachineInstanceIdSql(dbType), RESULT_SET_TO_STATE_INSTANCE,
                 stateMachineInstanceId);
 
-        if (stateInstanceList == null || stateInstanceList.size() == 0) {
+        if (CollectionUtils.isEmpty(stateInstanceList)) {
             return stateInstanceList;
         }
-        StateInstance lastStateInstance = stateInstanceList.get(stateInstanceList.size() - 1);
+        StateInstance lastStateInstance = CollectionUtils.getLast(stateInstanceList);
         if (lastStateInstance.getGmtEnd() == null) {
             lastStateInstance.setStatus(ExecutionStatus.RU);
         }

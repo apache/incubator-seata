@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
@@ -42,7 +43,7 @@ public class ParameterUtils {
                                                  AbstractTaskState serviceTaskState, Object variablesFrom) {
 
         List<Object> inputAssignments = serviceTaskState.getInput();
-        if (inputAssignments == null || inputAssignments.size() == 0) {
+        if (CollectionUtils.isEmpty(inputAssignments)) {
             return new ArrayList<>(0);
         }
 
@@ -70,9 +71,8 @@ public class ParameterUtils {
 
     public static Map<String, Object> createOutputParams(ExpressionFactoryManager expressionFactoryManager,
                                                          AbstractTaskState serviceTaskState, Object variablesFrom) {
-
         Map<String, Object> outputAssignments = serviceTaskState.getOutput();
-        if (outputAssignments == null || outputAssignments.size() == 0) {
+        if (CollectionUtils.isEmpty(outputAssignments)) {
             return new LinkedHashMap<>(0);
         }
 

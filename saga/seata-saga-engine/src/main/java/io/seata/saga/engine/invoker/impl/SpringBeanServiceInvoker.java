@@ -31,6 +31,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.invoker.ServiceInvoker;
 import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
@@ -171,12 +172,10 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     private Retry matchRetryConfig(List<Retry> retryList, Throwable e) {
-
-        if (retryList != null && retryList.size() > 0) {
+        if (CollectionUtils.isNotEmpty(retryList)) {
             for (Retry retryConfig : retryList) {
-
                 List<String> exceptions = retryConfig.getExceptions();
-                if (exceptions == null || exceptions.size() == 0) {
+                if (CollectionUtils.isEmpty(exceptions)) {
                     // Exceptions not configured, Match current exception if it is NetException.
                     if (ExceptionUtils.isNetException(e)) {
                         return retryConfig;
@@ -242,8 +241,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     protected Method findMethod(Class<?> clazz, String methodName, List<String> parameterTypes) {
-
-        if (parameterTypes == null || parameterTypes.size() == 0) {
+        if (CollectionUtils.isEmpty(parameterTypes)) {
             return BeanUtils.findDeclaredMethodWithMinimalParameters(clazz, methodName);
         } else {
             Class[] paramClassTypes = new Class[parameterTypes.size()];

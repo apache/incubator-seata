@@ -108,7 +108,7 @@ public class FileLocker extends AbstractLocker {
             return true;
         }
         ConcurrentMap<BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
-        if (lockHolder == null || lockHolder.size() == 0) {
+        if (CollectionUtils.isEmpty(lockHolder)) {
             return true;
         }
         for (Map.Entry<BucketLockMap, Set<String>> entry : lockHolder.entrySet()) {

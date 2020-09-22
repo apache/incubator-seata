@@ -527,18 +527,12 @@ public class EnhancedServiceLoader {
 
         private ExtensionDefinition getDefaultExtensionDefinition() {
             List<ExtensionDefinition> currentDefinitions = definitionsHolder.get();
-            if (currentDefinitions != null && currentDefinitions.size() > 0) {
-                return currentDefinitions.get(currentDefinitions.size() - 1);
-            }
-            return null;
+            return CollectionUtils.getLast(currentDefinitions);
         }
 
         private ExtensionDefinition getCachedExtensionDefinition(String activateName) {
             List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
-            if (CollectionUtils.isNotEmpty(definitions)) {
-                return definitions.get(definitions.size() - 1);
-            }
-            return null;
+            return CollectionUtils.getLast(definitions);
         }
 
         /**

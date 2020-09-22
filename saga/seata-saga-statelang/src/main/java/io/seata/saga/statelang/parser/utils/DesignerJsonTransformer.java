@@ -45,7 +45,7 @@ public class DesignerJsonTransformer {
         Map<String, Object> machineJsonObject = new LinkedHashMap<>();
 
         List<Object> nodes = (List) designerJsonObject.get("nodes");
-        if (nodes != null && nodes.size() > 0) {
+        if (CollectionUtils.isNotEmpty(nodes)) {
             Map<String, Object> nodeMap = new LinkedHashMap<>(nodes.size());
 
             for (Object node : nodes) {
@@ -55,7 +55,7 @@ public class DesignerJsonTransformer {
             }
 
             List<Object> edges = (List) designerJsonObject.get("edges");
-            if (edges != null && edges.size() > 0) {
+            if (CollectionUtils.isNotEmpty(edges)) {
                 for (Object edge : edges) {
                     Map<String, Object> edgeObj = (Map<String, Object>) edge;
                     transformEdge(machineJsonObject, nodes, nodeMap, edgeObj);

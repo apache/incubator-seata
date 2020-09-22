@@ -15,8 +15,6 @@
  */
 package io.seata.common.util;
 
-import com.sun.istack.internal.Nullable;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -217,8 +215,7 @@ public class CollectionUtils {
      * @param <T>  the type of item
      * @return the last item
      */
-    @Nullable
-    public static <T> T getLastItem(List<T> list) {
+    public static <T> T getLast(List<T> list) {
         if (isNotEmpty(list)) {
             return list.get(list.size() - 1);
         }
