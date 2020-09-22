@@ -196,8 +196,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
+        if (suspendedResourcesHolder == null) {
+            return;
+        }
         String xid = suspendedResourcesHolder.getXid();
-        if (StringUtils.isNotBlank(xid)) {
+        if (xid != null) {
             RootContext.bind(xid);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Resumimg the transaction,xid = {}", xid);

@@ -70,6 +70,7 @@ public class TccActionInterceptor implements MethodInterceptor {
             //not in transaction
             return invocation.proceed();
         }
+
         Method method = getActionInterfaceMethod(invocation);
         TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
         //try method
