@@ -97,7 +97,7 @@
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <httpclient.version>4.5.8</httpclient.version>
         <httpcore.version>4.4.11</httpcore.version>
-        <druid.version>1.1.12</druid.version>
+        <druid.version>1.1.23</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.35</mysql.client.version>
