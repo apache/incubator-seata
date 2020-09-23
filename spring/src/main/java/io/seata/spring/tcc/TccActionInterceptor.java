@@ -66,7 +66,7 @@ public class TccActionInterceptor implements MethodInterceptor {
     public Object invoke(final MethodInvocation invocation) throws Throwable {
         //get the xid
         String xid = RootContext.getXID();
-        if (xid == null) {
+        if (xid == null || RootContext.inSagaBranch()) {
             //not in transaction
             return invocation.proceed();
         }
