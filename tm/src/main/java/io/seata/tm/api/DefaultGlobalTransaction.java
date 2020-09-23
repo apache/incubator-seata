@@ -97,10 +97,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         assertXIDNull();
-        String currentXid = RootContext.getXID();
-        if (currentXid != null) {
-            throw new IllegalStateException("Transaction already exists, can't begin a new transaction," +
-                    " currentXid = " + currentXid);
+        if (RootContext.getXID() != null) {
+            throw new IllegalStateException();
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
@@ -135,7 +133,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (xid.equals(RootContext.getXID())) {
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 suspend(true);
             }
         }
@@ -170,7 +168,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (xid.equals(RootContext.getXID())) {
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 suspend(true);
             }
         }
@@ -190,7 +188,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         } else {
             xid = null;
         }
-        return new SuspendedResourcesHolder(xid, this);
+        return new SuspendedResourcesHolder(xid);
     }
 
     @Override
@@ -234,7 +232,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (xid.equals(RootContext.getXID())) {
+        if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
             suspend(true);
         }
     }
@@ -255,5 +253,4 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
     }
-
 }
