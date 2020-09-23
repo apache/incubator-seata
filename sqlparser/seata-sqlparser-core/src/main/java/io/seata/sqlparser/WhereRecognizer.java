@@ -42,10 +42,17 @@ public interface WhereRecognizer extends SQLRecognizer {
     String getWhereCondition();
 
     /**
-     * Return the limt SQL
+     * Return the limit SQL
      *
      * @return The limit SQL.
      */
     String getLimit();
+
+    /**
+     * Return the order by SQL
+     *
+     * @return The order by SQL.
+     */
+    String getOrderBy();
 
 }

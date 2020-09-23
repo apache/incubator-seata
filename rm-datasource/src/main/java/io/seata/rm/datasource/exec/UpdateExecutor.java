@@ -79,6 +79,10 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
+        String orderBy = recognizer.getOrderBy();
+        if (StringUtils.isNotBlank(orderBy)) {
+            suffix.append(orderBy);
+        }
         String limit = recognizer.getLimit();
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);

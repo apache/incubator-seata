@@ -17,9 +17,13 @@ package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
+import com.alibaba.druid.sql.ast.SQLOrderingSpecification;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
@@ -108,6 +112,36 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
             if (limit.getRowCount() != null) {
                 expr = (SQLIntegerExpr)limit.getRowCount();
                 builder.append(expr.getNumber());
+            }
+            return builder.toString();
+        }
+        return null;
+    }
+
+    protected String getOrderBy(SQLStatement sqlStatement, SQLType sqlType) {
+        SQLOrderBy orderBy = null;
+        if (SQLType.UPDATE == sqlType) {
+            orderBy = ((MySqlUpdateStatement)sqlStatement).getOrderBy();
+        } else if (SQLType.DELETE == sqlType) {
+            orderBy = ((MySqlDeleteStatement)sqlStatement).getOrderBy();
+        }
+        if (orderBy != null) {
+            String space = " ";
+            String comma = ",";
+            StringBuilder builder = new StringBuilder(space).append("ORDER BY").append(space);
+            List<SQLSelectOrderByItem> items = orderBy.getItems();
+            for (int i = 0; i < items.size(); i++) {
+                SQLSelectOrderByItem item = items.get(i);
+                SQLIdentifierExpr expr = (SQLIdentifierExpr)item.getExpr();
+                builder.append(expr.getName());
+                SQLOrderingSpecification specification = item.getType();
+                if (specification != null) {
+                    builder.append(space);
+                    builder.append(specification.name);
+                }
+                if (i + 1 != items.size()) {
+                    builder.append(comma);
+                }
             }
             return builder.toString();
         }

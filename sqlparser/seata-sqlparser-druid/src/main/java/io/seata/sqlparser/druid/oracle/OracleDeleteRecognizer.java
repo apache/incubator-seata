@@ -91,4 +91,9 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
         return null;
     }
 
+    @Override
+    public String getOrderBy() {
+        return null;
+    }
+
 }

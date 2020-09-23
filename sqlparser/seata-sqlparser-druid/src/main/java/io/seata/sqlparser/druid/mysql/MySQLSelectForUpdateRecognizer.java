@@ -76,6 +76,11 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
         return null;
     }
 
+    @Override
+    public String getOrderBy() {
+        return null;
+    }
+
     private SQLSelectQueryBlock getSelect() {
         SQLSelect select = ast.getSelect();
         if (select == null) {

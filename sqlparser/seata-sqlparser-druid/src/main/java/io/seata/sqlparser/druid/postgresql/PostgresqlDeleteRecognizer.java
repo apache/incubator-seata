@@ -86,4 +86,9 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
     public String getLimit() {
         return null;
     }
+
+    @Override
+    public String getOrderBy() {
+        return null;
+    }
 }

@@ -77,6 +77,11 @@ public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implem
         return null;
     }
 
+    @Override
+    public String getOrderBy() {
+        return null;
+    }
+
     private SQLSelectQueryBlock getSelect() {
         SQLSelect select = ast.getSelect();
         if (select == null) {

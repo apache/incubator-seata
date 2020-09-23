@@ -116,6 +116,11 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     }
 
     @Override
+    public String getOrderBy() {
+        return null;
+    }
+
+    @Override
     public String getTableAlias() {
         return ast.getTableSource().getAlias();
     }

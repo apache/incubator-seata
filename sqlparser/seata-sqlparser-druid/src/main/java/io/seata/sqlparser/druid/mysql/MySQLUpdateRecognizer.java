@@ -136,4 +136,9 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
         return super.getLimit(ast, getSQLType());
     }
 
+    @Override
+    public String getOrderBy() {
+        return super.getOrderBy(ast, getSQLType());
+    }
+
 }
