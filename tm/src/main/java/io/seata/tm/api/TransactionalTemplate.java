@@ -100,7 +100,8 @@ public class TransactionalTemplate {
                         // If transaction is not existing, throw exception.
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     } else {
-                        // If transaction is existing, unbind the xid.
+                        // If transaction is existing, clean it.
+                        tx = null;
                         RootContext.unbind();
                     }
                     // Continue and execute with new transaction.
