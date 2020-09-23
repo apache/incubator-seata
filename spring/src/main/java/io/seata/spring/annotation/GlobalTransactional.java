@@ -26,10 +26,6 @@ import io.seata.tm.api.transaction.Propagation;
 
 /**
  * The interface Global transactional.
- *
- * @author slievrly
- * @see io.seata.spring.annotation.GlobalTransactionScanner
- * @see io.seata.spring.annotation.GlobalTransactionalInterceptor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.TYPE})

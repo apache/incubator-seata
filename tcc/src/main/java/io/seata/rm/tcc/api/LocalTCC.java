@@ -25,9 +25,6 @@ import java.lang.annotation.Target;
  * Local TCC bean annotation, add on the TCC interface
  *
  * @author zhangsen
- * @see io.seata.spring.annotation.GlobalTransactionScanner
- * @see io.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser
- * @see io.seata.spring.tcc.TccActionInterceptor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

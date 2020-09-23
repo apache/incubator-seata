@@ -64,17 +64,16 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        //get the xid
-        String xid = RootContext.getXID();
-        if (xid == null || RootContext.inSagaBranch()) {
+        if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
             //not in transaction
             return invocation.proceed();
         }
-
         Method method = getActionInterfaceMethod(invocation);
         TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
         //try method
         if (businessAction != null) {
+            //save the xid
+            String xid = RootContext.getXID();
             //save the previous branchType
             BranchType previousBranchType = RootContext.getBranchType();
             //if not TCC, bind TCC branchType

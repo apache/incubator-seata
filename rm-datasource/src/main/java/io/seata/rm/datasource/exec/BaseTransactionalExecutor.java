@@ -106,8 +106,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public T execute(Object... args) throws Throwable {
-        String xid = RootContext.getXID();
-        if (xid != null) {
+        if (RootContext.inGlobalTransaction()) {
+            String xid = RootContext.getXID();
             statementProxy.getConnectionProxy().bind(xid);
         }
 

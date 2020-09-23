@@ -15,6 +15,7 @@
  */
 package io.seata.tm.api;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -99,8 +100,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         assertXIDNull();
         String currentXid = RootContext.getXID();
         if (currentXid != null) {
-            throw new IllegalStateException("Transaction already exists, can't begin a new transaction," +
-                    " currentXid = " + currentXid);
+            throw new IllegalStateException("Global transaction already exists," +
+                " can't begin a new global transaction, currentXid = " + currentXid);
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
@@ -182,10 +183,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
         String xid = RootContext.getXID();
-        if (xid != null && unbindXid) {
+        if (StringUtils.isNotEmpty(xid) && unbindXid) {
             RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction,xid = {}", xid);
+                LOGGER.debug("Suspending current transaction, xid = {}", xid);
             }
         } else {
             xid = null;
@@ -199,7 +200,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         String xid = suspendedResourcesHolder.getXid();
-        if (xid != null) {
+        if (StringUtils.isNotEmpty(xid)) {
             RootContext.bind(xid);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Resumimg the transaction,xid = {}", xid);

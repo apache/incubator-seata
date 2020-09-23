@@ -52,19 +52,11 @@ public class SuspendedResourcesHolder {
         return xid;
     }
 
-    public void setXid(String xid) {
-        this.xid = xid;
-    }
-
     public GlobalTransaction getTx() {
         return tx;
     }
 
-    public void setTx(GlobalTransaction tx) {
-        this.tx = tx;
-    }
-
     public void resume() throws TransactionException {
-        this.tx.resume(this);
+        tx.resume(this);
     }
 }

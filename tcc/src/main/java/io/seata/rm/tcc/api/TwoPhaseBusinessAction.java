@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
  * TCC annotation, Define a TCC interface, which added on the try method
  *
  * @author zhangsen
- * @see io.seata.spring.tcc.TccActionInterceptor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD })
