@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.util.IOUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -27,7 +28,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-import org.apache.commons.lang.StringUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -80,7 +80,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             suffix.append(" WHERE ").append(whereCondition);
         }
         String limit = recognizer.getLimit();
-        if (io.seata.common.util.StringUtils.isNotBlank(limit)) {
+        if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
         }
         suffix.append(" FOR UPDATE");

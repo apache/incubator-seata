@@ -39,6 +39,7 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
+import io.seata.sqlparser.struct.Null;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,6 +154,23 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             whereCondition = whereCondition.replace(NEXT_LINE, " ");
         }
         return whereCondition;
+    }
+
+    public ArrayList<List<Object>> getParamAppenderList(ArrayList<List<Object>> paramAppenderList) {
+        if (statementProxy instanceof ParametersHolder) {
+            ParametersHolder parametersHolder = (ParametersHolder)statementProxy;
+            Map<Integer, ArrayList<Object>> oneParamValues = parametersHolder.getParameters();
+            if (paramAppenderList.isEmpty()) {
+                oneParamValues.forEach((k, v) -> paramAppenderList.add(new ArrayList<>()));
+            }
+            int j = 0;
+            for (ArrayList<Object> v : oneParamValues.values()) {
+                List<Object> list = paramAppenderList.get(j);
+                v.forEach(i -> list.add(i instanceof Null ? null : i));
+                j++;
+            }
+        }
+        return paramAppenderList;
     }
 
     /**
