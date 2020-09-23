@@ -295,10 +295,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
                 default:
                     throw new ShouldNeverHappenException("Unknown Operation: " + logOperation);
-
             }
         }
-
     }
 
     @Override
