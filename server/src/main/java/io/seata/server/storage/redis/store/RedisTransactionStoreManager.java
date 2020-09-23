@@ -117,8 +117,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertOrUpdateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String key = getBranchKey(branchTransactionDO.getBranchId());
+            String branch = jedis.get(key);
             Pipeline pipeline = jedis.pipelined();
-            if (jedis.get(key) == null) {
+            if (StringUtils.isEmpty(branch)) {
                 pipeline.lpush(getBranchListKeyByXid(branchTransactionDO.getXid()), key);
             }
             pipeline.set(key, JSON.toJSONString(branchTransactionDO));
