@@ -77,7 +77,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE ").append(whereCondition);
+            suffix.append(WHERE).append(whereCondition);
         }
         String limit = recognizer.getLimit();
         if (StringUtils.isNotBlank(limit)) {

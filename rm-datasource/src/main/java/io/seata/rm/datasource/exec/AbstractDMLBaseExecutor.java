@@ -41,7 +41,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
 
-    protected static final String WHERE = " where ";
+    protected static final String WHERE = " WHERE ";
 
 
     /**
@@ -123,19 +123,6 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         } finally {
             connectionProxy.getContext().reset();
             connectionProxy.setAutoCommit(true);
-        }
-    }
-
-    /**
-     * splice all the SQL after where
-     *
-     * @param orgSql
-     * @param suffix
-     */
-    protected void allCondition(String orgSql, StringBuilder suffix) {
-        String toLowerSql = orgSql.toLowerCase();
-        if (toLowerSql.contains(WHERE)) {
-            suffix.append(orgSql.substring(toLowerSql.indexOf(WHERE)));
         }
     }
 

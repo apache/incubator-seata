@@ -64,7 +64,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE ").append(whereCondition);
+            suffix.append(WHERE).append(whereCondition);
         }
         String limit = visitor.getLimit();
         if (StringUtils.isNotBlank(limit)) {
