@@ -20,6 +20,8 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -165,10 +167,19 @@ class NettyClientChannelManager {
             return;
         }
         if (CollectionUtils.isEmpty(availList)) {
-            String serviceGroup = RegistryFactory.getInstance()
-                                                 .getServiceGroup(transactionServiceGroup);
-            LOGGER.error("no available service '{}' found in service group '{}', please make sure registry config correct", serviceGroup, transactionServiceGroup);
-            return;
+            String clusterName = RegistryFactory.getInstance().getServiceGroup(transactionServiceGroup);
+
+            if (StringUtils.isNotBlank(clusterName)) {
+                LOGGER.error("no available service found in cluster '{}{}{}', please make sure registry config correct",
+                        ConfigurationKeys.SERVICE_PREFIX,
+                        clusterName,
+                        ConfigurationKeys.GROUPLIST_POSTFIX);
+            } else {
+                LOGGER.error("no available service found in service group '{}{}{}', please make sure registry config correct",
+                        ConfigurationKeys.SERVICE_PREFIX,
+                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        transactionServiceGroup);
+            }
         }
         for (String serverAddress : availList) {
             try {
