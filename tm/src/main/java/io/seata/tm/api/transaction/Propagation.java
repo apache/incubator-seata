@@ -114,7 +114,7 @@ public enum Propagation {
     /**
      * The NEVER.
      * <p>
-     * If transaction is not existing, throw exception,
+     * If transaction is existing, throw exception,
      * else execute business without transaction.
      * </p>
      * <pre>

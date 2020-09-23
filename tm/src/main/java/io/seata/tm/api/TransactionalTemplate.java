@@ -62,14 +62,14 @@ public class TransactionalTemplate {
             switch (propagation) {
                 case NOT_SUPPORTED:
                     // If transaction is existing, suspend it.
-                    if (tx != null) {
+                    if (existingTransaction(tx)) {
                         suspendedResourcesHolder = tx.suspend(true);
                     }
                     // Execute without transaction and return.
                     return business.execute();
                 case REQUIRES_NEW:
                     // If transaction is existing, suspend it, and then begin new transaction.
-                    if (tx != null) {
+                    if (existingTransaction(tx)) {
                         suspendedResourcesHolder = tx.suspend(true);
                         tx = null;
                     }
@@ -77,7 +77,7 @@ public class TransactionalTemplate {
                     break;
                 case SUPPORTS:
                     // If transaction is not existing, execute without transaction.
-                    if (tx == null) {
+                    if (!existingTransaction(tx)) {
                         return business.execute();
                     }
                     // Continue and execute with new transaction
@@ -87,8 +87,8 @@ public class TransactionalTemplate {
                     // else continue and execute with new transaction.
                     break;
                 case NEVER:
-                    // If transaction is not existing, throw exception.
-                    if (tx != null) {
+                    // If transaction is existing, throw exception.
+                    if (existingTransaction(tx)) {
                         throw new TransactionException(
                                 String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
                                         , RootContext.getXID()));
@@ -98,7 +98,7 @@ public class TransactionalTemplate {
                     }
                 case MANDATORY:
                     // If transaction is not existing, throw exception.
-                    if (tx == null) {
+                    if (!existingTransaction(tx)) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
                     // Continue and execute with current transaction.
@@ -144,6 +144,9 @@ public class TransactionalTemplate {
         }
     }
 
+    private boolean existingTransaction(GlobalTransaction tx) {
+        return tx != null;
+    }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
         //roll back
