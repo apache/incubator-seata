@@ -38,7 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
 /**
  * The type Netty base config.
@@ -225,18 +225,12 @@ public class NettyBaseConfig {
          * @return the mode by name
          */
         public static WorkThreadMode getModeByName(String name) {
-            if (Auto.name().equalsIgnoreCase(name)) {
-                return Auto;
-            } else if (Pin.name().equalsIgnoreCase(name)) {
-                return Pin;
-            } else if (BusyPin.name().equalsIgnoreCase(name)) {
-                return BusyPin;
-            } else if (Default.name().equalsIgnoreCase(name)) {
-                return Default;
-            } else {
-                return null;
+            for (WorkThreadMode mode : values()) {
+                if (mode.name().equalsIgnoreCase(name)) {
+                    return mode;
+                }
             }
+            return null;
         }
-
     }
 }
