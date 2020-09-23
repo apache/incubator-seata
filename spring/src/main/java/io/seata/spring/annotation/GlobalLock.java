@@ -27,6 +27,10 @@ import java.lang.annotation.Target;
  * stage<br/>
  *
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
+ *
+ * @author skyesx
+ * @see io.seata.spring.annotation.GlobalTransactionScanner
+ * @see io.seata.spring.annotation.GlobalTransactionalInterceptor
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.TYPE})

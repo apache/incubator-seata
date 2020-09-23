@@ -19,6 +19,8 @@ package io.seata.tm.api.transaction;
  * Propagation level of global transactions.
  *
  * @author haozhibei
+ * @see io.seata.spring.annotation.GlobalTransactional
+ * @see io.seata.tm.api.TransactionalTemplate
  */
 public enum Propagation {
     /**
@@ -136,7 +138,7 @@ public enum Propagation {
      * else execute business with new transaction.
      * </p>
      * <pre>
-     *     if (tx != null) {
+     *     if (tx == null) {
      *         throw new TransactionException("existing transaction");
      *     }
      *     tx = beginNewTransaction(); // begin new transaction

@@ -97,7 +97,7 @@ public class TransactionalTemplate {
                     }
                 case MANDATORY:
                     // If transaction is not existing, throw exception.
-                    if (tx != null) {
+                    if (tx == null) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
                     // Continue and execute with new transaction.
