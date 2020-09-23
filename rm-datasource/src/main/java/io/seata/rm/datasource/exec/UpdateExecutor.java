@@ -79,6 +79,10 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE ").append(whereCondition);
         }
+        String limit = recognizer.getLimit();
+        if (io.seata.common.util.StringUtils.isNotBlank(limit)) {
+            suffix.append(limit);
+        }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {

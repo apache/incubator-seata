@@ -16,7 +16,9 @@
 package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
@@ -91,6 +93,11 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
     public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where);
+    }
+
+    @Override
+    public String getLimit() {
+        return super.getLimit(ast, getSQLType());
     }
 
 }

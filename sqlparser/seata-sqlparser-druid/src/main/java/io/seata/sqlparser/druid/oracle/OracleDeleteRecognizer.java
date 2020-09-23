@@ -86,4 +86,9 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
         return super.getWhereCondition(where);
     }
 
+    @Override
+    public String getLimit() {
+        return null;
+    }
+
 }

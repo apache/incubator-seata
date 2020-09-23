@@ -50,15 +50,25 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
     @Test
     public void deleteRecognizerTest_0() {
 
-        String sql = "DELETE FROM t1 WHERE id = 'id1'";
+        String sql = "DELETE FROM t1 WHERE id = 'id1' limit 1,2";
 
         SQLStatement statement = getSQLStatement(sql);
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
-
         Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
         Assertions.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
+        String limit = mySQLDeleteRecognizer.getLimit();
+        Assertions.assertEquals(" LIMIT 1,2", limit);
+        sql = "DELETE FROM t1 WHERE id > 1 limit 1";
+        statement = getSQLStatement(sql);
+        mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
+        Assertions.assertEquals(" LIMIT 1", mySQLDeleteRecognizer.getLimit());
+        sql = "DELETE FROM t1 WHERE id > 1";
+        statement = getSQLStatement(sql);
+        mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
+        Assertions.assertEquals(null, mySQLDeleteRecognizer.getLimit());
+
     }
 
     /**

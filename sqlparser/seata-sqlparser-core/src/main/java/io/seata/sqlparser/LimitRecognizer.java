@@ -15,37 +15,18 @@
  */
 package io.seata.sqlparser;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * The interface Where recognizer.
+ * The interface limit recognizer.
  *
- * @author sharajava
+ * @author funkye
  */
-public interface WhereRecognizer extends SQLRecognizer {
+public interface LimitRecognizer {
 
     /**
-     * Gets where condition.
+     * Gets limit.
      *
-     * @param parametersHolder the parameters holder
-     * @param paramAppenderList    the param appender list
-     * @return the where condition
-     */
-    String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList);
-
-    /**
-     * Gets where condition.
-     *
-     * @return the where condition
-     */
-    String getWhereCondition();
-
-    /**
-     * Return the limt SQL
-     *
-     * @return The limit SQL.
+     * @return the limit
      */
     String getLimit();
-
 }

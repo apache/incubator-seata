@@ -16,10 +16,16 @@
 package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
 import java.util.ArrayList;
@@ -83,6 +89,29 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
         executeVisit(where, new MySqlOutputVisitor(sb));
         return sb.toString();
+    }
+
+    protected String getLimit(SQLStatement sqlStatement, SQLType sqlType) {
+        SQLLimit limit = null;
+        if (SQLType.UPDATE == sqlType) {
+            limit = ((MySqlUpdateStatement)sqlStatement).getLimit();
+        } else if (SQLType.DELETE == sqlType) {
+            limit = ((MySqlDeleteStatement)sqlStatement).getLimit();
+        }
+        if (limit != null) {
+            StringBuilder builder = new StringBuilder(" LIMIT ");
+            SQLIntegerExpr expr;
+            if (limit.getOffset() != null) {
+                expr = (SQLIntegerExpr)limit.getOffset();
+                builder.append(expr.getNumber()).append(",");
+            }
+            if (limit.getRowCount() != null) {
+                expr = (SQLIntegerExpr)limit.getRowCount();
+                builder.append(expr.getNumber());
+            }
+            return builder.toString();
+        }
+        return null;
     }
 
 }
