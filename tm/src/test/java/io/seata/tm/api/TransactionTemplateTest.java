@@ -157,15 +157,4 @@ public class TransactionTemplateTest {
         verify(transactionHook).afterCompletion();
     }
 
-
-    @Test
-    public void testExistingTransaction(){
-        RootContext.bind(DEFAULT_XID);
-        TransactionalTemplate template = new TransactionalTemplate();
-        Assertions.assertTrue(template.existingTransaction(),"Existing transaction");
-
-        RootContext.unbind();
-        Assertions.assertFalse(template.existingTransaction(),"No existing transaction");
-    }
-
 }

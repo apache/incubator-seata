@@ -54,7 +54,7 @@ public class TransactionalTemplate {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
         // 1.1 get or create a transaction
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        GlobalTransaction tx = GlobalTransactionContext.getCurrent();
 
         // 1.2 Handle the Transaction propatation and the branchType
         Propagation propagation = txInfo.getPropagation();
@@ -62,28 +62,44 @@ public class TransactionalTemplate {
         try {
             switch (propagation) {
                 case NOT_SUPPORTED:
-                    suspendedResourcesHolder = tx.suspend(true);
+                    // If transaction is existing, suspend it.
+                    if (tx != null) {
+                        suspendedResourcesHolder = tx.suspend(true);
+                    }
+
+                    // execute without global transaction
                     return business.execute();
                 case REQUIRES_NEW:
-                    suspendedResourcesHolder = tx.suspend(true);
+                    // If transaction is existing, suspend it, and then begin new global transaction.
+                    if (tx != null) {
+                        suspendedResourcesHolder = tx.suspend(true);
+                    }
+
+                    tx = GlobalTransactionContext.createNew();
                     break;
                 case SUPPORTS:
-                    if (!existingTransaction()) {
+                    // If transaction is not existing, execute without global transaction.
+                    if (tx == null) {
                         return business.execute();
                     }
                     break;
                 case REQUIRED:
+                    // If current transaction is existing, execute with current global transaction,
+                    // else begin new global transaction and execute with it.
                     break;
                 case NEVER:
-                    if (existingTransaction()) {
+                    // If transaction is not existing, throw exception.
+                    if (tx != null) {
                         throw new TransactionException(
                                 String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
                                         ,RootContext.getXID()));
                     } else {
+                        // Execute without global transaction.
                         return business.execute();
                     }
                 case MANDATORY:
-                    if (!existingTransaction()) {
+                    // If transaction is not existing, throw exception.
+                    if (tx == null) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
                     break;
@@ -91,6 +107,10 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
+            // 1.3 If null, create a global transaction with role 'GlobalTransactionRole.Launcher'.
+            if (tx == null) {
+                tx = GlobalTransactionContext.createNew();
+            }
 
             try {
 
@@ -105,7 +125,7 @@ public class TransactionalTemplate {
 
                 } catch (Throwable ex) {
 
-                    // 3.the needed business exception to rollback.
+                    // 3. The needed business exception to rollback.
                     completeTransactionAfterThrowing(txInfo, tx, ex);
                     throw ex;
                 }
@@ -120,17 +140,12 @@ public class TransactionalTemplate {
                 cleanUp();
             }
         } finally {
-            tx.resume(suspendedResourcesHolder);
+            if (suspendedResourcesHolder != null) {
+                tx.resume(suspendedResourcesHolder);
+            }
         }
 
     }
-
-    public boolean existingTransaction() {
-        return StringUtils.isNotEmpty(RootContext.getXID());
-
-    }
-
-
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {
         //roll back
