@@ -24,7 +24,9 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,14 +98,13 @@ public class TransactionalTemplate {
                         return business.execute();
                     }
                 case MANDATORY:
+                    // If transaction is not existing, throw exception.
                     if (tx == null) {
-                        // If transaction is not existing, throw exception.
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
-                    } else {
-                        // If transaction is existing, clean it.
-                        tx = null;
-                        RootContext.unbind();
                     }
+                    // else clean current transaction.
+                    tx = null;
+                    RootContext.unbind();
                     // Continue and execute with new transaction.
                     break;
                 default:
