@@ -71,7 +71,7 @@ public class RootContext {
     }
 
     /**
-     * Bind.
+     * Bind xid.
      *
      * @param xid the xid
      */
@@ -98,9 +98,9 @@ public class RootContext {
     }
 
     /**
-     * Unbind string.
+     * Unbind xid.
      *
-     * @return the string
+     * @return the unbound xid
      */
     public static String unbind() {
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
@@ -162,7 +162,7 @@ public class RootContext {
     /**
      * unbind branch type
      *
-     * @return the previous branch type string
+     * @return the previous branch type
      */
     public static BranchType unbindBranchType() {
         BranchType unbindBranchType = (BranchType) CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);

@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;

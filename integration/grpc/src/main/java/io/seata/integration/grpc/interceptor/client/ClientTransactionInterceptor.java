@@ -23,7 +23,6 @@ import io.grpc.ForwardingClientCall;
 import io.grpc.ForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
