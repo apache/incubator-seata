@@ -64,7 +64,7 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        if (!RootContext.inGlobalTransaction()) {
+        if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
             //not in transaction
             return invocation.proceed();
         }

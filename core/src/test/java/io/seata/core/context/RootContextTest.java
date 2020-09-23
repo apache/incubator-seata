@@ -110,6 +110,34 @@ public class RootContextTest {
     }
 
     /**
+     * Test in tcc branch.
+     */
+    @Test
+    public void testInTccBranch() {
+        RootContext.bind(DEFAULT_XID);
+        assertThat(RootContext.inTccBranch()).isFalse();
+        RootContext.bindBranchType(BranchType.TCC);
+        assertThat(RootContext.inTccBranch()).isTrue();
+        RootContext.unbindBranchType();
+        assertThat(RootContext.inTccBranch()).isFalse();
+        RootContext.unbind();
+    }
+
+    /**
+     * Test in saga branch.
+     */
+    @Test
+    public void testInSagaBranch() {
+        RootContext.bind(DEFAULT_XID);
+        assertThat(RootContext.inSagaBranch()).isFalse();
+        RootContext.bindBranchType(BranchType.SAGA);
+        assertThat(RootContext.inSagaBranch()).isTrue();
+        RootContext.unbindBranchType();
+        assertThat(RootContext.inSagaBranch()).isFalse();
+        RootContext.unbind();
+    }
+
+    /**
      * Test assert not in global transaction with exception.
      */
     @Test
