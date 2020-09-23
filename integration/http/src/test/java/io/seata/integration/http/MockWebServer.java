@@ -95,7 +95,7 @@ public class MockWebServer {
         } catch (Exception e) {
             HttpHandlerExceptionResolver resolver = new HttpHandlerExceptionResolver();
             resolver.doResolveException(request, null, null, e);
-            if (StringUtils.isBlank(RootContext.getXID())) {
+            if (RootContext.getXID() == null) {
                 try {
                     return mockResponse.write("Callee remove local xid success");
                 } catch (IOException ex) {

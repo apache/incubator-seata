@@ -67,19 +67,18 @@ public class RootContext {
      * @return the xid
      */
     public static String getXID() {
-        String xid = (String) CONTEXT_HOLDER.get(KEY_XID);
-        if (StringUtils.isNotBlank(xid)) {
-            return xid;
-        }
-        return null;
+        return (String) CONTEXT_HOLDER.get(KEY_XID);
     }
 
     /**
-     * Bind.
+     * Bind xid.
      *
      * @param xid the xid
      */
     public static void bind(@Nonnull String xid) {
+        if (StringUtils.isBlank(xid)) {
+            throw new IllegalArgumentException("xid must be not blank");
+        }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
         }
@@ -99,9 +98,9 @@ public class RootContext {
     }
 
     /**
-     * Unbind string.
+     * Unbind xid.
      *
-     * @return the string
+     * @return the unbound xid
      */
     public static String unbind() {
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
@@ -168,6 +167,9 @@ public class RootContext {
      * @param branchType the branch type
      */
     public static void bindBranchType(@Nonnull BranchType branchType) {
+        if (branchType == null) {
+            throw new IllegalArgumentException("branchType must be not null");
+        }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind branch type {}", branchType);
         }
@@ -178,7 +180,7 @@ public class RootContext {
     /**
      * unbind branch type
      *
-     * @return the previous branch type string
+     * @return the previous branch type
      */
     public static BranchType unbindBranchType() {
         BranchType unbindBranchType = (BranchType) CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
@@ -191,7 +193,7 @@ public class RootContext {
     /**
      * requires global lock check
      *
-     * @return
+     * @return the boolean
      */
     public static boolean requireGlobalLock() {
         return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;
