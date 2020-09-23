@@ -99,7 +99,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
@@ -108,16 +108,6 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where);
-    }
-
-    @Override
-    public String getLimit() {
-        return null;
-    }
-
-    @Override
-    public String getOrderBy() {
-        return null;
     }
 
     @Override

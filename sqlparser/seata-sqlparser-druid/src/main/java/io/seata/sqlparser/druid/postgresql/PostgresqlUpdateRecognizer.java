@@ -107,16 +107,6 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
-    public String getLimit() {
-        return null;
-    }
-
-    @Override
-    public String getOrderBy() {
-        return null;
-    }
-
-    @Override
     public String getTableAlias() {
         return ast.getTableSource().getAlias();
     }

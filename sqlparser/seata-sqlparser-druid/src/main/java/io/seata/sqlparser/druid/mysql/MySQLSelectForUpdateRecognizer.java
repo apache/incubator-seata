@@ -58,7 +58,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
@@ -69,16 +69,6 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where);
-    }
-
-    @Override
-    public String getLimit() {
-        return null;
-    }
-
-    @Override
-    public String getOrderBy() {
-        return null;
     }
 
     private SQLSelectQueryBlock getSelect() {

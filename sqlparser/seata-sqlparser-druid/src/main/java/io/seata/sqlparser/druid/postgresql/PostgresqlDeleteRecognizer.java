@@ -81,14 +81,4 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where);
     }
-
-    @Override
-    public String getLimit() {
-        return null;
-    }
-
-    @Override
-    public String getOrderBy() {
-        return null;
-    }
 }

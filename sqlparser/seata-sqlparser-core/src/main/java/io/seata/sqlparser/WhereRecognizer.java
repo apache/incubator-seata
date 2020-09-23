@@ -46,13 +46,17 @@ public interface WhereRecognizer extends SQLRecognizer {
      *
      * @return The limit SQL.
      */
-    String getLimit();
+    default String getLimit(){
+        return null;
+    }
 
     /**
      * Return the order by SQL
      *
      * @return The order by SQL.
      */
-    String getOrderBy();
+    default String getOrderBy(){
+        return null;
+    }
 
 }
