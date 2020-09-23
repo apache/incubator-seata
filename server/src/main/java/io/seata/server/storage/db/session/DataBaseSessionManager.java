@@ -82,16 +82,12 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void addGlobalSession(GlobalSession session) throws TransactionException {
-        if (StringUtils.isBlank(taskName)) {
-            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
-            if (!ret) {
-                throw new StoreException("addGlobalSession failed.");
-            }
-        } else {
-            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
-            if (!ret) {
-                throw new StoreException("addGlobalSession failed.");
-            }
+        if (StringUtils.isNotBlank(taskName)) {
+            return;
+        }
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
+        if (!ret) {
+            throw new StoreException("addGlobalSession failed.");
         }
     }
 
@@ -116,6 +112,9 @@ public class DataBaseSessionManager extends AbstractSessionManager
      */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
+        if (StringUtils.isNotBlank(taskName)) {
+            return;
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
