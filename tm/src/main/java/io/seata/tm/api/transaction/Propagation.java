@@ -32,14 +32,16 @@ public enum Propagation {
      * <pre>
      *     if (tx == null) {
      *         tx = beginNewTransaction(); // begin new transaction, is not existing
-     *     }
-     *     try {
-     *         Object rs = business.execute(); // execute with current or new transaction
-     *         commitTransaction(tx);
-     *         return rs;
-     *     } catch (Exception ex) {
-     *         rollbackTransaction(tx);
-     *         throw ex;
+     *         try {
+     *             Object rs = business.execute(); // execute with new transaction
+     *             commitTransaction(tx);
+     *             return rs;
+     *         } catch (Exception ex) {
+     *             rollbackTransaction(tx);
+     *             throw ex;
+     *         }
+     *     } else {
+     *         return business.execute(); // execute with current transaction
      *     }
      * </pre>
      */
@@ -101,14 +103,7 @@ public enum Propagation {
      * </p>
      * <pre>
      *     if (tx != null) {
-     *         try {
-     *             Object rs = business.execute(); // execute with current transaction
-     *             commitTransaction(tx);
-     *             return rs;
-     *         } catch (Exception ex) {
-     *             rollbackTransaction(tx);
-     *             throw ex;
-     *         }
+     *         return business.execute(); // execute with current transaction
      *     } else {
      *         return business.execute(); // execute without transaction
      *     }
@@ -135,21 +130,13 @@ public enum Propagation {
      * The MANDATORY.
      * <p>
      * If transaction is not existing, throw exception,
-     * else execute business with new transaction.
+     * else execute business with current transaction.
      * </p>
      * <pre>
      *     if (tx == null) {
-     *         throw new TransactionException("existing transaction");
+     *         throw new TransactionException("not existing transaction");
      *     }
-     *     tx = beginNewTransaction(); // begin new transaction
-     *     try {
-     *         Object rs = business.execute(); // execute with new transaction
-     *         commitTransaction(tx);
-     *         return rs;
-     *     } catch (Exception ex) {
-     *         rollbackTransaction(tx);
-     *         throw ex;
-     *     }
+ *         return business.execute(); // execute with current transaction
      * </pre>
      */
     MANDATORY

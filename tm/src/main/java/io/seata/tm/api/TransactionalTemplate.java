@@ -102,10 +102,7 @@ public class TransactionalTemplate {
                     if (tx == null) {
                         throw new TransactionException("No existing transaction found for transaction marked with propagation 'mandatory'");
                     }
-                    // else clean current transaction.
-                    tx = null;
-                    RootContext.unbind();
-                    // Continue and execute with new transaction.
+                    // Continue and execute with current transaction.
                     break;
                 default:
                     throw new TransactionException("Not Supported Propagation:" + propagation);
