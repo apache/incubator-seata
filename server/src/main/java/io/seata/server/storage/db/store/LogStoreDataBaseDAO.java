@@ -194,18 +194,19 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setString(1, globalTransactionDO.getXid());
-            ps.setLong(2, globalTransactionDO.getTransactionId());
-            ps.setInt(3, globalTransactionDO.getStatus());
-            ps.setString(4, globalTransactionDO.getApplicationId());
-            ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
+            int i = 0;
+            ps.setString(i++, globalTransactionDO.getXid());
+            ps.setLong(i++, globalTransactionDO.getTransactionId());
+            ps.setInt(i++, globalTransactionDO.getStatus());
+            ps.setString(i++, globalTransactionDO.getApplicationId());
+            ps.setString(i++, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
             transactionName = transactionName.length() > transactionNameColumnSize ? transactionName.substring(0,
                 transactionNameColumnSize) : transactionName;
-            ps.setString(6, transactionName);
-            ps.setInt(7, globalTransactionDO.getTimeout());
-            ps.setLong(8, globalTransactionDO.getBeginTime());
-            ps.setString(9, globalTransactionDO.getApplicationData());
+            ps.setString(i++, transactionName);
+            ps.setInt(i++, globalTransactionDO.getTimeout());
+            ps.setLong(i++, globalTransactionDO.getBeginTime());
+            ps.setString(i++, globalTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -315,15 +316,16 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setString(1, branchTransactionDO.getXid());
-            ps.setLong(2, branchTransactionDO.getTransactionId());
-            ps.setLong(3, branchTransactionDO.getBranchId());
-            ps.setString(4, branchTransactionDO.getResourceGroupId());
-            ps.setString(5, branchTransactionDO.getResourceId());
-            ps.setString(6, branchTransactionDO.getBranchType());
-            ps.setInt(7, branchTransactionDO.getStatus());
-            ps.setString(8, branchTransactionDO.getClientId());
-            ps.setString(9, branchTransactionDO.getApplicationData());
+            int i = 0;
+            ps.setString(i++, branchTransactionDO.getXid());
+            ps.setLong(i++, branchTransactionDO.getTransactionId());
+            ps.setLong(i++, branchTransactionDO.getBranchId());
+            ps.setString(i++, branchTransactionDO.getResourceGroupId());
+            ps.setString(i++, branchTransactionDO.getResourceId());
+            ps.setString(i++, branchTransactionDO.getBranchType());
+            ps.setInt(i++, branchTransactionDO.getStatus());
+            ps.setString(i++, branchTransactionDO.getClientId());
+            ps.setString(i++, branchTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -344,14 +346,15 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, branchTransactionDO.getStatus());
+            int i = 0;
+            ps.setInt(i++, branchTransactionDO.getStatus());
             if (updateAppData) {
-                ps.setString(2, branchTransactionDO.getApplicationData());
-                ps.setString(3, branchTransactionDO.getXid());
-                ps.setLong(4, branchTransactionDO.getBranchId());
+                ps.setString(i++, branchTransactionDO.getApplicationData());
+                ps.setString(i++, branchTransactionDO.getXid());
+                ps.setLong(i++, branchTransactionDO.getBranchId());
             } else {
-                ps.setString(2, branchTransactionDO.getXid());
-                ps.setLong(3, branchTransactionDO.getBranchId());
+                ps.setString(i++, branchTransactionDO.getXid());
+                ps.setLong(i++, branchTransactionDO.getBranchId());
             }
 
             return ps.executeUpdate() > 0;
