@@ -15,6 +15,8 @@
  */
 package io.seata.tm.api;
 
+import java.util.List;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
@@ -24,9 +26,6 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
-
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
