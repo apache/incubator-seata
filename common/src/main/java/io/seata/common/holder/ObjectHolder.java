@@ -18,7 +18,6 @@ package io.seata.common.holder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sun.istack.internal.Nullable;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
@@ -48,7 +47,6 @@ public enum ObjectHolder {
      * @param object    the object
      * @return the previous object with the key, or null
      */
-    @Nullable
     public Object setObject(String objectKey, Object object) {
         return OBJECT_MAP.putIfAbsent(objectKey, object);
     }
