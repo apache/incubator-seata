@@ -200,12 +200,13 @@ public class StringUtils {
             return sb.toString();
         }
         if (obj instanceof Map) {
+            Map<Object, Object> map = (Map)obj;
             StringBuilder sb = new StringBuilder();
             sb.append("{");
-            if (!((Map)obj).isEmpty()) {
-                for (Map.Entry<Object, Object> entry : ((Map<Object, Object>)obj).entrySet()) {
-                    Object v = entry.getValue();
-                    sb.append(toString(entry.getKey())).append("->").append(toString(v)).append(",");
+            if (!map.isEmpty()) {
+                for (Map.Entry<Object, Object> entry : map.entrySet()) {
+                    sb.append(toString(entry.getKey())).append("->")
+                            .append(toString(entry.getValue())).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
             }
