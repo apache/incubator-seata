@@ -23,7 +23,9 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
+import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,18 +169,18 @@ class NettyClientChannelManager {
             return;
         }
         if (CollectionUtils.isEmpty(availList)) {
-            String clusterName = RegistryFactory.getInstance().getServiceGroup(transactionServiceGroup);
+            RegistryService registryService = RegistryFactory.getInstance();
+            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
 
-            if (StringUtils.isNotBlank(clusterName)) {
-                LOGGER.error("no available service found in cluster '{}{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_PREFIX,
-                        clusterName,
-                        ConfigurationKeys.GROUPLIST_POSTFIX);
-            } else {
-                LOGGER.error("no available service found in service group '{}{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_PREFIX,
+            if (StringUtils.isBlank(clusterName)) {
+                LOGGER.error("cant no get cluster name in registry config '{}{}', please make sure registry config correct",
                         ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
                         transactionServiceGroup);
+                return;
+            }
+
+            if (!(registryService instanceof FileRegistryServiceImpl)) {
+                LOGGER.error("no available service found, please make sure registry config correct and keep your seata server running");
             }
         }
         for (String serverAddress : availList) {
