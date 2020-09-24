@@ -18,7 +18,6 @@ package io.seata.tm.api;
 import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
@@ -90,8 +89,8 @@ public class TransactionalTemplate {
                     // If transaction is existing, throw exception.
                     if (existingTransaction(tx)) {
                         throw new TransactionException(
-                                String.format("Existing transaction found for transaction marked with propagation 'never',xid = %s"
-                                        , RootContext.getXID()));
+                            String.format("Existing transaction found for transaction marked with propagation 'never', xid = %s"
+                                    , tx.getXid()));
                     } else {
                         // Execute without transaction and return.
                         return business.execute();

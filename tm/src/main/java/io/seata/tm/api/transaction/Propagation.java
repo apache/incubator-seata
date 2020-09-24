@@ -29,11 +29,14 @@ public enum Propagation {
      * <p>
      * If transaction is existing, execute with current transaction,
      * else execute with new transaction.
+     * </p>
+     *
+     * <p>
      * The logic is similar to the following code:
      * <code><pre>
      *     if (tx == null) {
-     *         tx = beginNewTransaction(); // begin new transaction, is not existing
      *         try {
+     *             tx = beginNewTransaction(); // begin new transaction, is not existing
      *             Object rs = business.execute(); // execute with new transaction
      *             commitTransaction(tx);
      *             return rs;
@@ -54,14 +57,17 @@ public enum Propagation {
      *
      * <p>
      * If transaction is existing, suspend it, and then execute business with new transaction.
+     * </p>
+     *
+     * <p>
      * The logic is similar to the following code:
      * <code><pre>
      *     try {
      *         if (tx != null) {
      *             suspendedResource = suspendTransaction(tx); // suspend current transaction
      *         }
-     *         tx = beginNewTransaction(); // begin new transaction
      *         try {
+     *             tx = beginNewTransaction(); // begin new transaction
      *             Object rs = business.execute(); // execute with new transaction
      *             commitTransaction(tx);
      *             return rs;
@@ -84,6 +90,9 @@ public enum Propagation {
      *
      * <p>
      * If transaction is existing, suspend it, and then execute business without transaction.
+     * </p>
+     *
+     * <p>
      * The logic is similar to the following code:
      * <code><pre>
      *     try {
@@ -107,6 +116,9 @@ public enum Propagation {
      * <p>
      * If transaction is not existing, execute without global transaction,
      * else execute business with current transaction.
+     * </p>
+     *
+     * <p>
      * The logic is similar to the following code:
      * <code><pre>
      *     if (tx != null) {
@@ -125,6 +137,9 @@ public enum Propagation {
      * <p>
      * If transaction is existing, throw exception,
      * else execute business without transaction.
+     * </p>
+     *
+     * <p>
      * The logic is similar to the following code:
      * <code><pre>
      *     if (tx != null) {
@@ -142,6 +157,9 @@ public enum Propagation {
      * <p>
      * If transaction is not existing, throw exception,
      * else execute business with current transaction.
+     * </p>
+     *
+     * <p>
      * The logic is similar to the following code:
      * <code><pre>
      *     if (tx == null) {
