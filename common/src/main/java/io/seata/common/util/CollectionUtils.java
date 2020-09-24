@@ -243,7 +243,7 @@ public class CollectionUtils {
         }
 
         int size;
-        for (int i = 0; i < 10; ++i) {
+        while (true) {
             size = list.size();
             if (size == 0) {
                 return null;
@@ -255,7 +255,5 @@ public class CollectionUtils {
                 // catch the exception and continue to retry
             }
         }
-
-        return list.get(list.size() - 1);
     }
 }
