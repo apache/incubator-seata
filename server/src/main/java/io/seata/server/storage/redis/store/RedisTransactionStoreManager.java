@@ -394,7 +394,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private String getGlobalKeyByXid(String xid) {
-        return DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + xid;
+        return DEFAULT_REDIS_SEATA_GLOBAL_SESSION_PREFIX + xid;
     }
 
     private String getBranchListKeyByXid(String xid) {
