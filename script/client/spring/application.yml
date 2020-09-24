@@ -31,7 +31,7 @@ seata:
       log-table: undo_log
       only-care-update-columns: true
     log:
-      exceptionRate: 100
+      exception-rate: 100
   service:
     vgroup-mapping:
       my_test_tx_group: default
