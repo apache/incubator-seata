@@ -231,13 +231,14 @@ public class CollectionUtils {
 
     /**
      * Get the last item.
+     * This method can avoid the 'IndexOutOfBoundsException' cause by concurrency.
      *
      * @param list the list
      * @param <T>  the type of item
      * @return the last item
      */
     public static <T> T getLast(List<T> list) {
-        if (list == null) {
+        if (isEmpty(list)) {
             return null;
         }
 
@@ -251,7 +252,7 @@ public class CollectionUtils {
             try {
                 return list.get(size - 1);
             } catch (IndexOutOfBoundsException ex) {
-                // do nothing
+                // catch the exception and continue to retry
             }
         }
 
