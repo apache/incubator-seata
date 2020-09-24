@@ -241,11 +241,20 @@ public class CollectionUtils {
             return null;
         }
 
-        int size = list.size();
-        if (size == 0) {
-            return null;
+        int size;
+        for (int i = 0; i < 10; ++i) {
+            size = list.size();
+            if (size == 0) {
+                return null;
+            }
+
+            try {
+                return list.get(size - 1);
+            } catch (IndexOutOfBoundsException ex) {
+                // do nothing
+            }
         }
 
-        return list.get(size - 1);
+        return list.get(list.size() - 1);
     }
 }

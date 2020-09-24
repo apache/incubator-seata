@@ -447,9 +447,12 @@ public class ChannelManager {
         if (RM_CHANNELS.isEmpty()) {
             return null;
         }
-        Map<String,Channel> channels = new HashMap<>(RM_CHANNELS.size());
-        for (String resourceId : RM_CHANNELS.keySet()) {
-            Channel channel = tryOtherApp(RM_CHANNELS.get(resourceId), null);
+        Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
+        String resourceId;
+        for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>> entry
+                : RM_CHANNELS.entrySet()) {
+            resourceId = entry.getKey();
+            Channel channel = tryOtherApp(entry.getValue(), null);
             if (channel == null) {
                 continue;
             }

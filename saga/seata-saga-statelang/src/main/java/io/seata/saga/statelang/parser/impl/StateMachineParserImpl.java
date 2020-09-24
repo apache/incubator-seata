@@ -74,8 +74,11 @@ public class StateMachineParserImpl implements StateMachineParser {
         }
 
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
-        for (String stateName : statesNode.keySet()) {
-            Map<String, Object> stateNode = (Map<String, Object>) statesNode.get(stateName);
+        String stateName;
+        Map<String, Object> stateNode;
+        for (Map.Entry<String, Object> entry : statesNode.entrySet()) {
+            stateName = entry.getKey();
+            stateNode = (Map<String, Object>) entry.getValue();
             String stateType = (String) stateNode.get("Type");
             StateParser stateParser = StateParserFactory.getStateParser(stateType);
             if (stateParser == null) {
@@ -93,15 +96,14 @@ public class StateMachineParserImpl implements StateMachineParser {
         }
 
         Map<String, State> stateMap = stateMachine.getStates();
-        for (String name : stateMap.keySet()) {
-            State state = stateMap.get(name);
+        for (State state : stateMap.values()) {
             if (state instanceof AbstractTaskState) {
                 AbstractTaskState taskState = (AbstractTaskState) state;
                 if (StringUtils.isNotBlank(taskState.getCompensateState())) {
                     taskState.setForUpdate(true);
 
                     State compState = stateMap.get(taskState.getCompensateState());
-                    if (compState != null && compState instanceof AbstractTaskState) {
+                    if (compState instanceof AbstractTaskState) {
                         ((AbstractTaskState) compState).setForCompensation(true);
                     }
                 }

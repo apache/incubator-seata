@@ -93,8 +93,7 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
                     for (String property : inputExpMap.keySet()) {
                         if (inputMap != null && inputMap.containsKey(property)) {
                             bindings.put(property, inputMap.get(property));
-                        }
-                        else {
+                        } else {
                             //if we do not bind the null value property, groovy will throw MissingPropertyException
                             bindings.put(property, null);
                         }

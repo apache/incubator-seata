@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.util.concurrent.FastThreadLocalThread;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Named thread factory.
@@ -30,7 +31,8 @@ import io.netty.util.concurrent.FastThreadLocalThread;
  */
 public class NamedThreadFactory implements ThreadFactory {
     private final static Map<String, AtomicInteger> PREFIX_COUNTER = new ConcurrentHashMap<>();
-    private AtomicInteger counter = new AtomicInteger(0);
+
+    private final AtomicInteger counter = new AtomicInteger(0);
     private final String prefix;
     private final int totalSize;
     private final boolean makeDaemons;
@@ -43,7 +45,7 @@ public class NamedThreadFactory implements ThreadFactory {
      * @param makeDaemons the make daemons
      */
     public NamedThreadFactory(String prefix, int totalSize, boolean makeDaemons) {
-        int prefixCounter = PREFIX_COUNTER.computeIfAbsent(prefix, key -> new AtomicInteger(0))
+        int prefixCounter = CollectionUtils.computeIfAbsent(PREFIX_COUNTER, prefix, key -> new AtomicInteger(0))
                 .incrementAndGet();
         this.prefix = prefix + "_" + prefixCounter;
         this.makeDaemons = makeDaemons;

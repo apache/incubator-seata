@@ -81,9 +81,9 @@ public class ParameterUtils {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
-                    for (String paramName : outputAssignments.keySet()) {
-                        outputExpressions.put(paramName,
-                                createValueExpression(expressionFactoryManager, outputAssignments.get(paramName)));
+                    for (Map.Entry<String, Object> entry : outputAssignments.entrySet()) {
+                        outputExpressions.put(entry.getKey(),
+                                createValueExpression(expressionFactoryManager, entry.getValue()));
                     }
                 }
                 serviceTaskState.setOutputExpressions(outputExpressions);
@@ -107,10 +107,11 @@ public class ParameterUtils {
         } else if (valueExpression instanceof Map) {
             Map<String, Object> mapValueExpression = (Map<String, Object>)valueExpression;
             Map<String, Object> mapValue = new LinkedHashMap<>();
-            for (String paramName : mapValueExpression.keySet()) {
-                Object value = getValue(mapValueExpression.get(paramName), variablesFrom, stateInstance);
+            Object value;
+            for (Map.Entry<String, Object> entry : mapValueExpression.entrySet()) {
+                value = getValue(entry.getValue(), variablesFrom, stateInstance);
                 if (value != null) {
-                    mapValue.put(paramName, value);
+                    mapValue.put(entry.getKey(), value);
                 }
             }
             return mapValue;
@@ -136,9 +137,10 @@ public class ParameterUtils {
         } else if (paramAssignment instanceof Map) {
             Map<String, Object> paramMapAssignment = (Map<String, Object>)paramAssignment;
             Map<String, Object> paramMap = new LinkedHashMap<>(paramMapAssignment.size());
-            for (String paramName : paramMapAssignment.keySet()) {
-                Object valueAssignment = paramMapAssignment.get(paramName);
-                paramMap.put(paramName, createValueExpression(expressionFactoryManager, valueAssignment));
+            Object valueAssignment;
+            for (Map.Entry<String, Object> entry : paramMapAssignment.entrySet()) {
+                valueAssignment = entry.getValue();
+                paramMap.put(entry.getKey(), createValueExpression(expressionFactoryManager, valueAssignment));
             }
             valueExpression = paramMap;
         } else if (paramAssignment instanceof List) {

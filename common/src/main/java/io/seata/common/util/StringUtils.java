@@ -203,9 +203,9 @@ public class StringUtils {
             StringBuilder sb = new StringBuilder();
             sb.append("{");
             if (!((Map)obj).isEmpty()) {
-                for (Object k : ((Map)obj).keySet()) {
-                    Object v = ((Map)obj).get(k);
-                    sb.append(toString(k)).append("->").append(toString(v)).append(",");
+                for (Map.Entry<Object, Object> entry : ((Map<Object, Object>)obj).entrySet()) {
+                    Object v = entry.getValue();
+                    sb.append(toString(entry.getKey())).append("->").append(toString(v)).append(",");
                 }
                 sb.deleteCharAt(sb.length() - 1);
             }

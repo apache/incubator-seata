@@ -17,6 +17,7 @@ package io.seata.serializer.protobuf;
 
 import com.google.protobuf.MessageLite;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +49,7 @@ public class ProtobufHelper {
      * @return
      */
     public Class getPbClass(String clazzName) {
-        return requestClassCache.computeIfAbsent(clazzName, key -> {
+        return CollectionUtils.computeIfAbsent(requestClassCache, clazzName, key -> {
             // get the parameter and result
             Class clazz;
             try {

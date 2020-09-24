@@ -229,14 +229,9 @@ public class DesignerJsonTransformer {
                     FrameworkErrorCode.InvalidConfiguration);
         }
         Map<String, List<StateInstance>> stateInstanceMapGroupByName = new HashMap<>(stateMachineInstance.getStateMap().size());
-        for (String id : stateMachineInstance.getStateMap().keySet()) {
-            StateInstance stateInstance = stateMachineInstance.getStateMap().get(id);
-            List<StateInstance> stateInstanceList = stateInstanceMapGroupByName.get(stateInstance.getName());
-            if (stateInstanceList == null) {
-                stateInstanceList = new ArrayList<>();
-                stateInstanceMapGroupByName.put(stateInstance.getName(), stateInstanceList);
-            }
-            stateInstanceList.add(stateInstance);
+        for (StateInstance stateInstance : stateMachineInstance.getStateMap().values()) {
+            stateInstanceMapGroupByName.computeIfAbsent(stateInstance.getName(), key -> new ArrayList<>())
+                    .add(stateInstance);
         }
         List<Object> nodesArray = (List<Object>) stateMachineJsonObj.get("nodes");
         for (Object nodeObj : nodesArray) {

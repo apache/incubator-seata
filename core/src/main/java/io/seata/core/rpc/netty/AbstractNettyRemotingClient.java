@@ -152,8 +152,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-            BlockingQueue<RpcMessage> basket = map.computeIfAbsent(serverAddress,
+            BlockingQueue<RpcMessage> basket = basketMap.computeIfAbsent(serverAddress,
                 key -> new LinkedBlockingQueue<>());
             basket.offer(rpcMessage);
             if (LOGGER.isDebugEnabled()) {
@@ -316,11 +315,15 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
                 }
                 isSending = true;
-                for (String address : basketMap.keySet()) {
-                    BlockingQueue<RpcMessage> basket = basketMap.get(address);
+                String address;
+                BlockingQueue<RpcMessage> basket;
+                for (Map.Entry<String, BlockingQueue<RpcMessage>> entry : basketMap.entrySet()) {
+                    basket = entry.getValue();
                     if (basket.isEmpty()) {
                         continue;
                     }
+
+                    address = entry.getKey();
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
                     while (!basket.isEmpty()) {

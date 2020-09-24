@@ -68,18 +68,17 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
         if (parent != null) {
             collectedVariables.putAll(parent.getVariables());
         }
-        for (String name : variables.keySet()) {
-            collectedVariables.put(name, variables.get(name));
+        for (Map.Entry<String, Object> entry : variables.entrySet()) {
+            collectedVariables.put(entry.getKey(), entry.getValue());
         }
         return collectedVariables;
     }
 
     @Override
     public void setVariables(Map<String, Object> variables) {
-
         if (variables != null) {
-            for (String name : variables.keySet()) {
-                setVariable(name, variables.get(name));
+            for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                setVariable(entry.getKey(), entry.getValue());
             }
         }
     }

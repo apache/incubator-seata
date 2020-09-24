@@ -185,6 +185,8 @@ public class FileConfiguration extends AbstractConfiguration {
         configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
                 .add(listener);
         listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
+
+        // Start config change listener for the dataId.
         FileListener fileListener = new FileListener(dataId, listener);
         fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }

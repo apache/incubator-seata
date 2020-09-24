@@ -305,11 +305,12 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
-                            for (String expressionStr : statusMatchList.keySet()) {
-
-                                String statusVal = statusMatchList.get(expressionStr);
-                                Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(),
-                                    expressionStr);
+                            String expressionStr, statusVal;
+                            Evaluator evaluator;
+                            for (Map.Entry<String, String> entry : statusMatchList.entrySet()) {
+                                expressionStr = entry.getKey();
+                                statusVal = entry.getValue();
+                                evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
                                 if (evaluator != null) {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }

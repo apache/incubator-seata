@@ -139,6 +139,8 @@ public class ConsulConfiguration extends AbstractConfiguration {
         ConsulListener consulListener = new ConsulListener(dataId, listener);
         configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
                 .add(consulListener);
+
+        // Start config change listener for the dataId.
         consulListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 

@@ -149,8 +149,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                 Map<Integer,ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
                 int totalPlaceholderNum = -1;
-                for (int i = 0; i < rowSize; i++) {
-                    List<Object> row = insertRows.get(i);
+                for (List<Object> row : insertRows) {
                     // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
                     // insert parameter count will than the actual +1
                     if (row.isEmpty()) {
@@ -163,12 +162,10 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                             currentRowPlaceholderNum += 1;
                         }
                     }
-                    for (String pkKey:pkIndexMap.keySet())
-                    {
-                        List pkValues = pkValuesMap.get(pkKey);
-                        if (Objects.isNull(pkValues))
-                        {
-                            pkValues = new ArrayList(rowSize);
+                    for (String pkKey : pkIndexMap.keySet()) {
+                        List<Object> pkValues = pkValuesMap.get(pkKey);
+                        if (Objects.isNull(pkValues)) {
+                            pkValues = new ArrayList<>(rowSize);
                         }
                         int pkIndex = pkIndexMap.get(pkKey);
                         Object pkValue = row.get(pkIndex);
@@ -186,8 +183,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                         } else {
                             pkValues.add(pkValue);
                         }
-                        if (!pkValuesMap.containsKey(ColumnUtils.delEscape(pkKey, getDbType())))
-                        {
+                        if (!pkValuesMap.containsKey(ColumnUtils.delEscape(pkKey, getDbType()))) {
                             pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
                         }
                     }
@@ -195,11 +191,15 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         } else {
             ps = false;
+            String pkKey;
+            int pkIndex;
+            List<Object> pkValues;
             List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             for (List<Object> row : insertRows) {
-                for (String pkKey:pkIndexMap.keySet()) {
-                    int pkIndex = pkIndexMap.get(pkKey);
-                    List<Object> pkValues = pkValuesMap.get(pkKey);
+                for (Map.Entry<String, Integer> entry : pkIndexMap.entrySet()) {
+                    pkKey = entry.getKey();
+                    pkIndex = entry.getValue();
+                    pkValues = pkValuesMap.get(pkKey);
                     if (Objects.isNull(pkValues)) {
                         pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), Lists.newArrayList(row.get(pkIndex)));
                     } else {
