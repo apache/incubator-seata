@@ -231,7 +231,10 @@ public class CollectionUtils {
 
     /**
      * Get the last item.
+     * <p>
      * This method can avoid the 'IndexOutOfBoundsException' cause by concurrency.
+     * 'IndexOutOfBoundsException' may be thrown, because the `list.size()` and `list.get(size - 1)` are not atomic operations.
+     * </p>
      *
      * @param list the list
      * @param <T>  the type of item
