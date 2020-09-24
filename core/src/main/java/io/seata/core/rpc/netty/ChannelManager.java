@@ -448,15 +448,14 @@ public class ChannelManager {
             return null;
         }
         Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
-        String resourceId;
+        Channel channel;
         for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>> entry
                 : RM_CHANNELS.entrySet()) {
-            resourceId = entry.getKey();
-            Channel channel = tryOtherApp(entry.getValue(), null);
+            channel = tryOtherApp(entry.getValue(), null);
             if (channel == null) {
                 continue;
             }
-            channels.put(resourceId, channel);
+            channels.put(entry.getKey(), channel);
         }
         return channels;
     }

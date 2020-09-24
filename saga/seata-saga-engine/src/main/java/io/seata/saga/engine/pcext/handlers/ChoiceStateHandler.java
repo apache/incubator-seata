@@ -69,7 +69,7 @@ public class ChoiceStateHandler implements StateHandler {
         for (Map.Entry<Object, String> entry : choiceEvaluators.entrySet()) {
             evaluator = (Evaluator)entry.getKey();
             if (evaluator.evaluate(context.getVariables())) {
-                context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, choiceEvaluators.get(evaluator));
+                context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, entry.getValue());
                 return;
             }
         }

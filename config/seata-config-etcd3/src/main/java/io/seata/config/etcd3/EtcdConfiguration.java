@@ -159,8 +159,6 @@ public class EtcdConfiguration extends AbstractConfiguration {
         EtcdListener etcdListener = new EtcdListener(dataId, listener);
         configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
                 .add(etcdListener);
-
-        // Start config change listener for the dataId.
         etcdListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 

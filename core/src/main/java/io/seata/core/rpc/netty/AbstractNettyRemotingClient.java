@@ -322,7 +322,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     if (basket.isEmpty()) {
                         continue;
                     }
-
                     address = entry.getKey();
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();

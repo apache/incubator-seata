@@ -18,6 +18,7 @@ package io.seata.spring.annotation.datasource;
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
@@ -64,7 +65,7 @@ public class DataSourceProxyHolder {
      * @return dataSourceProxy
      */
     public DataSource putDataSource(DataSource originalDataSource, String dataSourceProxyMode) {
-        return this.dataSourceProxyMap.computeIfAbsent(originalDataSource,
+        return CollectionUtils.computeIfAbsent(this.dataSourceProxyMap, originalDataSource,
                 BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode) ? DataSourceProxyXA::new : DataSourceProxy::new);
     }
 
