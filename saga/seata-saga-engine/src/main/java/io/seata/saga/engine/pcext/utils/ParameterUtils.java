@@ -41,7 +41,6 @@ public class ParameterUtils {
     public static List<Object> createInputParams(ExpressionFactoryManager expressionFactoryManager,
                                                  StateInstanceImpl stateInstance,
                                                  AbstractTaskState serviceTaskState, Object variablesFrom) {
-
         List<Object> inputAssignments = serviceTaskState.getInput();
         if (CollectionUtils.isEmpty(inputAssignments)) {
             return new ArrayList<>(0);

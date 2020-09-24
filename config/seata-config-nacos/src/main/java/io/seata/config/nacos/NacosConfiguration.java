@@ -178,7 +178,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
-        if (configListeners != null && !configListeners.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
             return null;

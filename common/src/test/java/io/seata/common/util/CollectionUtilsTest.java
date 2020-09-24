@@ -29,15 +29,11 @@ import org.junit.jupiter.api.Test;
  * The type Collection utils test.
  *
  * @author Geng Zhang
- * @author wang.liang
  */
 public class CollectionUtilsTest {
 
-    /**
-     * Is size equals.
-     */
     @Test
-    public void test_isEquals_isNotEquals() {
+    public void test_isEmpty_isNotEmpty() {
         // case 1: null
         List<String> list = null;
         String[] array = null;
@@ -153,7 +149,7 @@ public class CollectionUtilsTest {
         Assertions.assertEquals(CollectionUtils.toUpperList(sourceList), CollectionUtils.toUpperList(anotherList));
         anotherList.add("D");
         Assertions.assertTrue(
-                CollectionUtils.toUpperList(anotherList).containsAll(CollectionUtils.toUpperList(sourceList)));
+            CollectionUtils.toUpperList(anotherList).containsAll(CollectionUtils.toUpperList(sourceList)));
 
         List<String> listWithNull = new ArrayList<>();
         listWithNull.add("foo");
