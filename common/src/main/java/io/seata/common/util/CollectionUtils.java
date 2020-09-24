@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * The type Collection utils.
@@ -188,6 +189,26 @@ public class CollectionUtils {
     }
 
     /**
+     * Compute if absent.
+     * Use this method if you are frequently using the same key value.
+     * Because the get method has no lock.
+     *
+     * @param map             the map
+     * @param key             the key
+     * @param mappingFunction the mapping function
+     * @param <K>             the type of key
+     * @param <V>             the type of value
+     * @return the value
+     */
+    public static <K, V> V computeIfAbsent(Map<K, V> map, K key, Function<? super K, ? extends V> mappingFunction) {
+        V value = map.get(key);
+        if (value != null) {
+            return value;
+        }
+        return map.computeIfAbsent(key, mappingFunction);
+    }
+
+    /**
      * To upper list list.
      *
      * @param sourceList the source list
@@ -216,9 +237,15 @@ public class CollectionUtils {
      * @return the last item
      */
     public static <T> T getLast(List<T> list) {
-        if (isNotEmpty(list)) {
-            return list.get(list.size() - 1);
+        if (list == null) {
+            return null;
         }
-        return null;
+
+        int size = list.size();
+        if (size == 0) {
+            return null;
+        }
+
+        return list.get(size - 1);
     }
 }
