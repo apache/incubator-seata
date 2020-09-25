@@ -97,6 +97,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             });
     }
 
+    public ConfigurationCache clear() {
+        CONFIG_CACHE.clear();
+        return this;
+    }
+
     private static class ConfigurationCacheInstance {
         private static final ConfigurationCache INSTANCE = new ConfigurationCache();
     }

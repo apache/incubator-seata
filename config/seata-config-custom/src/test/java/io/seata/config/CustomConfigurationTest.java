@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 public class CustomConfigurationTest {
     @Test
     public void testCustomConfigLoad() throws Exception {
+        ConfigurationCache.getInstance().clear();
         Configuration configuration = ConfigurationFactory.getInstance();
         Assertions.assertNotNull(configuration);
         Properties properties;
