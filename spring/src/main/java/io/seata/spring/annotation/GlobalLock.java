@@ -29,6 +29,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * stage<br/>
  *
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
+ *
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // the interceptor of GlobalLock
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // the interceptor of AT/XA mode and GlobalLock
