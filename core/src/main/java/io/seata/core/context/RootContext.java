@@ -58,8 +58,8 @@ public class RootContext {
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
-    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
+    private static final BranchType DEFAULT_BRANCH_TYPE = BranchType.get(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE));
 
     /**
      * Gets xid.
@@ -156,8 +156,8 @@ public class RootContext {
             if (branchType != null) {
                 return branchType;
             }
-            //default branchType is the dataSourceProxyMode
-            return BranchType.XA.name().equalsIgnoreCase(DATA_SOURCE_PROXY_MODE) ? BranchType.XA : BranchType.AT;
+            //Returns the default branch type.
+            return DEFAULT_BRANCH_TYPE;
         }
         return null;
     }
