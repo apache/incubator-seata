@@ -51,7 +51,7 @@ import redis.clients.jedis.ScanResult;
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     // global transaction prefix
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
+    private static final String DEFAULT_REDIS_SEATA_GLOBAL_SESSION_PREFIX = "SEATA_GLOBAL_SESSION_";
 
     // the prefix of the branchs transaction
     private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA_XID_BRANCHS_";
@@ -394,7 +394,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private String getGlobalKeyByXid(String xid) {
-        return DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + xid;
+        return DEFAULT_REDIS_SEATA_GLOBAL_SESSION_PREFIX + xid;
     }
 
     private String getBranchListKeyByXid(String xid) {
