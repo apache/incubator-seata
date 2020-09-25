@@ -17,6 +17,8 @@ package io.seata.rm.datasource;
 
 import javax.sql.DataSource;
 
+import io.seata.core.model.BranchType;
+
 /**
  * The interface Seata data source.
  *
@@ -30,4 +32,11 @@ public interface SeataDataSourceProxy extends DataSource {
      * @return the target data source
      */
     DataSource getTargetDataSource();
+
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
+    BranchType getBranchType();
 }

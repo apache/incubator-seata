@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -33,7 +34,7 @@ import org.springframework.beans.BeanUtils;
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
 
     private final BranchType dataSourceProxyMode;
-    private final Class<? extends DataSource> dataSourceProxyClazz;
+    private final Class<? extends SeataDataSourceProxy> dataSourceProxyClazz;
 
     public SeataAutoDataSourceProxyAdvice(String dataSourceProxyMode) {
         if (BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)) {
@@ -57,7 +58,7 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
         Object[] args = invocation.getArguments();
         Method m = BeanUtils.findDeclaredMethod(dataSourceProxyClazz, method.getName(), method.getParameterTypes());
         if (m != null) {
-            DataSource dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
+            SeataDataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
             return m.invoke(dataSourceProxy, args);
         } else {
             return invocation.proceed();

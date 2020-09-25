@@ -63,17 +63,17 @@ public class DataSourceProxyHolder {
      * @param dataSourceProxyMode the data source proxy mode
      * @return dataSourceProxy
      */
-    public DataSource putDataSource(DataSource dataSource, BranchType dataSourceProxyMode) {
+    public SeataDataSourceProxy putDataSource(DataSource dataSource, BranchType dataSourceProxyMode) {
         DataSource originalDataSource;
         if (dataSource instanceof SeataDataSourceProxy) {
-            if ((BranchType.AT == dataSourceProxyMode && dataSource instanceof DataSourceProxy)
-                    || (BranchType.XA == dataSourceProxyMode && dataSource instanceof DataSourceProxyXA)) {
-                //It's already a proxy, return it directly.
-                return dataSource;
-            } else {
-                //Get the original data source.
-                originalDataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
+            //If it's an right proxy, return it directly.
+            SeataDataSourceProxy dataSourceProxy = (SeataDataSourceProxy)dataSource;
+            if (dataSourceProxyMode == dataSourceProxy.getBranchType()) {
+                return (SeataDataSourceProxy)dataSource;
             }
+
+            //Get the original data source.
+            originalDataSource = dataSourceProxy.getTargetDataSource();
         } else {
             originalDataSource = dataSource;
         }
