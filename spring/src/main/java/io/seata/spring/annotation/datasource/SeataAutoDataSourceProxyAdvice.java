@@ -49,8 +49,7 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         if (!RootContext.requireGlobalLock()
-                && BranchType.AT != RootContext.getBranchType()
-                && BranchType.XA != RootContext.getBranchType()) {
+                && dataSourceProxyMode != RootContext.getBranchType()) {
             return invocation.proceed();
         }
 
