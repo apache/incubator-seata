@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 public class CustomConfigurationTest {
     @Test
     public void testCustomConfigLoad() throws Exception {
-        ConfigurationCache.getInstance().clear();
         Configuration configuration = ConfigurationFactory.getInstance();
         Assertions.assertNotNull(configuration);
         Properties properties;
@@ -38,7 +37,7 @@ public class CustomConfigurationTest {
         for (String name : properties.stringPropertyNames()) {
             String value = properties.getProperty(name);
             Assertions.assertNotNull(value);
-            Assertions.assertEquals(value, configuration.getConfig(name));
+            Assertions.assertEquals(value, configuration.getConfig(name).toLowerCase());
         }
     }
 }
