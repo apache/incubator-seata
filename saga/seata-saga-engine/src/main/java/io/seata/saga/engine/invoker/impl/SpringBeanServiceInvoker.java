@@ -137,7 +137,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Map<Retry, AtomicInteger> retryCountMap = new HashMap<>();
         while (true) {
-
             try {
                 return invokeMethod(bean, method, args);
             } catch (Throwable e) {
@@ -146,7 +145,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                     throw e;
                 }
 
-                AtomicInteger retryCount = retryCountMap.computeIfAbsent(matchedRetryConfig,
+                AtomicInteger retryCount = CollectionUtils.computeIfAbsent(retryCountMap, matchedRetryConfig,
                     key -> new AtomicInteger(0));
                 if (retryCount.intValue() >= matchedRetryConfig.getMaxAttempts()) {
                     throw e;
@@ -181,7 +180,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                         return retryConfig;
                     }
                 } else {
-
                     List<Class<? extends Exception>> exceptionClasses = retryConfig.getExceptionClasses();
                     if (exceptionClasses == null) {
                         synchronized (retryConfig) {

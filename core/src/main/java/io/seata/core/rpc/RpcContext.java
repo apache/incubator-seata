@@ -16,6 +16,7 @@
 package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.rpc.netty.ChannelUtil;
 import io.seata.core.rpc.netty.NettyPoolKey;
@@ -141,7 +142,7 @@ public class RpcContext {
         if (this.clientRMHolderMap == null) {
             this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
-        ConcurrentMap<Integer, RpcContext> portMap = clientRMHolderMap.computeIfAbsent(resourceId,
+        ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(clientRMHolderMap, resourceId,
             key -> new ConcurrentHashMap<>());
         portMap.put(clientPort, this);
     }

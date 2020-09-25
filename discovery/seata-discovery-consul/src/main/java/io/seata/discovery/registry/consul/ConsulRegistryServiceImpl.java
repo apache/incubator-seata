@@ -131,7 +131,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         Response<List<HealthService>> response = getHealthyServices(cluster, -1, DEFAULT_WATCH_TIMEOUT);
         //3.get current consul index.
         Long index = response.getConsulIndex();
-        ConsulNotifier notifier = notifiers.computeIfAbsent(cluster, k -> new ConsulNotifier(cluster, index));
+        ConsulNotifier notifier = notifiers.computeIfAbsent(cluster, key -> new ConsulNotifier(cluster, index));
         //4.run notifier
         notifierExecutor.submit(notifier);
     }

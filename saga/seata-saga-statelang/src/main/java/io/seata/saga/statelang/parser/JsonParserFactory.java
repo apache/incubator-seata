@@ -16,6 +16,7 @@
 package io.seata.saga.statelang.parser;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -39,7 +40,7 @@ public class JsonParserFactory {
      * @return the JsonParser
      */
     public static JsonParser getJsonParser(String name) {
-        return INSTANCES.computeIfAbsent(name,
+        return CollectionUtils.computeIfAbsent(INSTANCES, name,
             key -> EnhancedServiceLoader.load(JsonParser.class, name, Thread.currentThread().getContextClassLoader()));
     }
 }

@@ -507,7 +507,8 @@ public class EnhancedServiceLoader {
                 ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
-                    nameToDefinitionsMap.computeIfAbsent(serviceName, e -> new ArrayList<>()).add(result);
+                    CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
+                            .add(result);
                 }
                 return result;
             }

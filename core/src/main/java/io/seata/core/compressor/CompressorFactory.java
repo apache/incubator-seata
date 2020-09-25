@@ -17,6 +17,7 @@ package io.seata.core.compressor;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +45,7 @@ public class CompressorFactory {
      */
     public static Compressor getCompressor(byte code) {
         CompressorType type = CompressorType.getByCode(code);
-        return COMPRESSOR_MAP.computeIfAbsent(type,
+        return CollectionUtils.computeIfAbsent(COMPRESSOR_MAP, type,
             key -> EnhancedServiceLoader.load(Compressor.class, type.name()));
     }
 

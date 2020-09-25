@@ -17,6 +17,7 @@ package io.seata.core.store.db.sql.lock;
 
 import com.google.common.collect.Maps;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.Map;
 
@@ -37,8 +38,7 @@ public class LockStoreSqlFactory {
      * @return lock store sql
      */
     public static LockStoreSql getLogStoreSql(String dbType) {
-        return LOCK_STORE_SQL_MAP.computeIfAbsent(dbType,
+        return CollectionUtils.computeIfAbsent(LOCK_STORE_SQL_MAP, dbType,
             key -> EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase()));
     }
-
 }

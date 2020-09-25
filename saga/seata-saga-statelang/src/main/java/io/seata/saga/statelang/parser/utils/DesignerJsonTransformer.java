@@ -75,7 +75,7 @@ public class DesignerJsonTransformer {
                 machineJsonObject.putAll((Map<String, Object>) propsObj.get("StateMachine"));
             }
         } else if (!"Catch".equals(type)) {
-            Map<String, Object> states = (Map<String, Object>) machineJsonObject.computeIfAbsent("States",
+            Map<String, Object> states = (Map<String, Object>) CollectionUtils.computeIfAbsent(machineJsonObject, "States",
                 key -> new LinkedHashMap<>());
 
             Map<String, Object> stateJsonObject = new LinkedHashMap<>();
@@ -133,7 +133,7 @@ public class DesignerJsonTransformer {
                         throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask' or 'ScriptTask'");
                     }
                     Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
-                    List<Object> catches = (List<Object>) catchAttachedState.computeIfAbsent("Catch",
+                    List<Object> catches = (List<Object>) CollectionUtils.computeIfAbsent(catchAttachedState, "Catch",
                         key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
@@ -144,7 +144,7 @@ public class DesignerJsonTransformer {
                         catches.add(catchObj);
                     }
                 } else if ("Choice".equals(sourceType)) {
-                    List<Object> choices = (List<Object>) sourceState.computeIfAbsent("Choices",
+                    List<Object> choices = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Choices",
                         key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
@@ -230,7 +230,7 @@ public class DesignerJsonTransformer {
         }
         Map<String, List<StateInstance>> stateInstanceMapGroupByName = new HashMap<>(stateMachineInstance.getStateMap().size());
         for (StateInstance stateInstance : stateMachineInstance.getStateMap().values()) {
-            stateInstanceMapGroupByName.computeIfAbsent(stateInstance.getName(), key -> new ArrayList<>())
+            CollectionUtils.computeIfAbsent(stateInstanceMapGroupByName, stateInstance.getName(), key -> new ArrayList<>())
                     .add(stateInstance);
         }
         List<Object> nodesArray = (List<Object>) stateMachineJsonObj.get("nodes");

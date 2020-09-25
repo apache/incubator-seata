@@ -16,6 +16,7 @@
 package io.seata.serializer.protobuf;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -38,7 +39,7 @@ public class ProtobufInnerSerializer {
 
     public static byte[] serializeContent(Object request) {
         Class clazz = request.getClass();
-        Method method = PROTOBUF_HELPER.toByteArrayMethodMap.computeIfAbsent(clazz, key -> {
+        Method method = CollectionUtils.computeIfAbsent(PROTOBUF_HELPER.toByteArrayMethodMap, clazz, key -> {
             try {
                 Method m = clazz.getMethod(METHOD_TOBYTEARRAY);
                 m.setAccessible(true);
@@ -62,7 +63,7 @@ public class ProtobufInnerSerializer {
         }
         Class clazz = PROTOBUF_HELPER.getPbClass(responseClazz);
 
-        Method method = PROTOBUF_HELPER.parseFromMethodMap.computeIfAbsent(clazz, key -> {
+        Method method = CollectionUtils.computeIfAbsent(PROTOBUF_HELPER.parseFromMethodMap, clazz, key -> {
             try {
                 Method m = clazz.getMethod(METHOD_PARSEFROM, byte[].class);
                 if (!Modifier.isStatic(m.getModifiers())) {

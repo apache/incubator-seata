@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,7 +58,7 @@ public class UndoLogParserFactory {
      * @return the UndoLogParser
      */
     public static UndoLogParser getInstance(String name) {
-        return INSTANCES.computeIfAbsent(name,
+        return CollectionUtils.computeIfAbsent(INSTANCES, name,
             key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
     }
 }

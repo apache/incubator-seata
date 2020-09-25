@@ -130,7 +130,7 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
     }
 
     protected ScriptEngine getScriptEngineFromCache(String scriptType, ScriptEngineManager scriptEngineManager) {
-        return this.scriptEngineCache.computeIfAbsent(scriptType,
+        return CollectionUtils.computeIfAbsent(scriptEngineCache, scriptType,
             key -> scriptEngineManager.getEngineByName(scriptType));
     }
 
