@@ -15,16 +15,20 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.tm.api.TransactionalExecutor;
+
 /**
  * Propagation level of global transactions.
  *
  * @author haozhibei
- * @see io.seata.spring.annotation.GlobalTransactional
- * @see io.seata.tm.api.TransactionalTemplate
+ * @see io.seata.spring.annotation.GlobalTransactional#propagation() // TM annotation
+ * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#invoke(MethodInvocation) // the interceptor of TM
+ * @see io.seata.tm.api.TransactionalTemplate#execute(TransactionalExecutor) // the transaction template of TM
  */
 public enum Propagation {
     /**
      * The REQUIRED.
+     * The default propagation.
      *
      * <p>
      * If transaction is existing, execute with current transaction,

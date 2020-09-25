@@ -18,6 +18,7 @@ package io.seata.spring.annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
@@ -193,6 +194,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
+    /**
+     * The following will be scanned:
+     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
+     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
+     * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
+     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
+     * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service scanner
+     */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         if (disableGlobalTransaction) {
@@ -279,7 +288,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
-        throws BeansException {
+            throws BeansException {
         return new Object[]{interceptor};
     }
 

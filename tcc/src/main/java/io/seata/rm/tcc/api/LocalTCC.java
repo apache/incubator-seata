@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
  * Local TCC bean annotation, add on the TCC interface
  *
  * @author zhangsen
+ * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
