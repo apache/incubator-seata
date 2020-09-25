@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.StringUtils;
+import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
@@ -36,10 +36,9 @@ public class ExporterFactory {
 
     public static List<Exporter> getInstanceList() {
         List<Exporter> exporters = new ArrayList<>();
-        String exporterTypeNameList = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, null);
-        if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
-            String[] exporterTypeNames = exporterTypeNameList.split(",");
+        String[] exporterTypeNames = ConfigurationFactory.getInstance().getArray(
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, ",", null);
+        if (CollectionUtils.isNotEmpty(exporterTypeNames)) {
             for (String exporterTypeName : exporterTypeNames) {
                 ExporterType exporterType;
                 try {

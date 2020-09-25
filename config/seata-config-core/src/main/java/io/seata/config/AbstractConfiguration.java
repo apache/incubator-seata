@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.seata.common.util.DurationUtil;
+import io.seata.common.util.EnumUtils;
 import io.seata.common.util.StringUtils;
 
 /**
@@ -125,6 +126,22 @@ public abstract class AbstractConfiguration implements Configuration {
     @Override
     public boolean getBoolean(String dataId) {
         return getBoolean(dataId, DEFAULT_VALUE_BOOLEAN);
+    }
+
+    @Override
+    public <T extends Enum<T>> T getEnum(String dataId, Class<T> enumClazz, T defaultValue, long timeoutMills) {
+        String result = getConfig(dataId, timeoutMills);
+        return StringUtils.isBlank(result) ? defaultValue : EnumUtils.getEnum(enumClazz, result);
+    }
+
+    @Override
+    public <T extends Enum<T>> T getEnum(String dataId, Class<T> enumClazz, T defaultValue) {
+        return getEnum(dataId, enumClazz, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    @Override
+    public <T extends Enum<T>> T getEnum(String dataId, Class<T> enumClazz) {
+        return getEnum(dataId, enumClazz, null);
     }
 
     @Override

@@ -162,6 +162,39 @@ public interface Configuration {
     boolean getBoolean(String dataId);
 
     /**
+     * Gets enum.
+     *
+     * @param dataId       the data id
+     * @param enumClazz    the class of enum
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @param <T>          the type of enum
+     * @return the enum
+     */
+    <T extends Enum<T>> T getEnum(String dataId, Class<T> enumClazz, T defaultValue, long timeoutMills);
+
+    /**
+     * Gets enum.
+     *
+     * @param dataId       the data id
+     * @param enumClazz    the class of enum
+     * @param defaultValue the default value
+     * @param <T>          the type of enum
+     * @return the enum
+     */
+    <T extends Enum<T>> T getEnum(String dataId, Class<T> enumClazz, T defaultValue);
+
+    /**
+     * Gets enum.
+     *
+     * @param dataId       the data id
+     * @param enumClazz    the class of enum
+     * @param <T>          the type of enum
+     * @return the enum
+     */
+    <T extends Enum<T>> T getEnum(String dataId, Class<T> enumClazz);
+
+    /**
      * Gets config.
      *
      * @param dataId       the data id

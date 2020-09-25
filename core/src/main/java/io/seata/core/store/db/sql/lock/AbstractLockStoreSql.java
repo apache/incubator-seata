@@ -15,10 +15,8 @@
  */
 package io.seata.core.store.db.sql.lock;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 
 /**
@@ -27,7 +25,7 @@ import io.seata.core.constants.ServerTableColumnsName;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
-public class AbstractLockStoreSql implements LockStoreSql {
+public abstract class AbstractLockStoreSql implements LockStoreSql {
 
     /**
      * The constant CONFIG.
@@ -92,12 +90,6 @@ public class AbstractLockStoreSql implements LockStoreSql {
      */
     private static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
         + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACE_HOLD + ")";
-
-
-    @Override
-    public String getInsertLockSQL(String lockTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
-    }
 
     @Override
     public String getDeleteLockSql(String lockTable) {

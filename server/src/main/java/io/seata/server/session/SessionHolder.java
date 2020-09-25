@@ -29,8 +29,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Session holder.
@@ -38,8 +36,6 @@ import org.slf4j.LoggerFactory;
  * @author sharajava
  */
 public class SessionHolder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHolder.class);
 
     /**
      * The constant CONFIG.

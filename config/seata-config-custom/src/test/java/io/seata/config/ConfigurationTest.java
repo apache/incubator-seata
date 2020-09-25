@@ -15,11 +15,11 @@
  */
 package io.seata.config;
 
-import org.junit.jupiter.api.Test;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,8 +36,9 @@ public class ConfigurationTest {
     private static final long LONG_VALUE = 3L;
     private static final Duration DURATION_VALUE = Duration.ofSeconds(10);
     private static final boolean BOOLEAN_VALUE = true;
+    private static final ConfigType ENUM_VALUE = ConfigType.File;
     private static final String[] ARRAY_VALUE = new String[]{"a", "b", "c"};
-    private static final List<String> LIST_VALUE = Arrays.asList(new String[]{"d", "e", "f"});
+    private static final List<String> LIST_VALUE = Arrays.asList("d", "e", "f");
 
     private static final String DEFAULT_STRING_VALUE = "BBBB";
     private static final short DEFAULT_SHORT_VALUE = (short) 2;
@@ -45,11 +46,12 @@ public class ConfigurationTest {
     private static final long DEFAULT_LONG_VALUE = 4L;
     private static final Duration DEFAULT_DURATION_VALUE = Duration.ofSeconds(200);
     private static final boolean DEFAULT_BOOLEAN_VALUE = true;
+    private static final ConfigType DEFAULT_ENUM_VALUE = ConfigType.Nacos;
     private static final String[] DEFAULT_ARRAY_VALUE = new String[]{"b", "c", "d"};
-    private static final List<String> DEFAULT_LIST_VALUE = Arrays.asList(new String[]{"e", "f", "g"});
+    private static final List<String> DEFAULT_LIST_VALUE = Arrays.asList("e", "f", "g");
 
     @Test
-    public void test_getMethods() throws Exception {
+    public void test_getMethods() {
         String dataId, splitCode;
         Configuration configuration = ConfigurationFactory.getInstance();
 
@@ -82,6 +84,12 @@ public class ConfigurationTest {
         assertThat(configuration.getBoolean(dataId)).isEqualTo(BOOLEAN_VALUE);
         //assertThat(configuration.getBoolean(dataId + NULL_POSTFIX)).isFalse();
         assertThat(configuration.getBoolean(dataId + NULL_POSTFIX, DEFAULT_BOOLEAN_VALUE)).isEqualTo(DEFAULT_BOOLEAN_VALUE);
+
+        //enum
+        dataId = "enum";
+        assertThat(configuration.getEnum(dataId, ConfigType.class)).isEqualTo(ENUM_VALUE);
+        assertThat(configuration.getEnum(dataId + NULL_POSTFIX, ConfigType.class)).isNull();
+        assertThat(configuration.getEnum(dataId + NULL_POSTFIX, ConfigType.class, DEFAULT_ENUM_VALUE)).isEqualTo(DEFAULT_ENUM_VALUE);
 
         //duration
         dataId = "duration";

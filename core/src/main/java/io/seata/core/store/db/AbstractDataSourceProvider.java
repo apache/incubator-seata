@@ -111,8 +111,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db max wait
      */
     protected Long getMaxWait() {
-        Long maxWait = CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
-        return maxWait;
+        return CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
     }
 
     protected ClassLoader getDriverClassLoader() {
@@ -194,8 +193,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getPassword() {
-        String password = CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
-        return password;
+        return CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
     }
 
     /**
