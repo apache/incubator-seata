@@ -13,15 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import io.seata.common.XID;
-import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.coordinator.DefaultCoordinator;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import io.seata.server.raft.RaftServer;
+import org.junit.jupiter.api.Test;
+
+import com.alipay.remoting.exception.CodecException;
+import com.alipay.remoting.serialization.SerializerManager;
+import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.entity.Task;
+
+import io.seata.common.XID;
+import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.core.rpc.netty.NettyRemotingServer;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.raft.RaftServerFactory;
+import io.seata.server.storage.raft.RaftSyncMsg;
 
 /**
  * The type Server test.
@@ -50,4 +64,54 @@ public class ServerTest {
         System.exit(0);
     }
 
+    @Test
+    public void testRaftCluster() {
+        try {
+            RaftServerFactory raftServerFactory = new RaftServerFactory();
+            String ip = "127.0.0.1";
+            String conf = "127.0.0.1:7091,127.0.0.1:7092,127.0.0.1:7093";
+            raftServerFactory.init(ip, 8091, conf);
+            RaftServer raftServer = raftServerFactory.getRaftServer();
+            raftServerFactory.init(ip, 8092, conf);
+            RaftServer raftServer2 = raftServerFactory.getRaftServer();
+            raftServerFactory.init(ip, 8093, conf);
+            RaftServer raftServer3 = raftServerFactory.getRaftServer();
+            Task task = new Task();
+            RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
+            try {
+                task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(SerializerManager.Hessian2).serialize(raftSyncMsg)));
+            } catch (CodecException e) {
+                e.printStackTrace();
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            PeerId peerId = raftServer.getNode().getLeaderId();
+            switch (peerId.getPort()) {
+                case 7091:
+                    raftServer.getNode().apply(task);
+                    break;
+                case 7092:
+                    raftServer2.getNode().apply(task);
+                    break;
+                case 7093:
+                    raftServer3.getNode().apply(task);
+                    break;
+                default:
+                    break;
+            }
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent();
+            conf = conf + ",127.0.0.1:7094";
+            raftServerFactory.init(ip, 8094, conf);
+            RaftServer raftServer4 = raftServerFactory.getRaftServer();
+            event.setNewValue(conf);
+            raftServer.onChangeEvent(event);
+            raftServer2.onChangeEvent(event);
+            raftServer3.onChangeEvent(event);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

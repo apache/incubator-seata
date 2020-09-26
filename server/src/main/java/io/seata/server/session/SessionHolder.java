@@ -19,6 +19,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import io.seata.server.raft.RaftServerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -29,8 +34,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Session holder.
@@ -91,9 +94,9 @@ public class SessionHolder {
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-        } else if (StoreMode.FILE.equals(storeMode)) {
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                DEFAULT_SESSION_STORE_FILE_DIR);
+        } else if (StoreMode.RAFT.equals(storeMode)||StoreMode.FILE.equals(storeMode)) {
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+                + "/" + XID.getPort();
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
@@ -105,6 +108,16 @@ public class SessionHolder {
                 new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
+            if (StoreMode.RAFT.equals(storeMode)) {
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
+                    new Object[] {ROOT_SESSION_MANAGER});
+                ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                    StoreMode.RAFT.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER});
+                RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                    StoreMode.RAFT.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER});
+                RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
+                    StoreMode.RAFT.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER});
+            }
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -128,6 +141,9 @@ public class SessionHolder {
             ((Reloadable)ROOT_SESSION_MANAGER).reload();
 
             Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
+            if (!RaftServerFactory.getInstance().isLeader()) {
+                return;
+            }
             if (reloadedSessions != null && !reloadedSessions.isEmpty()) {
                 reloadedSessions.forEach(globalSession -> {
                     GlobalStatus globalStatus = globalSession.getStatus();

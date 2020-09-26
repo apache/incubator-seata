@@ -25,7 +25,7 @@ import io.seata.core.model.BranchStatus;
  *
  * @author zhangsen
  */
-public class BranchTransactionDO {
+public class BranchTransactionDO implements java.io.Serializable{
 
     private String xid;
 

@@ -15,6 +15,20 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,21 +47,6 @@ import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 /**
  * The abstract netty remoting.
  *
@@ -62,6 +61,13 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     protected final ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("timeoutChecker", 1, true));
+
+    /**
+     * The find leader executor.
+     */
+    protected final ScheduledThreadPoolExecutor findLeaderExecutor =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("findLeader", 1, true));
+
     /**
      * The Message executor.
      */

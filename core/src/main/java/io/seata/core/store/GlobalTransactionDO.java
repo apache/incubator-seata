@@ -15,16 +15,15 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.StringUtils;
-
 import java.util.Date;
+import io.seata.common.util.StringUtils;
 
 /**
  * Global Transaction data object
  *
  * @author zhangsen
  */
-public class GlobalTransactionDO {
+public class GlobalTransactionDO implements java.io.Serializable{
 
     private String xid;
 
@@ -244,6 +243,38 @@ public class GlobalTransactionDO {
      */
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    /**
+     * Sets transactionId
+     * @param transactionId the transactionId
+     */
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    /**
+     * Sets status
+     * @param status the status
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * Sets timeout
+     * @param timeout the timeout
+     */
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
+    }
+
+    /**
+     * Sets begin time
+     * @param beginTime the begin time
+     */
+    public void setBeginTime(Long beginTime) {
+        this.beginTime = beginTime;
     }
 
     @Override

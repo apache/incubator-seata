@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -27,8 +28,14 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
-
+import com.alipay.sofa.jraft.RouteTable;
+import com.alipay.sofa.jraft.conf.Configuration;
+import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.option.CliOptions;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -37,11 +44,15 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.EventExecutorGroup;
+import io.seata.common.XID;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
@@ -57,11 +68,14 @@ import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.store.StoreMode;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
@@ -104,15 +118,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
+    public static InetSocketAddress leaderAddress;
+    private static CliClientServiceImpl cliClientService;
+    private static List<InetSocketAddress> addressList;
+    private Lock lock = new ReentrantLock();
 
     @Override
     public void init() {
-        timerExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                clientChannelManager.reconnect(getTransactionServiceGroup());
-            }
-        }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+        timerExecutor.scheduleAtFixedRate(() -> clientChannelManager.reconnect(getTransactionServiceGroup()), SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
@@ -120,6 +133,26 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 new LinkedBlockingQueue<>(),
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
+        }
+        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        if (StringUtils.isNotBlank(initConfStr)) {
+            String storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+            if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
+                cliClientService = new CliClientServiceImpl();
+                cliClientService.init(new CliOptions());
+                findLeader();
+                // The leader election takes 1 second
+                int cycle = 500;
+                findLeaderExecutor.scheduleAtFixedRate(() -> {
+                    if (lock.tryLock()) {
+                        try {
+                            findLeader();
+                        } finally {
+                            lock.unlock();
+                        }
+                    }
+                }, cycle, cycle, TimeUnit.MILLISECONDS);
+            }
         }
         super.init();
         clientBootstrap.start();
@@ -254,9 +287,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            @SuppressWarnings("unchecked")
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
+            if (leaderAddress != null) {
+                address = leaderAddress;
+            } else {
+                @SuppressWarnings("unchecked")
+                List<InetSocketAddress> inetSocketAddressList =
+                    RegistryFactory.getInstance().lookup(transactionServiceGroup);
+                address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
+            }
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
@@ -463,4 +501,71 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             super.close(ctx, future);
         }
     }
+
+    private void findLeader() {
+        List<InetSocketAddress> inetSocketAddressList = null;
+        try {
+            inetSocketAddressList = RegistryFactory.getInstance().lookup(getTransactionServiceGroup());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+        if (CollectionUtils.isEmpty(inetSocketAddressList) || inetSocketAddressList.size() < 3) {
+            if (addressList != null) {
+                inetSocketAddressList = addressList;
+            } else {
+                return;
+            }
+        }
+        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        if (StringUtils.isNotBlank(initConfStr)) {
+            StringBuilder stringBuilder = new StringBuilder();
+            String seg = ",";
+            int i = 0;
+            int defaultValue = 1000;
+            while (i < inetSocketAddressList.size()) {
+                InetSocketAddress inetSocketAddress = inetSocketAddressList.get(i);
+                stringBuilder.append(inetSocketAddress.getAddress().getHostAddress().replace("/", "") + ":"
+                    + (inetSocketAddress.getPort() - defaultValue));
+                i++;
+                if (i < inetSocketAddressList.size()) {
+                    stringBuilder.append(seg);
+                }
+            }
+            if (!Objects.equals(addressList, inetSocketAddressList)) {
+                addressList = inetSocketAddressList;
+                Configuration conf = new Configuration();
+                if (!conf.parse(stringBuilder.toString())) {
+                    throw new IllegalArgumentException("Fail to parse conf:" + stringBuilder);
+                }
+                RouteTable.getInstance().updateConfiguration(SEATA_RAFT_GROUP, conf);
+            }
+            try {
+                if (!RouteTable.getInstance().refreshLeader(cliClientService, SEATA_RAFT_GROUP, defaultValue).isOk()) {
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error("Refresh leader failed");
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                LOGGER.error("Refresh leader failed,{}", e.getMessage());
+            }
+            PeerId leader = RouteTable.getInstance().selectLeader(SEATA_RAFT_GROUP);
+            int port = leader.getPort() + defaultValue;
+            for (InetSocketAddress inetSocketAddress : inetSocketAddressList) {
+                if (inetSocketAddress.getPort() == port
+                    && inetSocketAddress.getAddress().getHostAddress().contains(leader.getIp())) {
+                    if (leaderAddress != inetSocketAddress) {
+                        leaderAddress = inetSocketAddress;
+                        XID.setIpAddress(leader.getIp());
+                        XID.setPort(leader.getPort());
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("switch the leader node to:{}:{}", XID.getIpAddress(), XID.getPort());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
 }
