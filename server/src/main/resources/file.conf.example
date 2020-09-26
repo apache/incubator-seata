@@ -69,6 +69,9 @@ store {
 }
 ## server configuration, only used in server side
 server {
+  raft{
+    cluster = ""
+  }
   recovery {
     #schedule committing retry period in milliseconds
     committingRetryPeriod = 1000
