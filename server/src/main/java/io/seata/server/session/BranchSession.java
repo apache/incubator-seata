@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable, java.io.Serializable {
+public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 

@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class GlobalSession implements SessionLifecycle, SessionStorable, java.io.Serializable {
+public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSession.class);
 
@@ -609,7 +609,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable, java.io
         globalSessionLock.unlock();
     }
 
-    private static class GlobalSessionLock implements java.io.Serializable {
+    private static class GlobalSessionLock {
 
         private Lock globalSessionLock = new ReentrantLock();
 
