@@ -57,12 +57,6 @@ public class RedisSeesionManagerTest {
         sessionManager = redisSessionManager;
     }
 
-    @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
-    }
-
     @Test
     public void test_addGlobalSession() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
@@ -162,6 +156,12 @@ public class RedisSeesionManagerTest {
         sessionManager.addBranchSession(globalSession, branchSession);
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
+    }
+
+    @AfterAll
+    public static void after() {
+        server.stop();
+        server = null;
     }
 
 }
