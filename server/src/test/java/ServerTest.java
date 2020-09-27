@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,6 +35,8 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.storage.raft.RaftSyncMsg;
+
+import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 
 /**
  * The type Server test.
@@ -79,7 +80,7 @@ public class ServerTest {
             Task task = new Task();
             RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
             try {
-                task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(SerializerManager.Hessian2).serialize(raftSyncMsg)));
+                task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(raftSyncMsg)));
             } catch (CodecException e) {
                 e.printStackTrace();
             }
@@ -110,6 +111,15 @@ public class ServerTest {
             raftServer.onChangeEvent(event);
             raftServer2.onChangeEvent(event);
             raftServer3.onChangeEvent(event);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            raftServer.onShutDown();
+            raftServer2.onShutDown();
+            raftServer3.onShutDown();
+            raftServer4.onShutDown();
         } catch (IOException e) {
             e.printStackTrace();
         }
