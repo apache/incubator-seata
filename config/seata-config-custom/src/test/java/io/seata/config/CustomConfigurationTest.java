@@ -37,7 +37,7 @@ public class CustomConfigurationTest {
         for (String name : properties.stringPropertyNames()) {
             String value = properties.getProperty(name);
             Assertions.assertNotNull(value);
-            Assertions.assertEquals(value, configuration.getConfig(name).toLowerCase());
+            Assertions.assertEquals(value.toLowerCase(), configuration.getConfig(name).toLowerCase());
         }
     }
 }
