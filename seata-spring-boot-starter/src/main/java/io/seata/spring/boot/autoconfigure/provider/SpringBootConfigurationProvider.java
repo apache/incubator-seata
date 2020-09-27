@@ -63,7 +63,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                         result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
                     }
                     if (result != null) {
-                        //If the return type is String, need to convert the object to string
+                        //If the return type is String/Array/List/Enum, need to convert.
                         if (method.getReturnType().equals(String.class)) {
                             return String.valueOf(result);
                         } else if (method.getReturnType().isArray()) {
@@ -101,7 +101,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (propertyClass != null) {
             Object propertyObject = ObjectHolder.INSTANCE.getObject(ApplicationContext.class).getBean(propertyClass);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
-                    f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
+                f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
                 Field field = fieldOptional.get();
                 field.setAccessible(true);
@@ -171,9 +171,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      */
     private Class getPropertyClass(String propertyPrefix) {
         return PROPERTY_MAP.entrySet().stream()
-                .filter(e -> propertyPrefix.equals(e.getKey()))
-                .findAny()
-                .map(Map.Entry::getValue)
-                .orElse(null);
+            .filter(e -> propertyPrefix.equals(e.getKey()))
+            .findAny()
+            .map(Map.Entry::getValue)
+            .orElse(null);
     }
 }
