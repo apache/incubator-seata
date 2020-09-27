@@ -45,6 +45,8 @@ public class BranchTransactionDO implements java.io.Serializable {
 
     private String applicationData;
 
+    private String lockKey;
+
     private Date gmtCreate;
 
     private Date gmtModified;
@@ -245,6 +247,14 @@ public class BranchTransactionDO implements java.io.Serializable {
      */
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    public String getLockKey() {
+        return lockKey;
+    }
+
+    public void setLockKey(String lockKey) {
+        this.lockKey = lockKey;
     }
 
     @Override

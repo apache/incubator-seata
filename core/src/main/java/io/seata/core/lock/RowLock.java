@@ -22,7 +22,7 @@ import io.seata.common.util.StringUtils;
  *
  * @author zhangsen
  */
-public class RowLock {
+public class RowLock implements java.io.Serializable {
 
     private String xid;
 

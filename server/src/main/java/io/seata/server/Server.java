@@ -101,7 +101,6 @@ public class Server {
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
 
         try {
-            RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
             nettyRemotingServer.init();
         } catch (Throwable e) {
             logger.error("nettyServer init error:{}", e.getMessage(), e);

@@ -130,6 +130,7 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
+        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
         reload();
     }
 

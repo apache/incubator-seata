@@ -507,7 +507,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         try {
             inetSocketAddressList = RegistryFactory.getInstance().lookup(getTransactionServiceGroup());
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(e.getMessage());
+            }
         }
         if (CollectionUtils.isEmpty(inetSocketAddressList) || inetSocketAddressList.size() < 3) {
             if (addressList != null) {
@@ -547,7 +549,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     return;
                 }
             } catch (Exception e) {
-                LOGGER.error("Refresh leader failed,{}", e.getMessage());
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("Refresh leader failed,{}", e.getMessage());
+                }
             }
             PeerId leader = RouteTable.getInstance().selectLeader(SEATA_RAFT_GROUP);
             int port = leader.getPort() + defaultValue;

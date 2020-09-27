@@ -59,8 +59,7 @@ public class RaftSyncMsg implements java.io.Serializable {
 
     public RaftSyncMsg() {}
 
-    public RaftSyncMsg(MsgType msgType, BranchTransactionDO branchTransactionDO,
-        BranchStatus branchStatus) {
+    public RaftSyncMsg(MsgType msgType, BranchTransactionDO branchSession, BranchStatus branchStatus) {
         this.msgType = msgType;
         this.branchSession = branchSession;
         this.branchStatus = branchStatus;
@@ -98,6 +97,14 @@ public class RaftSyncMsg implements java.io.Serializable {
         this.globalStatus = globalStatus;
     }
 
+    public BranchStatus getBranchStatus() {
+        return branchStatus;
+    }
+
+    public void setBranchStatus(BranchStatus branchStatus) {
+        this.branchStatus = branchStatus;
+    }
+
     public enum MsgType {
         /**
          * addGlobalSession
@@ -122,7 +129,15 @@ public class RaftSyncMsg implements java.io.Serializable {
         /**
          * updateBranchSessionStatus
          */
-        UPDATE_BRANCH_SESSION_STATUS
+        UPDATE_BRANCH_SESSION_STATUS,
+        /**
+         * acquireLock
+         */
+        ACQUIRE_LOCK,
+        /**
+         * releaseGlobalSessionLock
+         */
+        RELEASE_GLOBAL_SESSION_LOCK
     }
 
 }

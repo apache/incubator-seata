@@ -42,7 +42,7 @@ import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.raft.RaftSyncMsg;
-
+import io.seata.server.storage.raft.RaftTaskUtil;
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
@@ -152,7 +152,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
-        createTask(raftSessionManager, raftSyncMsg);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -167,8 +167,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             }
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO);
-        createTask(raftSessionManager, raftSyncMsg);
+        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -184,8 +184,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             }
         });
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO,branchStatus);
-        createTask(raftSessionManager, raftSyncMsg);
+        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -202,7 +202,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg(ADD_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
-        createTask(raftSessionManager, raftSyncMsg);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -225,7 +225,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg(REMOVE_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
-        createTask(raftSessionManager, raftSyncMsg);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -246,7 +246,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
-        createTask(raftSessionManager, raftSyncMsg);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -256,14 +256,4 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         }
     }
 
-    private void createTask(Closure done, Object data) {
-        final Task task = new Task();
-        try {
-            task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(data)));
-        } catch (CodecException e) {
-            e.printStackTrace();
-        }
-        task.setDone(done);
-        RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
-    }
 }

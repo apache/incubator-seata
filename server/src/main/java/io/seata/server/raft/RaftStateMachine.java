@@ -28,21 +28,28 @@ import com.alipay.sofa.jraft.error.RaftException;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.jraft.util.Utils;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSyncMsg;
+import io.seata.server.storage.raft.lock.RaftLockManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
+import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
@@ -90,22 +97,49 @@ public class RaftStateMachine extends StateMachineAdapter {
                     if (ADD_GLOBAL_SESSION.equals(msgType)) {
                         GlobalSession globalSession = SessionConverter.convertGlobalSession(msg.getGlobalSession());
                         SessionHolder.getRootSessionManager().addGlobalSession(globalSession);
+                    } else if (ACQUIRE_LOCK.equals(msgType)) {
+                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());
+                        BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+                        boolean include = false;
+                        if (branchSession != null) {
+                            include = true;
+                            branchSession.setLockKey(msg.getBranchSession().getLockKey());
+                        } else {
+                            branchSession = SessionConverter.convertBranchSession(msg.getBranchSession());
+                        }
+                        Boolean owner = RaftLockManager.LOCK_MANAGER.acquireLock(branchSession);
+                        if (owner && !include) {
+                            globalSession.add(branchSession);
+                        }
                     } else if (ADD_BRANCH_SESSION.equals(msgType)) {
                         GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-                        BranchSession branchSession = SessionConverter.convertBranchSession(msg.getBranchSession());
-                        globalSession.addBranch(branchSession);
+                        BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+                        if (branchSession == null) {
+                            branchSession = SessionConverter.convertBranchSession(msg.getBranchSession());
+                            globalSession.addBranch(branchSession);
+                        }
                         SessionHolder.getRootSessionManager().addBranchSession(globalSession, branchSession);
                     } else if (UPDATE_GLOBAL_SESSION_STATUS.equals(msgType)) {
                         GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-                        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(globalSession, msg.getGlobalStatus());
+                        GlobalStatus status = msg.getGlobalStatus();
+                        globalSession.setStatus(status);
+                        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(globalSession, status);
                     } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
                         GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
                         BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
-                        globalSession.removeBranch(branchSession);
                         SessionHolder.getRootSessionManager().removeBranchSession(globalSession, branchSession);
+                    } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
+                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
+                        RaftLockManager.LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
                     } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
                         GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
                         sessionManager.removeGlobalSession(globalSession);
+                    } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
+                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());
+                        BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+                        BranchStatus status = msg.getBranchStatus();
+                        branchSession.setStatus(status);
+                        SessionHolder.getRootSessionManager().updateBranchSessionStatus(branchSession, status);
                     }
                 } catch (Exception e) {
                     LOG.error("Message synchronization failure", e);
