@@ -350,12 +350,9 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setInt(i++, branchTransactionDO.getStatus());
             if (updateAppData) {
                 ps.setString(i++, branchTransactionDO.getApplicationData());
-                ps.setString(i++, branchTransactionDO.getXid());
-                ps.setLong(i++, branchTransactionDO.getBranchId());
-            } else {
-                ps.setString(i++, branchTransactionDO.getXid());
-                ps.setLong(i++, branchTransactionDO.getBranchId());
             }
+            ps.setString(i++, branchTransactionDO.getXid());
+            ps.setLong(i++, branchTransactionDO.getBranchId());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
