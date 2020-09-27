@@ -125,22 +125,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             pipelined.hmset(branchKey, BeanUtils.objectToMap(branchTransactionDO));
             pipelined.rpush(branchListKey, branchKey);
-            List<Object> objects = pipelined.syncAndReturnAll();
-            if (CollectionUtils.isNotEmpty(objects)) {
-                String hmset = objects.get(0).toString();
-                Long rpush = Long.valueOf(objects.get(1).toString());
-                if (OK.equals(hmset) && rpush > 0) {
-                    return true;
-                } else {
-                    if (OK.equals(hmset)) {
-                        jedis.del(branchKey);
-                    }
-                    if (rpush > 0) {
-                        jedis.lrem(branchListKey,0,branchKey);
-                    }
-                }
-            }
-            return false;
+            pipelined.sync();
+            return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
@@ -163,22 +149,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             pipelined.lrem(branchListKey, 0, branchKey);
             pipelined.del(branchKey);
-            List<Object> objects = pipelined.syncAndReturnAll();
-            if (CollectionUtils.isNotEmpty(objects)) {
-                Long lrem = Long.valueOf(objects.get(0).toString());
-                Long del = Long.valueOf(objects.get(1).toString());
-                if (lrem > 0 && del > 0) {
-                    return true;
-                } else {
-                    if (lrem > 0) {
-                        jedis.rpush(branchListKey,branchKey);
-                    }
-                    if (del > 0) {
-                        jedis.hmset(branchKey,branchTransactionDOMap);
-                    }
-                }
-            }
-            return false;
+            pipelined.sync();
+            return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
@@ -199,11 +171,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Map<String,String> map = new HashMap<>(2);
             map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
             map.put(REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            String hmset = jedis.hmset(branchKey, map);
-            if (OK.equalsIgnoreCase(hmset)) {
-                return true;
-            }
-            return false;
+            jedis.hmset(branchKey, map);
+            return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
@@ -223,22 +192,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             pipelined.hmset(globalKey, BeanUtils.objectToMap(globalTransactionDO));
             pipelined.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), globalTransactionDO.getXid());
-            List<Object> objects = pipelined.syncAndReturnAll();
-            if (CollectionUtils.isNotEmpty(objects)) {
-                String hmset = objects.get(0).toString();
-                Long rpush = Long.valueOf(objects.get(1).toString());
-                if (OK.equals(hmset) && rpush > 0) {
-                    return true;
-                } else {
-                    if (OK.equals(hmset)) {
-                        jedis.hdel(globalKey);
-                    }
-                    if (rpush > 0) {
-                        jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0, globalTransactionDO.getXid());
-                    }
-                }
-            }
-            return false;
+            pipelined.sync();
+            return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
@@ -263,26 +218,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         globalTransactionDO.getXid());
                 return true;
             }
-
             Pipeline pipelined = jedis.pipelined();
             pipelined.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, globalTransactionDO.getXid());
             pipelined.del(globalKey);
-            List<Object> objects = pipelined.syncAndReturnAll();
-            if (CollectionUtils.isNotEmpty(objects)) {
-                Long lrem = Long.valueOf(objects.get(0).toString());
-                Long del = Long.valueOf(objects.get(1).toString());
-                if (lrem > 0 && del > 0) {
-                    return true;
-                } else {
-                    if (lrem > 0) {
-                        jedis.rpush(buildGlobalStatus(globalTransactionDO.getStatus()),globalTransactionDO.getXid());
-                    }
-                    if (del > 0) {
-                        jedis.hmset(globalKey,globalTransactionDoMap);
-                    }
-                }
-            }
-            return false;
+            pipelined.sync();
+            return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
