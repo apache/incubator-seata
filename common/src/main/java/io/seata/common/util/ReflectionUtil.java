@@ -247,7 +247,7 @@ public class ReflectionUtil {
      * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
      */
     private static final Map<Class<?>, Field[]> DECLARED_FIELDS_CACHE =
-            new ConcurrentHashMap<Class<?>, Field[]>(256);
+            new ConcurrentHashMap<>(256);
 
 
     /**

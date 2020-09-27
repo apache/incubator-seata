@@ -52,4 +52,11 @@ public @interface TwoPhaseBusinessAction {
      */
     String rollbackMethod() default "rollback";
 
+    /**
+     * share tcc phase 1 and 2 context
+     *
+     * @return the boolean
+     */
+    boolean enableShareContext() default false;
+
 }

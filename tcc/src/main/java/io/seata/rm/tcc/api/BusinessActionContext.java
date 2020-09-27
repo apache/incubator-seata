@@ -32,12 +32,13 @@ public class BusinessActionContext implements Serializable {
 
     private String actionName;
 
-    private Map<String, Object> actionContext = new HashMap<>(4);
+    private Map<String, Object> actionContext;
 
     /**
      * Instantiates a new Business action context.
      */
     public BusinessActionContext() {
+        this.actionContext = new HashMap<>(4);
     }
 
     /**

@@ -86,7 +86,9 @@ public class ActionInterceptorHandler {
         ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
         //the final result
         ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
-        doUpdateTccActionLogStore(actionContext, ret);
+        if (businessAction.enableShareContext()){
+            doUpdateTccActionLogStore(actionContext, ret);
+        }
         return ret;
     }
 

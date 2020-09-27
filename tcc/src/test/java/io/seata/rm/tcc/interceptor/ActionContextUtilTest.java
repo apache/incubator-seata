@@ -26,9 +26,9 @@ public class ActionContextUtilTest {
 
     public static class ActionCtx{
         @ActionContextField("A")
-        String a = "a";
+        private String a = "a";
         @ActionContextField()
-        boolean b = true;
+        private boolean b = true;
 
     }
 

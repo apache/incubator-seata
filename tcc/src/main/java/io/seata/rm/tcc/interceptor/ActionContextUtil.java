@@ -102,8 +102,8 @@ public class ActionContextUtil {
     /**
      * Parse action result value of ActionContext
      *
-     * @param bizRet
-     * @param actionContext
+     * @param bizRet business return value
+     * @param actionContext business context
      */
     public static void parseBizRet(Object bizRet, BusinessActionContext actionContext) {
         if (Objects.isNull(bizRet)) {
@@ -114,6 +114,7 @@ public class ActionContextUtil {
             return;
         }
         ReflectionUtil.doWithFields(retClass, field -> {
+            field.setAccessible(true);
             ActionContextField actionContextField = field.getAnnotation(ActionContextField.class);
             String key = StringUtils.isEmpty(actionContextField.value()) ? field.getName() : actionContextField.value();
             actionContext.addActionContext(key, field.get(bizRet));
