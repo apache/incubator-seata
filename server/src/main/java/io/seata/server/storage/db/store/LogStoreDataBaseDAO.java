@@ -194,7 +194,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            int i = 0;
+            int i = 1;
             ps.setString(i++, globalTransactionDO.getXid());
             ps.setLong(i++, globalTransactionDO.getTransactionId());
             ps.setInt(i++, globalTransactionDO.getStatus());
@@ -316,7 +316,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            int i = 0;
+            int i = 1;
             ps.setString(i++, branchTransactionDO.getXid());
             ps.setLong(i++, branchTransactionDO.getTransactionId());
             ps.setLong(i++, branchTransactionDO.getBranchId());
@@ -346,7 +346,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            int i = 0;
+            int i = 1;
             ps.setInt(i++, branchTransactionDO.getStatus());
             if (updateAppData) {
                 ps.setString(i++, branchTransactionDO.getApplicationData());
