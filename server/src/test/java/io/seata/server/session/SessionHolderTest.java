@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.common.XID;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.StoreMode;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 
 /**
@@ -37,7 +39,9 @@ public class SessionHolderTest {
 
     @BeforeEach
     public void before() {
-        String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+        String sessionStorePath =
+            SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + "/"
+                + XID.getPort();
         //delete file previously created
         pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
     }

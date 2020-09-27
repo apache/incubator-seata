@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
  * The type Session store test.
@@ -55,7 +56,8 @@ public class SessionStoreTest {
      */
     @BeforeEach
     public void clean() throws Exception {
-        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+            + "/" + XID.getPort();
         File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
         File rootDataFileHis = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
 

@@ -90,12 +90,13 @@ public class DefaultCoordinatorTest {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-        DEFAULT_SESSION_STORE_FILE_DIR);
+    private static String sessionStorePath;
 
     @BeforeAll
     public static void beforeClass() throws Exception {
         XID.setIpAddress(NetUtil.getLocalIp());
+        sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+            + "/" + XID.getPort();
         RemotingServer remotingServer = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(remotingServer);
         core = new DefaultCore(remotingServer);
