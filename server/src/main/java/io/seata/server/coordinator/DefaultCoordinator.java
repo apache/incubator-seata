@@ -378,7 +378,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
-            if (!RaftServerFactory.getInstance().isLeader()) {
+            if (RaftServerFactory.getInstance().isLeader()) {
                 try {
                     handleRetryRollbacking();
                 } catch (Exception e) {
@@ -388,7 +388,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
-            if (!RaftServerFactory.getInstance().isLeader()) {
+            if (RaftServerFactory.getInstance().isLeader()) {
                 try {
                     handleRetryCommitting();
                 } catch (Exception e) {
@@ -398,7 +398,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
-            if (!RaftServerFactory.getInstance().isLeader()) {
+            if (RaftServerFactory.getInstance().isLeader()) {
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
@@ -408,7 +408,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
-            if (!RaftServerFactory.getInstance().isLeader()) {
+            if (RaftServerFactory.getInstance().isLeader()) {
                 try {
                     timeoutCheck();
                 } catch (Exception e) {
@@ -418,7 +418,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(() -> {
-            if (!RaftServerFactory.getInstance().isLeader()) {
+            if (RaftServerFactory.getInstance().isLeader()) {
                 try {
                     undoLogDelete();
                 } catch (Exception e) {
