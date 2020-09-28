@@ -32,7 +32,10 @@ import java.util.Set;
  *
  * @author zhangsen
  */
-public abstract class SpringProxyUtils {
+public class SpringProxyUtils {
+    private SpringProxyUtils() {
+    }
+
     /**
      * Find target class class.
      *
