@@ -110,13 +110,16 @@ public class SessionHolder {
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
             if (StoreMode.RAFT.equals(storeMode)) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
-                    new Object[] {ROOT_SESSION_MANAGER});
-                ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                    StoreMode.RAFT.getName(), new Object[] {ASYNC_COMMITTING_SESSION_MANAGER});
-                RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                    StoreMode.RAFT.getName(), new Object[] {RETRY_COMMITTING_SESSION_MANAGER});
-                RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                    StoreMode.RAFT.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER});
+                    new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
+                ASYNC_COMMITTING_SESSION_MANAGER =
+                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
+                        new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, ASYNC_COMMITTING_SESSION_MANAGER});
+                RETRY_COMMITTING_SESSION_MANAGER =
+                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
+                        new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, RETRY_COMMITTING_SESSION_MANAGER});
+                RETRY_ROLLBACKING_SESSION_MANAGER =
+                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
+                        new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, RETRY_ROLLBACKING_SESSION_MANAGER});
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
@@ -130,7 +133,6 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
-        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
         reload();
     }
 
@@ -142,6 +144,11 @@ public class SessionHolder {
             ((Reloadable)ROOT_SESSION_MANAGER).reload();
 
             Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
+            try {
+                RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (!RaftServerFactory.getInstance().isLeader()) {
                 return;
             }

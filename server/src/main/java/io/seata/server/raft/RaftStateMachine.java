@@ -17,6 +17,7 @@ package io.seata.server.raft;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
@@ -38,11 +39,16 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSyncMsg;
 import io.seata.server.storage.raft.lock.RaftLockManager;
+import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
+import static io.seata.server.session.SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME;
+import static io.seata.server.session.SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME;
+import static io.seata.server.session.SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME;
+import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
@@ -59,8 +65,6 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftStateMachine.class);
 
-    SessionManager sessionManager;
-
     /**
      * Leader term
      */
@@ -75,11 +79,6 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     public RaftStateMachine() {
-        try {
-            sessionManager = SessionHolder.getRootSessionManager();
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-        }
     }
 
     @Override
@@ -90,15 +89,29 @@ public class RaftStateMachine extends StateMachineAdapter {
                 processor = iterator.done();
             } else {
                 try {
+                    SessionManager sessionManager = null;
                     RaftSyncMsg msg = SerializerManager.getSerializer(Hessian2).deserialize(iterator.getData().array(),
                         RaftSyncMsg.class.getName());
                     RaftSyncMsg.MsgType msgType = msg.getMsgType();
-                    LOG.info("state machine synchronization,task:{}", msgType);
+                    String sessionName = msg.getSessionName();
+                    if (Objects.equals(sessionName, ROOT_SESSION_MANAGER_NAME)) {
+                        sessionManager = SessionHolder.getRootSessionManager();
+                    } else if (Objects.equals(sessionName, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
+                        sessionManager = SessionHolder.getAsyncCommittingSessionManager();
+                    } else if (Objects.equals(sessionName, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
+                        sessionManager = SessionHolder.getRetryCommittingSessionManager();
+                    } else if (Objects.equals(sessionName, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
+                        sessionManager = SessionHolder.getRetryRollbackingSessionManager();
+                    }
+                    RaftSessionManager raftSessionManager =
+                        sessionManager != null ? (RaftSessionManager)sessionManager : null;
+                    LOG.info("state machine synchronization,task:{},sessionManager:{}", msgType,
+                        sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
                     if (ADD_GLOBAL_SESSION.equals(msgType)) {
                         GlobalSession globalSession = SessionConverter.convertGlobalSession(msg.getGlobalSession());
-                        SessionHolder.getRootSessionManager().addGlobalSession(globalSession);
+                        raftSessionManager.getFileSessionManager().addGlobalSession(globalSession);
                     } else if (ACQUIRE_LOCK.equals(msgType)) {
-                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());
+                        GlobalSession globalSession = SessionHolder.getRootSessionManager().findGlobalSession(msg.getBranchSession().getXid());
                         BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
                         boolean include = false;
                         if (branchSession != null) {
@@ -112,34 +125,34 @@ public class RaftStateMachine extends StateMachineAdapter {
                             globalSession.add(branchSession);
                         }
                     } else if (ADD_BRANCH_SESSION.equals(msgType)) {
-                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
+                        GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
                         BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
                         if (branchSession == null) {
                             branchSession = SessionConverter.convertBranchSession(msg.getBranchSession());
                             globalSession.addBranch(branchSession);
                         }
-                        SessionHolder.getRootSessionManager().addBranchSession(globalSession, branchSession);
+                        raftSessionManager.addBranchSession(globalSession, branchSession);
                     } else if (UPDATE_GLOBAL_SESSION_STATUS.equals(msgType)) {
-                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
+                        GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
                         GlobalStatus status = msg.getGlobalStatus();
                         globalSession.setStatus(status);
-                        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(globalSession, status);
+                        raftSessionManager.updateGlobalSessionStatus(globalSession, status);
                     } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
-                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
+                        GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
                         BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
-                        SessionHolder.getRootSessionManager().removeBranchSession(globalSession, branchSession);
+                        raftSessionManager.removeBranchSession(globalSession, branchSession);
                     } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
-                        GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
+                        GlobalSession globalSession = SessionHolder.getRootSessionManager().findGlobalSession(msg.getGlobalSession().getXid());
                         RaftLockManager.LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
                     } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
                         GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-                        sessionManager.removeGlobalSession(globalSession);
+                        raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
                     } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
                         GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());
                         BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
                         BranchStatus status = msg.getBranchStatus();
                         branchSession.setStatus(status);
-                        SessionHolder.getRootSessionManager().updateBranchSessionStatus(branchSession, status);
+                        raftSessionManager.updateBranchSessionStatus(branchSession, status);
                     }
                 } catch (Exception e) {
                     LOG.error("Message synchronization failure", e);

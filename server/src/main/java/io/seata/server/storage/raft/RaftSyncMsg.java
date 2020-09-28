@@ -35,6 +35,8 @@ public class RaftSyncMsg implements java.io.Serializable {
 
     BranchStatus branchStatus;
 
+    String sessionName;
+
     public RaftSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
@@ -140,4 +142,11 @@ public class RaftSyncMsg implements java.io.Serializable {
         RELEASE_GLOBAL_SESSION_LOCK
     }
 
+    public String getSessionName() {
+        return sessionName;
+    }
+
+    public void setSessionName(String sessionName) {
+        this.sessionName = sessionName;
+    }
 }
