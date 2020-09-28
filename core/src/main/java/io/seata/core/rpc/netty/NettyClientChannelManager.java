@@ -173,7 +173,7 @@ class NettyClientChannelManager {
             String clusterName = registryService.getServiceGroup(transactionServiceGroup);
 
             if (StringUtils.isBlank(clusterName)) {
-                LOGGER.error("cant no get cluster name in registry config '{}{}', please make sure registry config correct",
+                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
                         ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
                         transactionServiceGroup);
                 return;
