@@ -30,6 +30,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.redis.JedisPooledFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.ScanParams;
@@ -39,6 +41,8 @@ import redis.clients.jedis.ScanResult;
  * @author funkye
  */
 public class UndoLogCache {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogCache.class);
 
     private String undoLogCacheKeyXid = "UNDO_LOG_CACHE_KEY_XID_";
 
@@ -83,7 +87,7 @@ public class UndoLogCache {
                 try {
                     objects = (Map<String, Object>)mapper.readValue(value, Map.class);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.error("get undolog cache error :{}", e.getMessage(), e);
                 }
                 if (objects != null && objects.size() > 0) {
                     return objects;
@@ -157,7 +161,7 @@ public class UndoLogCache {
             pipeline.expire(key, 60);
             pipeline.sync();
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOGGER.error("put cache fail error msg :{}", e.getMessage(), e);
         }
     }
 
