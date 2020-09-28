@@ -146,7 +146,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
-        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().batchDeleteUndoLog(xids, branchIds));
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
