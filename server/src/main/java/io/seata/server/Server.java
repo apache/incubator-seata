@@ -33,7 +33,6 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.env.ContainerHelper;
 import io.seata.server.env.PortHelper;
 import io.seata.server.metrics.MetricsManager;
-import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.session.SessionHolder;
 
 /**
