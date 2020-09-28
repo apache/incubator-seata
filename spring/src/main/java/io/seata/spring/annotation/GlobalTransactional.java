@@ -31,7 +31,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @author slievrly
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, GlobalTransactional)  // TM: the interceptor of TM
- * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // RM: the interceptor of AT/XA mode and GlobalLock
+ * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // RM: the interceptor of GlobalLockLogic and AT/XA mode
  * @see io.seata.spring.tcc.TccActionInterceptor#invoke(MethodInvocation) // RM: the interceptor of TCC mode
  */
 @Retention(RetentionPolicy.RUNTIME)
