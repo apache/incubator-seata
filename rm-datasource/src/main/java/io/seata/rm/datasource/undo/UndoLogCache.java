@@ -99,6 +99,35 @@ public class UndoLogCache {
         }
     }
 
+    public void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Set<String> keys = new HashSet<>();
+            xids.forEach(xid -> {
+                String cursor = initialCursor;
+                ScanParams params = new ScanParams();
+                params.count(logQueryLimit);
+                params.match(getCacheKey(xid,match));
+                ScanResult<String> scans;
+                do {
+                    scans = jedis.scan(cursor, params);
+                    keys.addAll(scans.getResult());
+                    cursor = scans.getCursor();
+                } while (!initialCursor.equals(cursor));
+            });
+            if (CollectionUtils.isNotEmpty(keys)) {
+                Set<String> delKeys = new HashSet<>();
+                keys.forEach(key -> {
+                    branchIds.forEach(branchId -> {
+                        if (branchId != null && key.contains(branchId.toString())) {
+                            delKeys.add(key);
+                        }
+                    });
+                });
+                jedis.del(delKeys.toArray(new String[0]));
+            }
+        }
+    }
+
     public void remove(Set<String> xids) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Set<String> keys = new HashSet<>();
@@ -106,9 +135,7 @@ public class UndoLogCache {
                 String cursor = initialCursor;
                 ScanParams params = new ScanParams();
                 params.count(logQueryLimit);
-                StringBuilder sb = new StringBuilder();
-                sb.append(undoLogCacheKeyXid).append(xid).append(match);
-                params.match(sb.toString());
+                params.match(getCacheKey(xid,match));
                 ScanResult<String> scans;
                 do {
                     scans = jedis.scan(cursor, params);
@@ -137,6 +164,12 @@ public class UndoLogCache {
     private String getCacheKey(String xid, Long branchId) {
         StringBuilder sb = new StringBuilder();
         sb.append(undoLogCacheKeyXid).append(xid).append(branchIdPrefix).append(branchId);
+        return sb.toString();
+    }
+
+    private String getCacheKey(String xid, String match) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(undoLogCacheKeyXid).append(xid).append(match);
         return sb.toString();
     }
 

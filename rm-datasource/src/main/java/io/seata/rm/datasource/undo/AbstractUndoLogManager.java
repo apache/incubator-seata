@@ -146,7 +146,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
-        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().remove(xids));
+        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().batchDeleteUndoLog(xids, branchIds));
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -309,7 +309,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             LOGGER.info("xASYN_REDIS_THREAD.execute(() ->id {} branch {}, ignore {} undo_log", xid,
                                 branchId, state);
                         }
-                        ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().remove(xid, branchId));
                         return;
                     }
                     if (conn == null) {
