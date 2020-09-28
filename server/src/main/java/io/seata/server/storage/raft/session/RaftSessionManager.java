@@ -171,7 +171,6 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        LOGGER.info("removeGlobalSession,raftSessionManager:{}", name);
         fileSessionManager.removeGlobalSession(session);
     }
 
@@ -272,12 +271,26 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         RaftSessionManager raftSessionManager = new RaftSessionManager(globalSession, status -> {
             if (status.isOk()) {
                 try {
-                    SessionHolder.getRootSessionManager().removeGlobalSession(globalSession);
+                    SessionManager sessionManager = null;
+                    if (!Objects.equals(name, ROOT_SESSION_MANAGER_NAME)) {
+                        if (Objects.equals(name, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
+                            sessionManager = SessionHolder.getAsyncCommittingSessionManager();
+                        } else if (Objects.equals(name, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
+                            sessionManager = SessionHolder.getRetryCommittingSessionManager();
+                        } else if (Objects.equals(name, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
+                            sessionManager = SessionHolder.getRetryRollbackingSessionManager();
+                        }
+                    } else {
+                        sessionManager = SessionHolder.getRootSessionManager();
+                    }
+                    RaftSessionManager manager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
+                    manager.removeGlobalSession(globalSession);
                 } catch (TransactionException e) {
                     e.printStackTrace();
                 }
             }
         });
+        LOGGER.info("onEnd,raftSessionManager:{}", name);
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
         raftSyncMsg.setSessionName(this.name);
