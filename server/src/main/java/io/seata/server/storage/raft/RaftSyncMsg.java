@@ -149,4 +149,10 @@ public class RaftSyncMsg implements java.io.Serializable {
     public void setSessionName(String sessionName) {
         this.sessionName = sessionName;
     }
+
+    @Override public String toString() {
+        return "RaftSyncMsg{" + "msgType=" + msgType + ", globalSession=" + globalSession + ", branchSession="
+            + branchSession + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", sessionName='"
+            + sessionName + '\'' + '}';
+    }
 }

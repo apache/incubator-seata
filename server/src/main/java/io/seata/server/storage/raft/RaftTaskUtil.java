@@ -20,6 +20,7 @@ import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import io.seata.server.raft.RaftServerFactory;
+import io.seata.server.storage.raft.session.RaftSessionManager;
 
 import java.nio.ByteBuffer;
 
@@ -34,7 +35,7 @@ public class RaftTaskUtil {
         createTask(null, data);
     }
 
-    public static void createTask(Closure done, Object data) {
+    public static void createTask(RaftSessionManager done, Object data) {
         final Task task = new Task();
         try {
             task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(data)));
