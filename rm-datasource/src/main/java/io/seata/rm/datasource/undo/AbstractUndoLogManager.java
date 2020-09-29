@@ -305,8 +305,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                     int state = (int)cache.get(UndoLogCache.STATE);
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("xASYN_REDIS_THREAD.execute(() ->id {} branch {}, ignore {} undo_log", xid,
-                                branchId, state);
+                            LOGGER.info("xid {} branch {}, ignore {} undo_log", xid, branchId, state);
                         }
                         return;
                     }
