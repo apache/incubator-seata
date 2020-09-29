@@ -17,6 +17,7 @@ package io.seata.server.storage.raft.session;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.alipay.sofa.jraft.Closure;
@@ -314,4 +315,16 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     public void setFileSessionManager(FileSessionManager fileSessionManager) {
         this.fileSessionManager = fileSessionManager;
     }
+
+    public Map<String, GlobalSession> getSessionMap() {
+        return this.fileSessionManager.getSessionMap();
+    }
+
+    public void setSessionMap(Map<String, GlobalSession> sessionMap) {
+        if (sessionMap == null || sessionMap.isEmpty()) {
+            return;
+        }
+        this.fileSessionManager.setSessionMap(sessionMap);
+    }
+
 }

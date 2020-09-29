@@ -17,11 +17,10 @@ package io.seata.server.raft;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
-import io.seata.common.util.CollectionUtils;
-import io.seata.serializer.fst.FstSerializerFactory;
-import io.seata.server.storage.raft.RaftSyncMsg;
+import java.util.Map;
+import io.seata.serializer.kryo.KryoInnerSerializer;
+import io.seata.serializer.kryo.KryoSerializerFactory;
+import io.seata.server.session.GlobalSession;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +34,6 @@ public class RaftSnapshotFile {
 
     private String path;
 
-    private static final FstSerializerFactory fstSerializerFactory = FstSerializerFactory.getDefaultFactory();
-
     public RaftSnapshotFile(String path) {
         super();
         this.path = path;
@@ -49,22 +46,30 @@ public class RaftSnapshotFile {
     /**
      * Save value to snapshot file.
      */
-    public boolean save(final List<RaftSyncMsg> value) {
+    public boolean save(final Map<String,Map<String, GlobalSession>> value) {
+        KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
         try {
-            FileUtils.writeByteArrayToFile(new File(path), fstSerializerFactory.serialize(value));
+            FileUtils.writeByteArrayToFile(new File(path), kryoInnerSerializer.serialize(value));
             return true;
         } catch (IOException e) {
             LOG.error("Fail to save snapshot", e);
             return false;
+        }finally {
+            KryoSerializerFactory.getInstance().returnKryo(kryoInnerSerializer);
         }
     }
 
-    public List<RaftSyncMsg> load() throws IOException {
-        final List<RaftSyncMsg> list = fstSerializerFactory.deserialize(FileUtils.readFileToByteArray(new File(path)));
-        if (!CollectionUtils.isEmpty(list)) {
-            return list;
+    public Map<String,Map<String, GlobalSession>> load() throws IOException {
+        KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
+        try {
+            final Map<String,Map<String, GlobalSession>> map = kryoInnerSerializer.deserialize(FileUtils.readFileToByteArray(new File(path)));
+            if (!map.isEmpty()) {
+                return map;
+            }
+            throw new IOException("Fail to load snapshot from " + path);
+        }finally {
+            KryoSerializerFactory.getInstance().returnKryo(kryoInnerSerializer);
         }
-        throw new IOException("Fail to load snapshot from " + path);
     }
 
 }

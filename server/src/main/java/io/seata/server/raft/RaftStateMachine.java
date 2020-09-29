@@ -16,12 +16,10 @@
 package io.seata.server.raft;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
@@ -32,7 +30,6 @@ import com.alipay.sofa.jraft.error.RaftException;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.jraft.util.Utils;
-import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
@@ -76,7 +73,6 @@ public class RaftStateMachine extends StateMachineAdapter {
     /**
      * counter value
      */
-    private List<RaftSyncMsg> raftSyncMsgs = new ArrayList<>();
 
     public boolean isLeader() {
         return this.leaderTerm.get() > 0;
@@ -89,20 +85,12 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onApply(Iterator iterator) {
         while (iterator.hasNext()) {
             Closure processor = null;
-            RaftSyncMsg msg = null;
-            try {
-                msg = SerializerManager.getSerializer(Hessian2).deserialize(iterator.getData().array(),
-                    RaftSyncMsg.class.getName());
-            } catch (CodecException e) {
-                LOG.error(e.getMessage(), e);
-            }
-            if (msg != null) {
-                raftSyncMsgs.add(msg);
-            }
             if (iterator.done() != null) {
                 processor = iterator.done();
             } else {
                 try {
+                    RaftSyncMsg msg = SerializerManager.getSerializer(Hessian2).deserialize(iterator.getData().array(),
+                        RaftSyncMsg.class.getName());
                     onExecuteRaft(msg);
                 } catch (Exception e) {
                     LOG.error("Message synchronization failure", e);
@@ -117,12 +105,21 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
-        if(CollectionUtils.isEmpty(raftSyncMsgs)){
+        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
+        Map<String, Map<String, GlobalSession>> sessionMaps = new HashMap<>();
+        sessionMaps.put(ROOT_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
+        raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
+        sessionMaps.put(RETRY_ROLLBACKING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
+        raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
+        sessionMaps.put(RETRY_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
+        raftSessionManager = (RaftSessionManager)SessionHolder.getAsyncCommittingSessionManager();
+        sessionMaps.put(ASYNC_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
+        if (sessionMaps.isEmpty()) {
             return;
         }
         Utils.runInThread(() -> {
             final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
-            if (snapshot.save(raftSyncMsgs)) {
+            if (snapshot.save(sessionMaps)) {
                 if (writer.addFile("data")) {
                     done.run(Status.OK());
                 } else {
@@ -151,14 +148,15 @@ public class RaftStateMachine extends StateMachineAdapter {
         }
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
         try {
-           List<RaftSyncMsg> list= snapshot.load();
-           list.forEach(i->{
-               try {
-                   onExecuteRaft(i);
-               } catch (TransactionException e) {
-                   LOG.error("Failed to recover data {}", i);
-               }
-           });
+            Map<String, Map<String, GlobalSession>> sessionMaps = snapshot.load();
+            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
+            raftSessionManager.setSessionMap(sessionMaps.get(ROOT_SESSION_MANAGER_NAME));
+            raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
+            raftSessionManager.setSessionMap(sessionMaps.get(RETRY_ROLLBACKING_SESSION_MANAGER_NAME));
+            raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
+            raftSessionManager.setSessionMap(sessionMaps.get(RETRY_COMMITTING_SESSION_MANAGER_NAME));
+            raftSessionManager = (RaftSessionManager)SessionHolder.getAsyncCommittingSessionManager();
+            raftSessionManager.setSessionMap(sessionMaps.get(ASYNC_COMMITTING_SESSION_MANAGER_NAME));
             return true;
         } catch (final Exception e) {
             LOG.error("Fail to load snapshot from {}", snapshot.getPath());

@@ -301,6 +301,14 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     }
 
+    public Map<String, GlobalSession> getSessionMap() {
+        return sessionMap;
+    }
+
+    public void setSessionMap(Map<String, GlobalSession> sessionMap) {
+        this.sessionMap = sessionMap;
+    }
+
     @Override
     public void destroy() {
         transactionStoreManager.shutdown();
