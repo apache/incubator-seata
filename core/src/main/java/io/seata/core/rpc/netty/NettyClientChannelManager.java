@@ -182,6 +182,7 @@ class NettyClientChannelManager {
             if (!(registryService instanceof FileRegistryServiceImpl)) {
                 LOGGER.error("no available service found, please make sure registry config correct and keep your seata server running");
             }
+            return;
         }
         for (String serverAddress : availList) {
             try {
