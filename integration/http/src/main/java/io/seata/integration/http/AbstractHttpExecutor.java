@@ -156,6 +156,12 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     }
 
     public static Map<String, String> convert(Map<String, Object> param) {
-        return param.keySet().stream().filter(key -> param.get(key) != null && param.get(key) != null).collect(Collectors.toMap(key -> key, key -> param.get(key).toString()));
+        Map<String, String> covertMap = new HashMap<>();
+        param.forEach((key, value) -> {
+            if (value != null) {
+                covertMap.put(key, value.toString());
+            }
+        });
+        return covertMap;
     }
 }
