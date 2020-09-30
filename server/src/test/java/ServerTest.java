@@ -84,12 +84,18 @@ public class ServerTest {
             } catch (CodecException e) {
                 e.printStackTrace();
             }
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            PeerId peerId;
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                peerId = raftServer.getNode().getLeaderId();
+                if (peerId != null) {
+                    break;
+                }
             }
-            PeerId peerId = raftServer.getNode().getLeaderId();
             switch (peerId.getPort()) {
                 case 7091:
                     raftServer.getNode().apply(task);

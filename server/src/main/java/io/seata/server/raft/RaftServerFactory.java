@@ -84,7 +84,7 @@ public class RaftServerFactory {
         nodeOptions.setInitialConf(initConf);
 
         raftServer = new RaftServer(dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions);
-        stateMachine = raftServer.getFsm();
+        stateMachine = raftServer.getRaftStateMachine();
         LOGGER.info("Started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
     }
 

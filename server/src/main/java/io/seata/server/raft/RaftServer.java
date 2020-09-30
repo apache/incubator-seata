@@ -45,7 +45,7 @@ public class RaftServer implements ConfigurationChangeListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServer.class);
     private RaftGroupService raftGroupService;
     private Node node;
-    private RaftStateMachine fsm;
+    private RaftStateMachine raftStateMachine;
     private CliService cliService;
 
     public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
@@ -56,9 +56,9 @@ public class RaftServer implements ConfigurationChangeListener {
         // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
         final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
         // Initialize the state machine
-        this.fsm = new RaftStateMachine();
+        this.raftStateMachine = new RaftStateMachine();
         // Set the state machine to startup parameters
-        nodeOptions.setFsm(this.fsm);
+        nodeOptions.setFsm(this.raftStateMachine);
         // Set the storage path
         // Log, must
         nodeOptions.setLogUri(dataPath + File.separator + "log");
@@ -79,12 +79,12 @@ public class RaftServer implements ConfigurationChangeListener {
         return this.node;
     }
 
-    public RaftStateMachine getFsm() {
-        return fsm;
+    public RaftStateMachine getRaftStateMachine() {
+        return raftStateMachine;
     }
 
-    public void setFsm(RaftStateMachine fsm) {
-        this.fsm = fsm;
+    public void setRaftStateMachine(RaftStateMachine raftStateMachine) {
+        this.raftStateMachine = raftStateMachine;
     }
 
     public CliService getCliService() {
