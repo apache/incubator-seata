@@ -16,7 +16,6 @@
 package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -65,7 +64,7 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        if (!RootContext.inGlobalTransaction()) {
+        if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
             //not in transaction
             return invocation.proceed();
         }
@@ -76,8 +75,11 @@ public class TccActionInterceptor implements MethodInterceptor {
             //save the xid
             String xid = RootContext.getXID();
             //save the previous branchType
-            String previousBranchType = RootContext.getBranchType();
-            RootContext.bindBranchType(BranchType.TCC);
+            BranchType previousBranchType = RootContext.getBranchType();
+            //if not TCC, bind TCC branchType
+            if (BranchType.TCC != previousBranchType) {
+                RootContext.bindBranchType(BranchType.TCC);
+            }
             try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
@@ -87,10 +89,9 @@ public class TccActionInterceptor implements MethodInterceptor {
                 return ret.get(Constants.TCC_METHOD_RESULT);
             }
             finally {
-                RootContext.unbindBranchType();
-                //restore the TCC branchType if exists
-                if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
-                    RootContext.bindBranchType(BranchType.TCC);
+                //if not TCC, unbind branchType
+                if (BranchType.TCC != previousBranchType) {
+                    RootContext.unbindBranchType();
                 }
             }
         }

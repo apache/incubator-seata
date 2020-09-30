@@ -1,0 +1,78 @@
+server:
+  port: 8098
+
+logging:
+  config: classpath:logback.xml
+  file:
+    path: ${user.home}/logs
+
+seata:
+  config:
+    type: file
+    apollo:
+      appId: seata-server
+      apolloMeta: http://localhost:8801
+      namespace: application
+    nacos:
+      serverAddr: 127.0.0.1:8848
+      namespace:
+      group: SEATA_GROUP
+      username:
+      password:
+    consul:
+      serverAddr: 127.0.0.1:8500
+    zk:
+      serverAddr: 127.0.0.1:2181
+      sessionTimeout: 6000
+      connectTimeout: 2000
+      username:
+      password:
+    etcd3:
+      serverAddr: http://localhost:2379
+    file:
+      name: file.conf
+  registry:
+    type: file
+    zk:
+      cluster: default
+      serverAddr: 127.0.0.1:2181
+      sessionTimeout: 6000
+      connectTimeout: 2000
+      username: ""
+      password: ""
+    nacos:
+      application:
+      serverAddr: 127.0.0.1:8848
+      group: SEATA_GROUP
+      namespace:
+      cluster: default
+      username:
+      password:
+    eureka:
+      serviceUrl: http://localhost:8761/eureka
+      application: default
+      weight: 1
+    redis:
+      serverAddr: localhost:6379
+      db: 0
+      password:
+      cluster: default
+      timeout: 0
+    consul:
+      cluster: default
+      serverAddr: 127.0.0.1:8500
+    etcd3:
+      cluster: default
+      serverAddr: http://localhost:2379
+    sofa:
+      serverAddr: 127.0.0.1:9603
+      application: default
+      region: DEFAULT_ZONE
+      datacenter: DefaultDataCenter
+      cluster: default
+      group: SEATA_GROUP
+      addressWaitTime: 3000
+    file:
+      name: file.conf
+    
+

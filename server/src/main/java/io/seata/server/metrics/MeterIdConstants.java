@@ -23,38 +23,38 @@ import io.seata.metrics.Id;
  *
  * @author zhengyangyong
  */
-public class MeterIdConstants {
-    public static final Id COUNTER_ACTIVE = new Id(IdConstants.SEATA_TRANSACTION)
+public interface MeterIdConstants {
+    Id COUNTER_ACTIVE = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ACTIVE);
 
-    public static final Id COUNTER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id COUNTER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTED);
 
-    public static final Id COUNTER_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id COUNTER_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
-    public static final Id SUMMARY_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id SUMMARY_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTED);
 
-    public static final Id SUMMARY_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id SUMMARY_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
 
-    public static final Id TIMER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
+    Id TIMER_COMMITTED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTED);
 
-    public static final Id TIMER_ROLLBACK = new Id(IdConstants.SEATA_TRANSACTION)
+    Id TIMER_ROLLBACK = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
