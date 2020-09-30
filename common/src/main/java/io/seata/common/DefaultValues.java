@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * @author xingfudeshi@gmail.com
  */
