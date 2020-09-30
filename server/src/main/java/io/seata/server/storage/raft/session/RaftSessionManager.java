@@ -109,20 +109,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         RaftSessionManager raftSessionManager = new RaftSessionManager(globalSession, name, status -> {
             if (status.isOk()) {
                 try {
-                    SessionManager sessionManager = null;
-                    if (!Objects.equals(name, ROOT_SESSION_MANAGER_NAME)) {
-                        if (Objects.equals(name, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
-                            sessionManager = SessionHolder.getAsyncCommittingSessionManager();
-                        } else if (Objects.equals(name, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
-                            sessionManager = SessionHolder.getRetryCommittingSessionManager();
-                        } else if (Objects.equals(name, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
-                            sessionManager = SessionHolder.getRetryRollbackingSessionManager();
-                        }
-                    } else {
-                        sessionManager = SessionHolder.getRootSessionManager();
-                    }
-                    RaftSessionManager manager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
-                    manager.getFileSessionManager().addGlobalSession(globalSession);
+                    getSessionManager().getFileSessionManager().addGlobalSession(globalSession);
                 } catch (TransactionException e) {
                     e.printStackTrace();
                 }
@@ -198,8 +185,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     }
 
     @Override
-    public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus branchStatus)
-        throws TransactionException {
+    public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession,
+        BranchStatus branchStatus) throws TransactionException {
         RaftSessionManager raftSessionManager = new RaftSessionManager(globalSession, status -> {
             if (status.isOk()) {
                 try {
@@ -267,19 +254,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         RaftSessionManager raftSessionManager = new RaftSessionManager(globalSession, status -> {
             if (status.isOk()) {
                 try {
-                    SessionManager sessionManager = null;
-                    if (!Objects.equals(name, ROOT_SESSION_MANAGER_NAME)) {
-                        if (Objects.equals(name, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
-                            sessionManager = SessionHolder.getAsyncCommittingSessionManager();
-                        } else if (Objects.equals(name, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
-                            sessionManager = SessionHolder.getRetryCommittingSessionManager();
-                        } else if (Objects.equals(name, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
-                            sessionManager = SessionHolder.getRetryRollbackingSessionManager();
-                        }
-                    } else {
-                        sessionManager = SessionHolder.getRootSessionManager();
-                    }
-                    RaftSessionManager manager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
+                    RaftSessionManager manager = getSessionManager();
                     manager.removeGlobalSession(globalSession);
                 } catch (TransactionException e) {
                     e.printStackTrace();
@@ -291,6 +266,22 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
+    }
+
+    private RaftSessionManager getSessionManager() {
+        SessionManager sessionManager = null;
+        if (!Objects.equals(name, ROOT_SESSION_MANAGER_NAME)) {
+            if (Objects.equals(name, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
+                sessionManager = SessionHolder.getAsyncCommittingSessionManager();
+            } else if (Objects.equals(name, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
+                sessionManager = SessionHolder.getRetryCommittingSessionManager();
+            } else if (Objects.equals(name, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
+                sessionManager = SessionHolder.getRetryRollbackingSessionManager();
+            }
+        } else {
+            sessionManager = SessionHolder.getRootSessionManager();
+        }
+        return (RaftSessionManager)sessionManager;
     }
 
     @Override

@@ -66,7 +66,7 @@ public class ServerTest {
     }
 
     @Test
-    public void testRaftCluster() {
+    public void testRaftCluster() throws Exception {
         try {
             RaftServerFactory raftServerFactory = new RaftServerFactory();
             String ip = "127.0.0.1";
@@ -79,11 +79,6 @@ public class ServerTest {
             RaftServer raftServer3 = raftServerFactory.getRaftServer();
             Task task = new Task();
             RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
-            try {
-                task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(raftSyncMsg)));
-            } catch (CodecException e) {
-                e.printStackTrace();
-            }
             PeerId peerId;
             while (true) {
                 try {
@@ -96,19 +91,28 @@ public class ServerTest {
                     break;
                 }
             }
+            RaftServer leader = null;
             switch (peerId.getPort()) {
                 case 7091:
-                    raftServer.getNode().apply(task);
+                    leader = raftServer;
                     break;
                 case 7092:
-                    raftServer2.getNode().apply(task);
+                    leader = raftServer2;
                     break;
                 case 7093:
-                    raftServer3.getNode().apply(task);
+                    leader = raftServer3;
                     break;
                 default:
                     break;
             }
+            RaftServerFactory.getInstance().setRaftServer(leader);
+            RaftServerFactory.getInstance().setStateMachine(leader.getRaftStateMachine());
+            try {
+                task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(raftSyncMsg)));
+            } catch (CodecException e) {
+                e.printStackTrace();
+            }
+            RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
             ConfigurationChangeEvent event = new ConfigurationChangeEvent();
             conf = conf + ",127.0.0.1:7094";
             raftServerFactory.init(ip, 8094, conf);

@@ -92,6 +92,18 @@ public class RaftServerFactory {
         return raftServer;
     }
 
+    public void setRaftServer(RaftServer raftServer) {
+        this.raftServer = raftServer;
+    }
+
+    public RaftStateMachine getStateMachine() {
+        return stateMachine;
+    }
+
+    public void setStateMachine(RaftStateMachine stateMachine) {
+        this.stateMachine = stateMachine;
+    }
+
     public Boolean isLeader() {
         if (stateMachine != null) {
             return stateMachine.isLeader();
