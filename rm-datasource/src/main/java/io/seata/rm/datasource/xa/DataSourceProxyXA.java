@@ -43,7 +43,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
         if (dataSource instanceof SeataDataSourceProxy) {
-            LOGGER.info("Unwrap the data source, because the type of the data source is: {}", dataSource.getClass().getName());
+            LOGGER.info("Unwrap the data source, because the type is: {}", dataSource.getClass().getName());
             dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
         }
         this.dataSource = dataSource;

@@ -66,8 +66,9 @@ public class DataSourceProxyHolder {
     public SeataDataSourceProxy putDataSource(DataSource dataSource, BranchType dataSourceProxyMode) {
         DataSource originalDataSource;
         if (dataSource instanceof SeataDataSourceProxy) {
+            SeataDataSourceProxy dataSourceProxy = (SeataDataSourceProxy) dataSource;
+
             //If it's an right proxy, return it directly.
-            SeataDataSourceProxy dataSourceProxy = (SeataDataSourceProxy)dataSource;
             if (dataSourceProxyMode == dataSourceProxy.getBranchType()) {
                 return (SeataDataSourceProxy)dataSource;
             }

@@ -86,7 +86,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
         if (targetDataSource instanceof SeataDataSourceProxy) {
-            LOGGER.info("Unwrap the target data source, because the type of the target data source is: {}", targetDataSource.getClass().getName());
+            LOGGER.info("Unwrap the target data source, because the type is: {}", targetDataSource.getClass().getName());
             targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
         }
         this.targetDataSource = targetDataSource;

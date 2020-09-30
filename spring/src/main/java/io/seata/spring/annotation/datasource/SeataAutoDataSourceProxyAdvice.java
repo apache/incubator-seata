@@ -37,12 +37,14 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
     private final Class<? extends SeataDataSourceProxy> dataSourceProxyClazz;
 
     public SeataAutoDataSourceProxyAdvice(String dataSourceProxyMode) {
-        if (BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)) {
+        if (BranchType.AT.name().equalsIgnoreCase(dataSourceProxyMode)) {
+            this.dataSourceProxyMode = BranchType.AT;
+            this.dataSourceProxyClazz = DataSourceProxy.class;
+        } else if (BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)) {
             this.dataSourceProxyMode = BranchType.XA;
             this.dataSourceProxyClazz = DataSourceProxyXA.class;
         } else {
-            this.dataSourceProxyMode = BranchType.AT;
-            this.dataSourceProxyClazz = DataSourceProxy.class;
+            throw new IllegalArgumentException("Unknown dataSourceProxyMode: " + dataSourceProxyMode);
         }
     }
 
