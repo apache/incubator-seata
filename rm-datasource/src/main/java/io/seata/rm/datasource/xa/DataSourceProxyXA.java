@@ -20,6 +20,8 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
@@ -33,12 +35,15 @@ import java.sql.SQLException;
  */
 public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxyXA.class);
+
     public DataSourceProxyXA(DataSource dataSource) {
         this(dataSource, DEFAULT_RESOURCE_GROUP_ID);
     }
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
         if (dataSource instanceof SeataDataSourceProxy) {
+            LOGGER.info("Unwrap the data source, because the type of the data source is: {}", dataSource.getClass().getName());
             dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
         }
         this.dataSource = dataSource;
