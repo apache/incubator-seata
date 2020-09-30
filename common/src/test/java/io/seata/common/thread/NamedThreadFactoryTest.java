@@ -15,10 +15,10 @@
  */
 package io.seata.common.thread;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.Test;
 
 /**
  * @author Otis.z
@@ -30,6 +30,10 @@ public class NamedThreadFactoryTest {
     @Test
     public void testNewThread() {
         NamedThreadFactory namedThreadFactory = new NamedThreadFactory("testNameThread", 5);
+
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            namedThreadFactory.newThread(null);
+        });
 
         Thread testNameThread = namedThreadFactory
             .newThread(() -> {
