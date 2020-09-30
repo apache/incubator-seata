@@ -15,6 +15,8 @@
  */
 package io.seata.spring.annotation.datasource;
 
+import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -42,6 +44,9 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
         boolean useJdkProxy = Boolean.parseBoolean(annotationAttributes.get(ATTRIBUTE_KEY_USE_JDK_PROXY).toString());
         String[] excludes = (String[]) annotationAttributes.get(ATTRIBUTE_KEY_EXCLUDES);
         String dataSourceProxyMode = (String) annotationAttributes.get(ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE);
+
+        //Set the default branch type to RootContext.
+        RootContext.setDefaultBranchType(BranchType.get(dataSourceProxyMode));
 
         //register seataDataSourceBeanPostProcessor bean def
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)) {
