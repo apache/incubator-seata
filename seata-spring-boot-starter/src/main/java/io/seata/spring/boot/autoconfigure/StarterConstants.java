@@ -17,15 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
-import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.*;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
@@ -90,6 +82,7 @@ public interface StarterConstants {
             put(SHUTDOWN_PREFIX, ShutdownProperties.class);
             put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             put(UNDO_PREFIX, UndoProperties.class);
+            put(COMPRESS_PREFIX, UndoCompressProperties.class);
             put(LOG_PREFIX, LogProperties.class);
             put(TRANSPORT_PREFIX, TransportProperties.class);
             put(CONFIG_PREFIX, ConfigProperties.class);
