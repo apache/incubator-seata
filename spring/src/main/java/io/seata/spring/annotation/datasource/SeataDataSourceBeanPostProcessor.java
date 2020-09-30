@@ -60,7 +60,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
             //If is SeataDataSourceProxy, return the original data source.
             if (bean instanceof SeataDataSourceProxy) {
-                LOGGER.info("unwrap the bean of the data source, and return the original data source as a bean.");
+                LOGGER.info("Unwrap the bean of the data source, and return the original data source as a bean.");
                 return ((SeataDataSourceProxy) bean).getTargetDataSource();
             }
         }
