@@ -24,6 +24,12 @@ public interface ClientTableColumnsName {
 
     /**
      * The constant undo_log column name xid
+     * this field is not use in mysql
+     */
+    String UNDO_LOG_ID = "id";
+
+    /**
+     * The constant undo_log column name xid
      */
     String UNDO_LOG_XID = "xid";
 
@@ -46,6 +52,11 @@ public interface ClientTableColumnsName {
      * The constant undo_log column name log_status
      */
     String UNDO_LOG_LOG_STATUS = "log_status";
+
+    /**
+     * The constant undo_log column name compress_type
+     */
+    String UNDO_LOG_COMPRESS_TYPE = "compress_type";
 
     /**
      * The constant undo_log column name log_created
