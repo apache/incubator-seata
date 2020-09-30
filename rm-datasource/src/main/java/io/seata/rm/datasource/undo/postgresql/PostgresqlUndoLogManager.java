@@ -16,11 +16,10 @@
 package io.seata.rm.datasource.undo.postgresql;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
-import io.seata.core.model.CompressType;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import io.seata.rm.datasource.util.CompressUtil;
 import io.seata.sqlparser.util.JdbcConstants;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -77,26 +76,26 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-                                           CompressType compressType, Connection conn) throws SQLException {
+                                           CompressorType compressType, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, compressType, State.Normal, conn);
     }
 
     @Override
     protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
         byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-        CompressType compressType = CompressType.get(rs.getString(ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE));
+        CompressorType compressType = CompressorType.getByCode(rs.getInt(ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE));
 
-        return CompressUtil.decompress(rollbackInfo, compressType);
+        return getCompressor(compressType).decompress(rollbackInfo);
     }
 
     @Override
     protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser,
         Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(parser.getName()), parser.getDefaultContent(), CompressType.NONE,
+        insertUndoLog(xid, branchId, buildContext(parser.getName()), parser.getDefaultContent(), CompressorType.NONE,
                 State.GlobalFinished, conn);
     }
 
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent, CompressType compressType,
+    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent, CompressorType compressType,
                                State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
@@ -105,7 +104,7 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
             pst.setBytes(4, undoLogContent);
-            pst.setString(5, compressType.getType());
+            pst.setInt(5, compressType.getCode());
             pst.setInt(6, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {

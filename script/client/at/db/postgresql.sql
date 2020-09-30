@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.undo_log
     xid           VARCHAR(100) NOT NULL,
     context       VARCHAR(128) NOT NULL,
     rollback_info BYTEA        NOT NULL,
-    compress_type CHAR(8)      NOT NULL,
+    compress_type INT          NOT NULL,
     log_status    INT          NOT NULL,
     log_created   TIMESTAMP(0) NOT NULL,
     log_modified  TIMESTAMP(0) NOT NULL,

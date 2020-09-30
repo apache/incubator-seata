@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `undo_log`
     `xid`           VARCHAR(100) NOT NULL COMMENT 'global transaction id',
     `context`       VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',
     `rollback_info` LONGBLOB     NOT NULL COMMENT 'rollback info',
-    `compress_type` CHAR(8)      NOT NULL COMMENT 'compress type',
+    `compress_type` TINYINT      NOT NULL COMMENT 'compress type',
     `log_status`    INT(11)      NOT NULL COMMENT '0:normal status,1:defense status',
     `log_created`   DATETIME(6)  NOT NULL COMMENT 'create datetime',
     `log_modified`  DATETIME(6)  NOT NULL COMMENT 'modify datetime',
