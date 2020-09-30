@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The type Framework exception test.
+ * The test for {@link FrameworkException}
  *
  * @author Otis.z
  */
@@ -36,11 +36,11 @@ public class FrameworkExceptionTest {
      */
     @Test
     public void testGetErrcode() {
-        Throwable throwable = Assertions.assertThrows(FrameworkException.class, () -> {
+        FrameworkException throwable = Assertions.assertThrows(FrameworkException.class, () -> {
             message.print4();
         });
         assertThat(throwable).hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
-        assertThat(((FrameworkException)throwable).getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
+        assertThat(throwable.getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
     }
 
     /**
@@ -52,6 +52,10 @@ public class FrameworkExceptionTest {
             message.print();
         });
         assertThat(throwable).hasMessage("");
+
+        FrameworkException ex = new FrameworkException();
+        FrameworkException ex2 = FrameworkException.nestedException(ex);
+        Assertions.assertSame(ex, ex2);
     }
 
     /**
@@ -140,6 +144,16 @@ public class FrameworkExceptionTest {
             message.print9();
         });
         assertThat(throwable).hasMessage("frameworkExceptionMsg");
+    }
+
+    /**
+     * Test nested sql exception.
+     */
+    @Test
+    public void testNestedSQLException() {
+        SQLException ex = new SQLException();
+        SQLException ex2 = FrameworkException.nestedSQLException(ex);
+        Assertions.assertSame(ex, ex2);
     }
 
     private static void exceptionAsserts(FrameworkException exception, String expectMessage) {
