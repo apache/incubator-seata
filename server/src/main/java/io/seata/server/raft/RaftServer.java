@@ -73,9 +73,7 @@ public class RaftServer implements ConfigurationChangeListener {
         this.node = this.raftGroupService.start();
     }
 
-    public RaftServer() {
-
-    }
+    public RaftServer() {}
 
     public Node getNode() {
         return this.node;

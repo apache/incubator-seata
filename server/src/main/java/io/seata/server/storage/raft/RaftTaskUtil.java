@@ -17,7 +17,6 @@ package io.seata.server.storage.raft;
 
 import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.serialization.SerializerManager;
-import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import io.seata.server.raft.RaftServerFactory;
 import io.seata.server.storage.raft.session.RaftSessionManager;
