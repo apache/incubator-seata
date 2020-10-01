@@ -160,7 +160,7 @@
       "name": "seata.client.undo.compress.type",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties",
-      "defaultValue": "gzip"
+      "defaultValue": "zip"
     },
     {
       "name": "seata.client.undo.compress.threshold",

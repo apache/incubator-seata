@@ -104,7 +104,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_CLIENT_UNDO_COMPRESS_TYPE
      */
-    String DEFAULT_CLIENT_UNDO_COMPRESS_TYPE = "gzip";
+    String DEFAULT_CLIENT_UNDO_COMPRESS_TYPE = "zip";
 
     /**
      * the constant DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD

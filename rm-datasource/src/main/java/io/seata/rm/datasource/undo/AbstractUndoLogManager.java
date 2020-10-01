@@ -239,12 +239,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         CompressorType compressorType = CompressorType.NONE;
         if (ROLLBACK_INFO_COMPRESS_ENABLE && undoLogContent.length > ROLLBACK_INFO_COMPRESS_THRESHOLD) {
             compressorType = ROLLBACK_INFO_COMPRESS_TYPE;
-            long start = System.currentTimeMillis();
-            long beforeSize = undoLogContent.length;
-
             undoLogContent = getCompressor(compressorType).compress(undoLogContent);
-
-            LOGGER.debug("compress size from {} to {}, usage :{}", beforeSize, undoLogContent.length, (System.currentTimeMillis() - start));
         }
 
         if (LOGGER.isDebugEnabled()) {

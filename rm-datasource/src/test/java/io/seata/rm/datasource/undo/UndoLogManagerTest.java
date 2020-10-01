@@ -88,4 +88,8 @@ public class UndoLogManagerTest {
         assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_STRING);
     }
 
+    @Test
+    public void testCompress() {
+
+    }
 }
