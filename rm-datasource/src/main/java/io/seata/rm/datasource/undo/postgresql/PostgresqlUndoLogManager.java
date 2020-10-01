@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.postgresql;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -85,7 +86,7 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
         byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
         CompressorType compressType = CompressorType.getByCode(rs.getInt(ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE));
 
-        return getCompressor(compressType).decompress(rollbackInfo);
+        return CompressorFactory.getCompressor(compressType.getCode()).decompress(rollbackInfo);
     }
 
     @Override

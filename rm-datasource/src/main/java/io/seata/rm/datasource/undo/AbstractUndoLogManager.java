@@ -32,6 +32,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.SizeUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.Compressor;
+import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.constants.ConfigurationKeys;
@@ -96,17 +97,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     protected static final CompressorType ROLLBACK_INFO_COMPRESS_TYPE = CompressorType.getByName(ConfigurationFactory.getInstance().getConfig(
         ConfigurationKeys.CLIENT_UNDO_COMPRESS_TYPE, DEFAULT_CLIENT_UNDO_COMPRESS_TYPE));
 
-    protected static final Map<CompressorType, Compressor> COMPRESSOR_MAP = new HashMap<>(2, 1.01f);
-
     protected static final long ROLLBACK_INFO_COMPRESS_THRESHOLD = SizeUtil.size2Long(ConfigurationFactory.getInstance().getConfig(
             ConfigurationKeys.CLIENT_UNDO_COMPRESS_THRESHOLD, DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD));
 
     private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
-
-    static {
-        COMPRESSOR_MAP.put(ROLLBACK_INFO_COMPRESS_TYPE, EnhancedServiceLoader.load(Compressor.class, ROLLBACK_INFO_COMPRESS_TYPE.name()));
-        COMPRESSOR_MAP.put(CompressorType.NONE, EnhancedServiceLoader.load(Compressor.class, ROLLBACK_INFO_COMPRESS_TYPE.name()));
-    }
 
     public static String getCurrentSerializer() {
         return SERIALIZER_LOCAL.get();
@@ -237,9 +231,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         byte[] undoLogContent = parser.encode(branchUndoLog);
 
         CompressorType compressorType = CompressorType.NONE;
-        if (ROLLBACK_INFO_COMPRESS_ENABLE && undoLogContent.length > ROLLBACK_INFO_COMPRESS_THRESHOLD) {
+        if (needCompress(undoLogContent)) {
             compressorType = ROLLBACK_INFO_COMPRESS_TYPE;
-            undoLogContent = getCompressor(compressorType).compress(undoLogContent);
+            undoLogContent = CompressorFactory.getCompressor(compressorType.getCode()).compress(undoLogContent);
         }
 
         if (LOGGER.isDebugEnabled()) {
@@ -424,11 +418,12 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     protected abstract byte[] getRollbackInfo(ResultSet rs) throws SQLException;
 
-    protected static Compressor getCompressor(CompressorType compressorType) {
-        Compressor compressor = COMPRESSOR_MAP.get(compressorType);
-        if (null == compressor) {
-            COMPRESSOR_MAP.put(compressorType, EnhancedServiceLoader.load(Compressor.class, compressorType.name()));
-        }
-        return COMPRESSOR_MAP.get(compressorType);
+    /**
+     * if the undoLogContent is big enough to be compress
+     * @param undoLogContent
+     * @return
+     */
+    protected boolean needCompress(byte[] undoLogContent) {
+        return ROLLBACK_INFO_COMPRESS_ENABLE && undoLogContent.length > ROLLBACK_INFO_COMPRESS_THRESHOLD;
     }
 }
