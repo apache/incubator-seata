@@ -27,11 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import io.seata.common.Constants;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.SizeUtil;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;

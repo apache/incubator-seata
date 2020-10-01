@@ -44,7 +44,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
 
 
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-            " (" + ClientTableColumnsName.UNDO_LOG_ID + "," +ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
+            " (" + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE + ","
             + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
