@@ -13,82 +13,61 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource;
+package io.seata.rm.datasource.mock;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
- * The type Abstract data source proxy.
- *
- * @author sharajava
+ * @author wang.liang
  */
-public abstract class AbstractDataSourceProxy implements SeataDataSourceProxy {
-
-    /**
-     * The Target data source.
-     */
-    protected DataSource targetDataSource;
-
-    /**
-     * Instantiates a new Abstract data source proxy.
-     */
-    public AbstractDataSourceProxy(){}
-
-    /**
-     * Instantiates a new Abstract data source proxy.
-     *
-     * @param targetDataSource the target data source
-     */
-    public AbstractDataSourceProxy(DataSource targetDataSource) {
-        this.targetDataSource = targetDataSource;
+public class MockDataSource implements DataSource {
+    @Override
+    public Connection getConnection() throws SQLException {
+        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata", null);
     }
 
-    /**
-     * Gets target data source.
-     *
-     * @return the target data source
-     */
     @Override
-    public DataSource getTargetDataSource() {
-        return targetDataSource;
+    public Connection getConnection(String username, String password) throws SQLException {
+        return null;
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return targetDataSource.unwrap(iface);
+        return null;
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return targetDataSource.isWrapperFor(iface);
+        return false;
     }
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        return targetDataSource.getLogWriter();
+        return null;
     }
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-        targetDataSource.setLogWriter(out);
+
     }
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-        targetDataSource.setLoginTimeout(seconds);
+
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        return targetDataSource.getLoginTimeout();
+        return 0;
     }
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return targetDataSource.getParentLogger();
+        return null;
     }
 }

@@ -60,11 +60,26 @@ public enum BranchType {
      * @return the branch type
      */
     public static BranchType get(int ordinal) {
-        for (BranchType branchType : BranchType.values()) {
+        for (BranchType branchType : values()) {
             if (branchType.ordinal() == ordinal) {
                 return branchType;
             }
         }
         throw new IllegalArgumentException("Unknown BranchType[" + ordinal + "]");
+    }
+
+    /**
+     * Get branch type.
+     *
+     * @param name the name
+     * @return the branch type
+     */
+    public static BranchType get(String name) {
+        for (BranchType branchType : values()) {
+            if (branchType.name().equalsIgnoreCase(name)) {
+                return branchType;
+            }
+        }
+        throw new IllegalArgumentException("Unknown BranchType[" + name + "]");
     }
 }
