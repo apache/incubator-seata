@@ -16,17 +16,19 @@
 package io.seata.core.context;
 
 import java.util.Map;
+import javax.annotation.Nonnull;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.common.DefaultValues;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import static io.seata.core.model.BranchType.AT;
+import static io.seata.core.model.BranchType.XA;
 
 /**
  * The type Root context.
@@ -58,8 +60,16 @@ public class RootContext {
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
-    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
+    private static BranchType DEFAULT_BRANCH_TYPE = BranchType.get(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE));
+
+    public static void setDefaultBranchType(BranchType defaultBranchType) {
+        if (defaultBranchType != AT && defaultBranchType != XA) {
+            throw new IllegalArgumentException("The default branch type must be AT or XA." +
+                    " the value of the argument is: " + defaultBranchType);
+        }
+        DEFAULT_BRANCH_TYPE = defaultBranchType;
+    }
 
     /**
      * Gets xid.
@@ -156,8 +166,8 @@ public class RootContext {
             if (branchType != null) {
                 return branchType;
             }
-            //default branchType is the dataSourceProxyMode
-            return BranchType.XA.name().equalsIgnoreCase(DATA_SOURCE_PROXY_MODE) ? BranchType.XA : BranchType.AT;
+            //Returns the default branch type.
+            return DEFAULT_BRANCH_TYPE;
         }
         return null;
     }
