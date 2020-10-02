@@ -13,17 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.grpc.interceptor;
+package io.seata.rm.datasource;
 
-import io.grpc.Metadata;
-import io.seata.core.context.RootContext;
+import javax.sql.DataSource;
+
+import io.seata.core.model.BranchType;
 
 /**
- * @author eddyxu1213@126.com
+ * The interface Seata data source.
+ *
+ * @author wang.liang
  */
-public interface GrpcHeaderKey {
+public interface SeataDataSourceProxy extends DataSource {
 
-    Metadata.Key<String> HEADER_KEY = Metadata.Key.of(RootContext.KEY_XID, Metadata.ASCII_STRING_MARSHALLER);
+    /**
+     * Gets target data source.
+     *
+     * @return the target data source
+     */
+    DataSource getTargetDataSource();
 
-    Metadata.Key<String> HEADER_KEY_LOWERCASE = Metadata.Key.of(RootContext.KEY_XID.toLowerCase(), Metadata.ASCII_STRING_MARSHALLER);
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
+    BranchType getBranchType();
 }
