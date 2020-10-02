@@ -15,10 +15,12 @@
  */
 package io.seata.rm.datasource;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,17 @@ import org.junit.jupiter.api.Test;
  * @author ph3636
  */
 public class DataSourceProxyTest {
+
+    @Test
+    public void test_constructor() {
+        DataSource dataSource = new MockDataSource();
+
+        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+        Assertions.assertEquals(dataSourceProxy.getTargetDataSource(), dataSource);
+
+        DataSourceProxy dataSourceProxy2 = new DataSourceProxy(dataSourceProxy);
+        Assertions.assertEquals(dataSourceProxy2.getTargetDataSource(), dataSource);
+    }
 
     @Test
     public void getResourceIdTest() throws SQLException, NoSuchFieldException, IllegalAccessException {

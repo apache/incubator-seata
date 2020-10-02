@@ -17,6 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
+import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
@@ -34,6 +35,7 @@ import org.springframework.context.annotation.DependsOn;
 import static io.seata.common.Constants.BEAN_NAME_FAILURE_HANDLER;
 import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR;
+import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -67,11 +69,30 @@ public class SeataAutoConfiguration {
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
 
-    @Bean(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)
+    /**
+     * The data source configuration.
+     */
+    @Configuration
     @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = {"enableAutoDataSourceProxy", "enable-auto-data-source-proxy"}, havingValue = "true", matchIfMissing = true)
-    @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
-    public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator(SeataProperties seataProperties) {
-        return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(),
-            seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
+    static class SeataDataSourceConfiguration {
+
+        /**
+         * The bean seataDataSourceBeanPostProcessor.
+         */
+        @Bean(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)
+        @ConditionalOnMissingBean(SeataDataSourceBeanPostProcessor.class)
+        public SeataDataSourceBeanPostProcessor seataDataSourceBeanPostProcessor(SeataProperties seataProperties) {
+            return new SeataDataSourceBeanPostProcessor(seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
+        }
+
+        /**
+         * The bean seataAutoDataSourceProxyCreator.
+         */
+        @Bean(BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR)
+        @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
+        public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator(SeataProperties seataProperties) {
+            return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(),
+                    seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
+        }
     }
 }
