@@ -180,7 +180,7 @@ class NettyClientChannelManager {
             }
 
             if (!(registryService instanceof FileRegistryServiceImpl)) {
-                LOGGER.error("no available service found, please make sure registry config correct and keep your seata server running");
+                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
             }
             return;
         }
