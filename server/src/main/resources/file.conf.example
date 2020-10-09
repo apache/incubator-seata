@@ -89,7 +89,7 @@ server {
       type = gzip
       # if rollback info size > threshold, then will be compress
       # allow k m g t
-      threshold = 8k
+      threshold = 64k
     }
   }
   #check auth
