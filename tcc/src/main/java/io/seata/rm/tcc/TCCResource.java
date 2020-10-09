@@ -176,9 +176,8 @@ public class TCCResource implements Resource {
      *
      * @param commitType the commit type
      */
-    public TCCResource setCommitType(CommitType commitType) {
+    public void setCommitType(CommitType commitType) {
         this.commitType = commitType;
-        return this;
     }
 
     /**
