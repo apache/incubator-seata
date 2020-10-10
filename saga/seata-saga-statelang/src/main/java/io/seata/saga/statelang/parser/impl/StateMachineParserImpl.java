@@ -75,7 +75,7 @@ public class StateMachineParserImpl implements StateMachineParser {
 
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
         statesNode.forEach((stateName, value) -> {
-            Map<String, Object>stateNode = (Map<String, Object>) value;
+            Map<String, Object> stateNode = (Map<String, Object>) value;
             String stateType = (String) stateNode.get("Type");
             StateParser<?> stateParser = StateParserFactory.getStateParser(stateType);
             if (stateParser == null) {
