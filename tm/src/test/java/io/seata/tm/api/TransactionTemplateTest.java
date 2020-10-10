@@ -15,7 +15,9 @@
  */
 package io.seata.tm.api;
 
-import io.seata.core.context.RootContext;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -25,13 +27,9 @@ import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -156,16 +154,4 @@ public class TransactionTemplateTest {
         verify(transactionHook).afterRollback();
         verify(transactionHook).afterCompletion();
     }
-
-
-    @Test
-    public void testExistingTransaction(){
-        RootContext.bind(DEFAULT_XID);
-        TransactionalTemplate template = new TransactionalTemplate();
-        Assertions.assertTrue(template.existingTransaction(),"Existing transaction");
-
-        RootContext.unbind();
-        Assertions.assertFalse(template.existingTransaction(),"No existing transaction");
-    }
-
 }
