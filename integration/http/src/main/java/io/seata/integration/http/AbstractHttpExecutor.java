@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Abstract http executor.
@@ -157,8 +157,14 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     }
 
     public static Map<String, String> convert(Map<String, Object> param) {
-        return param.keySet().stream()
-                .filter(key -> param.get(key) != null)
-                .collect(Collectors.toMap(key -> key, key -> param.get(key).toString()));
+        Map<String, String> covertMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(param)) {
+            param.forEach((key, value) -> {
+                if (value != null) {
+                    covertMap.put(key, value.toString());
+                }
+            });
+        }
+        return covertMap;
     }
 }
