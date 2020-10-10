@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class ServerOnRequestProcessor implements RemotingProcessor {
+public class ServerOnRequestProcessor extends AbstractRemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
@@ -76,18 +76,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         if (ChannelManager.isRegistered(ctx.channel())) {
             onRequestMessage(ctx, rpcMessage);
         } else {
-            try {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
-                }
-                ctx.disconnect();
-                ctx.close();
-            } catch (Exception exx) {
-                LOGGER.error(exx.getMessage());
-            }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(String.format("close a unhandled connection! [%s]", ctx.channel().toString()));
-            }
+            super.close(ctx);
         }
     }
 

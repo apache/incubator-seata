@@ -25,10 +25,8 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -43,7 +41,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class ServerOnResponseProcessor implements RemotingProcessor {
+public class ServerOnResponseProcessor extends AbstractRemotingProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
@@ -72,18 +70,7 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
             if (ChannelManager.isRegistered(ctx.channel())) {
                 onResponseMessage(ctx, rpcMessage);
             } else {
-                try {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
-                    }
-                    ctx.disconnect();
-                    ctx.close();
-                } catch (Exception exx) {
-                    LOGGER.error(exx.getMessage());
-                }
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info(String.format("close a unhandled connection! [%s]", ctx.channel().toString()));
-                }
+                super.close(ctx);
             }
         }
     }
