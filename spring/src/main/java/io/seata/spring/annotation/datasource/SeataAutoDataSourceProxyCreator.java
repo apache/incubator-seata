@@ -17,6 +17,7 @@ package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
 import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +32,11 @@ import org.springframework.beans.BeansException;
  */
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoDataSourceProxyCreator.class);
-    private final String[] excludes;
+    private final List<String> excludes;
     private final Advisor advisor;
 
     public SeataAutoDataSourceProxyCreator(boolean useJdkProxy, String[] excludes, String dataSourceProxyMode) {
-        this.excludes = excludes;
+        this.excludes = Arrays.asList(excludes);
         this.advisor = new DefaultIntroductionAdvisor(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
         setProxyTargetClass(!useJdkProxy);
     }
@@ -50,8 +51,8 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected boolean shouldSkip(Class<?> beanClass, String beanName) {
-        return SeataProxy.class.isAssignableFrom(beanClass) ||
-            !DataSource.class.isAssignableFrom(beanClass) ||
-            Arrays.asList(excludes).contains(beanClass.getName());
+        return !DataSource.class.isAssignableFrom(beanClass) ||
+            SeataProxy.class.isAssignableFrom(beanClass) ||
+            excludes.contains(beanClass.getName());
     }
 }
