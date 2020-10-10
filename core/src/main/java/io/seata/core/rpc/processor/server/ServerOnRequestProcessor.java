@@ -34,7 +34,6 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +71,7 @@ public class ServerOnRequestProcessor extends AbstractRemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         if (ChannelManager.isRegistered(ctx.channel())) {
             onRequestMessage(ctx, rpcMessage);
         } else {
