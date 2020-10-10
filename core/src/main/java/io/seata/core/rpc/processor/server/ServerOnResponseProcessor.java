@@ -48,12 +48,12 @@ public class ServerOnResponseProcessor extends AbstractRemotingProcessor {
     /**
      * To handle the received RPC message on upper level.
      */
-    private TransactionMessageHandler transactionMessageHandler;
+    private final TransactionMessageHandler transactionMessageHandler;
 
     /**
      * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
-    private ConcurrentMap<Integer, MessageFuture> futures;
+    private final ConcurrentMap<Integer, MessageFuture> futures;
 
     public ServerOnResponseProcessor(TransactionMessageHandler transactionMessageHandler,
                                      ConcurrentHashMap<Integer, MessageFuture> futures) {
@@ -62,7 +62,7 @@ public class ServerOnResponseProcessor extends AbstractRemotingProcessor {
     }
 
     @Override
-    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+    public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         MessageFuture messageFuture = futures.remove(rpcMessage.getId());
         if (messageFuture != null) {
             messageFuture.setResultMessage(rpcMessage.getBody());
