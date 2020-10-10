@@ -398,6 +398,17 @@
       ]
     },
     {
+      "name": "seata.client.undo.compress.type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.core.compressor.CompressorType"
+          }
+        }
+      ]
+    },
+    {
       "name": "seata.transport.thread-factory.worker-thread-size",
       "providers": [
         {
