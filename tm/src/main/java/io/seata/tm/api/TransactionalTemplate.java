@@ -70,7 +70,7 @@ public class TransactionalTemplate {
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (existingTransaction(tx)) {
                         suspendedResourcesHolder = tx.suspend(true);
-                        tx = null;
+                        tx = GlobalTransactionContext.createNew();
                     }
                     // Continue and execute with new transaction
                     break;
@@ -138,7 +138,7 @@ public class TransactionalTemplate {
         } finally {
             // If the transaction is suspended, resume it.
             if (suspendedResourcesHolder != null) {
-                suspendedResourcesHolder.resume();
+                tx.resume(suspendedResourcesHolder);
             }
         }
     }

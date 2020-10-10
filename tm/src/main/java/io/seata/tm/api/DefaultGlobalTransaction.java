@@ -191,7 +191,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         } else {
             xid = null;
         }
-        return new SuspendedResourcesHolder(xid, this);
+        return new SuspendedResourcesHolder(xid);
     }
 
     @Override
