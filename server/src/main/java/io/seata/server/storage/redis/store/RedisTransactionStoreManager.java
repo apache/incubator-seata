@@ -353,7 +353,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
             }
             List<GlobalSession> globalSessions = new ArrayList<>();
-            xids.parallelStream().forEach(xid -> globalSessions.add(this.readSession(xid,true)));
+            xids.parallelStream().forEach(xid -> {
+                GlobalSession globalSession = this.readSession(xid, true);
+                if (globalSession != null) {
+                    globalSessions.add(globalSession);
+                }
+            });
             return globalSessions;
         }
     }
@@ -367,10 +372,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
-            globalSessions.add(this.readSession(sessionCondition.getXid(), true));
+            GlobalSession globalSession = this.readSession(sessionCondition.getXid(), true);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
+            }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
-            globalSessions.add(this.readSessionByTransactionId(sessionCondition.getTransactionId().toString(),true));
+            GlobalSession globalSession = this
+                    .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
+            }
             return globalSessions;
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
@@ -387,7 +399,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return the global session with branch session
      */
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
-        List<BranchTransactionDO> branchTransactionDOs) {
+            List<BranchTransactionDO> branchTransactionDOs) {
         GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
