@@ -19,6 +19,7 @@ package io.seata.common.util;
  * @author chd
  */
 public class SizeUtil {
+    private static final long RADIX = 1024;
     /**
      * case size to byte length
      * example:
@@ -45,13 +46,13 @@ public class SizeUtil {
 
         switch (unit) {
             case 'k':
-                return number * 1024;
+                return number * RADIX;
             case 'm':
-                return number * 1024 * 1024;
+                return number * RADIX * RADIX;
             case 'g':
-                return number * 1024 * 1024 * 1024;
+                return number * RADIX * RADIX * RADIX;
             case 't':
-                return number * 1024 * 1024 * 1024 * 1024;
+                return number * RADIX * RADIX * RADIX * RADIX;
             default:
                 throw new IllegalArgumentException("could not convert " + size + " to byte length");
         }
