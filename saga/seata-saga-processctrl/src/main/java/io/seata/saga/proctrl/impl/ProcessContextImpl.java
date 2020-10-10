@@ -68,18 +68,14 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
         if (parent != null) {
             collectedVariables.putAll(parent.getVariables());
         }
-        variables.forEach((name, value) -> {
-            collectedVariables.put(name, value);
-        });
+        variables.forEach(collectedVariables::put);
         return collectedVariables;
     }
 
     @Override
     public void setVariables(final Map<String, Object> variables) {
         if (variables != null) {
-            variables.forEach((name, value) -> {
-                setVariable(name, value);
-            });
+            variables.forEach(this::setVariable);
         }
     }
 

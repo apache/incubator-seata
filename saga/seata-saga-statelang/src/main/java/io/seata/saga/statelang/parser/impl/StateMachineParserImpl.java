@@ -77,7 +77,7 @@ public class StateMachineParserImpl implements StateMachineParser {
         statesNode.forEach((stateName, value) -> {
             Map<String, Object>stateNode = (Map<String, Object>) value;
             String stateType = (String) stateNode.get("Type");
-            StateParser stateParser = StateParserFactory.getStateParser(stateType);
+            StateParser<?> stateParser = StateParserFactory.getStateParser(stateType);
             if (stateParser == null) {
                 throw new IllegalArgumentException("State Type [" + stateType + "] is not support");
             }

@@ -114,14 +114,15 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
-    private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest, Map<String, String> headers) throws IOException {
+    private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest,
+            Map<String, String> headers) throws IOException {
         CloseableHttpResponse response;
         String xid = RootContext.getXID();
         if (xid != null) {
             headers.put(RootContext.KEY_XID, xid);
         }
         if (!headers.isEmpty()) {
-            headers.keySet().forEach(key -> httpUriRequest.addHeader(key, headers.get(key)));
+            headers.forEach(httpUriRequest::addHeader);
         }
         response = httpClient.execute(httpUriRequest);
         int statusCode = response.getStatusLine().getStatusCode();
