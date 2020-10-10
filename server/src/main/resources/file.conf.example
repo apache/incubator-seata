@@ -83,14 +83,6 @@ server {
     logSaveDays = 7
     #schedule delete expired undo_log in milliseconds
     logDeletePeriod = 86400000
-    compress {
-      enable = true
-      // allow zip, gzip, 7z, lz4, bzip2, default is zip
-      type = zip
-      # if rollback info size > threshold, then will be compress
-      # allow k m g t
-      threshold = 64k
-    }
   }
   #check auth
   enableCheckAuth = true
