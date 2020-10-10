@@ -154,7 +154,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return methodInvocation.proceed();
     }
 
-    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
+    Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
         return globalLockTemplate.execute(() -> {
             try {
                 return methodInvocation.proceed();
@@ -166,7 +166,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         });
     }
 
-    private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
+    Object handleGlobalTransaction(final MethodInvocation methodInvocation,
         final GlobalTransactional globalTrxAnno) throws Throwable {
         boolean succeed = true;
         try {

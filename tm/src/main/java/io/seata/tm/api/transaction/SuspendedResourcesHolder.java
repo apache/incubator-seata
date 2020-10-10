@@ -20,15 +20,14 @@ package io.seata.tm.api.transaction;
  * Used by {@code suspend} and {@code resume}
  *
  * @author wangzhongxiang
+ * @author wang.liang
  */
 public class SuspendedResourcesHolder {
 
-    /**The xid*/
+    /**
+     * The xid
+     */
     private String xid;
-
-
-    public SuspendedResourcesHolder() {
-    }
 
     public SuspendedResourcesHolder(String xid) {
         this.xid = xid;
@@ -36,9 +35,5 @@ public class SuspendedResourcesHolder {
 
     public String getXid() {
         return xid;
-    }
-
-    public void setXid(String xid) {
-        this.xid = xid;
     }
 }

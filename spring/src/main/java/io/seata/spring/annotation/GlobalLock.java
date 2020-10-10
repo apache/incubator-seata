@@ -21,12 +21,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.aopalliance.intercept.MethodInvocation;
+
 /**
  * declare the transaction only execute in single local RM,<br/>
  * but the transaction need to ensure records to update(or select for update) is not in global transaction middle
  * stage<br/>
  *
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
+ *
+ * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
+ * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // the interceptor of GlobalLock
+ * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // the interceptor of GlobalLockLogic and AT/XA mode
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.TYPE})

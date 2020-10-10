@@ -22,12 +22,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TCC annotation, Define a TCC interface, which added on the try method
+ * TCC annotation.
+ * Define a TCC interface, which added on the try method.
+ * Must be used with `@LocalTCC`.
  *
  * @author zhangsen
+ * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation, which added on the TCC interface. It can't be left out.
+ * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
+ * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
+@Target({ElementType.METHOD})
 @Inherited
 public @interface TwoPhaseBusinessAction {
 
@@ -36,7 +41,7 @@ public @interface TwoPhaseBusinessAction {
      *
      * @return the string
      */
-    String name() ;
+    String name();
 
     /**
      * commit methed name
@@ -51,5 +56,4 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
-
 }
