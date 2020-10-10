@@ -15,8 +15,10 @@
  */
 package io.seata.common.util;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -194,6 +196,23 @@ public class CollectionUtilsTest {
 
         Assertions.assertEquals("", CollectionUtils.toString(emptyCollection));
         Assertions.assertEquals("[Foo,Bar]", CollectionUtils.toString(filledCollection));
+    }
+
+    @Test
+    public void testObjectMapToStringMap() {
+        Map<String, Object> objMap = new HashMap<>();
+
+        Date now = new Date();
+
+        objMap.put("a", "aa");
+        objMap.put("b", 22);
+        objMap.put("c", now);
+
+        Map<String, String> strMap = CollectionUtils.toStringMap(objMap);
+
+        Assertions.assertEquals("aa", strMap.get("a"));
+        Assertions.assertEquals("22", strMap.get("b"));
+        Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(now), strMap.get("c"));
     }
 
     @Test

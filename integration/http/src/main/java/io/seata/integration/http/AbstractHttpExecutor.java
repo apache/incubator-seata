@@ -149,22 +149,10 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
 
     public static Map<String, String> convertParamOfBean(Object sourceParam) {
-        return convert(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
+        return CollectionUtils.toStringMap(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
     }
 
     public static <T> Map<String, String> convertParamOfJsonString(String jsonstr, Class<T> returnType) {
         return convertParamOfBean(JSON.parseObject(jsonstr, returnType));
-    }
-
-    public static Map<String, String> convert(Map<String, Object> param) {
-        Map<String, String> covertMap = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(param)) {
-            param.forEach((key, value) -> {
-                if (value != null) {
-                    covertMap.put(key, value.toString());
-                }
-            });
-        }
-        return covertMap;
     }
 }

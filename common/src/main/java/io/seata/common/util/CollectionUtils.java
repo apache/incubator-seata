@@ -94,7 +94,7 @@ public class CollectionUtils {
     }
 
     /**
-     * To string string.
+     * To string.
      *
      * @param col the col
      * @return the string
@@ -112,6 +112,24 @@ public class CollectionUtils {
         sb.deleteCharAt(sb.length() - 1);
         sb.append("]");
         return sb.toString();
+    }
+
+    /**
+     * To string map
+     *
+     * @param param map
+     * @return the string map
+     */
+    public static Map<String, String> toStringMap(Map<String, Object> param) {
+        Map<String, String> covertMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(param)) {
+            param.forEach((key, value) -> {
+                if (value != null) {
+                    covertMap.put(key, StringUtils.toString(value));
+                }
+            });
+        }
+        return covertMap;
     }
 
     /**
