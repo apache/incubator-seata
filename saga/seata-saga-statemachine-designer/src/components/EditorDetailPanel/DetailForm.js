@@ -25,6 +25,26 @@ class DetailForm extends React.Component {
     return propsAPI.getSelected()[0] ? propsAPI.getSelected()[0] : lastSelectedItem;
   }
 
+  componentWillMount() {
+    // fix edit node details
+    this.operationDetail();
+  }
+
+  operationDetail = () => {
+    const { propsAPI, form } = this.props;
+    const currentPage = propsAPI.editor.getCurrentPage().getGraph();
+    currentPage.on('node:click', (e) => {
+      const { label, stateId, stateType, stateProps } = e.item.getModel();
+      lastSelectedItem = e.item;
+      form.setFieldsValue({ label, stateId, stateType, stateProps: JSON.stringify(stateProps, null, 2) });
+    });
+    currentPage.on('edge:click', (e) => {
+      const { label = '', shape = 'flow-smooth', stateProps } = e.item.getModel();
+      lastSelectedItem = e.item;
+      form.setFieldsValue({ label, shape, stateProps: JSON.stringify(stateProps, null, 2) });
+    });
+  }
+
   handleSubmit = (e) => {
     if (e && e.preventDefault) {
       e.preventDefault();
@@ -38,13 +58,13 @@ class DetailForm extends React.Component {
         if (err) {
           return;
         }
-
+        
         const item = this.item;
-
+        
         if (!item) {
           return;
         }
-
+        
         if (values.stateProps) {
           values.stateProps = JSON.parse(values.stateProps);
         }
@@ -73,7 +93,7 @@ class DetailForm extends React.Component {
   renderNodeDetail = () => {
     const { form } = this.props;
     const { label, stateId, stateType, stateProps } = this.item.getModel();
-
+    
     return (
       <Fragment>
         <Item label="Label" {...inlineFormItemLayout}>
