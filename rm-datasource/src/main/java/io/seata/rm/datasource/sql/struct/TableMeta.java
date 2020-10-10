@@ -114,14 +114,13 @@ public class TableMeta {
      */
     public Map<String, ColumnMeta> getPrimaryKeyMap() {
         Map<String, ColumnMeta> pk = new HashMap<>();
-        for (Entry<String, IndexMeta> entry : allIndexes.entrySet()) {
-            IndexMeta index = entry.getValue();
+        allIndexes.forEach((key, index) -> {
             if (index.getIndextype().value() == IndexType.PRIMARY.value()) {
                 for (ColumnMeta col : index.getValues()) {
                     pk.put(col.getColumnName(), col);
                 }
             }
-        }
+        });
 
         if (pk.size() < 1) {
             throw new NotSupportYetException(String.format("%s needs to contain the primary key.", tableName));

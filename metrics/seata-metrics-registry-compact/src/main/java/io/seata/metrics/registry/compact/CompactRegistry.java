@@ -65,10 +65,11 @@ public class CompactRegistry implements Registry {
     @Override
     public Iterable<Measurement> measure() {
         final List<Measurement> measurements = new ArrayList<>();
-        if (!METERS.isEmpty()) {
-            METERS.values().iterator()
-                .forEachRemaining(meter -> meter.measure().forEach(measurements::add));
+        if (METERS.isEmpty()) {
+            return measurements;
         }
+        METERS.values().iterator()
+                .forEachRemaining(meter -> meter.measure().forEach(measurements::add));
         return measurements;
     }
 }

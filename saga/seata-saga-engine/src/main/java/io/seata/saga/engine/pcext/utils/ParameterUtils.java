@@ -107,13 +107,12 @@ public class ParameterUtils {
         } else if (valueExpression instanceof Map) {
             Map<String, Object> mapValueExpression = (Map<String, Object>)valueExpression;
             Map<String, Object> mapValue = new LinkedHashMap<>();
-            Object value;
-            for (Map.Entry<String, Object> entry : mapValueExpression.entrySet()) {
-                value = getValue(entry.getValue(), variablesFrom, stateInstance);
+            mapValueExpression.forEach((key, value) -> {
+                value = getValue(value, variablesFrom, stateInstance);
                 if (value != null) {
-                    mapValue.put(entry.getKey(), value);
+                    mapValue.put(key, value);
                 }
-            }
+            });
             return mapValue;
         } else if (valueExpression instanceof List) {
             List<Object> listValueExpression = (List<Object>)valueExpression;
@@ -137,11 +136,9 @@ public class ParameterUtils {
         } else if (paramAssignment instanceof Map) {
             Map<String, Object> paramMapAssignment = (Map<String, Object>)paramAssignment;
             Map<String, Object> paramMap = new LinkedHashMap<>(paramMapAssignment.size());
-            Object valueAssignment;
-            for (Map.Entry<String, Object> entry : paramMapAssignment.entrySet()) {
-                valueAssignment = entry.getValue();
-                paramMap.put(entry.getKey(), createValueExpression(expressionFactoryManager, valueAssignment));
-            }
+            paramMapAssignment.forEach((paramName, valueAssignment) -> {
+                paramMap.put(paramName, createValueExpression(expressionFactoryManager, valueAssignment));
+            });
             valueExpression = paramMap;
         } else if (paramAssignment instanceof List) {
             List<Object> paramListAssignment = (List<Object>)paramAssignment;

@@ -201,11 +201,11 @@ public class CollectionUtilsTest {
         // case 1: null
         Assertions.assertNull(CollectionUtils.getLast(null));
 
-        // case 2: empty list
+        // case 2: empty
         List<String> emptyList = Collections.EMPTY_LIST;
         Assertions.assertNull(CollectionUtils.getLast(emptyList));
 
-        // case 3: un empty list
+        // case 3: not empty
         List<String> list = new ArrayList<>();
         list.add("Foo");
         list.add("Bar");

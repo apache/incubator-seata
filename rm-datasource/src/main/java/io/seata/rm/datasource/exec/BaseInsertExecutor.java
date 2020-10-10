@@ -162,12 +162,16 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                             currentRowPlaceholderNum += 1;
                         }
                     }
-                    for (String pkKey : pkIndexMap.keySet()) {
-                        List<Object> pkValues = pkValuesMap.get(pkKey);
+                    String pkKey;
+                    int pkIndex;
+                    List<Object> pkValues;
+                    for (Map.Entry<String, Integer> entry : pkIndexMap.entrySet()) {
+                        pkKey = entry.getKey();
+                        pkValues = pkValuesMap.get(pkKey);
                         if (Objects.isNull(pkValues)) {
                             pkValues = new ArrayList<>(rowSize);
                         }
-                        int pkIndex = pkIndexMap.get(pkKey);
+                        pkIndex = entry.getValue();
                         Object pkValue = row.get(pkIndex);
                         if (PLACEHOLDER.equals(pkValue)) {
                             int currentRowNotPlaceholderNumBeforePkIndex = 0;
@@ -191,21 +195,16 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             }
         } else {
             ps = false;
-            String pkKey;
-            int pkIndex;
-            List<Object> pkValues;
             List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
             for (List<Object> row : insertRows) {
-                for (Map.Entry<String, Integer> entry : pkIndexMap.entrySet()) {
-                    pkKey = entry.getKey();
-                    pkIndex = entry.getValue();
-                    pkValues = pkValuesMap.get(pkKey);
+                pkIndexMap.forEach((pkKey, pkIndex) -> {
+                    List<Object> pkValues = pkValuesMap.get(pkKey);
                     if (Objects.isNull(pkValues)) {
                         pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), Lists.newArrayList(row.get(pkIndex)));
                     } else {
                         pkValues.add(row.get(pkIndex));
                     }
-                }
+                });
             }
         }
         if (pkValuesMap.isEmpty()) {

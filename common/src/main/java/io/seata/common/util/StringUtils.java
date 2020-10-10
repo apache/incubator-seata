@@ -204,10 +204,10 @@ public class StringUtils {
             StringBuilder sb = new StringBuilder();
             sb.append("{");
             if (!map.isEmpty()) {
-                for (Map.Entry<Object, Object> entry : map.entrySet()) {
-                    sb.append(toString(entry.getKey())).append("->")
-                            .append(toString(entry.getValue())).append(",");
-                }
+                map.forEach((key, value) -> {
+                    sb.append(toString(key)).append("->")
+                        .append(toString(value)).append(",");
+                });
                 sb.deleteCharAt(sb.length() - 1);
             }
             sb.append("}");

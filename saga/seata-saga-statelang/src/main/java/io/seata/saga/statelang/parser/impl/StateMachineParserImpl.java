@@ -74,11 +74,8 @@ public class StateMachineParserImpl implements StateMachineParser {
         }
 
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
-        String stateName;
-        Map<String, Object> stateNode;
-        for (Map.Entry<String, Object> entry : statesNode.entrySet()) {
-            stateName = entry.getKey();
-            stateNode = (Map<String, Object>) entry.getValue();
+        statesNode.forEach((stateName, value) -> {
+            Map<String, Object>stateNode = (Map<String, Object>) value;
             String stateType = (String) stateNode.get("Type");
             StateParser stateParser = StateParserFactory.getStateParser(stateType);
             if (stateParser == null) {
@@ -93,7 +90,7 @@ public class StateMachineParserImpl implements StateMachineParser {
                 throw new IllegalArgumentException("State[name:" + stateName + "] is already exists");
             }
             stateMachine.putState(stateName, state);
-        }
+        });
 
         Map<String, State> stateMap = stateMachine.getStates();
         for (State state : stateMap.values()) {

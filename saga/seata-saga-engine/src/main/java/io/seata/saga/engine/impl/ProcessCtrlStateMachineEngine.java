@@ -60,13 +60,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     private StateMachineConfig stateMachineConfig;
 
     private static void nullSafeCopy(Map<String, Object> srcMap, Map<String, Object> destMap) {
-        Object value;
-        for (Map.Entry<String, Object> entry : srcMap.entrySet()) {
-            value = entry.getValue();
+        srcMap.forEach((key, value) -> {
             if (value != null) {
-                destMap.put(entry.getKey(), value);
+                destMap.put(key, value);
             }
-        }
+        });
     }
 
     @Override

@@ -316,14 +316,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
                 }
                 isSending = true;
-                String address;
-                BlockingQueue<RpcMessage> basket;
-                for (Map.Entry<String, BlockingQueue<RpcMessage>> entry : basketMap.entrySet()) {
-                    basket = entry.getValue();
+                basketMap.forEach((address, basket) -> {
                     if (basket.isEmpty()) {
-                        continue;
+                        return;
                     }
-                    address = entry.getKey();
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
                     while (!basket.isEmpty()) {
@@ -354,7 +350,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
-                }
+                });
                 isSending = false;
             }
         }

@@ -63,23 +63,23 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public Map<String, Object> getVariables() {
-        Map<String, Object> collectedVariables = new HashMap<>();
+        final Map<String, Object> collectedVariables = new HashMap<>();
 
         if (parent != null) {
             collectedVariables.putAll(parent.getVariables());
         }
-        for (Map.Entry<String, Object> entry : variables.entrySet()) {
-            collectedVariables.put(entry.getKey(), entry.getValue());
-        }
+        variables.forEach((name, value) -> {
+            collectedVariables.put(name, value);
+        });
         return collectedVariables;
     }
 
     @Override
-    public void setVariables(Map<String, Object> variables) {
+    public void setVariables(final Map<String, Object> variables) {
         if (variables != null) {
-            for (Map.Entry<String, Object> entry : variables.entrySet()) {
-                setVariable(entry.getKey(), entry.getValue());
-            }
+            variables.forEach((name, value) -> {
+                setVariable(name, value);
+            });
         }
     }
 
