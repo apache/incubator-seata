@@ -51,7 +51,7 @@ import redis.clients.jedis.ScanResult;
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     // global transaction prefix
-    private static final String DEFAULT_REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
+    private static final String DEFAULT_REDIS_SEATA_GLOBAL_SESSION_PREFIX = "SEATA_GLOBAL_SESSION_";
 
     // the prefix of the branchs transaction
     private static final String DEFAULT_REDIS_SEATA_XID_BRANCHS_PREFIX = "SEATA_XID_BRANCHS_";
@@ -77,9 +77,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * Get the instance.
      */
     public static RedisTransactionStoreManager getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (RedisTransactionStoreManager.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new RedisTransactionStoreManager();
                 }
             }
@@ -117,8 +117,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean insertOrUpdateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String key = getBranchKey(branchTransactionDO.getBranchId());
+            String branch = jedis.get(key);
             Pipeline pipeline = jedis.pipelined();
-            if (jedis.get(key) == null) {
+            if (StringUtils.isEmpty(branch)) {
                 pipeline.lpush(getBranchListKeyByXid(branchTransactionDO.getXid()), key);
             }
             pipeline.set(key, JSON.toJSONString(branchTransactionDO));
@@ -227,7 +228,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 for (String globalKey : keys) {
                     GlobalTransactionDO globalTransactionDO =
                         JSON.parseObject(jedis.get(globalKey), GlobalTransactionDO.class);
-                    if (null != globalTransactionDO && states.contains(globalTransactionDO.getStatus())) {
+                    if (globalTransactionDO != null && states.contains(globalTransactionDO.getStatus())) {
                         globalTransactionDOs.add(globalTransactionDO);
                     }
                 }
@@ -393,7 +394,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private String getGlobalKeyByXid(String xid) {
-        return DEFAULT_REDIS_SEATA_GLOBAL_PREFIX + xid;
+        return DEFAULT_REDIS_SEATA_GLOBAL_SESSION_PREFIX + xid;
     }
 
     private String getBranchListKeyByXid(String xid) {

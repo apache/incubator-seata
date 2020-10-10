@@ -45,6 +45,8 @@ public class JedisPooledFactory {
 
     private static final int MAXCONN = 10;
 
+    private static final int MAXTOTAL = 100;
+
     private static final int DATABASE = 0;
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
@@ -58,7 +60,7 @@ public class JedisPooledFactory {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
                 if (jedisPool == null) {
-                    if (null != jedisPools && jedisPools.length > 0) {
+                    if (jedisPools != null && jedisPools.length > 0) {
                         jedisPool = jedisPools[0];
                     } else {
                         String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
@@ -68,6 +70,7 @@ public class JedisPooledFactory {
                         JedisPoolConfig poolConfig = new JedisPoolConfig();
                         poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
                         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
+                        poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, MAXTOTAL));
                         jedisPool =
                             new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
                                 CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,

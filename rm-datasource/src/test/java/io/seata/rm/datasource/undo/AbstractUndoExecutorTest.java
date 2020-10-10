@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.sqlparser.SQLType;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -25,8 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Geng Zhang
@@ -160,7 +160,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
     @Test
     public void testParsePK() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("id");
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"id"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -186,8 +186,46 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         sqlUndoLog.setAfterImage(null);
 
         TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, true);
-        Object[] pkValues = executor.parsePkValues(beforeImage);
-        Assertions.assertEquals(2, pkValues.length);
+        Map<String,List<Field>> pkValues = executor.parsePkValues(beforeImage);
+        Assertions.assertEquals(2, pkValues.get("id").size());
+    }
+
+    @Test
+    public void testBuildWhereConditionByPKs() throws SQLException {
+        List<String> pkNameList =new ArrayList<>();
+        pkNameList.add("id1");
+        pkNameList.add("id2");
+
+        Map<String,List<Field>> pkRowValues = new HashMap<>();
+        List<Field> pkId1Values= new ArrayList<>();
+        pkId1Values.add(new Field());
+        pkId1Values.add(new Field());
+        pkId1Values.add(new Field());
+        List<Field> pkId2Values= new ArrayList<>();
+        pkId2Values.add(new Field());
+        pkId2Values.add(new Field());
+        pkId2Values.add(new Field());
+        pkRowValues.put("id1",pkId1Values);
+        pkRowValues.put("id2",pkId2Values);
+
+        String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )",sql);
+    }
+
+    @Test
+    public void testBuildWhereConditionByPK() throws SQLException {
+        List<String> pkNameList =new ArrayList<>();
+        pkNameList.add("id1");
+
+        Map<String,List<Field>> pkRowValues = new HashMap<>();
+        List<Field> pkId1Values= new ArrayList<>();
+        pkId1Values.add(new Field());
+        List<Field> pkId2Values= new ArrayList<>();
+        pkId2Values.add(new Field());
+        pkRowValues.put("id1",pkId1Values);
+
+        String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
+        Assertions.assertEquals("(id1) in ( (?) )",sql);
     }
 }
 

@@ -65,6 +65,51 @@ public class StateMachineAsyncTests {
     }
 
     @Test
+    public void testSimpleScriptTaskStateMachine() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleScriptTaskStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
+
+
+        start = System.currentTimeMillis();
+
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        waittingForFinish(inst);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+
+        start = System.currentTimeMillis();
+        paramMap.put("scriptThrowException", true);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        waittingForFinish(inst);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
     public void testSimpleRetryStateMachine() {
 
         long start  = System.currentTimeMillis();

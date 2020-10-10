@@ -8,6 +8,7 @@ import 'codemirror/mode/javascript/javascript'
 const nodeIndexes = {
   Start: 1,
   ServiceTask: 1,
+  ScriptTask: 1,
   Compensation: 1,
   Choice: 1,
   Succeed: 1,
@@ -38,7 +39,7 @@ class WorkSpaceBase extends React.Component {
     const { executeCommand, update } = propsAPI;
 
     if (param.action == 'add' && param.item.type == 'edge') {
-      // Default polyline-round type
+      // Default polyline-round type @FIXME polyline-round has a bug
       if (param.item.target
         && param.item.target.model
         && param.item.source
@@ -88,6 +89,7 @@ class WorkSpaceBase extends React.Component {
       param.item.model.stateId = param.item.model.stateId + nodeIndexes[param.item.model.stateType]++;
       if (param.item.model.stateType == 'ServiceTask'
         || param.item.model.stateType == 'Compensation'
+        || param.item.model.stateType == 'ScriptTask'
         || param.item.model.stateType == 'SubStateMachine') {
         param.item.model.label = param.item.model.stateId;
       }

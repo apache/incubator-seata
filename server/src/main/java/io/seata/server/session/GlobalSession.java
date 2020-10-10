@@ -108,7 +108,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
+            if (!branchSession.canBeCommittedAsync()) {
                 return false;
             }
         }
@@ -246,10 +246,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
+        if (!branchSession.unlock()) {
+            throw new TransactionException("Unlock branch lock failed!");
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
-        branchSession.unlock();
         remove(branchSession);
     }
 
@@ -492,19 +494,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != byApplicationIdBytes) {
+        if (byApplicationIdBytes != null) {
             byteBuffer.putShort((short)byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byServiceGroupBytes) {
+        if (byServiceGroupBytes != null) {
             byteBuffer.putShort((short)byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byTxNameBytes) {
+        if (byTxNameBytes != null) {
             byteBuffer.putShort((short)byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {

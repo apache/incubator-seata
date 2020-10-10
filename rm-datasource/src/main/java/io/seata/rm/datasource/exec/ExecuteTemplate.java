@@ -16,14 +16,12 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.StringUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -68,8 +66,7 @@ public class ExecuteTemplate {
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
-
-        if (!shouldExecuteInATMode()) {
+        if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
@@ -122,16 +119,4 @@ public class ExecuteTemplate {
         return rs;
     }
 
-    private static boolean shouldExecuteInATMode() {
-        if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
-            return false;
-        }
-        if (RootContext.inGlobalTransaction()) {
-            String branchType = RootContext.getBranchType();
-            if (StringUtils.equals(BranchType.TCC.name(), branchType) || StringUtils.equals(BranchType.SAGA.name(), branchType)) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
