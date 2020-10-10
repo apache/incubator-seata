@@ -414,7 +414,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @return
      * @throws SQLException
      */
-    protected abstract byte[] getRollbackInfo(ResultSet rs) throws SQLException;
+    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException  {
+        byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+        CompressorType compressType = CompressorType.getByCode(rs.getInt(ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE));
+        return CompressorFactory.getCompressor(compressType.getCode()).decompress(rollbackInfo);
+    }
 
     /**
      * if the undoLogContent is big enough to be compress

@@ -15,16 +15,13 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.BlobUtils;
-import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -76,14 +73,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
                                            CompressorType compressType, Connection conn) throws SQLException {
         insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, compressType, State.Normal, conn);
-    }
-
-    @Override
-    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
-        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
-        CompressorType compressType = CompressorType.getByCode(rs.getInt(ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE));
-        return CompressorFactory.getCompressor(compressType.getCode()).decompress(rollbackInfo);
     }
 
     @Override
