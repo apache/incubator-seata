@@ -13,27 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.rm.datasource;
+
+import javax.sql.DataSource;
+
+import io.seata.core.model.BranchType;
 
 /**
- * Holder for suspended resources to support propagation or nested logic.
- * Used by {@code suspend} and {@code resume}
+ * The interface Seata data source.
  *
- * @author wangzhongxiang
  * @author wang.liang
  */
-public class SuspendedResourcesHolder {
+public interface SeataDataSourceProxy extends DataSource {
 
     /**
-     * The xid
+     * Gets target data source.
+     *
+     * @return the target data source
      */
-    private String xid;
+    DataSource getTargetDataSource();
 
-    public SuspendedResourcesHolder(String xid) {
-        this.xid = xid;
-    }
-
-    public String getXid() {
-        return xid;
-    }
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
+    BranchType getBranchType();
 }
