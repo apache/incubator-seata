@@ -117,7 +117,7 @@ public class IdWorker {
         waitIfNecessary();
         long next = timestampAndSequence.incrementAndGet();
         long timestampWithSequence = next & timestampAndSequenceMask;
-        return (workerId | timestampWithSequence);
+        return workerId | timestampWithSequence;
     }
 
     /**
@@ -131,7 +131,9 @@ public class IdWorker {
         if (current >= newest) {
             try {
                 Thread.sleep(5);
-            } catch (InterruptedException ignore) {}
+            } catch (InterruptedException ignore) {
+                // don't care
+            }
         }
     }
 
