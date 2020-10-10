@@ -18,6 +18,7 @@ package io.seata.spring.annotation;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
@@ -34,6 +35,7 @@ import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
@@ -193,6 +195,26 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
+    /**
+     * The following will be scanned, and added corresponding interceptor:
+     *
+     * TM:
+     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
+     * Corresponding interceptor:
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, GlobalTransactional) // TM handler
+     *
+     * GlobalLock:
+     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
+     * Corresponding interceptor:
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // GlobalLock handler
+     *
+     * TCC mode:
+     * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
+     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
+     * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service parser
+     * Corresponding interceptor:
+     * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
+     */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         if (disableGlobalTransaction) {
@@ -279,7 +301,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
-        throws BeansException {
+            throws BeansException {
         return new Object[]{interceptor};
     }
 
