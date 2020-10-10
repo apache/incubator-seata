@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * The type Delete executor.
@@ -64,7 +64,15 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE ").append(whereCondition);
+            suffix.append(WHERE).append(whereCondition);
+        }
+        String orderBy = visitor.getOrderBy();
+        if (StringUtils.isNotBlank(orderBy)) {
+            suffix.append(orderBy);
+        }
+        String limit = visitor.getLimit();
+        if (StringUtils.isNotBlank(limit)) {
+            suffix.append(limit);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
