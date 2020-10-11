@@ -74,8 +74,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     private TableMeta tableMeta;
 
-    private static final String NEXT_LINE = "\n";
-
     /**
      * Instantiates a new Base transactional executor.
      *
@@ -147,10 +145,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 whereConditionSb.append(" or ( ").append(whereCondition).append(" ) ");
             }
             whereCondition = whereConditionSb.toString();
-        }
-        // fix druid bug parse where contain \n
-        if (StringUtils.isNotBlank(whereCondition) && whereCondition.contains(NEXT_LINE)) {
-            whereCondition = whereCondition.replace(NEXT_LINE, " ");
         }
         return whereCondition;
     }
