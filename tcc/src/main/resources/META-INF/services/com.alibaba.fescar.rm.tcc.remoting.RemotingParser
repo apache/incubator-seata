@@ -1,3 +1,0 @@
-com.alibaba.fescar.rm.tcc.remoting.parser.DubboRemotingParser
-com.alibaba.fescar.rm.tcc.remoting.parser.LocalTCCRemotingParser
-com.alibaba.fescar.rm.tcc.remoting.parser.SofaRpcRemotingParser

@@ -1,0 +1,4 @@
+io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser
+io.seata.rm.datasource.undo.parser.JacksonUndoLogParser
+io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser
+io.seata.rm.datasource.undo.parser.KryoUndoLogParser

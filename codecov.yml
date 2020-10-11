@@ -1,0 +1,23 @@
+codecov:
+  require_ci_to_pass: yes
+coverage:
+  status:
+    patch: no
+    project:
+      default:
+        threshold: 1%
+        if_not_found: success
+    changes: no
+  precision: 2
+  range: "50...100"
+ignore:
+ - "test/.*"
+ - ".github/.*"
+ - ".mvn/.*"
+ - ".style/.*"
+ - "*.md"
+ - "rm-datasource/src/test/java/io/seata/rm/datasource/mock"
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: no

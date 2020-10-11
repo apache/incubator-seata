@@ -49,7 +49,7 @@ TCC 动态代理的主要功能是：生成TCC运行时上下文、透传业务�
 
 #### 模块说明
 
-fescar-tcc 包含TCC主要代码：
+seata-tcc 包含TCC主要代码：
 
 - interceptor：TCC 动态代理；
 
