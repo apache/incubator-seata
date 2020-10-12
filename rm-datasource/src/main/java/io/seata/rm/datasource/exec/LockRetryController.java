@@ -33,11 +33,11 @@ import io.seata.core.model.GlobalLockConfig;
  */
 public class LockRetryController {
 
-    private static GlobalConfig globalConfig = new GlobalConfig();
+    private static final GlobalConfig LISTENER = new GlobalConfig();
 
     static {
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, globalConfig);
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, globalConfig);
+        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, LISTENER);
+        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, LISTENER);
     }
 
     private int lockRetryInternal;
@@ -79,7 +79,7 @@ public class LockRetryController {
             }
         }
         // if there is no customized config, use global config instead
-        return globalConfig.getGlobalLockRetryInternal();
+        return LISTENER.getGlobalLockRetryInternal();
     }
 
     int getLockRetryTimes() {
@@ -92,7 +92,7 @@ public class LockRetryController {
             }
         }
         // if there is no customized config, use global config instead
-        return globalConfig.getGlobalLockRetryTimes();
+        return LISTENER.getGlobalLockRetryTimes();
     }
 
     static class GlobalConfig implements ConfigurationChangeListener {
