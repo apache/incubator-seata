@@ -99,8 +99,8 @@ public class IdWorker {
             workerId = generateWorkerId();
         }
         if (workerId > maxWorkerId || workerId < 0) {
-            throw new IllegalArgumentException(
-                    String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+            String message = String.format("worker Id can't be greater than %d or less than 0", maxWorkerId);
+            throw new IllegalArgumentException(message);
         }
         this.workerId = workerId << (timestampBits + sequenceBits);
     }
