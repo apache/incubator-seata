@@ -156,7 +156,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return methodInvocation.proceed();
     }
 
-    private Object handleGlobalLock(final MethodInvocation methodInvocation,
+    Object handleGlobalLock(final MethodInvocation methodInvocation,
         final GlobalLock globalLockAnno) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
