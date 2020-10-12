@@ -18,12 +18,9 @@ package io.seata.sqlparser;
 /**
  * @author ggndnn
  */
-public final class SqlParserType {
-    private SqlParserType() {
-    }
-
+public interface SqlParserType {
     /**
      * The constant SQL_PARSER_TYPE_DRUID.
      */
-    public static final String SQL_PARSER_TYPE_DRUID = "druid";
+    String SQL_PARSER_TYPE_DRUID = "druid";
 }
