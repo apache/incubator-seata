@@ -69,12 +69,12 @@ public class RootContextTest {
         assertThat(RootContext.getBranchType()).isNull();
         //after bind xid, branchType is not null
         RootContext.bind(DEFAULT_XID);
-        assertThat(RootContext.getBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        assertThat(RootContext.getBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE);
 
         //unbind xid and branchType
         assertThat(RootContext.unbind()).isEqualTo(DEFAULT_XID);
         assertThat(RootContext.getBranchType()).isNull();
-        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE);
         assertThat(RootContext.getBranchType()).isNull();
     }
 
@@ -89,10 +89,10 @@ public class RootContextTest {
         assertThat(RootContext.getBranchType()).isNull();
         //after bind xid, branchType is not null
         RootContext.bind(DEFAULT_XID);
-        assertThat(RootContext.getBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        assertThat(RootContext.getBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE);
 
         RootContext.unbind();
-        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
+        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE);
         assertThat(RootContext.getBranchType()).isNull();
     }
 
@@ -107,6 +107,34 @@ public class RootContextTest {
         RootContext.unbind();
         assertThat(RootContext.inGlobalTransaction()).isFalse();
         assertThat(RootContext.getXID()).isNull();
+    }
+
+    /**
+     * Test in tcc branch.
+     */
+    @Test
+    public void testInTccBranch() {
+        RootContext.bind(DEFAULT_XID);
+        assertThat(RootContext.inTccBranch()).isFalse();
+        RootContext.bindBranchType(BranchType.TCC);
+        assertThat(RootContext.inTccBranch()).isTrue();
+        RootContext.unbindBranchType();
+        assertThat(RootContext.inTccBranch()).isFalse();
+        RootContext.unbind();
+    }
+
+    /**
+     * Test in saga branch.
+     */
+    @Test
+    public void testInSagaBranch() {
+        RootContext.bind(DEFAULT_XID);
+        assertThat(RootContext.inSagaBranch()).isFalse();
+        RootContext.bindBranchType(BranchType.SAGA);
+        assertThat(RootContext.inSagaBranch()).isTrue();
+        RootContext.unbindBranchType();
+        assertThat(RootContext.inSagaBranch()).isFalse();
+        RootContext.unbind();
     }
 
     /**
@@ -141,8 +169,7 @@ public class RootContextTest {
         assertThat(RootContext.getBranchType()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
         RootContext.bindBranchType(DEFAULT_BRANCH_TYPE);
-        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE.name());
-        RootContext.unbindBranchType();
+        assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE);
         assertThat(RootContext.getBranchType()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
     }
