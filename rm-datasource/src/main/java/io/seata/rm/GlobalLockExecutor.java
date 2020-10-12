@@ -13,27 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.rm;
+
+import io.seata.core.model.GlobalLockConfig;
 
 /**
- * Holder for suspended resources to support propagation or nested logic.
- * Used by {@code suspend} and {@code resume}
- *
- * @author wangzhongxiang
- * @author wang.liang
+ * executor to execute business logic that require global lock
+ * @author selfishlover
  */
-public class SuspendedResourcesHolder {
+public interface GlobalLockExecutor {
 
     /**
-     * The xid
+     * execute business logic
+     * @return business return
+     * @throws Throwable whatever throw during execution
      */
-    private String xid;
+    Object execute() throws Throwable;
 
-    public SuspendedResourcesHolder(String xid) {
-        this.xid = xid;
-    }
-
-    public String getXid() {
-        return xid;
-    }
+    /**
+     * global lock config info
+     * @return
+     */
+    GlobalLockConfig getGlobalLockConfig();
 }

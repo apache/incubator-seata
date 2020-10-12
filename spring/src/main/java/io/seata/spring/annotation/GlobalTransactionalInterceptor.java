@@ -34,11 +34,13 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
-import io.seata.rm.GlobalLockTemplate;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.spring.event.DegradeCheckEvent;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
+import io.seata.rm.GlobalLockExecutor;
+import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
@@ -69,7 +71,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-    private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
+    private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
     private final FailureHandler failureHandler;
     private volatile boolean disable;
     private static int degradeCheckPeriod;
@@ -147,26 +149,32 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 if (globalTransactionalAnnotation != null) {
                     return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
                 } else if (globalLockAnnotation != null) {
-                    return handleGlobalLock(methodInvocation);
+                    return handleGlobalLock(methodInvocation, globalLockAnnotation);
                 }
             }
         }
         return methodInvocation.proceed();
     }
 
-    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
-        return globalLockTemplate.execute(() -> {
-            try {
+    Object handleGlobalLock(final MethodInvocation methodInvocation,
+        final GlobalLock globalLockAnno) throws Throwable {
+        return globalLockTemplate.execute(new GlobalLockExecutor() {
+            @Override
+            public Object execute() throws Throwable {
                 return methodInvocation.proceed();
-            } catch (Exception e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
+            }
+
+            @Override
+            public GlobalLockConfig getGlobalLockConfig() {
+                GlobalLockConfig config = new GlobalLockConfig();
+                config.setLockRetryInternal(globalLockAnno.lockRetryInternal());
+                config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
+                return config;
             }
         });
     }
 
-    private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
+    Object handleGlobalTransaction(final MethodInvocation methodInvocation,
         final GlobalTransactional globalTrxAnno) throws Throwable {
         boolean succeed = true;
         try {
@@ -196,6 +204,8 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setTimeOut(timeout);
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
+                    transactionInfo.setLockRetryInternal(globalTrxAnno.lockRetryInternal());
+                    transactionInfo.setLockRetryTimes(globalTrxAnno.lockRetryTimes());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));
