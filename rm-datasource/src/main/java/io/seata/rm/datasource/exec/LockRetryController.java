@@ -27,7 +27,7 @@ import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.model.GlobalLockConfig;
 
 /**
- * The type Lock retry controller.
+ * Lock retry controller
  *
  * @author sharajava
  */
