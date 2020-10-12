@@ -15,12 +15,10 @@
  */
 package io.seata.rm.datasource.exec;
 
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
@@ -42,6 +40,9 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
+
+    protected static final String WHERE = " WHERE ";
+
 
     /**
      * Instantiates a new Abstract dml base executor.
