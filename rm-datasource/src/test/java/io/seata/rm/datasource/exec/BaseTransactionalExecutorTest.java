@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.core.model.GlobalLockConfig;
+import io.seata.rm.GlobalLockExecutor;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -27,7 +29,6 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Statement;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -38,7 +39,7 @@ public class BaseTransactionalExecutorTest {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
-    public void testExecuteWithGlobalLockSet() throws Exception {
+    public void testExecuteWithGlobalLockSet() throws Throwable {
 
         //initial objects
         ConnectionProxy connectionProxy = new ConnectionProxy(null, null);
@@ -51,27 +52,30 @@ public class BaseTransactionalExecutorTest {
                 return null;
             }
         };
-        GlobalLockTemplate<Object> globalLockLocalTransactionalTemplate = new GlobalLockTemplate<>();
+        GlobalLockTemplate template = new GlobalLockTemplate();
 
         // not in global lock context
         try {
             baseTransactionalExecutor.execute(new Object());
-            Assertions.assertFalse(connectionProxy.isGlobalLockRequire(), "conectionContext set!");
+            Assertions.assertFalse(connectionProxy.isGlobalLockRequire(), "connection context set!");
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
 
-        //in global lock context
-        globalLockLocalTransactionalTemplate.execute(() -> {
-            try {
+        // in global lock context
+        template.execute(new GlobalLockExecutor() {
+            @Override
+            public Object execute() throws Throwable {
                 baseTransactionalExecutor.execute(new Object());
-                Assertions.assertTrue(connectionProxy.isGlobalLockRequire(), "conectionContext not set!");
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
+                Assertions.assertTrue(connectionProxy.isGlobalLockRequire(), "connection context not set!");
+                return null;
             }
-            return null;
-        });
 
+            @Override
+            public GlobalLockConfig getGlobalLockConfig() {
+                return null;
+            }
+        });
     }
 
     @Test
