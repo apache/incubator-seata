@@ -168,7 +168,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (StringUtils.isEmpty(previousBranchStatus)) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
-            Map<String,String> map = new HashMap<>(2);
+            Map<String,String> map = new HashMap<>(2,1);
             map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
             map.put(REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
             jedis.hmset(branchKey, map);
@@ -275,7 +275,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     jedis.watch(globalKey);
                     String xid2 = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
                     if (StringUtils.isNotEmpty(xid2)) {
-                        Map<String,String> mapPrevious = new HashMap<>(2);
+                        Map<String,String> mapPrevious = new HashMap<>(2,1);
                         mapPrevious.put(REDIS_KEY_GLOBAL_STATUS,previousStatus);
                         mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
                         Transaction multi2 = jedis.multi();
@@ -469,10 +469,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return REDIS_SEATA_BRANCHES_PREFIX + xid;
     }
 
-    private String buildGlobalKeyByTransactionId(Long transactionId) {
-        return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
-    }
-    private String buildGlobalKeyByTransactionId(String transactionId) {
+    private String buildGlobalKeyByTransactionId(Object transactionId) {
         return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
     }
 
