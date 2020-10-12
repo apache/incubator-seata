@@ -60,10 +60,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         DatabaseMetaData dbmd = conn.getMetaData();
         T rs;
         Savepoint sp = null;
-        LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
                 /*
@@ -82,6 +79,9 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 throw new SQLException("not support savepoint. please check your db version");
             }
 
+            LockRetryController lockRetryController = new LockRetryController();
+            ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
+            String selectPKSQL = buildSelectSQL(paramAppenderList);
             while (true) {
                 try {
                     // #870

@@ -33,6 +33,10 @@ public final class TransactionInfo implements Serializable {
 
     private Propagation propagation;
 
+    private int lockRetryInternal;
+
+    private int lockRetryTimes;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -86,5 +90,21 @@ public final class TransactionInfo implements Serializable {
 
     public void setPropagation(Propagation propagation) {
         this.propagation = propagation;
+    }
+
+    public int getLockRetryInternal() {
+        return lockRetryInternal;
+    }
+
+    public void setLockRetryInternal(int lockRetryInternal) {
+        this.lockRetryInternal = lockRetryInternal;
+    }
+
+    public int getLockRetryTimes() {
+        return lockRetryTimes;
+    }
+
+    public void setLockRetryTimes(int lockRetryTimes) {
+        this.lockRetryTimes = lockRetryTimes;
     }
 }

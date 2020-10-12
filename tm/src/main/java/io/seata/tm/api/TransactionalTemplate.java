@@ -18,7 +18,9 @@ package io.seata.tm.api;
 import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
@@ -111,6 +113,9 @@ public class TransactionalTemplate {
                 tx = GlobalTransactionContext.createNew();
             }
 
+            // set current tx config to holder
+            GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
+
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
                 //    else do nothing. Of course, the hooks will still be triggered.
@@ -132,6 +137,7 @@ public class TransactionalTemplate {
                 return rs;
             } finally {
                 //5. clear
+                resumeGlobalLockConfig(previousConfig);
                 triggerAfterCompletion();
                 cleanUp();
             }
@@ -149,6 +155,21 @@ public class TransactionalTemplate {
 
     private boolean notExistingTransaction(GlobalTransaction tx) {
         return tx == null;
+    }
+
+    private GlobalLockConfig replaceGlobalLockConfig(TransactionInfo info) {
+        GlobalLockConfig myConfig = new GlobalLockConfig();
+        myConfig.setLockRetryInternal(info.getLockRetryInternal());
+        myConfig.setLockRetryTimes(info.getLockRetryTimes());
+        return GlobalLockConfigHolder.setAndReturnPrevious(myConfig);
+    }
+
+    private void resumeGlobalLockConfig(GlobalLockConfig config) {
+        if (config != null) {
+            GlobalLockConfigHolder.setAndReturnPrevious(config);
+        } else {
+            GlobalLockConfigHolder.remove();
+        }
     }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable originalException) throws TransactionalExecutor.ExecutionException {

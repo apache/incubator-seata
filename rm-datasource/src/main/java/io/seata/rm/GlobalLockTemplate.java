@@ -15,45 +15,43 @@
  */
 package io.seata.rm;
 
-import java.util.concurrent.Callable;
-
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.GlobalLockConfig;
 
 /**
- * Template of executing business logic in a local transaction with Global lock.
- *
- * @param <T>
- * @author deyou
+ * executor template for local transaction which need global lock
+ * @author selfishlover
  */
-public class GlobalLockTemplate<T> {
+public class GlobalLockTemplate {
 
-    /**
-     * Execute object.
-     *
-     * @param business the business
-     * @return the object
-     * @throws Exception
-     */
-    public Object execute(Callable<T> business) throws Exception {
-
-        Object rs;
-        //fix nested situation
-        boolean hasInGlobalLock = RootContext.requireGlobalLock();
-        // add global lock declare
-        if (!hasInGlobalLock) {
+    public Object execute(GlobalLockExecutor executor) throws Throwable {
+        boolean alreadyInGlobalLock = RootContext.requireGlobalLock();
+        if (!alreadyInGlobalLock) {
             RootContext.bindGlobalLockFlag();
         }
+
+        // set my config to config holder so that it can be access in further execution
+        // for example, LockRetryController can access it with config holder
+        GlobalLockConfig myConfig = executor.getGlobalLockConfig();
+        GlobalLockConfig previousConfig = GlobalLockConfigHolder.setAndReturnPrevious(myConfig);
+
         try {
-            // Do Your Business
-            rs = business.call();
+            return executor.execute();
         } finally {
-            //clean the global lock declare
-            if (!hasInGlobalLock) {
+            // only unbind when this is the root caller.
+            // otherwise, the outer caller would lose global lock flag
+            if (!alreadyInGlobalLock) {
                 RootContext.unbindGlobalLockFlag();
             }
+
+            // if previous config is not null, we need to set it back
+            // so that the outer logic can still use their config
+            if (previousConfig != null) {
+                GlobalLockConfigHolder.setAndReturnPrevious(previousConfig);
+            } else {
+                GlobalLockConfigHolder.remove();
+            }
         }
-
-        return rs;
     }
-
 }
