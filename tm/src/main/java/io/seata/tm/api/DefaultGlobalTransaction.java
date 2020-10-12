@@ -97,8 +97,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         assertXIDNull();
-        if (RootContext.getXID() != null) {
-            throw new IllegalStateException();
+        String currentXid = RootContext.getXID();
+        if (currentXid != null) {
+            throw new IllegalStateException("Global transaction already exists," +
+                " can't begin a new global transaction, currentXid = " + currentXid);
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
@@ -133,7 +135,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            if (xid.equals(RootContext.getXID())) {
                 suspend(true);
             }
         }
@@ -168,7 +170,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            if (xid.equals(RootContext.getXID())) {
                 suspend(true);
             }
         }
@@ -183,7 +185,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (xid != null && unbindXid) {
             RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction,xid = {}", xid);
+                LOGGER.debug("Suspending current transaction, xid = {}", xid);
             }
         } else {
             xid = null;
@@ -232,7 +234,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+        if (xid.equals(RootContext.getXID())) {
             suspend(true);
         }
     }
