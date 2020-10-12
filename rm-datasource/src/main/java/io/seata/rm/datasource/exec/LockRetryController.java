@@ -101,13 +101,13 @@ public class LockRetryController {
 
         private volatile int globalLockRetryTimes;
 
-        private int defaultRetryInternal = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
-        private int defaultRetryTimes = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
+        private final int DEFAULT_RETRY_INTERVAL = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
+        private final int DEFAULT_RETRY_TIMES = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
 
         public GlobalConfig() {
             Configuration configuration = ConfigurationFactory.getInstance();
-            globalLockRetryInternal = configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, defaultRetryInternal);
-            globalLockRetryTimes = configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, defaultRetryTimes);
+            globalLockRetryInternal = configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, DEFAULT_RETRY_INTERVAL);
+            globalLockRetryTimes = configuration.getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, DEFAULT_RETRY_TIMES);
         }
 
         @Override
@@ -115,10 +115,10 @@ public class LockRetryController {
             String dataId = event.getDataId();
             String newValue = event.getNewValue();
             if (ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL.equals(dataId)) {
-                globalLockRetryInternal = NumberUtils.toInt(newValue, defaultRetryInternal);
+                globalLockRetryInternal = NumberUtils.toInt(newValue, DEFAULT_RETRY_INTERVAL);
             }
             if (ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES.equals(dataId)) {
-                globalLockRetryTimes = NumberUtils.toInt(newValue, defaultRetryTimes);
+                globalLockRetryTimes = NumberUtils.toInt(newValue, DEFAULT_RETRY_TIMES);
             }
         }
 
