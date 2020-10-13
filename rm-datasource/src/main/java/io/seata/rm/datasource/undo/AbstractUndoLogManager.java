@@ -194,9 +194,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         return state == State.Normal.getValue();
     }
 
-    protected String buildContext(String serializer) {
+    protected String buildContext(String serializer, CompressorType compressorType) {
         Map<String, String> map = new HashMap<>();
         map.put(UndoLogConstants.SERIALIZER_KEY, serializer);
+        map.put(UndoLogConstants.COMPRESSOR_TYPE_KEY, compressorType.name());
         return CollectionUtils.encodeMap(map);
     }
 
@@ -238,8 +239,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName()), undoLogContent, compressorType,
-            cp.getTargetConnection());
+        insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
     }
 
     /**
@@ -400,12 +400,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @param branchId       the branchId
      * @param rollbackCtx    the rollbackContext
      * @param undoLogContent the undoLogContent
-     * @param compressType   the compressType
      * @param conn           sql connection
      * @throws SQLException
      */
     protected abstract void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                                                    CompressorType compressType, Connection conn) throws SQLException;
+                                                    Connection conn) throws SQLException;
 
     /**
      * RollbackInfo to bytes
@@ -416,8 +415,12 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     protected byte[] getRollbackInfo(ResultSet rs) throws SQLException  {
         byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-        CompressorType compressType = CompressorType.getByCode(rs.getInt(ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE));
-        return CompressorFactory.getCompressor(compressType.getCode()).decompress(rollbackInfo);
+
+        String rollbackInfoContext = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
+        Map<String, String> context = CollectionUtils.decodeMap(rollbackInfoContext);
+        CompressorType compressorType = CompressorType.getByName(context.get(UndoLogConstants.COMPRESSOR_TYPE_KEY));
+
+        return CompressorFactory.getCompressor(compressorType.getCode()).decompress(rollbackInfo);
     }
 
     /**

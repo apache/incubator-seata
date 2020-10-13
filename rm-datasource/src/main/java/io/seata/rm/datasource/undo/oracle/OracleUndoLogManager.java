@@ -43,10 +43,9 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
             " (" + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
-            + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_COMPRESS_TYPE + ","
-            + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
-            + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
-            + "VALUES (UNDO_LOG_SEQ.nextval,?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+            + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
+            + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
+            + "VALUES (UNDO_LOG_SEQ.nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
@@ -71,18 +70,18 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                                           CompressorType compressType, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, compressType, State.Normal, conn);
+                                           Connection conn) throws SQLException {
+        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
     protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(parser.getName()), parser.getDefaultContent(), CompressorType.NONE,
+        insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(),
                 State.GlobalFinished, conn);
     }
 
 
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent, CompressorType compressType,
+    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
                                State state, Connection conn) throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchID);
@@ -90,8 +89,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             pst.setString(3, rollbackCtx);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
             pst.setBlob(4, inputStream);
-            pst.setInt(5, compressType.getCode());
-            pst.setInt(6, state.getValue());
+            pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {

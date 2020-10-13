@@ -6,7 +6,6 @@ CREATE TABLE undo_log
     xid           VARCHAR2(100) NOT NULL,
     context       VARCHAR2(128) NOT NULL,
     rollback_info BLOB          NOT NULL,
-    compress_type NUMBER(2)     NOT NULL,
     log_status    NUMBER(10)    NOT NULL,
     log_created   TIMESTAMP(0)  NOT NULL,
     log_modified  TIMESTAMP(0)  NOT NULL,
