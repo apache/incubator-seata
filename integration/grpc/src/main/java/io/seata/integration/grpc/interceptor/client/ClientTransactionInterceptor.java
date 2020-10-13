@@ -39,6 +39,7 @@ public class ClientTransactionInterceptor implements ClientInterceptor {
 
         String xid = RootContext.getXID();
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
+
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
                 if (xid != null) {
