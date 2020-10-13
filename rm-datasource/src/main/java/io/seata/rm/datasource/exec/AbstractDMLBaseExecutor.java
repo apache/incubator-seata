@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.AbstractConnectionProxy;
+import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;

@@ -30,7 +30,6 @@ import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
@@ -43,7 +42,6 @@ import io.seata.sqlparser.WhereRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * The type Base transactional executor.
@@ -408,36 +406,5 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected String getDbType() {
         return statementProxy.getConnectionProxy().getDbType();
-    }
-
-
-    protected static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
-        private final ConnectionProxy connection;
-
-        LockRetryPolicy(final ConnectionProxy connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public <T> T execute(Callable<T> callable) throws Exception {
-            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
-                return doRetryOnLockConflict(callable);
-            } else {
-                return callable.call();
-            }
-        }
-
-        @Override
-        protected void onException(Exception e) throws Exception {
-            ConnectionContext context = connection.getContext();
-            //UndoItems can't use the Set collection class to prevent ABA
-            context.getUndoItems().clear();
-            context.getLockKeysBuffer().clear();
-            connection.getTargetConnection().rollback();
-        }
-
-        public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
-            return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
-        }
     }
 }
