@@ -138,7 +138,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         try {
             branchRegisterRequest.setCommitType(CommitType.get(in.get()));
         } catch (BufferUnderflowException e) {
-            // If current request from an older version of the client, handle the exception and set the default commitType.
+            // If current request is from an older version of the client, set the default commitType.
             CommitType commitType = CommitType.getDefault(branchRegisterRequest.getBranchType());
             branchRegisterRequest.setCommitType(commitType);
         }

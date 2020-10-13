@@ -501,8 +501,8 @@ public class DataBaseSessionManagerTest {
 
     @Test
     public void test_findGlobalSessions() throws TransactionException, SQLException {
-        String xid = null;
-        long branchId = 0;
+        String xid;
+        long branchId;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                     "test", "test123", 100);
@@ -529,8 +529,8 @@ public class DataBaseSessionManagerTest {
             branchSession.setStatus(BranchStatus.PhaseOne_Done);
             sessionManager.addBranchSession(globalSession, branchSession);
         }
-        String xid2 = null;
-        long branchId2 = 0;
+        String xid2;
+        long branchId2;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                     "test", "test123", 100);
