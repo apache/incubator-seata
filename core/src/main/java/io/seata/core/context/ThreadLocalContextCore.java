@@ -27,25 +27,25 @@ import io.seata.common.loader.LoadLevel;
 @LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE)
 public class ThreadLocalContextCore implements ContextCore {
 
-    private ThreadLocal<Map<String, String>> threadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
+    private ThreadLocal<Map<String, Object>> threadLocal = ThreadLocal.withInitial(HashMap::new);
 
     @Override
-    public String put(String key, String value) {
+    public Object put(String key, Object value) {
         return threadLocal.get().put(key, value);
     }
 
     @Override
-    public String get(String key) {
+    public Object get(String key) {
         return threadLocal.get().get(key);
     }
 
     @Override
-    public String remove(String key) {
+    public Object remove(String key) {
         return threadLocal.get().remove(key);
     }
 
     @Override
-    public Map<String, String> entries() {
+    public Map<String, Object> entries() {
         return threadLocal.get();
     }
 }
