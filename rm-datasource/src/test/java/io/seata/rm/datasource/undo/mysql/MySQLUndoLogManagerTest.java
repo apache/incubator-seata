@@ -100,7 +100,7 @@ public class MySQLUndoLogManagerTest {
         Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished("xid", 1L, new JacksonUndoLogParser(),
             dataSource.getConnection()));
 
-        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, CompressorType.NONE, dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, dataSource.getConnection()));
 
         Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
 
