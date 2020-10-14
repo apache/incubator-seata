@@ -31,19 +31,19 @@ public class RegistryFactory {
 
     private static volatile RegistryService instance = null;
 
+
+    static {
+        if (instance == null) {
+            instance = buildRegistryService();
+        }
+    }
+
     /**
      * Gets instance.
      *
      * @return the instance
      */
     public static RegistryService getInstance() {
-        if (instance == null) {
-            synchronized (RegistryFactory.class) {
-                if (instance == null) {
-                    instance = buildRegistryService();
-                }
-            }
-        }
         return instance;
     }
 
