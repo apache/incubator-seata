@@ -418,8 +418,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
         String rollbackInfoContext = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
         Map<String, String> context = CollectionUtils.decodeMap(rollbackInfoContext);
-        CompressorType compressorType = CompressorType.getByName(context.get(UndoLogConstants.COMPRESSOR_TYPE_KEY));
-
+        CompressorType compressorType = CompressorType.getByName(context.getOrDefault(UndoLogConstants.COMPRESSOR_TYPE_KEY,
+                CompressorType.NONE.name()));
         return CompressorFactory.getCompressor(compressorType.getCode()).decompress(rollbackInfo);
     }
 
