@@ -152,12 +152,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            basketMap.computeIfAbsent(serverAddress, k -> new LinkedBlockingQueue<>());
-            if (!basketMap.get(serverAddress).offer(rpcMessage)) {
-                if(LOGGER.isErrorEnabled()) {
-                    LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
-                            serverAddress, rpcMessage);
-                }
+            BlockingQueue<RpcMessage> basket = basketMap.computeIfAbsent(serverAddress, k -> new LinkedBlockingQueue<>());
+            if (basket.offer(rpcMessage)) {
                 return null;
             }
             if (LOGGER.isDebugEnabled()) {
