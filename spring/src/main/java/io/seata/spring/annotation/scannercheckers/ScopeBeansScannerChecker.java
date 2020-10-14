@@ -13,36 +13,38 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation.scannerexcluders;
+package io.seata.spring.annotation.scannercheckers;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.GlobalTransactional;
-import io.seata.spring.annotation.ScannerExcluder;
+import io.seata.spring.annotation.ScannerChecker;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.MultiValueMap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
- * Scope scanner excluder.
+ * Scope scanner checker.
  *
  * @author wang.liang
  */
 @LoadLevel(name = "ScopeBeans", order = 200)
-public class ScopeBeansScannerExcluder implements ScannerExcluder {
+public class ScopeBeansScannerChecker implements ScannerChecker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScopeBeansScannerExcluder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScopeBeansScannerChecker.class);
     private static final Set<String> EXCLUDE_SCOPE_SET = new HashSet<>();
 
     public static final String REQUEST_SCOPE_NAME = "request";
@@ -78,38 +80,50 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
      * Match the '@Scope' beans, and check whether exclusion is required.
      */
     @Override
-    public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
+    public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
         if (bean instanceof ScopedProxyFactoryBean) {
-            // exclude
-            return true;
+            // do not scan the ScopedProxyFactoryBean
+            return false;
         }
 
-        while (beanDefinition != null && !(beanDefinition instanceof AnnotatedBeanDefinition)) {
-            beanDefinition = beanDefinition.getOriginatingBeanDefinition();
-        }
-
-        if (beanDefinition != null) {
-            AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
-            if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
-                if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getFactoryMethodMetadata())) {
-                    // exclude
-                    return true;
-                }
-            }
-            if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getMetadata())) {
-                // exclude
+        BeanDefinition beanDefinition = null;
+        if (beanFactory != null) {
+            try {
+                beanDefinition = beanFactory.getBeanDefinition(beanName);
+            } catch (NoSuchBeanDefinitionException e) {
+                // if no bean definition, need scan
                 return true;
             }
         }
 
-        // not exclude
-        return false;
+        // find the AnnotatedBeanDefinition
+        while (beanDefinition != null && !(beanDefinition instanceof AnnotatedBeanDefinition)) {
+            beanDefinition = beanDefinition.getOriginatingBeanDefinition();
+        }
+
+        // if found the AnnotatedBeanDefinition, do check
+        if (beanDefinition != null) {
+            AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition)beanDefinition;
+            if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
+                if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getFactoryMethodMetadata())) {
+                    // found the target @Scope, do not scan
+                    return false;
+                }
+            }
+            if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getMetadata())) {
+                // found the target @Scope, do not scan
+                return false;
+            }
+        }
+
+        // need scan
+        return true;
     }
 
     private boolean hasExcludeScope(String beanName, AnnotatedTypeMetadata annotatedTypeMetadata) {
         MultiValueMap<String, Object> scopeAttributes = annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
-
         if (scopeAttributes == null || scopeAttributes.isEmpty()) {
+            // not found @Scope
             return false;
         }
 
@@ -117,19 +131,20 @@ public class ScopeBeansScannerExcluder implements ScannerExcluder {
             Object scopeName = scopeAttributes.getFirst("scopeName");
             if (scopeName != null) {
                 if (EXCLUDE_SCOPE_SET.contains(scopeName.toString().toLowerCase())) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Exclude bean '{}' from the {}, cause of @Scope(scopeName = \"{}\")." +
-                                        " @{} and @{} will be invalid in this bean.",
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Exclude bean '{}' from the {}, cause of @Scope(scopeName = \"{}\"). " +
+                            "@{} and @{} will be invalid in this bean. If used, please refactor the code.",
                                 beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString(),
                                 GlobalTransactional.class.getSimpleName(), GlobalLock.class.getSimpleName());
                     }
 
-                    // exclude
+                    // found @Scope and the scopeName is in the `EXCLUDE_SCOPE_SET`, do not scan
                     return true;
                 }
             }
         }
 
+        // no @Scope to exclude was found
         return false;
     }
 }

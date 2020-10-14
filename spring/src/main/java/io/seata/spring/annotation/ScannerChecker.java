@@ -15,22 +15,23 @@
  */
 package io.seata.spring.annotation;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
- * The ScannerExcluder for GlobalTransactionScanner
+ * The Scanner checker for {@link GlobalTransactionScanner}
  *
  * @author wang.liang
+ * @see GlobalTransactionScanner#wrapIfNecessary(Object, String, Object)
  */
-public interface ScannerExcluder {
+public interface ScannerChecker {
 
     /**
-     * Do matches need to be excluded
+     * Do check
      *
-     * @param bean           the bean
-     * @param beanName       the bean name
-     * @param beanDefinition the bean definition
-     * @return the boolean: true=exclude|false=not exclude
+     * @param bean        the bean
+     * @param beanName    the bean name
+     * @param beanFactory the bean factory
+     * @return the boolean: true=need scan | false=do not scan
      */
-    boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable;
+    boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable;
 }

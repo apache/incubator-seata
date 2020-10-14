@@ -13,24 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation.scannerexcluders;
-
-import io.seata.common.loader.LoadLevel;
-import io.seata.spring.annotation.ScannerExcluder;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.config.BeanDefinition;
+package io.seata.spring.annotation.scannercheckers;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.spring.annotation.ScannerChecker;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+
 /**
- * Package scanner excluder.
+ * Package scanner checker.
  *
  * @author wang.liang
  */
 @LoadLevel(name = "Packages", order = 100)
-public class PackageScannerExcluder implements ScannerExcluder {
+public class PackageScannerChecker implements ScannerChecker {
 
     /**
      * The packages need to scan
@@ -55,21 +55,21 @@ public class PackageScannerExcluder implements ScannerExcluder {
     }
 
     @Override
-    public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
+    public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
         if (SCANNABLE_PACKAGE_SET.isEmpty()) {
-            // not exclude
-            return false;
+            // if empty, pass this checker
+            return true;
         }
 
         String className = bean.getClass().getName();
         for (String pkg : SCANNABLE_PACKAGE_SET) {
             if (className.startsWith(pkg)) {
-                // not exclude
-                return false;
+                // need scan
+                return true;
             }
         }
 
-        // exclude
-        return true;
+        // not in the scannable packages, do not scan this bean
+        return false;
     }
 }

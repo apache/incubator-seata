@@ -59,7 +59,7 @@ public class SeataProperties {
     /**
      * Specifies beans that won't be scanned in the GlobalTransactionScanner
      */
-    private String[] excludesForScanner = {};
+    private String[] excludesForScanning = {};
     /**
      * Specifies which datasource bean are not eligible for auto-proxying
      */
@@ -145,12 +145,12 @@ public class SeataProperties {
         return this;
     }
 
-    public String[] getExcludesForScanner() {
-        return excludesForScanner;
+    public String[] getExcludesForScanning() {
+        return excludesForScanning;
     }
 
-    public SeataProperties setExcludesForScanner(String[] excludesForScanner) {
-        this.excludesForScanner = excludesForScanner;
+    public SeataProperties setExcludesForScanning(String[] excludesForScanning) {
+        this.excludesForScanning = excludesForScanning;
         return this;
     }
 }

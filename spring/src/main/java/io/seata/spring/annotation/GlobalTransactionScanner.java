@@ -23,19 +23,18 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationCache;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
-import io.seata.spring.annotation.scannerexcluders.PackageScannerExcluder;
+import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
@@ -54,13 +53,10 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
@@ -84,7 +80,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDE_SET = new HashSet<>();
-    private static final Set<ScannerExcluder> SCANNER_EXCLUDER_SET = new LinkedHashSet<>();
+    private static final Set<ScannerChecker> SCANNER_CHECKER_SET = new LinkedHashSet<>();
 
     private static ConfigurableListableBeanFactory beanFactory;
 
@@ -238,22 +234,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return bean;
                 }
 
-                //execute the excluders
-                if (!SCANNER_EXCLUDER_SET.isEmpty()) {
-                    try {
-                        BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-                        for (ScannerExcluder excluder : SCANNER_EXCLUDER_SET) {
-                            try {
-                                if (excluder.isMatch(bean, beanName, beanDefinition)) {
-                                    return bean;
-                                }
-                            } catch (Throwable e) {
-                                LOGGER.error("Do check need exclude failed: beanName={}, excluder={}",
-                                        beanName, excluder.getClass().getSimpleName(), e);
+                //do checkers
+                if (SCANNER_CHECKER_SET.isEmpty()) {
+                    for (ScannerChecker checker : SCANNER_CHECKER_SET) {
+                        try {
+                            if (!checker.check(bean, beanName, beanFactory)) {
+                                // check failed, do not scan this bean
+                                return bean;
                             }
+                        } catch (Throwable e) {
+                            LOGGER.error("Do check failed: beanName={}, checker={}",
+                                beanName, checker.getClass().getSimpleName(), e);
                         }
-                    } catch (NoSuchBeanDefinitionException e) {
-                        //do nothing
                     }
                 }
 
@@ -377,19 +369,19 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     public static void addScannablePackages(String... packages) {
-        PackageScannerExcluder.addScannablePackages(packages);
+        PackageScannerChecker.addScannablePackages(packages);
     }
 
-    public static void addScannerExcluders(Collection<ScannerExcluder> scannerExcluders) {
-        if (CollectionUtils.isNotEmpty(scannerExcluders)) {
-            scannerExcluders.remove(null);
-            SCANNER_EXCLUDER_SET.addAll(scannerExcluders);
+    public static void addScannerCheckers(Collection<ScannerChecker> scannerCheckers) {
+        if (CollectionUtils.isNotEmpty(scannerCheckers)) {
+            scannerCheckers.remove(null);
+            SCANNER_CHECKER_SET.addAll(scannerCheckers);
         }
     }
 
-    public static void addScannerExcluders(ScannerExcluder... scannerExcluders) {
-        if (ArrayUtils.isNotEmpty(scannerExcluders)) {
-            addScannerExcluders(Arrays.asList(scannerExcluders));
+    public static void addScannerCheckers(ScannerChecker... scannerCheckers) {
+        if (ArrayUtils.isNotEmpty(scannerCheckers)) {
+            addScannerCheckers(Arrays.asList(scannerCheckers));
         }
     }
 

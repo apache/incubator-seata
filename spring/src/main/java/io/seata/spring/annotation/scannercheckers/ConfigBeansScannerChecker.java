@@ -13,27 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation.scannerexcluders;
+package io.seata.spring.annotation.scannercheckers;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.spring.annotation.ScannerExcluder;
-import org.springframework.beans.factory.config.BeanDefinition;
+import io.seata.spring.annotation.ScannerChecker;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
- * Config scanner excluder.
+ * Config scanner checker.
  *
  * @author wang.liang
  */
 @LoadLevel(name = "ConfigBeans", order = 150)
-public class ConfigBeansScannerExcluder implements ScannerExcluder {
+public class ConfigBeansScannerChecker implements ScannerChecker {
 
-    /**
-     * Match the config beans, and exclude.
-     */
     @Override
-    public boolean isMatch(Object bean, String beanName, BeanDefinition beanDefinition) throws Throwable {
-        return beanName == null
-                || beanName.endsWith("AutoConfiguration")
-                || beanName.endsWith("Properties");
+    public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
+        if (beanName != null && (beanName.endsWith("AutoConfiguration") || beanName.endsWith("Properties"))) {
+            // do not scan the config beans
+            return false;
+        }
+
+        return true;
     }
 }

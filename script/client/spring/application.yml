@@ -6,7 +6,7 @@ seata:
   data-source-proxy-mode: AT
   use-jdk-proxy: false
   scan-packages: firstPackage,secondPackage
-  excludes-for-scanner: firstBeanNameForExclude,secondBeanNameForExclude
+  excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
