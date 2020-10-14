@@ -74,11 +74,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
@@ -157,7 +152,6 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
         <dependency>
