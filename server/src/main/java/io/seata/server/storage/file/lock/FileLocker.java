@@ -38,7 +38,7 @@ public class FileLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;
 
-    private static final ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
+    public static final ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
         ConcurrentMap<Integer/* bucketId */, BucketLockMap>>>
         LOCK_MAP = new ConcurrentHashMap<>();
 

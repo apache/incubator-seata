@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
@@ -30,14 +31,19 @@ import com.alipay.sofa.jraft.error.RaftException;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.jraft.util.Utils;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
+import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.server.storage.raft.RaftSyncMsg;
 import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
@@ -78,7 +84,10 @@ public class RaftStateMachine extends StateMachineAdapter {
         return this.leaderTerm.get() > 0;
     }
 
+    String mode;
+
     public RaftStateMachine() {
+        mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
     }
 
     @Override
@@ -105,8 +114,11 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
+        if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+            return;
+        }
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-        Map<String, Map<String, GlobalSession>> sessionMaps = new HashMap<>();
+        Map<String, Object> sessionMaps = new HashMap<>();
         sessionMaps.put(ROOT_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
         raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
         sessionMaps.put(RETRY_ROLLBACKING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
@@ -114,6 +126,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         sessionMaps.put(RETRY_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
         raftSessionManager = (RaftSessionManager)SessionHolder.getAsyncCommittingSessionManager();
         sessionMaps.put(ASYNC_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
+        sessionMaps.put("LOCK_MAP", FileLocker.LOCK_MAP);
         if (sessionMaps.isEmpty()) {
             return;
         }
@@ -138,6 +151,9 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public boolean onSnapshotLoad(final SnapshotReader reader) {
+        if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
+            return false;
+        }
         if (isLeader()) {
             LOG.warn("Leader is not supposed to load snapshot");
             return false;
@@ -148,15 +164,20 @@ public class RaftStateMachine extends StateMachineAdapter {
         }
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
         try {
-            Map<String, Map<String, GlobalSession>> sessionMaps = snapshot.load();
+            Map<String, Object> sessionMaps = snapshot.load();
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-            raftSessionManager.setSessionMap(sessionMaps.get(ROOT_SESSION_MANAGER_NAME));
+            raftSessionManager.setSessionMap((Map<String, GlobalSession>)sessionMaps.get(ROOT_SESSION_MANAGER_NAME));
             raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
-            raftSessionManager.setSessionMap(sessionMaps.get(RETRY_ROLLBACKING_SESSION_MANAGER_NAME));
+            raftSessionManager.setSessionMap(
+                (Map<String, GlobalSession>)sessionMaps.get(RETRY_ROLLBACKING_SESSION_MANAGER_NAME));
             raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
-            raftSessionManager.setSessionMap(sessionMaps.get(RETRY_COMMITTING_SESSION_MANAGER_NAME));
+            raftSessionManager.setSessionMap(
+                (Map<String, GlobalSession>)sessionMaps.get(RETRY_COMMITTING_SESSION_MANAGER_NAME));
             raftSessionManager = (RaftSessionManager)SessionHolder.getAsyncCommittingSessionManager();
-            raftSessionManager.setSessionMap(sessionMaps.get(ASYNC_COMMITTING_SESSION_MANAGER_NAME));
+            raftSessionManager.setSessionMap(
+                (Map<String, GlobalSession>)sessionMaps.get(ASYNC_COMMITTING_SESSION_MANAGER_NAME));
+            FileLocker.LOCK_MAP.putAll(
+                (Map<? extends String, ? extends ConcurrentMap<String, ConcurrentMap<Integer, FileLocker.BucketLockMap>>>)sessionMaps.get("LOCK_MAP"));
             return true;
         } catch (final Exception e) {
             LOG.error("Fail to load snapshot from {}", snapshot.getPath());

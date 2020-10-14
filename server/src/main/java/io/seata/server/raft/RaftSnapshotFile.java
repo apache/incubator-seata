@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Map;
 import io.seata.serializer.kryo.KryoInnerSerializer;
 import io.seata.serializer.kryo.KryoSerializerFactory;
-import io.seata.server.session.GlobalSession;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ public class RaftSnapshotFile {
     /**
      * Save value to snapshot file.
      */
-    public boolean save(final Map<String, Map<String, GlobalSession>> value) {
+    public boolean save(final Map<String, Object> value) {
         KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
         try {
             FileUtils.writeByteArrayToFile(new File(path), kryoInnerSerializer.serialize(value));
@@ -59,10 +58,10 @@ public class RaftSnapshotFile {
         }
     }
 
-    public Map<String, Map<String, GlobalSession>> load() throws IOException {
+    public Map<String, Object> load() throws IOException {
         KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
         try {
-            final Map<String, Map<String, GlobalSession>> map =
+            final Map<String, Object> map =
                 kryoInnerSerializer.deserialize(FileUtils.readFileToByteArray(new File(path)));
             if (!map.isEmpty()) {
                 return map;
