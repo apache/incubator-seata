@@ -34,7 +34,7 @@ public class ResourceUtil {
     public static Resource[] getResources(String location) {
         try {
             return RESOURCE_RESOLVER.getResources(location);
-        } catch (IOException var3) {
+        } catch (IOException e) {
             return new Resource[0];
         }
     }
