@@ -111,7 +111,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             response.setBranchId(branchId);
             response.setBranchStatus(status);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Branch Committed result: " + status);
+                LOGGER.info("Branch Committed result: {}", status);
             }
 
             //trigger after branch commit hooks
@@ -171,7 +171,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
             response.setBranchId(branchId);
             response.setBranchStatus(status);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Branch Rollbacked result: " + status);
+                LOGGER.info("Branch Rollbacked result: {}", status);
             }
 
             //trigger after branch rollback hooks
