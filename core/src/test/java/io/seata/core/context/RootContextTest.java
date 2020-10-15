@@ -16,7 +16,6 @@
 package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-
 import io.seata.core.model.BranchType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,9 +45,9 @@ public class RootContextTest {
         RootContext.unbind();
         assertThat(RootContext.getXID()).isNull();
 
-        Assertions.assertThrows(IllegalArgumentException.class, ()-> RootContext.bind(null));
-        Assertions.assertThrows(IllegalArgumentException.class, ()-> RootContext.bind(""));
-        Assertions.assertThrows(IllegalArgumentException.class, ()-> RootContext.bind("   "));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bind(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bind(""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bind("   "));
     }
 
     /**
@@ -82,7 +81,7 @@ public class RootContextTest {
         assertThat(RootContext.unbindBranchType()).isEqualTo(DEFAULT_BRANCH_TYPE);
         assertThat(RootContext.getBranchType()).isNull();
 
-        Assertions.assertThrows(IllegalArgumentException.class, ()-> RootContext.bindBranchType(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bindBranchType(null));
     }
 
     /**
@@ -172,7 +171,7 @@ public class RootContextTest {
     }
 
     @Test
-    public void testBindBranchType_And_UnbindBranchType(){
+    public void testBindBranchType_And_UnbindBranchType() {
         assertThat(RootContext.getBranchType()).isNull();
         assertThat(RootContext.unbindBranchType()).isNull();
         RootContext.bindBranchType(DEFAULT_BRANCH_TYPE);

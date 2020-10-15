@@ -17,6 +17,7 @@ package io.seata.core.context;
 
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -76,6 +77,7 @@ public class RootContext {
      *
      * @return the xid
      */
+    @Nullable
     public static String getXID() {
         return (String) CONTEXT_HOLDER.get(KEY_XID);
     }
@@ -110,8 +112,9 @@ public class RootContext {
     /**
      * Unbind xid.
      *
-     * @return the unbound xid
+     * @return the previous xid or null
      */
+    @Nullable
     public static String unbind() {
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
@@ -159,6 +162,7 @@ public class RootContext {
      *
      * @return the branch type String
      */
+    @Nullable
     public static BranchType getBranchType() {
         if (inGlobalTransaction()) {
             BranchType branchType = (BranchType) CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
@@ -190,8 +194,9 @@ public class RootContext {
     /**
      * unbind branch type
      *
-     * @return the previous branch type
+     * @return the previous branch type or null
      */
+    @Nullable
     public static BranchType unbindBranchType() {
         BranchType unbindBranchType = (BranchType) CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {

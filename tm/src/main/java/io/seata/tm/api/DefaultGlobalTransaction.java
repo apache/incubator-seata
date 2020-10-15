@@ -136,7 +136,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (xid.equals(RootContext.getXID())) {
-                suspend(true);
+                suspend();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -171,7 +171,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (xid.equals(RootContext.getXID())) {
-                suspend(true);
+                suspend();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -180,17 +180,16 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
-        String xid = RootContext.getXID();
-        if (xid != null && unbindXid) {
-            RootContext.unbind();
+    public SuspendedResourcesHolder suspend() throws TransactionException {
+        String xid = RootContext.unbind();
+        if (xid != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Suspending current transaction, xid = {}", xid);
             }
+            return new SuspendedResourcesHolder(xid);
         } else {
-            xid = null;
+            return null;
         }
-        return new SuspendedResourcesHolder(xid);
     }
 
     @Override
@@ -199,11 +198,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         String xid = suspendedResourcesHolder.getXid();
-        if (xid != null) {
-            RootContext.bind(xid);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Resumimg the transaction,xid = {}", xid);
-            }
+        RootContext.bind(xid);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Resumimg the transaction,xid = {}", xid);
         }
     }
 
@@ -235,7 +232,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         if (xid.equals(RootContext.getXID())) {
-            suspend(true);
+            suspend();
         }
     }
 
