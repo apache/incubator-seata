@@ -89,7 +89,7 @@ public class SeataAutoConfiguration {
         // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanning());
 
-        // create globa transaction scanner
+        // create global transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
 

@@ -52,6 +52,7 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -79,7 +80,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
-    private static final Set<String> EXCLUDE_SET = new HashSet<>();
+    private static final Set<String> EXCLUDE_BEAN_NAME_SET = new HashSet<>();
     private static final Set<ScannerChecker> SCANNER_CHECKER_SET = new LinkedHashSet<>();
 
     private static ConfigurableListableBeanFactory beanFactory;
@@ -217,7 +218,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * GlobalLock:
      * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // GlobalLock handler
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock) // GlobalLock handler
      *
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
@@ -228,27 +229,31 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+        // do checkers
+        if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
+                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+            return bean;
+        }
+        if (!SCANNER_CHECKER_SET.isEmpty()) {
+            for (ScannerChecker checker : SCANNER_CHECKER_SET) {
+                try {
+                    if (!checker.check(bean, beanName, beanFactory)) {
+                        // failed check, do not scan this bean
+                        return bean;
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error("Do check failed: beanName={}, checker={}",
+                            beanName, checker.getClass().getSimpleName(), e);
+                }
+            }
+        }
+        //endregion
+
         try {
             synchronized (PROXYED_SET) {
-                if (PROXYED_SET.contains(beanName) || EXCLUDE_SET.contains(beanName)) {
+                if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-
-                //do checkers
-                if (SCANNER_CHECKER_SET.isEmpty()) {
-                    for (ScannerChecker checker : SCANNER_CHECKER_SET) {
-                        try {
-                            if (!checker.check(bean, beanName, beanFactory)) {
-                                // check failed, do not scan this bean
-                                return bean;
-                            }
-                        } catch (Throwable e) {
-                            LOGGER.error("Do check failed: beanName={}, checker={}",
-                                beanName, checker.getClass().getSimpleName(), e);
-                        }
-                    }
-                }
-
                 interceptor = null;
                 //check TCC proxy
                 if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
@@ -387,7 +392,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     public static void addScannerExcludeBeanNames(String... beanNames) {
         if (ArrayUtils.isNotEmpty(beanNames)) {
-            EXCLUDE_SET.addAll(Arrays.asList(beanNames));
+            EXCLUDE_BEAN_NAME_SET.addAll(Arrays.asList(beanNames));
         }
     }
 }

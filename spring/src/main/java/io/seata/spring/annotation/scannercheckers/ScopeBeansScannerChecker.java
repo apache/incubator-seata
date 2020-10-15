@@ -81,19 +81,18 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
      */
     @Override
     public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
-        if (bean instanceof ScopedProxyFactoryBean) {
-            // do not scan the ScopedProxyFactoryBean
-            return false;
+        if (beanFactory == null) {
+            // the beanFactory is null, pass this checker
+            return true;
         }
 
-        BeanDefinition beanDefinition = null;
-        if (beanFactory != null) {
-            try {
-                beanDefinition = beanFactory.getBeanDefinition(beanName);
-            } catch (NoSuchBeanDefinitionException e) {
-                // if no bean definition, need scan
-                return true;
-            }
+        // get bean definition
+        BeanDefinition beanDefinition;
+        try {
+            beanDefinition = beanFactory.getBeanDefinition(beanName);
+        } catch (NoSuchBeanDefinitionException e) {
+            // if no bean definition, need scan
+            return true;
         }
 
         // find the AnnotatedBeanDefinition
