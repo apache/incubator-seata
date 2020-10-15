@@ -22,6 +22,7 @@ import java.util.List;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -132,7 +133,7 @@ public class SessionHolder {
 
         // There is a remove operation in the following code, it will affect the file mode, so new ArrayList
         List<GlobalSession> allSessions = new ArrayList<>(ROOT_SESSION_MANAGER.allSessions());
-        if (allSessions != null && !allSessions.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(allSessions)) {
             allSessions.forEach(globalSession -> {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
