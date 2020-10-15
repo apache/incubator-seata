@@ -230,24 +230,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         // do checkers
-        if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
-                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+        if (!doCheckers(bean, beanName)) {
             return bean;
         }
-        if (!SCANNER_CHECKER_SET.isEmpty()) {
-            for (ScannerChecker checker : SCANNER_CHECKER_SET) {
-                try {
-                    if (!checker.check(bean, beanName, beanFactory)) {
-                        // failed check, do not scan this bean
-                        return bean;
-                    }
-                } catch (Throwable e) {
-                    LOGGER.error("Do check failed: beanName={}, checker={}",
-                            beanName, checker.getClass().getSimpleName(), e);
-                }
-            }
-        }
-        //endregion
 
         try {
             synchronized (PROXYED_SET) {
@@ -297,6 +282,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         } catch (Exception exx) {
             throw new RuntimeException(exx);
         }
+    }
+
+    private boolean doCheckers(Object bean, String beanName) {
+        if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
+                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+            return false;
+        }
+
+        if (!SCANNER_CHECKER_SET.isEmpty()) {
+            for (ScannerChecker checker : SCANNER_CHECKER_SET) {
+                try {
+                    if (!checker.check(bean, beanName, beanFactory)) {
+                        // failed check, do not scan this bean
+                        return false;
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error("Do check failed: beanName={}, checker={}",
+                            beanName, checker.getClass().getSimpleName(), e);
+                }
+            }
+        }
+
+        return true;
     }
 
     private boolean existsAnnotation(Class<?>[] classes) {
