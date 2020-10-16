@@ -49,12 +49,12 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
         if (dataSource instanceof SeataDataSourceProxy) {
             LOGGER.info("Unwrap the data source, because the type is: {}", dataSource.getClass().getName());
-            dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
+            dataSource = ((SeataDataSourceProxy)dataSource).getTargetDataSource();
         }
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
-        if (SQL_SERVER.equals(dbType)) {
+        if (SQL_SERVER.equalsIgnoreCase(dbType)) {
             if (dataSource instanceof SQLServerXADataSource) {
                 return;
             }
@@ -104,7 +104,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection.unwrap(Connection.class);
-        XAConnection xaConnection = SQL_SERVER.equals(dbType) ? ((SQLServerXADataSource)dataSource).getXAConnection()
+        XAConnection xaConnection = SQL_SERVER.equalsIgnoreCase(dbType) ? ((SQLServerXADataSource)dataSource).getXAConnection()
             : XAUtils.createXAConnection(physicalConn, this);
         ConnectionProxyXA connectionProxyXA =
             new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
