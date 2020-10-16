@@ -28,12 +28,14 @@ import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
@@ -69,6 +71,7 @@ public interface StarterConstants {
     String REGISTRY_CONSUL_PREFIX = REGISTRY_PREFIX + ".consul";
     String REGISTRY_ETCD3_PREFIX = REGISTRY_PREFIX + ".etcd3";
     String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
+    String REGISTRY_CUSTOM_PREFIX = REGISTRY_PREFIX + ".custom";
 
     String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
@@ -77,6 +80,7 @@ public interface StarterConstants {
     String CONFIG_APOLLO_PREFIX = CONFIG_PREFIX + ".apollo";
     String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
+    String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
     HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
         private static final long serialVersionUID = -8902807645596274597L;
@@ -100,6 +104,7 @@ public interface StarterConstants {
             put(CONFIG_ZK_PREFIX, ConfigZooKeeperProperties.class);
             put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
             put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
+            put(CONFIG_CUSTOM_PREFIX, ConfigCustomProperties.class);
 
             put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
             put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
@@ -108,6 +113,7 @@ public interface StarterConstants {
             put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
             put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
             put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
+            put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
         }
 
     };

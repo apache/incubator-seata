@@ -30,12 +30,14 @@ import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
@@ -181,7 +183,11 @@ public class PropertiesTest {
         assertEquals("127.0.0.1:2181", context.getBean(ConfigZooKeeperProperties.class).getServerAddr());
         assertEquals(6000L, context.getBean(ConfigZooKeeperProperties.class).getSessionTimeout());
         assertEquals(2000L, context.getBean(ConfigZooKeeperProperties.class).getConnectTimeout());
+    }
 
+    @Test
+    public void testConfigCustomProperties() {
+        assertEquals("", context.getBean(ConfigCustomProperties.class).getName());
     }
 
     @Test
@@ -247,6 +253,11 @@ public class PropertiesTest {
         assertEquals("127.0.0.1:2181", context.getBean(RegistryZooKeeperProperties.class).getServerAddr());
         assertEquals(6000L, context.getBean(RegistryZooKeeperProperties.class).getSessionTimeout());
         assertEquals(2000L, context.getBean(RegistryZooKeeperProperties.class).getConnectTimeout());
+    }
+
+    @Test
+    public void testRegistryCustomProperties() {
+        assertEquals("", context.getBean(RegistryCustomProperties.class).getName());
     }
 
     @Test
