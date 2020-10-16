@@ -47,7 +47,7 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
             if (StringUtils.isNotEmpty(resultMsg)) {
                 String msg;
                 if (resultMsg.length() > MAX_ERR_MSG_LEN) {
-                    msg = resultMsg.substring(0, MAX_ERR_MSG_LEN);
+                    msg = resultMsg.substring(0, MAX_ERR_MSG_LEN) + "...";
                 } else {
                     msg = resultMsg;
                 }
