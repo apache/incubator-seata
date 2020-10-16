@@ -15,6 +15,13 @@
  */
 package io.seata.rm.datasource.xa;
 
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.SeataDataSourceProxy;
@@ -22,11 +29,9 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.microsoft.sqlserver.jdbc.SQLServerXADataSource;
 
-import javax.sql.DataSource;
-import javax.sql.XAConnection;
-import java.sql.Connection;
-import java.sql.SQLException;
+import static com.alibaba.druid.util.JdbcConstants.SQL_SERVER;
 
 /**
  * DataSource proxy for XA mode.
@@ -49,6 +54,30 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
+        if (SQL_SERVER == dbType) {
+            if (dataSource instanceof SQLServerXADataSource) {
+                return;
+            }
+            try (Connection connection = dataSource.getConnection()) {
+                String username = connection.getMetaData().getUserName();
+                String password = null;
+                if (StringUtils.isBlank(password)) {
+                    Method getPassword = dataSource.getClass().getMethod("getPassword", null);
+                    Object pwd = getPassword.invoke(dataSource, null);
+                    if (pwd == null) {
+                        throw new SQLException("failed to get data source password");
+                    }
+                    password = String.valueOf(password);
+                }
+                SQLServerXADataSource sqlServerXADataSource = new SQLServerXADataSource();
+                sqlServerXADataSource.setUser(username);
+                sqlServerXADataSource.setPassword(password);
+                sqlServerXADataSource.setURL(connection.getMetaData().getURL());
+                this.dataSource = sqlServerXADataSource;
+            } catch (Exception e) {
+                LOGGER.error("Failed to create sqlServer XA DataSource errorMsg:{}", e.getMessage(), e);
+            }
+        }
     }
 
     @Override
@@ -78,8 +107,10 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection.unwrap(Connection.class);
-        XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
-        ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
+        XAConnection xaConnection = SQL_SERVER == dbType ? ((SQLServerXADataSource)dataSource).getXAConnection()
+            : XAUtils.createXAConnection(physicalConn, this);
+        ConnectionProxyXA connectionProxyXA =
+            new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
     }
