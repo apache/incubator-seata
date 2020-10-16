@@ -28,6 +28,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import org.apache.commons.lang.StringUtils;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -76,10 +77,30 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
-        if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE ").append(whereCondition);
+//        if (StringUtils.isNotBlank(whereCondition)) {
+//            suffix.append(" WHERE ").append(whereCondition);
+//        }
+//        suffix.append(" FOR UPDATE");
+        if (JdbcConstants.SQLSERVER.equals(getDbType())) {
+            String where = "";
+            if (StringUtils.isNotBlank(whereCondition)) {
+                where = " WHERE " + whereCondition;
+            }
+            if ("".equals(where)) {
+                suffix
+                        .append(" WITH (TABLOCK)")
+                        .append(where);
+            } else {
+                suffix
+                        .append(" WITH (ROWLOCK,UPDLOCK)")
+                        .append(where);
+            }
+        } else {
+            if (StringUtils.isNotBlank(whereCondition)) {
+                suffix.append(" WHERE ").append(whereCondition);
+            }
+            suffix.append(" FOR UPDATE");
         }
-        suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             List<String> updateColumns = recognizer.getUpdateColumns();

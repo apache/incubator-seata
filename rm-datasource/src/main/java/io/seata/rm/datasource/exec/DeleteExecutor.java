@@ -28,6 +28,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import org.apache.commons.lang.StringUtils;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Delete executor.
@@ -63,10 +64,30 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE ").append(whereCondition);
+        if (JdbcConstants.SQLSERVER.equals(getDbType())) {
+            String where = "";
+            if (StringUtils.isNotBlank(whereCondition)) {
+                where = " WHERE " + whereCondition;
+            }
+            if ("".equals(where)) {
+                suffix
+                        .append(" WITH (TABLOCK)")
+                        .append(where);
+            } else {
+                suffix
+                        .append(" WITH (ROWLOCK,UPDLOCK)")
+                        .append(where);
+            }
+        } else {
+            if (StringUtils.isNotBlank(whereCondition)) {
+                suffix.append(" WHERE ").append(whereCondition);
+            }
+            suffix.append(" FOR UPDATE");
         }
-        suffix.append(" FOR UPDATE");
+//        if (StringUtils.isNotBlank(whereCondition)) {
+//            suffix.append(" WHERE ").append(whereCondition);
+//        }
+//        suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));

@@ -24,6 +24,7 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -67,10 +68,30 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
             whereCondition.append(whereConditionStr);
         }
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        if (whereCondition.length() > 0) {
-            suffix.append(" WHERE ").append(whereCondition);
+//        if (whereCondition.length() > 0) {
+//            suffix.append(" WHERE ").append(whereCondition);
+//        }
+//        suffix.append(" FOR UPDATE");
+        if (JdbcConstants.SQLSERVER.equals(getDbType())) {
+            String where = "";
+            if (whereCondition.length() > 0) {
+                where = " WHERE " + whereCondition;
+            }
+            if ("".equals(where)) {
+                suffix
+                        .append(" WITH (TABLOCK)")
+                        .append(where);
+            } else {
+                suffix
+                        .append(" WITH (ROWLOCK,UPDLOCK)")
+                        .append(where);
+            }
+        } else {
+            if (whereCondition.length() > 0) {
+                suffix.append(" WHERE ").append(whereCondition);
+            }
+            suffix.append(" FOR UPDATE");
         }
-        suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tmeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));

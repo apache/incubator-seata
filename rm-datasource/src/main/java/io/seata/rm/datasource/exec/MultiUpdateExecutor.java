@@ -38,6 +38,7 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type MultiSql executor.
@@ -96,13 +97,40 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
-        if (noWhereCondition) {
-            //select all rows
-            paramAppenderList.clear();
+//        if (noWhereCondition) {
+//            //select all rows
+//            paramAppenderList.clear();
+//        } else {
+//            suffix.append(" WHERE ").append(whereCondition);
+//        }
+//        suffix.append(" FOR UPDATE");
+        if (JdbcConstants.SQLSERVER.equals(getDbType())) {
+            String where = "";
+
+            if (noWhereCondition) {
+                //select all rows
+                paramAppenderList.clear();
+            } else {
+                where = " WHERE " + whereCondition;
+            }
+            if ("".equals(where)) {
+                suffix
+                        .append(" WITH (TABLOCK)")
+                        .append(where);
+            } else {
+                suffix
+                        .append(" WITH (ROWLOCK,UPDLOCK)")
+                        .append(where);
+            }
         } else {
-            suffix.append(" WHERE ").append(whereCondition);
+            if (noWhereCondition) {
+                //select all rows
+                paramAppenderList.clear();
+            } else {
+                suffix.append(" WHERE ").append(whereCondition);
+            }
+            suffix.append(" FOR UPDATE");
         }
-        suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {

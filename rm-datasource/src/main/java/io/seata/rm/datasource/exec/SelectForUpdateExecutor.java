@@ -31,6 +31,7 @@ import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Select for update executor.
@@ -139,10 +140,30 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         selectSQLAppender.append(getColumnNamesInSQL(getTableMeta().getEscapePkNameList(getDbType())));
         selectSQLAppender.append(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
-        if (StringUtils.isNotBlank(whereCondition)) {
-            selectSQLAppender.append(" WHERE ").append(whereCondition);
+//        if (StringUtils.isNotBlank(whereCondition)) {
+//            selectSQLAppender.append(" WHERE ").append(whereCondition);
+//        }
+//        selectSQLAppender.append(" FOR UPDATE");
+        if (JdbcConstants.SQLSERVER.equals(getDbType())) {
+            String where = "";
+            if (StringUtils.isNotBlank(whereCondition)) {
+                where = " WHERE " + whereCondition;
+            }
+            if ("".equals(where)) {
+                selectSQLAppender
+                        .append(" WITH (TABLOCK)")
+                        .append(where);
+            } else {
+                selectSQLAppender
+                        .append(" WITH (ROWLOCK,UPDLOCK)")
+                        .append(where);
+            }
+        } else {
+            if (StringUtils.isNotBlank(whereCondition)) {
+                selectSQLAppender.append(" WHERE ").append(whereCondition);
+            }
+            selectSQLAppender.append(" FOR UPDATE");
         }
-        selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();
     }
 }
