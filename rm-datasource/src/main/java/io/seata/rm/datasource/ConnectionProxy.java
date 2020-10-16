@@ -187,10 +187,15 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return null;
             });
         } catch (SQLException e) {
-            exception = e;
+            if (exception == null) {
+                exception = e;
+            }
             throw e;
         } catch (Exception e) {
             throw new SQLException(e);
+        }
+        if (exception != null) {
+            exception = null;
         }
     }
 
