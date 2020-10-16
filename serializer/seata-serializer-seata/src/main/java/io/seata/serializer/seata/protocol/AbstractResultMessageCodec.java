@@ -29,8 +29,6 @@ import io.seata.core.protocol.ResultCode;
  */
 public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
-    private static final int MAX_ERR_MSG_LEN = 128;
-
     @Override
     public Class<?> getMessageClassType() {
         return AbstractResultMessage.class;
