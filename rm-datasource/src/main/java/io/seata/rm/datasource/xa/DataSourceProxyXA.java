@@ -54,21 +54,18 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
-        if (SQL_SERVER == dbType) {
+        if (SQL_SERVER.equals(dbType)) {
             if (dataSource instanceof SQLServerXADataSource) {
                 return;
             }
             try (Connection connection = dataSource.getConnection()) {
                 String username = connection.getMetaData().getUserName();
-                String password = null;
-                if (StringUtils.isBlank(password)) {
-                    Method getPassword = dataSource.getClass().getMethod("getPassword", null);
-                    Object pwd = getPassword.invoke(dataSource, null);
-                    if (pwd == null) {
-                        throw new SQLException("failed to get data source password");
-                    }
-                    password = String.valueOf(password);
+                Method getPassword = dataSource.getClass().getMethod("getPassword", null);
+                Object pwd = getPassword.invoke(dataSource, null);
+                if (pwd == null) {
+                    throw new SQLException("failed to get data source password");
                 }
+                String password = String.valueOf(pwd);
                 SQLServerXADataSource sqlServerXADataSource = new SQLServerXADataSource();
                 sqlServerXADataSource.setUser(username);
                 sqlServerXADataSource.setPassword(password);
@@ -107,7 +104,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection.unwrap(Connection.class);
-        XAConnection xaConnection = SQL_SERVER == dbType ? ((SQLServerXADataSource)dataSource).getXAConnection()
+        XAConnection xaConnection = SQL_SERVER.equals(dbType) ? ((SQLServerXADataSource)dataSource).getXAConnection()
             : XAUtils.createXAConnection(physicalConn, this);
         ConnectionProxyXA connectionProxyXA =
             new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
