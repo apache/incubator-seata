@@ -17,6 +17,7 @@ package io.seata.serializer.protobuf;
 
 import com.google.protobuf.MessageLite;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,17 +31,17 @@ public class ProtobufHelper {
     /**
      * Cache of parseFrom method
      */
-    ConcurrentMap<Class, Method> parseFromMethodMap = new ConcurrentHashMap<Class, Method>();
+    ConcurrentMap<Class, Method> parseFromMethodMap = new ConcurrentHashMap<>();
 
     /**
      * Cache of toByteArray method
      */
-    ConcurrentMap<Class, Method> toByteArrayMethodMap = new ConcurrentHashMap<Class, Method>();
+    ConcurrentMap<Class, Method> toByteArrayMethodMap = new ConcurrentHashMap<>();
 
     /**
      *  {className:class}
      */
-    private ConcurrentMap<String, Class> requestClassCache = new ConcurrentHashMap<String, Class>();
+    private ConcurrentMap<String, Class> requestClassCache = new ConcurrentHashMap<>();
 
     /**
      *
@@ -48,32 +49,20 @@ public class ProtobufHelper {
      * @return
      */
     public Class getPbClass(String clazzName) {
-        Class reqClass = requestClassCache.get(clazzName);
-        if (reqClass == null) {
+        return CollectionUtils.computeIfAbsent(requestClassCache, clazzName, key -> {
             // get the parameter and result
-            Class clazz = null;
+            Class clazz;
             try {
                 clazz = Class.forName(clazzName);
             } catch (ClassNotFoundException e) {
                 throw new ShouldNeverHappenException("get class occurs exception", e);
-
             }
-            loadProtoClassToCache(clazzName, clazz);
-        }
-        return requestClassCache.get(clazzName);
-    }
-
-    /**
-     *
-     * @param key
-     * @param clazz
-     */
-    private void loadProtoClassToCache(String key, Class clazz) {
-        if (clazz == void.class || !isProtoBufMessageClass(clazz)) {
-            throw new ShouldNeverHappenException("class based protobuf: " + clazz.getName()
-                + ", only support return protobuf message!");
-        }
-        requestClassCache.put(key, clazz);
+            if (clazz == void.class || !isProtoBufMessageClass(clazz)) {
+                throw new ShouldNeverHappenException("class based protobuf: " + clazz.getName()
+                        + ", only support return protobuf message!");
+            }
+            return clazz;
+        });
     }
 
     /**

@@ -17,6 +17,7 @@ package io.seata.core.compressor;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +31,7 @@ public class CompressorFactory {
     /**
      * The constant COMPRESSOR_MAP.
      */
-    protected static final Map<CompressorType, Compressor> COMPRESSOR_MAP = new ConcurrentHashMap<CompressorType, Compressor>();
+    protected static final Map<CompressorType, Compressor> COMPRESSOR_MAP = new ConcurrentHashMap<>();
 
     static {
         COMPRESSOR_MAP.put(CompressorType.NONE, new NoneCompressor());
@@ -44,12 +45,8 @@ public class CompressorFactory {
      */
     public static Compressor getCompressor(byte code) {
         CompressorType type = CompressorType.getByCode(code);
-        if (COMPRESSOR_MAP.get(type) != null) {
-            return COMPRESSOR_MAP.get(type);
-        }
-        Compressor impl = EnhancedServiceLoader.load(Compressor.class, type.name());
-        COMPRESSOR_MAP.putIfAbsent(type, impl);
-        return impl;
+        return CollectionUtils.computeIfAbsent(COMPRESSOR_MAP, type,
+            key -> EnhancedServiceLoader.load(Compressor.class, type.name()));
     }
 
     /**

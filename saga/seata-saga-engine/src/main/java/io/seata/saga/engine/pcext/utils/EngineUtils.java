@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -159,13 +160,12 @@ public class EngineUtils {
      */
     public static void handleException(ProcessContext context, AbstractTaskState state, Throwable e) {
         List<ExceptionMatch> catches = state.getCatches();
-        if (catches != null && catches.size() > 0) {
+        if (CollectionUtils.isNotEmpty(catches)) {
             for (TaskState.ExceptionMatch exceptionMatch : catches) {
 
                 List<String> exceptions = exceptionMatch.getExceptions();
                 List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
-                if (exceptions != null && exceptions.size() > 0) {
-
+                if (CollectionUtils.isNotEmpty(exceptions)) {
                     if (exceptionClasses == null) {
                         synchronized (exceptionMatch) {
                             exceptionClasses = exceptionMatch.getExceptionClasses();

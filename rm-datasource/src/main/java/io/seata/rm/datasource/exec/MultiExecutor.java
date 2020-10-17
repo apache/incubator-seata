@@ -111,9 +111,10 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         if (beforeImagesMap == null || afterImagesMap == null) {
             throw new IllegalStateException("images can not be null");
         }
-        for (SQLRecognizer recognizer : beforeImagesMap.keySet()) {
-            sqlRecognizer = recognizer;
-            beforeImage = beforeImagesMap.get(recognizer);
+        SQLRecognizer recognizer;
+        for (Map.Entry<SQLRecognizer, TableRecords> entry : beforeImagesMap.entrySet()) {
+            sqlRecognizer = recognizer = entry.getKey();
+            beforeImage = entry.getValue();
             afterImage = afterImagesMap.get(recognizer);
             super.prepareUndoLog(beforeImage, afterImage);
         }

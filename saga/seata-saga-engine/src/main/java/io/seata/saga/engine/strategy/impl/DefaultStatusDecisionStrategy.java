@@ -18,6 +18,7 @@ package io.seata.saga.engine.strategy.impl;
 import java.util.List;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.strategy.StatusDecisionStrategy;
@@ -96,10 +97,8 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
     public static boolean setMachineStatusBasedOnStateList(StateMachineInstance stateMachineInstance,
                                                            List<StateInstance> stateList) {
         boolean hasSetStatus = false;
-        if (stateList != null && stateList.size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(stateList)) {
             boolean hasSuccessUpdateService = false;
-
             boolean hasUnsuccessService = false;
 
             for (int i = stateList.size() - 1; i >= 0; i--) {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Stack;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.EventConsumer;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
         List<EventConsumer> eventHandlers = getEventConsumers(context.getClass());
-        if (eventHandlers == null || eventHandlers.size() == 0) {
+        if (CollectionUtils.isEmpty(eventHandlers)) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("cannot find event handler by class: " + context.getClass());
             }

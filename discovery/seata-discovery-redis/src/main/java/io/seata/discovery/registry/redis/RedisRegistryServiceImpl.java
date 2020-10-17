@@ -160,8 +160,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     @Override
     public void subscribe(String cluster, RedisListener listener) {
         String redisRegistryKey = REDIS_FILEKEY_PREFIX + cluster;
-        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
-        LISTENER_SERVICE_MAP.get(cluster).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+                .add(listener);
         threadPoolExecutor.submit(() -> {
             try {
                 try (Jedis jedis = jedisPool.getResource()) {

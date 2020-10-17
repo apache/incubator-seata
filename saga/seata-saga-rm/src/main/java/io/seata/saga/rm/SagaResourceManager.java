@@ -45,7 +45,7 @@ public class SagaResourceManager extends AbstractResourceManager {
     /**
      * Saga resource cache
      */
-    private Map<String, Resource> sagaResourceCache = new ConcurrentHashMap<String, Resource>();
+    private Map<String, Resource> sagaResourceCache = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new saga resource manager.

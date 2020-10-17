@@ -146,8 +146,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         subscriberRegistration.setScopeEnum(ScopeEnum.global);
         subscriberRegistration.setGroup(registryProps.getProperty(PRO_GROUP_KEY));
 
-        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
-        LISTENER_SERVICE_MAP.get(cluster).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+                .add(listener);
         getRegistryInstance().register(subscriberRegistration);
     }
 

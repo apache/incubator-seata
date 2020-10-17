@@ -43,7 +43,7 @@ public class ColorConverter extends CompositeConverter<ILoggingEvent> {
     private static final String DISABLE_PROPERTY_NAME = "logback.color.disable-for-bat";
 
     static {
-        Map<String, AnsiElement> ansiElements = new HashMap<String, AnsiElement>();
+        Map<String, AnsiElement> ansiElements = new HashMap<>();
         ansiElements.put("faint", AnsiStyle.FAINT);
         ansiElements.put("red", AnsiColor.RED);
         ansiElements.put("green", AnsiColor.GREEN);
@@ -57,7 +57,7 @@ public class ColorConverter extends CompositeConverter<ILoggingEvent> {
     private static final Map<Integer, AnsiElement> LEVELS;
 
     static {
-        Map<Integer, AnsiElement> ansiLevels = new HashMap<Integer, AnsiElement>();
+        Map<Integer, AnsiElement> ansiLevels = new HashMap<>();
         ansiLevels.put(Level.ERROR_INTEGER, AnsiColor.RED);
         ansiLevels.put(Level.WARN_INTEGER, AnsiColor.YELLOW);
         LEVELS = Collections.unmodifiableMap(ansiLevels);

@@ -15,6 +15,7 @@
  */
 package io.seata.config.nacos;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -27,6 +28,7 @@ import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
@@ -95,8 +97,8 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         try {
@@ -136,13 +138,13 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
         try {
-            configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             NacosListener nacosListener = new NacosListener(dataId, listener);
-            configListenersMap.get(dataId).put(listener, nacosListener);
+            configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+                    .put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
             LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
@@ -151,29 +153,33 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        for (ConfigurationChangeListener entry : configChangeListeners) {
-            if (listener.equals(entry)) {
-                NacosListener nacosListener = null;
-                if (configListenersMap.containsKey(dataId)) {
-                    nacosListener = configListenersMap.get(dataId).get(listener);
-                    configListenersMap.get(dataId).remove(entry);
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configChangeListeners)) {
+            for (ConfigurationChangeListener entry : configChangeListeners) {
+                if (listener.equals(entry)) {
+                    NacosListener nacosListener = null;
+                    Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+                    if (configListeners != null) {
+                        nacosListener = configListeners.get(listener);
+                        configListeners.remove(entry);
+                    }
+                    if (nacosListener != null) {
+                        configService.removeListener(dataId, getNacosGroup(), nacosListener);
+                    }
+                    break;
                 }
-                if (nacosListener != null) {
-                    configService.removeListener(dataId, getNacosGroup(), nacosListener);
-                }
-                break;
             }
         }
     }
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        if (configListenersMap.containsKey(dataId)) {
-            return configListenersMap.get(dataId).keySet();
+        Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            return configListeners.keySet();
         } else {
             return null;
         }

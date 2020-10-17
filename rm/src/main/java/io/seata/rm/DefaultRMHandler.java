@@ -37,8 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultRMHandler extends AbstractRMHandler {
 
-    protected static Map<BranchType, AbstractRMHandler> allRMHandlersMap
-        = new ConcurrentHashMap<BranchType, AbstractRMHandler>();
+    protected static Map<BranchType, AbstractRMHandler> allRMHandlersMap = new ConcurrentHashMap<>();
 
     protected DefaultRMHandler() {
         initRMHandlers();

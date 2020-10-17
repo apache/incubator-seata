@@ -50,7 +50,6 @@ public class StateParserFactory {
     }
 
     public static StateParser getStateParser(String stateType) {
-
         return stateParserMap.get(stateType);
     }
 }

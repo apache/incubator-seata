@@ -40,6 +40,13 @@ public enum ObjectHolder {
         return clasz.cast(OBJECT_MAP.values().stream().filter(clasz::isInstance).findAny().orElseThrow(() -> new ShouldNeverHappenException("Can't find any object of class " + clasz.getName())));
     }
 
+    /**
+     * Sets object.
+     *
+     * @param objectKey the key
+     * @param object    the object
+     * @return the previous object with the key, or null
+     */
     public Object setObject(String objectKey, Object object) {
         return OBJECT_MAP.putIfAbsent(objectKey, object);
     }

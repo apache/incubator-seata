@@ -16,6 +16,8 @@
 package io.seata.core.store.db.sql.log;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,15 +30,11 @@ public class LogStoreSqlsFactory {
 
     /**
      * get the log store sqls
-     * @param dbType
-     * @return
+     * @param dbType the db type
+     * @return the LogStoreSqls
      */
     public static LogStoreSqls getLogStoreSqls(String dbType) {
-        if (LOG_STORE_SQLS_MAP.get(dbType) != null) {
-            return LOG_STORE_SQLS_MAP.get(dbType);
-        }
-        LogStoreSqls logStoreSqls = EnhancedServiceLoader.load(LogStoreSqls.class, dbType.toLowerCase());
-        LOG_STORE_SQLS_MAP.put(dbType, logStoreSqls);
-        return logStoreSqls;
+        return CollectionUtils.computeIfAbsent(LOG_STORE_SQLS_MAP, dbType,
+            key -> EnhancedServiceLoader.load(LogStoreSqls.class, dbType.toLowerCase()));
     }
 }

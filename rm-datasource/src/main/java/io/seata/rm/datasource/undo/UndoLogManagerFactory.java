@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * @author jsbxyyx
@@ -34,12 +35,7 @@ public class UndoLogManagerFactory {
      * @return undo log manager.
      */
     public static UndoLogManager getUndoLogManager(String dbType) {
-        if (UNDO_LOG_MANAGER_MAP.get(dbType) != null) {
-            return UNDO_LOG_MANAGER_MAP.get(dbType);
-        }
-        UndoLogManager undoLogManager = EnhancedServiceLoader.load(UndoLogManager.class, dbType);
-        UNDO_LOG_MANAGER_MAP.putIfAbsent(dbType, undoLogManager);
-        return undoLogManager;
+        return CollectionUtils.computeIfAbsent(UNDO_LOG_MANAGER_MAP, dbType,
+            key -> EnhancedServiceLoader.load(UndoLogManager.class, dbType));
     }
-
 }

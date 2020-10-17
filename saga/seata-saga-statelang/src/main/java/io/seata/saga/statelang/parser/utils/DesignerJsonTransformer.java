@@ -17,6 +17,7 @@ package io.seata.saga.statelang.parser.utils;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -44,8 +45,7 @@ public class DesignerJsonTransformer {
         Map<String, Object> machineJsonObject = new LinkedHashMap<>();
 
         List<Object> nodes = (List) designerJsonObject.get("nodes");
-        if (nodes != null && nodes.size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(nodes)) {
             Map<String, Object> nodeMap = new LinkedHashMap<>(nodes.size());
 
             for (Object node : nodes) {
@@ -55,7 +55,7 @@ public class DesignerJsonTransformer {
             }
 
             List<Object> edges = (List) designerJsonObject.get("edges");
-            if (edges != null && edges.size() > 0) {
+            if (CollectionUtils.isNotEmpty(edges)) {
                 for (Object edge : edges) {
                     Map<String, Object> edgeObj = (Map<String, Object>) edge;
                     transformEdge(machineJsonObject, nodes, nodeMap, edgeObj);
@@ -75,12 +75,8 @@ public class DesignerJsonTransformer {
                 machineJsonObject.putAll((Map<String, Object>) propsObj.get("StateMachine"));
             }
         } else if (!"Catch".equals(type)) {
-
-            Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
-            if (states == null) {
-                states = new LinkedHashMap<>();
-                machineJsonObject.put("States", states);
-            }
+            Map<String, Object> states = (Map<String, Object>) CollectionUtils.computeIfAbsent(machineJsonObject, "States",
+                key -> new LinkedHashMap<>());
 
             Map<String, Object> stateJsonObject = new LinkedHashMap<>();
             String stateId = (String) nodeObj.get("stateId");
@@ -116,7 +112,6 @@ public class DesignerJsonTransformer {
             Map<String, Object> targetNode = (Map<String, Object>) nodeMap.get(targetId);
 
             if (sourceNode != null) {
-
                 Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
                 Map<String, Object> sourceState = (Map<String, Object>) states.get((String) sourceNode.get("stateId"));
                 String targetStateId = (String) targetNode.get("stateId");
@@ -138,11 +133,8 @@ public class DesignerJsonTransformer {
                         throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask' or 'ScriptTask'");
                     }
                     Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
-                    List<Object> catches = (List<Object>) catchAttachedState.get("Catch");
-                    if (catches == null) {
-                        catches = new ArrayList<>();
-                        catchAttachedState.put("Catch", catches);
-                    }
+                    List<Object> catches = (List<Object>) CollectionUtils.computeIfAbsent(catchAttachedState, "Catch",
+                        key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
                     if (edgeProps != null) {
@@ -152,19 +144,14 @@ public class DesignerJsonTransformer {
                         catches.add(catchObj);
                     }
                 } else if ("Choice".equals(sourceType)) {
-                    List<Object> choices = (List<Object>) sourceState.get("Choices");
-                    if (choices == null) {
-                        choices = new ArrayList<>();
-                        sourceState.put("Choices", choices);
-                    }
+                    List<Object> choices = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Choices",
+                        key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
                     if (edgeProps != null) {
-
                         if (Boolean.TRUE.equals(edgeProps.get("Default"))) {
                             sourceState.put("Default", targetStateId);
                         } else {
-                            //JSONObject choiceObj = new JSONObject(true);
                             Map<String, Object> choiceObj = new LinkedHashMap<>();
                             choiceObj.put("Expression", edgeProps.get("Expression"));
                             choiceObj.put("Next", targetStateId);
@@ -242,14 +229,9 @@ public class DesignerJsonTransformer {
                     FrameworkErrorCode.InvalidConfiguration);
         }
         Map<String, List<StateInstance>> stateInstanceMapGroupByName = new HashMap<>(stateMachineInstance.getStateMap().size());
-        for (String id : stateMachineInstance.getStateMap().keySet()) {
-            StateInstance stateInstance = stateMachineInstance.getStateMap().get(id);
-            List<StateInstance> stateInstanceList = stateInstanceMapGroupByName.get(stateInstance.getName());
-            if (stateInstanceList == null) {
-                stateInstanceList = new ArrayList<>();
-                stateInstanceMapGroupByName.put(stateInstance.getName(), stateInstanceList);
-            }
-            stateInstanceList.add(stateInstance);
+        for (StateInstance stateInstance : stateMachineInstance.getStateMap().values()) {
+            CollectionUtils.computeIfAbsent(stateInstanceMapGroupByName, stateInstance.getName(), key -> new ArrayList<>())
+                    .add(stateInstance);
         }
         List<Object> nodesArray = (List<Object>) stateMachineJsonObj.get("nodes");
         for (Object nodeObj : nodesArray) {
@@ -262,8 +244,7 @@ public class DesignerJsonTransformer {
                 node.remove("color");
             }
             List<StateInstance> stateInstanceList = stateInstanceMapGroupByName.get(stateId);
-            if (stateInstanceList != null && stateInstanceList.size() > 0) {
-
+            if (CollectionUtils.isNotEmpty(stateInstanceList)) {
                 StateInstance stateInstance = null;
                 if (stateInstanceList.size() == 1) {
                     stateInstance = stateInstanceList.get(0);

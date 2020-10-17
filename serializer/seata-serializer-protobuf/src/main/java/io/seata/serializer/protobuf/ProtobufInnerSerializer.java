@@ -16,6 +16,7 @@
 package io.seata.serializer.protobuf;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -37,27 +38,23 @@ public class ProtobufInnerSerializer {
     private static final String METHOD_PARSEFROM = "parseFrom";
 
     public static byte[] serializeContent(Object request) {
-
         Class clazz = request.getClass();
-        Method method = PROTOBUF_HELPER.toByteArrayMethodMap.get(clazz);
-        if (method == null) {
+        Method method = CollectionUtils.computeIfAbsent(PROTOBUF_HELPER.toByteArrayMethodMap, clazz, key -> {
             try {
-                method = clazz.getMethod(METHOD_TOBYTEARRAY);
-                method.setAccessible(true);
-                PROTOBUF_HELPER.toByteArrayMethodMap.put(clazz, method);
+                Method m = clazz.getMethod(METHOD_TOBYTEARRAY);
+                m.setAccessible(true);
+                return m;
             } catch (Exception e) {
                 throw new ShouldNeverHappenException("Cannot found method " + clazz.getName()
                     + ".toByteArray(), please check the generated code.", e);
             }
-        }
-        byte[] bytes = new byte[0];
+        });
+
         try {
-            bytes = (byte[])method.invoke(request);
+            return (byte[])method.invoke(request);
         } catch (Exception e) {
             throw new ShouldNeverHappenException("serialize occurs exception", e);
         }
-
-        return bytes;
     }
 
     public static <T> T deserializeContent(String responseClazz, byte[] content) {
@@ -66,28 +63,25 @@ public class ProtobufInnerSerializer {
         }
         Class clazz = PROTOBUF_HELPER.getPbClass(responseClazz);
 
-        Method method = PROTOBUF_HELPER.parseFromMethodMap.get(clazz);
-        if (method == null) {
+        Method method = CollectionUtils.computeIfAbsent(PROTOBUF_HELPER.parseFromMethodMap, clazz, key -> {
             try {
-                method = clazz.getMethod(METHOD_PARSEFROM, byte[].class);
-                if (!Modifier.isStatic(method.getModifiers())) {
+                Method m = clazz.getMethod(METHOD_PARSEFROM, byte[].class);
+                if (!Modifier.isStatic(m.getModifiers())) {
                     throw new ShouldNeverHappenException("Cannot found static method " + clazz.getName()
                         + ".parseFrom(byte[]), please check the generated code");
                 }
-                method.setAccessible(true);
-                PROTOBUF_HELPER.parseFromMethodMap.put(clazz, method);
+                m.setAccessible(true);
+                return m;
             } catch (NoSuchMethodException e) {
                 throw new ShouldNeverHappenException("Cannot found method " + clazz.getName()
                     + ".parseFrom(byte[]), please check the generated code", e);
             }
-        }
-        Object result;
+        });
+
         try {
-            result = method.invoke(null, content);
+            return (T)method.invoke(null, content);
         } catch (Exception e) {
             throw new ShouldNeverHappenException("Error when invoke " + clazz.getName() + ".parseFrom(byte[]).", e);
         }
-
-        return (T)result;
     }
 }

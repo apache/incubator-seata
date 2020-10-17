@@ -17,6 +17,7 @@ package io.seata.saga.engine.pcext.interceptors;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
@@ -108,7 +109,7 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
             try {
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
                     stateMachineConfig.getExpressionFactoryManager(), state, serviceOutputParams);
-                if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
+                if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }
             } catch (Exception e) {

@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,11 +37,7 @@ public class KeywordCheckerFactory {
      * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
-        if (KEYWORD_CHECKER_MAP.get(dbType) != null) {
-            return KEYWORD_CHECKER_MAP.get(dbType);
-        }
-        KeywordChecker tableMetaCache = EnhancedServiceLoader.load(KeywordChecker.class, dbType);
-        KEYWORD_CHECKER_MAP.putIfAbsent(dbType, tableMetaCache);
-        return tableMetaCache;
+        return CollectionUtils.computeIfAbsent(KEYWORD_CHECKER_MAP, dbType,
+            key -> EnhancedServiceLoader.load(KeywordChecker.class, dbType));
     }
 }

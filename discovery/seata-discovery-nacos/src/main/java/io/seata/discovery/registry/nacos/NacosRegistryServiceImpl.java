@@ -95,8 +95,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public void subscribe(String cluster, EventListener listener) throws Exception {
         List<String> clusters = new ArrayList<>();
         clusters.add(cluster);
-        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
-        LISTENER_SERVICE_MAP.get(cluster).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+                .add(listener);
         getNamingInstance().subscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 

@@ -108,16 +108,14 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         // PK is just auto generated
         Map<String, List<Object>> pkValuesMap = new HashMap<>(8);
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        String autoColumnName = "";
-        for (String pkColumnName : pkMetaMap.keySet()) {
-            if (pkMetaMap.get(pkColumnName).isAutoincrement())
-            {
-                autoColumnName = pkColumnName;
+        String autoColumnName = null;
+        for (Map.Entry<String, ColumnMeta> entry : pkMetaMap.entrySet()) {
+            if (entry.getValue().isAutoincrement()) {
+                autoColumnName = entry.getKey();
                 break;
             }
         }
-        if (StringUtils.isBlank(autoColumnName))
-        {
+        if (StringUtils.isBlank(autoColumnName)) {
             throw new ShouldNeverHappenException();
         }
 

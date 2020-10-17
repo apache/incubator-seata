@@ -142,9 +142,10 @@ public class AsyncWorker implements ResourceManagerInbound {
         }
 
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
+        List<Phase2Context> contextsGroupedByResourceId;
         while (!ASYNC_COMMIT_BUFFER.isEmpty()) {
             Phase2Context commitContext = ASYNC_COMMIT_BUFFER.poll();
-            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.computeIfAbsent(commitContext.resourceId, k -> new ArrayList<>());
+            contextsGroupedByResourceId = CollectionUtils.computeIfAbsent(mappedContexts, commitContext.resourceId, key -> new ArrayList<>());
             contextsGroupedByResourceId.add(commitContext);
         }
 
@@ -164,7 +165,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
                     continue;
                 }
-                List<Phase2Context> contextsGroupedByResourceId = entry.getValue();
+                contextsGroupedByResourceId = entry.getValue();
                 Set<String> xids = new LinkedHashSet<>(UNDOLOG_DELETE_LIMIT_SIZE);
                 Set<Long> branchIds = new LinkedHashSet<>(UNDOLOG_DELETE_LIMIT_SIZE);
                 for (Phase2Context commitContext : contextsGroupedByResourceId) {

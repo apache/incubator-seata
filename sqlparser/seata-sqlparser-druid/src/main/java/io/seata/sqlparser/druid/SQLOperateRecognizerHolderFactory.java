@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The SQLOperateRecognizerHolderFactory
@@ -36,11 +37,7 @@ public class SQLOperateRecognizerHolderFactory {
      * @return the SQLOperateRecognizer
      */
     public static SQLOperateRecognizerHolder getSQLRecognizerHolder(String dbType) {
-        if (RECOGNIZER_HOLDER_MAP.get(dbType) != null) {
-            return RECOGNIZER_HOLDER_MAP.get(dbType);
-        }
-        SQLOperateRecognizerHolder recognizerHolder = EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, dbType, SQLOperateRecognizerHolderFactory.class.getClassLoader());
-        RECOGNIZER_HOLDER_MAP.putIfAbsent(dbType, recognizerHolder);
-        return recognizerHolder;
+        return CollectionUtils.computeIfAbsent(RECOGNIZER_HOLDER_MAP, dbType,
+            key -> EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, dbType, SQLOperateRecognizerHolderFactory.class.getClassLoader()));
     }
 }

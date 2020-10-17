@@ -39,7 +39,7 @@ public class Version {
     /**
      * The constant VERSION_MAP.
      */
-    public static final Map<String, String> VERSION_MAP = new ConcurrentHashMap<String, String>();
+    public static final Map<String, String> VERSION_MAP = new ConcurrentHashMap<>();
 
     private Version() {
 
