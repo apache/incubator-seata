@@ -22,6 +22,7 @@ import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.evaluation.EvaluatorFactory;
@@ -159,7 +160,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             && StringUtils.isEmpty(stateInstance.getStateIdRetriedFor()) && !state.isForCompensation()) {
 
             List<StateInstance> stateList = stateMachineInstance.getStateList();
-            if (stateList != null && stateList.size() > 0) {
+            if (CollectionUtils.isNotEmpty(stateList)) {
                 for (int i = stateList.size() - 1; i >= 0; i--) {
                     StateInstance executedState = stateList.get(i);
 
@@ -241,7 +242,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             try {
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
                     stateMachineConfig.getExpressionFactoryManager(), state, serviceOutputParams);
-                if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
+                if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }
             } catch (Exception e) {
@@ -285,10 +286,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private void decideExecutionStatus(ProcessContext context, StateInstance stateInstance, ServiceTaskStateImpl state,
                                        Exception exp) {
-
         Map<String, String> statusMatchList = state.getStatus();
-        if (statusMatchList != null && statusMatchList.size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(statusMatchList)) {
             if (state.isAsync()) {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
@@ -297,7 +296,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         state.getServiceMethod(), state.getName(), stateInstance.getId());
                 }
             } else {
-
                 StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
@@ -307,11 +305,12 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
-                            for (String expressionStr : statusMatchList.keySet()) {
-
-                                String statusVal = statusMatchList.get(expressionStr);
-                                Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(),
-                                    expressionStr);
+                            String expressionStr, statusVal;
+                            Evaluator evaluator;
+                            for (Map.Entry<String, String> entry : statusMatchList.entrySet()) {
+                                expressionStr = entry.getKey();
+                                statusVal = entry.getValue();
+                                evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
                                 if (evaluator != null) {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }
