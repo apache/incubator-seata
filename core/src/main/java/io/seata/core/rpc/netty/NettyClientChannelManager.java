@@ -20,8 +20,12 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
+import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,26 +45,26 @@ import java.util.stream.Collectors;
  * @author zhaojun
  */
 class NettyClientChannelManager {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientChannelManager.class);
-    
+
     private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<>();
-    
+
     private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<>();
-    
+
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
-    
+
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
-    
+
     private Function<String, NettyPoolKey> poolKeyFunction;
-    
+
     NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
                                      final NettyClientConfig clientConfig) {
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig(clientConfig));
         this.poolKeyFunction = poolKeyFunction;
     }
-    
+
     private GenericKeyedObjectPool.Config getNettyPoolConfig(final NettyClientConfig clientConfig) {
         GenericKeyedObjectPool.Config poolConfig = new GenericKeyedObjectPool.Config();
         poolConfig.maxActive = clientConfig.getMaxPoolActive();
@@ -71,7 +75,7 @@ class NettyClientChannelManager {
         poolConfig.lifo = clientConfig.isPoolLifo();
         return poolConfig;
     }
-    
+
     /**
      * Get all channels registered on current Rpc Client.
      *
@@ -80,7 +84,7 @@ class NettyClientChannelManager {
     ConcurrentMap<String, Channel> getChannels() {
         return channels;
     }
-    
+
     /**
      * Acquire netty client channel connected to remote server.
      *
@@ -98,12 +102,12 @@ class NettyClientChannelManager {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("will connect to " + serverAddress);
         }
-        channelLocks.putIfAbsent(serverAddress, new Object());
-        synchronized (channelLocks.get(serverAddress)) {
+        Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
+        synchronized (lockObj) {
             return doConnect(serverAddress);
         }
     }
-    
+
     /**
      * Release channel to pool if necessary.
      *
@@ -132,7 +136,7 @@ class NettyClientChannelManager {
             LOGGER.error(exx.getMessage());
         }
     }
-    
+
     /**
      * Destroy channel.
      *
@@ -150,7 +154,7 @@ class NettyClientChannelManager {
             LOGGER.error("return channel to rmPool error:{}", exx.getMessage());
         }
     }
-    
+
     /**
      * Reconnect to remote server of current transaction service group.
      *
@@ -165,9 +169,19 @@ class NettyClientChannelManager {
             return;
         }
         if (CollectionUtils.isEmpty(availList)) {
-            String serviceGroup = RegistryFactory.getInstance()
-                                                 .getServiceGroup(transactionServiceGroup);
-            LOGGER.error("no available service '{}' found, please make sure registry config correct", serviceGroup);
+            RegistryService registryService = RegistryFactory.getInstance();
+            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
+
+            if (StringUtils.isBlank(clusterName)) {
+                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
+                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        transactionServiceGroup);
+                return;
+            }
+
+            if (!(registryService instanceof FileRegistryServiceImpl)) {
+                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
+            }
             return;
         }
         for (String serverAddress : availList) {
@@ -178,18 +192,19 @@ class NettyClientChannelManager {
             }
         }
     }
-    
+
     void invalidateObject(final String serverAddress, final Channel channel) throws Exception {
         nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), channel);
     }
-    
+
     void registerChannel(final String serverAddress, final Channel channel) {
-        if (channels.get(serverAddress) != null && channels.get(serverAddress).isActive()) {
+        Channel channelToServer = channels.get(serverAddress);
+        if (channelToServer != null && channelToServer.isActive()) {
             return;
         }
         channels.put(serverAddress, channel);
     }
-    
+
     private Channel doConnect(String serverAddress) {
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null && channelToServer.isActive()) {
@@ -211,7 +226,7 @@ class NettyClientChannelManager {
         }
         return channelFromPool;
     }
-    
+
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
                                                                             .lookup(transactionServiceGroup);
@@ -223,7 +238,7 @@ class NettyClientChannelManager {
                                          .map(NetUtil::toStringAddress)
                                          .collect(Collectors.toList());
     }
-    
+
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {
         if (rmChannel.isActive()) {
             return rmChannel;
