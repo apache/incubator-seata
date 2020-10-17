@@ -43,6 +43,7 @@ public interface StarterConstants {
     String REGISTRY_CONSUL_PREFIX = REGISTRY_PREFIX + ".consul";
     String REGISTRY_ETCD3_PREFIX = REGISTRY_PREFIX + ".etcd3";
     String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
+    String REGISTRY_CUSTOM_PREFIX = REGISTRY_PREFIX + ".custom";
 
     String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
@@ -51,6 +52,7 @@ public interface StarterConstants {
     String CONFIG_APOLLO_PREFIX = CONFIG_PREFIX + ".apollo";
     String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
+    String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
     int MAP_CAPACITY = 64;
     HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
