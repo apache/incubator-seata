@@ -13,33 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.spring.boot.autoconfigure.properties.config;
 
-import javax.annotation.Nonnull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
 
 /**
- * Holder for suspended resources to support propagation or nested logic.
- * Used by {@code suspend} and {@code resume}
- *
- * @author wangzhongxiang
- * @author wang.liang
+ * @author jrial95@gmail.com
  */
-public class SuspendedResourcesHolder {
+@Component
+@ConfigurationProperties(prefix = CONFIG_CUSTOM_PREFIX)
+public class ConfigCustomProperties {
+    private String name = "";
 
-    /**
-     * The xid
-     */
-    private String xid;
-
-    public SuspendedResourcesHolder(String xid) {
-        if (xid == null) {
-            throw new IllegalArgumentException("xid must be not null");
-        }
-        this.xid = xid;
+    public String getName() {
+        return name;
     }
 
-    @Nonnull
-    public String getXid() {
-        return xid;
+    public ConfigCustomProperties setName(String name) {
+        this.name = name;
+        return this;
     }
 }
