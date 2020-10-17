@@ -30,12 +30,14 @@ import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
@@ -64,6 +66,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREF
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
@@ -73,6 +76,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSUL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
@@ -103,9 +107,10 @@ public class SeataAutoConfiguration {
             UndoProperties undoProperties, LogProperties logProperties, TransportProperties transportProperties,
             ConfigProperties configProperties, ConfigFileProperties configFileProperties, RegistryProperties registryProperties,
             ConfigNacosProperties configNacosProperties, ConfigConsulProperties configConsulProperties, ConfigZooKeeperProperties configZooKeeperProperties,
-            ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, RegistryConsulProperties registryConsulProperties,
-            RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties, RegistryNacosProperties registryNacosProperties,
-            RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties, RegistryZooKeeperProperties registryZooKeeperProperties) {
+            ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, ConfigCustomProperties configCustomProperties,
+            RegistryConsulProperties registryConsulProperties, RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties,
+            RegistryNacosProperties registryNacosProperties, RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties,
+            RegistryZooKeeperProperties registryZooKeeperProperties, RegistryCustomProperties registryCustomProperties) {
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, seataProperties);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, rmProperties);
@@ -126,6 +131,7 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(CONFIG_ZK_PREFIX, configZooKeeperProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_APOLLO_PREFIX, configApolloProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_ETCD3_PREFIX, configEtcd3Properties);
+        PROPERTY_BEAN_MAP.put(CONFIG_CUSTOM_PREFIX, configCustomProperties);
 
         PROPERTY_BEAN_MAP.put(REGISTRY_CONSUL_PREFIX, registryConsulProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_ETCD3_PREFIX, registryEtcd3Properties);
@@ -134,6 +140,7 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, registryRedisProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, registrySofaProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, registryZooKeeperProperties);
+        PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, registryCustomProperties);
     }
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
