@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.metrics.Counter;
 import io.seata.metrics.Gauge;
 import io.seata.metrics.Id;
@@ -43,32 +44,32 @@ public class CompactRegistry implements Registry {
 
     @Override
     public <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier) {
-        return (Gauge<T>)CompactRegistry.METERS.computeIfAbsent(id.getId(), key -> new CompactGauge<>(id, supplier));
+        return (Gauge<T>)CollectionUtils.computeIfAbsent(METERS, id.getId(), key -> new CompactGauge<>(id, supplier));
     }
 
     @Override
     public Counter getCounter(Id id) {
-        return (Counter)CompactRegistry.METERS.computeIfAbsent(id.getId(), key -> new CompactCounter(id));
+        return (Counter)CollectionUtils.computeIfAbsent(METERS, id.getId(), key -> new CompactCounter(id));
     }
 
     @Override
     public Summary getSummary(Id id) {
-        return (Summary)CompactRegistry.METERS.computeIfAbsent(id.getId(), key -> new CompactSummary(id));
+        return (Summary)CollectionUtils.computeIfAbsent(METERS, id.getId(), key -> new CompactSummary(id));
     }
 
     @Override
     public Timer getTimer(Id id) {
-        return (Timer)CompactRegistry.METERS.computeIfAbsent(id.getId(), key -> new CompactTimer(id));
+        return (Timer)CollectionUtils.computeIfAbsent(METERS, id.getId(), key -> new CompactTimer(id));
     }
 
     @Override
     public Iterable<Measurement> measure() {
-        List<Measurement> measurements = new ArrayList<>();
-        if (CompactRegistry.METERS.size() == 0) {
+        final List<Measurement> measurements = new ArrayList<>();
+        if (METERS.isEmpty()) {
             return measurements;
         }
-        CompactRegistry.METERS.values().iterator().forEachRemaining(
-            meter -> meter.measure().forEach(measurements::add));
+        METERS.values().iterator()
+                .forEachRemaining(meter -> meter.measure().forEach(measurements::add));
         return measurements;
     }
 }
