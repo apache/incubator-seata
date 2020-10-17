@@ -49,7 +49,7 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
+                        oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
                         Object o = oneParamValues.get(i);
