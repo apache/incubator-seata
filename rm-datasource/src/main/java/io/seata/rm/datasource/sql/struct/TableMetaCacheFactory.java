@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * @author guoyao
@@ -34,11 +35,7 @@ public class TableMetaCacheFactory {
      * @return table meta cache
      */
     public static TableMetaCache getTableMetaCache(String dbType) {
-        if (TABLE_META_CACHE_MAP.get(dbType) != null) {
-            return TABLE_META_CACHE_MAP.get(dbType);
-        }
-        TableMetaCache tableMetaCache = EnhancedServiceLoader.load(TableMetaCache.class, dbType);
-        TABLE_META_CACHE_MAP.putIfAbsent(dbType, tableMetaCache);
-        return tableMetaCache;
+        return CollectionUtils.computeIfAbsent(TABLE_META_CACHE_MAP, dbType,
+            key -> EnhancedServiceLoader.load(TableMetaCache.class, dbType));
     }
 }
