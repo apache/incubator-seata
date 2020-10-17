@@ -157,8 +157,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
     @Override
     public void subscribe(String cluster, Watch.Listener listener) throws Exception {
-        listenerMap.putIfAbsent(cluster, new HashSet<>());
-        listenerMap.get(cluster).add(listener);
+        listenerMap.computeIfAbsent(cluster, key -> new HashSet<>())
+                .add(listener);
         EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(cluster, listener));
         executorService.submit(watcher);
     }
