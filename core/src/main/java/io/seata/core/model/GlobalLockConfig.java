@@ -13,33 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
-
-import javax.annotation.Nonnull;
+package io.seata.core.model;
 
 /**
- * Holder for suspended resources to support propagation or nested logic.
- * Used by {@code suspend} and {@code resume}
- *
- * @author wangzhongxiang
- * @author wang.liang
+ * @author selfishlover
  */
-public class SuspendedResourcesHolder {
+public class GlobalLockConfig {
 
-    /**
-     * The xid
-     */
-    private String xid;
+    private int lockRetryInternal;
 
-    public SuspendedResourcesHolder(String xid) {
-        if (xid == null) {
-            throw new IllegalArgumentException("xid must be not null");
-        }
-        this.xid = xid;
+    private int lockRetryTimes;
+
+    public int getLockRetryInternal() {
+        return lockRetryInternal;
     }
 
-    @Nonnull
-    public String getXid() {
-        return xid;
+    public void setLockRetryInternal(int lockRetryInternal) {
+        this.lockRetryInternal = lockRetryInternal;
+    }
+
+    public int getLockRetryTimes() {
+        return lockRetryTimes;
+    }
+
+    public void setLockRetryTimes(int lockRetryTimes) {
+        this.lockRetryTimes = lockRetryTimes;
     }
 }
