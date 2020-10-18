@@ -144,8 +144,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             getClientInstance().createPersistent(path);
         }
         getClientInstance().subscribeChildChanges(path, listener);
-        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new CopyOnWriteArrayList<>());
-        LISTENER_SERVICE_MAP.get(cluster).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new CopyOnWriteArrayList<>())
+                .add(listener);
     }
 
     @Override
