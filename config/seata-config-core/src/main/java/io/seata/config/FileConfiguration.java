@@ -320,11 +320,13 @@ public class FileConfiguration extends AbstractConfiguration {
                 try {
                     String currentConfig =
                         ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
-                    String oldConfig = listenedConfigMap.get(dataId);
-                    if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
-                        listenedConfigMap.put(dataId, currentConfig);
-                        event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
-                        listener.onChangeEvent(event);
+                    if (StringUtils.isNotBlank(currentConfig)) {
+                        String oldConfig = listenedConfigMap.get(dataId);
+                        if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
+                            listenedConfigMap.put(dataId, currentConfig);
+                            event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
+                            listener.onChangeEvent(event);
+                        }
                     }
                 } catch (Exception exx) {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage());
