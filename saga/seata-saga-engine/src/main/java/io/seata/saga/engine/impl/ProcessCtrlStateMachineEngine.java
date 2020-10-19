@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
@@ -59,12 +60,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     private StateMachineConfig stateMachineConfig;
 
     private static void nullSafeCopy(Map<String, Object> srcMap, Map<String, Object> destMap) {
-        for (String key : srcMap.keySet()) {
-            Object value = srcMap.get(key);
+        srcMap.forEach((key, value) -> {
             if (value != null) {
                 destMap.put(key, value);
             }
-        }
+        });
     }
 
     @Override
@@ -215,7 +215,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         checkStatus(stateMachineInstance, acceptStatus, null, stateMachineInstance.getStatus(), null, "forward");
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
-        if (actList == null || actList.size() == 0) {
+        if (CollectionUtils.isEmpty(actList)) {
             throw new ForwardInvalidException("StateMachineInstance[id:" + stateMachineInstId
                 + "] has no stateInstance, pls start a new StateMachine execution instead",
                 FrameworkErrorCode.OperationDenied);
@@ -317,23 +317,21 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     }
 
     private Map<String, Object> getStateMachineContextVariables(StateMachineInstance stateMachineInstance) {
-
         Map<String, Object> contextVariables = stateMachineInstance.getEndParams();
-        if (contextVariables == null || contextVariables.size() == 0) {
+        if (CollectionUtils.isEmpty(contextVariables)) {
             contextVariables = replayContextVariables(stateMachineInstance);
         }
         return contextVariables;
     }
 
     protected Map<String, Object> replayContextVariables(StateMachineInstance stateMachineInstance) {
-
         Map<String, Object> contextVariables = new HashMap<>();
         if (stateMachineInstance.getStartParams() == null) {
             contextVariables.putAll(stateMachineInstance.getStartParams());
         }
 
         List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
-        if (stateInstanceList == null || stateInstanceList.size() == 0) {
+        if (CollectionUtils.isEmpty(stateInstanceList)) {
             return contextVariables;
         }
 
@@ -348,17 +346,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                             FrameworkErrorCode.ObjectNotExists);
                 }
 
-                if (state.getOutput() != null && state.getOutput().size() > 0) {
+                if (CollectionUtils.isNotEmpty(state.getOutput())) {
                     try {
                         Map<String, Object> outputVariablesToContext = ParameterUtils
                                 .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
                                         serviceOutputParams);
-                        if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
+                        if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                             contextVariables.putAll(outputVariablesToContext);
                         }
 
                         if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
-
                             contextVariables.put(
                                     state.getName() + DomainConstants.VAR_NAME_BUSINESSKEY,
                                     stateInstance.getBusinessKey());
@@ -368,9 +365,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                                 FrameworkErrorCode.ContextVariableReplayFailed);
                     }
                 }
-
             }
-
         }
         return contextVariables;
     }
@@ -402,8 +397,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
                     List<StateMachineInstance> subInst = stateMachineConfig.getStateLogStore()
                         .queryStateMachineInstanceByParentId(EngineUtils.generateParentId(finalState));
-                    if (subInst != null && subInst.size() > 0) {
-
+                    if (CollectionUtils.isNotEmpty(subInst)) {
                         if (ExecutionStatus.SU.equals(subInst.get(0).getCompensationStatus())) {
                             continue;
                         }
@@ -557,16 +551,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
 
             List<StateInstance> stateList = inst.getStateList();
-            if (stateList == null || stateList.size() == 0) {
+            if (CollectionUtils.isEmpty(stateList)) {
                 stateList = stateMachineConfig.getStateLogStore().queryStateInstanceListByMachineInstanceId(instId);
-                if (stateList != null && stateList.size() > 0) {
+                if (CollectionUtils.isNotEmpty(stateList)) {
                     for (StateInstance tmpStateInstance : stateList) {
                         inst.putStateInstance(tmpStateInstance.getId(), tmpStateInstance);
                     }
                 }
             }
 
-            if (inst.getEndParams() == null || inst.getEndParams().size() == 0) {
+            if (CollectionUtils.isEmpty(inst.getEndParams())) {
                 inst.setEndParams(replayContextVariables(inst));
             }
         }

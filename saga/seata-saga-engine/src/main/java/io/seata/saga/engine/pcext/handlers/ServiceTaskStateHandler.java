@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
@@ -138,7 +139,7 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptableState
                 DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         List<StateMachineInstance> subInst = stateMachineConfig.getStateLogStore().queryStateMachineInstanceByParentId(
                 subStateMachineParentId);
-        if (subInst == null || subInst.size() <= 0) {
+        if (CollectionUtils.isEmpty(subInst)) {
             throw new EngineExecutionException(
                     "cannot find sub statemachine instance by parentId:" + subStateMachineParentId,
                     FrameworkErrorCode.ObjectNotExists);
