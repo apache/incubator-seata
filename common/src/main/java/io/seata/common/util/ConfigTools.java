@@ -15,6 +15,7 @@
  */
 package io.seata.common.util;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -40,14 +41,14 @@ public class ConfigTools {
     }
 
     // obtain the public key (Base64 encoding)
-    public static String getPublicKey(KeyPair keyPair) throws Exception {
+    public static String getPublicKey(KeyPair keyPair) {
         PublicKey publicKey = keyPair.getPublic();
         byte[] bytes = publicKey.getEncoded();
         return byte2Base64(bytes);
     }
 
     // obtain the private key (Base64 encoding)
-    public static String getPrivateKey(KeyPair keyPair) throws Exception {
+    public static String getPrivateKey(KeyPair keyPair) {
         PrivateKey privateKey = keyPair.getPrivate();
         byte[] bytes = privateKey.getEncoded();
         return byte2Base64(bytes);
@@ -86,7 +87,7 @@ public class ConfigTools {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, publicKey);
         byte[] bytes = cipher.doFinal(base642Byte(content));
-        return new String(bytes, "utf-8");
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     // private key encryption
@@ -104,12 +105,12 @@ public class ConfigTools {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
         byte[] bytes = cipher.doFinal(base642Byte(content));
-        return new String(bytes, "utf-8");
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     // byte array to Base64 encoding
-    public static String byte2Base64(byte[] bytes) throws Exception {
-        return new String(Base64.getEncoder().encode(bytes), "utf-8");
+    public static String byte2Base64(byte[] bytes) {
+        return new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
     }
 
     // Base64 encoding to byte array
