@@ -153,7 +153,8 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get();
+        Object getValue = configFuture.get();
+        return getValue == null ? null : String.valueOf(getValue);
     }
 
     @Override
