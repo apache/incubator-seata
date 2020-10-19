@@ -37,7 +37,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public Object getVariable(String name) {
-
         if (variables.containsKey(name)) {
             return variables.get(name);
         }
@@ -64,24 +63,19 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public Map<String, Object> getVariables() {
-        Map<String, Object> collectedVariables = new HashMap<>();
+        final Map<String, Object> collectedVariables = new HashMap<>();
 
         if (parent != null) {
             collectedVariables.putAll(parent.getVariables());
         }
-        for (String name : variables.keySet()) {
-            collectedVariables.put(name, variables.get(name));
-        }
+        variables.forEach(collectedVariables::put);
         return collectedVariables;
     }
 
     @Override
-    public void setVariables(Map<String, Object> variables) {
-
+    public void setVariables(final Map<String, Object> variables) {
         if (variables != null) {
-            for (String name : variables.keySet()) {
-                setVariable(name, variables.get(name));
-            }
+            variables.forEach(this::setVariable);
         }
     }
 
