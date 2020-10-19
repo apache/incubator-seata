@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture.ConfigOperation;
 import io.seata.config.file.FileConfig;
 import org.apache.commons.lang.ObjectUtils;
@@ -187,8 +189,8 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
@@ -219,25 +221,27 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
-        configListenersMap.get(dataId).add(listener);
+        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(listener);
         listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
+
+        // Start config change listener for the dataId.
         FileListener fileListener = new FileListener(dataId, listener);
         fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (dataId == null || configChangeListeners == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        if (configListenersMap.containsKey(dataId)) {
-            configListenersMap.get(dataId).remove(listener);
-            if (configListenersMap.get(dataId).isEmpty()) {
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            configListeners.remove(listener);
+            if (configListeners.isEmpty()) {
                 configListenersMap.remove(dataId);
                 listenedConfigMap.remove(dataId);
             }
