@@ -78,7 +78,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                     int errorCode = ((XAException)sqle).errorCode;
                     // -3 An XA control connection could not be created; -4 The XA transaction has ended
                     boolean rationalFail =
-                        errorCode == XAException.XAER_NOTA || (errorCode == XAException.XAER_RMERR ? true : false);
+                        errorCode == XAException.XAER_NOTA || errorCode == XAException.XAER_RMERR;
                     if (rationalFail) {
                         if (committed) {
                             return BranchStatus.PhaseTwo_Committed;
