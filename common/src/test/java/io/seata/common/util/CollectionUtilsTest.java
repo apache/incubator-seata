@@ -199,17 +199,23 @@ public class CollectionUtilsTest {
     }
 
     @Test
+    public void testIsEmpty() {
+        Map<String, Object> map = new HashMap<>();
+        Assertions.assertTrue(CollectionUtils.isEmpty(map));
+        map.put("k", "v");
+        Assertions.assertFalse(CollectionUtils.isEmpty(map));
+        map = null;
+        Assertions.assertTrue(CollectionUtils.isEmpty(map));
+    }
+
+    @Test
     public void testObjectMapToStringMap() {
         Map<String, Object> objMap = new HashMap<>();
-
         Date now = new Date();
-
         objMap.put("a", "aa");
         objMap.put("b", 22);
         objMap.put("c", now);
-
         Map<String, String> strMap = CollectionUtils.toStringMap(objMap);
-
         Assertions.assertEquals("aa", strMap.get("a"));
         Assertions.assertEquals("22", strMap.get("b"));
         Assertions.assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(now), strMap.get("c"));
