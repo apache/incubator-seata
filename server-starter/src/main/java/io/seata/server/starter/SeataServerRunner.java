@@ -19,6 +19,9 @@ import io.seata.server.Server;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author spilledyear@outlook.com
+ */
 @Component
 public class SeataServerRunner implements CommandLineRunner {
 
