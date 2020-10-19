@@ -71,7 +71,7 @@ public class HeadMapSerializer {
      * @return header map
      */
     public Map<String, String> decode(ByteBuf in, int length) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         if (in == null || in.readableBytes() == 0 || length == 0) {
             return map;
         }
