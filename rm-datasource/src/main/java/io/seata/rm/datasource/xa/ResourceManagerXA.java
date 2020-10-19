@@ -75,7 +75,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                 }
             } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
-                    int errorCode=((XAException)sqle).errorCode;
+                    int errorCode = ((XAException)sqle).errorCode;
                     // -3 An XA control connection could not be created; -4 The XA transaction has ended
                     boolean rationalFail =
                         errorCode == XAException.XAER_NOTA || (errorCode == XAException.XAER_RMERR ? true : false);
