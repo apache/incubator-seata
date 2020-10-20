@@ -19,12 +19,14 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import java.sql.Connection;
@@ -40,6 +42,17 @@ import static org.mockito.ArgumentMatchers.any;
  * @author sharajava
  */
 public class DataSourceProxyXATest {
+
+    @Test
+    public void test_constructor() {
+        DataSource dataSource = new MockDataSource();
+
+        DataSourceProxyXA dataSourceProxy = new DataSourceProxyXA(dataSource);
+        Assertions.assertEquals(dataSourceProxy.getTargetDataSource(), dataSource);
+
+        DataSourceProxyXA dataSourceProxy2 = new DataSourceProxyXA(dataSourceProxy);
+        Assertions.assertEquals(dataSourceProxy2.getTargetDataSource(), dataSource);
+    }
 
     @Test
     public void testGetConnection() throws SQLException {
