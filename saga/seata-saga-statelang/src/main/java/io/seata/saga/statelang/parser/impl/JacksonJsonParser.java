@@ -62,7 +62,7 @@ public class JacksonJsonParser implements JsonParser {
     @Override
     public String toJsonString(Object o, boolean prettyPrint) {
         try {
-            if (o instanceof List && ((List) o).size() == 0) {
+            if (o instanceof List && ((List) o).isEmpty()) {
                 return "[]";
             }
             if (prettyPrint) {

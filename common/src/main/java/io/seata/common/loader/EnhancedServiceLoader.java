@@ -217,12 +217,8 @@ public class EnhancedServiceLoader {
             if (type == null) {
                 throw new IllegalArgumentException("Enhanced Service type == null");
             }
-            InnerEnhancedServiceLoader<S> loader = (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.get(type);
-            if (loader == null) {
-                SERVICE_LOADERS.putIfAbsent(type, new InnerEnhancedServiceLoader<S>(type));
-                loader = (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.get(type);
-            }
-            return loader;
+            return (InnerEnhancedServiceLoader<S>)CollectionUtils.computeIfAbsent(SERVICE_LOADERS, type,
+                key -> new InnerEnhancedServiceLoader<>(type));
         }
 
         /**
@@ -342,8 +338,8 @@ public class EnhancedServiceLoader {
                     throw (EnhancedServiceNotFoundException)e;
                 } else {
                     throw new EnhancedServiceNotFoundException(
-                            "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                                    .getFullStackTrace(e));
+                        "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
+                            .getFullStackTrace(e));
                 }
             }
         }
@@ -375,11 +371,8 @@ public class EnhancedServiceLoader {
                 throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
             if (Scope.SINGLETON.equals(definition.getScope())) {
-                Holder<Object> holder = definitionToInstanceMap.get(definition);
-                if (holder == null) {
-                    definitionToInstanceMap.putIfAbsent(definition, new Holder<>());
-                    holder = definitionToInstanceMap.get(definition);
-                }
+                Holder<Object> holder = CollectionUtils.computeIfAbsent(definitionToInstanceMap, definition,
+                    key -> new Holder<>());
                 Object instance = holder.get();
                 if (instance == null) {
                     synchronized (holder) {
@@ -514,7 +507,8 @@ public class EnhancedServiceLoader {
                 ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
-                    nameToDefinitionsMap.computeIfAbsent(serviceName, e -> new ArrayList<>()).add(result);
+                    CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
+                            .add(result);
                 }
                 return result;
             }
@@ -535,18 +529,12 @@ public class EnhancedServiceLoader {
 
         private ExtensionDefinition getDefaultExtensionDefinition() {
             List<ExtensionDefinition> currentDefinitions = definitionsHolder.get();
-            if (currentDefinitions != null && currentDefinitions.size() > 0) {
-                return currentDefinitions.get(currentDefinitions.size() - 1);
-            }
-            return null;
+            return CollectionUtils.getLast(currentDefinitions);
         }
 
         private ExtensionDefinition getCachedExtensionDefinition(String activateName) {
-            if (nameToDefinitionsMap.containsKey(activateName)) {
-                List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
-                return definitions.get(definitions.size() - 1);
-            }
-            return null;
+            List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
+            return CollectionUtils.getLast(definitions);
         }
 
         /**
