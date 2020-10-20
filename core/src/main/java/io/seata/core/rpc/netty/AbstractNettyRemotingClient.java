@@ -40,6 +40,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.AbstractMessage;
@@ -152,7 +153,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            BlockingQueue<RpcMessage> basket = basketMap.computeIfAbsent(serverAddress, k -> new LinkedBlockingQueue<>());
+            BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
+                key -> new LinkedBlockingQueue<>());
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
                         serverAddress, rpcMessage);
@@ -318,10 +320,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
                 }
                 isSending = true;
-                for (String address : basketMap.keySet()) {
-                    BlockingQueue<RpcMessage> basket = basketMap.get(address);
+                basketMap.forEach((address, basket) -> {
                     if (basket.isEmpty()) {
-                        continue;
+                        return;
                     }
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
@@ -353,7 +354,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
-                }
+                });
                 isSending = false;
             }
         }

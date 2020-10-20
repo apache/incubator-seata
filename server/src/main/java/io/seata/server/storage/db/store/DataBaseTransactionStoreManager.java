@@ -29,19 +29,17 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceProvider;
-import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.storage.SessionConverter;
 
 /**
  * The type Database transaction store manager.
@@ -101,17 +99,17 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
         if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
-            return logStore.insertGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.insertGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
-            return logStore.updateGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            return logStore.deleteGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.deleteGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
-            return logStore.insertBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.insertBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
-            return logStore.updateBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.updateBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
-            return logStore.deleteBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.deleteBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
@@ -218,82 +216,16 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
                                            List<BranchTransactionDO> branchTransactionDOs) {
-        GlobalSession globalSession = convertGlobalSession(globalTransactionDO);
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
         //branch transactions
-        if (branchTransactionDOs != null && branchTransactionDOs.size() > 0) {
+        if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
-                globalSession.add(convertBranchSession(branchTransactionDO));
+                globalSession.add(SessionConverter.convertBranchSession(branchTransactionDO));
             }
         }
         return globalSession;
     }
 
-    private GlobalSession convertGlobalSession(GlobalTransactionDO globalTransactionDO) {
-        GlobalSession session = new GlobalSession(globalTransactionDO.getApplicationId(),
-            globalTransactionDO.getTransactionServiceGroup(),
-            globalTransactionDO.getTransactionName(),
-            globalTransactionDO.getTimeout());
-        session.setTransactionId(globalTransactionDO.getTransactionId());
-        session.setXid(globalTransactionDO.getXid());
-        session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
-        session.setApplicationData(globalTransactionDO.getApplicationData());
-        session.setBeginTime(globalTransactionDO.getBeginTime());
-        return session;
-    }
-
-    private BranchSession convertBranchSession(BranchTransactionDO branchTransactionDO) {
-        BranchSession branchSession = new BranchSession();
-        branchSession.setXid(branchTransactionDO.getXid());
-        branchSession.setTransactionId(branchTransactionDO.getTransactionId());
-        branchSession.setApplicationData(branchTransactionDO.getApplicationData());
-        branchSession.setBranchId(branchTransactionDO.getBranchId());
-        branchSession.setBranchType(BranchType.valueOf(branchTransactionDO.getBranchType()));
-        branchSession.setResourceId(branchTransactionDO.getResourceId());
-        branchSession.setClientId(branchTransactionDO.getClientId());
-        branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
-        branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
-        return branchSession;
-    }
-
-    private GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
-        if (session == null || !(session instanceof GlobalSession)) {
-            throw new IllegalArgumentException(
-                "the parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
-        }
-        GlobalSession globalSession = (GlobalSession)session;
-
-        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalTransactionDO.setXid(globalSession.getXid());
-        globalTransactionDO.setStatus(globalSession.getStatus().getCode());
-        globalTransactionDO.setApplicationId(globalSession.getApplicationId());
-        globalTransactionDO.setBeginTime(globalSession.getBeginTime());
-        globalTransactionDO.setTimeout(globalSession.getTimeout());
-        globalTransactionDO.setTransactionId(globalSession.getTransactionId());
-        globalTransactionDO.setTransactionName(globalSession.getTransactionName());
-        globalTransactionDO.setTransactionServiceGroup(globalSession.getTransactionServiceGroup());
-        globalTransactionDO.setApplicationData(globalSession.getApplicationData());
-        return globalTransactionDO;
-    }
-
-    private BranchTransactionDO convertBranchTransactionDO(SessionStorable session) {
-        if (session == null || !(session instanceof BranchSession)) {
-            throw new IllegalArgumentException(
-                "the parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
-        }
-        BranchSession branchSession = (BranchSession)session;
-
-        BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-        branchTransactionDO.setXid(branchSession.getXid());
-        branchTransactionDO.setBranchId(branchSession.getBranchId());
-        branchTransactionDO.setBranchType(branchSession.getBranchType().name());
-        branchTransactionDO.setClientId(branchSession.getClientId());
-        branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
-        branchTransactionDO.setTransactionId(branchSession.getTransactionId());
-        branchTransactionDO.setApplicationData(branchSession.getApplicationData());
-        branchTransactionDO.setResourceId(branchSession.getResourceId());
-        branchTransactionDO.setStatus(branchSession.getStatus().getCode());
-        return branchTransactionDO;
-    }
 
     /**
      * Sets log store.
