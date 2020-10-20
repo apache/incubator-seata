@@ -269,7 +269,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 return i;
             }
         }
-        return advised.getAdvisors().length - 1;
+        return advised.getAdvisors().length;
     }
 
     private boolean existsAnnotation(Class<?>[] classes) {

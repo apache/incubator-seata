@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql.struct;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 
+import java.sql.NClob;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
@@ -206,6 +207,11 @@ public class TableRecords {
                     }
                 } else if (dataType == JDBCType.CLOB.getVendorTypeNumber()) {
                     Clob clob = resultSet.getClob(i);
+                    if (clob != null) {
+                        field.setValue(new SerialClob(clob));
+                    }
+                } else if (dataType == JDBCType.NCLOB.getVendorTypeNumber()) {
+                    NClob clob = resultSet.getNClob(i);
                     if (clob != null) {
                         field.setValue(new SerialClob(clob));
                     }

@@ -67,7 +67,7 @@ import static io.seata.core.constants.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PER
 public class GlobalTransactionalInterceptor implements ConfigurationChangeListener, MethodInterceptor, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
-    private static final int ORDER_NUM = Ordered.HIGHEST_PRECEDENCE + 1000;
+    private static final int ORDER_NUM = Ordered.LOWEST_PRECEDENCE - 1000;
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
