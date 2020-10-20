@@ -16,17 +16,20 @@
 package io.seata.core.context;
 
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.common.DefaultValues;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import static io.seata.core.model.BranchType.AT;
+import static io.seata.core.model.BranchType.XA;
 
 /**
  * The type Root context.
@@ -58,28 +61,36 @@ public class RootContext {
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
-    private static final String DATA_SOURCE_PROXY_MODE = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE);
+    private static BranchType DEFAULT_BRANCH_TYPE = BranchType.get(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.DATA_SOURCE_PROXY_MODE, DefaultValues.DEFAULT_DATA_SOURCE_PROXY_MODE));
+
+    public static void setDefaultBranchType(BranchType defaultBranchType) {
+        if (defaultBranchType != AT && defaultBranchType != XA) {
+            throw new IllegalArgumentException("The default branch type must be AT or XA." +
+                    " the value of the argument is: " + defaultBranchType);
+        }
+        DEFAULT_BRANCH_TYPE = defaultBranchType;
+    }
 
     /**
      * Gets xid.
      *
      * @return the xid
      */
+    @Nullable
     public static String getXID() {
-        String xid = (String) CONTEXT_HOLDER.get(KEY_XID);
-        if (StringUtils.isNotBlank(xid)) {
-            return xid;
-        }
-        return null;
+        return (String) CONTEXT_HOLDER.get(KEY_XID);
     }
 
     /**
-     * Bind.
+     * Bind xid.
      *
      * @param xid the xid
      */
     public static void bind(@Nonnull String xid) {
+        if (StringUtils.isBlank(xid)) {
+            throw new IllegalArgumentException("xid must be not blank");
+        }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
         }
@@ -99,10 +110,11 @@ public class RootContext {
     }
 
     /**
-     * Unbind string.
+     * Unbind xid.
      *
-     * @return the string
+     * @return the previous xid or null
      */
+    @Nullable
     public static String unbind() {
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
@@ -150,14 +162,15 @@ public class RootContext {
      *
      * @return the branch type String
      */
+    @Nullable
     public static BranchType getBranchType() {
         if (inGlobalTransaction()) {
             BranchType branchType = (BranchType) CONTEXT_HOLDER.get(KEY_BRANCH_TYPE);
             if (branchType != null) {
                 return branchType;
             }
-            //default branchType is the dataSourceProxyMode
-            return BranchType.XA.name().equalsIgnoreCase(DATA_SOURCE_PROXY_MODE) ? BranchType.XA : BranchType.AT;
+            //Returns the default branch type.
+            return DEFAULT_BRANCH_TYPE;
         }
         return null;
     }
@@ -168,6 +181,9 @@ public class RootContext {
      * @param branchType the branch type
      */
     public static void bindBranchType(@Nonnull BranchType branchType) {
+        if (branchType == null) {
+            throw new IllegalArgumentException("branchType must be not null");
+        }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind branch type {}", branchType);
         }
@@ -178,8 +194,9 @@ public class RootContext {
     /**
      * unbind branch type
      *
-     * @return the previous branch type string
+     * @return the previous branch type or null
      */
+    @Nullable
     public static BranchType unbindBranchType() {
         BranchType unbindBranchType = (BranchType) CONTEXT_HOLDER.remove(KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {
@@ -191,7 +208,7 @@ public class RootContext {
     /**
      * requires global lock check
      *
-     * @return
+     * @return the boolean
      */
     public static boolean requireGlobalLock() {
         return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;
