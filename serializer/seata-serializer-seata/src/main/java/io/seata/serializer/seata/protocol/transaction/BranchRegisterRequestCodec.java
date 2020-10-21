@@ -100,7 +100,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         }
 
         // 6. Commit Type
-        out.writeByte((byte) commitType.getCode());
+        out.writeByte((byte) commitType.value());
     }
 
     @Override

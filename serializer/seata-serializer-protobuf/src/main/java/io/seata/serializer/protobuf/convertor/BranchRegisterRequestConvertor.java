@@ -45,7 +45,7 @@ public class BranchRegisterRequestConvertor implements PbConvertor<BranchRegiste
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
             .setApplicationData(applicationData == null ? "" : applicationData)
             .setBranchType(BranchTypeProto.valueOf(branchRegisterRequest.getBranchType().name()))
-            .setCommitType(branchRegisterRequest.getCommitType().getCode())
+            .setCommitType(branchRegisterRequest.getCommitType().value())
             .setLockKey(lockKey == null ? "" : lockKey)
             .setResourceId(resourceId == null ? "" : resourceId)
             .setXid(branchRegisterRequest.getXid())

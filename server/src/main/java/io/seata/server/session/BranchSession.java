@@ -329,7 +329,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte branchTypeByte = branchType != null ? (byte) branchType.ordinal() : -1;
 
-        byte commitTypeByte = commitType != null ? (byte) commitType.getCode() : -1;
+        byte commitTypeByte = commitType != null ? (byte) commitType.value() : -1;
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 

@@ -40,7 +40,7 @@ public class BranchTransactionDO {
 
     private String branchType;
 
-    private Integer commitType = CommitType.SyncCommit.getCode();
+    private Integer commitType = CommitType.SyncCommit.value();
 
     private Integer status = BranchStatus.Unknown.getCode();
 

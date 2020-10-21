@@ -38,44 +38,44 @@ public enum CommitType {
     NoCommit(2),
     ;
 
-    private int code;
+    private int value;
 
-    CommitType(int code) {
-        this.code = code;
+    CommitType(int value) {
+        this.value = value;
     }
 
     /**
-     * Gets code.
+     * Gets value.
      *
-     * @return the code
+     * @return the value
      */
-    public int getCode() {
-        return code;
+    public int value() {
+        return value;
     }
 
     /**
      * Get commit type
      *
-     * @param code the code
+     * @param value the value
      * @return the commit type
      */
-    public static CommitType get(byte code) {
-        return get((int) code);
+    public static CommitType get(byte value) {
+        return get((int) value);
     }
 
     /**
      * Get commit type.
      *
-     * @param code the code
+     * @param value the value
      * @return the commit type
      */
-    public static CommitType get(int code) {
+    public static CommitType get(int value) {
         for (CommitType t : CommitType.values()) {
-            if (t.getCode() == code) {
+            if (t.value() == value) {
                 return t;
             }
         }
-        throw new IllegalArgumentException("unknown type:" + code);
+        throw new IllegalArgumentException("unknown CommitType[" + value + "]");
     }
 
     /**

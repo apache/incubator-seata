@@ -46,7 +46,7 @@ public class GlobalLockQueryRequestConvertor
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
             .setApplicationData(applicationData == null ? "" : applicationData)
             .setBranchType(BranchTypeProto.valueOf(globalLockQueryRequest.getBranchType().name()))
-            .setCommitType(globalLockQueryRequest.getCommitType().getCode())
+            .setCommitType(globalLockQueryRequest.getCommitType().value())
             .setLockKey(lockKey == null ? "" : lockKey)
             .setResourceId(globalLockQueryRequest.getResourceId())
             .setXid(globalLockQueryRequest.getXid())

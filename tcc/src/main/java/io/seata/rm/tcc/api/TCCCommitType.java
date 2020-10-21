@@ -35,7 +35,7 @@ public enum TCCCommitType {
     AsyncCommit;
 
     /**
-     * Gets the corresponding commit type
+     * Gets the corresponding CommitType
      *
      * @return the commit type
      */
@@ -45,7 +45,6 @@ public enum TCCCommitType {
                 return commitType;
             }
         }
-        return CommitType.SyncCommit;
+        throw new RuntimeException("The " + TCCCommitType.class.getSimpleName() + " name '" + this.name() + "' is incorrect");
     }
-
 }
