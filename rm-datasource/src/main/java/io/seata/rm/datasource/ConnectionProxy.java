@@ -250,6 +250,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void rollback() throws SQLException {
+        if (exception != null) {
+            exception = null;
+        }
         targetConnection.rollback();
         if (context.inGlobalTransaction() && context.isBranchRegistered()) {
             report(false);
@@ -260,8 +263,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
         if (exception != null) {
+            SQLException e = exception;
             rollback();
-            throw exception;
+            throw e;
         }
         if (autoCommit && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.
