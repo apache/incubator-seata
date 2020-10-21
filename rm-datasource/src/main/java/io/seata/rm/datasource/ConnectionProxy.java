@@ -260,6 +260,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
         if (exception != null) {
+            rollback();
             throw exception;
         }
         if (autoCommit && !getAutoCommit()) {
