@@ -43,11 +43,15 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
         out.writeByte(resultCode.ordinal());
         if (resultCode == ResultCode.Failed) {
             if (StringUtils.isNotEmpty(resultMsg)) {
-                byte[] bs = resultMsg.getBytes(UTF8);
-                out.writeShort((short)bs.length);
-                if (bs.length > 0) {
-                    out.writeBytes(bs);
+                String msg;
+                if (resultMsg.length() > Short.MAX_VALUE) {
+                    msg = resultMsg.substring(0, Short.MAX_VALUE);
+                } else {
+                    msg = resultMsg;
                 }
+                byte[] bs = msg.getBytes(UTF8);
+                out.writeShort((short)bs.length);
+                out.writeBytes(bs);
             } else {
                 out.writeShort((short)0);
             }
