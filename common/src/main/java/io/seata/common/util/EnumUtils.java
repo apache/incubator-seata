@@ -35,7 +35,7 @@ public class EnumUtils {
         if (StringUtils.isNotBlank(enumName)) {
             E[] enumValues = enumClass.getEnumConstants();
             if (CollectionUtils.isEmpty(enumValues)) {
-                throw new IllegalArgumentException("The enum '" + enumClass.getSimpleName() + "' does not has any values.");
+                throw new IllegalArgumentException(String.format("The enum '%s' does not has any values.", enumClass.getSimpleName()));
             }
 
             for (E e : enumValues) {
@@ -45,6 +45,6 @@ public class EnumUtils {
             }
         }
 
-        throw new IllegalArgumentException("Unknown enum " + enumClass.getSimpleName() + "[" + enumName + "]");
+        throw new IllegalArgumentException(String.format("Unknown enum %s[%s]", enumClass.getSimpleName(), enumName));
     }
 }
