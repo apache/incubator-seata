@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.EventConsumer;
 import org.slf4j.Logger;
@@ -37,9 +38,8 @@ public class AsyncEventBus extends AbstractEventBus<ProcessContext> {
 
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
-
         List<EventConsumer> eventConsumers = getEventConsumers(context.getClass());
-        if (eventConsumers == null || eventConsumers.size() == 0) {
+        if (CollectionUtils.isEmpty(eventConsumers)) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("cannot find event handler by class: " + context.getClass());
             }
@@ -47,13 +47,7 @@ public class AsyncEventBus extends AbstractEventBus<ProcessContext> {
         }
 
         for (EventConsumer eventConsumer : eventConsumers) {
-
-            threadPoolExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    eventConsumer.process(context);
-                }
-            });
+            threadPoolExecutor.execute(() -> eventConsumer.process(context));
         }
         return true;
     }
