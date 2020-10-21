@@ -195,7 +195,8 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String) configFuture.get();
+        Object getValue = configFuture.get();
+        return getValue == null ? null : String.valueOf(getValue);
     }
 
     @Override
@@ -354,12 +355,14 @@ public class FileConfiguration extends AbstractConfiguration {
             while (true) {
                 try {
                     String currentConfig =
-                            ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
-                    String oldConfig = listenedConfigMap.get(dataId);
-                    if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
-                        listenedConfigMap.put(dataId, currentConfig);
-                        event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
-                        listener.onChangeEvent(event);
+                        ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+                    if (StringUtils.isNotBlank(currentConfig)) {
+                        String oldConfig = listenedConfigMap.get(dataId);
+                        if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
+                            listenedConfigMap.put(dataId, currentConfig);
+                            event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
+                            listener.onChangeEvent(event);
+                        }
                     }
                 } catch (Exception exx) {
                     LOGGER.error("fileListener execute error:{}", exx.getMessage());
