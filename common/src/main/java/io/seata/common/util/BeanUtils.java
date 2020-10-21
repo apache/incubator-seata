@@ -39,7 +39,7 @@ public class BeanUtils {
         }
 
         Field[] fields = o.getClass().getDeclaredFields();
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("[");
         for (Field field : fields) {
             Object val = null;
