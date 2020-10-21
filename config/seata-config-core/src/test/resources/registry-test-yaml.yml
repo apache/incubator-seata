@@ -1,0 +1,11 @@
+registry:
+  type: file
+  file:
+    name: file.conf
+config:
+  type: file
+  file:
+    name: file-test-yaml.conf
+    # for test
+    testBlank: ''
+    testNull:

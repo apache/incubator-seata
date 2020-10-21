@@ -16,6 +16,7 @@
 package io.seata.config;
 
 import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
@@ -33,8 +34,7 @@ public final class ConfigurationFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
 
-    private static final String REGISTRY_CONF_PREFIX = "registry";
-    private static final String REGISTRY_CONF_SUFFIX = ".conf";
+    private static final String REGISTRY_CONF_DEFAULT = "registry";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     public static final String ENV_PROPERTY_KEY = "seataEnv";
 
@@ -42,28 +42,32 @@ public final class ConfigurationFactory {
 
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
-    public static final Configuration CURRENT_FILE_INSTANCE;
+    public static Configuration CURRENT_FILE_INSTANCE;
 
     static {
+        load();
+    }
+
+    private static void load() {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         if (seataConfigName == null) {
             seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
         }
         if (seataConfigName == null) {
-            seataConfigName = REGISTRY_CONF_PREFIX;
+            seataConfigName = REGISTRY_CONF_DEFAULT;
         }
         String envValue = System.getProperty(ENV_PROPERTY_KEY);
         if (envValue == null) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (envValue == null) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
-            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
+        Configuration configuration = (envValue == null) ? new FileConfiguration(seataConfigName,
+                false) : new FileConfiguration(seataConfigName + "-" + envValue, false);
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load Configuration:{}", extConfiguration == null ? configuration.getClass().getSimpleName()
-                    : extConfiguration.getClass().getSimpleName());
+                        : extConfiguration.getClass().getSimpleName());
             }
         } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -99,13 +103,12 @@ public final class ConfigurationFactory {
         String configTypeName;
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                    + ConfigurationKeys.FILE_ROOT_TYPE);
+                    ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                            + ConfigurationKeys.FILE_ROOT_TYPE);
 
             if (StringUtils.isBlank(configTypeName)) {
                 throw new NotSupportYetException("config type can not be null");
             }
-
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
             throw e;
@@ -114,14 +117,14 @@ public final class ConfigurationFactory {
         Configuration configuration;
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
-                ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
+                    ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             configuration = new FileConfiguration(name);
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load Configuration:{}", extConfiguration == null
-                        ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
+                            ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -130,7 +133,7 @@ public final class ConfigurationFactory {
             }
         } else {
             configuration = EnhancedServiceLoader
-                .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+                    .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
         }
         try {
             Configuration configurationCache;
@@ -148,5 +151,12 @@ public final class ConfigurationFactory {
             LOGGER.error("failed to load configurationCacheProvider:{}", e.getMessage(), e);
         }
         return null == extConfiguration ? configuration : extConfiguration;
+    }
+
+    protected static void reload() {
+        ConfigurationCache.getInstance().clear();
+        load();
+        instance = null;
+        getInstance();
     }
 }
