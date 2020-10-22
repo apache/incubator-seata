@@ -512,21 +512,21 @@ public interface ConfigurationKeys {
     /**
      * The constant SEATA_ACCESS_KEY.
      */
-    public static final String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
 
     /**
      * The constant SEATA_SECRET_KEY.
      */
-    public static final String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
 
     /**
      * The constant EXTRA_DATA_SPLIT_CHAR.
      */
-    public static final String EXTRA_DATA_SPLIT_CHAR = "\n";
+    String EXTRA_DATA_SPLIT_CHAR = "\n";
     /**
      * The constant EXTRA_DATA_KV_CHAR.
      */
-    public static final String EXTRA_DATA_KV_CHAR = "=";
+    String EXTRA_DATA_KV_CHAR = "=";
 
     /**
      * The constant SERVER_ENABLE_CHECK_AUTH.
