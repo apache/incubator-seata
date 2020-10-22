@@ -25,6 +25,6 @@ import io.seata.common.loader.LoadLevel;
 public class DefaultAuthSigner implements AuthSigner {
     @Override
     public String sign(String data, String key) {
-        return "";
+        return data;
     }
 }

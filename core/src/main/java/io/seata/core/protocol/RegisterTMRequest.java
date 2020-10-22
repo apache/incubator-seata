@@ -54,6 +54,9 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
         StringBuilder sb = new StringBuilder();
         if (null != extraData) {
             sb.append(extraData);
+            if (!extraData.endsWith(EXTRA_DATA_SPLIT_CHAR)) {
+                sb.append(EXTRA_DATA_SPLIT_CHAR);
+            }
         }
         if (transactionServiceGroup != null && !transactionServiceGroup.isEmpty()) {
             sb.append(String.format("%s=%s", UDATA_VGROUP, transactionServiceGroup));
