@@ -244,7 +244,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='荣怀集团' height='40'  src='https://img.alicdn.com/tfs/TB1AzbWgZKfxu4jSZPfXXb3dXXa-1117-382.png'  /img>  
     <img alt='浙江群集大数据科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1HtFZFq61gK0jSZFlXXXDKFXa-1375-214.png'  /img>  
     <img alt='北京易点租有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1nax.FuH2gK0jSZFEXXcqMpXa-336-154.png'  /img>  
-    <img alt='浙江蕙康科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1Y_FLlmslXu8jSZFuXXXg7FXa-272-221.png'  /img>  
+    <img alt='浙江蕙康科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1nS7IZNv1gK0jSZFFXXb0sXXa-716-193.png'  /img>  
     <img alt='致远创想' height='40'  src='https://img.alicdn.com/tfs/TB13aaKpA9l0K4jSZFKXXXFjpXa-300-300.png'  /img> 
     <img alt='深圳智荟物联技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1To3amPMZ7e4jSZFOXXX7epXa-1228-500.png'  /img> 
     <img alt='源讯中国' height='40'  src='https://img.alicdn.com/tfs/TB1CZuKpA9l0K4jSZFKXXXFjpXa-283-92.png'  /img> 
