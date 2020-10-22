@@ -20,12 +20,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -42,7 +43,6 @@ import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.common.loader.Scope;
 
 
 /**
@@ -85,7 +85,6 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     @Override
     public void reload() {
         restoreSessions();
-        washSessions();
     }
 
     @Override
@@ -167,29 +166,20 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
         }
     }
 
-    private void washSessions() {
-        if (sessionMap.size() > 0) {
-            Iterator<Map.Entry<String, GlobalSession>> iterator = sessionMap.entrySet().iterator();
-            while (iterator.hasNext()) {
-                GlobalSession globalSession = iterator.next().getValue();
-
-                GlobalStatus globalStatus = globalSession.getStatus();
-                switch (globalStatus) {
-                    case UnKnown:
-                    case Committed:
-                    case CommitFailed:
-                    case Rollbacked:
-                    case RollbackFailed:
-                    case TimeoutRollbacked:
-                    case TimeoutRollbackFailed:
-                    case Finished:
-                        // Remove all sessions finished
-                        iterator.remove();
-                        break;
-                    default:
-                        break;
-                }
-            }
+    private boolean checkSessionStatus(GlobalSession globalSession) {
+        GlobalStatus globalStatus = globalSession.getStatus();
+        switch (globalStatus) {
+            case UnKnown:
+            case Committed:
+            case CommitFailed:
+            case Rollbacked:
+            case RollbackFailed:
+            case TimeoutRollbacked:
+            case TimeoutRollbackFailed:
+            case Finished:
+                return false;
+            default:
+                return true;
         }
     }
 
@@ -220,9 +210,15 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     }
                     GlobalSession foundGlobalSession = sessionMap.get(globalSession.getXid());
                     if (foundGlobalSession == null) {
-                        sessionMap.put(globalSession.getXid(), globalSession);
+                        if (this.checkSessionStatus(globalSession)) {
+                            sessionMap.put(globalSession.getXid(), globalSession);
+                        }
                     } else {
-                        foundGlobalSession.setStatus(globalSession.getStatus());
+                        if (this.checkSessionStatus(globalSession)) {
+                            foundGlobalSession.setStatus(globalSession.getStatus());
+                        } else {
+                            sessionMap.remove(globalSession.getXid());
+                        }
                     }
                     break;
                 }
