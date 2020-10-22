@@ -96,57 +96,26 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
-    protected String getLimit(SQLStatement sqlStatement, SQLType sqlType) {
-        SQLLimit limit = null;
-        if (SQLType.UPDATE == sqlType) {
-            limit = ((MySqlUpdateStatement)sqlStatement).getLimit();
-        } else if (SQLType.DELETE == sqlType) {
-            limit = ((MySqlDeleteStatement)sqlStatement).getLimit();
+    protected String getLimitCondition(SQLLimit sqlLimit) {
+        if (Objects.isNull(sqlLimit)) {
+            return StringUtils.EMPTY;
         }
-        if (limit != null) {
-            StringBuilder builder = new StringBuilder(" LIMIT ");
-            SQLIntegerExpr expr;
-            if (limit.getOffset() != null) {
-                expr = (SQLIntegerExpr)limit.getOffset();
-                builder.append(expr.getNumber()).append(",");
-            }
-            if (limit.getRowCount() != null) {
-                expr = (SQLIntegerExpr)limit.getRowCount();
-                builder.append(expr.getNumber());
-            }
-            return builder.toString();
-        }
-        return null;
+
+        StringBuilder sb = new StringBuilder();
+        executeLimit(sqlLimit, new MySqlOutputVisitor(sb));
+
+        return sb.toString();
     }
 
-    protected String getOrderBy(SQLStatement sqlStatement, SQLType sqlType) {
-        SQLOrderBy orderBy = null;
-        if (SQLType.UPDATE == sqlType) {
-            orderBy = ((MySqlUpdateStatement)sqlStatement).getOrderBy();
-        } else if (SQLType.DELETE == sqlType) {
-            orderBy = ((MySqlDeleteStatement)sqlStatement).getOrderBy();
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
         }
-        if (orderBy != null) {
-            String space = " ";
-            String comma = ",";
-            StringBuilder builder = new StringBuilder(space).append("ORDER BY").append(space);
-            List<SQLSelectOrderByItem> items = orderBy.getItems();
-            for (int i = 0; i < items.size(); i++) {
-                SQLSelectOrderByItem item = items.get(i);
-                SQLIdentifierExpr expr = (SQLIdentifierExpr)item.getExpr();
-                builder.append(expr.getName());
-                SQLOrderingSpecification specification = item.getType();
-                if (specification != null) {
-                    builder.append(space);
-                    builder.append(specification.name);
-                }
-                if (i + 1 != items.size()) {
-                    builder.append(comma);
-                }
-            }
-            return builder.toString();
-        }
-        return null;
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, new MySqlOutputVisitor(sb));
+
+        return sb.toString();
     }
 
 }

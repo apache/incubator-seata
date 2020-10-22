@@ -66,11 +66,11 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        String orderBy = visitor.getOrderBy();
+        String orderBy = visitor.getOrderByCondition();
         if (StringUtils.isNotBlank(orderBy)) {
             suffix.append(orderBy);
         }
-        String limit = visitor.getLimit();
+        String limit = visitor.getLimitCondition();
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
         }

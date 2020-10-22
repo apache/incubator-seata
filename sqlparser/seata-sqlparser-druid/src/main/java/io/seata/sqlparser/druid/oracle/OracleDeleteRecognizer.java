@@ -86,4 +86,16 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
         return super.getWhereCondition(where);
     }
 
+    @Override
+    public String getLimitCondition() {
+        //oracle does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        //oracle does not support order by yet
+        return null;
+    }
+
 }

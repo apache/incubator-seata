@@ -16,6 +16,8 @@
 package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
@@ -104,4 +106,16 @@ public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognize
         return sb.toString();
     }
 
+    @Override
+    public String getLimitCondition() {
+        SQLLimit limit = getSelect().getLimit();
+        return super.getLimitCondition(limit);
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        ast.getSelect().getOrderBy();
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
+    }
 }

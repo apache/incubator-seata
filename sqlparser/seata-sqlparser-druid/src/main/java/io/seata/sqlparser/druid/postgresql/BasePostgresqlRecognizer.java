@@ -16,10 +16,14 @@
 package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
 import java.util.ArrayList;
@@ -80,6 +84,28 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
         executeVisit(where, new PGOutputVisitor(sb));
+        return sb.toString();
+    }
+
+    protected String getLimitCondition(SQLLimit sqlLimit) {
+        if (Objects.isNull(sqlLimit)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeLimit(sqlLimit, new MySqlOutputVisitor(sb));
+
+        return sb.toString();
+    }
+
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, new MySqlOutputVisitor(sb));
+
         return sb.toString();
     }
 }

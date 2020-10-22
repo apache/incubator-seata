@@ -111,6 +111,18 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     }
 
     @Override
+    public String getLimitCondition() {
+        //oracle does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        //oracle does not support order by yet
+        return null;
+    }
+
+    @Override
     public String getTableAlias() {
         return ast.getTableSource().getAlias();
     }

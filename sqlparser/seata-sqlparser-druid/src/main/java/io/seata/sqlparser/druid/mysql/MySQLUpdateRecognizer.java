@@ -16,6 +16,8 @@
 package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
@@ -132,13 +134,15 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     }
 
     @Override
-    public String getLimit() {
-        return super.getLimit(ast, getSQLType());
+    public String getLimitCondition() {
+        SQLLimit limit = ast.getLimit();
+        return super.getLimitCondition(limit);
     }
 
     @Override
-    public String getOrderBy() {
-        return super.getOrderBy(ast, getSQLType());
+    public String getOrderByCondition() {
+        SQLOrderBy sqlOrderBy = ast.getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
     }
 
 }

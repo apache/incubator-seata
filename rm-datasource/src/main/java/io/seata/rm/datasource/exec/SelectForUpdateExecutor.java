@@ -142,6 +142,14 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         if (StringUtils.isNotBlank(whereCondition)) {
             selectSQLAppender.append(" WHERE ").append(whereCondition);
         }
+        String orderBy = recognizer.getOrderByCondition();
+        if (StringUtils.isNotBlank(orderBy)) {
+            selectSQLAppender.append(orderBy);
+        }
+        String limit = recognizer.getLimitCondition();
+        if (StringUtils.isNotBlank(limit)) {
+            selectSQLAppender.append(limit);
+        }
         selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();
     }

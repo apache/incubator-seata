@@ -72,6 +72,18 @@ public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implem
         return super.getWhereCondition(where);
     }
 
+    @Override
+    public String getLimitCondition() {
+        //oracle does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        //oracle does not support order by yet
+        return null;
+    }
+
     private SQLSelectQueryBlock getSelect() {
         SQLSelect select = ast.getSelect();
         if (select == null) {
