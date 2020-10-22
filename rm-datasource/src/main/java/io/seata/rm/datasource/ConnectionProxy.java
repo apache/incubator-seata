@@ -258,10 +258,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        SQLException exception = context.getException();
-        if (exception != null) {
-            context.reset();
-            throw exception;
+        if (context.getException() != null) {
+            rollback();
         }
         if (autoCommit && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.
