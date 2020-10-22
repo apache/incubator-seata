@@ -174,7 +174,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         }
     }
 
-    protected void isUpdatePkValue(List<String> updateColumns) {
+    protected void assertContainsPKColumnName(List<String> updateColumns) {
         for (String columnName : updateColumns) {
             String standardColumnName = getStandardPkColumnName(columnName);
             if (StringUtils.isNotEmpty(standardColumnName)) {
