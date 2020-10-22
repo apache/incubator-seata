@@ -80,6 +80,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
+            assertContainsPKColumnName(updateColumns);
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
                 continue;
@@ -132,7 +133,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {
-            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(),getTableMeta().getPrimaryKeyOnlyName(),pst);
+            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
         } finally {
@@ -149,7 +150,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
-        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(),beforeImage.pkRows().size(),getDbType());
+        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {

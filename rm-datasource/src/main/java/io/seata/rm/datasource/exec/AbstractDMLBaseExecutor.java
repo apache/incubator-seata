@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.concurrent.Callable;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -27,6 +28,7 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +63,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      *
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizers     the multi sql recognizer
+     * @param sqlRecognizers    the multi sql recognizer
      */
     public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                                    List<SQLRecognizer> sqlRecognizers) {
@@ -86,8 +88,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1)
-        {
+        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1) {
             throw new NotSupportYetException("multi pk only support mysql!");
         }
         TableRecords beforeImage = beforeImage();
@@ -170,6 +171,15 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
 
         public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
             return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+        }
+    }
+
+    protected void assertContainsPKColumnName(List<String> updateColumns) {
+        for (String columnName : updateColumns) {
+            String standardColumnName = getStandardPkColumnName(columnName);
+            if (StringUtils.isNotEmpty(standardColumnName)) {
+                throw new ShouldNeverHappenException("Sorry, update pk value is not supported!");
+            }
         }
     }
 }
