@@ -249,6 +249,16 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='大账房' height='40'  src='https://img.alicdn.com/tfs/TB1.sIyZKL2gK0jSZFmXXc7iXXa-121-121.png'  /img> 
     <img alt='上海阳光喔教育科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1aUUcZHY1gK0jSZTEXXXDQVXa-246-72.png'  /img> 
     <img alt='北京新学道教育科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1v3.gZLb2gK0jSZK9XXaEgFXa-240-240.png'  /img> 
+    <img alt='北京悦途出行网络科技公司' height='40'  src='https://img.alicdn.com/tfs/TB1VHkrZHr1gK0jSZFDXXb9yVXa-248-80.png'  /img> 
+    <img alt='唯小宝（江苏）网络技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1eswAZFP7gK0jSZFjXXc5aXXa-800-800.png'  /img> 
+    <img alt='国信易企签' height='40'  src='https://img.alicdn.com/tfs/TB1UTwmZFT7gK0jSZFpXXaTkpXa-201-85.png'  /img> 
+    <img alt='南航' height='40'  src='https://img.alicdn.com/tfs/TB1RmzamZVl614jSZKPXXaGjpXa-150-150.png'  /img> 
+    <img alt='桔子数科' height='40'  src='https://img.alicdn.com/tfs/TB1HD.oZUY1gK0jSZFMXXaWcVXa-300-300.png'  /img> 
+    <img alt='上海意贝斯特信息技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1kGElZUH1gK0jSZSyXXXtlpXa-126-48.png'  /img> 
+    <img alt='御家汇' height='40'  src='https://img.alicdn.com/tfs/TB1kIIqZUY1gK0jSZFMXXaWcVXa-90-80.png'  /img> 
+    <img alt='广州社众软件' height='40'  src='https://img.alicdn.com/tfs/TB1CawkZND1gK0jSZFsXXbldVXa-112-112.png'  /img> 
+    <img alt='浩鲸科技' height='40'  src='https://img.alicdn.com/tfs/TB1fxZqZQL0gK0jSZFAXXcA9pXa-300-300.png'  /img> 
+    <img alt='华宇信息' height='40'  src='https://img.alicdn.com/tfs/TB1q3UiZKL2gK0jSZPhXXahvXXa-802-271.png'  /img> 
     <img alt='欧莱雅百库' height='40'  src='https://img.alicdn.com/tfs/TB1Xa3bZQL0gK0jSZFtXXXQCXXa-936-93.png'  /img> 
     <img alt='深圳市云羿贸易科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB15r7dZHY1gK0jSZTEXXXDQVXa-234-233.png'  /img> 
     <img alt='中国云尚科技' height='40'  src='https://img.alicdn.com/tfs/TB1uf7bZQL0gK0jSZFtXXXQCXXa-303-65.png'  /img> 
@@ -261,16 +271,6 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='鲸算科技' height='40'  src='https://img.alicdn.com/tfs/TB1jfCLpA9l0K4jSZFKXXXFjpXa-514-220.png'  /img> 
     <img alt='宋城独木桥网络有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1UKocmPMZ7e4jSZFOXXX7epXa-234-82.png'  /img> 
     <img alt='厦门服云信息科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1zuAzZKL2gK0jSZFmXXc7iXXa-691-263.png'  /img> 
-    <img alt='唯小宝（江苏）网络技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1eswAZFP7gK0jSZFjXXc5aXXa-800-800.png'  /img> 
-    <img alt='国信易企签' height='40'  src='https://img.alicdn.com/tfs/TB1UTwmZFT7gK0jSZFpXXaTkpXa-201-85.png'  /img> 
-    <img alt='南航' height='40'  src='https://img.alicdn.com/tfs/TB1RmzamZVl614jSZKPXXaGjpXa-150-150.png'  /img> 
-    <img alt='桔子数科' height='40'  src='https://img.alicdn.com/tfs/TB1HD.oZUY1gK0jSZFMXXaWcVXa-300-300.png'  /img> 
-    <img alt='上海意贝斯特信息技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1kGElZUH1gK0jSZSyXXXtlpXa-126-48.png'  /img> 
-    <img alt='御家汇' height='40'  src='https://img.alicdn.com/tfs/TB1kIIqZUY1gK0jSZFMXXaWcVXa-90-80.png'  /img> 
-    <img alt='广州社众软件' height='40'  src='https://img.alicdn.com/tfs/TB1CawkZND1gK0jSZFsXXbldVXa-112-112.png'  /img> 
-    <img alt='浩鲸科技' height='40'  src='https://img.alicdn.com/tfs/TB1fxZqZQL0gK0jSZFAXXcA9pXa-300-300.png'  /img> 
-    <img alt='华宇信息' height='40'  src='https://img.alicdn.com/tfs/TB1q3UiZKL2gK0jSZPhXXahvXXa-802-271.png'  /img> 
-    <img alt='北京悦途出行网络科技公司' height='40'  src='https://img.alicdn.com/tfs/TB1VHkrZHr1gK0jSZFDXXb9yVXa-248-80.png'  /img> 
 </div>
 
 
