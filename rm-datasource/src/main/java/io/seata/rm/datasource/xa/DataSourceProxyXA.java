@@ -49,6 +49,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
+
+        //Set the default branch type to RootContext.
+        RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     @Override
