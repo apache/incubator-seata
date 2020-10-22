@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The Type UndoExecutorHolderFactory
@@ -36,11 +37,7 @@ public class UndoExecutorHolderFactory {
      * @return the UndoExecutorGroup
      */
     public static UndoExecutorHolder getUndoExecutorHolder(String dbType) {
-        if (UNDO_EXECUTOR_HOLDER_MAP.get(dbType) != null) {
-            return UNDO_EXECUTOR_HOLDER_MAP.get(dbType);
-        }
-        UndoExecutorHolder undoExecutorHolder = EnhancedServiceLoader.load(UndoExecutorHolder.class, dbType);
-        UNDO_EXECUTOR_HOLDER_MAP.putIfAbsent(dbType, undoExecutorHolder);
-        return undoExecutorHolder;
+        return CollectionUtils.computeIfAbsent(UNDO_EXECUTOR_HOLDER_MAP, dbType,
+            key -> EnhancedServiceLoader.load(UndoExecutorHolder.class, dbType));
     }
 }
