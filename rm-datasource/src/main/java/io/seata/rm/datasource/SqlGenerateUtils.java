@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * generate sql and set value to sql
@@ -45,6 +46,9 @@ public class SqlGenerateUtils {
      */
     public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType)
         throws SQLException {
+        if (dbType.equals(JdbcConstants.SQLSERVER)) {
+            return buildWhereConditionByPKs(pkNameList, dbType);
+        }
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
 

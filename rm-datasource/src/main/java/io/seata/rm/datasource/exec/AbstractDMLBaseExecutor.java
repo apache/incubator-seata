@@ -85,7 +85,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1)
+        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && !JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1)
         {
             throw new NotSupportYetException("multi pk only support mysql!");
         }
