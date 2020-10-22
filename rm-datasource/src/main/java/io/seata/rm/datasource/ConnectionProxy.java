@@ -57,8 +57,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
-    private SQLException exception;
-
     /**
      * Instantiates a new Connection proxy.
      *
@@ -181,6 +179,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void commit() throws SQLException {
+        SQLException exception = context.getException();
         try {
             LOCK_RETRY_POLICY.execute(() -> {
                 doCommit();
@@ -188,14 +187,14 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             });
         } catch (SQLException e) {
             if (exception == null) {
-                exception = e;
+                context.setException(e);
             }
             throw e;
         } catch (Exception e) {
             throw new SQLException(e);
         }
         if (exception != null) {
-            exception = null;
+            context.setException(null);
         }
     }
 
@@ -250,9 +249,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void rollback() throws SQLException {
-        if (exception != null) {
-            exception = null;
-        }
         targetConnection.rollback();
         if (context.inGlobalTransaction() && context.isBranchRegistered()) {
             report(false);
@@ -262,10 +258,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
+        SQLException exception = context.getException();
         if (exception != null) {
-            SQLException e = exception;
-            rollback();
-            throw e;
+            context.reset();
+            throw exception;
         }
         if (autoCommit && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.

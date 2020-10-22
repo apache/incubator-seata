@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,6 +34,7 @@ public class ConnectionContext {
     private String xid;
     private Long branchId;
     private boolean isGlobalLockRequire;
+    private SQLException exception;
 
     /**
      * Table and primary key should not be duplicated.
@@ -173,6 +175,7 @@ public class ConnectionContext {
     void reset(String xid) {
         this.xid = xid;
         branchId = null;
+        exception = null;
         this.isGlobalLockRequire = false;
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
@@ -216,10 +219,29 @@ public class ConnectionContext {
         return lockKeysBuffer;
     }
 
+    /**
+     * Gets exception.
+     *
+     * @return the exception
+     */
+    public SQLException getException() {
+        return exception;
+    }
+
+    /**
+     * Sets exception.
+     *
+     * @param exception the sql exception
+     */
+    public void setException(SQLException exception) {
+        this.exception = exception;
+    }
+
     @Override
     public String toString() {
-        return "ConnectionContext [xid=" + xid + ", branchId=" + branchId + ", lockKeysBuffer=" + lockKeysBuffer
-            + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
+        return "ConnectionContext{" + "xid='" + xid + '\'' + ", branchId=" + branchId + ", isGlobalLockRequire="
+            + isGlobalLockRequire + ", exception=" + exception != null ? exception.getMessage()
+                : null + ", lockKeysBuffer=" + lockKeysBuffer + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + '}';
     }
 
 }
