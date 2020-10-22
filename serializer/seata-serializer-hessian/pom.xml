@@ -23,8 +23,9 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>seata-serializer-hessian</artifactId>
+    <packaging>jar</packaging>
+    <name>seata-serializer-hessian ${project.version}</name>
     <dependencies>
         <dependency>
             <groupId>com.caucho</groupId>
