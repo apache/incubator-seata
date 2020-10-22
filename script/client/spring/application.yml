@@ -91,6 +91,8 @@ seata:
       connect-timeout: 2000
       username: ""
       password: ""
+    custom:
+      name: ""
   registry:
     type: file
     load-balance: RandomLoadBalance
@@ -129,3 +131,5 @@ seata:
       connect-timeout: 2000
       username: ""
       password: ""
+    custom:
+      name: ""

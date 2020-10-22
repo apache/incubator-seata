@@ -232,6 +232,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
         String rollbackCtx = buildContext(parser.getName());
+        insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
         if (CACHE_ENABLE) {
             Map<String, Object> undoLog = new HashMap<>();
             undoLog.put(UndoLogCache.XID, xid);
@@ -241,7 +242,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             undoLog.put(UndoLogCache.STATE, State.Normal.getValue());
             ASYN_REDIS_THREAD.execute(() -> UndoLogCache.getInstance().put(undoLog));
         }
-        insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
     }
 
     /**

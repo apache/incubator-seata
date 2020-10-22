@@ -15,30 +15,31 @@
  */
 package io.seata.tm.api.transaction;
 
+import javax.annotation.Nonnull;
+
 /**
  * Holder for suspended resources to support propagation or nested logic.
  * Used by {@code suspend} and {@code resume}
  *
  * @author wangzhongxiang
+ * @author wang.liang
  */
 public class SuspendedResourcesHolder {
 
-    /**The xid*/
+    /**
+     * The xid
+     */
     private String xid;
 
-
-    public SuspendedResourcesHolder() {
-    }
-
     public SuspendedResourcesHolder(String xid) {
+        if (xid == null) {
+            throw new IllegalArgumentException("xid must be not null");
+        }
         this.xid = xid;
     }
 
+    @Nonnull
     public String getXid() {
         return xid;
-    }
-
-    public void setXid(String xid) {
-        this.xid = xid;
     }
 }
