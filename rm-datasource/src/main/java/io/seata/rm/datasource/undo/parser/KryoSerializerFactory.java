@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
+import de.javakaffee.kryoserializers.JdkProxySerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +71,7 @@ public class KryoSerializerFactory implements KryoFactory {
 
         // register sql type
         kryo.register(Timestamp.class, new TimestampSerializer());
-
+        kryo.register(InvocationHandler.class, new JdkProxySerializer());
         // register commonly class
         UndoLogSerializerClassRegistry.getRegisteredClasses().forEach((clazz, ser) -> {
             if (ser == null) {

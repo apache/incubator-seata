@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
-import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -60,7 +59,6 @@ public class UndoLogSerializerClassRegistry {
         // register serializer
         registerClass(Collections.singletonList("").getClass(), new ArraysAsListSerializer());
         registerClass(GregorianCalendar.class, new GregorianCalendarSerializer());
-        registerClass(InvocationHandler.class, new JdkProxySerializer());
         registerClass(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
         registerClass(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
         registerClass(Pattern.class, new RegexSerializer());
