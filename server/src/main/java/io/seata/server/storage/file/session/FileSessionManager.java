@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -138,14 +140,19 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     }
 
     private void restoreSessions() {
-        Map<Long, BranchSession> unhandledBranchBuffer = new HashMap<>();
+        final Set<String> removedGlobalBuffer = new HashSet<>();
+        final Map<Long, BranchSession> unhandledBranchBuffer = new HashMap<>();
 
-        restoreSessions(true, unhandledBranchBuffer);
-        restoreSessions(false, unhandledBranchBuffer);
+        restoreSessions(true, removedGlobalBuffer, unhandledBranchBuffer);
+        restoreSessions(false, removedGlobalBuffer, unhandledBranchBuffer);
 
         if (!unhandledBranchBuffer.isEmpty()) {
             unhandledBranchBuffer.values().forEach(branchSession -> {
                 String xid = branchSession.getXid();
+                if (removedGlobalBuffer.contains(xid)) {
+                    return;
+                }
+
                 long bid = branchSession.getBranchId();
                 GlobalSession found = sessionMap.get(xid);
                 if (found == null) {
@@ -161,7 +168,6 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                         existingBranch.setStatus(branchSession.getStatus());
                     }
                 }
-
             });
         }
     }
@@ -183,18 +189,18 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
         }
     }
 
-    private void restoreSessions(boolean isHistory, Map<Long, BranchSession> unhandledBranchBuffer) {
+    private void restoreSessions(boolean isHistory, Set<String> removedGlobalBuffer, Map<Long, BranchSession> unhandledBranchBuffer) {
         if (!(transactionStoreManager instanceof ReloadableStore)) {
             return;
         }
         while (((ReloadableStore)transactionStoreManager).hasRemaining(isHistory)) {
             List<TransactionWriteStore> stores = ((ReloadableStore)transactionStoreManager).readWriteStore(READ_SIZE,
                 isHistory);
-            restore(stores, unhandledBranchBuffer);
+            restore(stores, removedGlobalBuffer, unhandledBranchBuffer);
         }
     }
 
-    private void restore(List<TransactionWriteStore> stores, Map<Long, BranchSession> unhandledBranchSessions) {
+    private void restore(List<TransactionWriteStore> stores, Set<String> removedGlobalBuffer, Map<Long, BranchSession> unhandledBranchBuffer) {
         for (TransactionWriteStore store : stores) {
             TransactionStoreManager.LogOperation logOperation = store.getOperate();
             SessionStorable sessionStorable = store.getSessionRequest();
@@ -208,16 +214,22 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                                 .getXid());
                         break;
                     }
+                    if (removedGlobalBuffer.contains(globalSession.getXid())) {
+                        break;
+                    }
                     GlobalSession foundGlobalSession = sessionMap.get(globalSession.getXid());
                     if (foundGlobalSession == null) {
                         if (this.checkSessionStatus(globalSession)) {
                             sessionMap.put(globalSession.getXid(), globalSession);
+                        } else {
+                            removedGlobalBuffer.add(globalSession.getXid());
                         }
                     } else {
                         if (this.checkSessionStatus(globalSession)) {
                             foundGlobalSession.setStatus(globalSession.getStatus());
                         } else {
                             sessionMap.remove(globalSession.getXid());
+                            removedGlobalBuffer.add(globalSession.getXid());
                         }
                     }
                     break;
@@ -230,11 +242,15 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                                 .getXid());
                         break;
                     }
+                    if (removedGlobalBuffer.contains(globalSession.getXid())) {
+                        break;
+                    }
                     if (sessionMap.remove(globalSession.getXid()) == null) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info("GlobalSession To Be Removed Does Not Exists [" + globalSession.getXid() + "]");
                         }
                     }
+                    removedGlobalBuffer.add(globalSession.getXid());
                     break;
                 }
                 case BRANCH_ADD:
@@ -246,9 +262,12 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                                 .getXid());
                         break;
                     }
+                    if (removedGlobalBuffer.contains(branchSession.getXid())) {
+                        break;
+                    }
                     GlobalSession foundGlobalSession = sessionMap.get(branchSession.getXid());
                     if (foundGlobalSession == null) {
-                        unhandledBranchSessions.put(branchSession.getBranchId(), branchSession);
+                        unhandledBranchBuffer.put(branchSession.getBranchId(), branchSession);
                     } else {
                         BranchSession existingBranch = foundGlobalSession.getBranch(branchSession.getBranchId());
                         if (existingBranch == null) {
@@ -262,6 +281,9 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                 case BRANCH_REMOVE: {
                     BranchSession branchSession = (BranchSession)sessionStorable;
                     String xid = branchSession.getXid();
+                    if (removedGlobalBuffer.contains(xid)) {
+                        break;
+                    }
                     long bid = branchSession.getBranchId();
                     if (branchSession.getTransactionId() == 0) {
                         LOGGER.error(
@@ -288,10 +310,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     }
                     break;
                 }
-
                 default:
                     throw new ShouldNeverHappenException("Unknown Operation: " + logOperation);
-
             }
         }
 
