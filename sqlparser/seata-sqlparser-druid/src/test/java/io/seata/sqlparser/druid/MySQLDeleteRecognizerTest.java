@@ -56,24 +56,24 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
         String orderBy = mySQLDeleteRecognizer.getOrderByCondition();
-        Assertions.assertTrue(orderBy.equalsIgnoreCase(" ORDER BY id asc,name desc"));
+        Assertions.assertTrue(orderBy.equalsIgnoreCase("ORDER BY id ASC, name DESC"));
         Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
         Assertions.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
         String limit = mySQLDeleteRecognizer.getLimitCondition();
-        Assertions.assertEquals(" LIMIT 1,2", limit);
+        Assertions.assertEquals("LIMIT 1, 2", limit);
         sql = "DELETE FROM t1 WHERE id > 1 order by id ,name desc limit 1";
         statement = getSQLStatement(sql);
         mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
         orderBy = mySQLDeleteRecognizer.getOrderByCondition();
-        Assertions.assertTrue(orderBy.equalsIgnoreCase(" order by id,name desc"));
-        Assertions.assertEquals(" LIMIT 1", mySQLDeleteRecognizer.getLimitCondition());
+        Assertions.assertTrue(orderBy.equalsIgnoreCase("order by id, name DESC"));
+        Assertions.assertEquals("LIMIT 1", mySQLDeleteRecognizer.getLimitCondition());
         sql = "DELETE FROM t1 WHERE id > 1";
         statement = getSQLStatement(sql);
         mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
-        Assertions.assertEquals(null, mySQLDeleteRecognizer.getLimitCondition());
+        Assertions.assertEquals("", mySQLDeleteRecognizer.getLimitCondition());
         orderBy = mySQLDeleteRecognizer.getOrderByCondition();
-        Assertions.assertEquals(null, mySQLDeleteRecognizer.getOrderByCondition());
+        Assertions.assertEquals("", mySQLDeleteRecognizer.getOrderByCondition());
 
     }
 
