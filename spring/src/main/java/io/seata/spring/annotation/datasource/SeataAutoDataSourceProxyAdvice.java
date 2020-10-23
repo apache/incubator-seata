@@ -15,8 +15,8 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
+import javax.sql.DataSource;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -46,6 +46,9 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
         } else {
             throw new IllegalArgumentException("Unknown dataSourceProxyMode: " + dataSourceProxyMode);
         }
+
+        //Set the default branch type in the RootContext.
+        RootContext.setDefaultBranchType(this.dataSourceProxyMode);
     }
 
     @Override

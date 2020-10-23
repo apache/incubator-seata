@@ -23,6 +23,11 @@ package io.seata.core.constants;
 public interface ConfigurationKeys {
 
     /**
+     * The constant SEATA_PREFIX.
+     */
+    public static final String SEATA_PREFIX = "seata.";
+
+    /**
      * The constant SERVICE_PREFIX.
      */
     String SERVICE_PREFIX = "service.";
@@ -513,6 +518,25 @@ public interface ConfigurationKeys {
      * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
      */
     String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
+
+    /**
+     * The constant SEATA_ACCESS_KEY.
+     */
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+
+    /**
+     * The constant SEATA_SECRET_KEY.
+     */
+    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+
+    /**
+     * The constant EXTRA_DATA_SPLIT_CHAR.
+     */
+    String EXTRA_DATA_SPLIT_CHAR = "\n";
+    /**
+     * The constant EXTRA_DATA_KV_CHAR.
+     */
+    String EXTRA_DATA_KV_CHAR = "=";
 
     /**
      * The constant SERVER_ENABLE_CHECK_AUTH.
