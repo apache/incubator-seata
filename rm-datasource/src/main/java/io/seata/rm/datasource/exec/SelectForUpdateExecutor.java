@@ -144,11 +144,11 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         }
         String orderBy = recognizer.getOrderByCondition();
         if (StringUtils.isNotBlank(orderBy)) {
-            selectSQLAppender.append(orderBy);
+            selectSQLAppender.append(" ").append(orderBy);
         }
         String limit = recognizer.getLimitCondition();
         if (StringUtils.isNotBlank(limit)) {
-            selectSQLAppender.append(limit);
+            selectSQLAppender.append(" ").append(limit);
         }
         selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();

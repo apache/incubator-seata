@@ -68,11 +68,11 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         String orderBy = visitor.getOrderByCondition();
         if (StringUtils.isNotBlank(orderBy)) {
-            suffix.append(orderBy);
+            suffix.append(" ").append(orderBy);
         }
         String limit = visitor.getLimitCondition();
         if (StringUtils.isNotBlank(limit)) {
-            suffix.append(limit);
+            suffix.append(" ").append(limit);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());

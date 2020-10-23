@@ -83,11 +83,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         String orderBy = recognizer.getOrderByCondition();
         if (StringUtils.isNotBlank(orderBy)) {
-            suffix.append(orderBy);
+            suffix.append(" ").append(orderBy);
         }
         String limit = recognizer.getLimitCondition();
         if (StringUtils.isNotBlank(limit)) {
-            suffix.append(limit);
+            suffix.append(" ").append(limit);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
