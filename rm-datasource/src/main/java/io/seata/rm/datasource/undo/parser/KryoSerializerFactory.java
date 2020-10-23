@@ -27,7 +27,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
-import io.seata.core.serializer.SerializerClassRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +71,7 @@ public class KryoSerializerFactory implements KryoFactory {
         kryo.register(Timestamp.class, new TimestampSerializer());
 
         // register commonly class
-        SerializerClassRegistry.getRegisteredClasses().forEach((clazz, ser) -> {
+        UndoLogSerializerClassRegistry.getRegisteredClasses().forEach((clazz, ser) -> {
             if (ser == null) {
                 kryo.register(clazz);
             } else {

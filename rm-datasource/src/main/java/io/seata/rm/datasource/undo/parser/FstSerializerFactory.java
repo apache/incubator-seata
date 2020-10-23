@@ -18,7 +18,6 @@ package io.seata.rm.datasource.undo.parser;
 import java.sql.Timestamp;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
-import io.seata.core.serializer.SerializerClassRegistry;
 import org.nustaq.serialization.FSTConfiguration;
 
 /**
@@ -37,7 +36,7 @@ public class FstSerializerFactory {
     public FstSerializerFactory() {
         // support clob and blob sql type
         conf.registerClass(SerialBlob.class, SerialClob.class, Timestamp.class);
-        SerializerClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
+        UndoLogSerializerClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
     }
 
     public <T> byte[] serialize(T t) {
