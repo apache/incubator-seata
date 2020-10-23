@@ -299,6 +299,13 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
         }
 
+        /**
+         * 执行
+         * @param callable
+         * @param <T>
+         * @return
+         * @throws Exception
+         */
         public <T> T execute(Callable<T> callable) throws Exception {
             if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
                 return callable.call();
