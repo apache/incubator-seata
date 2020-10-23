@@ -104,8 +104,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public T execute(Object... args) throws Throwable {
-        if (RootContext.inGlobalTransaction()) {
-            String xid = RootContext.getXID();
+        String xid = RootContext.getXID();
+        if (xid != null) {
             statementProxy.getConnectionProxy().bind(xid);
         }
 
@@ -244,11 +244,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
 
     /**
-     * get standard column name from user sql column name
+     * get standard pk column name from user sql column name
      *
      * @return
      */
-    protected String getStandardColumnName(String userColumnName) {
+    protected String getStandardPkColumnName(String userColumnName) {
         String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
         for (String cn : getTableMeta().getPrimaryKeyOnlyName()) {
             if (cn.toUpperCase().equals(newUserColumnName.toUpperCase())) {

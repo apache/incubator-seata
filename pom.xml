@@ -67,6 +67,7 @@
             <id>Seata</id>
             <name>Seata</name>
             <url>https://seata.io</url>
+            <email>dev-seata@googlegroups.com</email>
         </developer>
     </developers>
 
