@@ -40,7 +40,6 @@ import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import de.javakaffee.kryoserializers.ArraysAsListSerializer;
 import de.javakaffee.kryoserializers.BitSetSerializer;
 import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
-import de.javakaffee.kryoserializers.JdkProxySerializer;
 import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
 import de.javakaffee.kryoserializers.UUIDSerializer;
