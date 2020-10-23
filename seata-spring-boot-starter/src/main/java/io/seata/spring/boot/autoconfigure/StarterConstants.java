@@ -17,6 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
+import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
@@ -86,6 +87,8 @@ public interface StarterConstants {
         private static final long serialVersionUID = -8902807645596274597L;
 
         {
+            put(SEATA_PREFIX, SeataProperties.class);
+
             put(CLIENT_RM_PREFIX, RmProperties.class);
             put(CLIENT_TM_PREFIX, TmProperties.class);
             put(LOCK_PREFIX, LockProperties.class);
