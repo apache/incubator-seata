@@ -22,18 +22,10 @@ import java.util.Objects;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
-import com.alibaba.druid.sql.ast.SQLOrderingSpecification;
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
-import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
 
