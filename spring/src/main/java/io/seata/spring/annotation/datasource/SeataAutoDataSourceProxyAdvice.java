@@ -47,7 +47,7 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
             throw new IllegalArgumentException("Unknown dataSourceProxyMode: " + dataSourceProxyMode);
         }
 
-        //Set the default branch type to RootContext.
+        //Set the default branch type in the RootContext.
         RootContext.setDefaultBranchType(this.dataSourceProxyMode);
     }
 

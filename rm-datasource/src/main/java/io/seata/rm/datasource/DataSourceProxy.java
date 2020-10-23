@@ -116,7 +116,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
 
-        //Set the default branch type to RootContext.
+        //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }
 
