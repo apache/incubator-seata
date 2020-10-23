@@ -15,12 +15,12 @@
  */
 package io.seata.rm.datasource;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;

@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.xa;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
+
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.SeataDataSourceProxy;
@@ -22,11 +27,6 @@ import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-import javax.sql.XAConnection;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * DataSource proxy for XA mode.

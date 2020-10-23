@@ -15,8 +15,8 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
+import javax.sql.DataSource;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
