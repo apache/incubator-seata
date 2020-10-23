@@ -15,10 +15,10 @@
  */
 package io.seata.core.rpc;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import io.seata.common.util.CollectionUtils;
 import org.slf4j.Logger;
@@ -91,35 +91,63 @@ public class ShutdownHook extends Thread {
 
     private static class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
 
+        private static AtomicLong seq = new AtomicLong();
+
         private Disposable disposable;
 
         private int priority;
 
+        private long seqId;
+
         public DisposablePriorityWrapper(Disposable disposable, int priority) {
             this.disposable = disposable;
             this.priority = priority;
+            this.seqId = seq.incrementAndGet();
         }
 
         @Override
         public int compareTo(DisposablePriorityWrapper disposablePriorityWrapper) {
-            return priority - disposablePriorityWrapper.priority;
+            int cmp = priority - disposablePriorityWrapper.priority;
+            if (cmp == 0) {
+                if (seqId > disposablePriorityWrapper.seqId) {
+                    cmp = 1;
+                } else if (seqId < disposablePriorityWrapper.seqId) {
+                    cmp = -1;
+                } else {
+                    cmp = 0;
+                }
+            }
+            return cmp;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.priority);
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + priority;
+            result = prime * result + (int) (seqId ^ (seqId >>> 32));
+            return result;
         }
 
         @Override
-        public boolean equals(Object other) {
-            if (this == other) {
+        public boolean equals(Object obj) {
+            if (this == obj) {
                 return true;
             }
-            if (!(other instanceof DisposablePriorityWrapper)) {
+            if (obj == null) {
                 return false;
             }
-            DisposablePriorityWrapper dpw = (DisposablePriorityWrapper)other;
-            return this.priority == dpw.priority && this.disposable.equals(dpw.disposable);
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            DisposablePriorityWrapper other = (DisposablePriorityWrapper) obj;
+            if (priority != other.priority) {
+                return false;
+            }
+            if (seqId != other.seqId) {
+                return false;
+            }
+            return true;
         }
 
         @Override

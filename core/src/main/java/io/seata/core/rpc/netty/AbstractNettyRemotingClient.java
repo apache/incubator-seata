@@ -40,6 +40,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.AbstractMessage;
@@ -152,12 +153,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-            BlockingQueue<RpcMessage> basket = map.get(serverAddress);
-            if (basket == null) {
-                map.putIfAbsent(serverAddress, new LinkedBlockingQueue<>());
-                basket = map.get(serverAddress);
-            }
+            BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
+                key -> new LinkedBlockingQueue<>());
             basket.offer(rpcMessage);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());
@@ -319,10 +316,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
                 }
                 isSending = true;
-                for (String address : basketMap.keySet()) {
-                    BlockingQueue<RpcMessage> basket = basketMap.get(address);
+                basketMap.forEach((address, basket) -> {
                     if (basket.isEmpty()) {
-                        continue;
+                        return;
                     }
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
@@ -354,7 +350,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
-                }
+                });
                 isSending = false;
             }
         }
