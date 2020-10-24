@@ -27,6 +27,7 @@ import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleSelectForUpdateRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleUpdateRecognizer;
+import io.seata.sqlparser.druid.oracle.OracleSelectRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -89,7 +90,7 @@ public class SQLVisitorFactoryTest {
         //test for oracle select
         sql = "select * from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertNull(recognizer);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleSelectRecognizer.class.getName());
 
         //test for oracle select for update
         sql = "select * from t for update";
