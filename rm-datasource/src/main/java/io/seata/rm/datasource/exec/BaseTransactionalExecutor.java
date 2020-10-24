@@ -407,4 +407,5 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getDbType() {
         return statementProxy.getConnectionProxy().getDbType();
     }
+
 }
