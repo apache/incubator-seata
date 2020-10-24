@@ -97,9 +97,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
 
                     if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
-                        // do as usual
-                        // in @GlobalLock env, don't need to append key eithor,
-                        // but check lock hear, do the same thing as @GlobalTransactional env
+                        // Do the same thing under either @GlobalTransactional or @GlobalLock, 
+                        // that only check the global lock here.
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
                     } else {
                         throw new RuntimeException("Unknown situation!");
