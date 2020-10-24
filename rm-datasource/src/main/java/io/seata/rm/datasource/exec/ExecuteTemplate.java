@@ -17,8 +17,10 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
@@ -98,6 +100,15 @@ public class ExecuteTemplate {
                     case SELECT_FOR_UPDATE:
                         executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
+                    case SELECT:
+                        GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+
+                        if (config.isAutoAddForUpdate()) {
+                            // if sql type is select && allow enable auto add for update
+                            // do the same thing with select for update
+                            executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            break;
+                        }
                     default:
                         executor = new PlainExecutor<>(statementProxy, statementCallback);
                         break;

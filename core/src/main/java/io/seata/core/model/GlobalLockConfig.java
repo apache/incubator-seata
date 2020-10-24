@@ -24,6 +24,8 @@ public class GlobalLockConfig {
 
     private int lockRetryTimes;
 
+    private boolean autoAddForUpdate;
+
     public int getLockRetryInternal() {
         return lockRetryInternal;
     }
@@ -38,5 +40,13 @@ public class GlobalLockConfig {
 
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public boolean isAutoAddForUpdate() {
+        return autoAddForUpdate;
+    }
+
+    public void setAutoAddForUpdate(boolean autoAddForUpdate) {
+        this.autoAddForUpdate = autoAddForUpdate;
     }
 }

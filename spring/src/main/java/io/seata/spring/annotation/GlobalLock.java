@@ -53,4 +53,10 @@ public @interface GlobalLock {
      * @return
      */
     int lockRetryTimes() default -1;
+
+    /**
+     * if autoAddForUpdate is true
+     *  then it will check lock even the target sql do not contain for update
+     */
+    boolean autoAddForUpdate() default false;
 }
