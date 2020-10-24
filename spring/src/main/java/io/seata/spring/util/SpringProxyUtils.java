@@ -24,7 +24,7 @@ import java.util.Set;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.EmptyTargetSource;
 
@@ -48,7 +48,7 @@ public class SpringProxyUtils {
      */
     public static Class<?> findTargetClass(Object proxy) throws Exception {
         if (AopUtils.isAopProxy(proxy)) {
-            AdvisedSupport advised = getAdvisedSupport(proxy);
+            Advised advised = getAdvisedSupport(proxy);
             if (AopUtils.isJdkDynamicProxy(proxy)) {
                 TargetSource targetSource = advised.getTargetSource();
                 return targetSource instanceof EmptyTargetSource ? getFirstInterfaceByAdvised(advised)
@@ -63,14 +63,14 @@ public class SpringProxyUtils {
 
     public static Class<?>[] findInterfaces(Object proxy) throws Exception {
         if (AopUtils.isJdkDynamicProxy(proxy)) {
-            AdvisedSupport advised = getAdvisedSupport(proxy);
+            Advised advised = getAdvisedSupport(proxy);
             return getInterfacesByAdvised(advised);
         } else {
             return new Class<?>[]{};
         }
     }
 
-    private static Class<?>[] getInterfacesByAdvised(AdvisedSupport advised) {
+    private static Class<?>[] getInterfacesByAdvised(Advised advised) {
         Class<?>[] interfaces = advised.getProxiedInterfaces();
         if (interfaces.length > 0) {
             return interfaces;
@@ -79,7 +79,7 @@ public class SpringProxyUtils {
         }
     }
 
-    private static Class<?> getFirstInterfaceByAdvised(AdvisedSupport advised) {
+    private static Class<?> getFirstInterfaceByAdvised(Advised advised) {
         Class<?>[] interfaces = advised.getProxiedInterfaces();
         if (interfaces.length > 0) {
             return interfaces[0];
@@ -95,18 +95,8 @@ public class SpringProxyUtils {
      * @return the advised support
      * @throws Exception the exception
      */
-    public static AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
-        Field h;
-        if (AopUtils.isJdkDynamicProxy(proxy)) {
-            h = proxy.getClass().getSuperclass().getDeclaredField("h");
-        } else {
-            h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
-        }
-        h.setAccessible(true);
-        Object dynamicAdvisedInterceptor = h.get(proxy);
-        Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
-        advised.setAccessible(true);
-        return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
+    public static Advised getAdvisedSupport(Object proxy) throws Exception {
+        return (Advised) proxy;
     }
 
     /**
@@ -160,7 +150,7 @@ public class SpringProxyUtils {
         if (!AopUtils.isAopProxy(proxy)) {
             return proxy.getClass();
         }
-        AdvisedSupport advisedSupport = getAdvisedSupport(proxy);
+        Advised advisedSupport = getAdvisedSupport(proxy);
         Object target = advisedSupport.getTargetSource().getTarget();
         /*
          * the Proxy of sofa:reference has no target
