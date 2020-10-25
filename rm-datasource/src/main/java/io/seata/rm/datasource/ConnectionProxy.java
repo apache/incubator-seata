@@ -179,22 +179,19 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void commit() throws SQLException {
-        SQLException exception = context.getException();
         try {
             LOCK_RETRY_POLICY.execute(() -> {
                 doCommit();
                 return null;
             });
         } catch (SQLException e) {
-            if (exception == null) {
-                context.setException(e);
+            if (!getAutoCommit()) {
+                targetConnection.rollback();
+                context.reset();
             }
             throw e;
         } catch (Exception e) {
             throw new SQLException(e);
-        }
-        if (exception != null) {
-            context.setException(null);
         }
     }
 
@@ -249,7 +246,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void rollback() throws SQLException {
-        targetConnection.rollback();
+
         if (context.inGlobalTransaction() && context.isBranchRegistered()) {
             report(false);
         }
@@ -258,13 +255,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if (context.inGlobalTransaction() || context.isGlobalLockRequire()) {
-            if (context.getException() != null) {
-                rollback();
-            } else if (autoCommit && !getAutoCommit()) {
-                // change autocommit from false to true, we should commit() first according to JDBC spec.
-                doCommit();
-            }
+        if ((context.inGlobalTransaction() || context.isGlobalLockRequire()) && autoCommit && !getAutoCommit()) {
+            // change autocommit from false to true, we should commit() first according to JDBC spec.
+            doCommit();
         }
         targetConnection.setAutoCommit(autoCommit);
     }
