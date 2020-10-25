@@ -186,8 +186,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             });
         } catch (SQLException e) {
             if (!getAutoCommit()) {
-                targetConnection.rollback();
-                context.reset();
+                rollback();
             }
             throw e;
         } catch (Exception e) {
@@ -246,7 +245,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void rollback() throws SQLException {
-
+        targetConnection.rollback();
         if (context.inGlobalTransaction() && context.isBranchRegistered()) {
             report(false);
         }
