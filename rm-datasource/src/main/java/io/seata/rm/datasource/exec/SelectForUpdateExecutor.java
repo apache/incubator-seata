@@ -96,13 +96,10 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                         break;
                     }
 
-                    if (RootContext.inGlobalTransaction()) {
-                        //do as usual
+                    if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
+                        // Do the same thing under either @GlobalTransactional or @GlobalLock, 
+                        // that only check the global lock  here.
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
-                    } else if (RootContext.requireGlobalLock()) {
-                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
-                        // not reentrant)
-                        statementProxy.getConnectionProxy().appendLockKey(lockKeys);
                     } else {
                         throw new RuntimeException("Unknown situation!");
                     }
@@ -113,6 +110,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         conn.rollback();
                     }
+                    // trigger retry
                     lockRetryController.sleep(lce);
                 }
             }
