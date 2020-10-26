@@ -185,7 +185,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return null;
             });
         } catch (SQLException e) {
-            if (!getAutoCommit()) {
+            if (targetConnection != null && !getAutoCommit()) {
                 rollback();
             }
             throw e;
