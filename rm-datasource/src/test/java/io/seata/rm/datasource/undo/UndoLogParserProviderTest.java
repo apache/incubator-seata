@@ -15,13 +15,16 @@
  */
 package io.seata.rm.datasource.undo;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
+import io.seata.rm.datasource.undo.parser.FstUndoLogParser;
 import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
+import io.seata.rm.datasource.undo.parser.KryoUndoLogParser;
 import io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * @author Geng Zhang
@@ -42,6 +45,14 @@ class UndoLogParserProviderTest {
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof ProtostuffUndoLogParser);
         
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "fst");
+        Assertions.assertNotNull(parser);
+        Assertions.assertTrue(parser instanceof FstUndoLogParser);
+
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "kryo");
+        Assertions.assertNotNull(parser);
+        Assertions.assertTrue(parser instanceof KryoUndoLogParser);
+
         try {
             EnhancedServiceLoader.load(UndoLogParser.class, "adadad");
             Assertions.fail();

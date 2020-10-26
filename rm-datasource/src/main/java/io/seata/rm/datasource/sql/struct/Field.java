@@ -20,7 +20,9 @@ package io.seata.rm.datasource.sql.struct;
  *
  * @author sharajava
  */
-public class Field {
+public class Field implements java.io.Serializable {
+
+    private static final long serialVersionUID = -3489407607572041783L;
 
     /**
      * The Name.
