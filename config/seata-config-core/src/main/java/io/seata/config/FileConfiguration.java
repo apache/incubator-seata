@@ -86,6 +86,7 @@ public class FileConfiguration extends AbstractConfiguration {
         this.name = null;
         this.targetFilePath = null;
         this.allowDynamicRefresh = false;
+        fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     /**
@@ -128,6 +129,7 @@ public class FileConfiguration extends AbstractConfiguration {
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
                 Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
                 new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
+        fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     private File getConfigFile(String name) {
@@ -234,7 +236,6 @@ public class FileConfiguration extends AbstractConfiguration {
 
         // Start config change listener for the dataId.
         fileListener.addListener(dataId, listener);
-        fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
