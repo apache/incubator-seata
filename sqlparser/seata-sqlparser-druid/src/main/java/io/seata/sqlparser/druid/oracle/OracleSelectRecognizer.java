@@ -15,6 +15,9 @@
  */
 package io.seata.sqlparser.druid.oracle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -27,9 +30,6 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type oracle select recognizer.
