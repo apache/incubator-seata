@@ -15,33 +15,35 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.sql.serial.SerialArray;
-
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
 import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.JDBCType;
-import java.sql.Ref;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.sql.serial.SerialArray;
 
 /**
  * The type Table records.
  *
  * @author sharajava
  */
-public class TableRecords {
+public class TableRecords implements java.io.Serializable {
+
+    private static final long serialVersionUID = 4441667803166771721L;
 
     private transient TableMeta tableMeta;
 
@@ -199,32 +201,37 @@ public class TableRecords {
                 field.setType(dataType);
                 // mysql will not run in this code
                 // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
-                if (dataType == JDBCType.BLOB.getVendorTypeNumber()) {
+                if (dataType == Types.BLOB) {
                     Blob blob = resultSet.getBlob(i);
                     if (blob != null) {
                         field.setValue(new SerialBlob(blob));
                     }
-                } else if (dataType == JDBCType.CLOB.getVendorTypeNumber()) {
+                } else if (dataType == Types.CLOB) {
                     Clob clob = resultSet.getClob(i);
                     if (clob != null) {
                         field.setValue(new SerialClob(clob));
                     }
-                } else if (dataType == JDBCType.ARRAY.getVendorTypeNumber()) {
+                } else if (dataType == Types.NCLOB) {
+                    NClob object = resultSet.getNClob(i);
+                    if (object != null) {
+                        field.setValue(new SerialClob(object));
+                    }
+                } else if (dataType == Types.ARRAY) {
                     Array array = resultSet.getArray(i);
                     if (array != null) {
                         field.setValue(new SerialArray(array));
                     }
-                } else if (dataType == JDBCType.REF.getVendorTypeNumber()) {
+                } else if (dataType == Types.REF) {
                     Ref ref = resultSet.getRef(i);
                     if (ref != null) {
                         field.setValue(new SerialRef(ref));
                     }
-                } else if (dataType == JDBCType.DATALINK.getVendorTypeNumber()) {
+                } else if (dataType == Types.DATALINK) {
                     java.net.URL url = resultSet.getURL(i);
                     if (url != null) {
                         field.setValue(new SerialDatalink(url));
                     }
-                } else if (dataType == JDBCType.JAVA_OBJECT.getVendorTypeNumber()) {
+                } else if (dataType == Types.JAVA_OBJECT) {
                     Object object = resultSet.getObject(i);
                     if (object != null) {
                         field.setValue(new SerialJavaObject(object));
