@@ -15,7 +15,6 @@
  */
 package io.seata.spring.util;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -34,8 +33,7 @@ import org.springframework.aop.target.EmptyTargetSource;
  * @author zhangsen
  */
 public class SpringProxyUtils {
-
-    private SpringProxyUtils() {
+  private SpringProxyUtils() {
 
     }
 
