@@ -53,11 +53,11 @@ public class DruidSQLRecognizerFactoryImplTest {
         asts = SQLUtils.parseStatements(sqlCommon, JdbcConstants.ORACLE);
         Assertions.assertFalse((boolean)method.invoke(factory, asts.get(0), JdbcConstants.ORACLE));
 
-        // oracle for update
+        // pg for update
         asts = SQLUtils.parseStatements(sqlForUpdate, JdbcConstants.POSTGRESQL);
         Assertions.assertTrue((boolean)method.invoke(factory, asts.get(0), JdbcConstants.POSTGRESQL));
 
-        // oracle not for update
+        // pg not for update
         asts = SQLUtils.parseStatements(sqlCommon, JdbcConstants.POSTGRESQL);
         Assertions.assertFalse((boolean)method.invoke(factory, asts.get(0), JdbcConstants.POSTGRESQL));
     }
