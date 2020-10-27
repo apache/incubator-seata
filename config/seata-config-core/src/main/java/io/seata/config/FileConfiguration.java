@@ -337,7 +337,7 @@ public class FileConfiguration extends AbstractConfiguration {
      */
     class FileListener implements ConfigurationChangeListener {
 
-        private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new HashMap<>();
+        private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new ConcurrentHashMap<>();
 
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
@@ -350,7 +350,7 @@ public class FileConfiguration extends AbstractConfiguration {
         FileListener() {}
 
         public void addListener(String dataId, ConfigurationChangeListener listener) {
-            dataIdMap .computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
+            dataIdMap .computeIfAbsent(dataId, value -> ConcurrentHashMap.newKeySet()).add(listener);
         }
 
         @Override
