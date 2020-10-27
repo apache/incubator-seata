@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -336,7 +337,7 @@ public class FileConfiguration extends AbstractConfiguration {
      */
     class FileListener implements ConfigurationChangeListener {
 
-        private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new ConcurrentHashMap<>();
+        private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new HashMap<>();
 
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
@@ -348,8 +349,8 @@ public class FileConfiguration extends AbstractConfiguration {
          */
         FileListener() {}
 
-        public void addListener(String dataId, ConfigurationChangeListener listener) {
-            dataIdMap .computeIfAbsent(dataId, value -> ConcurrentHashMap.newKeySet()).add(listener);
+        public synchronized void addListener(String dataId, ConfigurationChangeListener listener) {
+            dataIdMap .computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
         }
 
         @Override
