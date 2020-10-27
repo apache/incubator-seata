@@ -350,9 +350,7 @@ public class FileConfiguration extends AbstractConfiguration {
         FileListener() {}
 
         public void addListener(String dataId, ConfigurationChangeListener listener) {
-            Set<ConfigurationChangeListener> changeListeners = dataIdMap.getOrDefault(dataId, new HashSet<>());
-            changeListeners.add(listener);
-            dataIdMap.put(dataId, changeListeners);
+            dataIdMap .computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
         }
 
         @Override
