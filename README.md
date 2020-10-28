@@ -187,6 +187,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='会通教育' height='40'  src='https://img.alicdn.com/tfs/TB1_D9Boxn1gK0jSZKPXXXvUXXa-580-218.jpg'  /img>
     <img alt='享住智慧' height='40'  src='http://image.xiangzhuzhihui.com/images/logo/logo_02.png'  /img>
     <img alt='兰亮网络' height='40'  src='https://img.alicdn.com/tfs/TB1_miroq61gK0jSZFlXXXDKFXa-283-70.png'  /img>
+    <img alt='桔子数科' height='40'  src='https://img.alicdn.com/tfs/TB1HD.oZUY1gK0jSZFMXXaWcVXa-300-300.png'  /img> 
     <img alt='蓝天教育' height='40'  src='https://img.alicdn.com/tfs/TB1CaSroAT2gK0jSZPcXXcKkpXa-492-176.jpg'  /img>
     <img alt='烟台欣合' height='40'  src='https://shinhoglobal.com/img/logo-shinho.svg'  /img>
     <img alt='阿康健康' height='40'  src='https://img.alicdn.com/tfs/TB1JNSqouH2gK0jSZFEXXcqMpXa-450-182.jpg'  /img>
@@ -263,7 +264,6 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='北京新学道教育科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1v3.gZLb2gK0jSZK9XXaEgFXa-240-240.png'  /img> 
     <img alt='北京悦途出行网络科技公司' height='40'  src='https://img.alicdn.com/tfs/TB1VHkrZHr1gK0jSZFDXXb9yVXa-248-80.png'  /img> 
     <img alt='国信易企签' height='40'  src='https://img.alicdn.com/tfs/TB1UTwmZFT7gK0jSZFpXXaTkpXa-201-85.png'  /img>  
-    <img alt='桔子数科' height='40'  src='https://img.alicdn.com/tfs/TB1HD.oZUY1gK0jSZFMXXaWcVXa-300-300.png'  /img> 
     <img alt='上海意贝斯特信息技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1kGElZUH1gK0jSZSyXXXtlpXa-126-48.png'  /img> 
     <img alt='御家汇' height='40'  src='https://img.alicdn.com/tfs/TB1kIIqZUY1gK0jSZFMXXaWcVXa-90-80.png'  /img> 
     <img alt='广州社众软件' height='40'  src='https://img.alicdn.com/tfs/TB1CawkZND1gK0jSZFsXXbldVXa-112-112.png'  /img> 
