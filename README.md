@@ -234,6 +234,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='杭州启舰科技有限公司' height='40'  src='http://www.qijian-tech.com/img/logo.33134af4.png'  /img>
     <img alt='上海美浮特' height='40'  src='https://img.alicdn.com/tfs/TB1uUtaFuT2gK0jSZFvXXXnFXXa-370-45.jpg'  /img>    
     <img alt='杭州中威慧云医疗科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1iqo_FaL7gK0jSZFBXXXZZpXa-361-54.jpg'  /img> 
+    <img alt='微链' height='40'  src='https://img.alicdn.com/tfs/TB14LhHmMgP7K4jSZFqXXamhVXa-300-135.png'  /img> 
     <img alt='海典软件' height='40'  src='https://img.alicdn.com/tfs/TB1KmosZNv1gK0jSZFFXXb0sXXa-247-61.png'  /img> 
     <img alt='易族智汇（北京）' height='40'  src='http://www.javamall.com.cn/images/logonew.jpg'  /img> 
     <img alt='佛山宅无限' height='40'  src='https://zwxnetwork.oss-cn-shenzhen.aliyuncs.com/static/temporary_official_website/logo.png'  /img>     
@@ -271,7 +272,6 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='中国云尚科技' height='40'  src='https://img.alicdn.com/tfs/TB1uf7bZQL0gK0jSZFtXXXQCXXa-303-65.png'  /img> 
     <img alt='卫宁健康' height='40'  src='https://img.alicdn.com/tfs/TB1WMgmZUY1gK0jSZFCXXcwqXXa-189-57.png'  /img> 
     <img alt='聚合联动' height='40'  src='https://img.alicdn.com/tfs/TB1gnllpnM11u4jSZPxXXahcXXa-150-60.png'  /img> 
-    <img alt='微链' height='40'  src='https://img.alicdn.com/tfs/TB14LhHmMgP7K4jSZFqXXamhVXa-300-135.png'  /img> 
     <img alt='熙菱信息' height='40'  src='https://img.alicdn.com/tfs/TB1NJmLpA9l0K4jSZFKXXXFjpXa-195-60.png'  /img> 
     <img alt='鲸算科技' height='40'  src='https://img.alicdn.com/tfs/TB1jfCLpA9l0K4jSZFKXXXFjpXa-514-220.png'  /img> 
     <img alt='杭州沃朴物联科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1vxJ.ZVT7gK0jSZFpXXaTkpXa-309-51.png'  /img> 
