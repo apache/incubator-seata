@@ -194,6 +194,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='深圳好尔美' height='40'  src='https://img.alicdn.com/tfs/TB1IIivoxD1gK0jSZFyXXciOVXa-200-130.png'  /img>
     <img alt='浙大睿医' height='40'  src='https://img.alicdn.com/tfs/TB1kQThrFY7gK0jSZKzXXaikpXa-220-110.jpg'  /img>
     <img alt='居然之家' height='40'  src='https://img.alicdn.com/tfs/TB1LK6jrUT1gK0jSZFrXXcNCXXa-180-54.png'  /img>
+    <img alt='深圳来电科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1SEzM0eL2gK0jSZFmXXc7iXXa-154-45.png'  /img> 
     <img alt='臻善科技' height='40'  src='http://www.gisquest.com/static/web/img/img-1.png?v=v3'  /img>
     <img alt='中国支付通' height='40'  src='https://img.alicdn.com/tfs/TB1VGpTFET1gK0jSZFrXXcNCXXa-193-55.png'  /img>
     <img alt='众网小贷' height='40'  src='https://img.alicdn.com/tfs/TB19Y8XFEY1gK0jSZFMXXaWcVXa-160-60.png'  /img>
@@ -272,7 +273,6 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='宋城独木桥网络有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1UKocmPMZ7e4jSZFOXXX7epXa-234-82.png'  /img> 
     <img alt='厦门服云信息科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1zuAzZKL2gK0jSZFmXXc7iXXa-691-263.png'  /img> 
     <img alt='深圳市臻络科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1v5eiZ.T1gK0jSZFrXXcNCXXa-500-41.png'  /img> 
-    <img alt='深圳来电科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1SEzM0eL2gK0jSZFmXXc7iXXa-154-45.png'  /img> 
     <img alt='叩丁狼教育' height='40'  src='https://img.alicdn.com/tfs/TB1pfYTpRBh1e4jSZFhXXcC9VXa-151-72.png'  /img> 
     <img alt='杭州沃朴物联科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1vxJ.ZVT7gK0jSZFpXXaTkpXa-309-51.png'  /img> 
     <img alt='江西群享科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1Qcd0p79l0K4jSZFKXXXFjpXa-372-125.png'  /img> 
