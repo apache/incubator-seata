@@ -131,11 +131,11 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsIndex.next()) {
-                String indexName = rsIndex.getString("INDEX_NAME");
+                String indexName = rsIndex.getString("index_name");
                 if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
-                String colName = rsIndex.getString("COLUMN_NAME");
+                String colName = rsIndex.getString("column_name");
                 ColumnMeta col = tm.getAllColumns().get(colName);
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
@@ -143,13 +143,13 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 } else {
                     IndexMeta index = new IndexMeta();
                     index.setIndexName(indexName);
-                    index.setNonUnique(rsIndex.getBoolean("NON_UNIQUE"));
-                    index.setIndexQualifier(rsIndex.getString("INDEX_QUALIFIER"));
-                    index.setIndexName(rsIndex.getString("INDEX_NAME"));
-                    index.setType(rsIndex.getShort("TYPE"));
-                    index.setOrdinalPosition(rsIndex.getShort("ORDINAL_POSITION"));
-                    index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
-                    index.setCardinality(rsIndex.getInt("CARDINALITY"));
+                    index.setNonUnique(rsIndex.getBoolean("non_unique"));
+                    index.setIndexQualifier(rsIndex.getString("index_qualifier"));
+                    index.setIndexName(rsIndex.getString("index_name"));
+                    index.setType(rsIndex.getShort("type"));
+                    index.setOrdinalPosition(rsIndex.getShort("ordinal_position"));
+                    index.setAscOrDesc(rsIndex.getString("asc_or_desc"));
+                    index.setCardinality(rsIndex.getInt("cardinality"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.UNIQUE);
@@ -162,7 +162,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getString("PK_NAME");
+                String pkIndexName = rsPrimary.getString("pk_name");
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);
