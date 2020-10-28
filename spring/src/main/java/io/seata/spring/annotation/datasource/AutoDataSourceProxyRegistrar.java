@@ -47,6 +47,7 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)) {
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
                 .genericBeanDefinition(SeataDataSourceBeanPostProcessor.class)
+                .addConstructorArgValue(excludes)
                 .addConstructorArgValue(dataSourceProxyMode)
                 .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR, beanDefinition);
