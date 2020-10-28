@@ -86,7 +86,6 @@ public class FileConfiguration extends AbstractConfiguration {
         this.name = null;
         this.targetFilePath = null;
         this.allowDynamicRefresh = false;
-        fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     /**
@@ -129,7 +128,6 @@ public class FileConfiguration extends AbstractConfiguration {
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
                 Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
                 new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
-        fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     private File getConfigFile(String name) {
@@ -350,6 +348,11 @@ public class FileConfiguration extends AbstractConfiguration {
         FileListener() {}
 
         public synchronized void addListener(String dataId, ConfigurationChangeListener listener) {
+            // only the first time add listener will trigger on process event
+            if (dataIdMap.isEmpty()) {
+                fileListener.onProcessEvent(new ConfigurationChangeEvent());
+            }
+
             dataIdMap .computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
         }
 
