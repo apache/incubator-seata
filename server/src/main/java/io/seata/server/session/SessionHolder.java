@@ -17,6 +17,8 @@ package io.seata.server.session;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -131,10 +133,12 @@ public class SessionHolder {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
         }
 
-        // There is a remove operation in the following code, it will affect the file mode, so new ArrayList
-        List<GlobalSession> allSessions = new ArrayList<>(ROOT_SESSION_MANAGER.allSessions());
+        Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
         if (CollectionUtils.isNotEmpty(allSessions)) {
-            allSessions.forEach(globalSession -> {
+            List<GlobalSession> removeGlobalSessions = new ArrayList<>();
+            Iterator<GlobalSession> iterator = allSessions.iterator();
+            while (iterator.hasNext()) {
+                GlobalSession globalSession = iterator.next();
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
                     case UnKnown:
@@ -145,7 +149,7 @@ public class SessionHolder {
                     case TimeoutRollbacked:
                     case TimeoutRollbackFailed:
                     case Finished:
-                        removeInErrorState(globalSession);
+                        removeGlobalSessions.add(globalSession);
                         break;
                     case AsyncCommitting:
                         if (storeMode == StoreMode.FILE) {
@@ -177,7 +181,10 @@ public class SessionHolder {
                         break;
                     }
                 }
-            });
+            }
+            for (GlobalSession globalSession : removeGlobalSessions) {
+                removeInErrorState(globalSession);
+            }
         }
     }
 
