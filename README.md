@@ -195,6 +195,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='路客精品民宿' height='40'  src='https://img.alicdn.com/tfs/TB1CCavoBr0gK0jSZFnXXbRRXXa-240-100.png'  /img>
     <img alt='深圳好尔美' height='40'  src='https://img.alicdn.com/tfs/TB1IIivoxD1gK0jSZFyXXciOVXa-200-130.png'  /img>
     <img alt='浙大睿医' height='40'  src='https://img.alicdn.com/tfs/TB1kQThrFY7gK0jSZKzXXaikpXa-220-110.jpg'  /img>
+    <img alt='深圳市云羿贸易科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB15r7dZHY1gK0jSZTEXXXDQVXa-234-233.png'  /img> 
     <img alt='居然之家' height='40'  src='https://img.alicdn.com/tfs/TB1LK6jrUT1gK0jSZFrXXcNCXXa-180-54.png'  /img>
     <img alt='深圳来电科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1SEzM0eL2gK0jSZFmXXc7iXXa-154-45.png'  /img> 
     <img alt='臻善科技' height='40'  src='http://www.gisquest.com/static/web/img/img-1.png?v=v3'  /img>
@@ -266,7 +267,6 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='广州社众软件' height='40'  src='https://img.alicdn.com/tfs/TB1CawkZND1gK0jSZFsXXbldVXa-112-112.png'  /img> 
     <img alt='浩鲸科技' height='40'  src='https://img.alicdn.com/tfs/TB1fxZqZQL0gK0jSZFAXXcA9pXa-300-300.png'  /img> 
     <img alt='华宇信息' height='40'  src='https://img.alicdn.com/tfs/TB1q3UiZKL2gK0jSZPhXXahvXXa-802-271.png'  /img> 
-    <img alt='深圳市云羿贸易科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB15r7dZHY1gK0jSZTEXXXDQVXa-234-233.png'  /img> 
     <img alt='中国云尚科技' height='40'  src='https://img.alicdn.com/tfs/TB1uf7bZQL0gK0jSZFtXXXQCXXa-303-65.png'  /img> 
     <img alt='卫宁健康' height='40'  src='https://img.alicdn.com/tfs/TB1WMgmZUY1gK0jSZFCXXcwqXXa-189-57.png'  /img> 
     <img alt='海典软件' height='40'  src='https://img.alicdn.com/tfs/TB1KmosZNv1gK0jSZFFXXb0sXXa-247-61.png'  /img> 
