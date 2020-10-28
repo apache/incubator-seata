@@ -34,8 +34,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
 
-    private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap =
-        new HashMap<>();
+    private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
         if (StringUtils.isBlank(dataId)) {
@@ -43,7 +42,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
         synchronized (ConfigurationCache.class) {
             HashSet<ConfigurationChangeListener> listenerHashSet =
-                getInstance().configListenersMap.computeIfAbsent(dataId, k -> new HashSet<>());
+                getInstance().configListenersMap.computeIfAbsent(dataId, key -> new HashSet<>());
             if (!listenerHashSet.contains(getInstance())) {
                 ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
                 listenerHashSet.add(getInstance());
@@ -101,4 +100,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         private static final ConfigurationCache INSTANCE = new ConfigurationCache();
     }
 
+    public void clear() {
+        CONFIG_CACHE.clear();
+    }
 }

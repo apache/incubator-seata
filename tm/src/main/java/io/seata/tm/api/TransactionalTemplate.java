@@ -64,14 +64,14 @@ public class TransactionalTemplate {
                 case NOT_SUPPORTED:
                     // If transaction is existing, suspend it.
                     if (existingTransaction(tx)) {
-                        suspendedResourcesHolder = tx.suspend(true);
+                        suspendedResourcesHolder = tx.suspend();
                     }
                     // Execute without transaction and return.
                     return business.execute();
                 case REQUIRES_NEW:
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (existingTransaction(tx)) {
-                        suspendedResourcesHolder = tx.suspend(true);
+                        suspendedResourcesHolder = tx.suspend();
                         tx = GlobalTransactionContext.createNew();
                     }
                     // Continue and execute with new transaction
