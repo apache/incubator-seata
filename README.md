@@ -216,6 +216,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='维恩贝特' height='40'  src='http://www.vivebest.com/templates/crs/images/vnb_logo.png'  /img>
     <img alt='八库' height='40' src='https://img.alicdn.com/tfs/TB1hC5cwVY7gK0jSZKzXXaikpXa-318-134.png'  /img>
     <img alt='大诚若谷' height='40'  src='https://img.alicdn.com/tfs/TB1VuPhw4D1gK0jSZFyXXciOVXa-294-124.png'  /img>
+    <img alt='杭州华网信息' height='40'  src='https://img.alicdn.com/tfs/TB1FFX6FqL7gK0jSZFBXXXZZpXa-288-101.png'  /img>  
     <img alt='成都数智索' height='40'  src='https://img.alicdn.com/tfs/TB1oJKiw4D1gK0jSZFyXXciOVXa-2053-377.png'  /img>  
     <img alt='北京超图' height='40'  src='https://img.alicdn.com/tfs/TB1eKFXFEz1gK0jSZLeXXb9kVXa-163-54.png'  /img>
     <img alt='深圳易佰' height='40'  src='https://img.alicdn.com/tfs/TB1gkXaFrr1gK0jSZR0XXbP8XXa-187-57.png'  /img>
@@ -238,8 +239,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='F5未来商店' height='40'  src='https://cdn.f5-store.cn/front_end/common_images/logo.png'  /img>  
     <img alt='甄品信息科技' height='40'  src='https://img.alicdn.com/tfs/TB1SxJWFEY1gK0jSZFCXXcwqXXa-185-65.png'  /img>  
     <img alt='行云全球汇跨境电商（杭州分部）' height='40'  src='http://www.xyb2b.com/_nuxt/img/5e5584f.png'  /img>  
-    <img alt='世纪加华' height='40'  src='https://zhengxin-pub.bj.bcebos.com/logopic/a4ff4990e2ba2d57c90e8d16c649b952_fullsize.jpg?x-bce-process=image/resize,m_lfit,w_200'  /img>    
-    <img alt='杭州华网信息' height='40'  src='https://img.alicdn.com/tfs/TB1FFX6FqL7gK0jSZFBXXXZZpXa-288-101.png'  /img>   
+    <img alt='世纪加华' height='40'  src='https://zhengxin-pub.bj.bcebos.com/logopic/a4ff4990e2ba2d57c90e8d16c649b952_fullsize.jpg?x-bce-process=image/resize,m_lfit,w_200'  /img>     
     <img alt='快陪练' height='40'  src='https://img.alicdn.com/tfs/TB1rhNRFAL0gK0jSZFtXXXQCXXa-321-96.png'  /img> 
     <img alt='西南石油大学' height='40'  src='https://dss2.bdstatic.com/6Ot1bjeh1BF3odCf/it/u=829617221,290823158&fm=74&app=80&f=JPEG&size=f121,121?sec=1880279984&t=b0b603710dd0af061a278d11cfe327ae'  /img> 
     <img alt='厦门服云信息科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1zuAzZKL2gK0jSZFmXXc7iXXa-691-263.png'  /img> 
