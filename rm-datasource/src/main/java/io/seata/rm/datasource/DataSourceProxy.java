@@ -15,16 +15,17 @@
  */
 package io.seata.rm.datasource;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
@@ -114,6 +115,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
+
+        //Set the default branch type to 'AT' in the RootContext.
+        RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     /**
