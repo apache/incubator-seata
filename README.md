@@ -154,12 +154,12 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='58集团' height='40'  src='http://img.58cdn.com.cn/logo/58/252_84/logo-o.png?v=2'  /img>
     <img alt='南航' height='40'  src='https://img.alicdn.com/tfs/TB1GMQpZHY1gK0jSZTEXXXDQVXa-203-63.png'  /img>
     <img alt='TCL' height='40'  src='https://img.alicdn.com/tfs/TB1oHThw.Y1gK0jSZFCXXcwqXXa-214-200.png'  /img>
+    <img alt='韵达快递' height='40'  src='http://www.yunda56.com/cn/images/ky_images/logo.png'  /img>
     <img alt='科大讯飞' height='40'  src='https://img.alicdn.com/tfs/TB1x0p5jxvbeK8jSZPfXXariXXa-272-83.png'  /img>
     <img alt='太极计算机' height='40'  src='https://img.alicdn.com/tfs/TB1.zqEoAL0gK0jSZFAXXcA9pXa-245-38.png'  /img>
     <img alt='政采云' height='40'  src='https://img.alicdn.com/tfs/TB1DDiCorY1gK0jSZTEXXXDQVXa-440-114.jpg'  /img>
     <img alt='浙江公安厅' height='40'  src='https://img.alicdn.com/tfs/TB1SXGzoxn1gK0jSZKPXXXvUXXa-426-180.jpg'  /img>
     <img alt='特步' height='40'  src='https://www.xtep.com/public/images/logo.png'  /img>
-    <img alt='韵达快递' height='40'  src='http://www.yunda56.com/cn/images/ky_images/logo.png'  /img>
     <img alt='欧莱雅百库' height='40'  src='https://img.alicdn.com/tfs/TB1Xa3bZQL0gK0jSZFtXXXQCXXa-936-93.png'  /img> 
     <img alt='中通快递' height='40'  src='https://img.alicdn.com/tfs/TB1rCNSFxn1gK0jSZKPXXXvUXXa-172-31.png'  /img>
     <img alt='美的集团' height='40' src='https://img.alicdn.com/tfs/TB1cgvjwYj1gK0jSZFOXXc7GpXa-1040-282.png'  /img>    
