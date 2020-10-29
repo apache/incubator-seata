@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 
 
@@ -55,6 +57,14 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) recognizer;
+
+            if (StringUtils.isNotBlank(visitor.getLimit())) {
+                throw new ShouldNeverHappenException("Multi delete SQL should not contains limit condition !");
+            }
+            if (StringUtils.isNotBlank(visitor.getOrderBy())) {
+                throw new ShouldNeverHappenException("Multi delete SQL should not contains order by condition !");
+            }
+
             String whereConditionStr = buildWhereCondition(visitor, paramAppenderList);
             if (StringUtils.isBlank(whereConditionStr)) {
                 whereCondition = new StringBuilder();

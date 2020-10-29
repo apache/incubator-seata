@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -36,6 +38,7 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
@@ -79,6 +82,14 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
+
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit())) {
+                throw new ShouldNeverHappenException("Multi update SQL should not contains limit condition !");
+            }
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderBy())) {
+                throw new ShouldNeverHappenException("Multi update SQL should not contains order by condition !");
+            }
+
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
             assertContainsPKColumnName(updateColumns);
             updateColumnsSet.addAll(updateColumns);
