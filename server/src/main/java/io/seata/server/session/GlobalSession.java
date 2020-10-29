@@ -40,6 +40,10 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.model.GlobalStatus.AsyncCommitting;
+import static io.seata.core.model.GlobalStatus.CommitRetrying;
+import static io.seata.core.model.GlobalStatus.Committing;
+
 /**
  * The type Global session.
  *
@@ -256,8 +260,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
-        if (!branchSession.unlock()) {
-            throw new TransactionException("Unlock branch lock failed!");
+        // do not unlock if status in (Committing, CommitRetrying, AsyncCommitting),
+        // because it's already unlocked at 'DefaultCore.commit()'
+        if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
+            if (!branchSession.unlock()) {
+                throw new TransactionException("Unlock branch lock failed!");
+            }
         }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
