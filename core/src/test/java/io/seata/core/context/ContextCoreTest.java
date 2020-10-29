@@ -17,6 +17,8 @@ package io.seata.core.context;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -51,8 +53,10 @@ public class ContextCoreTest {
      * Test get.
      */
     @Test
-    public void testGet() {
+    public void testGet() throws InterruptedException, ExecutionException, TimeoutException {
         ContextCore load = ContextCoreLoader.load();
+
+        // current thread put, current thread get
         load.put(FIRST_KEY, FIRST_VALUE);
         load.put(SECOND_KEY, FIRST_VALUE);
         assertThat(load.get(FIRST_KEY)).isEqualTo(FIRST_VALUE);
@@ -66,6 +70,79 @@ public class ContextCoreTest {
         load.remove(FIRST_KEY);
         load.remove(SECOND_KEY);
         load.remove(NOT_EXIST_KEY);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+        // child thread put, current thread get
+        executorService.submit(() -> {
+            load.put(FIRST_KEY, FIRST_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            load.put(SECOND_KEY, FIRST_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        assertThat(load.get(FIRST_KEY)).isEqualTo(FIRST_VALUE);
+        assertThat(load.get(SECOND_KEY)).isEqualTo(FIRST_VALUE);
+        executorService.submit(() -> {
+            load.put(FIRST_KEY, SECOND_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            load.put(SECOND_KEY, SECOND_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        assertThat(load.get(FIRST_KEY)).isEqualTo(SECOND_VALUE);
+        assertThat(load.get(SECOND_KEY)).isEqualTo(SECOND_VALUE);
+        assertThat(load.get(NOT_EXIST_KEY)).isNull();
+        //clear keys
+        load.remove(FIRST_KEY);
+        load.remove(SECOND_KEY);
+        load.remove(NOT_EXIST_KEY);
+
+        // current thread put, child thread get
+        load.put(FIRST_KEY, FIRST_VALUE);
+        load.put(SECOND_KEY, FIRST_VALUE);
+        executorService.submit(() -> {
+            assertThat(load.get(FIRST_KEY)).isEqualTo(FIRST_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            assertThat(load.get(SECOND_KEY)).isEqualTo(FIRST_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        load.put(FIRST_KEY, SECOND_VALUE);
+        load.put(SECOND_KEY, SECOND_VALUE);
+        executorService.submit(() -> {
+            assertThat(load.get(FIRST_KEY)).isEqualTo(SECOND_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            assertThat(load.get(SECOND_KEY)).isEqualTo(SECOND_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            assertThat(load.get(NOT_EXIST_KEY)).isNull();
+        }).get(5, TimeUnit.MILLISECONDS);
+        // clear keys
+        load.remove(FIRST_KEY);
+        load.remove(SECOND_KEY);
+        load.remove(NOT_EXIST_KEY);
+
+        // current thread put, child thread remove, current thread get
+        load.put(FIRST_KEY, FIRST_VALUE);
+        load.put(SECOND_KEY, SECOND_VALUE);
+        executorService.submit(() -> {
+            assertThat(load.remove(FIRST_KEY)).isEqualTo(FIRST_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            assertThat(load.remove(SECOND_KEY)).isEqualTo(SECOND_VALUE);
+        }).get(5, TimeUnit.MILLISECONDS);
+        executorService.submit(() -> {
+            assertThat(load.remove(NOT_EXIST_KEY)).isNull();
+        }).get(5, TimeUnit.MILLISECONDS);
+        assertThat(load.get(FIRST_KEY)).isNull();
+        assertThat(load.get(SECOND_KEY)).isNull();
+        assertThat(load.get(NOT_EXIST_KEY)).isNull();
+        // clear keys
+        load.remove(FIRST_KEY);
+        load.remove(SECOND_KEY);
+        load.remove(NOT_EXIST_KEY);
+
+        // shutdown executor service
+        executorService.shutdown();
     }
 
     /**
