@@ -32,7 +32,9 @@ public enum TCCCommitType {
     /**
      * The async commit.
      */
-    AsyncCommit;
+    AsyncCommit,
+
+    ;
 
     /**
      * Gets the corresponding CommitType
