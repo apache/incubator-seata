@@ -17,6 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
+import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
@@ -105,6 +106,7 @@ public interface StarterConstants {
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
+            put(SAGA_PREFIX, StateMachineConfig.class);
             put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
 
             put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
