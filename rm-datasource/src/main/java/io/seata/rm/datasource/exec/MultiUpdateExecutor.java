@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;

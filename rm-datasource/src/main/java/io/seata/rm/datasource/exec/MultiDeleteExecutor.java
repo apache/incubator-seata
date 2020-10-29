@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 
