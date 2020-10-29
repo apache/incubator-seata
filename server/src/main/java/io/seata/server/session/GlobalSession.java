@@ -260,7 +260,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
-        // do not unlock if status in (Committing, CommitRetrying, AsyncCommitting),
+        // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
         // because it's already unlocked at 'DefaultCore.commit()'
         if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
             if (!branchSession.unlock()) {
