@@ -212,7 +212,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void clean() throws TransactionException {
-        LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
+        if (this.hasATBranch()) {
+            LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
+        }
     }
 
     /**
@@ -222,9 +224,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void closeAndClean() throws TransactionException {
         close();
-        if (this.hasATBranch()) {
-            clean();
-        }
+        clean();
     }
 
     /**
