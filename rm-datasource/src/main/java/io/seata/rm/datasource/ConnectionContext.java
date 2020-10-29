@@ -28,19 +28,20 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  * @author sharajava
  */
 public class ConnectionContext {
+    private static final Savepoint DEFAULT_SAVEPOINT = null;
     private String xid;
     private Long branchId;
     private boolean isGlobalLockRequire;
-    private Savepoint currentSavepoint = null;
+    private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
 
     /**
      * only HashMap can be use hear
-     * because of the key may by null
+     * because of the key may by null(DEFAULT_SAVEPOINT)
      */
     private HashMap<Savepoint, Set<String>> lockKeysBuffer = new HashMap<>();
     /**
      * only HashMap can be use hear
-     * because of the key may by null
+     * because of the key may by null(DEFAULT_SAVEPOINT)
      */
     private HashMap<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new HashMap<>();
 
@@ -112,8 +113,10 @@ public class ConnectionContext {
     public void releaseSavepoint(Savepoint savepoint) {
         List<Savepoint> afterSavepoints = getAfterSavepoints(savepoint);
 
-        List<SQLUndoLog> notSavepointSQLUndoLog = sqlUndoItemsBuffer.compute(null, (k, v) -> new ArrayList<>());
-        Set<String> notSavepointLockKeys = lockKeysBuffer.compute(null, (k, v) -> new HashSet<>());
+        List<SQLUndoLog> notSavepointSQLUndoLog = sqlUndoItemsBuffer.compute(DEFAULT_SAVEPOINT, (k, v) -> new ArrayList<>());
+        Set<String> notSavepointLockKeys = lockKeysBuffer.compute(DEFAULT_SAVEPOINT, (k, v) -> new HashSet<>());
+
+        // move the undo items & lock keys to default
         for (Savepoint sp : afterSavepoints) {
             List<SQLUndoLog> savepointSQLUndoLogs = sqlUndoItemsBuffer.remove(sp);
             if (!CollectionUtils.isEmpty(savepointSQLUndoLogs)) {
@@ -127,7 +130,7 @@ public class ConnectionContext {
         }
 
         savepoints.removeAll(afterSavepoints);
-        currentSavepoint = savepoints.size() == 0 ? null : savepoints.get(savepoints.size() - 1);
+        currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
     }
 
     List<Savepoint> getAfterSavepoints(Savepoint savepoint) {
