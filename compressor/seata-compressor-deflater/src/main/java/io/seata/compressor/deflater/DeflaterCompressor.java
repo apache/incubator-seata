@@ -16,7 +16,6 @@
 package io.seata.compressor.deflater;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.compressor.deflater.DeflaterUtil;
 import io.seata.core.compressor.Compressor;
 
 /**
