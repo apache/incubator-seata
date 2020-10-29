@@ -17,6 +17,7 @@ package io.seata.rm.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.concurrent.Callable;
 
 import io.seata.common.util.StringUtils;
@@ -191,6 +192,33 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         }
     }
 
+    @Override
+    public Savepoint setSavepoint() throws SQLException {
+        Savepoint savepoint = targetConnection.setSavepoint();
+        context.appendSavepoint(savepoint);
+        return savepoint;
+    }
+
+    @Override
+    public Savepoint setSavepoint(String name) throws SQLException {
+        Savepoint savepoint = targetConnection.setSavepoint(name);
+        context.appendSavepoint(savepoint);
+        return savepoint;
+    }
+
+    @Override
+    public void rollback(Savepoint savepoint) throws SQLException {
+        targetConnection.rollback(savepoint);
+        context.removeSavepoint(savepoint);
+    }
+
+    @Override
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        targetConnection.releaseSavepoint(savepoint);
+        context.releaseSavepoint(savepoint);
+    }
+
+
     private void doCommit() throws SQLException {
         if (context.inGlobalTransaction()) {
             processGlobalTransactionCommit();
@@ -232,7 +260,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void register() throws TransactionException {
-        if (!context.hasUndoLog() || context.getLockKeysBuffer().isEmpty()) {
+        if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),

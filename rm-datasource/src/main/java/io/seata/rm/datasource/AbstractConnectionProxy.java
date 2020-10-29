@@ -245,28 +245,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     }
 
     @Override
-    public Savepoint setSavepoint() throws SQLException {
-        return targetConnection.setSavepoint();
-    }
-
-    @Override
-    public Savepoint setSavepoint(String name) throws SQLException {
-        return targetConnection.setSavepoint(name);
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) throws SQLException {
-        targetConnection.rollback(savepoint);
-
-    }
-
-    @Override
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        targetConnection.releaseSavepoint(savepoint);
-
-    }
-
-    @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
         Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency,
