@@ -193,7 +193,7 @@ public class MultiExecutorTest {
 
 
         //contains order by update
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test2 set name = 'WILL' where id = 1 order by id desc;";
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -201,7 +201,7 @@ public class MultiExecutorTest {
         Assertions.assertThrows(ShouldNeverHappenException.class, executor::beforeImage);
 
         //contains order by and limit update
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test2 set name = 'WILL' where id = 1 order by id desc limit 1;";
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc limit 1;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
