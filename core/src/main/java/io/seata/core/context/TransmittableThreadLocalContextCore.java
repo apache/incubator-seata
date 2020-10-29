@@ -30,13 +30,13 @@ import java.util.Map;
 @LoadLevel(name = "TransmittableThreadLocalContextCore", order = Integer.MIN_VALUE + 2)
 public class TransmittableThreadLocalContextCore implements ContextCore {
 
-    private TransmittableThreadLocal<Map<String, Object>> transmittableThreadLocal =
-            new TransmittableThreadLocal<Map<String, Object>>() {
-                @Override
-                protected Map<String, Object> initialValue() {
-                    return new HashMap<>();
-                }
-            };
+    private TransmittableThreadLocal<Map<String, Object>> transmittableThreadLocal = new TransmittableThreadLocal<Map<String, Object>>() {
+
+        @Override
+        protected Map<String, Object> initialValue() {
+            return new HashMap<>();
+        }
+    };
 
     @Nullable
     @Override
