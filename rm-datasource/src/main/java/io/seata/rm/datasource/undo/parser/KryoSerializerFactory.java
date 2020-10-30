@@ -20,6 +20,8 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import com.esotericsoftware.kryo.Kryo;
@@ -29,6 +31,7 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
 import de.javakaffee.kryoserializers.JdkProxySerializer;
+import io.seata.common.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +45,8 @@ public class KryoSerializerFactory implements KryoFactory {
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
     private KryoPool pool = new KryoPool.Builder(this).softReferences().build();
+
+    private static final Map<Class, Serializer> TYPE_MAP = new ConcurrentHashMap<>();
 
     private KryoSerializerFactory() {}
 
@@ -60,10 +65,22 @@ public class KryoSerializerFactory implements KryoFactory {
         pool.release(kryoSerializer.getKryo());
     }
 
+    public void registerSerializer(Class type, Serializer ser) {
+        if (type != null && ser != null) {
+            TYPE_MAP.put(type, ser);
+        }
+    }
+
     @Override
     public Kryo create() {
         Kryo kryo = new Kryo();
         kryo.setRegistrationRequired(false);
+
+        if (CollectionUtils.isNotEmpty(TYPE_MAP)) {
+            for (Map.Entry<Class, Serializer> entry : TYPE_MAP.entrySet()) {
+                kryo.register(entry.getKey(), entry.getValue());
+            }
+        }
 
         // support clob and blob
         kryo.register(SerialBlob.class, new BlobSerializer());
