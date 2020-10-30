@@ -17,10 +17,17 @@ package io.seata.rm.datasource.exec;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -88,7 +95,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1) {
+        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && isMultiPk()) {
             throw new NotSupportYetException("multi pk only support mysql!");
         }
         TableRecords beforeImage = beforeImage();
@@ -97,6 +104,28 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         prepareUndoLog(beforeImage, afterImage);
         return result;
     }
+
+    private boolean isMultiPk() {
+        if (null != sqlRecognizer) {
+            return getTableMeta().getPrimaryKeyOnlyName().size() > 1;
+        }
+        if (CollectionUtils.isNotEmpty(sqlRecognizers)) {
+            List<SQLRecognizer> distinctSQLRecognizer = sqlRecognizers.stream().filter(
+                distinctByKey(t -> t.getTableName())).collect(Collectors.toList());
+            for (SQLRecognizer sqlRecognizer : distinctSQLRecognizer) {
+                if (getTableMeta(sqlRecognizer.getTableName()).getPrimaryKeyOnlyName().size() > 1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object, Boolean> map = new HashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+
 
     /**
      * Execute auto commit true t.
