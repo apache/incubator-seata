@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
  */
 public interface JacksonSerializer<T> {
 
-    Class<? extends T> type();
+    Class<T> type();
 
     JsonSerializer<T> ser();
 

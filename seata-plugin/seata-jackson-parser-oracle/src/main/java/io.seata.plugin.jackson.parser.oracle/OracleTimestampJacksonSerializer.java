@@ -42,7 +42,7 @@ public class OracleTimestampJacksonSerializer implements JacksonSerializer<oracl
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleTimestampJacksonSerializer.class);
 
     @Override
-    public Class<? extends oracle.sql.TIMESTAMP> type() {
+    public Class<oracle.sql.TIMESTAMP> type() {
         return oracle.sql.TIMESTAMP.class;
     }
 
