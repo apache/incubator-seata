@@ -217,7 +217,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void clean() throws TransactionException {
         if (this.hasATBranch()) {
-            LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this);
+            if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
+                throw new TransactionException("unLock globalSession error");
+            }
         }
     }
 
