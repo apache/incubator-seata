@@ -62,7 +62,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     public void init() {
         try {
             List<ProtostuffDelegate> delegates = EnhancedServiceLoader.loadAll(ProtostuffDelegate.class);
-            if (!CollectionUtils.isEmpty(delegates)) {
+            if (CollectionUtils.isNotEmpty(delegates)) {
                 for (ProtostuffDelegate delegate : delegates) {
                     if (delegate != null) {
                         idStrategy.registerDelegate(delegate.create());

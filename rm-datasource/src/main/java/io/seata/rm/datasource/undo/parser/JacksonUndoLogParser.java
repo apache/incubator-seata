@@ -104,7 +104,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
     public void init() {
         try {
             List<JacksonSerializer> jacksonSerializers = EnhancedServiceLoader.loadAll(JacksonSerializer.class);
-            if (!CollectionUtils.isEmpty(jacksonSerializers)) {
+            if (CollectionUtils.isNotEmpty(jacksonSerializers)) {
                 for (JacksonSerializer jacksonSerializer : jacksonSerializers) {
                     Class type = jacksonSerializer.type();
                     JsonSerializer ser = jacksonSerializer.ser();
