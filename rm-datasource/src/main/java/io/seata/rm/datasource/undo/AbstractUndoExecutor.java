@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -86,7 +87,9 @@ public abstract class AbstractUndoExecutor {
      *
      * @return the string
      */
-    protected abstract String buildUndoSQL();
+    protected String buildUndoSQL() {
+        throw new ShouldNeverHappenException(this.getClass().getName() + " will never call this method");
+    }
 
     /**
      * Instantiates a new Abstract undo executor.

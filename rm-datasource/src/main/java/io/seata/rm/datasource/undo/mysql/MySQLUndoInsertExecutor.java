@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
@@ -43,35 +45,51 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
      */
     private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s ";
 
-    /**
-     * Undo Inset.
-     *
-     * @return sql
-     */
-    @Override
-    protected String buildUndoSQL() {
-        TableRecords afterImage = sqlUndoLog.getAfterImage();
-        List<Row> afterImageRows = afterImage.getRows();
-        if (CollectionUtils.isEmpty(afterImageRows)) {
-            throw new ShouldNeverHappenException("Invalid UNDO LOG");
-        }
-        return generateDeleteSql(afterImageRows,afterImage);
-    }
+    private static final int DELETE_BATCH_NUM = 5000;
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
-            throws SQLException {
-        int undoIndex = 0;
-        for (Field pkField:pkValueList) {
-            undoIndex++;
-            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+    public void executeOn(Connection conn) throws SQLException {
+        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
+            return;
+        }
+        try {
+            TableRecords undoRows = getUndoRows();
+
+            List<List<Row>> rowsDouble = CollectionUtils.cutData(undoRows.getRows(), DELETE_BATCH_NUM);
+            PreparedStatement undoPSTCache = null;
+            for (List<Row> rows : rowsDouble) {
+                PreparedStatement undoPST = null;
+                if (null != undoPSTCache && rows.size() == DELETE_BATCH_NUM) {
+                    undoPST = undoPSTCache;
+                } else {
+                    undoPST = conn.prepareStatement(generateDeleteSql(rows, undoRows));
+                    undoPSTCache = undoPST;
+                }
+
+                int undoIndex = 0;
+                for (Row undoRow : rows) {
+                    for (Field field : undoRow.getFields()) {
+                        if (field.getKeyType() == KeyType.PRIMARY_KEY) {
+                            undoPST.setObject(++ undoIndex, field.getValue(), field.getType());
+                        }
+                    }
+                }
+                undoPST.executeUpdate();
+            }
+
+        } catch (Exception ex) {
+            if (ex instanceof SQLException) {
+                throw (SQLException) ex;
+            } else {
+                throw new SQLException(ex);
+            }
         }
     }
 
     private String generateDeleteSql(List<Row> rows, TableRecords afterImage) {
         List<String> pkNameList = getOrderedPkList(afterImage, rows.get(0), JdbcConstants.MYSQL).stream().map(
             e -> e.getName()).collect(Collectors.toList());
-        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.MYSQL);
+        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, rows.size(), JdbcConstants.MYSQL, rows.size());
         return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(), whereSql);
     }
 

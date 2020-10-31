@@ -15,6 +15,8 @@
  */
 package io.seata.common.util;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -276,5 +278,20 @@ public class CollectionUtils {
                 // catch the exception and continue to retry
             }
         }
+    }
+
+    public static <T> List<List<T>> cutData(List<T> list, int n) {
+        if (isEmpty(list) || n <= 0) {
+            throw new ShouldNeverHappenException("list is empty or cut target size is zero");
+        }
+        int targetSize = (list.size() + n - 1) / n;
+
+        List<List<T>> resp = new ArrayList<>(targetSize);
+
+        for (int i = 0; i < targetSize; i ++) {
+            resp.add(list.subList(i * n, Math.min(i * n + n, list.size())));
+        }
+
+        return resp;
     }
 }

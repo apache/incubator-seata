@@ -50,10 +50,8 @@ public class SqlGenerateUtils {
      * @param dbType     the type of database
      * @param maxInSize  the max in size
      * @return return where condition sql string.the sql can search all related records not just one.
-     * @throws SQLException the sql exception
      */
-    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType, int maxInSize)
-        throws SQLException {
+    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType, int maxInSize) {
         StringBuilder whereStr = new StringBuilder();
         //we must consider the situation of composite primary key
         int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
