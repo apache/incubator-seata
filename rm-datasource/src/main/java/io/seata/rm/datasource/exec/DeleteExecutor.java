@@ -19,15 +19,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
 
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
-import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 
@@ -72,28 +71,10 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(orderBy)) {
             suffix.append(orderBy);
         }
-        String limit = visitor.getLimit();
+        ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+        String limit = visitor.getLimit(parametersHolder, paramAppenderList);
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
-            // todo optimize code
-            int vars = limit.length() - limit.replace("?", "").length();
-            if (vars == 1) {
-                // if contains ?, the statementProxy must by PreparedStatementProxy
-                // limit ?
-                Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-                paramAppenderList.add(new ArrayList<Object>() {{
-                    add(parameters.get(parameters.size()).get(0));
-                }});
-            } else if (vars == 2) {
-                // limit ?,?
-                Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-                paramAppenderList.add(new ArrayList<Object>() {{
-                    add(parameters.get(parameters.size() - 1).get(0));
-                }});
-                paramAppenderList.add(new ArrayList<Object>() {{
-                    add(parameters.get(parameters.size()).get(0));
-                }});
-            }
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
