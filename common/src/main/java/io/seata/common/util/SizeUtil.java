@@ -54,7 +54,7 @@ public class SizeUtil {
             case 't':
                 return number * RADIX * RADIX * RADIX * RADIX;
             default:
-                throw new IllegalArgumentException("could not convert " + size + " to byte length");
+                throw new IllegalArgumentException("could not convert '" + size + "' to byte length");
         }
     }
 }
