@@ -97,16 +97,16 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 // limit ?
                 Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
                 paramAppenderList.add(new ArrayList<Object>() {{
-                    add(parameters.get(parameters.size()));
+                    add(parameters.get(parameters.size()).get(0));
                 }});
             } else if (vars == 2) {
                 // limit ?,?
                 Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
                 paramAppenderList.add(new ArrayList<Object>() {{
-                    add(parameters.get(parameters.size() - 1));
+                    add(parameters.get(parameters.size() - 1).get(0));
                 }});
                 paramAppenderList.add(new ArrayList<Object>() {{
-                    add(parameters.get(parameters.size()));
+                    add(parameters.get(parameters.size()).get(0));
                 }});
             }
         }
