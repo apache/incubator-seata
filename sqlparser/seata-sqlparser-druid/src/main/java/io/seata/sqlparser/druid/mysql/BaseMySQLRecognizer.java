@@ -107,12 +107,20 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
             StringBuilder builder = new StringBuilder(" LIMIT ");
             SQLIntegerExpr expr;
             if (limit.getOffset() != null) {
-                expr = (SQLIntegerExpr)limit.getOffset();
-                builder.append(expr.getNumber()).append(",");
+                if (limit.getOffset() instanceof SQLVariantRefExpr) {
+                    builder.append("?,");
+                } else {
+                    expr = (SQLIntegerExpr)limit.getOffset();
+                    builder.append(expr.getNumber()).append(",");
+                }
             }
             if (limit.getRowCount() != null) {
-                expr = (SQLIntegerExpr)limit.getRowCount();
-                builder.append(expr.getNumber());
+                if (limit.getRowCount() instanceof SQLVariantRefExpr) {
+                    builder.append("?");
+                } else {
+                    expr = (SQLIntegerExpr)limit.getRowCount();
+                    builder.append(expr.getNumber());
+                }
             }
             return builder.toString();
         }
