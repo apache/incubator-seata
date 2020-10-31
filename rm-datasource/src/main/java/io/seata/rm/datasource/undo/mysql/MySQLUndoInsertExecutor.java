@@ -62,7 +62,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
                 if (null != undoPSTCache && rows.size() == DELETE_BATCH_NUM) {
                     undoPST = undoPSTCache;
                 } else {
-                    undoPST = conn.prepareStatement(generateDeleteSql(rows, undoRows));
+                    undoPST = conn.prepareStatement(generateDeleteSql(rows));
                     undoPSTCache = undoPST;
                 }
 
@@ -86,8 +86,8 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         }
     }
 
-    private String generateDeleteSql(List<Row> rows, TableRecords afterImage) {
-        List<String> pkNameList = getOrderedPkList(afterImage, rows.get(0), JdbcConstants.MYSQL).stream().map(
+    private String generateDeleteSql(List<Row> rows) {
+        List<String> pkNameList = getOrderedPkList(getUndoRows(), rows.get(0), JdbcConstants.MYSQL).stream().map(
             e -> e.getName()).collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, rows.size(), JdbcConstants.MYSQL, rows.size());
         return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(), whereSql);
