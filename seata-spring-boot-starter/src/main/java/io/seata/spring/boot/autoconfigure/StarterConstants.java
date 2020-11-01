@@ -64,6 +64,7 @@ public interface StarterConstants {
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     String LOG_PREFIX = CLIENT_PREFIX + ".log";
 
+    String LOAD_BALANCE_PREFIX = SEATA_PREFIX + ".loadBalance";
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
     String REGISTRY_EUREKA_PREFIX = REGISTRY_PREFIX + ".eureka";

@@ -36,15 +36,7 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -223,8 +215,13 @@ public class PropertiesTest {
     @Test
     public void testRegistryProperties() {
         assertEquals("file", context.getBean(RegistryProperties.class).getType());
-        assertEquals("RandomLoadBalance", context.getBean(RegistryProperties.class).getLoadBalance());
-        assertEquals(10, context.getBean(RegistryProperties.class).getLoadBalanceVirtualNodes());
+    }
+
+
+    @Test
+    public void testLoadBalanceProperties() {
+        assertEquals("RandomLoadBalance", context.getBean(LoadBalanceProperties.class).getType());
+        assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
     }
 
     @Test
