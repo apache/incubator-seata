@@ -84,6 +84,13 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         }
     }
 
+    /**
+     * generate delete sql
+     * example:
+     *   delete from a where (pk1, pk2) in ((v1, v2), (v3, v4))
+     * @param rows the rows to delete
+     * @return the delete sql
+     */
     protected String generateDeleteSql(List<Row> rows) {
         List<String> pkNameList = getOrderedPkList(getUndoRows(), rows.get(0), JdbcConstants.MYSQL).stream().map(
             e -> e.getName()).collect(Collectors.toList());
