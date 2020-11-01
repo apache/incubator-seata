@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+
 import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLType;
@@ -25,10 +30,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Geng Zhang
