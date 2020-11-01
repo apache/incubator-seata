@@ -73,7 +73,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
                 if (null != undoPstCache && rows.size() == INSERT_BATCH_NUM) {
                     undoPst = undoPstCache;
                 } else {
-                    undoPst = conn.prepareStatement(generateInsertSql(rows, rows.size()));
+                    undoPst = conn.prepareStatement(generateInsertSql(rows));
                     undoPstCache = undoPst;
                 }
 
@@ -106,7 +106,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
      *
      * @return sql
      */
-    protected String generateInsertSql(List<Row> rows, int batchNum) {
+    protected String generateInsertSql(List<Row> rows) {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
 
         Row row = rows.get(0);
@@ -120,7 +120,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
                 .collect(Collectors.joining(", "));
         String insertValueOneRow = ("(" + fields.stream().map(field -> "?")
                 .collect(Collectors.joining(", ")) + ")");
-        String insertValues = String.join("", Collections.nCopies(batchNum, insertValueOneRow));
+        String insertValues = String.join("", Collections.nCopies(rows.size(), insertValueOneRow));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }
