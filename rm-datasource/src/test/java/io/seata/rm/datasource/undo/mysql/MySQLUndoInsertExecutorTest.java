@@ -81,13 +81,6 @@ public class MySQLUndoInsertExecutorTest extends BaseExecutorTest {
         executor = new MySQLUndoInsertExecutor(sqlUndoLog);
     }
 
-    @Test
-    public void buildUndoSQL() {
-//        String sql = executor.buildUndoSQL().toLowerCase();
-//        Assertions.assertNotNull(sql);
-//        Assertions.assertTrue(sql.contains("delete"));
-//        Assertions.assertTrue(sql.contains("id"));
-    }
 
     @Test
     public void getUndoRows() {
