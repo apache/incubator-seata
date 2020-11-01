@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
+import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,20 +38,9 @@ import java.util.List;
 public class OracleUndoDeleteExecutorTest extends BaseExecutorTest {
 
     @Test
-    public void buildUndoSQL() {
+    public void getUndoRows() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         OracleUndoDeleteExecutor executor = upperCase();
-
-        String sql = executor.buildUndoSQL();
-        Assertions.assertNotNull(sql);
-        Assertions.assertTrue(sql.contains("INSERT"));
-        Assertions.assertTrue(sql.contains("ID"));
-        Assertions.assertTrue(sql.contains("TABLE_NAME"));
-    }
-
-    @Test
-    public void getUndoRows() {
-        OracleUndoDeleteExecutor executor = upperCase();
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
+        Assertions.assertEquals(ReflectionUtil.invokeMethod(executor, "getUndoRows"), executor.getSqlUndoLog().getBeforeImage());
     }
 
     private OracleUndoDeleteExecutor upperCase() {
