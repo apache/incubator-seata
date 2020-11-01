@@ -115,7 +115,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoUpdateExecutorExtension mySQLUndoUpdateExecutor = new MySQLUndoUpdateExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, since = ? WHERE `key` = ?",
+        Assertions.assertEquals("UPDATE `lock` SET `desc`=case (`key`) when (?) then ? end,since=case (`key`) when (?) then ? end where (`key`) in ( (?) )",
             mySQLUndoUpdateExecutor.getSql().trim());
 
     }
@@ -136,7 +136,7 @@ public class MySQLKeywordCheckerTest {
          * @return the sql
          */
         public String getSql() {
-            return super.buildUndoSQL();
+            return super.generateUpdateSql(getUndoRows().getRows());
         }
     }
 
@@ -203,7 +203,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoInsertExecutorExtension mySQLUndoInsertExecutor = new MySQLUndoInsertExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?", mySQLUndoInsertExecutor.getSql().trim());
+        Assertions.assertEquals("DELETE FROM `lock` WHERE (`key`) in ( (?),(?) )", mySQLUndoInsertExecutor. getSql().trim());
 
     }
 
@@ -223,7 +223,7 @@ public class MySQLKeywordCheckerTest {
          * @return the sql
          */
         public String getSql() {
-            return super.buildUndoSQL();
+            return super.generateDeleteSql(getUndoRows().getRows());
         }
     }
 
@@ -290,7 +290,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?)",
+        Assertions.assertEquals("INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?),(?, ?, ?)",
             mySQLUndoDeleteExecutor.getSql());
 
     }
@@ -311,7 +311,7 @@ public class MySQLKeywordCheckerTest {
          * @return the sql
          */
         public String getSql() {
-            return super.buildUndoSQL();
+            return super.generateInsertSql(getUndoRows().getRows());
         }
     }
 

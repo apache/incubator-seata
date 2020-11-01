@@ -15,11 +15,9 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
@@ -118,9 +116,9 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertColumns = fields.stream()
                 .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL))
                 .collect(Collectors.joining(", "));
-        String insertValueOneRow = ("(" + fields.stream().map(field -> "?")
-                .collect(Collectors.joining(", ")) + ")");
-        String insertValues = String.join("", Collections.nCopies(rows.size(), insertValueOneRow));
+        String insertValueOneRow = "(" + fields.stream().map(field -> "?")
+                .collect(Collectors.joining(", ")) + ")";
+        String insertValues = String.join(",", Collections.nCopies(rows.size(), insertValueOneRow));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }

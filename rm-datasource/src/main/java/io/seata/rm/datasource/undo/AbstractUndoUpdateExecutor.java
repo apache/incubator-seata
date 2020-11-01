@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.util.CollectionUtils;
@@ -95,7 +110,7 @@ public class AbstractUndoUpdateExecutor extends AbstractUndoExecutor {
      *  case (pk1, pk2)
      *      when (?, ?) then ?
      *      when (?, ?) then ?
-     *  end，
+     *  end,
      * y = case (pk1, pk2)
      *     when (?, ?) then ?
      *     when (?, ?) then ?
@@ -108,17 +123,17 @@ public class AbstractUndoUpdateExecutor extends AbstractUndoExecutor {
         List<Field> nonPkFields = rows.get(0).nonPrimaryKeys();
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
-        List<String> updateColumns = nonPkFields.stream().map(
-                field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL)).collect(
-                Collectors.toList());
+        List<String> updateColumns = nonPkFields.stream()
+            .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL))
+            .collect(Collectors.toList());
 
 
         List<String> pkNameList = getOrderedPkList(beforeImage, rows.get(0), JdbcConstants.MYSQL).stream().map(Field::getName)
                 .collect(Collectors.toList());
 
         StringBuilder caseCondition = new StringBuilder("case (").append(String.join(",", pkNameList)).append(")");
-        String s = "when (" + String.join(",", Collections.nCopies(pkNameList.size(), "?")) + ") then ?";
-        caseCondition.append(String.join(" ", Collections.nCopies(rows.size(), s))).append("end ");
+        String s = " when (" + String.join(",", Collections.nCopies(pkNameList.size(), "?")) + ") then ?";
+        caseCondition.append(String.join(" ", Collections.nCopies(rows.size(), s))).append(" end");
 
         StringBuilder updateSql = new StringBuilder("UPDATE ").append(sqlUndoLog.getTableName()).append(" SET ");
 

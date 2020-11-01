@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
+ import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -22,10 +23,10 @@ import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,21 +37,9 @@ import java.util.List;
 public class OracleUndoUpdateExecutorTest extends BaseExecutorTest {
 
     @Test
-    public void buildUndoSQLByUpperCase() {
+    public void getUndoRows() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         OracleUndoUpdateExecutor executor = upperCaseSQL();
-
-        String sql = executor.buildUndoSQL();
-        Assertions.assertNotNull(sql);
-        Assertions.assertTrue(sql.contains("UPDATE"));
-        Assertions.assertTrue(sql.contains("ID"));
-        Assertions.assertTrue(sql.contains("AGE"));
-        Assertions.assertTrue(sql.contains("TABLE_NAME"));
-    }
-
-    @Test
-    public void getUndoRows() {
-        OracleUndoUpdateExecutor executor = upperCaseSQL();
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
+        Assertions.assertEquals(ReflectionUtil.invokeMethod(executor, "getUndoRows"), executor.getSqlUndoLog().getBeforeImage());
     }
 
     private OracleUndoUpdateExecutor upperCaseSQL() {

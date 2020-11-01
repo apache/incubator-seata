@@ -18,11 +18,9 @@ package io.seata.rm.datasource.undo.mysql;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -86,7 +84,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         }
     }
 
-    private String generateDeleteSql(List<Row> rows) {
+    protected String generateDeleteSql(List<Row> rows) {
         List<String> pkNameList = getOrderedPkList(getUndoRows(), rows.get(0), JdbcConstants.MYSQL).stream().map(
             e -> e.getName()).collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, rows.size(), JdbcConstants.MYSQL, rows.size());

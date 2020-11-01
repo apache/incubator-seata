@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
+import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLType;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,17 +84,8 @@ public class MySQLUndoUpdateExecutorTest extends BaseExecutorTest {
     }
 
     @Test
-    public void buildUndoSQL() {
-//        String sql = executor.buildUndoSQL().toLowerCase();
-//        Assertions.assertNotNull(sql);
-//        Assertions.assertTrue(sql.contains("update"));
-//        Assertions.assertTrue(sql.contains("id"));
-//        Assertions.assertTrue(sql.contains("age"));
-    }
-
-    @Test
-    public void getUndoRows() {
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
+    public void getUndoRows() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Assertions.assertEquals(ReflectionUtil.invokeMethod(executor, "getUndoRows"), executor.getSqlUndoLog().getBeforeImage());
     }
 
 }
