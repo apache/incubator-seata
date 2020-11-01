@@ -53,7 +53,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
      */
     private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES %s";
 
-    private static final int INSERT_BATCH_NUM = 5000;
+    private static final int INSERT_BATCH_NUM = 500;
 
     @Override
     public void executeOn(Connection conn) throws SQLException {
