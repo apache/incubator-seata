@@ -282,7 +282,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         if (sqlUndoLogs.size() > 1) {
                             Collections.reverse(sqlUndoLogs);
                         }
-                        long start = System.currentTimeMillis();
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
                             TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
                                 conn, sqlUndoLog.getTableName(), dataSourceProxy.getResourceId());
@@ -291,7 +290,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                                 dataSourceProxy.getDbType(), sqlUndoLog);
                             undoExecutor.executeOn(conn);
                         }
-                        LOGGER.info("undo usage is :{}", System.currentTimeMillis() - start);
                     } finally {
                         // remove serializer name
                         removeCurrentSerializer();
