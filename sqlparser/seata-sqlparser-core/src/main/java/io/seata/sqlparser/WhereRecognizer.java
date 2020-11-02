@@ -46,7 +46,7 @@ public interface WhereRecognizer extends SQLRecognizer {
      *
      * @return The limit SQL.
      */
-    default String getLimit() {
+    default String getLimit(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         return null;
     }
 

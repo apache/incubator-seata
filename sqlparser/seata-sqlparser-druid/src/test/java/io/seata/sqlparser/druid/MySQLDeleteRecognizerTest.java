@@ -49,10 +49,17 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
      */
     @Test
     public void deleteRecognizerTest_0() {
+        ParametersHolder parametersHolder = new ParametersHolder() {
+            @Override
+            public Map<Integer,ArrayList<Object>> getParameters() {
+                return Collections.EMPTY_MAP;
+            }
+        };
 
         String sql = "DELETE FROM t1 WHERE id = 'id1' order by id asc,name desc limit 1,2";
 
         SQLStatement statement = getSQLStatement(sql);
+        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
         String orderBy = mySQLDeleteRecognizer.getOrderBy();
@@ -60,18 +67,18 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
         Assertions.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
-        String limit = mySQLDeleteRecognizer.getLimit();
+        String limit = mySQLDeleteRecognizer.getLimit(parametersHolder, paramAppenderList);
         Assertions.assertEquals(" LIMIT 1,2", limit);
         sql = "DELETE FROM t1 WHERE id > 1 order by id ,name desc limit 1";
         statement = getSQLStatement(sql);
         mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
         orderBy = mySQLDeleteRecognizer.getOrderBy();
         Assertions.assertTrue(orderBy.equalsIgnoreCase(" order by id,name desc"));
-        Assertions.assertEquals(" LIMIT 1", mySQLDeleteRecognizer.getLimit());
+        Assertions.assertEquals(" LIMIT 1", mySQLDeleteRecognizer.getLimit(parametersHolder, paramAppenderList));
         sql = "DELETE FROM t1 WHERE id > 1";
         statement = getSQLStatement(sql);
         mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
-        Assertions.assertEquals(null, mySQLDeleteRecognizer.getLimit());
+        Assertions.assertEquals(null, mySQLDeleteRecognizer.getLimit(parametersHolder, paramAppenderList));
         orderBy = mySQLDeleteRecognizer.getOrderBy();
         Assertions.assertEquals(null, mySQLDeleteRecognizer.getOrderBy());
 

@@ -34,6 +34,7 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
@@ -85,7 +86,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (StringUtils.isNotBlank(orderBy)) {
             suffix.append(orderBy);
         }
-        String limit = recognizer.getLimit();
+        ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+        String limit = recognizer.getLimit(parametersHolder, paramAppenderList);
         if (StringUtils.isNotBlank(limit)) {
             suffix.append(limit);
         }

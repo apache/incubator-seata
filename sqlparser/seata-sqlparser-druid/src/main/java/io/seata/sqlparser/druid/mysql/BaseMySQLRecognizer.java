@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid.mysql;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -96,7 +97,7 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
-    protected String getLimit(SQLStatement sqlStatement, SQLType sqlType) {
+    protected String getLimit(SQLStatement sqlStatement, SQLType sqlType, ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         SQLLimit limit = null;
         if (SQLType.UPDATE == sqlType) {
             limit = ((MySqlUpdateStatement)sqlStatement).getLimit();
@@ -107,12 +108,24 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
             StringBuilder builder = new StringBuilder(" LIMIT ");
             SQLIntegerExpr expr;
             if (limit.getOffset() != null) {
-                expr = (SQLIntegerExpr)limit.getOffset();
-                builder.append(expr.getNumber()).append(",");
+                if (limit.getOffset() instanceof SQLVariantRefExpr) {
+                    builder.append("?,");
+                    Map<Integer, ArrayList<Object>> parameters = parametersHolder.getParameters();
+                    paramAppenderList.add(parameters.get(parameters.size() - 1));
+                } else {
+                    expr = (SQLIntegerExpr)limit.getOffset();
+                    builder.append(expr.getNumber()).append(",");
+                }
             }
             if (limit.getRowCount() != null) {
-                expr = (SQLIntegerExpr)limit.getRowCount();
-                builder.append(expr.getNumber());
+                if (limit.getRowCount() instanceof SQLVariantRefExpr) {
+                    builder.append("?");
+                    Map<Integer, ArrayList<Object>> parameters = parametersHolder.getParameters();
+                    paramAppenderList.add(parameters.get(parameters.size()));
+                } else {
+                    expr = (SQLIntegerExpr)limit.getRowCount();
+                    builder.append(expr.getNumber());
+                }
             }
             return builder.toString();
         }
