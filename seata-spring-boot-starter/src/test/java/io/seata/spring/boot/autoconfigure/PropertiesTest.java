@@ -36,7 +36,16 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.*;
+import io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
