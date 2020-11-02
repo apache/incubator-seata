@@ -18,6 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties.registry;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
+import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
 
 /**
@@ -30,6 +32,14 @@ public class RegistryProperties {
      * file, nacos, eureka, redis, zk, consul, etcd3, sofa
      */
     private String type = "file";
+    /**
+     * the load balance
+     */
+    private String loadBalance = DEFAULT_LOAD_BALANCE;
+    /**
+     * the load balance virtual nodes
+     */
+    private int loadBalanceVirtualNodes = VIRTUAL_NODES_DEFAULT;
 
     public String getType() {
         return type;
@@ -37,6 +47,24 @@ public class RegistryProperties {
 
     public RegistryProperties setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    public String getLoadBalance() {
+        return loadBalance;
+    }
+
+    public RegistryProperties setLoadBalance(String loadBalance) {
+        this.loadBalance = loadBalance;
+        return this;
+    }
+
+    public int getLoadBalanceVirtualNodes() {
+        return loadBalanceVirtualNodes;
+    }
+
+    public RegistryProperties setLoadBalanceVirtualNodes(int loadBalanceVirtualNodes) {
+        this.loadBalanceVirtualNodes = loadBalanceVirtualNodes;
         return this;
     }
 }

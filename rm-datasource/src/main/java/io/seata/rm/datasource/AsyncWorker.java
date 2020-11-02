@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
 /**
  * The type Async worker.
@@ -142,9 +142,10 @@ public class AsyncWorker implements ResourceManagerInbound {
         }
 
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
+        List<Phase2Context> contextsGroupedByResourceId;
         while (!ASYNC_COMMIT_BUFFER.isEmpty()) {
             Phase2Context commitContext = ASYNC_COMMIT_BUFFER.poll();
-            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.computeIfAbsent(commitContext.resourceId, k -> new ArrayList<>());
+            contextsGroupedByResourceId = CollectionUtils.computeIfAbsent(mappedContexts, commitContext.resourceId, key -> new ArrayList<>());
             contextsGroupedByResourceId.add(commitContext);
         }
 
@@ -164,7 +165,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
                     continue;
                 }
-                List<Phase2Context> contextsGroupedByResourceId = entry.getValue();
+                contextsGroupedByResourceId = entry.getValue();
                 Set<String> xids = new LinkedHashSet<>(UNDOLOG_DELETE_LIMIT_SIZE);
                 Set<Long> branchIds = new LinkedHashSet<>(UNDOLOG_DELETE_LIMIT_SIZE);
                 for (Phase2Context commitContext : contextsGroupedByResourceId) {
@@ -200,7 +201,9 @@ public class AsyncWorker implements ResourceManagerInbound {
             } catch (Throwable e) {
                 LOGGER.error(e.getMessage(), e);
                 try {
-                    conn.rollback();
+                    if (conn != null) {
+                        conn.rollback();
+                    }
                 } catch (SQLException rollbackEx) {
                     LOGGER.warn("Failed to rollback JDBC resource while deleting undo_log ", rollbackEx);
                 }
