@@ -23,7 +23,7 @@ import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
+ * @author ls9527
  */
 @Component
 @ConfigurationProperties(prefix = LOAD_BALANCE_PREFIX)

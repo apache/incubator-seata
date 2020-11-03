@@ -35,6 +35,7 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
@@ -63,8 +64,8 @@ public interface StarterConstants {
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     String LOG_PREFIX = CLIENT_PREFIX + ".log";
+    String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + ".loadBalance";
 
-    String LOAD_BALANCE_PREFIX = SEATA_PREFIX + ".loadBalance";
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
     String REGISTRY_EUREKA_PREFIX = REGISTRY_PREFIX + ".eureka";
@@ -98,6 +99,7 @@ public interface StarterConstants {
             put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             put(UNDO_PREFIX, UndoProperties.class);
             put(LOG_PREFIX, LogProperties.class);
+            put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
             put(TRANSPORT_PREFIX, TransportProperties.class);
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
