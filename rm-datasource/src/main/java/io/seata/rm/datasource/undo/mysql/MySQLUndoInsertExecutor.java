@@ -21,7 +21,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.seata.common.util.CollectionUtils;
+import com.google.common.collect.Lists;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -53,7 +53,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         try {
             TableRecords undoRows = getUndoRows();
 
-            List<List<Row>> rowsDouble = CollectionUtils.cutData(undoRows.getRows(), DELETE_BATCH_NUM);
+            List<List<Row>> rowsDouble = Lists.partition(undoRows.getRows(), DELETE_BATCH_NUM);
             PreparedStatement undoPSTCache = null;
             for (List<Row> rows : rowsDouble) {
                 PreparedStatement undoPST = null;

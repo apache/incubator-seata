@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.common.util.CollectionUtils;
+import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -55,7 +55,7 @@ public class AbstractUndoUpdateExecutor extends AbstractUndoExecutor {
         try {
             TableRecords undoRows = getUndoRows();
 
-            List<List<Row>> rowsDouble = CollectionUtils.cutData(undoRows.getRows(), UPDATE_BATCH_NUM);
+            List<List<Row>> rowsDouble = Lists.partition(undoRows.getRows(), UPDATE_BATCH_NUM);
             PreparedStatement undoPstCache = null;
             for (List<Row> rows : rowsDouble) {
                 PreparedStatement undoPst = null;
