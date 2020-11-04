@@ -38,11 +38,11 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     /**
      * The constant LOAD_BALANCE_TYPE.
      */
-    private static final String LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODE = LOAD_BALANCE_PREFIX + "visualNode";
+    public static final String LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES = LOAD_BALANCE_PREFIX + "visualNodes";
     /**
      * The constant VIRTUAL_NODES_NUM.
      */
-    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance().getInt(LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODE, VIRTUAL_NODES_DEFAULT);
+    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance().getInt(LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES, VIRTUAL_NODES_DEFAULT);
 
     @Override
     protected <T> T doSelect(List<T> invokers, String xid) {

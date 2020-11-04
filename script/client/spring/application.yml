@@ -32,6 +32,9 @@ seata:
       only-care-update-columns: true
     log:
       exceptionRate: 100
+    load-balance:
+      type: RandomLoadBalance
+      virtual-nodes: 10
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -85,8 +88,6 @@ seata:
       name: ""
   registry:
     type: file
-    load-balance: RandomLoadBalance
-    load-balance-virtual-nodes: 10
     file:
       name: file.conf
     consul:
