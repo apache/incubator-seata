@@ -27,7 +27,9 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -40,11 +42,6 @@ public class TmNettyClientTest extends AbstractServerTest {
     public static ThreadPoolExecutor initMessageExecutor() {
         return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
                 new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
-    }
-
-    @BeforeAll
-    public static void destory() throws InterruptedException {
-        stopSeataServer();
     }
 
     /**
@@ -65,6 +62,7 @@ public class TmNettyClientTest extends AbstractServerTest {
             XID.setPort(8091);
             // init snowflake for transactionId, branchId
             UUIDGenerator.init(1L);
+            System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
             nettyRemotingServer.init();
         });
         thread.start();

@@ -25,9 +25,12 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author lorne.cl
  */
+@TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
 public abstract class AbstractServerTest {
 
 
@@ -81,7 +85,7 @@ public abstract class AbstractServerTest {
                         XID.setIpAddress(NetUtil.getLocalIp());
                     }
                     XID.setPort(nettyServer.getListenPort());
-
+                    System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
                     nettyServer.init();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -93,6 +97,7 @@ public abstract class AbstractServerTest {
 
     protected static final void stopSeataServer() throws InterruptedException {
         if(nettyServer != null){
+            System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
             nettyServer.destroy();
             Thread.sleep(5000);
         }
