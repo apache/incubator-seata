@@ -44,9 +44,3 @@ store:
     minConn: 1
     maxConn: 10
     queryLimit: 100
-loadBalance:
-  type: RandomLoadBalance
-  consistentHash:
-    virtualNodes: 10
-
-
