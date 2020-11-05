@@ -61,12 +61,12 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
         CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT);
 
-    private final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
+    private final BlockingQueue<Phase2Context> commitQueue = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
 
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) {
-        if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
+        if (!commitQueue.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
             LOGGER.warn("Async commit buffer is FULL. Rejected branch [{}/{}] will be handled by housekeeping later.", branchId, xid);
         }
         return BranchStatus.PhaseTwo_Committed;
@@ -91,13 +91,13 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     private void doBranchCommits() {
-        if (ASYNC_COMMIT_BUFFER.isEmpty()) {
+        if (commitQueue.isEmpty()) {
             return;
         }
 
         // transfer all context currently received to this list
         List<Phase2Context> allContexts = new LinkedList<>();
-        ASYNC_COMMIT_BUFFER.drainTo(allContexts);
+        commitQueue.drainTo(allContexts);
 
         // group context by their resourceId
         Map<String, List<Phase2Context>> groupedContexts = groupedByResourceId(allContexts);
