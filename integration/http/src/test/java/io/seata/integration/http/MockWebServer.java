@@ -95,7 +95,7 @@ public class MockWebServer {
         } catch (Exception e) {
             HttpHandlerExceptionResolver resolver = new HttpHandlerExceptionResolver();
             resolver.doResolveException(request, null, null, e);
-            if (StringUtils.isBlank(RootContext.getXID())) {
+            if (RootContext.getXID() == null) {
                 try {
                     return mockResponse.write("Callee remove local xid success");
                 } catch (IOException ex) {
@@ -107,7 +107,6 @@ public class MockWebServer {
     }
 
     private HttpTest.Person boxing(MockRequest myRequest) {
-
         Map params = null;
         if ("get".equals(myRequest.getMethod()))
             params = getUrlParams(myRequest.getUrl());
@@ -115,7 +114,6 @@ public class MockWebServer {
             params = getBodyParams(myRequest.getBody());
         }
         return JSONObject.parseObject(JSONObject.toJSONString(params), HttpTest.Person.class);
-
     }
 
     private Map<String, String> getBodyParams(String body) {

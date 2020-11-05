@@ -32,9 +32,9 @@ public class GlobalTransactionContext {
     /**
      * Try to create a new GlobalTransaction.
      *
-     * @return
+     * @return the new global transaction
      */
-    private static GlobalTransaction createNew() {
+    public static GlobalTransaction createNew() {
         return new DefaultGlobalTransaction();
     }
 
@@ -43,7 +43,7 @@ public class GlobalTransactionContext {
      *
      * @return null if no transaction context there.
      */
-    private static GlobalTransaction getCurrent() {
+    public static GlobalTransaction getCurrent() {
         String xid = RootContext.getXID();
         if (xid == null) {
             return null;
