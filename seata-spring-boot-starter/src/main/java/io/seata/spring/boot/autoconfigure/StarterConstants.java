@@ -62,7 +62,6 @@ public interface StarterConstants {
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
-    String LOG_PREFIX = CLIENT_PREFIX + ".log";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -82,6 +81,8 @@ public interface StarterConstants {
     String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
+
+    String LOG_PREFIX = SEATA_PREFIX + ".log";
 
     HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
         private static final long serialVersionUID = -8902807645596274597L;
