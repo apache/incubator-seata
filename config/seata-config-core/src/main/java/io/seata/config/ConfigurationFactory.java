@@ -37,6 +37,7 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF_DEFAULT = "registry";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     public static final String ENV_PROPERTY_KEY = "seataEnv";
+    private static final String ENV_CONFIG_TYPE = "SEATA_CONFIG_TYPE";
 
     private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
 
@@ -102,9 +103,9 @@ public final class ConfigurationFactory {
         ConfigType configType;
         String configTypeName;
         try {
-            configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                    ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                            + ConfigurationKeys.FILE_ROOT_TYPE);
+            configTypeName =
+                System.getProperty(ENV_CONFIG_TYPE, CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
+                    + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE));
 
             if (StringUtils.isBlank(configTypeName)) {
                 throw new NotSupportYetException("config type can not be null");

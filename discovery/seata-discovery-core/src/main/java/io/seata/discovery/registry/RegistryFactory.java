@@ -30,7 +30,7 @@ import io.seata.config.ConfigurationKeys;
 public class RegistryFactory {
 
     private static volatile RegistryService instance = null;
-
+    private static final String ENV_REGISTRY_TYPE = "SEATA_REGISTRY_TYPE";
     /**
      * Gets instance.
      *
@@ -49,9 +49,9 @@ public class RegistryFactory {
 
     private static RegistryService buildRegistryService() {
         RegistryType registryType;
-        String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(
-            ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + ConfigurationKeys.FILE_ROOT_TYPE);
+        String registryTypeName = System.getProperty(ENV_REGISTRY_TYPE,
+            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE));
         try {
             registryType = RegistryType.getType(registryTypeName);
         } catch (Exception exx) {
