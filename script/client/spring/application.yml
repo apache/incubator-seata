@@ -40,6 +40,7 @@ seata:
         queryLimit: 100
         minConn: 1
         maxConn: 10
+        maxTotal: 100
     log:
       exceptionRate: 100
   service:

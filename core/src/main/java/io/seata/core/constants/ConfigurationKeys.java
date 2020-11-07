@@ -596,6 +596,6 @@ public interface ConfigurationKeys {
     /**
      * the constant CLIENT_UNDO_REDIS_MAX_TOTAL
      */
-    String CLIENT_UNDO_REDIS_MAX_TOTAL = CLIENT_UNDO_PREFIX + "maxTotal";
+    String CLIENT_UNDO_REDIS_MAX_TOTAL = CLIENT_UNDO_REDIS_PREFIX + "maxTotal";
 
 }

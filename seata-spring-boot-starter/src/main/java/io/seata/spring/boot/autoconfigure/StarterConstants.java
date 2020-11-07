@@ -26,7 +26,9 @@ import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoCacheProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -62,6 +64,8 @@ public interface StarterConstants {
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
+    String UNDO_REDIS_PREFIX = UNDO_PREFIX + ".redis";
+    String UNDO_CACHE_PREFIX = UNDO_PREFIX + ".cache";
     String LOG_PREFIX = CLIENT_PREFIX + ".log";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
@@ -96,6 +100,8 @@ public interface StarterConstants {
             put(SHUTDOWN_PREFIX, ShutdownProperties.class);
             put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             put(UNDO_PREFIX, UndoProperties.class);
+            put(UNDO_REDIS_PREFIX, UndoRedisProperties.class);
+            put(UNDO_CACHE_PREFIX, UndoCacheProperties.class);
             put(LOG_PREFIX, LogProperties.class);
             put(TRANSPORT_PREFIX, TransportProperties.class);
             put(CONFIG_PREFIX, ConfigProperties.class);
