@@ -109,10 +109,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         this.propagation = propagation;
         switch (propagation) {
             case NOT_SUPPORTED:
-                suspendedResourcesHolder = suspend(true);
+                if (existingTransaction()) {
+                    suspendedResourcesHolder = suspend();
+                }
                 return;
             case REQUIRES_NEW:
-                suspendedResourcesHolder = suspend(true);
+                suspendedResourcesHolder = suspend();
                 break;
             case SUPPORTS:
                 if (!existingTransaction()) {
@@ -190,9 +192,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-                suspend(true);
+                suspend();
             }
-            resume();
+            resume(suspendedResourcesHolder);
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] commit status: {}", xid, status);
@@ -232,9 +234,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-                suspend(true);
+                suspend();
             }
-            resume();
+            resume(suspendedResourcesHolder);
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] rollback status: {}", xid, status);
@@ -242,31 +244,27 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
-        String xid = RootContext.getXID();
-        if (StringUtils.isNotEmpty(xid) && unbindXid) {
-            RootContext.unbind();
+    public SuspendedResourcesHolder suspend() throws TransactionException {
+        String xid = RootContext.unbind();
+        if (xid != null) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction,xid = {}", xid);
+                LOGGER.debug("Suspending current transaction, xid = {}", xid);
             }
+            return new SuspendedResourcesHolder(xid);
         } else {
-            xid = null;
+            return null;
         }
-        return new SuspendedResourcesHolder(xid);
     }
 
     @Override
-    public void resume() throws TransactionException {
+    public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
         if (suspendedResourcesHolder == null) {
             return;
         }
         String xid = suspendedResourcesHolder.getXid();
-        if (StringUtils.isNotEmpty(xid)) {
-            RootContext.bind(xid);
-            suspendedResourcesHolder.setXid(null);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Resumimg the transaction,xid = {}", xid);
-            }
+        RootContext.bind(xid);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Resumimg the transaction,xid = {}", xid);
         }
     }
 
@@ -298,7 +296,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
-            suspend(true);
+            suspend();
         }
     }
 

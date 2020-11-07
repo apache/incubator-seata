@@ -89,16 +89,17 @@ public interface GlobalTransaction {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * @see SuspendedResourcesHolder
      */
-    SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException;
+    SuspendedResourcesHolder suspend() throws TransactionException;
 
     /**
      * Resume the global transaction.
      *
+     * @param suspendedResourcesHolder the suspended resources to resume
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      * @see SuspendedResourcesHolder
      */
-    void resume() throws TransactionException;
+    void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException;
 
     /**
      * Ask TC for current status of the corresponding global transaction.

@@ -77,7 +77,6 @@ public class TransactionalTemplate {
 
             return rs;
         } finally {
-            tx.resume();
             // 5. clear
             triggerAfterCompletion();
             cleanUp();

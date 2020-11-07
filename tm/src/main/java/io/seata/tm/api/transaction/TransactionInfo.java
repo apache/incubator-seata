@@ -15,10 +15,9 @@
  */
 package io.seata.tm.api.transaction;
 
-import io.seata.common.util.CollectionUtils;
-
 import java.io.Serializable;
 import java.util.Set;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * @author guoyao
@@ -32,6 +31,10 @@ public final class TransactionInfo implements Serializable {
     private Set<RollbackRule> rollbackRules;
 
     private Propagation propagation;
+
+    private int lockRetryInternal;
+
+    private int lockRetryTimes;
 
     public int getTimeOut() {
         return timeOut;
@@ -86,5 +89,21 @@ public final class TransactionInfo implements Serializable {
 
     public void setPropagation(Propagation propagation) {
         this.propagation = propagation;
+    }
+
+    public int getLockRetryInternal() {
+        return lockRetryInternal;
+    }
+
+    public void setLockRetryInternal(int lockRetryInternal) {
+        this.lockRetryInternal = lockRetryInternal;
+    }
+
+    public int getLockRetryTimes() {
+        return lockRetryTimes;
+    }
+
+    public void setLockRetryTimes(int lockRetryTimes) {
+        this.lockRetryTimes = lockRetryTimes;
     }
 }

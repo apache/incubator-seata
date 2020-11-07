@@ -22,11 +22,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import io.seata.common.exception.StoreException;
-import io.seata.saga.engine.store.utils.BeanUtils;
+import io.seata.common.util.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

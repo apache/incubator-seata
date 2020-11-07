@@ -15,6 +15,15 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -31,16 +40,6 @@ import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.ArrayList;
 
 /**
  * @author jsbxyyx
@@ -108,16 +107,14 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         // PK is just auto generated
         Map<String, List<Object>> pkValuesMap = new HashMap<>(8);
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        String autoColumnName = "";
-        for (String pkColumnName : pkMetaMap.keySet()) {
-            if (pkMetaMap.get(pkColumnName).isAutoincrement())
-            {
-                autoColumnName = pkColumnName;
+        String autoColumnName = null;
+        for (Map.Entry<String, ColumnMeta> entry : pkMetaMap.entrySet()) {
+            if (entry.getValue().isAutoincrement()) {
+                autoColumnName = entry.getKey();
                 break;
             }
         }
-        if (StringUtils.isBlank(autoColumnName))
-        {
+        if (StringUtils.isBlank(autoColumnName)) {
             throw new ShouldNeverHappenException();
         }
 

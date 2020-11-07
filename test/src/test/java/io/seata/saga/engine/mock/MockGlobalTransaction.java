@@ -76,7 +76,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend(boolean unbindXid)
+    public SuspendedResourcesHolder suspend()
             throws TransactionException {
         return null;
     }
