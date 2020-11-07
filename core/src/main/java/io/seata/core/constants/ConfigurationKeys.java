@@ -25,7 +25,7 @@ public interface ConfigurationKeys {
     /**
      * The constant SEATA_PREFIX.
      */
-    public static final String SEATA_PREFIX = "seata.";
+    String SEATA_PREFIX = "seata.";
 
     /**
      * The constant SERVICE_PREFIX.
