@@ -37,6 +37,7 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
@@ -81,7 +82,8 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
 
-            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit())) {
+            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit(parametersHolder, paramAppenderList))) {
                 throw new ShouldNeverHappenException("Multi update SQL should not contains limit condition !");
             }
             if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderBy())) {
