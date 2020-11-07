@@ -34,6 +34,10 @@ public final class TransactionInfo implements Serializable {
 
     private Set<TransactionHook> transactionHooks;
 
+    private int lockRetryInternal;
+
+    private int lockRetryTimes;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -95,6 +99,22 @@ public final class TransactionInfo implements Serializable {
 
     public void setTransactionHooks(Set<TransactionHook> transactionHooks) {
         this.transactionHooks = transactionHooks;
+    }
+
+    public int getLockRetryInternal() {
+        return lockRetryInternal;
+    }
+
+    public void setLockRetryInternal(int lockRetryInternal) {
+        this.lockRetryInternal = lockRetryInternal;
+    }
+
+    public int getLockRetryTimes() {
+        return lockRetryTimes;
+    }
+
+    public void setLockRetryTimes(int lockRetryTimes) {
+        this.lockRetryTimes = lockRetryTimes;
     }
 
 }
