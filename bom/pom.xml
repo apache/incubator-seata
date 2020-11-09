@@ -97,7 +97,6 @@
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <httpclient.version>4.5.8</httpclient.version>
         <httpcore.version>4.4.11</httpcore.version>
-        <druid.version>1.1.12</druid.version>
         <antlr4.version>4.8</antlr4.version>
         <druid.version>1.1.23</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
