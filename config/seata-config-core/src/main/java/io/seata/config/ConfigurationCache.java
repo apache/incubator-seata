@@ -100,4 +100,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         private static final ConfigurationCache INSTANCE = new ConfigurationCache();
     }
 
+    public void clear() {
+        CONFIG_CACHE.clear();
+    }
 }

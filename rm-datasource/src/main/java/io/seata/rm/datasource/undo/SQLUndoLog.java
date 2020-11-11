@@ -15,16 +15,19 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.sqlparser.SQLType;
+
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLType;
 
 /**
  * The type Sql undo log.
  *
  * @author sharajava
  */
-public class SQLUndoLog {
+public class SQLUndoLog implements java.io.Serializable {
+
+    private static final long serialVersionUID = -4160065043902060730L;
 
     private SQLType sqlType;
 
