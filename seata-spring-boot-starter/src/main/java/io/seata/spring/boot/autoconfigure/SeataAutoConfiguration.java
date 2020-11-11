@@ -36,6 +36,7 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
@@ -72,6 +73,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
@@ -121,6 +123,7 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, threadFactoryProperties);
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, undoProperties);
         PROPERTY_BEAN_MAP.put(LOG_PREFIX, logProperties);
+        PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
         PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, transportProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, configProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, configFileProperties);
