@@ -111,7 +111,7 @@ public class AsyncWorker implements ResourceManagerInbound {
         DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
         DataSourceProxy dataSourceProxy = resourceManager.get(resourceId);
         if (dataSourceProxy == null) {
-            LOGGER.warn("Failed to find resource for {}" + resourceId);
+            LOGGER.warn("Failed to find resource for {}", resourceId);
             return;
         }
 
