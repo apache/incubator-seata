@@ -31,6 +31,7 @@ import com.ctrip.framework.apollo.model.ConfigChange;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
@@ -112,8 +113,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
@@ -142,19 +143,22 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
-        LISTENER_SERVICE_MAP.get(dataId).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(listener);
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (!LISTENER_SERVICE_MAP.containsKey(dataId) || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.get(dataId).remove(listener);
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            configListeners.remove(listener);
+        }
     }
 
     @Override
