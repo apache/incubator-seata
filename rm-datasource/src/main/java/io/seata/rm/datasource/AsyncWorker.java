@@ -27,6 +27,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Lists;
@@ -77,17 +78,9 @@ public class AsyncWorker implements ResourceManagerInbound {
      */
     public void init() {
         LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
-        ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncWorker", 1, true));
-        timerExecutor.scheduleAtFixedRate(() -> {
-            try {
-
-                doBranchCommits();
-
-            } catch (Throwable e) {
-                LOGGER.info("Failed at async committing ... {}", e.getMessage());
-
-            }
-        }, 10, 1000, TimeUnit.MILLISECONDS);
+        ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 1, true);
+        ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1, threadFactory);
+        timerExecutor.scheduleAtFixedRate(this::doBranchCommits, 10, 1000, TimeUnit.MILLISECONDS);
     }
 
     private void doBranchCommits() {
@@ -126,7 +119,7 @@ public class AsyncWorker implements ResourceManagerInbound {
         try {
             conn = dataSourceProxy.getPlainConnection();
         } catch (SQLException sqle) {
-            LOGGER.warn("Failed to get connection for async committing on " + resourceId, sqle);
+            LOGGER.warn("Failed to get connection for async committing on {}", resourceId, sqle);
             return;
         }
 
@@ -151,17 +144,17 @@ public class AsyncWorker implements ResourceManagerInbound {
                 conn.commit();
             }
         } catch (SQLException e) {
-            LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", e);
+            LOGGER.warn("Failed to batch delete undo log", e);
             try {
                 conn.rollback();
             } catch (SQLException rollbackEx) {
-                LOGGER.warn("Failed to rollback JDBC resource while deleting undo_log ", rollbackEx);
+                LOGGER.warn("Failed to rollback JDBC resource after deleting undo log failed", rollbackEx);
             }
         } finally {
             try {
                 conn.close();
             } catch (SQLException closeEx) {
-                LOGGER.warn("Failed to close JDBC resource while deleting undo_log ", closeEx);
+                LOGGER.warn("Failed to close JDBC resource after deleting undo log", closeEx);
             }
         }
     }
