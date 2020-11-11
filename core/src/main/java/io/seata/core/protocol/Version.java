@@ -32,14 +32,14 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    private static final String CURRENT = "1.4.0-SNAPSHOT";
+    private static final String CURRENT = "1.5.0-SNAPSHOT";
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final int MAX_VERSION_DOT = 3;
 
     /**
      * The constant VERSION_MAP.
      */
-    public static final Map<String, String> VERSION_MAP = new ConcurrentHashMap<String, String>();
+    public static final Map<String, String> VERSION_MAP = new ConcurrentHashMap<>();
 
     private Version() {
 

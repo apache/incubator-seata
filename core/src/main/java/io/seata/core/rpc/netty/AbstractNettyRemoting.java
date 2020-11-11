@@ -20,6 +20,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.core.protocol.MessageFuture;
@@ -28,6 +29,7 @@ import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
+import io.seata.core.rpc.hook.RpcHook;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,6 +101,8 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * processor type {@link MessageType}
      */
     protected final HashMap<Integer/*MessageType*/, Pair<RemotingProcessor, ExecutorService>> processorTable = new HashMap<>(32);
+
+    protected final List<RpcHook> rpcHooks = EnhancedServiceLoader.loadAll(RpcHook.class);
 
     public void init() {
         timerExecutor.scheduleAtFixedRate(new Runnable() {
@@ -174,6 +179,9 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
         channelWritableCheck(channel, rpcMessage.getBody());
 
+        String remoteAddr = ChannelUtil.getAddressFromChannel(channel);
+        doBeforeRpcHooks(remoteAddr, rpcMessage);
+
         channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 MessageFuture messageFuture1 = futures.remove(rpcMessage.getId());
@@ -185,7 +193,9 @@ public abstract class AbstractNettyRemoting implements Disposable {
         });
 
         try {
-            return messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            Object result = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+            doAfterRpcHooks(remoteAddr, rpcMessage, result);
+            return result;
         } catch (Exception exx) {
             LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), channel.remoteAddress(),
                 rpcMessage.getBody());
@@ -209,6 +219,9 @@ public abstract class AbstractNettyRemoting implements Disposable {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
         }
+
+        doBeforeRpcHooks(ChannelUtil.getAddressFromChannel(channel), rpcMessage);
+
         channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 destroyChannel(future.channel());
@@ -349,4 +362,15 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     public abstract void destroyChannel(String serverAddress, Channel channel);
 
+    protected void doBeforeRpcHooks(String remoteAddr, RpcMessage request) {
+        for (RpcHook rpcHook: rpcHooks) {
+            rpcHook.doBeforeRequest(remoteAddr, request);
+        }
+    }
+
+    protected void doAfterRpcHooks(String remoteAddr, RpcMessage request, Object response) {
+        for (RpcHook rpcHook: rpcHooks) {
+            rpcHook.doAfterResponse(remoteAddr, request, response);
+        }
+    }
 }

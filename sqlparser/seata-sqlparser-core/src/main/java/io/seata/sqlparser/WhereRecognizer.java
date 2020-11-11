@@ -40,4 +40,23 @@ public interface WhereRecognizer extends SQLRecognizer {
      * @return the where condition
      */
     String getWhereCondition();
+
+    /**
+     * Return the limit SQL
+     *
+     * @return The limit SQL.
+     */
+    default String getLimit(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    /**
+     * Return the order by SQL
+     *
+     * @return The order by SQL.
+     */
+    default String getOrderBy() {
+        return null;
+    }
+
 }
