@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.spy;
 
-class ShutdownHookTest {
+public class ShutdownHookTest {
 
     private int previousPriority = -1;
 
