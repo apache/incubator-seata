@@ -15,6 +15,18 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.AbstractConnectionProxy;
+import io.seata.rm.datasource.ConnectionContext;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -24,20 +36,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.AbstractConnectionProxy;
-import io.seata.rm.datasource.ConnectionContext;
-import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.util.JdbcConstants;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract dml base executor.
