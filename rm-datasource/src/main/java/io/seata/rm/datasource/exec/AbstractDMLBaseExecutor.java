@@ -202,13 +202,4 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
         }
     }
-
-    protected void assertContainsPKColumnName(List<String> updateColumns) {
-        for (String columnName : updateColumns) {
-            String standardColumnName = getStandardPkColumnName(columnName);
-            if (StringUtils.isNotEmpty(standardColumnName)) {
-                throw new ShouldNeverHappenException("Sorry, update pk value is not supported!");
-            }
-        }
-    }
 }
