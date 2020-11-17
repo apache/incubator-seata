@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
 import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
@@ -22,6 +23,7 @@ import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
@@ -50,6 +52,7 @@ import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -84,6 +87,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
@@ -110,7 +115,8 @@ public class SeataAutoConfiguration {
             ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, ConfigCustomProperties configCustomProperties,
             RegistryConsulProperties registryConsulProperties, RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties,
             RegistryNacosProperties registryNacosProperties, RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties,
-            RegistryZooKeeperProperties registryZooKeeperProperties, RegistryCustomProperties registryCustomProperties) {
+            RegistryZooKeeperProperties registryZooKeeperProperties, RegistryCustomProperties registryCustomProperties,
+            @Autowired(required = false) StateMachineConfig stateMachineConfig, SagaAsyncThreadPoolProperties sagaAsyncThreadPoolProperties) {
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, seataProperties);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, rmProperties);
@@ -125,6 +131,8 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, configProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, configFileProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, registryProperties);
+        PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, stateMachineConfig);
+        PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, sagaAsyncThreadPoolProperties);
 
         PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, configNacosProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, configConsulProperties);
