@@ -392,6 +392,9 @@
         },
         {
           "value": "protostuff"
+        },
+        {
+          "value": "fst"
         }
       ]
     },
