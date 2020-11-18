@@ -40,9 +40,9 @@ store.file.sessionReloadReadSize=100
 store.db.datasource=druid
 store.db.dbType=mysql
 store.db.driverClassName=com.mysql.jdbc.Driver
-store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true
-store.db.user=username
-store.db.password=password
+store.db.url=jdbc:mysql://49.232.173.24:3306/seata?useUnicode=true
+store.db.user=root
+store.db.password=ewhzqJ2iHU,&
 store.db.minConn=5
 store.db.maxConn=30
 store.db.globalTable=global_table
@@ -50,12 +50,12 @@ store.db.branchTable=branch_table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
-store.redis.host=127.0.0.1
+store.redis.host=49.232.173.24
 store.redis.port=6379
 store.redis.maxConn=10
 store.redis.minConn=1
 store.redis.database=0
-store.redis.password=null
+store.redis.password=ewhzqJ2iHU,&
 store.redis.queryLimit=100
 server.recovery.committingRetryPeriod=1000
 server.recovery.asynCommittingRetryPeriod=1000
@@ -77,3 +77,4 @@ metrics.enabled=false
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
+
