@@ -1,17 +1,14 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Copyright 1999-2019 Seata.io Group.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package io.seata.server.raft;
 
@@ -22,34 +19,36 @@ import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
 import com.alipay.sofa.jraft.conf.Configuration;
+import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
+import io.seata.common.loader.LoadLevel;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.raft.AbstractRaftServer;
+import io.seata.core.raft.RaftServer;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
 
 /**
  * @author funkye
  */
-public class RaftServer implements ConfigurationChangeListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServer.class);
-    private RaftGroupService raftGroupService;
-    private Node node;
-    private RaftStateMachine raftStateMachine;
-    private CliService cliService;
+@LoadLevel(name = RAFT_TAG)
+public class RaftServerImpl extends AbstractRaftServer implements ConfigurationChangeListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerImpl.class);
 
-    public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
-        throws IOException {
+    public RaftServerImpl(final String dataPath, final String groupId, final PeerId serverId,
+        final NodeOptions nodeOptions) throws IOException {
         // Initialization path
         FileUtils.forceMkdir(new File(dataPath));
 
@@ -73,13 +72,14 @@ public class RaftServer implements ConfigurationChangeListener {
         this.node = this.raftGroupService.start();
     }
 
-    public RaftServer() {}
+    public RaftServerImpl() {}
 
+    @Override
     public Node getNode() {
         return this.node;
     }
 
-    public RaftStateMachine getRaftStateMachine() {
+    public StateMachineAdapter getRaftStateMachine() {
         return raftStateMachine;
     }
 
@@ -108,4 +108,11 @@ public class RaftServer implements ConfigurationChangeListener {
             }
         }
     }
+
+    @Override
+    public RaftServer init(String dataPath, String groupId, PeerId serverId, NodeOptions nodeOptions)
+        throws IOException {
+        return new RaftServerImpl(dataPath, groupId, serverId, nodeOptions);
+    }
+
 }

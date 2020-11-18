@@ -15,13 +15,14 @@
  */
 package io.seata.server.storage.raft;
 
+import java.nio.ByteBuffer;
 import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.entity.Task;
-import io.seata.server.raft.RaftServerFactory;
+import io.seata.core.raft.RaftServerFactory;
+import io.seata.server.raft.RaftServerImpl;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
-import java.nio.ByteBuffer;
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 
@@ -43,7 +44,8 @@ public class RaftTaskUtil {
         }
         task.setDone(done == null ? status -> {
         } : done);
-        RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
+        RaftServerImpl raftServer = (RaftServerImpl)RaftServerFactory.getInstance().getRaftServer();
+        raftServer.getNode().apply(task);
     }
 
 }

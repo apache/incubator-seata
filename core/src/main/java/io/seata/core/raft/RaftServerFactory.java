@@ -13,12 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.raft;
+package io.seata.core.raft;
 
 import java.io.IOException;
 import com.alipay.sofa.jraft.conf.Configuration;
+import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
+import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
 
 /**
  * @author funkye
@@ -35,9 +38,9 @@ public class RaftServerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerFactory.class);
 
-    private RaftServer raftServer;
+    private AbstractRaftServer raftServer;
 
-    private RaftStateMachine stateMachine;
+    private AbstractRaftStateMachine stateMachine;
 
     public static RaftServerFactory getInstance() {
         return SingletonHandler.instance;
@@ -82,25 +85,25 @@ public class RaftServerFactory {
         }
         // Set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
-
-        raftServer = new RaftServer(dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions);
-        stateMachine = raftServer.getRaftStateMachine();
-        LOGGER.info("Started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
+        raftServer = EnhancedServiceLoader.load(AbstractRaftServer.class, RAFT_TAG,
+            new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
+        stateMachine = raftServer.raftStateMachine;
+        LOGGER.info("Started counter server at port:{}", raftServer.node.getNodeId().getPeerId().getPort());
     }
 
-    public RaftServer getRaftServer() {
+    public AbstractRaftServer getRaftServer() {
         return raftServer;
     }
 
-    public void setRaftServer(RaftServer raftServer) {
+    public void setRaftServer(AbstractRaftServer raftServer) {
         this.raftServer = raftServer;
     }
 
-    public RaftStateMachine getStateMachine() {
+    public StateMachineAdapter getStateMachine() {
         return stateMachine;
     }
 
-    public void setStateMachine(RaftStateMachine stateMachine) {
+    public void setStateMachine(AbstractRaftStateMachine stateMachine) {
         this.stateMachine = stateMachine;
     }
 

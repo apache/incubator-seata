@@ -24,7 +24,7 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.StoreMode;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.lock.LockManager;
-import io.seata.server.raft.RaftServerFactory;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;

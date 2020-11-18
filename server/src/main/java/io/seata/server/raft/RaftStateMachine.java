@@ -20,12 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.error.RaftException;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -37,6 +35,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -68,23 +67,9 @@ import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SES
 /**
  * @author funkye
  */
-public class RaftStateMachine extends StateMachineAdapter {
+public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftStateMachine.class);
-
-    /**
-     * Leader term
-     */
-    private final AtomicLong leaderTerm = new AtomicLong(-1);
-    /**
-     * counter value
-     */
-
-    public boolean isLeader() {
-        return this.leaderTerm.get() > 0;
-    }
-
-    String mode;
 
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);

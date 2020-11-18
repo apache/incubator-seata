@@ -63,7 +63,7 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
-import io.seata.server.raft.RaftServerFactory;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 
