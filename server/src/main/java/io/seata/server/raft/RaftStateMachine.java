@@ -43,6 +43,7 @@ import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.lock.FileLocker;
+import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.raft.RaftSyncMsg;
 import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
@@ -102,10 +103,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
             return;
         }
-        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, Object> sessionMaps = new HashMap<>();
-        sessionMaps.put(ROOT_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
-        raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
+        sessionMaps.put(ROOT_SESSION_MANAGER_NAME, SessionHolder.getRootSessionManager());
+        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
         sessionMaps.put(RETRY_ROLLBACKING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
         raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
         sessionMaps.put(RETRY_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
@@ -150,9 +150,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
         try {
             Map<String, Object> sessionMaps = snapshot.load();
-            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-            raftSessionManager.setSessionMap((Map<String, GlobalSession>)sessionMaps.get(ROOT_SESSION_MANAGER_NAME));
-            raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
+            FileSessionManager fileSessionManager = (FileSessionManager)SessionHolder.getRootSessionManager();
+            fileSessionManager.setSessionMap((Map<String, GlobalSession>)sessionMaps.get(ROOT_SESSION_MANAGER_NAME));
+            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
             raftSessionManager.setSessionMap(
                 (Map<String, GlobalSession>)sessionMaps.get(RETRY_ROLLBACKING_SESSION_MANAGER_NAME));
             raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();

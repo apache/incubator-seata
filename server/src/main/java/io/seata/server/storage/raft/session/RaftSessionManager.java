@@ -312,9 +312,6 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     }
 
     public void setSessionMap(Map<String, GlobalSession> sessionMap) {
-        if (sessionMap == null || sessionMap.isEmpty()) {
-            return;
-        }
         this.fileSessionManager.setSessionMap(sessionMap);
     }
 
