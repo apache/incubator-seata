@@ -188,7 +188,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
                         FrameworkErrorCode.ExceptionCaught, message, stateMachineInstance, state.getName());
 
-                stateMachineInstance.putStateInstance(stateInstance.getId(), stateInstance);
                 EngineUtils.failStateMachine(context, exception);
 
                 throw exception;
