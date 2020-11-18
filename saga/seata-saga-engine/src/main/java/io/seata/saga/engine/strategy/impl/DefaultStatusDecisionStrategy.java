@@ -152,8 +152,16 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
             if (t != null) {
                 if (t.equals(NetExceptionType.CONNECT_EXCEPTION) || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)) {
                     stateMachineInstance.setStatus(ExecutionStatus.FA);
-                } else if (t.equals(NetExceptionType.READ_TIMEOUT_EXCEPTION) || t.equals(NetExceptionType.NOT_NET_EXCEPTION)) {
+                } else if (t.equals(NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
                     stateMachineInstance.setStatus(ExecutionStatus.UN);
+                } else {
+                    if (stateMachineInstance.getStateList().stream()
+                        .anyMatch(e -> ExecutionStatus.SU.equals(e.getStatus()) && DomainConstants.STATE_TYPE_SERVICE_TASK.equals(e.getType())
+                            && (e.isForUpdate() && !e.isForCompensation()))) {
+                        stateMachineInstance.setStatus(ExecutionStatus.UN);
+                    } else {
+                        stateMachineInstance.setStatus(ExecutionStatus.FA);
+                    }
                 }
             } else {
                 stateMachineInstance.setStatus(ExecutionStatus.UN);
