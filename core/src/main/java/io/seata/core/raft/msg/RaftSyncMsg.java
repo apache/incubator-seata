@@ -18,9 +18,11 @@ package io.seata.core.raft.msg;
 /**
  * @author funkye
  */
-public class RaftSyncMsg {
+public abstract class RaftSyncMsg {
 
     protected MsgType msgType;
+
+    public abstract MsgType getMsgType();
 
     public enum MsgType {
         /**

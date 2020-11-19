@@ -17,7 +17,6 @@ package io.seata.core.raft;
 
 import java.io.IOException;
 import com.alipay.sofa.jraft.conf.Configuration;
-import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import io.seata.common.loader.EnhancedServiceLoader;
