@@ -107,8 +107,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             return;
         }
         Map<String, Object> sessionMaps = new HashMap<>();
-        sessionMaps.put(ROOT_SESSION_MANAGER_NAME,
-            ((FileSessionManager)SessionHolder.getRootSessionManager()).getSessionMap());
+        FileSessionManager fileSessionManager = (FileSessionManager)SessionHolder.getRootSessionManager();
+        sessionMaps.put(ROOT_SESSION_MANAGER_NAME, fileSessionManager.getSessionMap());
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
         sessionMaps.put(RETRY_ROLLBACKING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
         raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
