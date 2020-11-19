@@ -44,7 +44,7 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.server.storage.file.session.FileSessionManager;
-import io.seata.server.storage.raft.RaftSyncMsg;
+import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
@@ -52,18 +52,18 @@ import org.slf4j.LoggerFactory;
 
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 import static io.seata.server.session.SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * @author funkye
@@ -84,8 +84,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 processor = iterator.done();
             } else {
                 try {
-                    RaftSyncMsg msg = SerializerManager.getSerializer(Hessian2).deserialize(iterator.getData().array(),
-                        RaftSyncMsg.class.getName());
+                    RaftSessionSyncMsg msg = SerializerManager.getSerializer(Hessian2).deserialize(iterator.getData().array(),
+                        RaftSessionSyncMsg.class.getName());
                     onExecuteRaft(msg);
                 } catch (Exception e) {
                     LOG.error("Message synchronization failure", e);
@@ -184,8 +184,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         super.onLeaderStop(status);
     }
 
-    private void onExecuteRaft(RaftSyncMsg msg) throws TransactionException {
-        RaftSyncMsg.MsgType msgType = msg.getMsgType();
+    private void onExecuteRaft(RaftSessionSyncMsg msg) throws TransactionException {
+        RaftSessionSyncMsg.MsgType msgType = msg.getMsgType();
         SessionManager sessionManager = null;
         String sessionName = msg.getSessionName();
         if (Objects.equals(sessionName, ROOT_SESSION_MANAGER_NAME)) {

@@ -15,20 +15,20 @@
  */
 package io.seata.core.raft;
 
-import com.alipay.sofa.jraft.CliService;
-import com.alipay.sofa.jraft.Node;
-import com.alipay.sofa.jraft.RaftGroupService;
+import com.alipay.sofa.jraft.Closure;
+import io.netty.channel.ChannelHandlerContext;
+import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.RpcMessage;
 
 /**
  * @author funkye
  */
-public abstract class AbstractRaftServer implements RaftServer {
-    public static final String RAFT_TAG = "raftServer";
-    protected AbstractRaftStateMachine raftStateMachine;
-    protected RaftGroupService raftGroupService;
-    protected Node node;
-    protected CliService cliService;
+public interface RaftClosure extends Closure {
 
-    public abstract Node getNode();
+    void setChannelHandlerContext(ChannelHandlerContext ctx);
+
+    void setRpcMessage(RpcMessage rpcMessage);
+
+    void setAbstractResultMessage(AbstractResultMessage[] results);
 
 }

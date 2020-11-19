@@ -99,7 +99,7 @@ public class RaftServerFactory {
         this.raftServer = raftServer;
     }
 
-    public StateMachineAdapter getStateMachine() {
+    public AbstractRaftStateMachine getStateMachine() {
         return stateMachine;
     }
 

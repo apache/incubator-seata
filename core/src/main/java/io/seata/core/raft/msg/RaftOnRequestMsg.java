@@ -13,22 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.raft;
+package io.seata.core.raft.msg;
 
-import com.alipay.sofa.jraft.CliService;
-import com.alipay.sofa.jraft.Node;
-import com.alipay.sofa.jraft.RaftGroupService;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.RpcContext;
 
 /**
  * @author funkye
  */
-public abstract class AbstractRaftServer implements RaftServer {
-    public static final String RAFT_TAG = "raftServer";
-    protected AbstractRaftStateMachine raftStateMachine;
-    protected RaftGroupService raftGroupService;
-    protected Node node;
-    protected CliService cliService;
+public class RaftOnRequestMsg extends RaftSyncMsg {
 
-    public abstract Node getNode();
+    RpcMessage rpcMessage;
+    boolean leader;
+    RpcContext rpcContext;
 
+    public RaftOnRequestMsg(MsgType msgType, RpcMessage rpcMessage, boolean leader, RpcContext rpcContext) {
+        this.rpcMessage = rpcMessage;
+        this.leader = leader;
+        this.rpcContext = rpcContext;
+        this.msgType = msgType;
+    }
 }

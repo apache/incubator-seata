@@ -17,15 +17,14 @@ package io.seata.server.storage.raft;
 
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.msg.RaftSyncMsg;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 
 /**
  * @author funkye
  */
-public class RaftSyncMsg implements java.io.Serializable {
-
-    MsgType msgType;
+public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializable {
 
     GlobalTransactionDO globalSession;
 
@@ -37,31 +36,31 @@ public class RaftSyncMsg implements java.io.Serializable {
 
     String sessionName;
 
-    public RaftSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
+    public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
     }
 
-    public RaftSyncMsg(MsgType msgType, GlobalTransactionDO globalSession, GlobalStatus globalStatus) {
+    public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession, GlobalStatus globalStatus) {
         this.msgType = msgType;
         this.globalSession = globalSession;
         this.globalStatus = globalStatus;
     }
 
-    public RaftSyncMsg(MsgType msgType, BranchTransactionDO branchSession) {
+    public RaftSessionSyncMsg(MsgType msgType, BranchTransactionDO branchSession) {
         this.msgType = msgType;
         this.branchSession = branchSession;
     }
 
-    public RaftSyncMsg(MsgType msgType, GlobalTransactionDO globalSession, BranchTransactionDO branchSession) {
+    public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession, BranchTransactionDO branchSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
         this.branchSession = branchSession;
     }
 
-    public RaftSyncMsg() {}
+    public RaftSessionSyncMsg() {}
 
-    public RaftSyncMsg(MsgType msgType, BranchTransactionDO branchSession, BranchStatus branchStatus) {
+    public RaftSessionSyncMsg(MsgType msgType, BranchTransactionDO branchSession, BranchStatus branchStatus) {
         this.msgType = msgType;
         this.branchSession = branchSession;
         this.branchStatus = branchStatus;
@@ -105,41 +104,6 @@ public class RaftSyncMsg implements java.io.Serializable {
 
     public void setBranchStatus(BranchStatus branchStatus) {
         this.branchStatus = branchStatus;
-    }
-
-    public enum MsgType {
-        /**
-         * addGlobalSession
-         */
-        ADD_GLOBAL_SESSION,
-        /**
-         * removeGlobalSession
-         */
-        REMOVE_GLOBAL_SESSION,
-        /**
-         *
-         */
-        ADD_BRANCH_SESSION,
-        /**
-         * addBranchSession
-         */
-        REMOVE_BRANCH_SESSION,
-        /**
-         * updateGlobalSessionStatus
-         */
-        UPDATE_GLOBAL_SESSION_STATUS,
-        /**
-         * updateBranchSessionStatus
-         */
-        UPDATE_BRANCH_SESSION_STATUS,
-        /**
-         * acquireLock
-         */
-        ACQUIRE_LOCK,
-        /**
-         * releaseGlobalSessionLock
-         */
-        RELEASE_GLOBAL_SESSION_LOCK
     }
 
     public String getSessionName() {

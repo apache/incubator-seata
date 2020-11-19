@@ -29,11 +29,11 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.lock.FileLocker;
-import io.seata.server.storage.raft.RaftSyncMsg;
+import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 
 /**
  * @author funkye
@@ -55,7 +55,7 @@ public class RaftLockManager extends AbstractLockManager {
             throw new TransactionException("this node is not a leader node, so requests are not allowed");
         }
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(ACQUIRE_LOCK, branchTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ACQUIRE_LOCK, branchTransactionDO);
         RaftTaskUtil.createTask(raftSyncMsg);
         return LOCK_MANAGER.acquireLock(branchSession);
     }
@@ -66,7 +66,7 @@ public class RaftLockManager extends AbstractLockManager {
             throw new TransactionException("this node is not a leader node, so requests are not allowed");
         }
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
         RaftTaskUtil.createTask(raftSyncMsg);
         return LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
     }

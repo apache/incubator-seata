@@ -15,22 +15,16 @@
  */
 package io.seata.server.storage.raft.session;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
-
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -40,19 +34,24 @@ import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.session.FileSessionManager;
-import io.seata.server.storage.raft.RaftSyncMsg;
+import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 import static io.seata.server.session.SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.server.storage.raft.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * @author funkye
@@ -116,7 +115,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             }
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
@@ -179,7 +178,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             }
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
+        RaftSessionSyncMsg
+            raftSyncMsg = new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
@@ -197,7 +197,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             }
         });
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
+        RaftSessionSyncMsg
+            raftSyncMsg = new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
@@ -215,7 +216,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(ADD_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
+        RaftSessionSyncMsg
+            raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
@@ -239,7 +241,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         });
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(REMOVE_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
+        RaftSessionSyncMsg
+            raftSyncMsg = new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
@@ -263,7 +266,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         });
         LOGGER.info("onEnd,raftSessionManager:{}", name);
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
