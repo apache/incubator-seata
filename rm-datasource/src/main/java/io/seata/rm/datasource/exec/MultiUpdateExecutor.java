@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -84,10 +84,10 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
 
             ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
             if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit(parametersHolder, paramAppenderList))) {
-                throw new ShouldNeverHappenException("Multi update SQL should not contains limit condition !");
+                throw new NotSupportYetException("Multi update SQL with limit condition is not support yet !");
             }
             if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderBy())) {
-                throw new ShouldNeverHappenException("Multi update SQL should not contains order by condition !");
+                throw new NotSupportYetException("Multi update SQL with orderBy condition is not support yet !");
             }
 
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();

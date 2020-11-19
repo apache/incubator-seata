@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
 
 
@@ -60,10 +60,10 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
 
             ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
             if (StringUtils.isNotBlank(visitor.getLimit(parametersHolder, paramAppenderList))) {
-                throw new ShouldNeverHappenException("Multi delete SQL should not contains limit condition !");
+                throw new NotSupportYetException("Multi delete SQL with limit condition is not support yet !");
             }
             if (StringUtils.isNotBlank(visitor.getOrderBy())) {
-                throw new ShouldNeverHappenException("Multi delete SQL should not contains order by condition !");
+                throw new NotSupportYetException("Multi delete SQL with orderBy condition is not support yet !");
             }
 
             String whereConditionStr = buildWhereCondition(visitor, paramAppenderList);
