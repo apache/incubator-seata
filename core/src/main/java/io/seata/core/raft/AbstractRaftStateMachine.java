@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 
+import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
+
 /**
  * @author funkye
  */
@@ -29,7 +31,7 @@ public abstract class AbstractRaftStateMachine extends StateMachineAdapter {
      */
     protected final AtomicLong leaderTerm = new AtomicLong(-1);
     protected String mode;
-
+    protected ServerOnRequestProcessor onRequestProcessor;
     /**
      * counter value
      */
@@ -37,4 +39,7 @@ public abstract class AbstractRaftStateMachine extends StateMachineAdapter {
     protected boolean isLeader() {
         return this.leaderTerm.get() > 0;
     }
+
+    public abstract void setOnRequestProcessor(ServerOnRequestProcessor onRequestProcessor);
+
 }

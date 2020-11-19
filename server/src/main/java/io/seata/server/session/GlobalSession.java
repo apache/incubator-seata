@@ -317,6 +317,27 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Instantiates a new Global session.
+     *
+     * @param xid                     the xid
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     */
+    public GlobalSession(String xid, String applicationId, String transactionServiceGroup, String transactionName,
+        int timeout) {
+        this.transactionId = Long.valueOf(xid.split(":")[2]);
+        this.status = GlobalStatus.Begin;
+
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.transactionName = transactionName;
+        this.timeout = timeout;
+        this.xid = xid;
+    }
+
+    /**
      * Gets transaction id.
      *
      * @return the transaction id
@@ -453,7 +474,23 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
-        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
+        GlobalSession session = createGlobalSession(null, applicationId, txServiceGroup, txName, timeout);
+        return session;
+    }
+
+    /**
+     * Create global session global session.
+     *
+     * @param xid            the xid
+     * @param applicationId  the application id
+     * @param txServiceGroup the tx service group
+     * @param txName         the tx name
+     * @param timeout        the timeout
+     * @return the global session
+     */
+    public static GlobalSession createGlobalSession(String xid, String applicationId, String txServiceGroup,
+        String txName, int timeout) {
+        GlobalSession session = new GlobalSession(xid, applicationId, txServiceGroup, txName, timeout);
         return session;
     }
 

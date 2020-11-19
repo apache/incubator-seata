@@ -33,4 +33,33 @@ public class RaftOnRequestMsg extends RaftSyncMsg {
         this.rpcContext = rpcContext;
         this.msgType = msgType;
     }
+
+    @Override
+    public MsgType getMsgType() {
+        return this.msgType;
+    }
+
+    public RpcMessage getRpcMessage() {
+        return rpcMessage;
+    }
+
+    public void setRpcMessage(RpcMessage rpcMessage) {
+        this.rpcMessage = rpcMessage;
+    }
+
+    public boolean isLeader() {
+        return leader;
+    }
+
+    public void setLeader(boolean leader) {
+        this.leader = leader;
+    }
+
+    public RpcContext getRpcContext() {
+        return rpcContext;
+    }
+
+    public void setRpcContext(RpcContext rpcContext) {
+        this.rpcContext = rpcContext;
+    }
 }

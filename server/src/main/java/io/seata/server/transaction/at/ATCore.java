@@ -60,4 +60,5 @@ public class ATCore extends AbstractCore {
             throws TransactionException {
         return lockManager.isLockable(xid, resourceId, lockKeys);
     }
+
 }

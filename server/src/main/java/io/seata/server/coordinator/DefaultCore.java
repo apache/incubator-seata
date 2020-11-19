@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +98,13 @@ public class DefaultCore implements Core {
         return getCore(branchType).branchRegister(branchType, resourceId, clientId, xid,
             applicationData, lockKeys);
     }
+    
+    @Override
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+        String applicationData, String lockKeys, Long branchId) throws TransactionException {
+        return getCore(branchType).branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys,
+            branchId);
+    }
 
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
@@ -123,10 +131,19 @@ public class DefaultCore implements Core {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
-        GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name,
-            timeout);
-        session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        return begin(null, applicationId, transactionServiceGroup, name, timeout);
+    }
 
+    @Override
+    public String begin(String xid, String applicationId, String transactionServiceGroup, String name, int timeout)
+        throws TransactionException {
+        GlobalSession session;
+        if (StringUtils.isBlank(xid)) {
+            session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name, timeout);
+        } else {
+            session = GlobalSession.createGlobalSession(xid, applicationId, transactionServiceGroup, name, timeout);
+        }
+        session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         session.begin();
 
         // transaction start event
@@ -374,4 +391,5 @@ public class DefaultCore implements Core {
             getCore(BranchType.SAGA).doGlobalReport(globalSession, xid, globalStatus);
         }
     }
+
 }

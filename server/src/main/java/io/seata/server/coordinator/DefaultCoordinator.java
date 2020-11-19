@@ -155,8 +155,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext)
         throws TransactionException {
-        response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
-            request.getTransactionName(), request.getTimeout()));
+        String xid = core.begin(request.getXid(),rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
+            request.getTransactionName(), request.getTimeout());
+        response.setXid(xid);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction applicationId: {},transactionServiceGroup: {}, transactionName: {},timeout:{},xid:{}",
                 rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout(), response.getXid());
@@ -189,10 +190,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
-                                    RpcContext rpcContext) throws TransactionException {
-        response.setBranchId(
-            core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                request.getXid(), request.getApplicationData(), request.getLockKey()));
+        RpcContext rpcContext) throws TransactionException {
+        Long branchId;
+        if (request.getBranchId() != null) {
+            branchId = core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
+                request.getXid(), request.getApplicationData(), request.getLockKey(), request.getBranchId());
+        } else {
+            branchId = core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
+                request.getXid(), request.getApplicationData(), request.getLockKey());
+        }
+        response.setBranchId(branchId);
     }
 
     @Override

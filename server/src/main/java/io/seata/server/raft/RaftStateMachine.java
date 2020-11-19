@@ -36,7 +36,9 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
+import io.seata.core.raft.msg.RaftOnRequestMsg;
 import io.seata.core.raft.msg.RaftSyncMsg;
+import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -105,7 +107,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             return;
         }
         Map<String, Object> sessionMaps = new HashMap<>();
-        sessionMaps.put(ROOT_SESSION_MANAGER_NAME, SessionHolder.getRootSessionManager());
+        sessionMaps.put(ROOT_SESSION_MANAGER_NAME,
+            ((FileSessionManager)SessionHolder.getRootSessionManager()).getSessionMap());
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
         sessionMaps.put(RETRY_ROLLBACKING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
         raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
@@ -252,6 +255,16 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 branchSession.setStatus(status);
                 raftSessionManager.updateBranchSessionStatus(branchSession, status);
             }
+        } else if (raftSyncMsg instanceof RaftOnRequestMsg) {
+            RaftOnRequestMsg raftOnRequestMsg = (RaftOnRequestMsg)raftSyncMsg;
+            onRequestProcessor.onRequestMessage(null, raftOnRequestMsg.getRpcMessage(), false,
+                raftOnRequestMsg.getRpcContext());
         }
     }
+
+    @Override
+    public void setOnRequestProcessor(ServerOnRequestProcessor onRequestProcessor) {
+        this.onRequestProcessor = onRequestProcessor;
+    }
+
 }

@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc.processor.server;
 
+import java.nio.ByteBuffer;
 import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Status;
@@ -37,6 +38,7 @@ import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalReportRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
+import io.seata.core.raft.AbstractRaftServer;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftClosure;
 import io.seata.core.raft.RaftServerFactory;
@@ -49,7 +51,6 @@ import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.SERVER_ON_REQUEST;
@@ -82,9 +83,15 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
 
     private TransactionMessageHandler transactionMessageHandler;
 
+
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
+        AbstractRaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
+        if (raftServer != null) {
+            AbstractRaftStateMachine machine = RaftServerFactory.getInstance().getStateMachine();
+            machine.setOnRequestProcessor(this);
+        }
     }
 
     @Override
@@ -112,7 +119,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
     }
 
-    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, boolean leader,
+    public void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, boolean leader,
         RpcContext rpcContext) {
         Object message = rpcMessage.getBody();
         if (leader) {
@@ -139,6 +146,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 ((MergedWarpMessage)message).msgs.forEach(msg -> {
                     if (msg instanceof GlobalBeginRequest) {
                         ((GlobalBeginRequest)msg).setXid(XID.generateXID(IdWorker.getInstance().nextId()));
+                    } else if (msg instanceof BranchRegisterRequest) {
+                        ((BranchRegisterRequest)msg).setBranchId(IdWorker.getInstance().nextId());
                     }
                 });
                 AbstractRaftStateMachine machine = RaftServerFactory.getInstance().getStateMachine();
@@ -176,7 +185,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                     closure.setRpcMessage(rpcMessage);
                     closure.setAbstractResultMessage(results);
                     final Task task = new Task();
-                    RaftOnRequestMsg msg = new RaftOnRequestMsg(SERVER_ON_REQUEST, rpcMessage, false, rpcContext);
+                    RpcContext context=new RpcContext();
+                    context.setClientId(rpcContext.getClientId());
+                    context.setVersion(rpcContext.getVersion());
+                    context.setApplicationId(rpcContext.getApplicationId());
+                    context.setTransactionServiceGroup(rpcContext.getTransactionServiceGroup());
+                    context.setClientRole(rpcContext.getClientRole());
+                    context.setResourceSets(rpcContext.getResourceSets());
+                    RaftOnRequestMsg msg = new RaftOnRequestMsg(SERVER_ON_REQUEST, rpcMessage, false, context);
                     try {
                         task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(msg)));
                     } catch (CodecException e) {

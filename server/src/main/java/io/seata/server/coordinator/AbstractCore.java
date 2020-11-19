@@ -74,21 +74,40 @@ public abstract class AbstractCore implements Core {
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                     applicationData, lockKeys, clientId);
-            branchSessionLock(globalSession, branchSession);
-            try {
-                globalSession.addBranch(branchSession);
-            } catch (RuntimeException ex) {
-                branchSessionUnlock(branchSession);
-                throw new BranchTransactionException(FailedToAddBranch, String
-                        .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
-                                branchSession.getBranchId()), ex);
-            }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
-                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
-            }
-            return branchSession.getBranchId();
+            return addBranch(resourceId, lockKeys, globalSession, branchSession);
         });
+    }
+
+    @Override
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+                               String applicationData, String lockKeys,Long branchId) throws TransactionException {
+        GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
+        return SessionHolder.lockAndExecute(globalSession, () -> {
+            globalSessionStatusCheck(globalSession);
+            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+            BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
+                applicationData, lockKeys, clientId, branchId);
+            return addBranch(resourceId, lockKeys, globalSession, branchSession);
+        });
+    }
+
+    protected Long addBranch(String resourceId, String lockKeys, GlobalSession globalSession, BranchSession branchSession)
+        throws TransactionException {
+        branchSessionLock(globalSession, branchSession);
+        try {
+            globalSession.addBranch(branchSession);
+        } catch (RuntimeException ex) {
+            branchSessionUnlock(branchSession);
+            throw new BranchTransactionException(FailedToAddBranch,
+                String.format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
+                    branchSession.getBranchId()),
+                ex);
+        }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
+                globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+        }
+        return branchSession.getBranchId();
     }
 
     protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
@@ -197,6 +216,12 @@ public abstract class AbstractCore implements Core {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
             throws TransactionException {
+        return null;
+    }
+    
+    @Override
+    public String begin(String xid, String applicationId, String transactionServiceGroup, String name, int timeout)
+        throws TransactionException {
         return null;
     }
 

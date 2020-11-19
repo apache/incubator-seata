@@ -18,7 +18,7 @@ package io.seata.core.raft.msg;
 /**
  * @author funkye
  */
-public abstract class RaftSyncMsg {
+public abstract class RaftSyncMsg implements java.io.Serializable {
 
     protected MsgType msgType;
 
