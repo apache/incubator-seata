@@ -18,6 +18,7 @@ package io.seata.server.logging.logback;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.pattern.CompositeConverter;
+import io.netty.util.internal.PlatformDependent;
 import io.seata.server.logging.logback.ansi.AnsiColor;
 import io.seata.server.logging.logback.ansi.AnsiElement;
 import io.seata.server.logging.logback.ansi.AnsiOutput;
@@ -39,8 +40,10 @@ public class ColorConverter extends CompositeConverter<ILoggingEvent> {
 
     private static final Map<String, AnsiElement> ELEMENTS;
 
+    private static final String DISABLE_PROPERTY_NAME = "logback.color.disable-for-bat";
+
     static {
-        Map<String, AnsiElement> ansiElements = new HashMap<String, AnsiElement>();
+        Map<String, AnsiElement> ansiElements = new HashMap<>();
         ansiElements.put("faint", AnsiStyle.FAINT);
         ansiElements.put("red", AnsiColor.RED);
         ansiElements.put("green", AnsiColor.GREEN);
@@ -54,14 +57,26 @@ public class ColorConverter extends CompositeConverter<ILoggingEvent> {
     private static final Map<Integer, AnsiElement> LEVELS;
 
     static {
-        Map<Integer, AnsiElement> ansiLevels = new HashMap<Integer, AnsiElement>();
+        Map<Integer, AnsiElement> ansiLevels = new HashMap<>();
         ansiLevels.put(Level.ERROR_INTEGER, AnsiColor.RED);
         ansiLevels.put(Level.WARN_INTEGER, AnsiColor.YELLOW);
         LEVELS = Collections.unmodifiableMap(ansiLevels);
     }
 
+    private final boolean disable;
+
+    public ColorConverter() {
+        //If is windows and run by seata-server.bat, then disable the color log.
+        disable = PlatformDependent.isWindows() && Boolean.parseBoolean(System.getProperty(DISABLE_PROPERTY_NAME));
+    }
+
     @Override
     protected String transform(ILoggingEvent event, String in) {
+        if (disable) {
+            //return the original log
+            return in;
+        }
+
         AnsiElement element = ELEMENTS.get(getFirstOption());
         if (element == null) {
             // Assume highlighting
