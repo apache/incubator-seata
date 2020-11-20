@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.util.DurationUtil;
 import io.seata.common.util.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -32,7 +34,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
 
-    private static final ConcurrentHashMap<String, Object> CONFIG_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
 
@@ -67,7 +69,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         Object oldValue = CONFIG_CACHE.get(event.getDataId());
         if (null == oldValue || !oldValue.equals(event.getNewValue())) {
             if (StringUtils.isNotBlank(event.getNewValue())) {
-                CONFIG_CACHE.put(event.getDataId(), event.getNewValue());
+                CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(event.getNewValue(), null));
             } else {
                 CONFIG_CACHE.remove(event.getDataId());
             }
@@ -76,24 +78,26 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     public Configuration proxy(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class,
-            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
-                if (method.getName().startsWith(METHOD_PREFIX)
-                    && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
-                    String rawDataId = (String)args[0];
-                    Object result = CONFIG_CACHE.get(rawDataId);
-                    if (null == result) {
-                        result = method.invoke(originalConfiguration, args);
-                        if (result != null) {
-                            CONFIG_CACHE.put(rawDataId, result);
+                (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+                    if (method.getName().startsWith(METHOD_PREFIX)
+                            && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                        String rawDataId = (String)args[0];
+                        ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
+                        String type = method.getName().substring(3);
+                        if (!ObjectWrapper.supportType(type)) {
+                            type = null;
                         }
+                        if (null == wrapper) {
+                            Object result = method.invoke(originalConfiguration, args);
+                            wrapper = new ObjectWrapper(result, type);
+                            if (result != null) {
+                                CONFIG_CACHE.put(rawDataId, wrapper);
+                            }
+                        }
+                        return wrapper.convertData(type);
                     }
-                    if (null != result && method.getReturnType().equals(String.class)) {
-                        return String.valueOf(result);
-                    }
-                    return result;
-                }
-                return method.invoke(originalConfiguration, args);
-            });
+                    return method.invoke(originalConfiguration, args);
+                });
     }
 
     private static class ConfigurationCacheInstance {
@@ -103,4 +107,63 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     public void clear() {
         CONFIG_CACHE.clear();
     }
+
+    private static class ObjectWrapper {
+
+        static final String INT = "Int";
+        static final String BOOLEAN = "Boolean";
+        static final String DURATION = "Duration";
+        static final String LONG = "Long";
+        static final String SHORT = "Short";
+
+        private final Object data;
+        private final String type;
+
+        ObjectWrapper(Object data, String type) {
+            this.data = data;
+            this.type = type;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public Object convertData(String aType) {
+            if (data != null && type != null) {
+                return data;
+            }
+            if (data != null) {
+                if (INT.equals(aType)) {
+                    return Integer.parseInt(data.toString());
+                } else if (BOOLEAN.equals(aType)) {
+                    return Boolean.parseBoolean(data.toString());
+                } else if (DURATION.equals(aType)) {
+                    return DurationUtil.parse(data.toString());
+                } else if (LONG.equals(aType)) {
+                    return Long.parseLong(data.toString());
+                } else if (SHORT.equals(aType)) {
+                    return Short.parseShort(data.toString());
+                } else {
+                    return String.valueOf(data);
+                }
+            }
+            return null;
+        }
+
+        public static boolean supportType(String type) {
+            if ((INT.equals(type)
+                    || BOOLEAN.equals(type)
+                    || DURATION.equals(type)
+                    || LONG.equals(type)
+                    || SHORT.equals(type))) {
+                return true;
+            }
+            return false;
+        }
+    }
+
 }
