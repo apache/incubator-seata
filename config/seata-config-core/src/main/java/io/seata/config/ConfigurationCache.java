@@ -18,6 +18,7 @@ package io.seata.config;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.util.DurationUtil;
@@ -135,7 +136,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public Object convertData(String aType) {
-            if (data != null && type != null) {
+            if (data != null && Objects.equals(type, aType)) {
                 return data;
             }
             if (data != null) {
@@ -149,9 +150,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     return Long.parseLong(data.toString());
                 } else if (SHORT.equals(aType)) {
                     return Short.parseShort(data.toString());
-                } else {
-                    return String.valueOf(data);
                 }
+                return String.valueOf(data);
             }
             return null;
         }
