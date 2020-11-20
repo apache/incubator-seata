@@ -83,7 +83,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                             && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                         String rawDataId = (String)args[0];
                         ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                        String type = method.getName().substring(3);
+                        String type = method.getName().substring(METHOD_PREFIX.length());
                         if (!ObjectWrapper.supportType(type)) {
                             type = null;
                         }
