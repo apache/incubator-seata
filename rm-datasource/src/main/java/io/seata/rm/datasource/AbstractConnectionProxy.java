@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -111,9 +112,9 @@ public abstract class AbstractConnectionProxy implements Connection {
         PreparedStatement targetPreparedStatement = null;
         if (StringUtils.equals(BranchType.AT.name(), RootContext.getBranchType())) {
             List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
-            if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
+            if (sqlRecognizers != null && sqlRecognizers.size() == 1 ) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
-                if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
+                if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT && isSupportReturningSql(sql)) {
                     TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
                             sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
                     String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
@@ -128,6 +129,23 @@ public abstract class AbstractConnectionProxy implements Connection {
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
     }
 
+    /**
+     * add by ccg
+     * @param sql
+     * @return
+     */
+    private boolean isSupportReturningSql(String sql) {
+        boolean result = true;
+        //insert into table  select * froma dual   not support  Returning
+        if(sql.toUpperCase().contains("SELECT") && !sql.toUpperCase().contains("VALUE")) {
+               result = false;
+        }
+        // begin insert into table ;insert into table; end;  TODO
+        else if(false) {
+
+        }
+        return result;
+    }
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
         RootContext.assertNotInGlobalTransaction();

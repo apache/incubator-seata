@@ -17,7 +17,6 @@ package io.seata.sqlparser.druid;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleMultiInsertRecognizer;
 
 /**
@@ -48,6 +47,7 @@ public interface SQLOperateRecognizerHolder {
     default SQLRecognizer getMultiInsertStatement(String sql, SQLStatement ast) {
           return new OracleMultiInsertRecognizer(sql, ast);
     }
+
 
 
     /**

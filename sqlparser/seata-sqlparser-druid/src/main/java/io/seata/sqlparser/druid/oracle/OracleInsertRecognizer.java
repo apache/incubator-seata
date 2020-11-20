@@ -15,6 +15,12 @@
  */
 package io.seata.sqlparser.druid.oracle;
 
+import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectQueryBlock;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectSubqueryTableSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -111,6 +117,13 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         List<SQLInsertStatement.ValuesClause> valuesClauses = ast.getValuesList();
+        //1.insert into table1 select * from dual uniou select * from dual
+        //2.insert into table1 select * from (select * from dual uniou select * from dual)
+        if(valuesClauses.isEmpty() && ast.getQuery() != null) {
+            List<List<Object>> rows = new ArrayList<>();
+            this.getInsertSelectRows(ast.getQuery().getQuery(),rows,primaryKeyIndex);
+            return rows;
+        }
         List<List<Object>> rows = new ArrayList<>(valuesClauses.size());
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
@@ -141,4 +154,65 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
         }
         return rows;
     }
+
+    private void getInsertSelectRows(SQLSelectQuery selectQuery,List<List<Object>> rows ,Collection<Integer> primaryKeyIndex) {
+        if(selectQuery instanceof  SQLUnionQuery) {
+            //a: get left(SQLSelectQueryBlock)
+            List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) ((SQLUnionQuery)selectQuery).getLeft()).getSelectList();
+            this.converSQLSelectItems(selectItems,rows,primaryKeyIndex);
+            //b:  get right(SQLUnionQuery)
+            if(((SQLUnionQuery)selectQuery).getRight() instanceof SQLUnionQuery) {
+               this.getInsertSelectRows(((SQLUnionQuery)selectQuery).getRight(),rows,primaryKeyIndex);
+            }
+            //b:  get right(SQLSelectQueryBlock)
+            else {
+                selectItems = ((SQLSelectQueryBlock)((SQLUnionQuery)selectQuery).getRight()).getSelectList();
+                this.converSQLSelectItems(selectItems,rows,primaryKeyIndex);
+            }
+        }
+        //SQLSelectQueryBlock
+        else {
+            //select * from (select * from dual union select * from dual)
+            if(((SQLSelectQueryBlock) selectQuery).getFrom() instanceof OracleSelectSubqueryTableSource) {
+                this.getInsertSelectRows(((OracleSelectSubqueryTableSource)((SQLSelectQueryBlock) selectQuery).getFrom()).getSelect().getQuery(),rows,primaryKeyIndex);
+            }
+            //select * from dual union select * from dual
+            else {
+                List<SQLSelectItem> selectItems = ((SQLSelectQueryBlock) selectQuery).getSelectList();
+                this.converSQLSelectItems(selectItems, rows, primaryKeyIndex);
+            }
+        }
+    }
+
+    private void converSQLSelectItems(List<SQLSelectItem> sqlSelectItem,List<List<Object>> rows ,Collection<Integer> primaryKeyIndex) {
+        List<Object> row = new ArrayList<>();
+        rows.add(row);
+        for (SQLSelectItem valuesClause : sqlSelectItem) {
+            SQLExpr expr = valuesClause.getExpr();
+            if (expr instanceof SQLNullExpr) {
+                row.add(Null.get());
+            } else if (expr instanceof SQLValuableExpr) {
+                row.add(((SQLValuableExpr) expr).getValue());
+            } else if (expr instanceof SQLVariantRefExpr) {
+                row.add(((SQLVariantRefExpr) expr).getName());
+            } else if (expr instanceof SQLMethodInvokeExpr) {
+                row.add(SqlMethodExpr.get());
+            } else if (expr instanceof SQLSequenceExpr) {
+                SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
+                String sequence = sequenceExpr.getSequence().getSimpleName();
+                String function = sequenceExpr.getFunction().name;
+                row.add(new SqlSequenceExpr(sequence, function));
+            } else {
+//                if (primaryKeyIndex.contains(i)) {
+//                    throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+//                }
+                row.add(NotPlaceholderExpr.get());
+            }
+        }
+
+    }
+    public OracleInsertStatement getAst() {
+        return ast;
+    }
+
 }

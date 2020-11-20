@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLBlockStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
@@ -46,20 +47,49 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
             throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
         }
-        List<SQLRecognizer> recognizers = null;
+        List<SQLRecognizer> recognizers = new ArrayList<>();
         SQLRecognizer recognizer = null;
         for (SQLStatement ast : asts) {
             SQLOperateRecognizerHolder recognizerHolder =
                     SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-            if (ast instanceof SQLInsertStatement) {
+            if (ast instanceof SQLInsertStatement ) {
                 recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-            } else if(ast instanceof OracleMultiInsertStatement) {
+            }
+            // begin insert table values();insert table values()  end;
+            else if( ast instanceof  SQLBlockStatement && ((SQLBlockStatement) ast).getStatementList().get(0)  instanceof SQLInsertStatement) {
+                SQLBlockStatement sqlBlockStatement = (SQLBlockStatement)ast;
+                List<SQLStatement> list = sqlBlockStatement.getStatementList();
+                for(SQLStatement statement:list) {
+                    recognizers.add(recognizerHolder.getInsertRecognizer(statement.toLowerCaseString(), statement));
+                }
+                break;
+            }
+            // insert all into table  values() select * from dual
+            else if(ast instanceof OracleMultiInsertStatement) {
                 recognizer = recognizerHolder.getMultiInsertStatement(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
+            } else if (ast instanceof SQLUpdateStatement ) {
                 recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
+            }
+            // // begin update table set a = b;update table set a= c where  end;
+            else if( ast instanceof  SQLBlockStatement && ((SQLBlockStatement) ast).getStatementList().get(0)  instanceof SQLUpdateStatement) {
+                SQLBlockStatement sqlBlockStatement = (SQLBlockStatement)ast;
+                List<SQLStatement> list = sqlBlockStatement.getStatementList();
+                for(SQLStatement statement:list) {
+                    recognizers.add(recognizerHolder.getUpdateRecognizer(statement.toLowerCaseString(), statement));
+                }
+                break;
+            } else if (ast instanceof SQLDeleteStatement ) {
                 recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
+            }
+            // // begin delete table where;delete table where  end;
+            else if( ast instanceof  SQLBlockStatement && ((SQLBlockStatement) ast).getStatementList().get(0)  instanceof SQLDeleteStatement) {
+                SQLBlockStatement sqlBlockStatement = (SQLBlockStatement)ast;
+                List<SQLStatement> list = sqlBlockStatement.getStatementList();
+                for(SQLStatement statement:list) {
+                    recognizers.add(recognizerHolder.getDeleteRecognizer(statement.toLowerCaseString(), statement));
+                }
+                break;
+            }  else if (ast instanceof SQLSelectStatement) {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
             }
             if (recognizer != null) {
@@ -70,5 +100,20 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             }
         }
         return recognizers;
+    }
+
+    private boolean isOraceBeginEndUpdateSql(String dbType,SQLStatement ast) {
+        if("oracle".equals(dbType.toLowerCase()) && ast instanceof SQLBlockStatement && ((SQLBlockStatement) ast).getStatementList().get(0) instanceof SQLUpdateStatement){
+            return  true;
+        } else {
+            return  false;
+        }
+    }
+    private boolean isOraceBeginEndDeleteSql(String dbType,SQLStatement ast) {
+        if("oracle".equals(dbType.toLowerCase()) && ast instanceof SQLBlockStatement && ((SQLBlockStatement) ast).getStatementList().get(0) instanceof SQLUpdateStatement){
+            return  true;
+        } else {
+            return  false;
+        }
     }
 }

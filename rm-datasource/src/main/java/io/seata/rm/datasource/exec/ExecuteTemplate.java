@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
+import co.faao.plugin.starter.seata.util.DataTraceLogUtil;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
 import io.seata.core.constants.Seata;
@@ -96,7 +97,18 @@ public class ExecuteTemplate {
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            return statementCallback.execute(statementProxy.getTargetStatement(), args);
+            if(statementProxy.getTargetSQL().trim().toLowerCase().startsWith("select")) {
+                return statementCallback.execute(statementProxy.getTargetStatement(), args);
+            }
+            //只开启数据追踪，没开启seata事务，放行执行，但追踪日志输出不支持的sql
+            else if("true".equals(System.getProperty("dataTrace")) && !Seata.EWELL_SEATA_STATE_IS_ON ) {
+                DataTraceLogUtil.trace("Unsupported SQL: " + statementProxy.getTargetSQL());
+                return statementCallback.execute(statementProxy.getTargetStatement(), args);
+            } else {
+                throw new UnsupportedOperationException("seata Unsupported SQL: " + statementProxy.getTargetSQL());
+//            seata 不支持的sql直接抛出异常，否则执行后不能回滚
+//            return statementCallback.execute(statementProxy.getTargetStatement(), args);
+            }
         } else {
             if (sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
