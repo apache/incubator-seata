@@ -66,8 +66,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
-        Object oldValue = CONFIG_CACHE.get(event.getDataId());
-        if (null == oldValue || !oldValue.equals(event.getNewValue())) {
+        ObjectWrapper wrapper = CONFIG_CACHE.get(event.getDataId());
+        // The wrapper.data only exists in the cache when it is not null.
+        if (null == wrapper || !wrapper.getData().equals(event.getNewValue())) {
             if (StringUtils.isNotBlank(event.getNewValue())) {
                 CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(event.getNewValue(), null));
             } else {
@@ -90,6 +91,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                         if (null == wrapper) {
                             Object result = method.invoke(originalConfiguration, args);
                             wrapper = new ObjectWrapper(result, type);
+                            // The wrapper.data only exists in the cache when it is not null.
                             if (result != null) {
                                 CONFIG_CACHE.put(rawDataId, wrapper);
                             }
