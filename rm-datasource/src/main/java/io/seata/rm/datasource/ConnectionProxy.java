@@ -185,6 +185,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return null;
             });
         } catch (SQLException e) {
+            if (targetConnection != null && !getAutoCommit()) {
+                rollback();
+            }
             throw e;
         } catch (Exception e) {
             throw new SQLException(e);
@@ -251,7 +254,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if (autoCommit && !getAutoCommit()) {
+        if ((context.inGlobalTransaction() || context.isGlobalLockRequire()) && autoCommit && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.
             doCommit();
         }
