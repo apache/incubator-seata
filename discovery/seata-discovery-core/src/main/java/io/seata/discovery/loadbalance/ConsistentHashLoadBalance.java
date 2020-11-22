@@ -36,7 +36,7 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.LOAD_BALANCE_PRE
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     /**
-     * The constant LOAD_BALANCE_TYPE.
+     * The constant LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES.
      */
     public static final String LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES = LOAD_BALANCE_PREFIX + "visualNodes";
     /**
