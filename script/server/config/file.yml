@@ -44,3 +44,4 @@ store:
     minConn: 1
     maxConn: 10
     queryLimit: 100
+
