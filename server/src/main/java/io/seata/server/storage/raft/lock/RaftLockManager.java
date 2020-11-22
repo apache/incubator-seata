@@ -50,23 +50,16 @@ public class RaftLockManager extends AbstractLockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
-/*        if (!RaftServerFactory.getInstance().isLeader()) {
-            throw new TransactionException("this node is not a leader node, so requests are not allowed");
-        }
-        BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ACQUIRE_LOCK, branchTransactionDO);
-        RaftTaskUtil.createTask(raftSyncMsg);*/
         return LOCK_MANAGER.acquireLock(branchSession);
     }
 
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        if (!RaftServerFactory.getInstance().isLeader()) {
-            throw new TransactionException("this node is not a leader node, so requests are not allowed");
+        if (RaftServerFactory.getInstance().isLeader()) {
+            GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
+            RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
+            RaftTaskUtil.createTask(raftSyncMsg);
         }
-        GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
-        RaftTaskUtil.createTask(raftSyncMsg);
         return LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
     }
 }

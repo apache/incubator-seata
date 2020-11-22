@@ -15,17 +15,24 @@
  */
 package io.seata.server.coordinator;
 
+import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.alipay.remoting.exception.CodecException;
+import com.alipay.remoting.serialization.SerializerManager;
+import com.alipay.sofa.jraft.Status;
+import com.alipay.sofa.jraft.entity.Task;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
@@ -33,6 +40,7 @@ import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.BranchSession;
@@ -40,6 +48,8 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 
+import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.DO_COMMIT;
 /**
  * The type Default core.
  *
@@ -192,6 +202,10 @@ public class DefaultCore implements Core {
 
     @Override
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        if (!RaftServerFactory.getInstance().isLeader()) {
+            return false;
+        }
+        Boolean isClutser = RaftServerFactory.getInstance().getRaftServer() != null;
         boolean success = true;
         // start committing event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
@@ -200,7 +214,9 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            for (BranchSession branchSession : globalSession.getSortedBranches()) {
+            List<BranchSession> sessionList = globalSession.getSortedBranches();
+            Map<Long, BranchStatus> branchStatusMap = new HashMap<>();
+            for (BranchSession branchSession : sessionList) {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
                     continue;
@@ -212,36 +228,44 @@ public class DefaultCore implements Core {
                     continue;
                 }
                 try {
-                    BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
-
-                    switch (branchStatus) {
-                        case PhaseTwo_Committed:
-                            globalSession.removeBranch(branchSession);
-                            continue;
-                        case PhaseTwo_CommitFailed_Unretryable:
-                            if (globalSession.canBeCommittedAsync()) {
-                                LOGGER.error(
-                                    "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
+                    BranchStatus branchStatus =
+                        getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
+                    if (!retrying && isClutser) {
+                        branchStatusMap.put(branchSession.getBranchId(), branchStatus);
+                    } else {
+                        switch (branchStatus) {
+                            case PhaseTwo_Committed:
+                                globalSession.removeBranch(branchSession);
                                 continue;
-                            } else {
-                                SessionHelper.endCommitFailed(globalSession);
-                                LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
-                                return false;
-                            }
-                        default:
-                            if (!retrying) {
-                                globalSession.queueToRetryCommit();
-                                return false;
-                            }
-                            if (globalSession.canBeCommittedAsync()) {
-                                LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
-                                    branchSession.getBranchId(), branchStatus);
-                                continue;
-                            } else {
-                                LOGGER.error(
-                                    "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.", globalSession.getXid(), branchSession.getBranchId());
-                                return false;
-                            }
+                            case PhaseTwo_CommitFailed_Unretryable:
+                                if (globalSession.canBeCommittedAsync()) {
+                                    LOGGER.error(
+                                        "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.",
+                                        branchSession.getBranchId());
+                                    continue;
+                                } else {
+                                    SessionHelper.endCommitFailed(globalSession);
+                                    LOGGER.error(
+                                        "Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.",
+                                        globalSession.getXid(), branchSession.getBranchId());
+                                    return false;
+                                }
+                            default:
+                                if (!retrying) {
+                                    globalSession.queueToRetryCommit();
+                                    return false;
+                                }
+                                if (globalSession.canBeCommittedAsync()) {
+                                    LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
+                                        branchSession.getBranchId(), branchStatus);
+                                    continue;
+                                } else {
+                                    LOGGER.error(
+                                        "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.",
+                                        globalSession.getXid(), branchSession.getBranchId());
+                                    return false;
+                                }
+                        }
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {}",
@@ -252,20 +276,53 @@ public class DefaultCore implements Core {
                     }
                 }
             }
+            if (!branchStatusMap.isEmpty()) {
+                RaftCoreClosure closure = new RaftCoreClosure() {
+                    Map<Long, BranchStatus> branchStatusMap;
+                    String xid;
+
+                    @Override
+                    public void setBranchStatusMap(Map<Long, BranchStatus> branchStatusMap) {
+                        this.branchStatusMap = branchStatusMap;
+                    }
+
+                    @Override
+                    public void setXid(String xid) {
+                        this.xid = xid;
+                    }
+
+                    @Override
+                    public void run(Status status) {
+                        doCommit(branchStatusMap, xid, true);
+                    }
+                };
+                final Task task = new Task();
+                RaftCoreSyncMsg msg = new RaftCoreSyncMsg(branchStatusMap, globalSession.getXid());
+                msg.setMsgType(DO_COMMIT);
+                try {
+                    task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(msg)));
+                } catch (CodecException e) {
+                    e.printStackTrace();
+                }
+                task.setDone(closure);
+                RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
+            }
             if (globalSession.hasBranch()) {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
         }
         if (success && globalSession.getBranchSessions().isEmpty()) {
-            SessionHelper.endCommitted(globalSession);
+            if ((!retrying && RaftServerFactory.getInstance().isLeader()) || (retrying && isClutser)) {
+                SessionHelper.endCommitted(globalSession);
 
-            // committed event
-            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                globalSession.getStatus()));
+                // committed event
+                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
+                    GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(), globalSession.getBeginTime(),
+                    System.currentTimeMillis(), globalSession.getStatus()));
 
-            LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
+                LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
+            }
         }
         return success;
     }
@@ -389,6 +446,61 @@ public class DefaultCore implements Core {
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (globalSession.isSaga()) {
             getCore(BranchType.SAGA).doGlobalReport(globalSession, xid, globalStatus);
+        }
+    }
+
+    public void doCommit(Map<Long, BranchStatus> branchStatusMap, String xid, boolean leader) {
+        GlobalSession globalSession = SessionHolder.getRootSessionManager().findGlobalSession(xid);
+        for (Map.Entry<Long, BranchStatus> entry : branchStatusMap.entrySet()) {
+            BranchSession branchSession = globalSession.getBranch(entry.getKey());
+            BranchStatus branchStatus = entry.getValue();
+            try {
+                switch (branchStatus) {
+                    case PhaseTwo_Committed:
+                        globalSession.removeBranch(branchSession);
+                        continue;
+                    case PhaseTwo_CommitFailed_Unretryable:
+                        if (globalSession.canBeCommittedAsync()) {
+                            LOGGER.error(
+                                "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.",
+                                branchSession.getBranchId());
+                            continue;
+                        } else {
+                            SessionHelper.endCommitFailed(globalSession);
+                            LOGGER.error(
+                                "Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.",
+                                globalSession.getXid(), branchSession.getBranchId());
+                            return;
+                        }
+                    default:
+                        globalSession.queueToRetryCommit();
+                        return;
+                }
+            } catch (Exception e) {
+                StackTraceLogger.error(LOGGER, e, "Committing branch transaction exception: {}",
+                    new String[] {branchSession.toString()});
+                if (leader) {
+                    try {
+                        globalSession.queueToRetryCommit();
+                    } catch (TransactionException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+        if (globalSession.getBranchSessions().isEmpty()) {
+            try {
+                SessionHelper.endCommitted(globalSession);
+            } catch (TransactionException e) {
+                e.printStackTrace();
+            }
+
+            // committed event
+            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                globalSession.getStatus()));
+
+            LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
     }
 

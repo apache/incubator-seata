@@ -66,15 +66,6 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
         this.branchStatus = branchStatus;
     }
 
-    @Override
-    public MsgType getMsgType() {
-        return msgType;
-    }
-
-    public void setMsgType(MsgType msgType) {
-        this.msgType = msgType;
-    }
-
     public GlobalTransactionDO getGlobalSession() {
         return globalSession;
     }

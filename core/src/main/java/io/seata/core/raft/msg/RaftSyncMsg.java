@@ -22,8 +22,13 @@ public abstract class RaftSyncMsg implements java.io.Serializable {
 
     protected MsgType msgType;
 
-    public abstract MsgType getMsgType();
+    public MsgType getMsgType() {
+        return this.msgType;
+    }
 
+    public void setMsgType(MsgType msgType) {
+        this.msgType = msgType;
+    }
     public enum MsgType {
         /**
          * addGlobalSession
@@ -60,7 +65,11 @@ public abstract class RaftSyncMsg implements java.io.Serializable {
         /**
          * ServerOnRequestProcessor
          */
-        SERVER_ON_REQUEST
+        SERVER_ON_REQUEST,
+        /**
+         * doCommit
+         */
+        DO_COMMIT
     }
 
 }

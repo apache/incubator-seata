@@ -40,6 +40,8 @@ import io.seata.core.raft.msg.RaftOnRequestMsg;
 import io.seata.core.raft.msg.RaftSyncMsg;
 import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import io.seata.core.store.StoreMode;
+import io.seata.server.coordinator.DefaultCore;
+import io.seata.server.coordinator.RaftCoreSyncMsg;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -74,7 +76,7 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftStateMachine.class);
-
+    private DefaultCore core;
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
     }
@@ -106,22 +108,20 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
             return;
         }
-        Map<String, Object> sessionMaps = new HashMap<>();
+        Map<String, Object> maps = new HashMap<>();
         FileSessionManager fileSessionManager = (FileSessionManager)SessionHolder.getRootSessionManager();
-        sessionMaps.put(ROOT_SESSION_MANAGER_NAME, fileSessionManager.getSessionMap());
-        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
-        sessionMaps.put(RETRY_ROLLBACKING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
-        raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
-        sessionMaps.put(RETRY_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
-        raftSessionManager = (RaftSessionManager)SessionHolder.getAsyncCommittingSessionManager();
-        sessionMaps.put(ASYNC_COMMITTING_SESSION_MANAGER_NAME, raftSessionManager.getSessionMap());
-        sessionMaps.put("LOCK_MAP", FileLocker.LOCK_MAP);
-        if (sessionMaps.isEmpty()) {
+        Map<String, GlobalSession> sessionMap = fileSessionManager.getSessionMap();
+        Map<String, byte[]> sessionByteMap = new HashMap<>();
+        LOG.info("sessionmap size:{}",sessionMap.size());
+        sessionMap.forEach((k, v) -> sessionByteMap.put(v.getXid(), v.encode()));
+        maps.put(ROOT_SESSION_MANAGER_NAME, sessionByteMap);
+        maps.put("LOCK_MAP", FileLocker.LOCK_MAP);
+        if (maps.isEmpty()) {
             return;
         }
         Utils.runInThread(() -> {
             final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
-            if (snapshot.save(sessionMaps)) {
+            if (snapshot.save(maps)) {
                 if (writer.addFile("data")) {
                     done.run(Status.OK());
                 } else {
@@ -153,20 +153,35 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         }
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
         try {
-            Map<String, Object> sessionMaps = snapshot.load();
+            Map<String, Object> maps = snapshot.load();
             FileSessionManager fileSessionManager = (FileSessionManager)SessionHolder.getRootSessionManager();
-            fileSessionManager.setSessionMap((Map<String, GlobalSession>)sessionMaps.get(ROOT_SESSION_MANAGER_NAME));
-            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager();
-            raftSessionManager.setSessionMap(
-                (Map<String, GlobalSession>)sessionMaps.get(RETRY_ROLLBACKING_SESSION_MANAGER_NAME));
-            raftSessionManager = (RaftSessionManager)SessionHolder.getRetryCommittingSessionManager();
-            raftSessionManager.setSessionMap(
-                (Map<String, GlobalSession>)sessionMaps.get(RETRY_COMMITTING_SESSION_MANAGER_NAME));
-            raftSessionManager = (RaftSessionManager)SessionHolder.getAsyncCommittingSessionManager();
-            raftSessionManager.setSessionMap(
-                (Map<String, GlobalSession>)sessionMaps.get(ASYNC_COMMITTING_SESSION_MANAGER_NAME));
-            FileLocker.LOCK_MAP.putAll(
-                (Map<? extends String, ? extends ConcurrentMap<String, ConcurrentMap<Integer, FileLocker.BucketLockMap>>>)sessionMaps.get("LOCK_MAP"));
+            FileLocker.LOCK_MAP.putAll((Map<? extends String,
+                ? extends ConcurrentMap<String, ConcurrentMap<Integer, FileLocker.BucketLockMap>>>)maps
+                    .get("LOCK_MAP"));
+            Map<String, byte[]> sessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
+            if (!sessionByteMap.isEmpty()) {
+                Map<String, GlobalSession> sessionMap = new HashMap<>();
+                sessionByteMap.forEach((k, v) -> {
+                    GlobalSession session = new GlobalSession();
+                    session.decode(v);
+                    sessionMap.put(k, session);
+                });
+                fileSessionManager.putAll(sessionMap);
+                sessionMap.forEach((k, v) -> {
+                    GlobalStatus status = v.getStatus();
+                    try {
+                        if (status == GlobalStatus.AsyncCommitting) {
+                            SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(v);
+                        } else if (status == GlobalStatus.CommitRetrying) {
+                            SessionHolder.getRetryCommittingSessionManager().addGlobalSession(v);
+                        } else if (status == GlobalStatus.RollbackRetrying) {
+                            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(v);
+                        }
+                    } catch (TransactionException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
             return true;
         } catch (final Exception e) {
             LOG.error("Fail to load snapshot from {}", snapshot.getPath());
@@ -234,31 +249,47 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 raftSessionManager.addBranchSession(globalSession, branchSession);
             } else if (UPDATE_GLOBAL_SESSION_STATUS.equals(msgType)) {
                 GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-                GlobalStatus status = msg.getGlobalStatus();
-                globalSession.setStatus(status);
-                raftSessionManager.updateGlobalSessionStatus(globalSession, status);
+                if (globalSession != null) {
+                    GlobalStatus status = msg.getGlobalStatus();
+                    globalSession.setStatus(status);
+                    raftSessionManager.updateGlobalSessionStatus(globalSession, status);
+                }
             } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
                 GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-                BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
-                raftSessionManager.removeBranchSession(globalSession, branchSession);
+                if (globalSession != null) {
+                    BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+                    if (branchSession != null) {
+                        raftSessionManager.removeBranchSession(globalSession, branchSession);
+                    }
+                }
             } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
                 GlobalSession globalSession =
                     SessionHolder.getRootSessionManager().findGlobalSession(msg.getGlobalSession().getXid());
-                RaftLockManager.LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
+                if (globalSession != null) {
+                    RaftLockManager.LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
+                }
             } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
                 GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
                 raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
+                SessionHolder.getRootSessionManager().removeGlobalSession(globalSession);
             } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
                 GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());
-                BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
-                BranchStatus status = msg.getBranchStatus();
-                branchSession.setStatus(status);
-                raftSessionManager.updateBranchSessionStatus(branchSession, status);
+                if (globalSession != null) {
+                    BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+                    if (branchSession != null) {
+                        BranchStatus status = msg.getBranchStatus();
+                        branchSession.setStatus(status);
+                        raftSessionManager.updateBranchSessionStatus(branchSession, status);
+                    }
+                }
             }
         } else if (raftSyncMsg instanceof RaftOnRequestMsg) {
             RaftOnRequestMsg raftOnRequestMsg = (RaftOnRequestMsg)raftSyncMsg;
             onRequestProcessor.onRequestMessage(null, raftOnRequestMsg.getRpcMessage(), false,
                 raftOnRequestMsg.getRpcContext());
+        } else if (raftSyncMsg instanceof RaftCoreSyncMsg) {
+            RaftCoreSyncMsg coreSyncMsg = (RaftCoreSyncMsg)raftSyncMsg;
+            core.doCommit(coreSyncMsg.getBranchStatusMap(), coreSyncMsg.getXid(), false);
         }
     }
 
@@ -267,4 +298,11 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         this.onRequestProcessor = onRequestProcessor;
     }
 
+    public DefaultCore getCore() {
+        return core;
+    }
+
+    public void setCore(DefaultCore core) {
+        this.core = core;
+    }
 }

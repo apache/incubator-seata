@@ -34,11 +34,6 @@ public class RaftOnRequestMsg extends RaftSyncMsg {
         this.msgType = msgType;
     }
 
-    @Override
-    public MsgType getMsgType() {
-        return this.msgType;
-    }
-
     public RpcMessage getRpcMessage() {
         return rpcMessage;
     }

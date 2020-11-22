@@ -476,4 +476,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         // 3. last destroy SessionHolder
         SessionHolder.destroy();
     }
+
+    public DefaultCore getCore() {
+        return core;
+    }
+
+    public void setCore(DefaultCore core) {
+        this.core = core;
+    }
 }
