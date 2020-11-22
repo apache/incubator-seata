@@ -22,7 +22,7 @@ import io.seata.core.protocol.AbstractMessage;
  *
  * @author slievrly
  */
-public class NettyPoolKey implements java.io.Serializable{
+public class NettyPoolKey implements java.io.Serializable {
 
     private TransactionRole transactionRole;
     private String address;

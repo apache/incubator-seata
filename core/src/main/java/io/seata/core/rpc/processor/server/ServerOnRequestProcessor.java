@@ -185,7 +185,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                     closure.setRpcMessage(rpcMessage);
                     closure.setAbstractResultMessage(results);
                     final Task task = new Task();
-                    RpcContext context=new RpcContext();
+                    RpcContext context = new RpcContext();
                     context.setClientId(rpcContext.getClientId());
                     context.setVersion(rpcContext.getVersion());
                     context.setApplicationId(rpcContext.getApplicationId());

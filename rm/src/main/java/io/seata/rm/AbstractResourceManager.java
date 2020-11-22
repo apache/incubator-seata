@@ -15,6 +15,7 @@
  */
 package io.seata.rm;
 
+import java.util.concurrent.TimeoutException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -31,8 +32,6 @@ import io.seata.core.protocol.transaction.BranchReportResponse;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeoutException;
 
 /**
  * abstract ResourceManager
@@ -55,7 +54,24 @@ public abstract class AbstractResourceManager implements ResourceManager {
      * @throws TransactionException
      */
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+        String applicationData, String lockKeys) throws TransactionException {
+        return branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys, null);
+    }
+
+    /**
+     * registry branch record
+     *
+     * @param branchType the branch type
+     * @param resourceId the resource id
+     * @param clientId   the client id
+     * @param xid        the xid
+     * @param lockKeys   the lock keys
+     * @return
+     * @throws TransactionException
+     */
+    @Override
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys,Long branchId) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
@@ -63,7 +79,9 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
             request.setApplicationData(applicationData);
-
+            if (branchId != null) {
+                request.setBranchId(branchId);
+            }
             BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));

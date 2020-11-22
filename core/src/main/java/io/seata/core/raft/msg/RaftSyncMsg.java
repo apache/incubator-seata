@@ -18,7 +18,7 @@ package io.seata.core.raft.msg;
 /**
  * @author funkye
  */
-public abstract class RaftSyncMsg implements java.io.Serializable {
+public class RaftSyncMsg implements java.io.Serializable {
 
     protected MsgType msgType;
 
@@ -29,6 +29,7 @@ public abstract class RaftSyncMsg implements java.io.Serializable {
     public void setMsgType(MsgType msgType) {
         this.msgType = msgType;
     }
+
     public enum MsgType {
         /**
          * addGlobalSession
