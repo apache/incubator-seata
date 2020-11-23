@@ -30,8 +30,6 @@ seata:
       log-serialization: jackson
       log-table: undo_log
       only-care-update-columns: true
-    log:
-      exceptionRate: 100
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -123,3 +121,5 @@ seata:
       password: ""
     custom:
       name: ""
+  log:
+    exceptionRate: 100

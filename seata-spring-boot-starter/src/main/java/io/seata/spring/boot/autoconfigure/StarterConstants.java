@@ -33,7 +33,7 @@ public interface StarterConstants {
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
-    String LOG_PREFIX = CLIENT_PREFIX + ".log";
+    String LOG_PREFIX = SEATA_PREFIX + ".log";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
