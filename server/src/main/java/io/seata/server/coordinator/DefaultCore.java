@@ -163,7 +163,7 @@ public class DefaultCore implements Core {
         if (shouldCommit) {
             boolean success = doGlobalCommit(globalSession, false);
             //If successful and all remaining branches can be committed asynchronously, do async commit.
-            if (success && !globalSession.getBranchSessions().isEmpty() && globalSession.canBeCommittedAsync()) {
+            if (success && globalSession.hasBranch() && globalSession.canBeCommittedAsync()) {
                 globalSession.asyncCommit();
                 return GlobalStatus.Committed;
             } else {
@@ -184,11 +184,9 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            boolean hasNoBranchsCanBeCommittedAsync = true;
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
-                    hasNoBranchsCanBeCommittedAsync = false;
                     continue;
                 }
 
@@ -238,7 +236,9 @@ public class DefaultCore implements Core {
                     }
                 }
             }
-            if (hasNoBranchsCanBeCommittedAsync && globalSession.hasBranch()) {
+            //If has branch and not all remaining branches can be committed asynchronously,
+            //do print log and return false
+            if (globalSession.hasBranch() && !globalSession.canBeCommittedAsync()) {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
