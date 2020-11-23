@@ -60,6 +60,7 @@ import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.DO_ROLLBACK;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
@@ -285,10 +286,16 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             }
         } else if (raftSyncMsg instanceof RaftOnRequestMsg) {
             RaftOnRequestMsg raftOnRequestMsg = (RaftOnRequestMsg)raftSyncMsg;
+            LOG.info("state machine synchronization,task:{}", raftOnRequestMsg.getMsgType());
             onRequestProcessor.raftOnRequestMessage(raftOnRequestMsg.getRpcMessage(), raftOnRequestMsg.getRpcContext());
         } else if (raftSyncMsg instanceof RaftCoreSyncMsg) {
             RaftCoreSyncMsg coreSyncMsg = (RaftCoreSyncMsg)raftSyncMsg;
-            core.doCommit(coreSyncMsg.getBranchStatusMap(), coreSyncMsg.getXid(), false);
+            LOG.info("state machine synchronization,task:{}", coreSyncMsg.getMsgType());
+            if (coreSyncMsg.getMsgType().equals(DO_ROLLBACK)) {
+                core.doRollback(coreSyncMsg.getBranchStatusMap(), coreSyncMsg.getXid(), false);
+            } else {
+                core.doCommit(coreSyncMsg.getBranchStatusMap(), coreSyncMsg.getXid(), false);
+            }
         }
     }
 

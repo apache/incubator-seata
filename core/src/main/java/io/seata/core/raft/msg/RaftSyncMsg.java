@@ -70,7 +70,11 @@ public class RaftSyncMsg implements java.io.Serializable {
         /**
          * doCommit
          */
-        DO_COMMIT
+        DO_COMMIT,
+        /**
+         * doRollback
+         */
+        DO_ROLLBACK
     }
 
 }

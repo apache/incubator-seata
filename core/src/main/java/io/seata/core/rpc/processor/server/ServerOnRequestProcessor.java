@@ -96,7 +96,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (ChannelManager.isRegistered(ctx.channel())) {
-            if (!RaftServerFactory.getInstance().isRaftMode()) {
+            if (RaftServerFactory.getInstance().isRaftMode()) {
                 if (RaftServerFactory.getInstance().isLeader()) {
                     raftOnRequestMessage(ctx, rpcMessage, true, ChannelManager.getContextFromIdentified(ctx.channel()));
                 } else {

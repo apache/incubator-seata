@@ -50,6 +50,8 @@ import io.seata.server.session.SessionHolder;
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.DO_COMMIT;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.DO_ROLLBACK;
+
 /**
  * The type Default core.
  *
@@ -135,6 +137,7 @@ public class DefaultCore implements Core {
 
     @Override
     public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        LOGGER.info("branchRollback");
         return getCore(branchSession.getBranchType()).branchRollback(globalSession, branchSession);
     }
 
@@ -310,72 +313,80 @@ public class DefaultCore implements Core {
 
     @Override
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
-        boolean success = true;
-        // start rollback event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
-
-        if (globalSession.isSaga()) {
-            success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
+        if (RaftServerFactory.getInstance().getRaftServer() != null) {
+            return doRaftGlobalRollback(globalSession, retrying);
         } else {
-            for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
-                BranchStatus currentBranchStatus = branchSession.getStatus();
-                if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
-                    globalSession.removeBranch(branchSession);
-                    continue;
-                }
-                try {
-                    BranchStatus branchStatus = branchRollback(globalSession, branchSession);
-                    switch (branchStatus) {
-                        case PhaseTwo_Rollbacked:
-                            globalSession.removeBranch(branchSession);
-                            LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
-                            continue;
-                        case PhaseTwo_RollbackFailed_Unretryable:
-                            SessionHelper.endRollbackFailed(globalSession);
-                            LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
-                            return false;
-                        default:
-                            LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
-                            if (!retrying) {
-                                globalSession.queueToRetryRollback();
-                            }
-                            return false;
-                    }
-                } catch (Exception ex) {
-                    StackTraceLogger.error(LOGGER, ex,
-                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
-                    if (!retrying) {
-                        globalSession.queueToRetryRollback();
-                    }
-                    throw new TransactionException(ex);
-                }
-            }
-
-            // In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch
-            // transaction registration when rolling back.
-            // 1. New branch transaction and rollback branch transaction have no data association
-            // 2. New branch transaction has data association with rollback branch transaction
-            // The second query can solve the first problem, and if it is the second problem, it may cause a rollback
-            // failure due to data changes.
-            GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
-            if (globalSessionTwice != null && globalSessionTwice.hasBranch()) {
-                LOGGER.info("Rollbacking global transaction is NOT done, xid = {}.", globalSession.getXid());
-                return false;
-            }
-        }
-        if (success) {
-            SessionHelper.endRollbacked(globalSession);
-
-            // rollbacked event
+            boolean success = true;
+            // start rollback event
             eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                globalSession.getStatus()));
+                globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
 
-            LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+            if (globalSession.isSaga()) {
+                success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
+            } else {
+                for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
+                    BranchStatus currentBranchStatus = branchSession.getStatus();
+                    if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
+                        globalSession.removeBranch(branchSession);
+                        continue;
+                    }
+                    try {
+                        BranchStatus branchStatus = branchRollback(globalSession, branchSession);
+                        switch (branchStatus) {
+                            case PhaseTwo_Rollbacked:
+                                globalSession.removeBranch(branchSession);
+                                LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}",
+                                    globalSession.getXid(), branchSession.getBranchId());
+                                continue;
+                            case PhaseTwo_RollbackFailed_Unretryable:
+                                SessionHelper.endRollbackFailed(globalSession);
+                                LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}",
+                                    globalSession.getXid(), branchSession.getBranchId());
+                                return false;
+                            default:
+                                LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}",
+                                    globalSession.getXid(), branchSession.getBranchId());
+                                if (!retrying) {
+                                    globalSession.queueToRetryRollback();
+                                }
+                                return false;
+                        }
+                    } catch (Exception ex) {
+                        StackTraceLogger.error(LOGGER, ex,
+                            "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
+                            new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                        if (!retrying) {
+                            globalSession.queueToRetryRollback();
+                        }
+                        throw new TransactionException(ex);
+                    }
+                }
+
+                // In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch
+                // transaction registration when rolling back.
+                // 1. New branch transaction and rollback branch transaction have no data association
+                // 2. New branch transaction has data association with rollback branch transaction
+                // The second query can solve the first problem, and if it is the second problem, it may cause a rollback
+                // failure due to data changes.
+                GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
+                if (globalSessionTwice != null && globalSessionTwice.hasBranch()) {
+                    LOGGER.info("Rollbacking global transaction is NOT done, xid = {}.", globalSession.getXid());
+                    return false;
+                }
+            }
+            if (success) {
+                SessionHelper.endRollbacked(globalSession);
+
+                // rollbacked event
+                eventBus.post(
+                    new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                        globalSession.getStatus()));
+
+                LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+            }
+            return success;
         }
-        return success;
     }
 
     @Override
@@ -498,6 +509,8 @@ public class DefaultCore implements Core {
                         doCommit(branchStatusMap, xid, true);
                     }
                 };
+                closure.setBranchStatusMap(branchStatusMap);
+                closure.setXid(globalSession.getXid());
                 final Task task = new Task();
                 RaftCoreSyncMsg msg = new RaftCoreSyncMsg(branchStatusMap, globalSession.getXid());
                 msg.setMsgType(DO_COMMIT);
@@ -509,7 +522,7 @@ public class DefaultCore implements Core {
                 task.setDone(closure);
                 RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
             }
-            if (globalSession.hasBranch()) {
+            if (!isRaftMode && globalSession.hasBranch()) {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
@@ -527,6 +540,182 @@ public class DefaultCore implements Core {
             }
         }
         return success;
+    }
+
+    public boolean doRaftGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        Boolean isRaftMode = RaftServerFactory.getInstance().isRaftMode();
+        if (isRaftMode) {
+            if (!RaftServerFactory.getInstance().isLeader()) {
+                // is not a leader, will not really respond to the client
+                return true;
+            }
+        }
+        boolean success = true;
+        // start rollback event
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+
+        if (globalSession.isSaga()) {
+            throw new TransactionException("saga is not supported for the time being");
+        } else {
+            List<BranchSession> sessionList = globalSession.getReverseSortedBranches();
+            Map<Long, BranchStatus> branchStatusMap = new HashMap<>();
+            for (BranchSession branchSession : sessionList) {
+                BranchStatus currentBranchStatus = branchSession.getStatus();
+                if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
+                    globalSession.removeBranch(branchSession);
+                    continue;
+                }
+                try {
+                    BranchStatus branchStatus = branchRollback(globalSession, branchSession);
+                    if (isRaftMode && !retrying) {
+                        branchStatusMap.put(branchSession.getBranchId(), branchStatus);
+                    } else {
+                        switch (branchStatus) {
+                            case PhaseTwo_Rollbacked:
+                                globalSession.removeBranch(branchSession);
+                                LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}",
+                                    globalSession.getXid(), branchSession.getBranchId());
+                                continue;
+                            case PhaseTwo_RollbackFailed_Unretryable:
+                                SessionHelper.endRollbackFailed(globalSession);
+                                LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}",
+                                    globalSession.getXid(), branchSession.getBranchId());
+                                return false;
+                            default:
+                                LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}",
+                                    globalSession.getXid(), branchSession.getBranchId());
+                                if (!retrying) {
+                                    globalSession.queueToRetryRollback();
+                                }
+                                return false;
+                        }
+                    }
+                } catch (Exception ex) {
+                    StackTraceLogger.error(LOGGER, ex,
+                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}", new String[] {
+                            globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                    if (!retrying) {
+                        globalSession.queueToRetryRollback();
+                    }
+                    throw new TransactionException(ex);
+                }
+
+            }
+            if (!branchStatusMap.isEmpty()) {
+                RaftCoreClosure closure = new RaftCoreClosure() {
+                    Map<Long, BranchStatus> branchStatusMap;
+                    String xid;
+
+                    @Override
+                    public void setBranchStatusMap(Map<Long, BranchStatus> branchStatusMap) {
+                        this.branchStatusMap = branchStatusMap;
+                    }
+
+                    @Override
+                    public void setXid(String xid) {
+                        this.xid = xid;
+                    }
+
+                    @Override
+                    public void run(Status status) {
+                        doRollback(branchStatusMap, xid, true);
+                    }
+                };
+                closure.setBranchStatusMap(branchStatusMap);
+                closure.setXid(globalSession.getXid());
+                final Task task = new Task();
+                RaftCoreSyncMsg msg = new RaftCoreSyncMsg(branchStatusMap, globalSession.getXid());
+                msg.setMsgType(DO_ROLLBACK);
+                try {
+                    task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(msg)));
+                } catch (CodecException e) {
+                    e.printStackTrace();
+                }
+                task.setDone(closure);
+                RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
+            }
+            // In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch
+            // transaction registration when rolling back.
+            // 1. New branch transaction and rollback branch transaction have no data association
+            // 2. New branch transaction has data association with rollback branch transaction
+            // The second query can solve the first problem, and if it is the second problem, it may cause a rollback
+            // failure due to data changes.
+            GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
+            if (!isRaftMode && globalSessionTwice != null && globalSessionTwice.hasBranch()) {
+                LOGGER.info("Rollbacking global transaction is NOT done, xid = {}.", globalSession.getXid());
+                return false;
+            }
+        }
+        if (success) {
+            if(!isRaftMode) {
+                SessionHelper.endRollbacked(globalSession);
+
+                // rollbacked event
+                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                    globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                    globalSession.getStatus()));
+
+                LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+            }
+        }
+        return success;
+    }
+
+    public void doRollback(Map<Long, BranchStatus> branchStatusMap, String xid, boolean leader) {
+        GlobalSession globalSession = SessionHolder.getRootSessionManager().findGlobalSession(xid);
+        if (globalSession == null) {
+            return;
+        }
+        for (Map.Entry<Long, BranchStatus> entry : branchStatusMap.entrySet()) {
+            BranchSession branchSession = globalSession.getBranch(entry.getKey());
+            if (branchSession != null) {
+                BranchStatus branchStatus = entry.getValue();
+                try {
+                    switch (branchStatus) {
+                        case PhaseTwo_Rollbacked:
+                            globalSession.removeBranch(branchSession);
+                            LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}",
+                                globalSession.getXid(), branchSession.getBranchId());
+                            continue;
+                        case PhaseTwo_RollbackFailed_Unretryable:
+                            SessionHelper.endRollbackFailed(globalSession);
+                            LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}",
+                                globalSession.getXid(), branchSession.getBranchId());
+                            return;
+                        default:
+                            LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}",
+                                globalSession.getXid(), branchSession.getBranchId());
+                            globalSession.queueToRetryRollback();
+                            return;
+                    }
+                } catch (Exception ex) {
+                    StackTraceLogger.error(LOGGER, ex,
+                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}", new String[] {
+                            globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                    if (leader) {
+                        try {
+                            globalSession.queueToRetryCommit();
+                        } catch (TransactionException e) {
+                            ex.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+        if (!globalSession.hasBranch()) {
+            try {
+                SessionHelper.endRollbacked(globalSession);
+            } catch (TransactionException e) {
+                e.printStackTrace();
+            }
+            // rollbacked event
+            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                globalSession.getStatus()));
+
+            LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
+        }
     }
 
     public void doCommit(Map<Long, BranchStatus> branchStatusMap, String xid, boolean leader) {
