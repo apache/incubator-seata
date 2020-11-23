@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package io.seata.config;
 
 import java.util.HashMap;
@@ -80,27 +81,27 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     public Configuration proxy(Configuration originalConfiguration) {
         return (Configuration)Enhancer.create(Configuration.class,
-                (MethodInterceptor)(proxy, method, args, methodProxy) -> {
-                    if (method.getName().startsWith(METHOD_PREFIX)
-                            && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
-                        String rawDataId = (String)args[0];
-                        ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                        String type = method.getName().substring(METHOD_PREFIX.length());
-                        if (!ObjectWrapper.supportType(type)) {
-                            type = null;
-                        }
-                        if (null == wrapper) {
-                            Object result = method.invoke(originalConfiguration, args);
-                            wrapper = new ObjectWrapper(result, type);
-                            // The wrapper.data only exists in the cache when it is not null.
-                            if (result != null) {
-                                CONFIG_CACHE.put(rawDataId, wrapper);
-                            }
-                        }
-                        return wrapper.convertData(type);
+            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+                if (method.getName().startsWith(METHOD_PREFIX)
+                        && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                    String rawDataId = (String)args[0];
+                    ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
+                    String type = method.getName().substring(METHOD_PREFIX.length());
+                    if (!ObjectWrapper.supportType(type)) {
+                        type = null;
                     }
-                    return method.invoke(originalConfiguration, args);
-                });
+                    if (null == wrapper) {
+                        Object result = method.invoke(originalConfiguration, args);
+                        wrapper = new ObjectWrapper(result, type);
+                        // The wrapper.data only exists in the cache when it is not null.
+                        if (result != null) {
+                            CONFIG_CACHE.put(rawDataId, wrapper);
+                        }
+                    }
+                    return wrapper.convertData(type);
+                }
+                return method.invoke(originalConfiguration, args);
+            });
     }
 
     private static class ConfigurationCacheInstance {
@@ -157,14 +158,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public static boolean supportType(String type) {
-            if ((INT.equals(type)
+            return INT.equals(type)
                     || BOOLEAN.equals(type)
                     || DURATION.equals(type)
                     || LONG.equals(type)
-                    || SHORT.equals(type))) {
-                return true;
-            }
-            return false;
+                    || SHORT.equals(type);
         }
     }
 
