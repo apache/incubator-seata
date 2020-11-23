@@ -474,7 +474,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
-        GlobalSession session = createGlobalSession(null, applicationId, txServiceGroup, txName, timeout);
+        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
         return session;
     }
 

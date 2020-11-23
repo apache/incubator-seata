@@ -83,7 +83,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
 
     private TransactionMessageHandler transactionMessageHandler;
 
-
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
@@ -97,11 +96,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (ChannelManager.isRegistered(ctx.channel())) {
-            boolean leader = RaftServerFactory.getInstance().isLeader();
-            if (leader) {
-                onRequestMessage(ctx, rpcMessage, true, ChannelManager.getContextFromIdentified(ctx.channel()));
+            if (!RaftServerFactory.getInstance().isRaftMode()) {
+                if (RaftServerFactory.getInstance().isLeader()) {
+                    raftOnRequestMessage(ctx, rpcMessage, true, ChannelManager.getContextFromIdentified(ctx.channel()));
+                } else {
+                    throw new TransactionException("begin fail tc is not leader");
+                }
             } else {
-                throw new TransactionException("begin fail tc is not leader");
+                onRequestMessage(ctx, rpcMessage);
             }
         } else {
             try {
@@ -119,10 +121,47 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
     }
 
-    public void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, boolean leader,
-        RpcContext rpcContext) {
+    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object message = rpcMessage.getBody();
-        if (leader) {
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+        } else {
+            try {
+                BatchLogHandler.INSTANCE.getLogQueue()
+                    .put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                        + rpcContext.getTransactionServiceGroup());
+            } catch (InterruptedException e) {
+                LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
+            }
+        }
+        if (!(message instanceof AbstractMessage)) {
+            return;
+        }
+        if (message instanceof MergedWarpMessage) {
+            AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
+            for (int i = 0; i < results.length; i++) {
+                final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
+                results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
+            }
+            MergeResultMessage resultMessage = new MergeResultMessage();
+            resultMessage.setMsgs(results);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
+        } else {
+            // the single send request message
+            final AbstractMessage msg = (AbstractMessage) message;
+            AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
+        }
+    }
+
+    public void raftOnRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, boolean leader,
+        RpcContext rpcContext) {
+        if (!leader) {
+            raftOnRequestMessage(ctx, rpcMessage, rpcContext);
+        } else {
+            Object message = rpcMessage.getBody();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
                     NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
@@ -138,10 +177,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
             if (!(message instanceof AbstractMessage)) {
                 return;
             }
-        }
 
-        if (message instanceof MergedWarpMessage) {
-            if (leader) {
+            if (message instanceof MergedWarpMessage) {
                 AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage)message).msgs.size()];
                 ((MergedWarpMessage)message).msgs.forEach(msg -> {
                     if (msg instanceof GlobalBeginRequest) {
@@ -150,68 +187,70 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                         ((BranchRegisterRequest)msg).setBranchId(IdWorker.getInstance().nextId());
                     }
                 });
-                AbstractRaftStateMachine machine = RaftServerFactory.getInstance().getStateMachine();
-                if (machine == null) {
-                    execute(ctx, rpcMessage, results);
-                } else {
-                    RaftClosure closure = new RaftClosure() {
-                        ChannelHandlerContext ctx;
-                        RpcMessage rpcMessage;
-                        AbstractResultMessage[] results;
+                RaftClosure closure = new RaftClosure() {
+                    ChannelHandlerContext ctx;
+                    RpcMessage rpcMessage;
+                    AbstractResultMessage[] results;
 
-                        @Override
-                        public void setChannelHandlerContext(ChannelHandlerContext ctx) {
-                            this.ctx = ctx;
-                        }
-
-                        @Override
-                        public void setRpcMessage(RpcMessage rpcMessage) {
-                            this.rpcMessage = rpcMessage;
-                        }
-
-                        @Override
-                        public void setAbstractResultMessage(AbstractResultMessage[] results) {
-                            this.results = results;
-                        }
-
-                        @Override
-                        public void run(Status status) {
-                            if (status.isOk()) {
-                                execute(ctx, rpcMessage, results);
-                            }
-                        }
-                    };
-                    closure.setChannelHandlerContext(ctx);
-                    closure.setRpcMessage(rpcMessage);
-                    closure.setAbstractResultMessage(results);
-                    final Task task = new Task();
-                    RpcContext context = new RpcContext();
-                    context.setClientId(rpcContext.getClientId());
-                    context.setVersion(rpcContext.getVersion());
-                    context.setApplicationId(rpcContext.getApplicationId());
-                    context.setTransactionServiceGroup(rpcContext.getTransactionServiceGroup());
-                    context.setClientRole(rpcContext.getClientRole());
-                    context.setResourceSets(rpcContext.getResourceSets());
-                    RaftOnRequestMsg msg = new RaftOnRequestMsg(SERVER_ON_REQUEST, rpcMessage, false, context);
-                    try {
-                        task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(msg)));
-                    } catch (CodecException e) {
-                        e.printStackTrace();
+                    @Override
+                    public void setChannelHandlerContext(ChannelHandlerContext ctx) {
+                        this.ctx = ctx;
                     }
-                    task.setDone(closure);
-                    RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
+
+                    @Override
+                    public void setRpcMessage(RpcMessage rpcMessage) {
+                        this.rpcMessage = rpcMessage;
+                    }
+
+                    @Override
+                    public void setAbstractResultMessage(AbstractResultMessage[] results) {
+                        this.results = results;
+                    }
+
+                    @Override
+                    public void run(Status status) {
+                        if (status.isOk()) {
+                            execute(ctx, rpcMessage, results);
+                        }
+                    }
+                };
+                closure.setChannelHandlerContext(ctx);
+                closure.setRpcMessage(rpcMessage);
+                closure.setAbstractResultMessage(results);
+                final Task task = new Task();
+                RpcContext context = new RpcContext();
+                context.setClientId(rpcContext.getClientId());
+                context.setVersion(rpcContext.getVersion());
+                context.setApplicationId(rpcContext.getApplicationId());
+                context.setTransactionServiceGroup(rpcContext.getTransactionServiceGroup());
+                context.setClientRole(rpcContext.getClientRole());
+                context.setResourceSets(rpcContext.getResourceSets());
+                RaftOnRequestMsg msg = new RaftOnRequestMsg(SERVER_ON_REQUEST, rpcMessage, false, context);
+                try {
+                    task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(msg)));
+                } catch (CodecException e) {
+                    e.printStackTrace();
                 }
+                task.setDone(closure);
+                RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
             } else {
-                ((MergedWarpMessage)message).msgs
-                    .forEach(subMsg -> transactionMessageHandler.onRequest(subMsg, rpcContext));
+                // the single send request message
+                final AbstractMessage msg = (AbstractMessage)message;
+                AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
+                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             }
+        }
+    }
+
+    public void raftOnRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, RpcContext rpcContext) {
+        Object message = rpcMessage.getBody();
+        if (message instanceof MergedWarpMessage) {
+            ((MergedWarpMessage)message).msgs
+                .forEach(subMsg -> transactionMessageHandler.onRequest(subMsg, rpcContext));
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage)message;
-            AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
-            if (leader) {
-                remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
-            }
+            transactionMessageHandler.onRequest(msg, rpcContext);
         }
     }
 

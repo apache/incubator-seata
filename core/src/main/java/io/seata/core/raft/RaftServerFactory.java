@@ -23,6 +23,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.store.StoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,8 @@ public class RaftServerFactory {
 
     private AbstractRaftStateMachine stateMachine;
 
+    private Boolean raftMode = false;
+
     public static RaftServerFactory getInstance() {
         return SingletonHandler.instance;
     }
@@ -56,6 +59,11 @@ public class RaftServerFactory {
             } else {
                 initConfStr = defaultConf[0];
             }
+        }
+        String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        StoreMode storeMode = StoreMode.get(mode);
+        if (storeMode.equals(StoreMode.RAFT)) {
+            raftMode = true;
         }
         String colon = ":";
         int constantInt = 100 * 10;
@@ -113,6 +121,10 @@ public class RaftServerFactory {
             return true;
         }
         return false;
+    }
+
+    public Boolean isRaftMode() {
+        return raftMode;
     }
 
     private static class SingletonHandler {
