@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author selfishlover
  */
-class GlobalLockTemplateTest {
+public class GlobalLockTemplateTest {
 
     private GlobalLockTemplate template = new GlobalLockTemplate();
 
