@@ -648,12 +648,12 @@ public class DefaultCore implements Core {
             }
         }
         if (success) {
-            if(!isRaftMode) {
+            if (!isRaftMode) {
                 SessionHelper.endRollbacked(globalSession);
 
                 // rollbacked event
-                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                    globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
+                    GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
                     globalSession.getStatus()));
 
                 LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
