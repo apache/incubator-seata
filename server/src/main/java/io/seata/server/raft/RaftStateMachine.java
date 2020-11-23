@@ -285,8 +285,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             }
         } else if (raftSyncMsg instanceof RaftOnRequestMsg) {
             RaftOnRequestMsg raftOnRequestMsg = (RaftOnRequestMsg)raftSyncMsg;
-            onRequestProcessor.onRequestMessage(null, raftOnRequestMsg.getRpcMessage(), false,
-                raftOnRequestMsg.getRpcContext());
+            onRequestProcessor.raftOnRequestMessage(raftOnRequestMsg.getRpcMessage(), raftOnRequestMsg.getRpcContext());
         } else if (raftSyncMsg instanceof RaftCoreSyncMsg) {
             RaftCoreSyncMsg coreSyncMsg = (RaftCoreSyncMsg)raftSyncMsg;
             core.doCommit(coreSyncMsg.getBranchStatusMap(), coreSyncMsg.getXid(), false);

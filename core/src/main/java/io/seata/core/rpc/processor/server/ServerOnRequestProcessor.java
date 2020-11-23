@@ -121,7 +121,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
     }
 
-    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+    public void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object message = rpcMessage.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
@@ -159,7 +159,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
     public void raftOnRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, boolean leader,
         RpcContext rpcContext) {
         if (!leader) {
-            raftOnRequestMessage(ctx, rpcMessage, rpcContext);
+            raftOnRequestMessage(rpcMessage, rpcContext);
         } else {
             Object message = rpcMessage.getBody();
             if (LOGGER.isDebugEnabled()) {
@@ -242,7 +242,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
     }
 
-    public void raftOnRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, RpcContext rpcContext) {
+    public void raftOnRequestMessage(RpcMessage rpcMessage, RpcContext rpcContext) {
         Object message = rpcMessage.getBody();
         if (message instanceof MergedWarpMessage) {
             ((MergedWarpMessage)message).msgs
