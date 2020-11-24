@@ -151,6 +151,16 @@
       "defaultValue": true
     },
     {
+      "name": "seata.client.log.exception-rate",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LogProperties",
+      "deprecation": {
+        "level": "error",
+        "replacement": "seata.log.exception-rate",
+        "reason": "The location of this configuration has been changed to 'seata.log.exception-rate'."
+      }
+    },
+    {
       "name": "seata.log.exception-rate",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LogProperties",

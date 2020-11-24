@@ -8,7 +8,7 @@ seata:
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
-      async-commit-buffer-limit: 1000
+      async-commit-buffer-limit: 10000
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: false
@@ -68,8 +68,8 @@ seata:
     etcd3:
       server-addr: http://localhost:2379
     nacos:
-      namespace:
-      serverAddr: 127.0.0.1:8848
+      namespace: ""
+      server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
       username: ""
       password: ""
@@ -90,7 +90,7 @@ seata:
     consul:
       server-addr: 127.0.0.1:8500
     etcd3:
-      serverAddr: http://localhost:2379
+      server-addr: http://localhost:2379
     eureka:
       weight: 1
       service-url: http://localhost:8761/eureka
@@ -98,20 +98,20 @@ seata:
       application: seata-server
       server-addr: 127.0.0.1:8848
       group : "SEATA_GROUP"
-      namespace:
+      namespace: ""
       username: ""
       password: ""
     redis:
       server-addr: localhost:6379
       db: 0
-      password:
+      password: ""
       timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
-      addressWaitTime: 3000
+      address-wait-time: 3000
       application: default
     zk:
       server-addr: 127.0.0.1:2181
@@ -122,4 +122,4 @@ seata:
     custom:
       name: ""
   log:
-    exceptionRate: 100
+    exception-rate: 100

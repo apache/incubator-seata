@@ -162,7 +162,8 @@ public class DefaultCore implements Core {
 
         if (shouldCommit) {
             boolean success = doGlobalCommit(globalSession, false);
-            if (success && !globalSession.getBranchSessions().isEmpty()) {
+            //If successful and all remaining branches can be committed asynchronously, do async commit.
+            if (success && globalSession.hasBranch() && globalSession.canBeCommittedAsync()) {
                 globalSession.asyncCommit();
                 return GlobalStatus.Committed;
             } else {
@@ -235,11 +236,14 @@ public class DefaultCore implements Core {
                     }
                 }
             }
-            if (globalSession.hasBranch()) {
+            //If has branch and not all remaining branches can be committed asynchronously,
+            //do print log and return false
+            if (globalSession.hasBranch() && !globalSession.canBeCommittedAsync()) {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
         }
+        //If success and there is no branch, end the global transaction.
         if (success && globalSession.getBranchSessions().isEmpty()) {
             SessionHelper.endCommitted(globalSession);
 
