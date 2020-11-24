@@ -15,15 +15,14 @@
  */
 package io.seata.server.storage.raft.lock;
 
-import io.seata.common.loader.EnhancedServiceLoader;
+import java.util.ArrayList;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.raft.RaftServerFactory;
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.core.store.StoreMode;
 import io.seata.server.lock.AbstractLockManager;
-import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
@@ -32,6 +31,7 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.RaftTaskUtil;
 
 
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ACQUIRE_LOCK;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
 
 /**
@@ -40,9 +40,6 @@ import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_
 @LoadLevel(name = "raft")
 public class RaftLockManager extends AbstractLockManager {
 
-    public static final LockManager LOCK_MANAGER =
-        EnhancedServiceLoader.load(LockManager.class, StoreMode.FILE.getName());
-
     @Override
     public Locker getLocker(BranchSession branchSession) {
         return new FileLocker(branchSession);
@@ -50,7 +47,12 @@ public class RaftLockManager extends AbstractLockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
-        return LOCK_MANAGER.acquireLock(branchSession);
+        if (RaftServerFactory.getInstance().isLeader()) {
+            BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
+            RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ACQUIRE_LOCK, branchTransactionDO);
+            RaftTaskUtil.createTask(raftSyncMsg);
+        }
+        return super.acquireLock(branchSession);
     }
 
     @Override
@@ -60,6 +62,13 @@ public class RaftLockManager extends AbstractLockManager {
             RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
             RaftTaskUtil.createTask(raftSyncMsg);
         }
-        return LOCK_MANAGER.releaseGlobalSessionLock(globalSession);
+        ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
+        boolean releaseLockResult = true;
+        for (BranchSession branchSession : branchSessions) {
+            if (!this.releaseLock(branchSession)) {
+                releaseLockResult = false;
+            }
+        }
+        return releaseLockResult;
     }
 }

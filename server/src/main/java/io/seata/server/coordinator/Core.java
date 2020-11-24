@@ -26,9 +26,6 @@ import io.seata.server.session.GlobalSession;
  */
 public interface Core extends TransactionCoordinatorInbound, TransactionCoordinatorOutbound {
 
-    String begin(String xid, String applicationId, String transactionServiceGroup, String name, int timeout)
-        throws TransactionException;
-
     /**
      * Do global commit.
      *

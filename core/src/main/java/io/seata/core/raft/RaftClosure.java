@@ -16,19 +16,39 @@
 package io.seata.core.raft;
 
 import com.alipay.sofa.jraft.Closure;
+import com.alipay.sofa.jraft.Status;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.RpcMessage;
 
 /**
  * @author funkye
  */
-public interface RaftClosure extends Closure {
+public class RaftClosure implements Closure {
+    ChannelHandlerContext ctx;
+    RpcMessage rpcMessage;
+    MergeResultMessage resultMessage;
+    AbstractResultMessage result;
+    public void setChannelHandlerContext(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
+    }
 
-    void setChannelHandlerContext(ChannelHandlerContext ctx);
+    public void setRpcMessage(RpcMessage rpcMessage) {
+        this.rpcMessage = rpcMessage;
+    }
 
-    void setRpcMessage(RpcMessage rpcMessage);
+    public void setMergeResultMessage(MergeResultMessage resultMessage) {
+        this.resultMessage = resultMessage;
+    }
 
-    void setAbstractResultMessage(AbstractResultMessage[] results);
+    public void setAbstractResultMessage(AbstractResultMessage result) {
+        this.result = result;
+    }
+
+    @Override
+    public void run(Status status) {
+    }
 
 }

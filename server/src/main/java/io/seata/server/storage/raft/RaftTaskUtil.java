@@ -20,7 +20,6 @@ import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.entity.Task;
 import io.seata.core.raft.RaftServerFactory;
-import io.seata.server.raft.RaftServerImpl;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 
@@ -44,8 +43,7 @@ public class RaftTaskUtil {
         }
         task.setDone(done == null ? status -> {
         } : done);
-        RaftServerImpl raftServer = (RaftServerImpl)RaftServerFactory.getInstance().getRaftServer();
-        raftServer.getNode().apply(task);
+        RaftServerFactory.getInstance().getRaftServer().getNode().apply(task);
     }
 
 }

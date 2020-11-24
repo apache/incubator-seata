@@ -15,11 +15,6 @@
  */
 package io.seata.core.rpc;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import io.netty.channel.Channel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -28,12 +23,18 @@ import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * The type rpc context.
  *
  * @author slievrly
  */
-public class RpcContext implements java.io.Serializable {
+public class RpcContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcContext.class);
 

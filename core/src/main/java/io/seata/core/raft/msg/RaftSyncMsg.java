@@ -66,15 +66,7 @@ public class RaftSyncMsg implements java.io.Serializable {
         /**
          * ServerOnRequestProcessor
          */
-        SERVER_ON_REQUEST,
-        /**
-         * doCommit
-         */
-        DO_COMMIT,
-        /**
-         * doRollback
-         */
-        DO_ROLLBACK
+        SERVER_ON_REQUEST
     }
 
 }

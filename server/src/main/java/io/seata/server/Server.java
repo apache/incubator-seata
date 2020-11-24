@@ -20,8 +20,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.seata.core.raft.RaftServerFactory;
-import io.seata.server.raft.RaftStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +98,7 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
-        if (RaftServerFactory.getInstance().getStateMachine() != null) {
-            RaftStateMachine machine = (RaftStateMachine)RaftServerFactory.getInstance().getStateMachine();
-            machine.setCore(coordinator.getCore());
-        }
+
         try {
             nettyRemotingServer.init();
         } catch (Throwable e) {

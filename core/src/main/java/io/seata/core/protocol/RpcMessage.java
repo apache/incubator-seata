@@ -15,16 +15,17 @@
  */
 package io.seata.core.protocol;
 
+import io.seata.common.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
-import io.seata.common.util.StringUtils;
 
 /**
  * The type Rpc message.
  *
  * @author slievrly
  */
-public class RpcMessage implements java.io.Serializable {
+public class RpcMessage {
 
     private int id;
     private byte messageType;

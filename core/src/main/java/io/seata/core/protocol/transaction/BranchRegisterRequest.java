@@ -36,8 +36,6 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
 
     private String applicationData;
 
-    private Long branchId;
-
     /**
      * Gets xid.
      *
@@ -138,14 +136,6 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
         return handler.handle(this, rpcContext);
     }
 
-    public Long getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(Long branchId) {
-        this.branchId = branchId;
-    }
-
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
@@ -160,9 +150,6 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
         result.append(",");
         result.append("lockKey=");
         result.append(lockKey);
-        result.append(",");
-        result.append("branchId=");
-        result.append(branchId);
 
         return result.toString();
     }

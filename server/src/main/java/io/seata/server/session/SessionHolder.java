@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import io.seata.core.raft.RaftServerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +35,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
 
 /**
@@ -112,6 +112,8 @@ public class SessionHolder {
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
             if (StoreMode.RAFT.equals(storeMode)) {
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
+                    new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
                 ASYNC_COMMITTING_SESSION_MANAGER =
                     EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                         new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, ASYNC_COMMITTING_SESSION_MANAGER});

@@ -55,6 +55,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
@@ -63,7 +64,6 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 
@@ -155,9 +155,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext)
         throws TransactionException {
-        String xid = core.begin(request.getXid(),rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
-            request.getTransactionName(), request.getTimeout());
-        response.setXid(xid);
+        response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
+            request.getTransactionName(), request.getTimeout()));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction applicationId: {},transactionServiceGroup: {}, transactionName: {},timeout:{},xid:{}",
                 rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout(), response.getXid());
@@ -190,16 +189,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
-        RpcContext rpcContext) throws TransactionException {
-        Long branchId;
-        if (request.getBranchId() != null) {
-            branchId = core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                request.getXid(), request.getApplicationData(), request.getLockKey(), request.getBranchId());
-        } else {
-            branchId = core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                request.getXid(), request.getApplicationData(), request.getLockKey());
-        }
-        response.setBranchId(branchId);
+                                    RpcContext rpcContext) throws TransactionException {
+        response.setBranchId(
+            core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
+                request.getXid(), request.getApplicationData(), request.getLockKey()));
     }
 
     @Override
@@ -475,13 +468,5 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();
-    }
-
-    public DefaultCore getCore() {
-        return core;
-    }
-
-    public void setCore(DefaultCore core) {
-        this.core = core;
     }
 }

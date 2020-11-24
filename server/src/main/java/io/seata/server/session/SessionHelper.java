@@ -44,29 +44,12 @@ public class SessionHelper {
      * @return the branch session
      */
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
-        String applicationData, String lockKeys, String clientId) {
-        return newBranchByGlobal(globalSession, branchType, resourceId, applicationData, lockKeys, clientId,
-            UUIDGenerator.generateUUID());
-    }
-
-    /**
-     * New branch by global branch session.
-     *
-     * @param globalSession the global session
-     * @param branchType    the branch type
-     * @param resourceId    the resource id
-     * @param lockKeys      the lock keys
-     * @param clientId      the client id
-     * @param branchId      the branch id
-     * @return the branch session
-     */
-    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
-        String applicationData, String lockKeys, String clientId, long branchId) {
+            String applicationData, String lockKeys, String clientId) {
         BranchSession branchSession = new BranchSession();
 
         branchSession.setXid(globalSession.getXid());
         branchSession.setTransactionId(globalSession.getTransactionId());
-        branchSession.setBranchId(branchId);
+        branchSession.setBranchId(UUIDGenerator.generateUUID());
         branchSession.setBranchType(branchType);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);

@@ -26,6 +26,7 @@ import io.seata.common.loader.Scope;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.AbstractSessionManager;
@@ -42,6 +43,7 @@ import io.seata.server.storage.raft.RaftTaskUtil;
 
 
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.ADD_GLOBAL_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
@@ -100,7 +102,22 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     }
 
     public void addGlobalSession(GlobalSession globalSession) throws TransactionException {
-        this.fileSessionManager.addGlobalSession(globalSession);
+        if (!RaftServerFactory.getInstance().isLeader()) {
+            throw new TransactionException("this node is not a leader node, so requests are not allowed");
+        }
+        RaftSessionManager raftSessionManager = new RaftSessionManager(globalSession, name, status -> {
+            if (status.isOk()) {
+                try {
+                    getSessionManager().getFileSessionManager().addGlobalSession(globalSession);
+                } catch (TransactionException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
+        raftSyncMsg.setSessionName(this.name);
+        RaftTaskUtil.createTask(raftSessionManager, raftSyncMsg);
     }
 
     @Override
@@ -242,7 +259,6 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                 try {
                     RaftSessionManager manager = getSessionManager();
                     manager.removeGlobalSession(globalSession);
-                    SessionHolder.getRootSessionManager().removeGlobalSession(globalSession);
                 } catch (TransactionException e) {
                     e.printStackTrace();
                 }
@@ -299,6 +315,9 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     }
 
     public void setSessionMap(Map<String, GlobalSession> sessionMap) {
+        if (sessionMap == null || sessionMap.isEmpty()) {
+            return;
+        }
         this.fileSessionManager.setSessionMap(sessionMap);
     }
 

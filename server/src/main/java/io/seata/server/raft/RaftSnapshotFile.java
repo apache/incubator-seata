@@ -48,10 +48,9 @@ public class RaftSnapshotFile {
     public boolean save(final Map<String, Object> value) {
         KryoInnerSerializer kryoInnerSerializer = KryoSerializerFactory.getInstance().get();
         try {
-            byte[] data = kryoInnerSerializer.serialize(value);
-            FileUtils.writeByteArrayToFile(new File(path), data);
+            FileUtils.writeByteArrayToFile(new File(path), kryoInnerSerializer.serialize(value));
             return true;
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error("Fail to save snapshot", e);
             return false;
         } finally {
