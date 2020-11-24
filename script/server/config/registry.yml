@@ -11,8 +11,9 @@ registry:
     namespace: 
     cluster: default
     username: 
-    password: 
-  
+    password:
+    dataId: seataServer.properties
+
   eureka:
     serviceUrl: http://localhost:8761/eureka
     application: default

@@ -68,7 +68,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> configListenersMap
+    private static ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> configListenersMap
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static Properties seataConfig;
 
@@ -286,11 +286,15 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static void initSeataConfig() {
         try {
-            String config = configService.getConfig(getNacosDataId(), getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
+            String nacosDataId = getNacosDataId();
+            String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
             seataConfig = new Properties();
             if (StringUtils.isNotBlank(config)) {
                 seataConfig.load(new ByteArrayInputStream(config.getBytes()));
             }
+
+            NacosListener nacosListener = new NacosListener(nacosDataId, null);
+            configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
         } catch (NacosException | IOException e) {
             LOGGER.error("init config properties error", e);
         }
@@ -330,6 +334,41 @@ public class NacosConfiguration extends AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
+            //新的配置方式，将所有配置放到一个dateId中
+            if (getNacosDataId().equals(dataId)) {
+                Properties seataConfigNew = new Properties();
+                if (StringUtils.isNotBlank(configInfo)) {
+                    try {
+                        seataConfigNew.load(new ByteArrayInputStream(configInfo.getBytes()));
+                    } catch (IOException e) {
+                        LOGGER.error("load config properties error", e);
+                        return;
+                    }
+                }
+
+                //获取所有监听的dataId，判断是否有修改
+                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : configListenersMap.entrySet()) {
+                    String listenedDataId = entry.getKey();
+                    String propertyOld = seataConfig.getProperty(listenedDataId, "");
+                    String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
+                    if (!propertyOld.equals(propertyNew)){
+                        ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                                .setDataId(listenedDataId)
+                                .setNewValue(propertyNew)
+                                .setNamespace(group);
+
+                        ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners = entry.getValue();
+                        for (ConfigurationChangeListener configListener : configListeners.keySet()) {
+                            configListener.onProcessEvent(event);
+                        }
+                    }
+                }
+
+                seataConfig = seataConfigNew;
+                return;
+            }
+
+            //兼容旧的写法
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
                     .setNamespace(group);
             listener.onProcessEvent(event);
