@@ -72,7 +72,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         // The wrapper.data only exists in the cache when it is not null.
         if (null == wrapper || !wrapper.getData().equals(event.getNewValue())) {
             if (StringUtils.isNotBlank(event.getNewValue())) {
-                CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(event.getNewValue(), null));
+                String type = wrapper != null ? wrapper.getType() : null;
+                Object data = new ObjectWrapper(event.getNewValue(), null).convertData(type);
+                CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(data, type));
             } else {
                 CONFIG_CACHE.remove(event.getDataId());
             }
@@ -158,11 +160,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         }
 
         public static boolean supportType(String type) {
-            return INT.equals(type)
-                    || BOOLEAN.equals(type)
-                    || DURATION.equals(type)
-                    || LONG.equals(type)
-                    || SHORT.equals(type);
+            return INT.equalsIgnoreCase(type)
+                    || BOOLEAN.equalsIgnoreCase(type)
+                    || DURATION.equalsIgnoreCase(type)
+                    || LONG.equalsIgnoreCase(type)
+                    || SHORT.equalsIgnoreCase(type);
         }
     }
 
