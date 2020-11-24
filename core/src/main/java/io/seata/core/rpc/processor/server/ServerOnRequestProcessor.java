@@ -75,7 +75,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
 
     private TransactionMessageHandler transactionMessageHandler;
 
-    private Boolean raftMode=false;
+    private Boolean raftMode = false;
 
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
