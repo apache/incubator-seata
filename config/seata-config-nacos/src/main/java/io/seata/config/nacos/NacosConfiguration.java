@@ -334,7 +334,7 @@ public class NacosConfiguration extends AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
-            //新的配置方式，将所有配置放到一个dateId中
+            //The new configuration method to puts all configurations into a dateId
             if (getNacosDataId().equals(dataId)) {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(configInfo)) {
@@ -346,12 +346,12 @@ public class NacosConfiguration extends AbstractConfiguration {
                     }
                 }
 
-                //获取所有监听的dataId，判断是否有修改
+                //Get all the monitored dataids and judge whether it has been modified
                 for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : configListenersMap.entrySet()) {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
-                    if (!propertyOld.equals(propertyNew)){
+                    if (!propertyOld.equals(propertyNew)) {
                         ConfigurationChangeEvent event = new ConfigurationChangeEvent()
                                 .setDataId(listenedDataId)
                                 .setNewValue(propertyNew)
@@ -368,7 +368,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 return;
             }
 
-            //兼容旧的写法
+            //Compatible with old writing
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
                     .setNamespace(group);
             listener.onProcessEvent(event);
