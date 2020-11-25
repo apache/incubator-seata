@@ -37,6 +37,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
+import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
@@ -215,18 +216,20 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     @Override
     public void onLeaderStart(final long term) {
         this.leaderTerm.set(term);
-        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-        Map<String, GlobalSession> retryRollbackingMap =
-            ((RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager()).getSessionMap();
-        Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-        sessionMap.forEach((k, v) -> {
-            GlobalStatus status = v.getStatus();
-            if (status.equals(GlobalStatus.RollbackRetrying) || status.equals(GlobalStatus.Rollbacking)
-                || status.equals(GlobalStatus.TimeoutRollbacking)
-                || status.equals(GlobalStatus.TimeoutRollbackRetrying)) {
-                retryRollbackingMap.putIfAbsent(v.getXid(), v);
-            }
-        });
+        if (RaftServerFactory.getInstance().isRaftMode()) {
+            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
+            Map<String, GlobalSession> retryRollbackingMap =
+                ((RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager()).getSessionMap();
+            Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
+            sessionMap.forEach((k, v) -> {
+                GlobalStatus status = v.getStatus();
+                if (status.equals(GlobalStatus.RollbackRetrying) || status.equals(GlobalStatus.Rollbacking)
+                    || status.equals(GlobalStatus.TimeoutRollbacking)
+                    || status.equals(GlobalStatus.TimeoutRollbackRetrying)) {
+                    retryRollbackingMap.putIfAbsent(v.getXid(), v);
+                }
+            });
+        }
         super.onLeaderStart(term);
     }
 
