@@ -68,9 +68,9 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> configListenersMap
+    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-    private static Properties seataConfig;
+    private static volatile Properties seataConfig;
 
     /**
      * Get instance of NacosConfiguration
@@ -158,7 +158,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
         try {
             NacosListener nacosListener = new NacosListener(dataId, listener);
-            configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+            CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                     .put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
@@ -176,7 +176,7 @@ public class NacosConfiguration extends AbstractConfiguration {
             for (ConfigurationChangeListener entry : configChangeListeners) {
                 if (listener.equals(entry)) {
                     NacosListener nacosListener = null;
-                    Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+                    Map<ConfigurationChangeListener, NacosListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
                     if (configListeners != null) {
                         nacosListener = configListeners.get(listener);
                         configListeners.remove(entry);
@@ -192,7 +192,7 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        Map<ConfigurationChangeListener, NacosListener> configListeners = configListenersMap.get(dataId);
+        Map<ConfigurationChangeListener, NacosListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
         if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
@@ -347,7 +347,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 }
 
                 //Get all the monitored dataids and judge whether it has been modified
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : configListenersMap.entrySet()) {
+                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
