@@ -27,7 +27,6 @@ import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
-import com.alipay.sofa.jraft.error.RaftException;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.jraft.util.Utils;
@@ -214,15 +213,21 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
 
     @Override
-    public void onError(final RaftException e) {
-        LOG.error("Raft error: {}", e, e);
-    }
-
-    @Override
     public void onLeaderStart(final long term) {
         this.leaderTerm.set(term);
+        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
+        Map<String, GlobalSession> retryRollbackingMap =
+            ((RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager()).getSessionMap();
+        Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
+        sessionMap.forEach((k, v) -> {
+            GlobalStatus status = v.getStatus();
+            if (status.equals(GlobalStatus.RollbackRetrying) || status.equals(GlobalStatus.Rollbacking)
+                || status.equals(GlobalStatus.TimeoutRollbacking)
+                || status.equals(GlobalStatus.TimeoutRollbackRetrying)) {
+                retryRollbackingMap.putIfAbsent(v.getXid(), v);
+            }
+        });
         super.onLeaderStart(term);
-
     }
 
     @Override
