@@ -17,6 +17,9 @@ package io.seata.config.nacos;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
@@ -70,7 +73,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-    private static volatile Properties seataConfig;
+    private static volatile Properties seataConfig = new Properties();
 
     /**
      * Get instance of NacosConfiguration
@@ -288,13 +291,13 @@ public class NacosConfiguration extends AbstractConfiguration {
         try {
             String nacosDataId = getNacosDataId();
             String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
-            seataConfig = new Properties();
             if (StringUtils.isNotBlank(config)) {
-                seataConfig.load(new ByteArrayInputStream(config.getBytes()));
+                try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
+                    seataConfig.load(reader);
+                }
+                NacosListener nacosListener = new NacosListener(nacosDataId, null);
+                configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
             }
-
-            NacosListener nacosListener = new NacosListener(nacosDataId, null);
-            configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
         } catch (NacosException | IOException e) {
             LOGGER.error("init config properties error", e);
         }
@@ -338,8 +341,8 @@ public class NacosConfiguration extends AbstractConfiguration {
             if (getNacosDataId().equals(dataId)) {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(configInfo)) {
-                    try {
-                        seataConfigNew.load(new ByteArrayInputStream(configInfo.getBytes()));
+                    try (Reader reader = new InputStreamReader(new ByteArrayInputStream(configInfo.getBytes()), StandardCharsets.UTF_8)) {
+                        seataConfigNew.load(reader);
                     } catch (IOException e) {
                         LOGGER.error("load config properties error", e);
                         return;
