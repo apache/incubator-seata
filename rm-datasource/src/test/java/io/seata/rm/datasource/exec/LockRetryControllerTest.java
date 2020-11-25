@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author selfishlover
  */
-class LockRetryControllerTest {
+public class LockRetryControllerTest {
 
     private GlobalLockConfig config;
 
