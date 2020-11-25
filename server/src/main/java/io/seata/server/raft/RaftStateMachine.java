@@ -137,8 +137,11 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         Map<String, byte[]> sessionByteMap = new HashMap<>();
         sessionMap.forEach((k, v) -> sessionByteMap.put(v.getXid(), v.encode()));
         maps.put(ROOT_SESSION_MANAGER_NAME, sessionByteMap);
-        maps.put("LOCK_MAP", FileLocker.LOCK_MAP);
-        LOG.info("sessionmap size:{},lock map size:{}",sessionMap.size(), FileLocker.LOCK_MAP.size());
+        ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
+            ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>>
+            LOCK_MAP = FileLocker.LOCK_MAP;
+        maps.put("LOCK_MAP", LOCK_MAP);
+        LOG.info("sessionmap size:{},lock map size:{}",sessionMap.size(), LOCK_MAP.size());
         if (maps.isEmpty()) {
             return;
         }
@@ -175,7 +178,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
             FileLocker.LOCK_MAP.putAll((Map<? extends String,
                 ? extends ConcurrentMap<String, ConcurrentMap<Integer, FileLocker.BucketLockMap>>>)maps
-                .get("LOCK_MAP"));
+                    .get("LOCK_MAP"));
             Map<String, byte[]> sessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
             if (!sessionByteMap.isEmpty()) {
@@ -232,8 +235,10 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         RaftSessionSyncMsg.MsgType msgType = msg.getMsgType();
         SessionManager sessionManager = null;
         String sessionName = msg.getSessionName();
+        Boolean rootManager = false;
         if (Objects.equals(sessionName, ROOT_SESSION_MANAGER_NAME)) {
             sessionManager = SessionHolder.getRootSessionManager();
+            rootManager = true;
         } else if (Objects.equals(sessionName, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
             sessionManager = SessionHolder.getAsyncCommittingSessionManager();
         } else if (Objects.equals(sessionName, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
@@ -245,7 +250,13 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         LOG.info("state machine synchronization,task:{},sessionManager:{}", msgType,
             sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
         if (ADD_GLOBAL_SESSION.equals(msgType)) {
-            GlobalSession globalSession = SessionConverter.convertGlobalSession(msg.getGlobalSession());
+            GlobalSession globalSession;
+            if (!rootManager) {
+                globalSession =
+                    SessionHolder.getRootSessionManager().findGlobalSession(msg.getGlobalSession().getXid());
+            } else {
+                globalSession = SessionConverter.convertGlobalSession(msg.getGlobalSession());
+            }
             raftSessionManager.getFileSessionManager().addGlobalSession(globalSession);
         } else if (ACQUIRE_LOCK.equals(msgType)) {
             GlobalSession globalSession =
@@ -285,11 +296,13 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             GlobalSession globalSession =
                 SessionHolder.getRootSessionManager().findGlobalSession(msg.getGlobalSession().getXid());
             if (globalSession != null) {
-                Boolean status = raftLockManager.releaseGlobalSessionLock(globalSession);
+                raftLockManager.releaseGlobalSessionLock(globalSession);
             }
         } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
             GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-            raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
+            if (globalSession != null) {
+                raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
+            }
         } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
             GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());
             BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
