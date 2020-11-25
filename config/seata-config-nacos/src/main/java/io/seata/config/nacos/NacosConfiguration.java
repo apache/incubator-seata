@@ -129,8 +129,12 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            seataConfig.setProperty(dataId, content);
-            result = configService.publishConfig(getNacosDataId(), getNacosGroup(), getSeataConfigStr());
+            if (!seataConfig.isEmpty()) {
+                seataConfig.setProperty(dataId, content);
+                result = configService.publishConfig(getNacosDataId(), getNacosGroup(), getSeataConfigStr());
+            } else {
+                result = configService.publishConfig(dataId, getNacosGroup(), content);
+            }
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -146,8 +150,12 @@ public class NacosConfiguration extends AbstractConfiguration {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            seataConfig.remove(dataId);
-            result = configService.publishConfig(getNacosDataId(), getNacosGroup(), getSeataConfigStr());
+            if (!seataConfig.isEmpty()) {
+                seataConfig.remove(dataId);
+                result = configService.publishConfig(getNacosDataId(), getNacosGroup(), getSeataConfigStr());
+            } else {
+                result = configService.removeConfig(dataId, getNacosGroup());
+            }
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
