@@ -94,13 +94,13 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     }
                     if (null == wrapper) {
                         Object result = method.invoke(originalConfiguration, args);
-                        wrapper = new ObjectWrapper(result, type);
                         // The wrapper.data only exists in the cache when it is not null.
                         if (result != null) {
+                            wrapper = new ObjectWrapper(result, type);
                             CONFIG_CACHE.put(rawDataId, wrapper);
                         }
                     }
-                    return wrapper.convertData(type);
+                    return wrapper == null ? null : wrapper.convertData(type);
                 }
                 return method.invoke(originalConfiguration, args);
             });
