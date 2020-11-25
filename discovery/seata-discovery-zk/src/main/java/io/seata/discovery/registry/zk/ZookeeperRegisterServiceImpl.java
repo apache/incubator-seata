@@ -260,6 +260,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         // recover client
         if (!LISTENER_SERVICE_MAP.isEmpty()) {
             Map<String, List<IZkChildListener>> listenerMap = new HashMap<>(LISTENER_SERVICE_MAP);
+            LISTENER_SERVICE_MAP.clear();
             for (Map.Entry<String, List<IZkChildListener>> listenerEntry : listenerMap.entrySet()) {
                 List<IZkChildListener> iZkChildListeners = listenerEntry.getValue();
                 if (CollectionUtils.isEmpty(iZkChildListeners)) {
