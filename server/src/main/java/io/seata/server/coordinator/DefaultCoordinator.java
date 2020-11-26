@@ -20,10 +20,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -66,6 +62,8 @@ import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Default coordinator.
@@ -271,7 +269,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
                 // prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking)
+                    && !rollbackingSession.isRollbackingDead()) {
                     continue;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {

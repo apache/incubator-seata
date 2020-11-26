@@ -42,6 +42,7 @@ import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
@@ -223,10 +224,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
             sessionMap.forEach((k, v) -> {
                 GlobalStatus status = v.getStatus();
-                if (status.equals(GlobalStatus.RollbackRetrying) || status.equals(GlobalStatus.Rollbacking)
-                    || status.equals(GlobalStatus.TimeoutRollbacking)
-                    || status.equals(GlobalStatus.TimeoutRollbackRetrying)) {
-                    retryRollbackingMap.putIfAbsent(v.getXid(), v);
+                if (status == GlobalStatus.RollbackRetrying || status == GlobalStatus.Rollbacking
+                    || status == GlobalStatus.TimeoutRollbacking || status == GlobalStatus.TimeoutRollbackRetrying) {
+                    retryRollbackingMap.computeIfAbsent(v.getXid(), session -> {
+                        v.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+                        return v;
+                    });
                 }
             });
         }
@@ -298,8 +301,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             }
         } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
             GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-            BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
-            raftSessionManager.removeBranchSession(globalSession, branchSession);
+            if (globalSession != null) {
+                BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+                if (branchSession != null) {
+                    raftSessionManager.removeBranchSession(globalSession, branchSession);
+                }
+            }
         } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
             GlobalSession globalSession =
                 SessionHolder.getRootSessionManager().findGlobalSession(msg.getGlobalSession().getXid());
@@ -309,7 +316,26 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
             GlobalSession globalSession = sessionManager.findGlobalSession(msg.getGlobalSession().getXid());
             if (globalSession != null) {
-                raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
+                if (globalSession != null) {
+                    if (rootManager) {
+                        GlobalStatus status = globalSession.getStatus();
+                        switch (status) {
+                            case Rollbacked:
+                                SessionHelper.endRollbacked(globalSession);
+                                break;
+                            case Committed:
+                                SessionHelper.endCommitted(globalSession);
+                                break;
+                            case CommitFailed:
+                                SessionHelper.endCommitFailed(globalSession);
+                                break;
+                            case RollbackFailed:
+                                SessionHelper.endRollbackFailed(globalSession);
+                                break;
+                        }
+                    }
+                    raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
+                }
             }
         } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
             GlobalSession globalSession = sessionManager.findGlobalSession(msg.getBranchSession().getXid());

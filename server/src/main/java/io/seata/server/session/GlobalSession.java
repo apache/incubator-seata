@@ -221,7 +221,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @param sessionLifecycleListener the session lifecycle listener
      */
     public void addSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
-        lifecycleListeners.add(sessionLifecycleListener);
+        if (!lifecycleListeners.contains(sessionLifecycleListener)) {
+            lifecycleListeners.add(sessionLifecycleListener);
+        }
     }
 
     /**

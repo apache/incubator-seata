@@ -80,7 +80,7 @@ public class RaftServerFactory {
         // Close the CLI service.
         nodeOptions.setDisableCli(false);
         // Snapshot should be made every 30 seconds
-        nodeOptions.setSnapshotIntervalSecs(10);
+        nodeOptions.setSnapshotIntervalSecs(60);
         // analytic parameter
         final PeerId serverId = new PeerId();
         if (!serverId.parse(serverIdStr)) {
