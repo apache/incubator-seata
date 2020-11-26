@@ -108,6 +108,26 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    public void testSimpleStateMachineWithChoiceNoDefault() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("a", 3);
+
+        String stateMachineName = "simpleChoiceNoDefaultTestStateMachine";
+
+        try {
+            stateMachineEngine.start(stateMachineName, null, paramMap);
+        } catch (EngineExecutionException e) {
+            e.printStackTrace(System.out);
+            Assertions.assertNotNull(e);
+        }
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+    }
+
+    @Test
     public void testSimpleStateMachineWithChoiceAndEnd() {
 
         long start = System.currentTimeMillis();
