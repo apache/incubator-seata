@@ -65,4 +65,11 @@ public class NamedThreadFactoryTest {
                 .isEqualTo(thread.getName());
         }
     }
+    @Test
+    public void testNamedThreadFactoryWithSecurityManager() {
+        NamedThreadFactory factory = new NamedThreadFactory("testThreadGroup", true);
+        Thread thread = factory.newThread(() -> {});
+        assertThat(thread.getThreadGroup()).isNotNull();
+    }
+
 }
