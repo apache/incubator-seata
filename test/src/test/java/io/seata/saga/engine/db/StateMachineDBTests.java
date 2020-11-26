@@ -121,7 +121,6 @@ public class StateMachineDBTests extends AbstractServerTest {
         try {
             stateMachineEngine.start(stateMachineName, null, paramMap);
         } catch (EngineExecutionException e) {
-            Assertions.assertNotNull(e);
             Assertions.assertTrue(FrameworkErrorCode.StateMachineNoChoiceMatched.equals(e.getErrcode()));
             e.printStackTrace(System.out);
         }
