@@ -170,7 +170,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
             return null;
         }
-        StringBuffer columnNamesStr = new StringBuffer();
+        StringBuilder columnNamesStr = new StringBuilder();
         for (int i = 0; i < columnNameList.size(); i++) {
             if (i > 0) {
                 columnNamesStr.append(" , ");

@@ -106,9 +106,15 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             RootContext.bindBranchType(BranchType.SAGA);
 
             // save to db
-            machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
-            executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType),
-                    STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT, machineInstance);
+            try {
+                machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
+                executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType),
+                        STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT, machineInstance);
+            } catch (Exception e) {
+                RootContext.unbind();
+                RootContext.unbindBranchType();
+                throw e;
+            }
         }
     }
 
