@@ -145,7 +145,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 RaftClosure closure = new RaftClosure() {
                     @Override
                     public void run(Status status) {
-                        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
+                        if (status.isOk()) {
+                            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
+                        }
                     }
                 };
                 closure.setChannelHandlerContext(ctx);
@@ -165,7 +167,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 RaftClosure closure = new RaftClosure() {
                     @Override
                     public void run(Status status) {
-                        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
+                        if(status.isOk()) {
+                            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
+                        }
                     }
                 };
                 closure.setChannelHandlerContext(ctx);
