@@ -38,7 +38,7 @@ public class PropertyBeanPostProcessorTest {
 
     @Bean
     public SeataProperties seataProperties() {
-        SeataProperties seataProperties=new SeataProperties();
+        SeataProperties seataProperties = new SeataProperties();
         seataProperties.setApplicationId("test-id");
         return seataProperties;
     }
@@ -50,9 +50,9 @@ public class PropertyBeanPostProcessorTest {
 
     @Test
     public void testCompletePropertyBean() throws ExecutionException, InterruptedException, TimeoutException {
-        Object object=PROPERTY_BEAN_MAP.get(SEATA_PREFIX).get(3, TimeUnit.SECONDS);
+        Object object = PROPERTY_BEAN_MAP.get(SEATA_PREFIX).get(3, TimeUnit.SECONDS);
         Assertions.assertThat(object).isInstanceOf(SeataProperties.class);
-        SeataProperties seataProperties= (SeataProperties) object;
+        SeataProperties seataProperties = (SeataProperties) object;
         Assertions.assertThat(seataProperties.getApplicationId()).isEqualTo("test-id");
     }
 
