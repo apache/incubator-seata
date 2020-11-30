@@ -89,7 +89,7 @@ public class PropertiesTest {
     public void testRmProperties() {
         assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
-        assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
+        assertTrue(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
     }
 
