@@ -19,6 +19,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import io.seata.config.Configuration;
@@ -31,11 +35,36 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
 import static io.seata.common.util.StringFormatUtils.DOT;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSUL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -43,6 +72,39 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBootConfigurationProvider.class);
     private static final String INTERCEPT_METHOD_PREFIX = "get";
+
+    static {
+        PROPERTY_BEAN_MAP.putIfAbsent(SEATA_PREFIX, new CompletableFuture<>());
+
+        PROPERTY_BEAN_MAP.putIfAbsent(CLIENT_RM_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CLIENT_TM_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(LOCK_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(SERVICE_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(SHUTDOWN_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(THREAD_FACTORY_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(UNDO_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(LOG_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(TRANSPORT_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_FILE_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_PREFIX, new CompletableFuture<>());
+
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_NACOS_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_CONSUL_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_ZK_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_APOLLO_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_ETCD3_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_CUSTOM_PREFIX, new CompletableFuture<>());
+
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_CONSUL_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_ETCD3_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_EUREKA_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_NACOS_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_REDIS_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_SOFA_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_ZK_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_CUSTOM_PREFIX, new CompletableFuture<>());
+    }
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
@@ -74,12 +136,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         });
     }
 
-    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException {
+    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException, ExecutionException, InterruptedException, TimeoutException {
         return get(dataId, defaultValue);
 
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException {
+    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, ExecutionException, InterruptedException, TimeoutException {
         Object result = get(dataId);
         if (result == null) {
             return defaultValue;
@@ -87,10 +149,11 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException {
+    private Object get(String dataId) throws IllegalAccessException, ExecutionException, InterruptedException, TimeoutException {
         String propertyPrefix = getPropertyPrefix(dataId);
-        Object propertyObject = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        if (propertyObject != null) {
+        CompletableFuture<Object> propertyFuture = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        if (propertyFuture != null) {
+            Object propertyObject = propertyFuture.get(10000, TimeUnit.MILLISECONDS);
             String propertySuffix = getPropertySuffix(dataId);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
@@ -107,7 +170,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         } else {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Property bean with prefix '{}' was not found in `StarterConstants.PROPERTY_BEAN_MAP`."
-                        + " Please inform the {} committer to fix this BUG.", propertyPrefix, SEATA_PREFIX);
+                    + " Please inform the {} committer to fix this BUG.", propertyPrefix, SEATA_PREFIX);
             }
         }
         return null;
