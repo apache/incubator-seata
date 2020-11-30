@@ -25,7 +25,7 @@ public interface ConfigurationKeys {
     /**
      * The constant SEATA_PREFIX.
      */
-    public static final String SEATA_PREFIX = "seata.";
+    String SEATA_PREFIX = "seata.";
 
     /**
      * The constant SERVICE_PREFIX.
@@ -341,14 +341,14 @@ public interface ConfigurationKeys {
      */
     String TRANSACTION_UNDO_LOG_TABLE = CLIENT_UNDO_PREFIX + "logTable";
     /**
-     * The constant CLIENT_LOG_PREFIX
+     * The constant LOG_PREFIX
      */
-    String CLIENT_LOG_PREFIX = CLIENT_PREFIX + "log.";
+    String LOG_PREFIX = "log.";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_EXCEPTION_RATE
      */
-    String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_LOG_PREFIX + "exceptionRate";
+    String TRANSACTION_LOG_EXCEPTION_RATE = LOG_PREFIX + "exceptionRate";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
