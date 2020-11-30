@@ -42,13 +42,13 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineParserImpl.class);
 
+    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
+
     public StateMachineParserImpl(String jsonParserName) {
         if (StringUtils.isNotBlank(jsonParserName)) {
             this.jsonParserName = jsonParserName;
         }
     }
-
-    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
 
     @Override
     public StateMachine parse(String json) {
