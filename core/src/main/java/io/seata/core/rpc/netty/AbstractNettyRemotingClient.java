@@ -121,7 +121,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     public static InetSocketAddress leaderAddress;
     private static CliClientServiceImpl cliClientService;
     private static List<InetSocketAddress> addressList;
-    private Lock lock = new ReentrantLock();
 
     @Override
     public void init() {
@@ -142,16 +141,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 cliClientService.init(new CliOptions());
                 findLeader();
                 // The leader election takes 1 second
-                int cycle = 500;
-                findLeaderExecutor.scheduleAtFixedRate(() -> {
-                    if (lock.tryLock()) {
-                        try {
-                            findLeader();
-                        } finally {
-                            lock.unlock();
-                        }
-                    }
-                }, cycle, cycle, TimeUnit.MILLISECONDS);
+                int cycle = 10 * 50;
+                findLeaderExecutor.scheduleAtFixedRate(() -> findLeader(), cycle, cycle, TimeUnit.MILLISECONDS);
             }
         }
         super.init();
@@ -543,13 +534,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             try {
                 if (!RouteTable.getInstance().refreshLeader(cliClientService, SEATA_RAFT_GROUP, defaultValue).isOk()) {
                     if (LOGGER.isErrorEnabled()) {
-                        LOGGER.error("Refresh leader failed");
+                        LOGGER.error("refresh leader failed");
                     }
                     return;
                 }
             } catch (Exception e) {
                 if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error("Refresh leader failed,{}", e.getMessage());
+                    LOGGER.error("refresh leader failed,error msg: {}", e.getMessage());
                 }
             }
             PeerId leader = RouteTable.getInstance().selectLeader(SEATA_RAFT_GROUP);
