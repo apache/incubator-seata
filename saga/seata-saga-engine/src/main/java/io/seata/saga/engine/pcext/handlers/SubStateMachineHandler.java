@@ -190,7 +190,8 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
 
             return engine.forward(subInstId, startParams);
         } else {
-            return startNewStateMachine(startParams, engine, stateInstance, subStateMachine);
+            originalStateInst.setStateMachineInstance(stateInstance.getStateMachineInstance());
+            return startNewStateMachine(startParams, engine, originalStateInst, subStateMachine);
         }
     }
 
