@@ -20,6 +20,8 @@ package io.seata.core.raft.msg;
  */
 public class RaftSyncMsg implements java.io.Serializable {
 
+    private static final long serialVersionUID = 8225279734319945365L;
+
     protected MsgType msgType;
 
     public MsgType getMsgType() {

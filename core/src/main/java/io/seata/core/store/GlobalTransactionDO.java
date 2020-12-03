@@ -25,6 +25,8 @@ import io.seata.common.util.StringUtils;
  */
 public class GlobalTransactionDO implements java.io.Serializable {
 
+    private static final long serialVersionUID = -6770955173129666389L;
+
     private String xid;
 
     private Long transactionId;

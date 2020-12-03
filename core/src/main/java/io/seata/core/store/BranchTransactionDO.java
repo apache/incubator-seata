@@ -27,6 +27,8 @@ import io.seata.core.model.BranchStatus;
  */
 public class BranchTransactionDO implements java.io.Serializable {
 
+    private static final long serialVersionUID = -2108665795230590896L;
+
     private String xid;
 
     private Long transactionId;
