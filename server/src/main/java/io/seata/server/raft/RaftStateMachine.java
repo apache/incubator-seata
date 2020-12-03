@@ -304,6 +304,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             if (globalSession != null) {
                 BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
                 if (branchSession != null) {
+                    globalSession.removeBranch(branchSession);
                     raftSessionManager.removeBranchSession(globalSession, branchSession);
                 }
             }
