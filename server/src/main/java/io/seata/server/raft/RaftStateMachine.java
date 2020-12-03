@@ -73,7 +73,7 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
  */
 public class RaftStateMachine extends AbstractRaftStateMachine {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RaftStateMachine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
     /**
      * Leader term
@@ -116,7 +116,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                         onExecuteRaft(msg);
                     }
                 } catch (Exception e) {
-                    LOG.error("Message synchronization failure", e);
+                    LOGGER.error("Message synchronization failure", e);
                 }
             }
             if (processor != null) {
@@ -142,7 +142,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>>
             LOCK_MAP = FileLocker.LOCK_MAP;
         maps.put("LOCK_MAP", LOCK_MAP);
-        LOG.info("sessionmap size:{},lock map size:{}",sessionMap.size(), LOCK_MAP.size());
+        LOGGER.info("sessionmap size:{},lock map size:{}",sessionMap.size(), LOCK_MAP.size());
         if (maps.isEmpty()) {
             return;
         }
@@ -166,11 +166,11 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             return false;
         }
         if (isLeader()) {
-            LOG.warn("Leader is not supposed to load snapshot");
+            LOGGER.warn("Leader is not supposed to load snapshot");
             return false;
         }
         if (reader.getFileMeta("data") == null) {
-            LOG.error("Fail to find data file in {}", reader.getPath());
+            LOGGER.error("Fail to find data file in {}", reader.getPath());
             return false;
         }
         final RaftSnapshotFile snapshot = new RaftSnapshotFile(reader.getPath() + File.separator + "data");
@@ -207,7 +207,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             }
             return true;
         } catch (final Exception e) {
-            LOG.error("Fail to load snapshot from {}", snapshot.getPath());
+            LOGGER.error("Fail to load snapshot from {}", snapshot.getPath());
             return false;
         }
 
@@ -258,7 +258,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             sessionManager = SessionHolder.getRetryRollbackingSessionManager();
         }
         RaftSessionManager raftSessionManager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
-        LOG.info("state machine synchronization,task:{},sessionManager:{}", msgType,
+        LOGGER.info("state machine synchronization,task:{},sessionManager:{}", msgType,
             sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
         if (ADD_GLOBAL_SESSION.equals(msgType)) {
             GlobalSession globalSession;

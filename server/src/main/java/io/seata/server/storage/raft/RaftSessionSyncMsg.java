@@ -26,6 +26,8 @@ import io.seata.core.store.GlobalTransactionDO;
  */
 public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializable {
 
+    private static final long serialVersionUID = -6737504033652157760L;
+
     GlobalTransactionDO globalSession;
 
     BranchTransactionDO branchSession;

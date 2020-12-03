@@ -558,4 +558,9 @@ public interface ConfigurationKeys {
      */
     String SERVER_RAFT_CLUSTER = SERVER_RAFT + "cluster";
 
+    /**
+     * The constant SERVER_RAFT_SNAPSHOT_INTERVAL.
+     */
+    String SERVER_RAFT_SNAPSHOT_INTERVAL = SERVER_RAFT + "snapshotInterval";
+
 }

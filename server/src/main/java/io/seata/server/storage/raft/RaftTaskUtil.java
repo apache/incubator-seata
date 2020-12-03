@@ -21,6 +21,8 @@ import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import io.seata.core.raft.RaftServerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
@@ -29,6 +31,8 @@ import static com.alipay.remoting.serialization.SerializerManager.Hessian2;
  * @author funkye
  */
 public class RaftTaskUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftTaskUtil.class);
 
     public static void createTask(Object data) {
         createTask(null, data);
@@ -39,7 +43,7 @@ public class RaftTaskUtil {
         try {
             task.setData(ByteBuffer.wrap(SerializerManager.getSerializer(Hessian2).serialize(data)));
         } catch (CodecException e) {
-            e.printStackTrace();
+            LOGGER.error("createTask fail,error msg:{}", e.getMessage(), e);
         }
         task.setDone(done == null ? status -> {
         } : done);

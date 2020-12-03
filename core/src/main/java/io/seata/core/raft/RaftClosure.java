@@ -27,10 +27,15 @@ import io.seata.core.protocol.RpcMessage;
  * @author funkye
  */
 public class RaftClosure implements Closure {
+
     ChannelHandlerContext ctx;
+
     RpcMessage rpcMessage;
+
     MergeResultMessage resultMessage;
+
     AbstractResultMessage result;
+
     public void setChannelHandlerContext(ChannelHandlerContext ctx) {
         this.ctx = ctx;
     }

@@ -20,10 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
@@ -37,6 +33,12 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static java.io.File.separator;
 
 /**
  * The type Session holder.
@@ -68,11 +70,6 @@ public class SessionHolder {
      */
     public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
 
-    /**
-     * The default session store dir
-     */
-    public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
-
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
@@ -99,7 +96,7 @@ public class SessionHolder {
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.RAFT.equals(storeMode) || StoreMode.FILE.equals(storeMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                + "/" + XID.getPort();
+                + separator + XID.getPort();
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
@@ -148,11 +145,7 @@ public class SessionHolder {
         }
 
         Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
-        try {
-            RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
         if (!RaftServerFactory.getInstance().isLeader()) {
             return;
         }

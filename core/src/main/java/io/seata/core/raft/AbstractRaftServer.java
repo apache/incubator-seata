@@ -31,4 +31,6 @@ public abstract class AbstractRaftServer implements RaftServer {
 
     public abstract Node getNode();
 
+    public abstract AbstractRaftStateMachine getAbstractRaftStateMachine();
+
 }

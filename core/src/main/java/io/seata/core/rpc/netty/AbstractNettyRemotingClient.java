@@ -28,8 +28,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
@@ -75,6 +73,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -513,7 +512,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             StringBuilder stringBuilder = new StringBuilder();
             String seg = ",";
             int i = 0;
-            int defaultValue = 1000;
+            int defaultValue = DEFAULT_RAFT_PORT_INTERVAL;
             while (i < inetSocketAddressList.size()) {
                 InetSocketAddress inetSocketAddress = inetSocketAddressList.get(i);
                 stringBuilder.append(inetSocketAddress.getAddress().getHostAddress().replace("/", "") + ":"

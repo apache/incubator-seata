@@ -71,6 +71,8 @@ store {
 server {
   raft{
     cluster = ""
+    #snapshot interval units are seconds
+    snapshotInterval = 30;
   }
   recovery {
     #schedule committing retry period in milliseconds

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RaftSnapshotFile {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RaftSnapshotFile.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftSnapshotFile.class);
 
     private String path;
 
@@ -51,7 +51,7 @@ public class RaftSnapshotFile {
             FileUtils.writeByteArrayToFile(new File(path), kryoInnerSerializer.serialize(value));
             return true;
         } catch (IOException e) {
-            LOG.error("Fail to save snapshot", e);
+            LOGGER.error("Fail to save snapshot", e);
             return false;
         } finally {
             KryoSerializerFactory.getInstance().returnKryo(kryoInnerSerializer);

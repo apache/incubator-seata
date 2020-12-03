@@ -15,7 +15,6 @@
  */
 package io.seata.core.raft;
 
-import java.io.IOException;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
@@ -28,8 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
+import static java.io.File.separator;
 
 /**
  * @author funkye
@@ -44,58 +46,60 @@ public class RaftServerFactory {
 
     private Boolean raftMode = false;
 
+    private io.seata.config.Configuration config = ConfigurationFactory.getInstance();
+
     public static RaftServerFactory getInstance() {
         return SingletonHandler.instance;
     }
 
-    public void init(String host, int port, String... defaultConf) throws IOException {
-        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+    public void init(String host, int port, String... defaultConf) {
+        String initConfStr = config.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isBlank(initConfStr)) {
             if (defaultConf == null || defaultConf.length == 0) {
                 if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("initialize SofaJraft fail cluster is null");
+                    LOGGER.warn("initialize SofaJRaft fail , server.raft.cluster is null");
                 }
                 return;
             } else {
                 initConfStr = defaultConf[0];
             }
         }
-        String mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        String mode = config.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);
         if (storeMode.equals(StoreMode.RAFT)) {
             raftMode = true;
         }
         String colon = ":";
-        int constantInt = 100 * 10;
-        String serverIdStr = host + colon + (port - constantInt);
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("initialize SofaJraft");
-        }
+        String serverIdStr = host + colon + (port - DEFAULT_RAFT_PORT_INTERVAL);
         final String dataPath =
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_FILE_DIR, "sessionStore") + "/"
+            config.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
                 + serverIdStr.split(colon)[1];
         final NodeOptions nodeOptions = new NodeOptions();
-        // Set the election timeout to 1 second
-        nodeOptions.setElectionTimeoutMs(constantInt);
-        // Close the CLI service.
+        // set the election timeout to 1 second
+        nodeOptions.setElectionTimeoutMs(DEFAULT_RAFT_PORT_INTERVAL);
+        // enable the CLI service.
         nodeOptions.setDisableCli(false);
-        // Snapshot should be made every 30 seconds
-        nodeOptions.setSnapshotIntervalSecs(60);
+        // snapshot should be made every 30 seconds
+        Integer snapshotInterval = config.getInt(ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL, 30);
+        nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         // analytic parameter
         final PeerId serverId = new PeerId();
         if (!serverId.parse(serverIdStr)) {
-            throw new IllegalArgumentException("Fail to parse serverId:" + serverIdStr);
+            throw new IllegalArgumentException("fail to parse serverId:" + serverIdStr);
         }
         final Configuration initConf = new Configuration();
         if (!initConf.parse(initConfStr)) {
-            throw new IllegalArgumentException("Fail to parse initConf:" + initConfStr);
+            throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
-        // Set up the initial cluster configuration
+        // set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
         raftServer = EnhancedServiceLoader.load(AbstractRaftServer.class, RAFT_TAG,
             new Object[] {dataPath, SEATA_RAFT_GROUP, serverId, nodeOptions});
-        stateMachine = raftServer.raftStateMachine;
-        LOGGER.info("Started counter server at port:{}", raftServer.node.getNodeId().getPeerId().getPort());
+        stateMachine = raftServer.getAbstractRaftStateMachine();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("initialize SofaJRaft");
+        }
+        LOGGER.info("started counter server at port:{}", raftServer.node.getNodeId().getPeerId().getPort());
     }
 
     public AbstractRaftServer getRaftServer() {
@@ -115,12 +119,7 @@ public class RaftServerFactory {
     }
 
     public Boolean isLeader() {
-        if (stateMachine != null) {
-            return stateMachine.isLeader();
-        } else if (raftServer == null) {
-            return true;
-        }
-        return false;
+        return raftServer == null ? true : stateMachine.isLeader();
     }
 
     public Boolean isRaftMode() {

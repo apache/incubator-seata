@@ -30,11 +30,10 @@ public abstract class AbstractRaftStateMachine extends StateMachineAdapter {
      * Leader term
      */
     protected final AtomicLong leaderTerm = new AtomicLong(-1);
+
     protected String mode;
+
     protected ServerOnRequestProcessor onRequestProcessor;
-    /**
-     * counter value
-     */
 
     protected boolean isLeader() {
         return this.leaderTerm.get() > 0;

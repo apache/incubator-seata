@@ -31,10 +31,9 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.raft.AbstractRaftServer;
+import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServer;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
@@ -45,7 +44,6 @@ import static io.seata.core.raft.AbstractRaftServer.RAFT_TAG;
  */
 @LoadLevel(name = RAFT_TAG)
 public class RaftServerImpl extends AbstractRaftServer implements ConfigurationChangeListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerImpl.class);
 
     public RaftServerImpl(final String dataPath, final String groupId, final PeerId serverId,
         final NodeOptions nodeOptions) throws IOException {
@@ -77,6 +75,11 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
     @Override
     public Node getNode() {
         return this.node;
+    }
+
+    @Override
+    public AbstractRaftStateMachine getAbstractRaftStateMachine() {
+        return raftStateMachine;
     }
 
     public StateMachineAdapter getRaftStateMachine() {

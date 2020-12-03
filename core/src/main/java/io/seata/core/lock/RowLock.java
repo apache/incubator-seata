@@ -24,6 +24,8 @@ import io.seata.common.util.StringUtils;
  */
 public class RowLock implements java.io.Serializable {
 
+    private static final long serialVersionUID = 5427149286363576988L;
+    
     private String xid;
 
     private Long transactionId;
