@@ -78,7 +78,12 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     /**
      * Leader term
      */
-    private final AtomicLong leaderTerm = new AtomicLong(-1);
+    private static final AtomicLong leaderTerm = new AtomicLong(-1);
+
+    public static void main(String[] args) {
+        System.out.println(leaderTerm.get());
+    }
+
     /**
      * counter value
      */
@@ -220,8 +225,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     @Override
     public void onLeaderStart(final long term) {
-        this.leaderTerm.set(term);
-        if (RaftServerFactory.getInstance().isRaftMode()) {
+        //become the leader again,reloading global session
+        if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
             Map<String, GlobalSession> retryRollbackingMap =
                 ((RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager()).getSessionMap();
@@ -237,6 +242,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 }
             });
         }
+        this.leaderTerm.set(term);
         super.onLeaderStart(term);
     }
 
