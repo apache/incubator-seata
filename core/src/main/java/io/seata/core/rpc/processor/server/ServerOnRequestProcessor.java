@@ -91,10 +91,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (ChannelManager.isRegistered(ctx.channel())) {
-            if (raftMode) {
-                if (!RaftServerFactory.getInstance().isLeader()) {
-                    throw new TransactionException("begin fail tc is not leader");
-                }
+            if (raftMode && !RaftServerFactory.getInstance().isLeader()) {
+                throw new TransactionException("begin fail tc is not leader");
             }
             onRequestMessage(ctx, rpcMessage,raftMode);
         } else {
@@ -113,7 +111,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
     }
 
-    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage,Boolean raftMode) {
+    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, Boolean raftMode) {
         Object message = rpcMessage.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {

@@ -381,7 +381,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 try {
                     handleRetryRollbacking();
                 } catch (Exception e) {
-                    LOGGER.info("Exception retry rollbacking ... ", e);
+                    LOGGER.error("Exception retry rollbacking ... ", e);
                 }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
@@ -391,7 +391,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 try {
                     handleRetryCommitting();
                 } catch (Exception e) {
-                    LOGGER.info("Exception retry committing ... ", e);
+                    LOGGER.error("Exception retry committing ... ", e);
                 }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
@@ -401,7 +401,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
-                    LOGGER.info("Exception async committing ... ", e);
+                    LOGGER.error("Exception async committing ... ", e);
                 }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
@@ -411,7 +411,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 try {
                     timeoutCheck();
                 } catch (Exception e) {
-                    LOGGER.info("Exception timeout checking ... ", e);
+                    LOGGER.error("Exception timeout checking ... ", e);
                 }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
@@ -421,7 +421,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 try {
                     undoLogDelete();
                 } catch (Exception e) {
-                    LOGGER.info("Exception undoLog deleting ... ", e);
+                    LOGGER.error("Exception undoLog deleting ... ", e);
                 }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);

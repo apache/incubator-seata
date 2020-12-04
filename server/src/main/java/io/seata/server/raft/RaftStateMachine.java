@@ -142,7 +142,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>>
             LOCK_MAP = FileLocker.LOCK_MAP;
         maps.put("LOCK_MAP", LOCK_MAP);
-        LOGGER.info("sessionmap size:{},lock map size:{}",sessionMap.size(), LOCK_MAP.size());
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("sessionmap size:{},lock map size:{}", sessionMap.size(), LOCK_MAP.size());
+        }
         if (maps.isEmpty()) {
             return;
         }
@@ -166,7 +168,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             return false;
         }
         if (isLeader()) {
-            LOGGER.warn("Leader is not supposed to load snapshot");
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Leader is not supposed to load snapshot");
+            }
             return false;
         }
         if (reader.getFileMeta("data") == null) {
@@ -201,13 +205,13 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                             SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(v);
                         }
                     } catch (TransactionException e) {
-                        e.printStackTrace();
+                        LOGGER.error("fail to load global session from {},error:{}", v.getXid(), e.getMessage(), e);
                     }
                 });
             }
             return true;
         } catch (final Exception e) {
-            LOGGER.error("Fail to load snapshot from {}", snapshot.getPath());
+            LOGGER.error("fail to load snapshot from {}", snapshot.getPath());
             return false;
         }
 
