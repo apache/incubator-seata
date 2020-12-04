@@ -29,10 +29,10 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  *
  * @author wangxb
  */
-public class TransactionPropagationInterceptor extends HandlerInterceptorAdapter {
+public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationIntercepter.class);
 
 
     @Override
