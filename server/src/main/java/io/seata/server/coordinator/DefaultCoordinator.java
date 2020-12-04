@@ -227,7 +227,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         + globalSession.getTimeout());
             }
             boolean shouldTimeout = SessionHolder.lockAndExecute(globalSession, () -> {
-                if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+                if (globalSession.getStatus() == GlobalStatus.Begin && globalSession.isTimeout()) {
                     return false;
                 }
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
