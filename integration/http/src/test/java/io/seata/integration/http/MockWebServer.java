@@ -86,7 +86,7 @@ public class MockWebServer {
             Method method = myServletClass.getDeclaredMethod(methodName, HttpTest.Person.class);
 
             /* mock request intercepter */
-            TransactionPropagationInterceptor intercepter = new TransactionPropagationInterceptor();
+            TransactionPropagationIntercepter intercepter = new TransactionPropagationIntercepter();
 
             intercepter.preHandle(request, null, null);
             Object result = method.invoke(myServlet, person);
