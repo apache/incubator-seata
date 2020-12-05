@@ -54,7 +54,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-@Sharable
+
 public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyRemotingClient.class);
