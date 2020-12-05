@@ -16,7 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.integration.http.HttpHandlerExceptionResolver;
-import io.seata.integration.http.TransactionPropagationIntercepter;
+import io.seata.integration.http.TransactionPropagationInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -36,7 +36,7 @@ public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new TransactionPropagationIntercepter());
+        registry.addInterceptor(new TransactionPropagationInterceptor());
     }
 
     @Override
