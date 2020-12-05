@@ -31,7 +31,7 @@ public class MockResponse {
     }
 
     public String write(String content) throws IOException {
-        StringBuffer httpResponse = new StringBuffer();
+        StringBuilder httpResponse = new StringBuilder();
         httpResponse.append("HTTP/1.1 200 OK\n")
                 .append("Content-Type:application/json\n")
                 .append("\r\n")
