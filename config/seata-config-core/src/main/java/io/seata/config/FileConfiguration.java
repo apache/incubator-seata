@@ -187,6 +187,9 @@ public class FileConfiguration extends AbstractConfiguration {
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("file not found--" + e.getMessage(), e);
         }
+
+        LOGGER.warn("The configuration file not found: {}. If your file is on the file system, " +
+            "please use a format like \"file:/path/to/file.conf\"", name);
         return null;
     }
 
