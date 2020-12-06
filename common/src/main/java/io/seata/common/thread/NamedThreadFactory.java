@@ -31,7 +31,7 @@ import io.seata.common.util.CollectionUtils;
  */
 public class NamedThreadFactory implements ThreadFactory {
     private final static Map<String, AtomicInteger> PREFIX_COUNTER = new ConcurrentHashMap<>();
-
+    private final ThreadGroup group;
     private final AtomicInteger counter = new AtomicInteger(0);
     private final String prefix;
     private final int totalSize;
@@ -47,6 +47,8 @@ public class NamedThreadFactory implements ThreadFactory {
     public NamedThreadFactory(String prefix, int totalSize, boolean makeDaemons) {
         int prefixCounter = CollectionUtils.computeIfAbsent(PREFIX_COUNTER, prefix, key -> new AtomicInteger(0))
                 .incrementAndGet();
+        SecurityManager securityManager = System.getSecurityManager();
+        group = (securityManager != null) ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
         this.prefix = prefix + "_" + prefixCounter;
         this.makeDaemons = makeDaemons;
         this.totalSize = totalSize;
@@ -78,7 +80,7 @@ public class NamedThreadFactory implements ThreadFactory {
         if (totalSize > 1) {
             name += "_" + totalSize;
         }
-        Thread thread = new FastThreadLocalThread(r, name);
+        Thread thread = new FastThreadLocalThread(group, r, name);
 
         thread.setDaemon(makeDaemons);
         if (thread.getPriority() != Thread.NORM_PRIORITY) {
