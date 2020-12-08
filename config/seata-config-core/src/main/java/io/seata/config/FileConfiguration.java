@@ -182,9 +182,6 @@ public class FileConfiguration extends AbstractConfiguration {
             for (String s : FileConfigFactory.getSuffixSet()) {
                 targetFile = new File(tryPath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
                 if (targetFile.exists()) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("The configuration file used is {}", targetFile.getPath());
-                    }
                     return targetFile;
                 }
             }
