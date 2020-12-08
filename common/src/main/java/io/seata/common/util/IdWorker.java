@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author funkye
+ * @author selfishlover
  */
 public class IdWorker {
 
