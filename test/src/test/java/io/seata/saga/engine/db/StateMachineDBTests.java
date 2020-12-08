@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.db;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
@@ -106,6 +107,26 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithChoiceNoDefault() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("a", 3);
+
+        String stateMachineName = "simpleChoiceNoDefaultTestStateMachine";
+
+        try {
+            stateMachineEngine.start(stateMachineName, null, paramMap);
+        } catch (EngineExecutionException e) {
+            Assertions.assertTrue(FrameworkErrorCode.StateMachineNoChoiceMatched.equals(e.getErrcode()));
+            e.printStackTrace(System.out);
+        }
+        long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
     }
 
