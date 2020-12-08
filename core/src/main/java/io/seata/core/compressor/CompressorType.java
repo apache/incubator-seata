@@ -48,7 +48,12 @@ public enum CompressorType {
     /**
      * The lz4.
      */
-    LZ4((byte) 5);
+    LZ4((byte) 5),
+
+    /**
+     * The deflater.
+     */
+    DEFLATER((byte) 6);
 
     private final byte code;
 

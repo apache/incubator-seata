@@ -28,11 +28,8 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.Reloadable;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.session.SessionLifecycleListener;
-import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import io.seata.common.loader.Scope;
@@ -46,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager
-    implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
+    implements Initialize {
 
     /**
      * The constant LOGGER.
@@ -195,9 +192,5 @@ public class DataBaseSessionManager extends AbstractSessionManager
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException {
         return lockCallable.call();
-    }
-
-    @Override
-    public void reload() {
     }
 }
