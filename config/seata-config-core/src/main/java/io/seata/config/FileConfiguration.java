@@ -157,7 +157,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 }
             }
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("file not found--" + e.getMessage(), e);
+            LOGGER.error("decode name error", e);
         }
 
         return null;
