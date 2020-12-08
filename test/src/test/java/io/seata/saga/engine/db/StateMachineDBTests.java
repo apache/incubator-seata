@@ -16,6 +16,8 @@
 package io.seata.saga.engine.db;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.exception.StoreException;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.AsyncCallback;
@@ -724,6 +726,18 @@ public class StateMachineDBTests extends AbstractServerTest {
         doTestStateMachineTransTimeoutAsync(paramMap);
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+    }
+
+    @Test
+    public void testStateMachineRecordFailed() {
+
+        String businessKey = "bizKey";
+
+        Assertions.assertDoesNotThrow(() -> stateMachineEngine.startWithBusinessKey("simpleTestStateMachine", null, businessKey, new HashMap<>()));
+
+        // use same biz key to mock exception
+        Assertions.assertThrows(StoreException.class, () -> stateMachineEngine.startWithBusinessKey("simpleTestStateMachine", null, businessKey, new HashMap<>()));
+        Assertions.assertNull(RootContext.getXID());
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {
