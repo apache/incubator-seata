@@ -188,10 +188,7 @@ public class FileConfiguration extends AbstractConfiguration {
             LOGGER.error("file not found--" + e.getMessage(), e);
         }
 
-        // try to get filename
-        String basename = StringUtils.isNullOrEmpty(name) ? "my-config.conf" : new File(name).getName();
-        LOGGER.warn("The configuration file not found: {}. If your file is on the file system, " +
-            "please use a format like \"file:/path/to/{}\"", name, basename);
+        LOGGER.warn("The configuration file not found: {}", name);
         return null;
     }
 
