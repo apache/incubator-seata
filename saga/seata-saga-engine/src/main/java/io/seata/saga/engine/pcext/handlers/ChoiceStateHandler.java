@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.evaluation.EvaluatorFactory;
@@ -26,10 +27,14 @@ import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateInstruction;
+import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.ChoiceState;
 import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.ChoiceStateImpl;
+import org.springframework.util.StringUtils;
 
 /**
  * ChoiceState Handler
@@ -72,6 +77,18 @@ public class ChoiceStateHandler implements StateHandler {
                 context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, entry.getValue());
                 return;
             }
+        }
+
+        if (StringUtils.isEmpty(choiceState.getDefault())) {
+
+            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_INST);
+
+            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(FrameworkErrorCode.StateMachineNoChoiceMatched, "No choice matched, maybe it is a bug. Choice state name: " + choiceState.getName(), stateMachineInstance, null);
+
+            EngineUtils.failStateMachine(context, exception);
+
+            throw exception;
         }
 
         context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, choiceState.getDefault());

@@ -207,6 +207,11 @@ public enum FrameworkErrorCode {
     StateMachineExecutionTimeout("0421", "State machine execution timeout", "State machine execution timeout"),
 
     /**
+     * State machine execution no choice matched
+     */
+    StateMachineNoChoiceMatched("0422", "State machine no choice matched", "State machine no choice matched"),
+
+    /**
      * Undefined error
      */
     UnknownAppError("10000", "Unknown error", "Internal error"),
