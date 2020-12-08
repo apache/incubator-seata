@@ -461,6 +461,16 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
 
     /**
+     * The constant STORE_REDIS_HOST.
+     */
+    String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+
+    /**
+     * The constant STORE_REDIS_PORT.
+     */
+    String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+
+    /**
      * The constant STORE_REDIS_SINGLE_PREFIX.
      */
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + "single.";

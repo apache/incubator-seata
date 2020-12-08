@@ -74,7 +74,7 @@ public class JedisPooledFactory {
                         poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
                         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
                         poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, MAXTOTAL));
-                        String mode = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_MODE);
+                        String mode = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_MODE,ConfigurationKeys.REDIS_SINGLE_MODE);
                         if (mode.equals(ConfigurationKeys.REDIS_SENTINEL_MODE)) {
                             String masterName = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_MASTERNAME);
                             if (StringUtils.isBlank(masterName)) {
@@ -86,9 +86,12 @@ public class JedisPooledFactory {
                             jedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, password,
                                     CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                         } else if (mode.equals(ConfigurationKeys.REDIS_SINGLE_MODE)) {
+                            String host = StringUtils.isBlank(CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST)) ?
+                                    CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
+                            int port = CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT) == 0 ?
+                                    CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT) : CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT);
                             jedisPool =
-                                    new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST, HOST),
-                                            CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT, PORT), 60000, password,
+                                    new JedisPool(poolConfig, host, port, 60000, password,
                                             CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                         } else {
                             throw new RedisException("Configuration error of redis cluster mode");
