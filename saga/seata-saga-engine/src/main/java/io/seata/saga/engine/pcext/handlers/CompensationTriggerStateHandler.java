@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Stack;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -45,8 +46,13 @@ public class CompensationTriggerStateHandler implements StateHandler {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
-
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
+        if (CollectionUtils.isEmpty(stateInstanceList)) {
+            stateInstanceList = stateMachineConfig.getStateLogStore().queryStateInstanceListByMachineInstanceId(
+                stateMachineInstance.getId());
+        }
 
         List<StateInstance> stateListToBeCompensated = CompensationHolder.findStateInstListToBeCompensated(context,
             stateInstanceList);
