@@ -160,7 +160,6 @@ public class FileConfiguration extends AbstractConfiguration {
             LOGGER.error("file not found--" + e.getMessage(), e);
         }
 
-        LOGGER.warn("The configuration file not found: {}", name);
         return null;
     }
 
