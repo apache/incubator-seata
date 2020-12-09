@@ -190,9 +190,8 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
 
             return engine.forward(subInstId, startParams);
         } else {
-            throw new ForwardInvalidException(
-                "Cannot find sub statemachine [" + subStateMachine.getStateMachineName() + "]",
-                FrameworkErrorCode.ObjectNotExists);
+            originalStateInst.setStateMachineInstance(stateInstance.getStateMachineInstance());
+            return startNewStateMachine(startParams, engine, originalStateInst, subStateMachine);
         }
     }
 
