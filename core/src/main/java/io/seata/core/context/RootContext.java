@@ -89,7 +89,7 @@ public class RootContext {
      */
     public static void bind(@Nonnull String xid) {
         if (StringUtils.isBlank(xid)) {
-            throw new IllegalArgumentException("xid must be not blank");
+            xid = null;
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
