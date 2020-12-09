@@ -123,3 +123,40 @@ seata:
       name: ""
   log:
     exception-rate: 100
+  store:
+    mode: "file"
+    file:
+      dir: "sessionStore"
+      maxBranchSessionSize: 16384
+      maxGlobalSessionSize: 512
+      fileWriteBufferCacheSize: 16384
+      sessionReloadReadSize: 100
+      flushDiskMode: async
+    db:
+      datasource: "druid"
+      dbType: "mysql"
+      driverClassName: "com.mysql.jdbc.Driver"
+      url: "jdbc:mysql://127.0.0.1:3306/seata"
+      user: ""
+      password: ""
+      minConn: 5
+      maxConn : 100
+      globalTable: "global_table"
+      branchTable: "branch_table"
+      lockTable: "lock_table"
+      queryLimit: 100
+      maxWait: 5000
+    redis:
+      mode: "single"
+      single:
+        host: "127.0.0.1"
+        port: "6379"
+      sentinel:
+        masterName: ""
+        sentinelHosts: ""
+      password: ""
+      database: "0"
+      minConn: 1
+      maxConn: 10
+      maxTotal: 100
+      queryLimit: 100

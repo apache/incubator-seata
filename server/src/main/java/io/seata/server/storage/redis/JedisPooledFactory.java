@@ -15,19 +15,24 @@
  */
 package io.seata.server.storage.redis;
 
-import io.seata.common.exception.RedisException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.seata.common.exception.RedisException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import redis.clients.jedis.*;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisSentinelPool;
 
 /**
  * @author funkye
@@ -52,6 +57,8 @@ public class JedisPooledFactory {
 
     private static final int DATABASE = 0;
 
+    private static final int SENTINEL_HOST_NUMBER = 3;
+
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
     /**
@@ -59,7 +66,7 @@ public class JedisPooledFactory {
      * 
      * @return redisPool
      */
-    public static JedisPoolAbstract getJedisPoolInstance(JedisPool... jedisPools) {
+    public static JedisPoolAbstract getJedisPoolInstance(JedisPoolAbstract... jedisPools) {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
                 if (jedisPool == null) {
@@ -80,16 +87,16 @@ public class JedisPooledFactory {
                             if (StringUtils.isBlank(masterName)) {
                                 throw new RedisException("The masterName is null in redis sentinel mode");
                             }
-                            Set<String> sentinels = new HashSet<>();
+                            Set<String> sentinels = new HashSet<>(SENTINEL_HOST_NUMBER);
                             String[] sentinelHosts = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
                             Arrays.asList(sentinelHosts).forEach(sentinelHost -> sentinels.add(sentinelHost));
                             jedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, password,
                                     CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                         } else if (mode.equals(ConfigurationKeys.REDIS_SINGLE_MODE)) {
-                            String host = StringUtils.isBlank(CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST)) ?
-                                    CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
-                            int port = CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT) == 0 ?
-                                    CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT) : CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT);
+                            String host = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
+                            host = StringUtils.isBlank(host) ? CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : host;
+                            int port = CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT);
+                            port = port == 0 ? CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT) : port;
                             jedisPool =
                                     new JedisPool(poolConfig, host, port, 60000, password,
                                             CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
