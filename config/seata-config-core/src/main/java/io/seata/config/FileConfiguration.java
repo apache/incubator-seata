@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,7 +141,7 @@ public class FileConfiguration extends AbstractConfiguration {
             // 是否指定文件系统上的路径
             boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
             String filePath = filePathCustom ? name.substring(SYS_FILE_RESOURCE_PREFIX.length()) : name;
-            String decodedPath = URLDecoder.decode(filePath, "utf-8");
+            String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8.name());
 
             File targetFile = getFileFromFileSystem(decodedPath);
             if (targetFile != null) {
@@ -157,7 +158,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 }
             }
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("decode name error", e);
+            LOGGER.error("decode name error: {}", e.getMessage(), e);
         }
 
         return null;
@@ -199,7 +200,7 @@ public class FileConfiguration extends AbstractConfiguration {
                         LOGGER.info("The configuration file used is {}", resource.getPath());
                     }
                     String path = resource.getPath();
-                    path = URLDecoder.decode(path, "utf-8");
+                    path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
                     return new File(path);
                 }
             }
@@ -208,7 +209,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 LOGGER.info("The configuration file used is {}", name);
             }
             String path = resource.getPath();
-            path = URLDecoder.decode(path, "utf-8");
+            path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
             return new File(path);
         }
 
