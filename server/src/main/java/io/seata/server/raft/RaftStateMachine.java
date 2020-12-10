@@ -75,32 +75,15 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
-    /**
-     * Leader term
-     */
-    private static final AtomicLong leaderTerm = new AtomicLong(-1);
-
-    public static void main(String[] args) {
-        System.out.println(leaderTerm.get());
-    }
-
-    /**
-     * counter value
-     */
-
-    public boolean isLeader() {
-        return this.leaderTerm.get() > 0;
-    }
-
     RaftLockManager raftLockManager;
+
+    String mode;
 
     @Override
     public void setOnRequestProcessor(ServerOnRequestProcessor onRequestProcessor) {
         this.onRequestProcessor = onRequestProcessor;
         raftLockManager = new RaftLockManager();
     }
-
-    String mode;
 
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
@@ -131,7 +114,6 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         }
     }
 
-
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
         if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
@@ -144,8 +126,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         sessionMap.forEach((k, v) -> sessionByteMap.put(v.getXid(), v.encode()));
         maps.put(ROOT_SESSION_MANAGER_NAME, sessionByteMap);
         ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
-            ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>>
-            LOCK_MAP = FileLocker.LOCK_MAP;
+            ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>> LOCK_MAP = FileLocker.LOCK_MAP;
         maps.put("LOCK_MAP", LOCK_MAP);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("sessionmap size:{},lock map size:{}", sessionMap.size(), LOCK_MAP.size());
@@ -222,10 +203,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     }
 
-
     @Override
     public void onLeaderStart(final long term) {
-        //become the leader again,reloading global session
+        // become the leader again,reloading global session
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
             Map<String, GlobalSession> retryRollbackingMap =
@@ -342,6 +322,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                                 break;
                             case RollbackFailed:
                                 SessionHelper.endRollbackFailed(globalSession);
+                                break;
+                            default:
                                 break;
                         }
                     }
