@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
+
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -209,22 +210,20 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT rollback on an inactive session");
         }
         try {
-            // Branch Report to TC
-            DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(), BranchStatus.PhaseOne_Failed, null);
-
-        } catch (TransactionException te) {
-            // log and ignore the report failure
-            LOGGER.warn("Failed to report XA branch rollback on " + xid + "-" + xaBranchXid.getBranchId()
-                + " since " + te.getCode() + ":" + te.getMessage());
-        }
-        try {
             // XA End: Fail
             xaResource.end(xaBranchXid, XAResource.TMFAIL);
             xaRollback(xaBranchXid);
+            // Branch Report to TC
+            DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
+                BranchStatus.PhaseTwo_Rollbacked, null);
+            LOGGER.info(xaBranchXid + " was rolled back.");
         } catch (XAException xe) {
-            throw new SQLException(
-                "Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId() + " since " + xe
-                    .getMessage(), xe);
+            throw new SQLException("Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId()
+                + " since " + xe.getMessage(), xe);
+        } catch (TransactionException te) {
+            // log and ignore the report failure
+            LOGGER.warn("Failed to report XA branch rollback on " + xid + "-" + xaBranchXid.getBranchId() + " since "
+                + te.getCode() + ":" + te.getMessage());
         } finally {
             cleanXABranchContext();
         }
