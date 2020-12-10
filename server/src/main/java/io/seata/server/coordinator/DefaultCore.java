@@ -293,7 +293,8 @@ public class DefaultCore implements Core {
         } else {
             for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
-                if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
+                if (currentBranchStatus == BranchStatus.PhaseOne_Failed
+                    || currentBranchStatus == BranchStatus.PhaseTwo_Rollbacked) {
                     globalSession.removeBranch(branchSession);
                     continue;
                 }
