@@ -31,7 +31,7 @@ public class ConfigNacosProperties {
     private String group = "SEATA_GROUP";
     private String username = "";
     private String password = "";
-    private String dataId = "";
+    private String dataId = "seata.properties";
 
     public String getServerAddr() {
         return serverAddr;
