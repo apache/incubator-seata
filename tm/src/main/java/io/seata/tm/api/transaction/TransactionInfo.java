@@ -22,6 +22,7 @@ import java.util.Set;
 
 /**
  * @author guoyao
+ * @author linkedme@qq.com
  */
 public final class TransactionInfo implements Serializable {
 
@@ -33,7 +34,13 @@ public final class TransactionInfo implements Serializable {
 
     private Propagation propagation;
 
+    /**
+     * will be removed in v1.6, please use the {@link #lockRetryInterval}
+     */
+    @Deprecated
     private int lockRetryInternal;
+
+    private int lockRetryInterval;
 
     private int lockRetryTimes;
 
@@ -92,12 +99,28 @@ public final class TransactionInfo implements Serializable {
         this.propagation = propagation;
     }
 
+    /**
+     * will be removed in v1.6, please use the {@link #getLockRetryInterval()}
+     */
+    @Deprecated
     public int getLockRetryInternal() {
         return lockRetryInternal;
     }
 
+    public int getLockRetryInterval() {
+        return lockRetryInterval;
+    }
+
+    /**
+     * will be removed in v1.6, please use the {@link #setLockRetryInterval(int)} ()}
+     */
+    @Deprecated
     public void setLockRetryInternal(int lockRetryInternal) {
         this.lockRetryInternal = lockRetryInternal;
+    }
+
+    public void setLockRetryInterval(int lockRetryInterval) {
+        this.lockRetryInterval = lockRetryInterval;
     }
 
     public int getLockRetryTimes() {

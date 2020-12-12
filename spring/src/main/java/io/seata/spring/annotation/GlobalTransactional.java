@@ -29,13 +29,14 @@ import org.aopalliance.intercept.MethodInvocation;
  * The interface Global transactional.
  *
  * @author slievrly
+ * @author linkedme@qq.com
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, GlobalTransactional)  // TM: the interceptor of TM
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // RM: the interceptor of GlobalLockLogic and AT/XA mode
  * @see io.seata.spring.tcc.TccActionInterceptor#invoke(MethodInvocation) // RM: the interceptor of TCC mode
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD,ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 public @interface GlobalTransactional {
 
@@ -56,30 +57,35 @@ public @interface GlobalTransactional {
 
     /**
      * roll back for the Class
+     *
      * @return
      */
     Class<? extends Throwable>[] rollbackFor() default {};
 
     /**
      * roll back for the class name
+     *
      * @return
      */
     String[] rollbackForClassName() default {};
 
     /**
      * not roll back for the Class
+     *
      * @return
      */
     Class<? extends Throwable>[] noRollbackFor() default {};
 
     /**
      * not roll back for the class name
+     *
      * @return
      */
     String[] noRollbackForClassName() default {};
 
     /**
      * the propagation of the global transaction
+     *
      * @return
      */
     Propagation propagation() default Propagation.REQUIRED;
@@ -88,15 +94,31 @@ public @interface GlobalTransactional {
      * customized global lock retry internal(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
+     * <br/>
+     * will be removed in v1.6, please use the new {@link GlobalTransactional#lockRetryInterval()}
+     *
      * @return
      */
+    @Deprecated
     int lockRetryInternal() default 0;
+
+    /**
+     * customized global lock retry interval(unit: ms)
+     * you may use this to override global config of "client.rm.lock.retryInterval"
+     * note: 0 or negative number will take no effect(which mean fall back to global config)
+     * <br/>
+     * will be removed in v1.6,
+     *
+     * @return lock retry interval(unit: ms)
+     */
+    int lockRetryInterval() default 0;
 
     /**
      * customized global lock retry times
      * you may use this to override global config of "client.rm.lock.retryTimes"
      * note: negative number will take no effect(which mean fall back to global config)
-     * @return
+     *
+     * @return lock retry times
      */
     int lockRetryTimes() default -1;
 }

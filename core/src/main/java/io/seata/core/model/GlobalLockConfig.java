@@ -20,16 +20,34 @@ package io.seata.core.model;
  */
 public class GlobalLockConfig {
 
+    /**
+     * Will be removed in 1.6
+     *
+     * @see #lockRetryInterval
+     */
+    @Deprecated
     private int lockRetryInternal;
+
+    private int lockRetryInterval;
 
     private int lockRetryTimes;
 
+    @Deprecated
     public int getLockRetryInternal() {
         return lockRetryInternal;
     }
 
+    public int getLockRetryInterval() {
+        return lockRetryInterval;
+    }
+
+    @Deprecated
     public void setLockRetryInternal(int lockRetryInternal) {
         this.lockRetryInternal = lockRetryInternal;
+    }
+
+    public void setLockRetryInterval(int lockRetryInterval) {
+        this.lockRetryInterval = lockRetryInterval;
     }
 
     public int getLockRetryTimes() {

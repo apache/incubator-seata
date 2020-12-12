@@ -27,10 +27,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author selfishlover
+ * Compared with {@link LockRetryControllerTest},
+ * let's test the effect of {@link GlobalLockConfig#getLockRetryInterval()},
+ * because {@link GlobalLockConfig#getLockRetryInternal()} will be deleted in v1.6
+ *
+ * @author linkedme@qq.com
  */
-public class LockRetryControllerTest {
-
+public class LockRetryControllerTestB {
     private GlobalLockConfig config;
 
     private final int defaultRetryInternal = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
@@ -39,7 +42,7 @@ public class LockRetryControllerTest {
     @BeforeEach
     void setUp() {
         config = new GlobalLockConfig();
-        config.setLockRetryInternal(10);
+        config.setLockRetryInterval(10);
         config.setLockRetryTimes(3);
         GlobalLockConfigHolder.setAndReturnPrevious(config);
     }
