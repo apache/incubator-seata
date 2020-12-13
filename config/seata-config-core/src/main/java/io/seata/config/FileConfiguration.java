@@ -20,7 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -166,7 +165,7 @@ public class FileConfiguration extends AbstractConfiguration {
     private File getFileFromFileSystem(String decodedPath) {
         String[] tryPaths = new String[] {
             // first: project dir
-            Paths.get(this.getClass().getClassLoader().getResource("").getPath(), decodedPath).toString(),
+            this.getClass().getClassLoader().getResource("").getPath() + decodedPath,
             // second: system path
             decodedPath
         };
