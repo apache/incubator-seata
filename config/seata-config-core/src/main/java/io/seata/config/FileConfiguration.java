@@ -138,7 +138,6 @@ public class FileConfiguration extends AbstractConfiguration {
                 throw new IllegalArgumentException("name can't be null");
             }
 
-            // 是否指定文件系统上的路径
             boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
             String filePath = filePathCustom ? name.substring(SYS_FILE_RESOURCE_PREFIX.length()) : name;
             String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8.name());
