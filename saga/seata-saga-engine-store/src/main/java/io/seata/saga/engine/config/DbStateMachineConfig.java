@@ -34,9 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.StringUtils;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
+import static io.seata.common.DefaultValues.*;
 
 /**
  * DbStateMachineConfig
@@ -66,6 +64,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+                setRetryPersistEnable(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_ENABLE, DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE));
+                setCompensatePersistEnable(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE, DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE));
             }
         } catch (Exception e) {
             LOGGER.warn("Load SEATA configuration failed, use default configuration instead.", e);

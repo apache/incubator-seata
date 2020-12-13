@@ -40,6 +40,8 @@ public class StateMachineImpl implements StateMachine {
     private Status status = Status.AC;
     private RecoverStrategy recoverStrategy;
     private boolean isPersist = true;
+    private boolean isRetryPersist = true;
+    private boolean isCompensatePersist = true;
     private String type = "STATE_LANG";
     private transient String content;
     private Date gmtCreate;
@@ -188,5 +190,23 @@ public class StateMachineImpl implements StateMachine {
     @Override
     public void setGmtCreate(Date gmtCreate) {
         this.gmtCreate = gmtCreate;
+    }
+
+    @Override
+    public boolean isRetryPersist() {
+        return isRetryPersist;
+    }
+
+    public void setRetryPersist(boolean retryPersist) {
+        isRetryPersist = retryPersist;
+    }
+
+    @Override
+    public boolean isCompensatePersist() {
+        return isCompensatePersist;
+    }
+
+    public void setCompensatePersist(boolean compensatePersist) {
+        isCompensatePersist = compensatePersist;
     }
 }

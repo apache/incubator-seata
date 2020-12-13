@@ -1,6 +1,6 @@
 {
-    "Name": "simpleStateMachineWithCompensationAndSubMachine",
-    "Comment": "带补偿定义和调用子状态机",
+    "Name": "simplePersistStateMachine",
+    "Comment": "自定义中间状态是否持久化的测试状态机定义",
     "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
@@ -8,8 +8,8 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "foo",
-            "CompensateState": "CompensateFirstState",
             "Next": "ChoiceState",
+            "CompensateState": "CompensateFirstState",
             "Input": [
                 {
                     "fooInput": "$.[a]"
@@ -28,11 +28,7 @@
                 },
                 {
                     "Expression":"[a] == 2",
-                    "Next":"CallSubStateMachine"
-                },
-                {
-                    "Expression": "[a] == 3 || [a] == 4",
-                    "Next": "CallSubStateMachineNotPersist"
+                    "Next":"ThirdState"
                 }
             ],
             "Default":"Fail"
@@ -40,7 +36,9 @@
         "SecondState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
-            "ServiceMethod": "bar",
+            "ServiceMethod": "randomExceptionMethod",
+            "IsForUpdate": true,
+            "IsRetryPersist": false,
             "Input": [
                 {
                     "barInput": "$.[fooResult]",
@@ -51,60 +49,56 @@
                 "barResult": "$.#root"
             },
             "Status": {
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null": "SU",
-                "#root == null": "FA",
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN"
+                "#root == null": "FA"
+            },
+            "Next": "Succeed"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "randomExceptionMethod",
+            "CompensateState": "CompensateThirdState",
+            "IsRetryPersist": false,
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "Output": {
+                "barResult": "$.#root"
+            },
+            "Status": {
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "#root != null": "SU",
+                "#root == null": "FA"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                        "java.lang.Throwable"
                     ],
                     "Next": "CompensationTrigger"
                 }
             ],
             "Next": "Succeed"
         },
-        "CallSubStateMachine": {
-            "Type": "SubStateMachine",
-            "StateMachineName": "simpleCompensationStateMachine",
-            "Input": [
-                {
-                    "a": "$.1",
-                    "barThrowException": "$.[barThrowException]",
-                    "fooThrowException": "$.[fooThrowException]",
-                    "compensateFooThrowException": "$.[compensateFooThrowException]"
-                }
-            ],
-            "Output": {
-                "fooResult": "$.#root"
-            },
-            "Next": "Succeed"
-        },
-        "CallSubStateMachineNotPersist": {
-            "Type": "SubStateMachine",
-            "StateMachineName": "simplePersistStateMachine",
-            "IsRetryPersist": false,
-            "IsCompensatePersist": false,
-            "Input": [
-                {
-                    "a": "$.[a]-2",
-                    "barThrowException": "$.[barThrowException]",
-                    "compensateBarThrowException": "$.[compensateBarThrowException]"
-                }
-            ],
-            "Output": {
-                "fooResult": "$.#root"
-            },
-            "Next": "Succeed"
-        },
         "CompensateFirstState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
-            "ServiceMethod": "compensateFoo",
+            "ServiceMethod": "compensateFoo"
+        },
+        "CompensateThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "compensateBar",
+            "IsCompensatePersist": false,
             "Input": [
                 {
-                    "compensateFooInput": "$.[fooResult]"
+                    "compensateBarInput": "$.[barResult]",
+                    "throwException": "$.[compensateBarThrowException]"
                 }
             ]
         },

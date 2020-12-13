@@ -36,6 +36,8 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.serializer.Serializer;
@@ -47,6 +49,7 @@ import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import io.seata.saga.tm.SagaTransactionalTemplate;
@@ -263,28 +266,60 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     @Override
     public void recordStateStarted(StateInstance stateInstance, ProcessContext context) {
         if (stateInstance != null) {
-            //if this state is for retry, do not register branch, but generate id
+
+            boolean isPersist = true;
+
+            DefaultStateMachineConfig stateMachineConfig = (DefaultStateMachineConfig)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            boolean isRetryPersist = stateMachineConfig.isRetryPersistEnable();
+            boolean isCompensatePersist = stateMachineConfig.isCompensatePersistEnable();
+
+            StateInstruction instruction = context.getInstruction(StateInstruction.class);
+            ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
+
+            isRetryPersist = isRetryPersist && stateInstance.getStateMachineInstance().getStateMachine()
+                .isRetryPersist() && state.isRetryPersist();
+            isCompensatePersist = isCompensatePersist && stateInstance.getStateMachineInstance().getStateMachine()
+                .isCompensatePersist() && state.isCompensatePersist();
+
+            // if this state is for retry, do not register branch
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
-
-                stateInstance.setId(generateRetryStateInstanceId(stateInstance));
+                if (isRetryPersist) {
+                    // generate id by default
+                    stateInstance.setId(generateRetryStateInstanceId(stateInstance));
+                } else {
+                    stateInstance.setId(stateInstance.getStateIdRetriedFor());
+                    isPersist = false;
+                }
             }
-            //if this state is for compensation, do not register branch, but generate id
+            // if this state is for compensation, do not register branch
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-
-                stateInstance.setId(generateCompensateStateInstanceId(stateInstance));
-            }
-            else {
+                String compensateStateInstanceId = generateCompensateStateInstanceId(stateInstance);
+                // generate id by default or first compensation
+                if (compensateStateInstanceId.endsWith("-1") || isCompensatePersist) {
+                    stateInstance.setId(compensateStateInstanceId);
+                } else {
+                    stateInstance.setId(stateInstance.getStateIdCompensatedFor() + "-1");
+                    isPersist = false;
+                }
+            } else {
                 branchRegister(stateInstance, context);
             }
-
 
             if (StringUtils.isEmpty(stateInstance.getId()) && seqGenerator != null) {
                 stateInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_INST));
             }
 
             stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
-            executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_INSERT,
-                    stateInstance);
+            if (isPersist) {
+                executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType),
+                    STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
+            } else {
+                // if this retry/compensate state do not need persist, just update last inst
+                executeUpdate(stateLogStoreSqls.getUpdateStateExecutionStatusSql(dbType),
+                    stateInstance.getStatus().name(), new Timestamp(System.currentTimeMillis()),
+                    stateInstance.getMachineInstanceId(), stateInstance.getId());
+            }
         }
     }
 
@@ -774,6 +809,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setString(12, stateInstance.getBusinessKey());
             statement.setString(13, stateInstance.getStateIdCompensatedFor());
             statement.setString(14, stateInstance.getStateIdRetriedFor());
+            statement.setTimestamp(15, new Timestamp(stateInstance.getGmtUpdated().getTime()));
         }
     }
 
@@ -785,8 +821,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     stateInstance.getException() != null ? (byte[]) stateInstance.getSerializedException() : null);
             statement.setString(3, stateInstance.getStatus().name());
             statement.setObject(4, stateInstance.getSerializedOutputParams());
-            statement.setString(5, stateInstance.getId());
-            statement.setString(6, stateInstance.getMachineInstanceId());
+            statement.setTimestamp(5, new Timestamp(stateInstance.getGmtEnd().getTime()));
+            statement.setString(6, stateInstance.getId());
+            statement.setString(7, stateInstance.getMachineInstanceId());
         }
     }
 

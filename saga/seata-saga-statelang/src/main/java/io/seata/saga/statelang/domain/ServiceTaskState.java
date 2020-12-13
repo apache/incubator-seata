@@ -58,4 +58,18 @@ public interface ServiceTaskState extends TaskState {
      * @return
      */
     boolean isPersist();
+
+    /**
+     * Is persist intermediate retry execution log to storage, default true
+     *
+     * @return
+     */
+    boolean isRetryPersist();
+
+    /**
+     * Is persist intermediate compensation execution log to storage, default true
+     *
+     * @return
+     */
+    boolean isCompensatePersist();
 }

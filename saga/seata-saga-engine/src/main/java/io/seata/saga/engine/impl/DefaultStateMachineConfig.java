@@ -70,7 +70,7 @@ import org.springframework.core.io.Resource;
 
 import javax.script.ScriptEngineManager;
 
-import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
+import static io.seata.common.DefaultValues.*;
 
 /**
  * Default state machine configuration
@@ -108,6 +108,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private String defaultTenantId = "000001";
     private ScriptEngineManager scriptEngineManager;
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
+    private boolean retryPersistEnable = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
+    private boolean compensatePersistEnable = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
 
     protected void init() throws Exception {
 
@@ -476,5 +478,21 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
+    }
+
+    public boolean isRetryPersistEnable() {
+        return retryPersistEnable;
+    }
+
+    public void setRetryPersistEnable(boolean retryPersistEnable) {
+        this.retryPersistEnable = retryPersistEnable;
+    }
+
+    public boolean isCompensatePersistEnable() {
+        return compensatePersistEnable;
+    }
+
+    public void setCompensatePersistEnable(boolean compensatePersistEnable) {
+        this.compensatePersistEnable = compensatePersistEnable;
     }
 }

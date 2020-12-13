@@ -134,6 +134,16 @@ public interface ConfigurationKeys {
     String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
+     * The constant CLIENT_SAGA_RETRY_PERSIST_ENABLE.
+     */
+    String CLIENT_SAGA_RETRY_PERSIST_ENABLE = CLIENT_RM_PREFIX + "sagaRetryPersistEnable";
+
+    /**
+     * The constant CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE.
+     */
+    String CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE = CLIENT_RM_PREFIX + "sagaCompensatePersistEnable";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";

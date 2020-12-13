@@ -39,6 +39,8 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private List<Object> inputExpressions;
     private Map<String, Object> outputExpressions;
     private boolean isPersist = true;
+    private boolean isRetryPersist = true;
+    private boolean isCompensatePersist = true;
 
     @Override
     public String getCompensateState() {
@@ -111,6 +113,22 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
     public void setPersist(boolean persist) {
         isPersist = persist;
+    }
+
+    public boolean isRetryPersist() {
+        return isRetryPersist;
+    }
+
+    public void setRetryPersist(boolean retryPersist) {
+        isRetryPersist = retryPersist;
+    }
+
+    public boolean isCompensatePersist() {
+        return isCompensatePersist;
+    }
+
+    public void setCompensatePersist(boolean compensatePersist) {
+        isCompensatePersist = compensatePersist;
     }
 
     public List<Object> getInputExpressions() {

@@ -40,10 +40,7 @@ import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import io.seata.saga.statelang.domain.impl.AbstractTaskState;
-import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
-import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
+import io.seata.saga.statelang.domain.impl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -382,7 +379,12 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             StateInstance stateInstance = stateInstanceList.get(i);
             if (!stateInstance.isForCompensation()) {
 
-                if (ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
+                boolean flag = ((DefaultStateMachineConfig)this.stateMachineConfig).isRetryPersistEnable();
+                StateMachine stateMachine = stateInstance.getStateMachineInstance().getStateMachine();
+                AbstractTaskState state = (AbstractTaskState)stateMachine.getState(stateInstance.getName());
+                flag = flag && stateMachine.isRetryPersist() && state.isRetryPersist();
+
+                if (flag && ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
                     continue;
                 }
 
@@ -402,7 +404,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                             continue;
                         }
 
-                        if (ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
+                        if (ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus()) && flag) {
+
                             throw new ForwardInvalidException(
                                 "Last forward execution state instance is SubStateMachine and compensation status is "
                                     + "[UN], Operation[forward] denied, stateInstanceId:"
@@ -410,7 +413,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                         }
 
                     }
-                } else if (ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
+                } else if (ExecutionStatus.UN.equals(stateInstance.getCompensationStatus()) && flag) {
 
                     throw new ForwardInvalidException(
                         "Last forward execution state instance compensation status is [UN], Operation[forward] "

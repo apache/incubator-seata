@@ -79,6 +79,18 @@ public class StateMachineParserImpl implements StateMachineParser {
             stateMachine.setPersist(false);
         }
 
+        // customize if persist intermediate retryStateInstLog
+        Object isRetryPersist = node.get("IsRetryPersist");
+        if (Boolean.FALSE.equals(isRetryPersist)) {
+            stateMachine.setRetryPersist(false);
+        }
+
+        // customize if persist intermediate compensateStateInstLog
+        Object isCompensatePersist = node.get("IsCompensatePersist");
+        if (Boolean.FALSE.equals(isCompensatePersist)) {
+            stateMachine.setCompensatePersist(false);
+        }
+
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
         statesNode.forEach((stateName, value) -> {
             Map<String, Object> stateNode = (Map<String, Object>) value;

@@ -25,6 +25,7 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
+import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
@@ -37,6 +38,7 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.SubStateMachine;
+import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +80,6 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-
         Object inputParamsObj = context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
         Map<String, Object> startParams = new HashMap<>(0);
         if (inputParamsObj instanceof List) {
@@ -90,6 +91,12 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
             startParams = (Map<String, Object>)inputParamsObj;
         }
 
+        DefaultStateMachineConfig machineConfig = (DefaultStateMachineConfig)engine.getStateMachineConfig();
+        boolean isRetryPersist = machineConfig.isRetryPersistEnable();
+        isRetryPersist = isRetryPersist && stateMachineInstance.getStateMachine().isRetryPersist() && subStateMachine.isRetryPersist();
+        if (!isRetryPersist && null != stateInstance.getStateIdRetriedFor()) {
+            context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
+        }
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
         try {
             if (LOGGER.isDebugEnabled()) {
