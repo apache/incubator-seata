@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class MockDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
-        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata", null);
+        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
     }
 
     @Override
