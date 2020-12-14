@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.google.common.eventbus.Subscribe;
+import io.seata.common.util.StringUtils;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.registry.Registry;
@@ -36,6 +37,8 @@ public class MetricsSubscriber {
     private final Registry registry;
 
     private final Map<GlobalStatus, Consumer<GlobalTransactionEvent>> consumers;
+
+    private static final String EMPTY_APP_ID = "EMPTY_APP";
 
     public MetricsSubscriber(Registry registry) {
         this.registry = registry;
@@ -99,6 +102,10 @@ public class MetricsSubscriber {
 
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
+        if(StringUtils.isEmpty(event.getAppId())){
+            event.setAppId(EMPTY_APP_ID);
+        }
+
         if (registry != null && consumers.containsKey(event.getStatus())) {
             consumers.get(event.getStatus()).accept(event);
         }
