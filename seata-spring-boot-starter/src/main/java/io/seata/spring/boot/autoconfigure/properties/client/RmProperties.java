@@ -22,6 +22,8 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_L
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
@@ -38,6 +40,8 @@ public class RmProperties {
     private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
     private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
+    private boolean sagaRetryPersistEnable = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
+    private boolean sagaCompensatePersistEnable = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -89,5 +93,21 @@ public class RmProperties {
 
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
+    }
+
+    public boolean isSagaRetryPersistEnable() {
+        return sagaRetryPersistEnable;
+    }
+
+    public void setSagaRetryPersistEnable(boolean sagaRetryPersistEnable) {
+        this.sagaRetryPersistEnable = sagaRetryPersistEnable;
+    }
+
+    public boolean isSagaCompensatePersistEnable() {
+        return sagaCompensatePersistEnable;
+    }
+
+    public void setSagaCompensatePersistEnable(boolean sagaCompensatePersistEnable) {
+        this.sagaCompensatePersistEnable = sagaCompensatePersistEnable;
     }
 }

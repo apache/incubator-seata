@@ -73,6 +73,18 @@
       "defaultValue": "fastjson"
     },
     {
+      "name": "seata.client.rm.saga-retry-persist-enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": "true"
+    },
+    {
+      "name": "seata.client.rm.saga-compensate-persist-enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": "true"
+    },
+    {
       "name": "seata.client.rm.lock.retry-interval",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LockProperties",
@@ -324,6 +336,30 @@
         },
         {
           "value": "jackson"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.rm.saga-retry-persist-enable",
+      "values": [
+        {
+          "value": true,
+          "description": "default true."
+        },
+        {
+          "value": false
+        }
+      ]
+    },
+    {
+      "name": "seata.client.rm.saga-compensate-persist-enable",
+      "values": [
+        {
+          "value": true,
+          "description": "default true."
+        },
+        {
+          "value": false
         }
       ]
     },
