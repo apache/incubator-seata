@@ -45,4 +45,10 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return the insert rows
      */
     List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex);
+
+    /**
+     *
+     * @return VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)、 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     */
+    List<String> getInsertParamsValue();
 }

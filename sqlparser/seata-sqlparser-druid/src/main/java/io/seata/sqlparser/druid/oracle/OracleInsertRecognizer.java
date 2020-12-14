@@ -141,4 +141,9 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
         }
         return rows;
     }
+
+    @Override
+    public List<String> getInsertParamsValue() {
+        return null;
+    }
 }

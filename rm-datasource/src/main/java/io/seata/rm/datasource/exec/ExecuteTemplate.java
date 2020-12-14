@@ -20,6 +20,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import java.sql.SQLException;
@@ -85,9 +86,13 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
-                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                        if(sqlRecognizer.getOriginalSQL().toUpperCase().trim().contains("ON DUPLICATE KEY UPDATE".trim()) && "mysql".equals(dbType)){
+                            executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
+                        }else{
+                            executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                                    new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                    new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                        }
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
