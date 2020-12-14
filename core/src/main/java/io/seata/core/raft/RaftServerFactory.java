@@ -52,17 +52,13 @@ public class RaftServerFactory {
         return SingletonHandler.instance;
     }
 
-    public void init(String host, int port, String... defaultConf) {
+    public void init(String host, int port) {
         String initConfStr = config.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isBlank(initConfStr)) {
-            if (defaultConf == null || defaultConf.length == 0) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("initialize SofaJRaft fail , server.raft.cluster is null");
-                }
-                return;
-            } else {
-                initConfStr = defaultConf[0];
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("initialize SofaJRaft fail , server.raft.cluster is null");
             }
+            return;
         }
         String mode = config.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);
@@ -70,7 +66,7 @@ public class RaftServerFactory {
             raftMode = true;
         }
         String colon = ":";
-        String serverIdStr = host + colon + (port - DEFAULT_RAFT_PORT_INTERVAL);
+        String serverIdStr = new StringBuilder(host).append(colon).append(port - DEFAULT_RAFT_PORT_INTERVAL).toString();
         final String dataPath =
             config.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
                 + serverIdStr.split(colon)[1];
