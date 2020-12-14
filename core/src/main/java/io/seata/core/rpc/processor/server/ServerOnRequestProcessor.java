@@ -165,7 +165,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
                 RaftClosure closure = new RaftClosure() {
                     @Override
                     public void run(Status status) {
-                        if(status.isOk()) {
+                        if (status.isOk()) {
                             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
                         }
                     }
