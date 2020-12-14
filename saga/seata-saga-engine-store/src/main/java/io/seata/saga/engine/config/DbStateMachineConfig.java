@@ -34,7 +34,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.StringUtils;
 
-import static io.seata.common.DefaultValues.*;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * DbStateMachineConfig
