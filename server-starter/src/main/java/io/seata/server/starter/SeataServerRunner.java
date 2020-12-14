@@ -35,14 +35,12 @@ public class SeataServerRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            synchronized (started) {
-                long start = System.currentTimeMillis();
-                Server.main(args);
-                long cost = System.currentTimeMillis() - start;
+            long start = System.currentTimeMillis();
+            Server.main(args);
+            started = true;
 
-                started = true;
-                logger.info("seata server started in {} millSeconds", cost);
-            }
+            long cost = System.currentTimeMillis() - start;
+            logger.info("seata server started in {} millSeconds", cost);
         } catch (Throwable e) {
             logger.error("seata server start error: {} ", e.getMessage(), e);
             System.exit(-1);
