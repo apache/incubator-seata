@@ -126,10 +126,10 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         sessionMap.forEach((k, v) -> sessionByteMap.put(v.getXid(), v.encode()));
         maps.put(ROOT_SESSION_MANAGER_NAME, sessionByteMap);
         ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
-            ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>> LOCK_MAP = FileLocker.LOCK_MAP;
-        maps.put("LOCK_MAP", LOCK_MAP);
+            ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>> lockMap = FileLocker.LOCK_MAP;
+        maps.put("LOCK_MAP", lockMap);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("sessionmap size:{},lock map size:{}", sessionMap.size(), LOCK_MAP.size());
+            LOGGER.info("sessionmap size:{},lock map size:{}", sessionMap.size(), lockMap.size());
         }
         if (maps.isEmpty()) {
             return;

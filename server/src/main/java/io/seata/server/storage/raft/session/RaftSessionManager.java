@@ -55,7 +55,7 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
  * @author funkye
  */
 @LoadLevel(name = "raft", scope = Scope.PROTOTYPE)
-public class RaftSessionManager extends AbstractSessionManager implements Reloadable{
+public class RaftSessionManager extends AbstractSessionManager implements Reloadable {
 
     private FileSessionManager fileSessionManager;
 
@@ -72,7 +72,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     }
 
     public void addGlobalSession(GlobalSession globalSession) throws TransactionException {
-        Closure closure= status -> {
+        Closure closure = status -> {
             if (status.isOk()) {
                 try {
                     LOGGER.info("addGlobalSession,raftSessionManager:{}", name);
@@ -81,7 +81,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                     e.printStackTrace();
                 }
             }
-        } ;
+        };
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
         raftSyncMsg.setSessionName(this.name);
@@ -136,7 +136,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void onStatusChange(GlobalSession globalSession, GlobalStatus globalStatus) throws TransactionException {
-        Closure closure= status -> {
+        Closure closure = status -> {
             if (status.isOk()) {
                 try {
                     LOGGER.info("onStatusChange,raftSessionManager:{}", name);
@@ -145,10 +145,10 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                     e.printStackTrace();
                 }
             }
-        } ;
+        };
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSessionSyncMsg
-            raftSyncMsg = new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
+        RaftSessionSyncMsg raftSyncMsg =
+            new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO, globalStatus);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(closure, raftSyncMsg);
     }
@@ -156,7 +156,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
     @Override
     public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession,
         BranchStatus branchStatus) throws TransactionException {
-        Closure closure= status -> {
+        Closure closure = status -> {
             if (status.isOk()) {
                 try {
                     LOGGER.info("onBranchStatusChange,raftSessionManager:{}", name);
@@ -165,17 +165,17 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                     e.printStackTrace();
                 }
             }
-        } ;
+        };
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg
-            raftSyncMsg = new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
+        RaftSessionSyncMsg raftSyncMsg =
+            new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(closure, raftSyncMsg);
     }
 
     @Override
     public void onAddBranch(GlobalSession globalSession, BranchSession branchSession) {
-        Closure closure= status -> {
+        Closure closure = status -> {
             if (status.isOk()) {
                 try {
                     LOGGER.info("onAddBranch,raftSessionManager:{}", name);
@@ -184,11 +184,11 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                     e.printStackTrace();
                 }
             }
-        } ;
+        };
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg
-            raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg =
+            new RaftSessionSyncMsg(ADD_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(closure, raftSyncMsg);
     }
@@ -201,7 +201,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void onRemoveBranch(GlobalSession globalSession, BranchSession branchSession) {
-        Closure closure= status -> {
+        Closure closure = status -> {
             if (status.isOk()) {
                 try {
                     LOGGER.info("onRemoveBranch,raftSessionManager:{}", name);
@@ -210,11 +210,11 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                     e.printStackTrace();
                 }
             }
-        } ;
+        };
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg
-            raftSyncMsg = new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg =
+            new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, globalTransactionDO, branchTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(closure, raftSyncMsg);
     }
@@ -226,7 +226,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void onEnd(GlobalSession globalSession) {
-        Closure closure= status -> {
+        Closure closure = status -> {
             if (status.isOk()) {
                 try {
                     LOGGER.info("onEnd,raftSessionManager:{}", name);
@@ -235,7 +235,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                     e.printStackTrace();
                 }
             }
-        } ;
+        };
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
         RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
         raftSyncMsg.setSessionName(this.name);
