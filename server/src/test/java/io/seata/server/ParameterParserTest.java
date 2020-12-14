@@ -43,6 +43,7 @@ public class ParameterParserTest {
     @Test
     public void testEmptyMode() {
         String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088"};
+        parameterParser.cleanUp();
         parameterParser = new ParameterParser(args);
         //always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
         Assertions.assertEquals("file", parameterParser.getStoreMode());
@@ -85,7 +86,10 @@ public class ParameterParserTest {
      */
     @AfterEach
     public void cleanUp() {
-        parameterParser = null;
+        if (null != parameterParser) {
+            parameterParser.cleanUp();
+            parameterParser = null;
+        }
     }
 
 }
