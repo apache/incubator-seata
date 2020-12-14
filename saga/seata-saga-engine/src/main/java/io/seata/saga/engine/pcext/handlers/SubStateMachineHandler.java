@@ -38,7 +38,6 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.SubStateMachine;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

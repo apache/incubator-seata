@@ -70,7 +70,9 @@ import org.springframework.core.io.Resource;
 
 import javax.script.ScriptEngineManager;
 
-import static io.seata.common.DefaultValues.*;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * Default state machine configuration
