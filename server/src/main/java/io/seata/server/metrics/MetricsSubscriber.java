@@ -15,16 +15,16 @@
  */
 package io.seata.server.metrics;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
 import com.google.common.eventbus.Subscribe;
 import io.seata.common.util.StringUtils;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.registry.Registry;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static io.seata.metrics.IdConstants.APP_ID_KEY;
 
@@ -102,11 +102,11 @@ public class MetricsSubscriber {
 
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
-        if(StringUtils.isEmpty(event.getAppId())){
-            event.setAppId(EMPTY_APP_ID);
-        }
-
         if (registry != null && consumers.containsKey(event.getStatus())) {
+            if (StringUtils.isEmpty(event.getAppId())) {
+                event.setAppId(EMPTY_APP_ID);
+            }
+
             consumers.get(event.getStatus()).accept(event);
         }
     }
