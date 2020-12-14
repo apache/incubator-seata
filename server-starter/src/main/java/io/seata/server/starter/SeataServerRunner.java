@@ -16,6 +16,8 @@
 package io.seata.server.starter;
 
 import io.seata.server.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +27,30 @@ import org.springframework.stereotype.Component;
 @Component
 public class SeataServerRunner implements CommandLineRunner {
 
+    final Logger logger = LoggerFactory.getLogger(SeataServerRunner.class);
+
+    private Boolean started = Boolean.FALSE;
+
+
     @Override
-    public void run(String... args) throws Exception {
-        Server.main(args);
+    public void run(String... args) {
+        try {
+            synchronized (started) {
+                long start = System.currentTimeMillis();
+
+                Server.main(args);
+
+                started = true;
+                logger.info("seata server started in {} millSeconds", (System.currentTimeMillis() - start));
+            }
+        } catch (Throwable e) {
+            logger.error("seata server start error: {} ", e.getMessage(), e);
+            System.exit(-1);
+        }
+    }
+
+
+    public boolean started() {
+        return started;
     }
 }

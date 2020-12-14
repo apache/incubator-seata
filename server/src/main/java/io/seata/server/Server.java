@@ -98,13 +98,6 @@ public class Server {
         }
         XID.setPort(nettyRemotingServer.getListenPort());
 
-        try {
-            nettyRemotingServer.init();
-        } catch (Throwable e) {
-            logger.error("nettyServer init error:{}", e.getMessage(), e);
-            System.exit(-1);
-        }
-
-        System.exit(0);
+        nettyRemotingServer.init();
     }
 }
