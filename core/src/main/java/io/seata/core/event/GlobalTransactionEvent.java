@@ -44,6 +44,8 @@ public class GlobalTransactionEvent implements Event {
      */
     private final String name;
 
+    private final String appId;
+
     /**
      * Transaction Begin Time
      */
@@ -71,6 +73,10 @@ public class GlobalTransactionEvent implements Event {
         return name;
     }
 
+    public String getAppId() {
+        return appId;
+    }
+
     public Long getBeginTime() {
         return beginTime;
     }
@@ -83,11 +89,12 @@ public class GlobalTransactionEvent implements Event {
         return status;
     }
 
-    public GlobalTransactionEvent(long id, String role, String name, Long beginTime, Long endTime,
+    public GlobalTransactionEvent(long id, String role, String name, String appId, Long beginTime, Long endTime,
                                   GlobalStatus status) {
         this.id = id;
         this.role = role;
         this.name = name;
+        this.appId = appId;
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.status = status;
