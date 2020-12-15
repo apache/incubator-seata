@@ -13,15 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.h2.keyword;
+package io.seata.common.util;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
-import io.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Test;
 
-/**
- * @author JerryYin
- */
-@LoadLevel(name = JdbcConstants.H2)
-public class H2KeywordChecker extends MySQLKeywordChecker {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class SizeUtilTest {
+    @Test
+    void size2Long() {
+        assertThat(SizeUtil.size2Long("2k")).isEqualTo(2L * 1024);
+        assertThat(SizeUtil.size2Long("2m")).isEqualTo(2L * 1024 * 1024);
+        assertThat(SizeUtil.size2Long("2G")).isEqualTo(2L * 1024 * 1024 * 1024);
+        assertThat(SizeUtil.size2Long("2t")).isEqualTo(2L * 1024 * 1024 * 1024 * 1024);
+    }
 }

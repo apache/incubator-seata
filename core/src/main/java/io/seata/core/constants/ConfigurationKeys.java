@@ -298,6 +298,26 @@ public interface ConfigurationKeys {
     String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
 
     /**
+     * the constant CLIENT_UNDO_COMPRESS_PREFIX
+     */
+    String CLIENT_UNDO_COMPRESS_PREFIX = CLIENT_UNDO_PREFIX + "compress.";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_TYPE
+     */
+    String CLIENT_UNDO_COMPRESS_TYPE = CLIENT_UNDO_COMPRESS_PREFIX + "type";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_ENABLE
+     */
+    String CLIENT_UNDO_COMPRESS_ENABLE = CLIENT_UNDO_COMPRESS_PREFIX + "enable";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_THRESHOLD
+     */
+    String CLIENT_UNDO_COMPRESS_THRESHOLD = CLIENT_UNDO_COMPRESS_PREFIX + "threshold";
+
+    /**
      * The constant METRICS_PREFIX.
      */
     String METRICS_PREFIX = "metrics.";

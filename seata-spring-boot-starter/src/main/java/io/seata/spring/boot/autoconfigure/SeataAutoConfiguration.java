@@ -28,6 +28,7 @@ import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryPropert
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -90,6 +91,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -102,15 +104,15 @@ public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
     public SeataAutoConfiguration(SeataProperties seataProperties,
-            RmProperties rmProperties, TmProperties tmProperties, LockProperties lockProperties,
-            ServiceProperties serviceProperties, ShutdownProperties shutdownProperties, ThreadFactoryProperties threadFactoryProperties,
-            UndoProperties undoProperties, LogProperties logProperties, TransportProperties transportProperties,
-            ConfigProperties configProperties, ConfigFileProperties configFileProperties, RegistryProperties registryProperties,
-            ConfigNacosProperties configNacosProperties, ConfigConsulProperties configConsulProperties, ConfigZooKeeperProperties configZooKeeperProperties,
-            ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, ConfigCustomProperties configCustomProperties,
-            RegistryConsulProperties registryConsulProperties, RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties,
-            RegistryNacosProperties registryNacosProperties, RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties,
-            RegistryZooKeeperProperties registryZooKeeperProperties, RegistryCustomProperties registryCustomProperties) {
+                                  RmProperties rmProperties, TmProperties tmProperties, LockProperties lockProperties,
+                                  ServiceProperties serviceProperties, ShutdownProperties shutdownProperties, ThreadFactoryProperties threadFactoryProperties,
+                                  UndoProperties undoProperties, UndoCompressProperties undoCompressProperties, LogProperties logProperties, TransportProperties transportProperties,
+                                  ConfigProperties configProperties, ConfigFileProperties configFileProperties, RegistryProperties registryProperties,
+                                  ConfigNacosProperties configNacosProperties, ConfigConsulProperties configConsulProperties, ConfigZooKeeperProperties configZooKeeperProperties,
+                                  ConfigApolloProperties configApolloProperties, ConfigEtcd3Properties configEtcd3Properties, ConfigCustomProperties configCustomProperties,
+                                  RegistryConsulProperties registryConsulProperties, RegistryEtcd3Properties registryEtcd3Properties, RegistryEurekaProperties registryEurekaProperties,
+                                  RegistryNacosProperties registryNacosProperties, RegistryRedisProperties registryRedisProperties, RegistrySofaProperties registrySofaProperties,
+                                  RegistryZooKeeperProperties registryZooKeeperProperties, RegistryCustomProperties registryCustomProperties) {
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, seataProperties);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, rmProperties);
@@ -120,6 +122,7 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, shutdownProperties);
         PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, threadFactoryProperties);
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, undoProperties);
+        PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, undoCompressProperties);
         PROPERTY_BEAN_MAP.put(LOG_PREFIX, logProperties);
         PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, transportProperties);
         PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, configProperties);

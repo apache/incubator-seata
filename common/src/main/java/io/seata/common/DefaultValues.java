@@ -103,4 +103,19 @@ public interface DefaultValues {
 
     String SEATA_RAFT_GROUP = "SEATA";
 
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE
+     */
+    boolean DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE = true;
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_TYPE
+     */
+    String DEFAULT_CLIENT_UNDO_COMPRESS_TYPE = "zip";
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD
+     */
+    String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
+
 }
