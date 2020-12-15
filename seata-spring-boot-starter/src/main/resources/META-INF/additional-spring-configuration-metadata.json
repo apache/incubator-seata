@@ -151,6 +151,24 @@
       "defaultValue": true
     },
     {
+      "name": "seata.client.undo.compress.enable",
+      "type": "java.lang.Boolean",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "seata.client.undo.compress.type",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties",
+      "defaultValue": "zip"
+    },
+    {
+      "name": "seata.client.undo.compress.threshold",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties",
+      "defaultValue": "64k"
+    },
+    {
       "name": "seata.client.log.exception-rate",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LogProperties",
@@ -383,6 +401,17 @@
     },
     {
       "name": "seata.transport.compressor",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "io.seata.core.compressor.CompressorType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.client.undo.compress.type",
       "providers": [
         {
           "name": "handle-as",
