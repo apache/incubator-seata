@@ -24,22 +24,28 @@ import io.seata.common.util.IdWorker;
  */
 public class UUIDGenerator {
 
+    private static volatile IdWorker idWorker;
+
     /**
-     * Generate uuid long.
-     *
-     * @return the long
+     * generate UUID using snowflake algorithm
+     * @return UUID
      */
     public static long generateUUID() {
-        return IdWorker.getInstance().nextId();
+        if (idWorker == null) {
+            synchronized (UUIDGenerator.class) {
+                if (idWorker == null) {
+                    init(null);
+                }
+            }
+        }
+        return idWorker.nextId();
     }
 
     /**
-     * Init.
-     *
-     * @param serverNode the server node id
+     * init IdWorker
+     * @param serverNode the server node id, consider as machine id in snowflake
      */
     public static void init(Long serverNode) {
-        IdWorker.init(serverNode);
+        idWorker = new IdWorker(serverNode);
     }
-
 }
