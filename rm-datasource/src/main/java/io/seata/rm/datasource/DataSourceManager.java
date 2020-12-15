@@ -21,7 +21,6 @@ import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.executor.Initialize;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -30,7 +29,6 @@ import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
@@ -45,22 +43,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author sharajava
  */
-public class DataSourceManager extends AbstractResourceManager implements Initialize {
+public class DataSourceManager extends AbstractResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceManager.class);
 
-    private ResourceManagerInbound asyncWorker;
+    private final AsyncWorker asyncWorker = new AsyncWorker();
 
-    private Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
-
-    /**
-     * Sets async worker.
-     *
-     * @param asyncWorker the async worker
-     */
-    public void setAsyncWorker(ResourceManagerInbound asyncWorker) {
-        this.asyncWorker = asyncWorker;
-    }
+    private final Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
@@ -92,25 +81,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     /**
-     * Init.
-     *
-     * @param asyncWorker the async worker
-     */
-    public synchronized void initAsyncWorker(ResourceManagerInbound asyncWorker) {
-        setAsyncWorker(asyncWorker);
-    }
-
-    /**
      * Instantiates a new Data source manager.
      */
     public DataSourceManager() {
-    }
-
-    @Override
-    public void init() {
-        AsyncWorker asyncWorker = new AsyncWorker();
-        asyncWorker.init();
-        initAsyncWorker(asyncWorker);
     }
 
     @Override

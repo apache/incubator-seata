@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -62,25 +63,37 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
         CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT);
 
-    private final BlockingQueue<Phase2Context> commitQueue = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
+    private final BlockingQueue<Phase2Context> commitQueue;
+
+    private final ScheduledExecutorService scheduledExecutor;
+
+    public AsyncWorker() {
+        LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
+        commitQueue = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
+
+        ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 2, true);
+        scheduledExecutor = new ScheduledThreadPoolExecutor(2, threadFactory);
+        scheduledExecutor.scheduleAtFixedRate(this::doBranchCommits, 10, 1000, TimeUnit.MILLISECONDS);
+    }
 
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) {
-        if (!commitQueue.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [{}/{}] will be handled by housekeeping later.", branchId, xid);
-        }
+        Phase2Context context = new Phase2Context(branchType, xid, branchId, resourceId, applicationData);
+        addToCommitQueue(context);
         return BranchStatus.PhaseTwo_Committed;
     }
 
     /**
-     * Init worker thread to do branch commit
+     * try add context to commitQueue directly, if fail(which means the queue is full),
+     * then doBranchCommits urgently(so that the queue could be empty again) and retry this process.
      */
-    public void init() {
-        LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
-        ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 1, true);
-        ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1, threadFactory);
-        timerExecutor.scheduleAtFixedRate(this::doBranchCommits, 10, 1000, TimeUnit.MILLISECONDS);
+    private void addToCommitQueue(Phase2Context context) {
+        if (commitQueue.offer(context)) {
+            return;
+        }
+        CompletableFuture.runAsync(this::doBranchCommits, scheduledExecutor)
+                .thenRun(() -> addToCommitQueue(context));
     }
 
     private void doBranchCommits() {
@@ -119,7 +132,7 @@ public class AsyncWorker implements ResourceManagerInbound {
         try {
             conn = dataSourceProxy.getPlainConnection();
         } catch (SQLException sqle) {
-            LOGGER.warn("Failed to get connection for async committing on {}", resourceId, sqle);
+            LOGGER.error("Failed to get connection for async committing on {}", resourceId, sqle);
             return;
         }
 
@@ -144,17 +157,17 @@ public class AsyncWorker implements ResourceManagerInbound {
                 conn.commit();
             }
         } catch (SQLException e) {
-            LOGGER.warn("Failed to batch delete undo log", e);
+            LOGGER.error("Failed to batch delete undo log", e);
             try {
                 conn.rollback();
             } catch (SQLException rollbackEx) {
-                LOGGER.warn("Failed to rollback JDBC resource after deleting undo log failed", rollbackEx);
+                LOGGER.error("Failed to rollback JDBC resource after deleting undo log failed", rollbackEx);
             }
         } finally {
             try {
                 conn.close();
             } catch (SQLException closeEx) {
-                LOGGER.warn("Failed to close JDBC resource after deleting undo log", closeEx);
+                LOGGER.error("Failed to close JDBC resource after deleting undo log", closeEx);
             }
         }
     }
