@@ -33,16 +33,24 @@ import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
  */
 public class NettyServerConfig extends NettyBaseConfig {
 
-    private int serverSelectorThreads = WORKER_THREAD_SIZE;
-    private int serverSocketSendBufSize = 153600;
-    private int serverSocketResvBufSize = 153600;
-    private int serverWorkerThreads = WORKER_THREAD_SIZE;
-    private int soBackLogSize = 1024;
-    private int writeBufferHighWaterMark = 67108864;
-    private int writeBufferLowWaterMark = 1048576;
+    private int serverSelectorThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int serverSocketSendBufSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
+    private int serverSocketResvBufSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize", String.valueOf(153600)));
+    private int serverWorkerThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverWorkerThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int soBackLogSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", String.valueOf(1024)));
+    private int writeBufferHighWaterMark = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
+    private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
     private static final int DEFAULT_LISTEN_PORT = 8091;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private int serverChannelMaxIdleTimeSeconds = 30;
+    private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
 
     /**

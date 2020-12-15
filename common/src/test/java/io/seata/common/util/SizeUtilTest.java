@@ -13,31 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.struct;
+package io.seata.common.util;
 
-/**
- * The not placeholder expression.
- * @author jsbxyyx
- */
-public class NotPlaceholderExpr {
+import org.junit.jupiter.api.Test;
 
-    private static NotPlaceholderExpr instance = new NotPlaceholderExpr();
+import static org.assertj.core.api.Assertions.assertThat;
 
-    /**
-     * Get NotPlaceholder.
-     *
-     * @return the NotPlaceholder
-     */
-    public static NotPlaceholderExpr get() {
-        return instance;
+class SizeUtilTest {
+    @Test
+    void size2Long() {
+        assertThat(SizeUtil.size2Long("2k")).isEqualTo(2L * 1024);
+        assertThat(SizeUtil.size2Long("2m")).isEqualTo(2L * 1024 * 1024);
+        assertThat(SizeUtil.size2Long("2G")).isEqualTo(2L * 1024 * 1024 * 1024);
+        assertThat(SizeUtil.size2Long("2t")).isEqualTo(2L * 1024 * 1024 * 1024 * 1024);
     }
-
-    private NotPlaceholderExpr() {
-    }
-
-    @Override
-    public String toString() {
-        return "NOT_PLACEHOLDER";
-    }
-
 }
