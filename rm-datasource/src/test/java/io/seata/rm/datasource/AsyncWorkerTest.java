@@ -15,9 +15,7 @@
  */
 package io.seata.rm.datasource;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -28,36 +26,33 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class AsyncWorkerTest {
 
-    private AsyncWorker worker = new AsyncWorker();
+    private final AsyncWorker worker = new AsyncWorker(null);
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Test
     void branchCommit() {
-        BranchStatus status = worker.branchCommit(BranchType.AT, "test", 0, null, null);
+        BranchStatus status = worker.branchCommit("test", 0, null);
         assertEquals(BranchStatus.PhaseTwo_Committed, status, "should return PhaseTwo_Committed");
     }
 
     @Test
-    void branchRollback() {
-        assertThrows(NotSupportYetException.class, () -> {
-            worker.branchRollback(BranchType.AT, "test", 0, null, null);
-        }, "if you had supported this method, please modify this test");
+    void doBranchCommitSafely() {
+        assertDoesNotThrow(worker::doBranchCommitSafely, "this method should never throw anything");
     }
 
     @Test
     void groupedByResourceId() {
         List<AsyncWorker.Phase2Context> contexts = getRandomContexts();
         Map<String, List<AsyncWorker.Phase2Context>> groupedContexts = worker.groupedByResourceId(contexts);
-        groupedContexts.forEach((resourceId, group) -> {
-            group.forEach(context -> {
-                assertEquals(resourceId, context.resourceId, "each context in the group should has the same resourceId");
-            });
-        });
+        groupedContexts.forEach((resourceId, group) -> group.forEach(context -> {
+            String message = "each context in the group should has the same resourceId";
+            assertEquals(resourceId, context.resourceId, message);
+        }));
     }
 
     private List<AsyncWorker.Phase2Context> getRandomContexts() {
@@ -73,6 +68,6 @@ class AsyncWorkerTest {
     }
 
     private AsyncWorker.Phase2Context buildContext(String resourceId) {
-        return new AsyncWorker.Phase2Context(BranchType.AT, null, 0, resourceId, null);
+        return new AsyncWorker.Phase2Context("test", 0, resourceId);
     }
 }

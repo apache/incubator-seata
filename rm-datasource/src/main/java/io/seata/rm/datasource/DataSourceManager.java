@@ -47,7 +47,7 @@ public class DataSourceManager extends AbstractResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceManager.class);
 
-    private final AsyncWorker asyncWorker = new AsyncWorker();
+    private final AsyncWorker asyncWorker = new AsyncWorker(this);
 
     private final Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
 
@@ -111,7 +111,7 @@ public class DataSourceManager extends AbstractResourceManager {
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) throws TransactionException {
-        return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
+        return asyncWorker.branchCommit(xid, branchId, resourceId);
     }
 
     @Override

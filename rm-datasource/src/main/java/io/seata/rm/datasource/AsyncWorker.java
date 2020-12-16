@@ -32,13 +32,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Lists;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.ResourceManagerInbound;
-import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
@@ -52,7 +48,7 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_L
  *
  * @author sharajava
  */
-public class AsyncWorker implements ResourceManagerInbound {
+public class AsyncWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncWorker.class);
 
@@ -63,40 +59,50 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
         CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT);
 
+    private final DataSourceManager dataSourceManager;
+
     private final BlockingQueue<Phase2Context> commitQueue;
 
     private final ScheduledExecutorService scheduledExecutor;
 
-    public AsyncWorker() {
+    public AsyncWorker(DataSourceManager dataSourceManager) {
+        this.dataSourceManager = dataSourceManager;
+
         LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
         commitQueue = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
 
         ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 2, true);
         scheduledExecutor = new ScheduledThreadPoolExecutor(2, threadFactory);
-        scheduledExecutor.scheduleAtFixedRate(this::doBranchCommits, 10, 1000, TimeUnit.MILLISECONDS);
+        scheduledExecutor.scheduleAtFixedRate(this::doBranchCommitSafely, 10, 1000, TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) {
-        Phase2Context context = new Phase2Context(branchType, xid, branchId, resourceId, applicationData);
+    public BranchStatus branchCommit(String xid, long branchId, String resourceId) {
+        Phase2Context context = new Phase2Context(xid, branchId, resourceId);
         addToCommitQueue(context);
         return BranchStatus.PhaseTwo_Committed;
     }
 
     /**
      * try add context to commitQueue directly, if fail(which means the queue is full),
-     * then doBranchCommits urgently(so that the queue could be empty again) and retry this process.
+     * then doBranchCommit urgently(so that the queue could be empty again) and retry this process.
      */
     private void addToCommitQueue(Phase2Context context) {
         if (commitQueue.offer(context)) {
             return;
         }
-        CompletableFuture.runAsync(this::doBranchCommits, scheduledExecutor)
+        CompletableFuture.runAsync(this::doBranchCommitSafely, scheduledExecutor)
                 .thenRun(() -> addToCommitQueue(context));
     }
 
-    private void doBranchCommits() {
+    void doBranchCommitSafely() {
+        try {
+            doBranchCommit();
+        } catch (Throwable e) {
+            LOGGER.error("Exception occur when doing branch commit", e);
+        }
+    }
+
+    private void doBranchCommit() {
         if (commitQueue.isEmpty()) {
             return;
         }
@@ -121,8 +127,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     private void dealWithGroupedContexts(String resourceId, List<Phase2Context> contexts) {
-        DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
-        DataSourceProxy dataSourceProxy = resourceManager.get(resourceId);
+        DataSourceProxy dataSourceProxy = dataSourceManager.get(resourceId);
         if (dataSourceProxy == null) {
             LOGGER.warn("Failed to find resource for {}", resourceId);
             return;
@@ -172,30 +177,18 @@ public class AsyncWorker implements ResourceManagerInbound {
         }
     }
 
-    @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) {
-        throw new NotSupportYetException();
-    }
-
     static class Phase2Context {
 
         /**
-         * Instantiates a new Phase 2 context.
-         *
-         * @param branchType      the branchType
+         * AT Phase 2 context
          * @param xid             the xid
          * @param branchId        the branch id
          * @param resourceId      the resource id
-         * @param applicationData the application data
          */
-        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId,
-                             String applicationData) {
+        public Phase2Context(String xid, long branchId, String resourceId) {
             this.xid = xid;
             this.branchId = branchId;
             this.resourceId = resourceId;
-            this.applicationData = applicationData;
-            this.branchType = branchType;
         }
 
         /**
@@ -210,14 +203,5 @@ public class AsyncWorker implements ResourceManagerInbound {
          * The Resource id.
          */
         String resourceId;
-        /**
-         * The Application data.
-         */
-        String applicationData;
-
-        /**
-         * the branch Type
-         */
-        BranchType branchType;
     }
 }
