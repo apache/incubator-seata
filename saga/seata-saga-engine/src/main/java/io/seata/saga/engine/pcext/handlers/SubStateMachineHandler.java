@@ -79,6 +79,7 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+
         Object inputParamsObj = context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
         Map<String, Object> startParams = new HashMap<>(0);
         if (inputParamsObj instanceof List) {
@@ -91,17 +92,17 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         }
 
         DefaultStateMachineConfig machineConfig = (DefaultStateMachineConfig)engine.getStateMachineConfig();
-        boolean isRetryPersist = machineConfig.isRetryPersistEnable();
-        isRetryPersist = isRetryPersist && stateMachineInstance.getStateMachine().isRetryPersist()
-            && subStateMachine.isRetryPersist();
-        if (!isRetryPersist && null != stateInstance.getStateIdRetriedFor()) {
+        boolean isRetryUpdate = machineConfig.isSagaRetryPersistModeUpdate();
+        isRetryUpdate = isRetryUpdate || stateMachineInstance.getStateMachine().isRetryPersistModeUpdate()
+            || subStateMachine.isRetryPersistModeUpdate();
+        if (isRetryUpdate && null != stateInstance.getStateIdRetriedFor()) {
             context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
         }
 
-        boolean isCompensatePersist = machineConfig.isCompensatePersistEnable();
-        isCompensatePersist = isCompensatePersist && stateMachineInstance.getStateMachine().isCompensatePersist()
-            && subStateMachine.isCompensatePersist();
-        if (!isCompensatePersist && null != stateInstance.getStateIdCompensatedFor()) {
+        boolean isCompensateUpdate = machineConfig.isSagaCompensatePersistModeUpdate();
+        isCompensateUpdate = isCompensateUpdate || stateMachineInstance.getStateMachine().isCompensatePersistModeUpdate()
+            || subStateMachine.isCompensatePersistModeUpdate();
+        if (isCompensateUpdate && null != stateInstance.getStateIdCompensatedFor()) {
             context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
         }
 

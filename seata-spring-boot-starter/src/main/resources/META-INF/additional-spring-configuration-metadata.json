@@ -73,16 +73,16 @@
       "defaultValue": "fastjson"
     },
     {
-      "name": "seata.client.rm.saga-retry-persist-enable",
+      "name": "seata.client.rm.saga-retry-persist-mode-update",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
-      "defaultValue": "true"
+      "defaultValue": "false"
     },
     {
-      "name": "seata.client.rm.saga-compensate-persist-enable",
+      "name": "seata.client.rm.saga-compensate-persist-mode-update",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
-      "defaultValue": "true"
+      "defaultValue": "false"
     },
     {
       "name": "seata.client.rm.lock.retry-interval",
@@ -358,26 +358,26 @@
       ]
     },
     {
-      "name": "seata.client.rm.saga-retry-persist-enable",
+      "name": "seata.client.rm.saga-retry-persist-mode-update",
       "values": [
         {
-          "value": true,
-          "description": "default true."
+          "value": false,
+          "description": "default false."
         },
         {
-          "value": false
+          "value": true
         }
       ]
     },
     {
-      "name": "seata.client.rm.saga-compensate-persist-enable",
+      "name": "seata.client.rm.saga-compensate-persist-mode-update",
       "values": [
         {
-          "value": true,
-          "description": "default true."
+          "value": false,
+          "description": "default false."
         },
         {
-          "value": false
+          "value": true
         }
       ]
     },

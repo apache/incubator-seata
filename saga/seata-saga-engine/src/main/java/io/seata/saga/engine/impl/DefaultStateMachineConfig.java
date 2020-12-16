@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import io.seata.common.DefaultValues;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
@@ -70,8 +71,8 @@ import org.springframework.core.io.Resource;
 
 import javax.script.ScriptEngineManager;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
@@ -110,8 +111,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private String defaultTenantId = "000001";
     private ScriptEngineManager scriptEngineManager;
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
-    private boolean retryPersistEnable = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_ENABLE;
-    private boolean compensatePersistEnable = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_ENABLE;
+    private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
+    private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 
     protected void init() throws Exception {
 
@@ -482,19 +483,19 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.sagaJsonParser = sagaJsonParser;
     }
 
-    public boolean isRetryPersistEnable() {
-        return retryPersistEnable;
+    public boolean isSagaRetryPersistModeUpdate() {
+        return sagaRetryPersistModeUpdate;
     }
 
-    public void setRetryPersistEnable(boolean retryPersistEnable) {
-        this.retryPersistEnable = retryPersistEnable;
+    public void setSagaRetryPersistModeUpdate(boolean sagaRetryPersistModeUpdate) {
+        this.sagaRetryPersistModeUpdate = sagaRetryPersistModeUpdate;
     }
 
-    public boolean isCompensatePersistEnable() {
-        return compensatePersistEnable;
+    public boolean isSagaCompensatePersistModeUpdate() {
+        return sagaCompensatePersistModeUpdate;
     }
 
-    public void setCompensatePersistEnable(boolean compensatePersistEnable) {
-        this.compensatePersistEnable = compensatePersistEnable;
+    public void setSagaCompensatePersistModeUpdate(boolean sagaCompensatePersistModeUpdate) {
+        this.sagaCompensatePersistModeUpdate = sagaCompensatePersistModeUpdate;
     }
 }

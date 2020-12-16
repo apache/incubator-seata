@@ -84,8 +84,8 @@
         "CallSubStateMachineNotPersist": {
             "Type": "SubStateMachine",
             "StateMachineName": "simplePersistStateMachine",
-            "IsRetryPersist": false,
-            "IsCompensatePersist": false,
+            "IsRetryPersistModeUpdate": true,
+            "IsCompensatePersistModeUpdate": true,
             "Input": [
                 {
                     "a": "$.[a]-2",

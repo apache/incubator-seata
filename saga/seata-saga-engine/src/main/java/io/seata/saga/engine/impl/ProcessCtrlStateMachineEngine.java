@@ -385,10 +385,10 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 StateMachine stateMachine = stateInstance.getStateMachineInstance().getStateMachine();
                 AbstractTaskState state = (AbstractTaskState)stateMachine.getState(stateInstance.getName());
 
-                boolean isRetryPersist = ((DefaultStateMachineConfig)this.stateMachineConfig).isRetryPersistEnable();
-                isRetryPersist = isRetryPersist && stateMachine.isRetryPersist() && state.isRetryPersist();
+                boolean isRetryUpdate = ((DefaultStateMachineConfig)this.stateMachineConfig).isSagaRetryPersistModeUpdate();
+                isRetryUpdate = isRetryUpdate || stateMachine.isRetryPersistModeUpdate() || state.isRetryPersistModeUpdate();
 
-                if (isRetryPersist && ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
+                if (!isRetryUpdate && ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
                     continue;
                 }
 
@@ -408,7 +408,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                             continue;
                         }
 
-                        if (isRetryPersist && ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
+                        if (!isRetryUpdate && ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
 
                             throw new ForwardInvalidException(
                                 "Last forward execution state instance is SubStateMachine and compensation status is "
@@ -417,7 +417,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                         }
 
                     }
-                } else if (isRetryPersist && ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
+                } else if (!isRetryUpdate && ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
 
                     throw new ForwardInvalidException(
                         "Last forward execution state instance compensation status is [UN], Operation[forward] "

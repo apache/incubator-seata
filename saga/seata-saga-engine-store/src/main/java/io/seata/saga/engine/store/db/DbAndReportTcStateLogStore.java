@@ -271,7 +271,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
             // if this state is for retry, do not register branch
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
-                if (isPersist(stateInstance, context)) {
+                if (!isUpdateMode(stateInstance, context)) {
                     // generate id by default
                     stateInstance.setId(generateRetryStateInstanceId(stateInstance));
                 } else {
@@ -283,7 +283,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
                 String compensateStateInstanceId = generateCompensateStateInstanceId(stateInstance);
                 // generate id by default or first compensation
-                if (compensateStateInstanceId.endsWith("-1") || isPersist(stateInstance, context)) {
+                if (compensateStateInstanceId.endsWith("-1") || !isUpdateMode(stateInstance, context)) {
                     stateInstance.setId(compensateStateInstanceId);
                 } else {
                     stateInstance.setId(stateInstance.getStateIdCompensatedFor() + "-1");
@@ -427,20 +427,20 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
         return -1;
     }
 
-    private boolean isPersist(StateInstance stateInstance, ProcessContext context) {
+    private boolean isUpdateMode(StateInstance stateInstance, ProcessContext context) {
         DefaultStateMachineConfig stateMachineConfig = (DefaultStateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
 
         if (!StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
-            return stateMachineConfig.isRetryPersistEnable() && stateInstance.getStateMachineInstance()
-                .getStateMachine().isRetryPersist() && state.isRetryPersist();
+            return stateMachineConfig.isSagaRetryPersistModeUpdate() || stateInstance.getStateMachineInstance()
+                .getStateMachine().isRetryPersistModeUpdate() || state.isRetryPersistModeUpdate();
         } else if (!StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-            return stateMachineConfig.isCompensatePersistEnable() && stateInstance.getStateMachineInstance()
-                .getStateMachine().isCompensatePersist() && state.isCompensatePersist();
+            return stateMachineConfig.isSagaCompensatePersistModeUpdate() || stateInstance.getStateMachineInstance()
+                .getStateMachine().isCompensatePersistModeUpdate() || state.isCompensatePersistModeUpdate();
         }
-        return true;
+        return false;
     }
 
     @Override
@@ -812,7 +812,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setString(12, stateInstance.getBusinessKey());
             statement.setString(13, stateInstance.getStateIdCompensatedFor());
             statement.setString(14, stateInstance.getStateIdRetriedFor());
-            statement.setTimestamp(15, new Timestamp(stateInstance.getGmtUpdated().getTime()));
         }
     }
 
@@ -824,9 +823,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     stateInstance.getException() != null ? (byte[]) stateInstance.getSerializedException() : null);
             statement.setString(3, stateInstance.getStatus().name());
             statement.setObject(4, stateInstance.getSerializedOutputParams());
-            statement.setTimestamp(5, new Timestamp(stateInstance.getGmtEnd().getTime()));
-            statement.setString(6, stateInstance.getId());
-            statement.setString(7, stateInstance.getMachineInstanceId());
+            statement.setString(5, stateInstance.getId());
+            statement.setString(6, stateInstance.getMachineInstanceId());
         }
     }
 

@@ -21,6 +21,9 @@ import java.util.Map;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.TaskState;
 
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
+
 /**
  * The state of the execution task (abstract class), the specific task to be executed is determined by the subclass
  *
@@ -39,8 +42,8 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private List<Object> inputExpressions;
     private Map<String, Object> outputExpressions;
     private boolean isPersist = true;
-    private boolean isRetryPersist = true;
-    private boolean isCompensatePersist = true;
+    private boolean retryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
+    private boolean compensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 
     @Override
     public String getCompensateState() {
@@ -115,20 +118,20 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         isPersist = persist;
     }
 
-    public boolean isRetryPersist() {
-        return isRetryPersist;
+    public boolean isRetryPersistModeUpdate() {
+        return retryPersistModeUpdate;
     }
 
-    public void setRetryPersist(boolean retryPersist) {
-        isRetryPersist = retryPersist;
+    public void setRetryPersistModeUpdate(boolean retryPersistModeUpdate) {
+        this.retryPersistModeUpdate = retryPersistModeUpdate;
     }
 
-    public boolean isCompensatePersist() {
-        return isCompensatePersist;
+    public boolean isCompensatePersistModeUpdate() {
+        return compensatePersistModeUpdate;
     }
 
-    public void setCompensatePersist(boolean compensatePersist) {
-        isCompensatePersist = compensatePersist;
+    public void setCompensatePersistModeUpdate(boolean compensatePersistModeUpdate) {
+        this.compensatePersistModeUpdate = compensatePersistModeUpdate;
     }
 
     public List<Object> getInputExpressions() {

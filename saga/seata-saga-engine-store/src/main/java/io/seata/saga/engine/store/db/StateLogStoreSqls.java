@@ -76,7 +76,7 @@ public class StateLogStoreSqls {
         + "AND machine_inst_id = ?";
 
     private static final String UPDATE_STATE_EXECUTION_STATUS_SQL
-        = "UPDATE ${TABLE_PREFIX}state_inst SET status = ? WHERE machine_inst_id = ? AND id = ?";
+        = "UPDATE ${TABLE_PREFIX}state_inst SET status = ?, gmt_started = ? WHERE machine_inst_id = ? AND id = ?";
 
     private static final String QUERY_STATE_INSTANCES_BY_MACHINE_INSTANCE_ID_SQL = "SELECT " + STATE_INSTANCE_FIELDS
         + " FROM ${TABLE_PREFIX}state_inst WHERE machine_inst_id = ? ORDER BY gmt_started, ID ASC";

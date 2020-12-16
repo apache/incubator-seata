@@ -14,8 +14,8 @@ seata:
       report-success-enable: false
       saga-branch-register-enable: false
       saga-json-parser: fastjson
-      saga-retry-persist-enable: true
-      saga-compensate-persist-enable: true
+      saga-retry-persist-mode-update: false
+      saga-compensate-persist-mode-update: false
       lock:
         retry-interval: 10
         retry-times: 30

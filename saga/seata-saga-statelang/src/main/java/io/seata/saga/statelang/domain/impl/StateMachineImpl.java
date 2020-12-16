@@ -19,9 +19,13 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.seata.common.DefaultValues;
 import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
+
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 
 /**
  * state machine
@@ -40,8 +44,8 @@ public class StateMachineImpl implements StateMachine {
     private Status status = Status.AC;
     private RecoverStrategy recoverStrategy;
     private boolean isPersist = true;
-    private boolean isRetryPersist = true;
-    private boolean isCompensatePersist = true;
+    private boolean retryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
+    private boolean compensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
     private String type = "STATE_LANG";
     private transient String content;
     private Date gmtCreate;
@@ -192,21 +196,19 @@ public class StateMachineImpl implements StateMachine {
         this.gmtCreate = gmtCreate;
     }
 
-    @Override
-    public boolean isRetryPersist() {
-        return isRetryPersist;
+    public boolean isRetryPersistModeUpdate() {
+        return retryPersistModeUpdate;
     }
 
-    public void setRetryPersist(boolean retryPersist) {
-        isRetryPersist = retryPersist;
+    public void setRetryPersistModeUpdate(boolean retryPersistModeUpdate) {
+        this.retryPersistModeUpdate = retryPersistModeUpdate;
     }
 
-    @Override
-    public boolean isCompensatePersist() {
-        return isCompensatePersist;
+    public boolean isCompensatePersistModeUpdate() {
+        return compensatePersistModeUpdate;
     }
 
-    public void setCompensatePersist(boolean compensatePersist) {
-        isCompensatePersist = compensatePersist;
+    public void setCompensatePersistModeUpdate(boolean compensatePersistModeUpdate) {
+        this.compensatePersistModeUpdate = compensatePersistModeUpdate;
     }
 }
