@@ -37,6 +37,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
@@ -83,6 +84,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         PROPERTY_BEAN_MAP.putIfAbsent(SHUTDOWN_PREFIX, new CompletableFuture<>());
         PROPERTY_BEAN_MAP.putIfAbsent(THREAD_FACTORY_PREFIX, new CompletableFuture<>());
         PROPERTY_BEAN_MAP.putIfAbsent(UNDO_PREFIX, new CompletableFuture<>());
+        PROPERTY_BEAN_MAP.putIfAbsent(COMPRESS_PREFIX, new CompletableFuture<>());
+
         PROPERTY_BEAN_MAP.putIfAbsent(LOG_PREFIX, new CompletableFuture<>());
         PROPERTY_BEAN_MAP.putIfAbsent(TRANSPORT_PREFIX, new CompletableFuture<>());
         PROPERTY_BEAN_MAP.putIfAbsent(CONFIG_PREFIX, new CompletableFuture<>());
