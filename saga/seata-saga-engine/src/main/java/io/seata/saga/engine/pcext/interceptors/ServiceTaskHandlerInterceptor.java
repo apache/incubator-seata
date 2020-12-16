@@ -149,16 +149,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                 stateToBeCompensated.setCompensationState(stateInstance);
                 stateInstance.setStateIdCompensatedFor(stateToBeCompensated.getId());
-                Map<String, StateInstance> stateNeedsCompensation = CompensationHolder.getCurrent(context, true).getStatesNeedCompensation();
-                if (stateNeedsCompensation.containsKey(stateInstance.getName())) {
-                    for (String key: stateNeedsCompensation.keySet()) {
-                        StateInstance currentInst = stateNeedsCompensation.get(key);
-                        if (null != currentInst && stateInstance.getName().equals(currentInst.getName())) {
-                            stateInstance.setStateIdCompensatedFor(stateToBeCompensated.getId());
-                            break;
-                        }
-                    }
-                }
             } else {
                 LOGGER.error("Compensation State[{}] has no state to compensate, maybe this is a bug.",
                     state.getName());
