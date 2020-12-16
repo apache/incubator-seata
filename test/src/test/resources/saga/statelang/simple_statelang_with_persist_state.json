@@ -3,6 +3,8 @@
     "Comment": "自定义中间状态是否持久化的测试状态机定义",
     "StartState": "FirstState",
     "Version": "0.0.1",
+    "IsRetryPersist": false,
+    "IsCompensatePersist": false,
     "States": {
         "FirstState": {
             "Type": "ServiceTask",
@@ -29,6 +31,10 @@
                 {
                     "Expression":"[a] == 2",
                     "Next":"ThirdState"
+                },
+                {
+                    "Expression":"[a] == 3",
+                    "Next":"ForthState"
                 }
             ],
             "Default":"Fail"
@@ -37,8 +43,6 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "randomExceptionMethod",
-            "IsForUpdate": true,
-            "IsRetryPersist": false,
             "Input": [
                 {
                     "barInput": "$.[fooResult]",
@@ -49,7 +53,7 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{java.lang.Throwable}": "UN",
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
@@ -60,7 +64,6 @@
             "ServiceName": "demoService",
             "ServiceMethod": "randomExceptionMethod",
             "CompensateState": "CompensateThirdState",
-            "IsRetryPersist": false,
             "Input": [
                 {
                     "barInput": "$.[fooResult]",
@@ -71,7 +74,36 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{java.lang.Throwable}": "UN",
+                "#root != null": "SU",
+                "#root == null": "FA"
+            },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "java.lang.Throwable"
+                    ],
+                    "Next": "CompensationTrigger"
+                }
+            ],
+            "Next": "Succeed"
+        },
+        "ForthState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "randomExceptionMethod",
+            "CompensateState": "CallSubStateMachine",
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "Output": {
+                "barResult": "$.#root"
+            },
+            "Status": {
+                "$Exception{java.lang.Throwable}": "UN",
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
@@ -94,13 +126,26 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "compensateBar",
-            "IsCompensatePersist": false,
             "Input": [
                 {
                     "compensateBarInput": "$.[barResult]",
                     "throwException": "$.[compensateBarThrowException]"
                 }
             ]
+        },
+        "CallSubStateMachine": {
+            "Type": "SubStateMachine",
+            "StateMachineName": "simplePersistStateMachine",
+            "Input": [
+                {
+                    "a": 1,
+                    "barThrowException": "$.[barThrowException]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "Succeed"
         },
         "CompensationTrigger": {
             "Type": "CompensationTrigger",

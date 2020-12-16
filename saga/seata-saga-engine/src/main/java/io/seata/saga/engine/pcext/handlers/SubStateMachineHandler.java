@@ -92,10 +92,20 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
 
         DefaultStateMachineConfig machineConfig = (DefaultStateMachineConfig)engine.getStateMachineConfig();
         boolean isRetryPersist = machineConfig.isRetryPersistEnable();
-        isRetryPersist = isRetryPersist && stateMachineInstance.getStateMachine().isRetryPersist() && subStateMachine.isRetryPersist();
+        isRetryPersist = isRetryPersist && stateMachineInstance.getStateMachine().isRetryPersist()
+            && subStateMachine.isRetryPersist();
         if (!isRetryPersist && null != stateInstance.getStateIdRetriedFor()) {
             context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
         }
+
+        boolean isCompensatePersist = machineConfig.isCompensatePersistEnable();
+        isCompensatePersist = isCompensatePersist && stateMachineInstance.getStateMachine().isCompensatePersist()
+            && subStateMachine.isCompensatePersist();
+        if (!isCompensatePersist && null != stateInstance.getStateIdCompensatedFor()) {
+            context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
+        }
+
+
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
         try {
             if (LOGGER.isDebugEnabled()) {
@@ -184,10 +194,12 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         }
 
         StateInstance originalStateInst = stateInstance;
-        do {
-            originalStateInst = statePersister.getStateInstance(originalStateInst.getStateIdRetriedFor(),
-                originalStateInst.getMachineInstanceId());
-        } while (StringUtils.hasText(originalStateInst.getStateIdRetriedFor()));
+        if (!originalStateInst.isForCompensation()) {
+            do {
+                originalStateInst = statePersister.getStateInstance(originalStateInst.getStateIdRetriedFor(),
+                    originalStateInst.getMachineInstanceId());
+            } while (StringUtils.hasText(originalStateInst.getStateIdRetriedFor()));
+        }
 
         List<StateMachineInstance> subInst = statePersister.queryStateMachineInstanceByParentId(
             EngineUtils.generateParentId(originalStateInst));

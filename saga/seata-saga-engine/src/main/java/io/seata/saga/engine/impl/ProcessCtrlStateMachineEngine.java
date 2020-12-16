@@ -382,12 +382,13 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             StateInstance stateInstance = stateInstanceList.get(i);
             if (!stateInstance.isForCompensation()) {
 
-                boolean flag = ((DefaultStateMachineConfig)this.stateMachineConfig).isRetryPersistEnable();
                 StateMachine stateMachine = stateInstance.getStateMachineInstance().getStateMachine();
                 AbstractTaskState state = (AbstractTaskState)stateMachine.getState(stateInstance.getName());
-                flag = flag && stateMachine.isRetryPersist() && state.isRetryPersist();
 
-                if (flag && ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
+                boolean isRetryPersist = ((DefaultStateMachineConfig)this.stateMachineConfig).isRetryPersistEnable();
+                isRetryPersist = isRetryPersist && stateMachine.isRetryPersist() && state.isRetryPersist();
+
+                if (isRetryPersist && ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
                     continue;
                 }
 
@@ -407,7 +408,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                             continue;
                         }
 
-                        if (ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus()) && flag) {
+                        if (isRetryPersist && ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
 
                             throw new ForwardInvalidException(
                                 "Last forward execution state instance is SubStateMachine and compensation status is "
@@ -416,7 +417,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                         }
 
                     }
-                } else if (ExecutionStatus.UN.equals(stateInstance.getCompensationStatus()) && flag) {
+                } else if (isRetryPersist && ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
 
                     throw new ForwardInvalidException(
                         "Last forward execution state instance compensation status is [UN], Operation[forward] "

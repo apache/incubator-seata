@@ -269,22 +269,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
             boolean isPersist = true;
 
-            DefaultStateMachineConfig stateMachineConfig = (DefaultStateMachineConfig)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            boolean isRetryPersist = stateMachineConfig.isRetryPersistEnable();
-            boolean isCompensatePersist = stateMachineConfig.isCompensatePersistEnable();
-
-            StateInstruction instruction = context.getInstruction(StateInstruction.class);
-            ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
-
-            isRetryPersist = isRetryPersist && stateInstance.getStateMachineInstance().getStateMachine()
-                .isRetryPersist() && state.isRetryPersist();
-            isCompensatePersist = isCompensatePersist && stateInstance.getStateMachineInstance().getStateMachine()
-                .isCompensatePersist() && state.isCompensatePersist();
-
             // if this state is for retry, do not register branch
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
-                if (isRetryPersist) {
+                if (isPersist(stateInstance, context)) {
                     // generate id by default
                     stateInstance.setId(generateRetryStateInstanceId(stateInstance));
                 } else {
@@ -296,7 +283,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
                 String compensateStateInstanceId = generateCompensateStateInstanceId(stateInstance);
                 // generate id by default or first compensation
-                if (compensateStateInstanceId.endsWith("-1") || isCompensatePersist) {
+                if (compensateStateInstanceId.endsWith("-1") || isPersist(stateInstance, context)) {
                     stateInstance.setId(compensateStateInstanceId);
                 } else {
                     stateInstance.setId(stateInstance.getStateIdCompensatedFor() + "-1");
@@ -438,6 +425,22 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
         }
         return -1;
+    }
+
+    private boolean isPersist(StateInstance stateInstance, ProcessContext context) {
+        DefaultStateMachineConfig stateMachineConfig = (DefaultStateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateInstruction instruction = context.getInstruction(StateInstruction.class);
+        ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
+
+        if (!StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
+            return stateMachineConfig.isRetryPersistEnable() && stateInstance.getStateMachineInstance()
+                .getStateMachine().isRetryPersist() && state.isRetryPersist();
+        } else if (!StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
+            return stateMachineConfig.isCompensatePersistEnable() && stateInstance.getStateMachineInstance()
+                .getStateMachine().isCompensatePersist() && state.isCompensatePersist();
+        }
+        return true;
     }
 
     @Override
