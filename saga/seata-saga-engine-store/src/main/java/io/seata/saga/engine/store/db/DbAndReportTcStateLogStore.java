@@ -267,27 +267,25 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     public void recordStateStarted(StateInstance stateInstance, ProcessContext context) {
         if (stateInstance != null) {
 
-            boolean isPersist = true;
+            boolean isUpdateMode = false;
 
             // if this state is for retry, do not register branch
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
-                if (!isUpdateMode(stateInstance, context)) {
+                if (isUpdateMode(stateInstance, context)) {
+                    stateInstance.setId(stateInstance.getStateIdRetriedFor());
+                    isUpdateMode = true;
+                } else {
                     // generate id by default
                     stateInstance.setId(generateRetryStateInstanceId(stateInstance));
-                } else {
-                    stateInstance.setId(stateInstance.getStateIdRetriedFor());
-                    isPersist = false;
                 }
             }
             // if this state is for compensation, do not register branch
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-                String compensateStateInstanceId = generateCompensateStateInstanceId(stateInstance);
-                // generate id by default or first compensation
-                if (compensateStateInstanceId.endsWith("-1") || !isUpdateMode(stateInstance, context)) {
-                    stateInstance.setId(compensateStateInstanceId);
+                if (isUpdateMode(stateInstance, context)) {
+                    stateInstance.setId(generateCompensateStateInstanceId(stateInstance, true));
+                    isUpdateMode = true;
                 } else {
-                    stateInstance.setId(stateInstance.getStateIdCompensatedFor() + "-1");
-                    isPersist = false;
+                    stateInstance.setId(generateCompensateStateInstanceId(stateInstance, false));
                 }
             } else {
                 branchRegister(stateInstance, context);
@@ -298,7 +296,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
 
             stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
-            if (isPersist) {
+            if (!isUpdateMode) {
                 executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType),
                     STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
             } else {
@@ -398,9 +396,13 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
      * @param stateInstance
      * @return
      */
-    private String generateCompensateStateInstanceId(StateInstance stateInstance) {
+    private String generateCompensateStateInstanceId(StateInstance stateInstance, boolean isUpdateMode) {
         String originalCompensateStateInstId = stateInstance.getStateIdCompensatedFor();
         int maxIndex = 1;
+        // if update mode, means update last compensate inst
+        if (isUpdateMode) {
+            return originalCompensateStateInstId + "-" + maxIndex;
+        }
         for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
             if (aStateInstance != stateInstance
                     && originalCompensateStateInstId.equals(aStateInstance.getStateIdCompensatedFor())) {
@@ -433,12 +435,20 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
 
-        if (!StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
+        if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
             return stateMachineConfig.isSagaRetryPersistModeUpdate() || stateInstance.getStateMachineInstance()
                 .getStateMachine().isRetryPersistModeUpdate() || state.isRetryPersistModeUpdate();
-        } else if (!StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-            return stateMachineConfig.isSagaCompensatePersistModeUpdate() || stateInstance.getStateMachineInstance()
-                .getStateMachine().isCompensatePersistModeUpdate() || state.isCompensatePersistModeUpdate();
+        } else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
+            if (stateMachineConfig.isSagaCompensatePersistModeUpdate() || stateInstance.getStateMachineInstance()
+                .getStateMachine().isCompensatePersistModeUpdate() || state.isCompensatePersistModeUpdate()) {
+                // find if this compensate has been executed
+                for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
+                    if (aStateInstance.isForCompensation() && aStateInstance.getName().equals(stateInstance.getName())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
         return false;
     }
