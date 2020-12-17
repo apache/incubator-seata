@@ -11,11 +11,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     strategy:
+      max-parallel: 1
       matrix:
         java: [8, 11]
         os: [ ubuntu-18.04 ]
-      max-paraller: 1
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
