@@ -30,11 +30,14 @@ import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 /**
  * @author will
  */
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class StatementProxyTest {
 
     private static List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
