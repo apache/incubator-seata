@@ -52,15 +52,13 @@ public class DataSourceManager extends AbstractResourceManager {
     private final Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-        throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+        GlobalLockQueryRequest request = new GlobalLockQueryRequest();
+        request.setXid(xid);
+        request.setLockKey(lockKeys);
+        request.setResourceId(resourceId);
         try {
-            GlobalLockQueryRequest request = new GlobalLockQueryRequest();
-            request.setXid(xid);
-            request.setLockKey(lockKeys);
-            request.setResourceId(resourceId);
-
-            GlobalLockQueryResponse response = null;
+            GlobalLockQueryResponse response;
             if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
                 response = (GlobalLockQueryResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             } else {
@@ -77,7 +75,6 @@ public class DataSourceManager extends AbstractResourceManager {
         } catch (RuntimeException rex) {
             throw new RmTransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
         }
-
     }
 
     /**
