@@ -482,7 +482,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             StateInstance originalStateInst = null;
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
 
-                originalStateInst = findOutOriginalStateInstanceOfRetryState(stateInstance);
+                if (isUpdateMode(stateInstance, context)) {
+                    originalStateInst = stateInstance;
+                } else {
+                    originalStateInst = findOutOriginalStateInstanceOfRetryState(stateInstance);
+                }
 
                 if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     branchStatus = BranchStatus.PhaseTwo_Committed;
@@ -495,7 +499,12 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
             } else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
 
-                originalStateInst = findOutOriginalStateInstanceOfCompensateState(stateInstance);
+                if (isUpdateMode(stateInstance, context)) {
+                    originalStateInst = stateInstance.getStateMachineInstance().getStateMap().get(
+                        stateInstance.getStateIdCompensatedFor());
+                } else {
+                    originalStateInst = findOutOriginalStateInstanceOfCompensateState(stateInstance);
+                }
             }
 
             if (originalStateInst == null) {
