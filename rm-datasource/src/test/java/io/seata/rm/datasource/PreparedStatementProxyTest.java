@@ -84,7 +84,7 @@ public class PreparedStatementProxyTest {
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
 
-        String sql = "update from prepared_statement_proxy set name = ?";
+        String sql = "update prepared_statement_proxy set name = ?";
 
         PreparedStatement preparedStatement = mockDriver.createSeataMockPreparedStatement(
             (MockConnection)connectionProxy.getTargetConnection(), sql);
