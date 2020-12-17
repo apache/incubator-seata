@@ -25,9 +25,13 @@ import com.alibaba.druid.mock.MockResultSet;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
+
 import com.google.common.collect.Lists;
+import io.seata.core.constants.DBType;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -79,6 +83,8 @@ public class StatementProxyTest {
         ((MockStatement) statement).setGeneratedKeys(mockResultSet);
 
         statementProxy = new StatementProxy(connectionProxy, statement);
+        SQLOperateRecognizerHolder recognizerHolder =
+            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(DBType.MYSQL.name().toLowerCase());
     }
 
     @Test

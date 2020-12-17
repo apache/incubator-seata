@@ -14,4 +14,4 @@
 #  limitations under the License.
 #
 
-io.seata.sqlparser.druid.mysql.MySQLOperateRecognizerHolder
+io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory
