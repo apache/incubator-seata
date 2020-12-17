@@ -27,11 +27,12 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 
 import com.google.common.collect.Lists;
-import io.seata.core.constants.DBType;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
-import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
+import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.SqlParserType;
+import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -83,8 +84,8 @@ public class StatementProxyTest {
         ((MockStatement) statement).setGeneratedKeys(mockResultSet);
 
         statementProxy = new StatementProxy(connectionProxy, statement);
-        SQLOperateRecognizerHolder recognizerHolder =
-            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(DBType.MYSQL.name().toLowerCase());
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
+            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @Test

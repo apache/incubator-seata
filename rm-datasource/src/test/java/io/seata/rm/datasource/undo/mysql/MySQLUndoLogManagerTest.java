@@ -29,7 +29,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import io.seata.core.constants.DBType;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -43,9 +43,10 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.rm.datasource.undo.UndoLogParserFactory;
 import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
+import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
-import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
+import io.seata.sqlparser.SqlParserType;
+import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,8 +82,8 @@ public class MySQLUndoLogManagerTest {
 
     @BeforeAll
     public static void setup(){
-        SQLOperateRecognizerHolder recognizerHolder =
-            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(DBType.MYSQL.name().toLowerCase());
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
+            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @BeforeEach
