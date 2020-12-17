@@ -101,6 +101,7 @@ public class StatementProxyTest {
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, new int[]{1}));
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, new String[]{"id"}));
         Assertions.assertDoesNotThrow(() -> statementProxy.executeBatch());
+        Assertions.assertDoesNotThrow(() -> statementProxy.clearBatch());
     }
 
     @Test
