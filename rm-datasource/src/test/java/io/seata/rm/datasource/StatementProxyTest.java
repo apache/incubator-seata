@@ -28,6 +28,7 @@ import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,11 @@ public class StatementProxyTest {
         ((MockStatement) statement).setGeneratedKeys(mockResultSet);
 
         statementProxy = new StatementProxy(connectionProxy, statement);
+    }
+
+    @AfterEach
+    public void clear() throws SQLException {
+        statementProxy.clearBatch();
     }
 
     @Test
