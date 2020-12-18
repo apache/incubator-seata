@@ -241,9 +241,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     protected TableRecords buildImage() throws SQLException {
         TableMeta tmeta = getTableMeta();
         //after image sql the same of before image
-        if(StringUtils.isBlank(selectSQL)){
+        if (StringUtils.isBlank(selectSQL)) {
             paramAppenderList = new ArrayList<>();
-            selectSQL=buildImageSQL(tmeta);
+            selectSQL = buildImageSQL(tmeta);
         }
         return buildTableRecords2(tmeta, selectSQL, paramAppenderList);
     }
@@ -280,7 +280,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @return
      */
     private String buildImageSQL(TableMeta tableMeta) {
-        if(CollectionUtils.isEmpty(paramAppenderList)){
+        if (CollectionUtils.isEmpty(paramAppenderList)) {
             paramAppenderList = new ArrayList<>();
         }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;

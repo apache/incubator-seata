@@ -86,9 +86,9 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        if(sqlRecognizer.getOriginalSQL().toUpperCase().trim().contains("ON DUPLICATE KEY UPDATE".trim()) && "mysql".equals(dbType)){
+                        if (sqlRecognizer.getOriginalSQL().toUpperCase().trim().contains("ON DUPLICATE KEY UPDATE".trim()) && "mysql".equals(dbType)) {
                             executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
-                        }else{
+                        } else {
                             executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
                                     new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
                                     new Object[]{statementProxy, statementCallback, sqlRecognizer});
