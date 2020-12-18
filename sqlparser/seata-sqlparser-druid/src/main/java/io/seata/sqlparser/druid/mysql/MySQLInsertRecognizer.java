@@ -140,7 +140,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     public List<String> getInsertParamsValue() {
         List<SQLInsertStatement.ValuesClause> valuesList = ast.getValuesList();
         List<String> list = new ArrayList<>();
-        for(SQLInsertStatement.ValuesClause m: valuesList){
+        for (SQLInsertStatement.ValuesClause m: valuesList) {
             list.add(m.toString());
         }
         return list;
