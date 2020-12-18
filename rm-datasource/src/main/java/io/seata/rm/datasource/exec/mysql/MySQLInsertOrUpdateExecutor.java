@@ -294,7 +294,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         for (int i = 0; i < insertNum; i++) {
             int finalI = i;
-            List<Object> paramAppenderTempList= new ArrayList<>();
+            List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
                 if (!"PRIMARY".equals(k.toUpperCase()) && !v.isNonUnique()) {
                     List<String> uniqueList = new ArrayList<>();
@@ -336,7 +336,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 String params = insertParamsArray[i];
                 ArrayList<Object> imageListTemp = imageParamperterMap.get(m);
                 if (imageListTemp == null) {
-                    imageListTemp =new ArrayList<>();
+                    imageListTemp = new ArrayList<>();
                 }
                 if (params.contains("?")) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
