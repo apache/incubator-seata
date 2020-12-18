@@ -321,7 +321,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     private int buildImageParamperters(SQLInsertRecognizer recognizer, Map<String, ArrayList<Object>> imageParamperterMap) {
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
-        // VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)、 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         List<String> insertParamsList = recognizer.getInsertParamsValue();
         List<String> insertColumns = recognizer.getInsertColumns();
         int paramsindex = 1;
