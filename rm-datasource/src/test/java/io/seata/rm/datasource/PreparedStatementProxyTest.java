@@ -39,10 +39,14 @@ import com.alibaba.druid.mock.MockSQLXML;
 import com.alibaba.druid.pool.DruidDataSource;
 
 import com.google.common.collect.Lists;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.mock.MockBlob;
 import io.seata.rm.datasource.mock.MockClob;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.SqlParserType;
+import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import io.seata.sqlparser.struct.Null;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -91,6 +95,8 @@ public class PreparedStatementProxyTest {
 
         preparedStatementProxy = new PreparedStatementProxy(connectionProxy, preparedStatement, sql);
         unusedConstructorPreparedStatementProxy = new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
+            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @Test
