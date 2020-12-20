@@ -22,6 +22,7 @@ import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -85,5 +86,10 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
+    }
+
+    @AfterAll
+    public static void tearDown(){
+        RootContext.unbind();
     }
 }
