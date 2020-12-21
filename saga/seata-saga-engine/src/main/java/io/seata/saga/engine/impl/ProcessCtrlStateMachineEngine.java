@@ -403,7 +403,6 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                         }
 
                         if (ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
-
                             throw new ForwardInvalidException(
                                 "Last forward execution state instance is SubStateMachine and compensation status is "
                                     + "[UN], Operation[forward] denied, stateInstanceId:"

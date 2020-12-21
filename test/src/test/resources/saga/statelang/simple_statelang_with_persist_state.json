@@ -31,10 +31,6 @@
                 {
                     "Expression":"[a] == 2",
                     "Next":"ThirdState"
-                },
-                {
-                    "Expression":"[a] == 3",
-                    "Next":"ForthState"
                 }
             ],
             "Default":"Fail"

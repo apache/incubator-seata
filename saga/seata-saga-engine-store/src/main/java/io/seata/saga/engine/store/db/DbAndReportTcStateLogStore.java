@@ -263,13 +263,12 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     public void recordStateStarted(StateInstance stateInstance, ProcessContext context) {
         if (stateInstance != null) {
 
-            boolean isUpdateMode = false;
+            boolean isUpdateMode = isUpdateMode(stateInstance, context);
 
             // if this state is for retry, do not register branch
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
-                if (isUpdateMode(stateInstance, context)) {
+                if (isUpdateMode) {
                     stateInstance.setId(stateInstance.getStateIdRetriedFor());
-                    isUpdateMode = true;
                 } else {
                     // generate id by default
                     stateInstance.setId(generateRetryStateInstanceId(stateInstance));
@@ -277,9 +276,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
             // if this state is for compensation, do not register branch
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-                if (isUpdateMode(stateInstance, context)) {
+                if (isUpdateMode) {
                     stateInstance.setId(generateCompensateStateInstanceId(stateInstance, true));
-                    isUpdateMode = true;
                 } else {
                     stateInstance.setId(generateCompensateStateInstanceId(stateInstance, false));
                 }
@@ -432,11 +430,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
         ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
 
         if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
+
             return stateMachineConfig.isSagaRetryPersistModeUpdate() || stateInstance.getStateMachineInstance()
                 .getStateMachine().isRetryPersistModeUpdate() || state.isRetryPersistModeUpdate();
+
         } else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
             if (stateMachineConfig.isSagaCompensatePersistModeUpdate() || stateInstance.getStateMachineInstance()
                 .getStateMachine().isCompensatePersistModeUpdate() || state.isCompensatePersistModeUpdate()) {
+
                 // find if this compensate has been executed
                 for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
                     if (aStateInstance.isForCompensation() && aStateInstance.getName().equals(stateInstance.getName())) {
