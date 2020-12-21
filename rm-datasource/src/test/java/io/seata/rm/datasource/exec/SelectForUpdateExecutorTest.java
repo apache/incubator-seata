@@ -50,6 +50,7 @@ public class SelectForUpdateExecutorTest {
 
     @BeforeAll
     public static void init() {
+        RootContext.unbind();
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][] {
             new Object[] {1, "Tom"},
