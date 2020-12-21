@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class FileConfiguration extends AbstractConfiguration {
             targetFilePath = file.getPath();
             fileConfig = FileConfigFactory.load(file, name);
         }
-        /**
+        /*
          * For seata-server side the conf file should always exists.
          * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
          */
@@ -135,58 +136,81 @@ public class FileConfiguration extends AbstractConfiguration {
             if (name == null) {
                 throw new IllegalArgumentException("name can't be null");
             }
-            String filePath = null;
+
             boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
-            if (filePathCustom) {
-                filePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-            } else {
-                // projectDir first
-                filePath = this.getClass().getClassLoader().getResource("").getPath() + name;
-            }
-            filePath = URLDecoder.decode(filePath, "utf-8");
-            File targetFile = new File(filePath);
-            if (!targetFile.exists()) {
-                for (String s : FileConfigFactory.getSuffixSet()) {
-                    targetFile = new File(filePath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                    if (targetFile.exists()) {
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("The configuration file used is {}", targetFile.getPath());
-                        }
-                        return targetFile;
-                    }
-                }
-            } else {
+            String filePath = filePathCustom ? name.substring(SYS_FILE_RESOURCE_PREFIX.length()) : name;
+            String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8.name());
+
+            File targetFile = getFileFromFileSystem(decodedPath);
+            if (targetFile != null) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("The configuration file used is {}", name);
+                    LOGGER.info("The configuration file used is {}", targetFile.getPath());
                 }
                 return targetFile;
             }
+
             if (!filePathCustom) {
-                URL resource = this.getClass().getClassLoader().getResource(name);
-                if (resource == null) {
-                    for (String s : FileConfigFactory.getSuffixSet()) {
-                        resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
-                        if (resource != null) {
-                            if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("The configuration file used is {}", resource.getPath());
-                            }
-                            String path = resource.getPath();
-                            path = URLDecoder.decode(path, "utf-8");
-                            return new File(path);
-                        }
-                    }
-                } else {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("The configuration file used is {}", name);
-                    }
-                    String path = resource.getPath();
-                    path = URLDecoder.decode(path, "utf-8");
-                    return new File(path);
+                File classpathFile = getFileFromClasspath(name);
+                if (classpathFile != null) {
+                    return classpathFile;
                 }
             }
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("file not found--" + e.getMessage(), e);
+            LOGGER.error("decode name error: {}", e.getMessage(), e);
         }
+
+        return null;
+    }
+
+    private File getFileFromFileSystem(String decodedPath) {
+        String[] tryPaths = new String[] {
+            // first: project dir
+            this.getClass().getClassLoader().getResource("").getPath() + decodedPath,
+            // second: system path
+            decodedPath
+        };
+
+        for (String tryPath : tryPaths) {
+            File targetFile = new File(tryPath);
+            if (targetFile.exists()) {
+                return targetFile;
+            }
+
+            // try to append config suffix
+            for (String s : FileConfigFactory.getSuffixSet()) {
+                targetFile = new File(tryPath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                if (targetFile.exists()) {
+                    return targetFile;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private File getFileFromClasspath(String name) throws UnsupportedEncodingException {
+        URL resource = this.getClass().getClassLoader().getResource(name);
+        if (resource == null) {
+            for (String s : FileConfigFactory.getSuffixSet()) {
+                resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                if (resource != null) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("The configuration file used is {}", resource.getPath());
+                    }
+                    String path = resource.getPath();
+                    path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
+                    return new File(path);
+                }
+            }
+        } else {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("The configuration file used is {}", name);
+            }
+            String path = resource.getPath();
+            path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
+            return new File(path);
+        }
+
         return null;
     }
 
