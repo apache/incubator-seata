@@ -14,15 +14,17 @@
  *  limitations under the License.
  */
 package io.seata.common.util;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+
+import java.net.NetworkInterface;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author funkye
+ * @author selfishlover
  */
 public class IdWorker {
-
-    private volatile static IdWorker idWorker = null;
 
     /**
      * Start time cut (2020-05-03)
@@ -30,145 +32,156 @@ public class IdWorker {
     private final long twepoch = 1588435200000L;
 
     /**
-     * The number of bits occupied by the machine id
+     * The number of bits occupied by workerId
      */
-    private final long workerIdBits = 10L;
+    private final int workerIdBits = 10;
 
     /**
-     * Maximum supported machine id, the result is 1023 (this shift algorithm can quickly calculate the largest decimal
-     * number that can be represented by a few binary numbers)
+     * The number of bits occupied by timestamp
      */
-    private final long maxWorkerId = -1L ^ (-1L << workerIdBits);
+    private final int timestampBits = 41;
 
     /**
-     * The number of bits the sequence occupies in id
+     * The number of bits occupied by sequence
      */
-    private final long sequenceBits = 12L;
+    private final int sequenceBits = 12;
 
     /**
-     * Machine ID left 12 digits
+     * Maximum supported machine id, the result is 1023
      */
-    private final long workerIdShift = sequenceBits;
+    private final int maxWorkerId = ~(-1 << workerIdBits);
 
     /**
-     * Time truncated to the left by 22 bits (10 + 12)
-     */
-    private final long timestampLeftShift = sequenceBits + workerIdBits;
-
-    /**
-     * Generate sequence mask
-     */
-    private final long sequenceMask = -1L ^ (-1L << sequenceBits);
-
-    /**
-     * Machine ID (0 ~ 1023)
+     * business meaning: machine ID (0 ~ 1023)
+     * actual layout in memory:
+     * highest 1 bit: 0
+     * middle 10 bit: workerId
+     * lowest 53 bit: all 0
      */
     private long workerId;
 
     /**
-     * Sequence in milliseconds (0 ~ 4095)
+     * timestamp and sequence mix in one Long
+     * highest 11 bit: not used
+     * middle  41 bit: timestamp
+     * lowest  12 bit: sequence
      */
-    private long sequence = 0L;
+    private AtomicLong timestampAndSequence;
 
     /**
-     * Time of last ID generation
+     * mask that help to extract timestamp and sequence from a long
      */
-    private long lastTimestamp = -1L;
+    private final long timestampAndSequenceMask = ~(-1L << (timestampBits + sequenceBits));
 
     /**
-     * Constructor
-     *
-     * @param workerId
-     *            Job ID (0 ~ 1023)
+     * instantiate an IdWorker using given workerId
+     * @param workerId if null, then will auto assign one
      */
-    public IdWorker(long workerId) {
+    public IdWorker(Long workerId) {
+        initTimestampAndSequence();
+        initWorkerId(workerId);
+    }
+
+    /**
+     * init first timestamp and sequence immediately
+     */
+    private void initTimestampAndSequence() {
+        long timestamp = getNewestTimestamp();
+        long timestampWithSequence = timestamp << sequenceBits;
+        this.timestampAndSequence = new AtomicLong(timestampWithSequence);
+    }
+
+    /**
+     * init workerId
+     * @param workerId if null, then auto generate one
+     */
+    private void initWorkerId(Long workerId) {
+        if (workerId == null) {
+            workerId = generateWorkerId();
+        }
         if (workerId > maxWorkerId || workerId < 0) {
-            throw new IllegalArgumentException(
-                String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
+            String message = String.format("worker Id can't be greater than %d or less than 0", maxWorkerId);
+            throw new IllegalArgumentException(message);
         }
-        this.workerId = workerId;
+        this.workerId = workerId << (timestampBits + sequenceBits);
     }
 
     /**
-     * Get the next ID (the method is thread-safe)
-     *
-     * @return SnowflakeId
+     * get next UUID(base on snowflake algorithm), which look like:
+     * highest 1 bit: always 0
+     * next   10 bit: workerId
+     * next   41 bit: timestamp
+     * lowest 12 bit: sequence
+     * @return UUID
      */
-    public synchronized long nextId() {
-        long timestamp = timeGen();
-
-        if (timestamp < lastTimestamp) {
-            throw new RuntimeException(String.format(
-                "clock moved backwards.  Refusing to generate id for %d milliseconds", lastTimestamp - timestamp));
-        }
-
-        if (lastTimestamp == timestamp) {
-            sequence = (sequence + 1) & sequenceMask;
-            if (sequence == 0) {
-                timestamp = tilNextMillis(lastTimestamp);
-            }
-        } else {
-            sequence = 0L;
-        }
-        lastTimestamp = timestamp;
-
-        return ((timestamp - twepoch) << timestampLeftShift) | (workerId << workerIdShift) | sequence;
+    public long nextId() {
+        waitIfNecessary();
+        long next = timestampAndSequence.incrementAndGet();
+        long timestampWithSequence = next & timestampAndSequenceMask;
+        return workerId | timestampWithSequence;
     }
 
     /**
-     * Block until the next millisecond until a new timestamp is obtained
-     *
-     * @param lastTimestamp
-     *            Time of last ID generation
-     * @return Current timestamp
+     * block current thread if the QPS of acquiring UUID is too high
+     * that current sequence space is exhausted
      */
-    protected long tilNextMillis(long lastTimestamp) {
-        long timestamp = timeGen();
-        while (timestamp <= lastTimestamp) {
-            timestamp = timeGen();
-        }
-        return timestamp;
-    }
-
-    /**
-     * Returns the current time in milliseconds
-     *
-     * @return Current time (ms)
-     */
-    protected long timeGen() {
-        return System.currentTimeMillis();
-    }
-
-    public static IdWorker getInstance() {
-        if (idWorker == null) {
-            synchronized (IdWorker.class) {
-                if (idWorker == null) {
-                    init(initWorkerId());
-                }
+    private void waitIfNecessary() {
+        long currentWithSequence = timestampAndSequence.get();
+        long current = currentWithSequence >>> sequenceBits;
+        long newest = getNewestTimestamp();
+        if (current >= newest) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ignore) {
+                // don't care
             }
         }
-        return idWorker;
     }
 
-    public static long initWorkerId() {
-        InetAddress address;
+    /**
+     * get newest timestamp relative to twepoch
+     */
+    private long getNewestTimestamp() {
+        return System.currentTimeMillis() - twepoch;
+    }
+
+    /**
+     * auto generate workerId, try using mac first, if failed, then randomly generate one
+     * @return workerId
+     */
+    private long generateWorkerId() {
         try {
-            address = InetAddress.getLocalHost();
-        } catch (final UnknownHostException e) {
-            throw new IllegalStateException("Cannot get LocalHost InetAddress, please check your network!",e);
+            return generateWorkerIdBaseOnMac();
+        } catch (Exception e) {
+            return generateRandomWorkerId();
         }
-        byte[] ipAddressByteArray = address.getAddress();
-        return ((ipAddressByteArray[ipAddressByteArray.length - 2] & 0B11) << Byte.SIZE) + (ipAddressByteArray[ipAddressByteArray.length - 1] & 0xFF);
     }
 
-    public static void init(Long serverNodeId) {
-        if (idWorker == null) {
-            synchronized (IdWorker.class) {
-                if (idWorker == null) {
-                    idWorker = new IdWorker(serverNodeId);
-                }
+    /**
+     * use lowest 10 bit of available MAC as workerId
+     * @return workerId
+     * @throws Exception when there is no available mac found
+     */
+    private long generateWorkerIdBaseOnMac() throws Exception {
+        Enumeration<NetworkInterface> all = NetworkInterface.getNetworkInterfaces();
+        while (all.hasMoreElements()) {
+            NetworkInterface networkInterface = all.nextElement();
+            boolean isLoopback = networkInterface.isLoopback();
+            boolean isVirtual = networkInterface.isVirtual();
+            if (isLoopback || isVirtual) {
+                continue;
             }
+            byte[] mac = networkInterface.getHardwareAddress();
+            return ((mac[4] & 0B11) << 8) | (mac[5] & 0xFF);
         }
+        throw new RuntimeException("no available mac found");
     }
 
+    /**
+     * randomly generate one as workerId
+     * @return workerId
+     */
+    private long generateRandomWorkerId() {
+        return new Random().nextInt(maxWorkerId + 1);
+    }
 }

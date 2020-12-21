@@ -17,39 +17,10 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
-import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
-
 /**
  * @author xingfudeshi@gmail.com
  */
 public interface StarterConstants {
-    int MAP_CAPACITY = 64;
     String SEATA_PREFIX = "seata";
     String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";
     String TRANSPORT_PREFIX = SEATA_PREFIX + ".transport";
@@ -62,7 +33,8 @@ public interface StarterConstants {
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
-    String LOG_PREFIX = CLIENT_PREFIX + ".log";
+    String LOG_PREFIX = SEATA_PREFIX + ".log";
+    String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -83,44 +55,8 @@ public interface StarterConstants {
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
-    HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
-        private static final long serialVersionUID = -8902807645596274597L;
-
-        {
-            put(SEATA_PREFIX, SeataProperties.class);
-
-            put(CLIENT_RM_PREFIX, RmProperties.class);
-            put(CLIENT_TM_PREFIX, TmProperties.class);
-            put(LOCK_PREFIX, LockProperties.class);
-            put(SERVICE_PREFIX, ServiceProperties.class);
-            put(SHUTDOWN_PREFIX, ShutdownProperties.class);
-            put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
-            put(UNDO_PREFIX, UndoProperties.class);
-            put(LOG_PREFIX, LogProperties.class);
-            put(TRANSPORT_PREFIX, TransportProperties.class);
-            put(CONFIG_PREFIX, ConfigProperties.class);
-            put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
-            put(REGISTRY_PREFIX, RegistryProperties.class);
-
-            put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
-            put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
-            put(CONFIG_ZK_PREFIX, ConfigZooKeeperProperties.class);
-            put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
-            put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
-            put(CONFIG_CUSTOM_PREFIX, ConfigCustomProperties.class);
-
-            put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
-            put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
-            put(REGISTRY_EUREKA_PREFIX, RegistryEurekaProperties.class);
-            put(REGISTRY_NACOS_PREFIX, RegistryNacosProperties.class);
-            put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
-            put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
-            put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
-            put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
-        }
-
-    };
-
+    int MAP_CAPACITY = 64;
+    HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
 
     /**
      * The following special keys need to be normalized.

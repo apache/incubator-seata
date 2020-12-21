@@ -44,6 +44,12 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
 
+    public StateMachineParserImpl(String jsonParserName) {
+        if (StringUtils.isNotBlank(jsonParserName)) {
+            this.jsonParserName = jsonParserName;
+        }
+    }
+
     @Override
     public StateMachine parse(String json) {
 

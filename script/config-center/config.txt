@@ -41,7 +41,7 @@ store.file.sessionReloadReadSize=100
 store.db.datasource=druid
 store.db.dbType=mysql
 store.db.driverClassName=com.mysql.jdbc.Driver
-store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true
+store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true&rewriteBatchedStatements=true
 store.db.user=username
 store.db.password=password
 store.db.minConn=5
@@ -71,7 +71,10 @@ client.undo.onlyCareUpdateColumns=true
 server.undo.logSaveDays=7
 server.undo.logDeletePeriod=86400000
 client.undo.logTable=undo_log
-client.log.exceptionRate=100
+client.undo.compress.enable=true
+client.undo.compress.type=zip
+client.undo.compress.threshold=64k
+log.exceptionRate=100
 transport.serialization=seata
 transport.compressor=none
 metrics.enabled=false
