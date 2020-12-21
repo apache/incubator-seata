@@ -134,6 +134,11 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
         FutureTask<String> future = new FutureTask<>(() -> {
             String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+            if (!zkClient.exists(path)) {
+                LOGGER.warn("config {} is not existed, return defaultValue {} ",
+                        dataId, defaultValue);
+                return defaultValue;
+            }
             String value1 = zkClient.readData(path);
             return StringUtils.isNullOrEmpty(value1) ? defaultValue : value1;
         });
