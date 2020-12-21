@@ -817,7 +817,6 @@ public class StateMachineDBTests extends AbstractServerTest {
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 4);
         paramMap.put("barThrowException", "true");
-        paramMap.put("compensateBarThrowException", "true");
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
@@ -832,32 +831,6 @@ public class StateMachineDBTests extends AbstractServerTest {
         inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
 
         Assertions.assertEquals(inst.getStateList().size(), 2);
-    }
-
-    @Test
-    public void testSimpleCompensateSubStatePersistDisabled() throws Exception {
-        long start  = System.currentTimeMillis();
-
-        Map<String, Object> paramMap = new HashMap<>(1);
-        paramMap.put("a", 3);
-        paramMap.put("barThrowException", "true");
-        paramMap.put("compensateBarThrowException", "true");
-
-        String stateMachineName = "simplePersistStateMachine";
-
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
-
-        long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
-
-        Assertions.assertNotNull(inst.getException());
-        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
-        Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.UN);
-
-        // this machine cost maybe long
-        Thread.sleep(sleepTime * 2L);
-        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
-        Assertions.assertEquals(inst.getStateList().size(), 4);
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {

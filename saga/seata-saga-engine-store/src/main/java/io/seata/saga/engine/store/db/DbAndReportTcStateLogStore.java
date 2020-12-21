@@ -93,11 +93,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             //if parentId is not null, machineInstance is a SubStateMachine, do not start a new global transaction,
             //use parent transaction instead.
             String parentId = machineInstance.getParentId();
-            if (StringUtils.hasLength(parentId)) {
-                if (StringUtils.isEmpty(machineInstance.getId())) {
-                    machineInstance.setId(parentId);
-                }
-            } else {
+            if (StringUtils.isEmpty(parentId)) {
                 beginTransaction(machineInstance, context);
             }
 

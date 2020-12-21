@@ -382,13 +382,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             StateInstance stateInstance = stateInstanceList.get(i);
             if (!stateInstance.isForCompensation()) {
 
-                StateMachine stateMachine = stateInstance.getStateMachineInstance().getStateMachine();
-                AbstractTaskState state = (AbstractTaskState)stateMachine.getState(stateInstance.getName());
-
-                boolean isRetryUpdate = ((DefaultStateMachineConfig)this.stateMachineConfig).isSagaRetryPersistModeUpdate();
-                isRetryUpdate = isRetryUpdate || stateMachine.isRetryPersistModeUpdate() || state.isRetryPersistModeUpdate();
-
-                if (!isRetryUpdate && ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
+                if (ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
                     continue;
                 }
 
@@ -408,7 +402,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                             continue;
                         }
 
-                        if (!isRetryUpdate && ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
+                        if (ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
 
                             throw new ForwardInvalidException(
                                 "Last forward execution state instance is SubStateMachine and compensation status is "
@@ -417,7 +411,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                         }
 
                     }
-                } else if (!isRetryUpdate && ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
+                } else if (ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
 
                     throw new ForwardInvalidException(
                         "Last forward execution state instance compensation status is [UN], Operation[forward] "

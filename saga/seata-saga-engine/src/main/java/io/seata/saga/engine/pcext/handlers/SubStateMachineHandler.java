@@ -25,7 +25,6 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
-import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
@@ -90,22 +89,6 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         } else if (inputParamsObj instanceof Map) {
             startParams = (Map<String, Object>)inputParamsObj;
         }
-
-        DefaultStateMachineConfig machineConfig = (DefaultStateMachineConfig)engine.getStateMachineConfig();
-        boolean isRetryUpdate = machineConfig.isSagaRetryPersistModeUpdate();
-        isRetryUpdate = isRetryUpdate || stateMachineInstance.getStateMachine().isRetryPersistModeUpdate()
-            || subStateMachine.isRetryPersistModeUpdate();
-        if (isRetryUpdate && null != stateInstance.getStateIdRetriedFor()) {
-            context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
-        }
-
-        boolean isCompensateUpdate = machineConfig.isSagaCompensatePersistModeUpdate();
-        isCompensateUpdate = isCompensateUpdate || stateMachineInstance.getStateMachine().isCompensatePersistModeUpdate()
-            || subStateMachine.isCompensatePersistModeUpdate();
-        if (isCompensateUpdate && null != stateInstance.getStateIdCompensatedFor()) {
-            context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
-        }
-
 
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
         try {
@@ -195,12 +178,10 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         }
 
         StateInstance originalStateInst = stateInstance;
-        if (!originalStateInst.isForCompensation()) {
-            do {
-                originalStateInst = statePersister.getStateInstance(originalStateInst.getStateIdRetriedFor(),
-                    originalStateInst.getMachineInstanceId());
-            } while (StringUtils.hasText(originalStateInst.getStateIdRetriedFor()));
-        }
+        do {
+            originalStateInst = statePersister.getStateInstance(originalStateInst.getStateIdRetriedFor(),
+                originalStateInst.getMachineInstanceId());
+        } while (StringUtils.hasText(originalStateInst.getStateIdRetriedFor()));
 
         List<StateMachineInstance> subInst = statePersister.queryStateMachineInstanceByParentId(
             EngineUtils.generateParentId(originalStateInst));

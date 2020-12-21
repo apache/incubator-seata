@@ -88,35 +88,6 @@
             ],
             "Next": "Succeed"
         },
-        "ForthState": {
-            "Type": "ServiceTask",
-            "ServiceName": "demoService",
-            "ServiceMethod": "randomExceptionMethod",
-            "CompensateState": "CallSubStateMachine",
-            "Input": [
-                {
-                    "barInput": "$.[fooResult]",
-                    "throwException": "$.[barThrowException]"
-                }
-            ],
-            "Output": {
-                "barResult": "$.#root"
-            },
-            "Status": {
-                "$Exception{java.lang.Throwable}": "UN",
-                "#root != null": "SU",
-                "#root == null": "FA"
-            },
-            "Catch": [
-                {
-                    "Exceptions": [
-                        "java.lang.Throwable"
-                    ],
-                    "Next": "CompensationTrigger"
-                }
-            ],
-            "Next": "Succeed"
-        },
         "CompensateFirstState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
@@ -132,20 +103,6 @@
                     "throwException": "$.[compensateBarThrowException]"
                 }
             ]
-        },
-        "CallSubStateMachine": {
-            "Type": "SubStateMachine",
-            "StateMachineName": "simplePersistStateMachine",
-            "Input": [
-                {
-                    "a": 1,
-                    "barThrowException": "$.[barThrowException]"
-                }
-            ],
-            "Output": {
-                "fooResult": "$.#root"
-            },
-            "Next": "Succeed"
         },
         "CompensationTrigger": {
             "Type": "CompensationTrigger",
