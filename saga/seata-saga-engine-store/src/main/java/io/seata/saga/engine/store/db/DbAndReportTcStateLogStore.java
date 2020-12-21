@@ -276,11 +276,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
             // if this state is for compensation, do not register branch
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-                if (isUpdateMode) {
-                    stateInstance.setId(generateCompensateStateInstanceId(stateInstance, true));
-                } else {
-                    stateInstance.setId(generateCompensateStateInstanceId(stateInstance, false));
-                }
+                stateInstance.setId(generateCompensateStateInstanceId(stateInstance, isUpdateMode));
             } else {
                 branchRegister(stateInstance, context);
             }
