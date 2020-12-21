@@ -15,8 +15,6 @@
  */
 package io.seata.saga.statelang.domain;
 
-import io.seata.common.DefaultValues;
-
 import java.util.List;
 
 /**
