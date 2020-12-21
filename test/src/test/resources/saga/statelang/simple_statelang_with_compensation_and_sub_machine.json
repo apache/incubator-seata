@@ -32,7 +32,7 @@
                 },
                 {
                     "Expression": "[a] == 3 || [a] == 4",
-                    "Next": "CallSubStateMachineNotPersist"
+                    "Next": "CallSubStateMachineAsUpdate"
                 }
             ],
             "Default":"Fail"
@@ -81,7 +81,7 @@
             },
             "Next": "Succeed"
         },
-        "CallSubStateMachineNotPersist": {
+        "CallSubStateMachineAsUpdate": {
             "Type": "SubStateMachine",
             "StateMachineName": "simplePersistStateMachine",
             "IsRetryPersistModeUpdate": true,

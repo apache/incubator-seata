@@ -741,14 +741,14 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testSimpleRetryStatePersistDisabled() throws Exception {
+    public void testSimpleRetryStateAsUpdateMode() throws Exception {
         long start  = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
         paramMap.put("barThrowException", "true");
 
-        String stateMachineName = "simplePersistStateMachine";
+        String stateMachineName = "simpleUpdateStateMachine";
 
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
@@ -764,7 +764,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testSimpleCompensateStatePersistDisabled() throws Exception {
+    public void testSimpleCompensateStateAsUpdateMode() throws Exception {
         long start  = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
@@ -772,7 +772,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         paramMap.put("barThrowException", "true");
         paramMap.put("compensateBarThrowException", "true");
 
-        String stateMachineName = "simplePersistStateMachine";
+        String stateMachineName = "simpleUpdateStateMachine";
 
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
@@ -788,7 +788,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testSimpleSubRetryStatePersistDisabled() throws Exception {
+    public void testSimpleSubRetryStateAsUpdateMode() throws Exception {
         long start  = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
@@ -811,7 +811,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testSimpleSubCompensateStatePersistDisabled() throws Exception {
+    public void testSimpleSubCompensateStateAsUpdateMode() throws Exception {
         long start  = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);

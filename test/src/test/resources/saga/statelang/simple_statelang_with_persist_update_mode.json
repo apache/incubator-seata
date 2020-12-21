@@ -1,5 +1,5 @@
 {
-    "Name": "simplePersistStateMachine",
+    "Name": "simpleUpdateStateMachine",
     "Comment": "自定义中间状态是否持久化的测试状态机定义",
     "StartState": "FirstState",
     "Version": "0.0.1",
