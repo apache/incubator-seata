@@ -52,4 +52,10 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      */
     List<String> getInsertParamsValue();
+
+    /**
+     * boolean duplicateKeyUpdate
+     * @return
+     */
+    boolean isDuplicateKeyUpdate();
 }

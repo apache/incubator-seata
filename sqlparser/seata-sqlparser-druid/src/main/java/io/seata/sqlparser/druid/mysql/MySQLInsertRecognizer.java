@@ -145,4 +145,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
         }
         return list;
     }
+
+    @Override
+    public boolean isDuplicateKeyUpdate() {
+        return CollectionUtils.isNotEmpty(ast.getDuplicateKeyUpdate());
+    }
 }

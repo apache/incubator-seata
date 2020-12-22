@@ -22,7 +22,10 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -86,7 +89,7 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        if (sqlRecognizer.getOriginalSQL().toUpperCase().trim().contains("ON DUPLICATE KEY UPDATE".trim()) && "mysql".equals(dbType)) {
+                        if (JdbcConstants.MYSQL.equals(dbType) && ((SQLInsertRecognizer)sqlRecognizer).isDuplicateKeyUpdate()) {
                             executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
                         } else {
                             executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
