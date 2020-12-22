@@ -18,6 +18,7 @@ package io.seata.rm.datasource;
 import java.sql.Savepoint;
 import java.util.*;
 
+import com.alibaba.druid.mock.MockSavepoint;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -28,24 +29,23 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint DEFAULT_SAVEPOINT = null;
+    private static final Savepoint DEFAULT_SAVEPOINT = new MockSavepoint();
+
     private String xid;
     private Long branchId;
     private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
 
     /**
-     * only HashMap can be use hear
-     * because of the key may by null(DEFAULT_SAVEPOINT)
+     * the lock keys buffer
      */
-    private HashMap<Savepoint, Set<String>> lockKeysBuffer = new HashMap<>();
+    private Map<Savepoint, Set<String>> lockKeysBuffer = new LinkedHashMap<>();
     /**
-     * only HashMap can be use hear
-     * because of the key may by null(DEFAULT_SAVEPOINT)
+     * the undo items buffer
      */
-    private HashMap<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new HashMap<>();
+    private Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
 
-    private List<Savepoint> savepoints = new ArrayList<>();
+    private List<Savepoint> savepoints = new ArrayList<>(8);
 
     /**
      * whether requires global lock in this connection
