@@ -30,12 +30,15 @@ import com.google.common.collect.Lists;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
+
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -93,6 +96,11 @@ public class StatementProxyTest {
             .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
+    @AfterEach
+    public void clear() throws SQLException {
+        statementProxy.clearBatch();
+    }
+
     @Test
     public void testStatementProxy() {
         Assertions.assertNotNull(statementProxy);
@@ -116,6 +124,7 @@ public class StatementProxyTest {
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, new int[]{1}));
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, new String[]{"id"}));
         Assertions.assertDoesNotThrow(() -> statementProxy.executeBatch());
+        Assertions.assertDoesNotThrow(() -> statementProxy.clearBatch());
     }
 
     @Test
