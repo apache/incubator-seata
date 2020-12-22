@@ -824,6 +824,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setString(12, stateInstance.getBusinessKey());
             statement.setString(13, stateInstance.getStateIdCompensatedFor());
             statement.setString(14, stateInstance.getStateIdRetriedFor());
+            statement.setTimestamp(15, new Timestamp(stateInstance.getGmtUpdated().getTime()));
         }
     }
 
@@ -835,8 +836,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     stateInstance.getException() != null ? (byte[]) stateInstance.getSerializedException() : null);
             statement.setString(3, stateInstance.getStatus().name());
             statement.setObject(4, stateInstance.getSerializedOutputParams());
-            statement.setString(5, stateInstance.getId());
-            statement.setString(6, stateInstance.getMachineInstanceId());
+            statement.setTimestamp(5, new Timestamp(stateInstance.getGmtEnd().getTime()));
+            statement.setString(6, stateInstance.getId());
+            statement.setString(7, stateInstance.getMachineInstanceId());
         }
     }
 

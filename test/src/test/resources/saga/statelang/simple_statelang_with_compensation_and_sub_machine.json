@@ -83,7 +83,7 @@
         },
         "CallSubStateMachineAsUpdate": {
             "Type": "SubStateMachine",
-            "StateMachineName": "simplePersistStateMachine",
+            "StateMachineName": "simpleUpdateStateMachine",
             "IsRetryPersistModeUpdate": true,
             "IsCompensatePersistModeUpdate": true,
             "Input": [
