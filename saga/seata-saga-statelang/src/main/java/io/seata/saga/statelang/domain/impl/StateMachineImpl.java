@@ -195,6 +195,7 @@ public class StateMachineImpl implements StateMachine {
         this.gmtCreate = gmtCreate;
     }
 
+    @Override
     public boolean isRetryPersistModeUpdate() {
         return retryPersistModeUpdate;
     }
@@ -203,6 +204,7 @@ public class StateMachineImpl implements StateMachine {
         this.retryPersistModeUpdate = retryPersistModeUpdate;
     }
 
+    @Override
     public boolean isCompensatePersistModeUpdate() {
         return compensatePersistModeUpdate;
     }
