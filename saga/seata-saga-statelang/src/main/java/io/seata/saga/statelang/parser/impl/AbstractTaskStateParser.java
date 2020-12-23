@@ -48,14 +48,14 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
 
         // customize if update origin or append new retryStateInstLog
         Object isRetryPersistModeUpdate = nodeMap.get("IsRetryPersistModeUpdate");
-        if (Boolean.TRUE.equals(isRetryPersistModeUpdate)) {
-            state.setRetryPersistModeUpdate(true);
+        if (isRetryPersistModeUpdate instanceof Boolean) {
+            state.setRetryPersistModeUpdate(Boolean.TRUE.equals(isRetryPersistModeUpdate));
         }
 
         // customize if update last or append new compensateStateInstLog
         Object isCompensatePersistModeUpdate = nodeMap.get("IsCompensatePersistModeUpdate");
-        if (Boolean.TRUE.equals(isCompensatePersistModeUpdate)) {
-            state.setCompensatePersistModeUpdate(true);
+        if (isCompensatePersistModeUpdate instanceof Boolean) {
+            state.setCompensatePersistModeUpdate(Boolean.TRUE.equals(isCompensatePersistModeUpdate));
         }
 
         List<Object> retryList = (List<Object>) nodeMap.get("Retry");

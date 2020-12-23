@@ -64,12 +64,12 @@ public interface ServiceTaskState extends TaskState {
      *
      * @return
      */
-    boolean isRetryPersistModeUpdate();
+    Boolean isRetryPersistModeUpdate();
 
     /**
      * Is update last compensate execution log, default append new
      *
      * @return
      */
-    boolean isCompensatePersistModeUpdate();
+    Boolean isCompensatePersistModeUpdate();
 }

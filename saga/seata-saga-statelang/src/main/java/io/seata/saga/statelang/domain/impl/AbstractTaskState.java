@@ -21,9 +21,6 @@ import java.util.Map;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.TaskState;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-
 /**
  * The state of the execution task (abstract class), the specific task to be executed is determined by the subclass
  *
@@ -42,8 +39,8 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private List<Object> inputExpressions;
     private Map<String, Object> outputExpressions;
     private boolean isPersist = true;
-    private boolean retryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-    private boolean compensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+    private Boolean retryPersistModeUpdate;
+    private Boolean compensatePersistModeUpdate;
 
     @Override
     public String getCompensateState() {
@@ -118,19 +115,19 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         isPersist = persist;
     }
 
-    public boolean isRetryPersistModeUpdate() {
+    public Boolean isRetryPersistModeUpdate() {
         return retryPersistModeUpdate;
     }
 
-    public void setRetryPersistModeUpdate(boolean retryPersistModeUpdate) {
+    public void setRetryPersistModeUpdate(Boolean retryPersistModeUpdate) {
         this.retryPersistModeUpdate = retryPersistModeUpdate;
     }
 
-    public boolean isCompensatePersistModeUpdate() {
+    public Boolean isCompensatePersistModeUpdate() {
         return compensatePersistModeUpdate;
     }
 
-    public void setCompensatePersistModeUpdate(boolean compensatePersistModeUpdate) {
+    public void setCompensatePersistModeUpdate(Boolean compensatePersistModeUpdate) {
         this.compensatePersistModeUpdate = compensatePersistModeUpdate;
     }
 

@@ -48,6 +48,7 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
@@ -424,24 +425,31 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
+        StateMachine stateMachine = stateInstance.getStateMachineInstance().getStateMachine();
 
         if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
 
-            return stateMachineConfig.isSagaRetryPersistModeUpdate() || stateInstance.getStateMachineInstance()
-                .getStateMachine().isRetryPersistModeUpdate() || state.isRetryPersistModeUpdate();
+            if (null != state.isRetryPersistModeUpdate()) {
+                return state.isRetryPersistModeUpdate();
+            } else if (null != stateMachine.isRetryPersistModeUpdate()) {
+                return stateMachine.isRetryPersistModeUpdate();
+            }
+            return stateMachineConfig.isSagaRetryPersistModeUpdate();
 
         } else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
-            if (stateMachineConfig.isSagaCompensatePersistModeUpdate() || stateInstance.getStateMachineInstance()
-                .getStateMachine().isCompensatePersistModeUpdate() || state.isCompensatePersistModeUpdate()) {
 
-                // find if this compensate has been executed
-                for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
-                    if (aStateInstance.isForCompensation() && aStateInstance.getName().equals(stateInstance.getName())) {
-                        return true;
+            // find if this compensate has been executed
+            for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
+                if (aStateInstance.isForCompensation() && aStateInstance.getName().equals(stateInstance.getName())) {
+                    if (null != state.isCompensatePersistModeUpdate()) {
+                        return state.isCompensatePersistModeUpdate();
+                    } else if (null != stateMachine.isCompensatePersistModeUpdate()) {
+                        return stateMachine.isCompensatePersistModeUpdate();
                     }
+                    return stateMachineConfig.isSagaCompensatePersistModeUpdate();
                 }
-                return false;
             }
+            return false;
         }
         return false;
     }

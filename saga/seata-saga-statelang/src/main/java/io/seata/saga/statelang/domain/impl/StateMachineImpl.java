@@ -23,9 +23,6 @@ import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-
 /**
  * state machine
  *
@@ -43,8 +40,8 @@ public class StateMachineImpl implements StateMachine {
     private Status status = Status.AC;
     private RecoverStrategy recoverStrategy;
     private boolean isPersist = true;
-    private boolean retryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-    private boolean compensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+    private Boolean retryPersistModeUpdate;
+    private Boolean compensatePersistModeUpdate;
     private String type = "STATE_LANG";
     private transient String content;
     private Date gmtCreate;
@@ -196,20 +193,20 @@ public class StateMachineImpl implements StateMachine {
     }
 
     @Override
-    public boolean isRetryPersistModeUpdate() {
+    public Boolean isRetryPersistModeUpdate() {
         return retryPersistModeUpdate;
     }
 
-    public void setRetryPersistModeUpdate(boolean retryPersistModeUpdate) {
+    public void setRetryPersistModeUpdate(Boolean retryPersistModeUpdate) {
         this.retryPersistModeUpdate = retryPersistModeUpdate;
     }
 
     @Override
-    public boolean isCompensatePersistModeUpdate() {
+    public Boolean isCompensatePersistModeUpdate() {
         return compensatePersistModeUpdate;
     }
 
-    public void setCompensatePersistModeUpdate(boolean compensatePersistModeUpdate) {
+    public void setCompensatePersistModeUpdate(Boolean compensatePersistModeUpdate) {
         this.compensatePersistModeUpdate = compensatePersistModeUpdate;
     }
 }

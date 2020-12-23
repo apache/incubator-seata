@@ -3,6 +3,8 @@
     "Comment": "带补偿定义和调用子状态机",
     "StartState": "FirstState",
     "Version": "0.0.1",
+    "IsRetryPersistModeUpdate": false,
+    "IsCompensatePersistModeUpdate": false,
     "States": {
         "FirstState": {
             "Type": "ServiceTask",
