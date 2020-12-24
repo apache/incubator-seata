@@ -11,7 +11,6 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 1
       matrix:
         java: [8, 11]
         os: [ ubuntu-18.04 ]
