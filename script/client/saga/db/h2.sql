@@ -52,6 +52,7 @@ create table if not exists seata_state_inst
     output_params            clob comment 'output parameters',
     status                   varchar(2)   not null comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
     excep                    blob comment 'exception',
+    gmt_updated              timestamp(3) comment 'update time',
     gmt_end                  timestamp(3) comment 'end time',
     primary key (id, machine_inst_id)
 );

@@ -143,6 +143,20 @@ public interface StateMachine {
     boolean isPersist();
 
     /**
+     * Is update last retry execution log, default append new
+     *
+     * @return
+     */
+    Boolean isRetryPersistModeUpdate();
+
+    /**
+     * Is update last compensate execution log, default append new
+     *
+     * @return
+     */
+    Boolean isCompensatePersistModeUpdate();
+
+    /**
      * State language text
      *
      * @return

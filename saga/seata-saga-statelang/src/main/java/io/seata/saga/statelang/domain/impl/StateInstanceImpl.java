@@ -38,6 +38,7 @@ public class StateInstanceImpl implements StateInstance {
     private String serviceType;
     private String businessKey;
     private Date gmtStarted;
+    private Date gmtUpdated;
     private Date gmtEnd;
     private boolean isForUpdate;
     private Exception exception;
@@ -141,6 +142,16 @@ public class StateInstanceImpl implements StateInstance {
     @Override
     public void setGmtStarted(Date gmtStarted) {
         this.gmtStarted = gmtStarted;
+    }
+
+    @Override
+    public Date getGmtUpdated() {
+        return gmtUpdated;
+    }
+
+    @Override
+    public void setGmtUpdated(Date gmtUpdated) {
+        this.gmtUpdated = gmtUpdated;
     }
 
     @Override

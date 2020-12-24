@@ -151,6 +151,20 @@ public interface StateInstance {
     void setGmtStarted(Date gmtStarted);
 
     /**
+     * get update time
+     *
+     * @return
+     */
+    Date getGmtUpdated();
+
+    /**
+     * set update time
+     *
+     * @param gmtUpdated
+     */
+    void setGmtUpdated(Date gmtUpdated);
+
+    /**
      * get end time
      *
      * @return

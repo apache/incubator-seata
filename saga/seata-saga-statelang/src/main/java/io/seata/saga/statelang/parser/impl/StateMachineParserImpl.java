@@ -79,6 +79,18 @@ public class StateMachineParserImpl implements StateMachineParser {
             stateMachine.setPersist(false);
         }
 
+        // customize if update origin or append new retryStateInstLog
+        Object isRetryPersistModeUpdate = node.get("IsRetryPersistModeUpdate");
+        if (isRetryPersistModeUpdate instanceof Boolean) {
+            stateMachine.setRetryPersistModeUpdate(Boolean.TRUE.equals(isRetryPersistModeUpdate));
+        }
+
+        // customize if update last or append new compensateStateInstLog
+        Object isCompensatePersistModeUpdate = node.get("IsCompensatePersistModeUpdate");
+        if (isCompensatePersistModeUpdate instanceof Boolean) {
+            stateMachine.setCompensatePersistModeUpdate(Boolean.TRUE.equals(isCompensatePersistModeUpdate));
+        }
+
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
         statesNode.forEach((stateName, value) -> {
             Map<String, Object> stateNode = (Map<String, Object>) value;

@@ -68,15 +68,15 @@ public class StateLogStoreSqls {
     private static final String RECORD_STATE_STARTED_SQL =
         "INSERT INTO ${TABLE_PREFIX}state_inst (id, machine_inst_id, name, type,"
             + " gmt_started, service_name, service_method, service_type, is_for_update, input_params, status, "
-            + "business_key, "
-            + "state_id_compensated_for, state_id_retried_for)\n" + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "business_key, state_id_compensated_for, state_id_retried_for, gmt_updated)\n"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String RECORD_STATE_FINISHED_SQL
-        = "UPDATE ${TABLE_PREFIX}state_inst SET gmt_end = ?, excep = ?, status = ?, output_params = ? WHERE id = ? "
-        + "AND machine_inst_id = ?";
+    private static final String RECORD_STATE_FINISHED_SQL =
+        "UPDATE ${TABLE_PREFIX}state_inst SET gmt_end = ?, excep = ?, status = ?, output_params = ?, gmt_updated = ? "
+            + "WHERE id = ? AND machine_inst_id = ?";
 
     private static final String UPDATE_STATE_EXECUTION_STATUS_SQL
-        = "UPDATE ${TABLE_PREFIX}state_inst SET status = ? WHERE machine_inst_id = ? AND id = ?";
+        = "UPDATE ${TABLE_PREFIX}state_inst SET status = ?, gmt_updated = ? WHERE machine_inst_id = ? AND id = ?";
 
     private static final String QUERY_STATE_INSTANCES_BY_MACHINE_INSTANCE_ID_SQL = "SELECT " + STATE_INSTANCE_FIELDS
         + " FROM ${TABLE_PREFIX}state_inst WHERE machine_inst_id = ? ORDER BY gmt_started, ID ASC";

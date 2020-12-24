@@ -58,6 +58,7 @@ CREATE TABLE seata_state_inst
     output_params            CLOB,
     status                   VARCHAR(2)   NOT NULL,
     excep                    BLOB,
+    gmt_updated              TIMESTAMP(3),
     gmt_end                  TIMESTAMP(3),
     PRIMARY KEY (id, machine_inst_id)
 );

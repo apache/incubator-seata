@@ -58,6 +58,7 @@ create table seata_state_inst
     output_params clob(65536) inline length 1024,
     status varchar(2) not null,
     excep blob(10240),
+    gmt_updated timestamp(3),
     gmt_end timestamp(3),
     primary key(id, machine_inst_id)
 );
