@@ -342,6 +342,13 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
+                } else if (params != null && params instanceof String ){
+                    // params is characterstring constant
+                    if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")){
+                        params = params.trim();
+                        params = params.substring(1,params.length()-1);
+                    }
+                    imageListTemp.add(params);
                 } else {
                     imageListTemp.add(params);
                 }
