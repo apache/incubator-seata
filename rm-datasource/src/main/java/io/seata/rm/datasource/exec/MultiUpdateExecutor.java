@@ -91,7 +91,6 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
 
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
-            assertContainsPKColumnName(updateColumns);
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
                 continue;
