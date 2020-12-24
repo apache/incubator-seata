@@ -36,6 +36,8 @@ import org.springframework.util.StringUtils;
 
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
@@ -66,6 +68,10 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+                setSagaRetryPersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
+                    DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE));
+                setSagaCompensatePersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,
+                    DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE));
             }
         } catch (Exception e) {
             LOGGER.warn("Load SEATA configuration failed, use default configuration instead.", e);
