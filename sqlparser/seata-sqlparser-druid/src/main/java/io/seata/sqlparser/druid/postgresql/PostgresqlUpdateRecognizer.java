@@ -68,6 +68,8 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
                 SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName());
+                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
