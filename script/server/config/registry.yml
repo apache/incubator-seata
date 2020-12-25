@@ -11,8 +11,8 @@ registry:
     namespace: 
     cluster: default
     username: 
-    password: 
-  
+    password:
+
   eureka:
     serviceUrl: http://localhost:8761/eureka
     application: default
@@ -64,11 +64,12 @@ config:
     namespace: 
     group: SEATA_GROUP
     username: 
-    password: 
+    password:
+    dataId: seataServer.properties
   
   consul:
     serverAddr: 127.0.0.1:8500
-  
+
   apollo:
     appId: seata-server
     apolloMeta: http://192.168.1.204:8801
