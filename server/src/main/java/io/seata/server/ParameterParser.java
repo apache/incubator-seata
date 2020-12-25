@@ -26,7 +26,11 @@ import io.seata.server.env.ContainerHelper;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
-import static io.seata.common.DefaultValues.*;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_MIN_SERVER_POOL_SIZE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_MAX_SERVER_POOL_SIZE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_MAX_TASK_QUEUE_SIZE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_KEEP_ALIVE_TIME;
+
 
 /**
  * The type Parameter parser.
