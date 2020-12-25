@@ -167,16 +167,16 @@ public class FileConfiguration extends AbstractConfiguration {
         // run with jar file and not package third lib into jar file, this.getClass().getClassLoader() will be null
         URL resourceUrl = this.getClass().getClassLoader().getResource("");
         String[] tryPaths = null;
-        if(resourceUrl != null){
-            tryPaths = new String[] {
-                    // first: project dir
-                    resourceUrl.getPath() + decodedPath,
-                    // second: system path
-                    decodedPath
+        if (resourceUrl != null) {
+            tryPaths = new String[]{
+                // first: project dir
+                resourceUrl.getPath() + decodedPath,
+                // second: system path
+                decodedPath
             };
         } else {
-            tryPaths = new String[] {
-                    decodedPath
+            tryPaths = new String[]{
+                decodedPath
             };
         }
 
