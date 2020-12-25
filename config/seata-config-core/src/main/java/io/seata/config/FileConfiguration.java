@@ -164,15 +164,22 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private File getFileFromFileSystem(String decodedPath) {
 
-        // 分离jar运行的时候, 报错啊, this.getClass().getClassLoader()是null
+        // run with jar file and not package third lib into jar file, this.getClass().getClassLoader() will be null
         URL resourceUrl = this.getClass().getClassLoader().getResource("");
-        String resourcePath = resourceUrl == null ? decodedPath : resourceUrl.getPath() + decodedPath;
-        String[] tryPaths = new String[] {
-            // first: project dir
-            resourcePath,
-            // second: system path
-            decodedPath
-        };
+        String[] tryPaths = null;
+        if(resourceUrl != null){
+            tryPaths = new String[] {
+                    // first: project dir
+                    resourceUrl.getPath() + decodedPath,
+                    // second: system path
+                    decodedPath
+            };
+        } else {
+            tryPaths = new String[] {
+                    decodedPath
+            };
+        }
+
 
         for (String tryPath : tryPaths) {
             File targetFile = new File(tryPath);
