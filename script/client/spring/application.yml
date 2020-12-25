@@ -14,6 +14,8 @@ seata:
       report-success-enable: false
       saga-branch-register-enable: false
       saga-json-parser: fastjson
+      saga-retry-persist-mode-update: false
+      saga-compensate-persist-mode-update: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -30,6 +32,10 @@ seata:
       log-serialization: jackson
       log-table: undo_log
       only-care-update-columns: true
+      compress:
+        enable: true
+        type: zip
+        threshold: 64k
   service:
     vgroup-mapping:
       my_test_tx_group: default
