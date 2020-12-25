@@ -134,6 +134,16 @@ public interface ConfigurationKeys {
     String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
+     * The constant CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE.
+     */
+    String CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaRetryPersistModeUpdate";
+
+    /**
+     * The constant CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE.
+     */
+    String CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaCompensatePersistModeUpdate";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
@@ -298,6 +308,26 @@ public interface ConfigurationKeys {
     String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
 
     /**
+     * the constant CLIENT_UNDO_COMPRESS_PREFIX
+     */
+    String CLIENT_UNDO_COMPRESS_PREFIX = CLIENT_UNDO_PREFIX + "compress.";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_TYPE
+     */
+    String CLIENT_UNDO_COMPRESS_TYPE = CLIENT_UNDO_COMPRESS_PREFIX + "type";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_ENABLE
+     */
+    String CLIENT_UNDO_COMPRESS_ENABLE = CLIENT_UNDO_COMPRESS_PREFIX + "enable";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_THRESHOLD
+     */
+    String CLIENT_UNDO_COMPRESS_THRESHOLD = CLIENT_UNDO_COMPRESS_PREFIX + "threshold";
+
+    /**
      * The constant METRICS_PREFIX.
      */
     String METRICS_PREFIX = "metrics.";
@@ -341,14 +371,14 @@ public interface ConfigurationKeys {
      */
     String TRANSACTION_UNDO_LOG_TABLE = CLIENT_UNDO_PREFIX + "logTable";
     /**
-     * The constant CLIENT_LOG_PREFIX
+     * The constant LOG_PREFIX
      */
-    String CLIENT_LOG_PREFIX = CLIENT_PREFIX + "log.";
+    String LOG_PREFIX = "log.";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_EXCEPTION_RATE
      */
-    String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_LOG_PREFIX + "exceptionRate";
+    String TRANSACTION_LOG_EXCEPTION_RATE = LOG_PREFIX + "exceptionRate";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.

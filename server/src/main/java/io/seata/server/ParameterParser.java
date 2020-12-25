@@ -18,21 +18,20 @@ package io.seata.server;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import io.seata.common.util.IdWorker;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
 
-import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 import static io.seata.common.DefaultValues.*;
 
 /**
  * The type Parameter parser.
  *
- * @author xingfudeshi@gmail.com
+ * @author xingfudeshi @gmail.com
  */
 public class ParameterParser {
 
@@ -98,9 +97,6 @@ public class ParameterParser {
                     jCommander.usage();
                     System.exit(0);
                 }
-            }
-            if (this.serverNode == null) {
-                this.serverNode = IdWorker.initWorkerId();
             }
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
@@ -183,6 +179,15 @@ public class ParameterParser {
      */
     public String getSeataEnv() {
         return seataEnv;
+    }
+
+    /**
+     * Clean up.
+     */
+    public void cleanUp() {
+        if (null != System.getProperty(ENV_PROPERTY_KEY)) {
+            System.clearProperty(ENV_PROPERTY_KEY);
+        }
     }
 
 }
