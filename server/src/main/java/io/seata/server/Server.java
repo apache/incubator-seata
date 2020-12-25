@@ -39,16 +39,6 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  */
 public class Server {
-
-    private static final int MIN_SERVER_POOL_SIZE = 50;
-    private static final int MAX_SERVER_POOL_SIZE = 500;
-    private static final int MAX_TASK_QUEUE_SIZE = 20000;
-    private static final int KEEP_ALIVE_TIME = 500;
-    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
-        MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
-        new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
-
     /**
      * The entry point of application.
      *
@@ -76,7 +66,12 @@ public class Server {
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(WORKING_THREADS);
+        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(parameterParser.getMinServerPoolSize(),
+                parameterParser.getMaxServerPoolSize(), parameterParser.getKeepAliveTime(), TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(parameterParser.getMaxTaskQueueSize()),
+                new NamedThreadFactory("ServerHandlerThread", parameterParser.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
+
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         //server port
         nettyRemotingServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(parameterParser.getServerNode());

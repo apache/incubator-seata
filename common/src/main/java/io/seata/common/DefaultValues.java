@@ -33,9 +33,6 @@ public interface DefaultValues {
     boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
-    boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
-    boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
-
     /**
      * Shutdown timeout default 3s
      */
@@ -99,18 +96,8 @@ public interface DefaultValues {
     String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
     int VIRTUAL_NODES_DEFAULT = 10;
 
-    /**
-     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE
-     */
-    boolean DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE = true;
-
-    /**
-     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_TYPE
-     */
-    String DEFAULT_CLIENT_UNDO_COMPRESS_TYPE = "zip";
-
-    /**
-     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD
-     */
-    String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
+    int SERVER_DEFAULT_MIN_SERVER_POOL_SIZE = 50;
+    int SERVER_DEFAULT_MAX_SERVER_POOL_SIZE = 500;
+    int SERVER_DEFAULT_MAX_TASK_QUEUE_SIZE = 20000;
+    int SERVER_DEFAULT_KEEP_ALIVE_TIME = 500;
 }
