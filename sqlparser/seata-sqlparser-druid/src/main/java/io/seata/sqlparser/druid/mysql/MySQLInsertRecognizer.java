@@ -143,8 +143,8 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
         for (SQLInsertStatement.ValuesClause m: valuesList) {
             String values = m.toString().replace("VALUES", "").trim();
             // when all params is constant, the length of values less than 1
-            if (values.length()>1){
-                values = values.substring(1,values.length()-1);
+            if (values.length() > 1) {
+                values = values.substring(1,values.length() - 1);
             }
             list.add(values);
         }
