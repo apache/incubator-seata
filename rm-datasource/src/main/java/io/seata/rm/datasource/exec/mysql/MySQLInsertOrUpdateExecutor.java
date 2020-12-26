@@ -296,9 +296,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             tableMeta.getAllIndexes().forEach((k, v) -> {
                 if (!v.isNonUnique()) {
                     List<String> uniqueList = new ArrayList<>();
-                    for (ColumnMeta m : v.getValues() ) {
+                    for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
-                        if (imageParamperterMap.get(columnName) ==null || imageParamperterMap.get(columnName).get(finalI) == null){
+                        if (imageParamperterMap.get(columnName) == null || imageParamperterMap.get(columnName).get(finalI) == null) {
                             continue;
                         }
                         uniqueList.add(columnName + " = ? ");
@@ -344,11 +344,11 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
-                } else if (params != null && params instanceof String ){
+                } else if (params != null && params instanceof String) {
                     // params is characterstring constant
-                    if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")){
+                    if ((params.trim().startsWith("'") && params.trim().endsWith("'")) || params.trim().startsWith("\"") && params.trim().endsWith("\"")) {
                         params = params.trim();
-                        params = params.substring(1,params.length()-1);
+                        params = params.substring(1,params.length() - 1);
                     }
                     imageListTemp.add(params);
                 } else {
