@@ -15,6 +15,7 @@
  */
 package io.seata.rm.xa;
 
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
@@ -22,6 +23,7 @@ import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.StatementProxyXA;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -202,5 +204,10 @@ public class ConnectionProxyXATest {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         Statement statement = connectionProxyXA.createStatement();
         Assertions.assertTrue(statement instanceof StatementProxyXA);
+    }
+
+    @AfterAll
+    public static void tearDown(){
+        RootContext.unbind();
     }
 }

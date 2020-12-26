@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS public.seata_state_inst
     input_params             TEXT,
     output_params            TEXT,
     status                   VARCHAR(2)   NOT NULL,
-    excep BYTEA,
+    excep                    BYTEA,
+    gmt_updated              TIMESTAMP(3) DEFAULT now(),
     gmt_end                  TIMESTAMP(3) DEFAULT now(),
     CONSTRAINT pk_seata_state_inst PRIMARY KEY (id, machine_inst_id)
 );
