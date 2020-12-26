@@ -26,10 +26,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.*;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
@@ -292,21 +289,26 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         int insertNum = buildImageParamperters(recognizer, imageParamperterMap);
         StringBuilder prefix = new StringBuilder("SELECT * ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        boolean[] isContainWhere = {false};
         for (int i = 0; i < insertNum; i++) {
             int finalI = i;
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
-                if (!"PRIMARY".equals(k.toUpperCase()) && !v.isNonUnique()) {
+                if (!v.isNonUnique()) {
                     List<String> uniqueList = new ArrayList<>();
-                    v.getValues().forEach(m -> {
+                    for (ColumnMeta m : v.getValues() ) {
                         String columnName = m.getColumnName();
+                        if (imageParamperterMap.get(columnName) ==null || imageParamperterMap.get(columnName).get(finalI) == null){
+                            continue;
+                        }
                         uniqueList.add(columnName + " = ? ");
-                        paramAppenderTempList.add(imageParamperterMap.get(m.getColumnName()).get(finalI));
-                    });
-                    if (suffix.toString().contains("WHERE")) {
+                        paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
+                    }
+                    if (isContainWhere[0]) {
                         suffix.append(" OR (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
                     } else {
                         suffix.append(" WHERE (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
+                        isContainWhere[0] = true;
                     }
                 }
             });
@@ -338,7 +340,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 if (imageListTemp == null) {
                     imageListTemp = new ArrayList<>();
                 }
-                if (params.contains("?")) {
+                if ("?".equals(params.toString().trim())) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
                     paramsindex++;
