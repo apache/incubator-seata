@@ -124,7 +124,7 @@ public class ConnectionContext {
         }
 
         savepoints.removeAll(afterSavepoints);
-        currentSavepoint = savepoints.size() == 0 ? null : savepoints.get(savepoints.size() - 1);
+        currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
     }
 
     public void releaseSavepoint(Savepoint savepoint) {
