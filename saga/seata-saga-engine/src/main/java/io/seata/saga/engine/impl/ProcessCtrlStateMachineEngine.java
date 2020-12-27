@@ -519,8 +519,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     }
 
     @Override
-    public StateMachineInstance skipAndForward(String stateMachineInstId) throws EngineExecutionException {
-        return forwardInternal(stateMachineInstId, null, false, true, null);
+    public StateMachineInstance skipAndForward(String stateMachineInstId, Map<String, Object> replaceParams) throws EngineExecutionException {
+        return forwardInternal(stateMachineInstId, replaceParams, false, true, null);
     }
 
     @Override

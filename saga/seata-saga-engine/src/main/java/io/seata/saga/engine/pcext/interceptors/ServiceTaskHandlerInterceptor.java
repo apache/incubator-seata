@@ -122,6 +122,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setStateMachineInstance(stateMachineInstance);
         stateInstance.setName(state.getName());
         stateInstance.setGmtStarted(new Date());
+        stateInstance.setGmtUpdated(stateInstance.getGmtStarted());
         stateInstance.setStatus(ExecutionStatus.RU);
 
         stateInstance.setStateIdRetriedFor(

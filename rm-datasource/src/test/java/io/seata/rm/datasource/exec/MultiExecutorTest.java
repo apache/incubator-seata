@@ -22,6 +22,7 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.util.JdbcConstants;
 import com.google.common.collect.Lists;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -174,9 +175,38 @@ public class MultiExecutorTest {
         Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
 
+        // contains limit delete
+        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 2 limit 1;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
+
+        // contains order by and limit delete
+        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 2 order by id desc limit 1;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
 
 
+        //contains order by update
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
 
+        //contains order by and limit update
+        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc limit 1;";
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        executor = new MultiExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, multi);
+        Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
     }
 }
 
