@@ -38,6 +38,8 @@ public interface DefaultValues {
      * The default session store dir
      */
     String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
+    boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
+    boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
     /**
      * Shutdown timeout default 3s
      */
