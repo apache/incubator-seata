@@ -108,11 +108,12 @@ public class MultiExecutorTest {
         List<SQLUndoLog> items = connectionProxy.getContext().getUndoItems();
         Assertions.assertTrue(items.stream().allMatch(t -> Objects.equals(t.getSqlType(), SQLType.UPDATE) && Objects.equals(t.getTableName(), "table_update_executor_test")));
         Assertions.assertEquals(items.size(), 1);
-        items.clear();
+        connectionProxy.getContext().reset();
 
 
         //same table delete
-        sql = "delete from table_update_executor_test where id = 2;delete from table_update_executor_test where id = 3";
+        sql = "delete from table_update_executor_test where id = 2;" +
+                "delete from table_update_executor_test where id = 3";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -129,7 +130,7 @@ public class MultiExecutorTest {
         Set<String> itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
         Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
         Assertions.assertEquals(items.size(), 1);
-        items.clear();
+        connectionProxy.getContext().reset();
 
 
         //multi table update
@@ -151,7 +152,7 @@ public class MultiExecutorTest {
         Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
         Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
-        items.clear();
+        connectionProxy.getContext().reset();
 
 
         // multi table delete

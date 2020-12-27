@@ -88,7 +88,7 @@ public class ConnectionContext {
      * @param lockKey the lock key
      */
     void appendLockKey(String lockKey) {
-        lockKeysBuffer.computeIfAbsent(currentSavepoint, (k) -> new HashSet<>()).add(lockKey);
+        lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>()).add(lockKey);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ConnectionContext {
      * @param sqlUndoLog the sql undo log
      */
     void appendUndoItem(SQLUndoLog sqlUndoLog) {
-        sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, (k) -> new ArrayList<>()).add(sqlUndoLog);
+        sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, k -> new ArrayList<>()).add(sqlUndoLog);
     }
 
     /**
@@ -132,8 +132,8 @@ public class ConnectionContext {
         savepoints.removeAll(afterSavepoints);
         currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
 
-        List<SQLUndoLog> currentSavepointSQLUndoLog = sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, (k) -> new ArrayList<>());
-        Set<String> currentSavepointLockKeys = lockKeysBuffer.computeIfAbsent(currentSavepoint, (k) -> new HashSet<>());
+        List<SQLUndoLog> currentSavepointSQLUndoLog = sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, k -> new ArrayList<>());
+        Set<String> currentSavepointLockKeys = lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>());
 
         // move the undo items & lock keys to current savepoint
         for (Savepoint sp : afterSavepoints) {
