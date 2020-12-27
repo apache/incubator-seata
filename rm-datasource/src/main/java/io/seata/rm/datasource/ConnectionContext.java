@@ -138,7 +138,7 @@ public class ConnectionContext {
         // move the undo items & lock keys to current savepoint
         for (Savepoint sp : afterSavepoints) {
             List<SQLUndoLog> savepointSQLUndoLogs = sqlUndoItemsBuffer.remove(sp);
-            if (!CollectionUtils.isEmpty(savepointSQLUndoLogs)) {
+            if (CollectionUtils.isNotEmpty(savepointSQLUndoLogs)) {
                 currentSavepointSQLUndoLog.addAll(savepointSQLUndoLogs);
             }
 
