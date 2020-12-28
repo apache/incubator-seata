@@ -43,11 +43,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     protected T targetStatement;
 
     /**
-     * The generated keys cached row set.
-     */
-    private CachedRowSet generatedKeysRowSet;
-
-    /**
      * The Target sql.
      */
     protected String targetSQL;
@@ -249,11 +244,8 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        if (generatedKeysRowSet != null) {
-            return generatedKeysRowSet;
-        }
         ResultSet rs = targetStatement.getGeneratedKeys();
-        generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
+        CachedRowSet generatedKeysRowSet = RowSetProvider.newFactory().createCachedRowSet();
         generatedKeysRowSet.populate(rs);
         return generatedKeysRowSet;
     }
