@@ -127,6 +127,26 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <excludeDefaultDirectories>false</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>../distribution</directory>
+                                    <includes>
+                                        <include>bin/**</include>
+                                        <include>conf/**</include>
+                                        <include>logs/**</include>
+                                        <include>lib/**</include>
+                                        <include>seata-server-${revision}/**</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>appassembler-maven-plugin</artifactId>
                         <version>1.10</version>
