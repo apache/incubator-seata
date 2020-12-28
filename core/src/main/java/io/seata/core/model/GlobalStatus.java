@@ -15,8 +15,6 @@
  */
 package io.seata.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Status of global transaction.
