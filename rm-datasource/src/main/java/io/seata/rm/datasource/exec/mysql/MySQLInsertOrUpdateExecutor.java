@@ -15,6 +15,16 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
@@ -40,15 +50,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
-
 /**
  * @version: 1.00.00
  * @description:
@@ -60,16 +61,24 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLInsertOrUpdateExecutor.class);
 
-    //is updated or not
+    /**
+     * is updated or not
+     */
     private boolean isUpdateFlag = false;
 
-    //before image sql and after image sql,condition is unique index
+    /**
+     * before image sql and after image sql,condition is unique index
+     */
     private String selectSQL;
 
-    //the params of selectSQL, value is the unique index
+    /**
+     * the params of selectSQL, value is the unique index
+     */
     private ArrayList<List<Object>> paramAppenderList;
 
-    //key is unique index name, value is unique index
+    /**
+     * key is unique index name, value is unique index
+     */
     private Map<String, List<String>> beforeUniqueIndexMap = new HashMap<>();
 
     public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
@@ -96,7 +105,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         }
         Object result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLog2(beforeImage, afterImage);
+        prepareUndoLogAll(beforeImage, afterImage);
         return result;
     }
 
@@ -107,7 +116,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @param afterImage  the after image
      * @throws SQLException the sql exception
      */
-    protected void prepareUndoLog2(TableRecords beforeImage, TableRecords afterImage) {
+    protected void prepareUndoLogAll(TableRecords beforeImage, TableRecords afterImage) {
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
@@ -156,7 +165,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         List<Row> updateRows = new ArrayList<>();
         List<Row> afterImageRows = afterImage.getRows();
         for (Row r : afterImageRows) {
-            Boolean[] isUpdateRows = {false};
+            AtomicBoolean isUpdateRowsFlag = new AtomicBoolean(false);
             getTableMeta().getAllIndexes().forEach((k, v) -> {
                 if (!"PRIMARY".equals(k.toUpperCase()) && !v.isNonUnique()) {
                     StringBuilder everyRowIndex = new StringBuilder();
@@ -171,13 +180,13 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     if (CollectionUtils.isNotEmpty(indexList)) {
                         indexList.forEach(m -> {
                             if (m.equals(everyRowIndex.toString())) {
-                                isUpdateRows[0] = true;
+                                isUpdateRowsFlag.set(true);
                             }
                         });
                     }
                 }
             });
-            if (isUpdateRows[0]) {
+            if (isUpdateRowsFlag.get()) {
                 updateRows.add(r);
             } else {
                 insertRows.add(r);
