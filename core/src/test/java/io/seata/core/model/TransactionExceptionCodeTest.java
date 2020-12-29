@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Montos
- * @create 2020/12/29 5:13 下午
  */
 public class TransactionExceptionCodeTest {
     private static final int BEGIN_CODE = 1;
