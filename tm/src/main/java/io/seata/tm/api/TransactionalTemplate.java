@@ -17,6 +17,7 @@ package io.seata.tm.api;
 
 
 import co.faao.plugin.transmission.response.MessageCoreResult;
+import co.faao.plugin.transmission.response.base.Result;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.constants.Seata;
 import io.seata.common.util.StringUtils;
@@ -121,11 +122,19 @@ public class TransactionalTemplate {
 
                 // 4. everything is fine, commit.
                 //code   add ccg ewell
-                if (rs != null && rs instanceof MessageCoreResult) {
-                    MessageCoreResult msr = (MessageCoreResult) rs;
-                    if (msr.getStatus().equals(0)) {
+                Integer status = null;
+                String errorMessage = null;
+                if (rs != null && (rs instanceof MessageCoreResult || rs instanceof Result)) {
+                    if(rs instanceof MessageCoreResult) {
+                        status = ((MessageCoreResult) rs).getStatus();
+                        errorMessage = ((MessageCoreResult) rs).getMessage();
+                    } else if(rs instanceof Result){
+                        status = ((Result) rs).getStatus();
+                        errorMessage = ((Result) rs).getMessage();
+                    }
+                    if (status != null && status.equals(0)) {
                         try {
-                            completeTransactionAfterThrowing(txInfo, tx, new Exception(msr.getMessage()));
+                            completeTransactionAfterThrowing(txInfo, tx, new Exception(errorMessage));
                         } catch (TransactionalExecutor.ExecutionException e) {
                             TransactionalExecutor.Code code = e.getCode();
                             if (!code.toString().equals(RollbackDone.toString())) {
