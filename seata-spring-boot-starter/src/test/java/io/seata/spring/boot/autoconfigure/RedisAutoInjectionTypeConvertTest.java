@@ -15,6 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
@@ -49,7 +51,10 @@ public class RedisAutoInjectionTypeConvertTest {
     @Bean
     RegistryRedisProperties registryRedisProperties() {
         RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
-        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, registryRedisProperties);
+        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+        if (PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_REDIS_PREFIX, completableFuture) == null) {
+            completableFuture.complete(registryRedisProperties);
+        }
         return registryRedisProperties;
     }
 
