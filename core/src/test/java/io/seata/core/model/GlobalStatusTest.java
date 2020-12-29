@@ -27,7 +27,7 @@ public class GlobalStatusTest {
     private static final int BEGIN_CODE = 1;
     private static final int NONE = 99;
     private static final int MIN_CODE = 0;
-    private static final int Max_CODE = 15;
+    private static final int MAX_CODE = 15;
 
     @Test
     public void testGetCode() {
@@ -57,7 +57,7 @@ public class GlobalStatusTest {
         GlobalStatus globalStatusOne = GlobalStatus.get(MIN_CODE);
         Assertions.assertEquals(globalStatusOne, GlobalStatus.UnKnown);
 
-        GlobalStatus globalStatusTwo = GlobalStatus.get(Max_CODE);
+        GlobalStatus globalStatusTwo = GlobalStatus.get(MAX_CODE);
         Assertions.assertEquals(globalStatusTwo, GlobalStatus.Finished);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> GlobalStatus.get(NONE));
