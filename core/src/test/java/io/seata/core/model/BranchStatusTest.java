@@ -28,6 +28,8 @@ public class BranchStatusTest {
 
     private static final int REGISTERED_CODE = 1;
     private static final int NONE = 99;
+    private static final int MIN_CODE = 0;
+    private static final int Max_CODE = 10;
 
     @Test
     public void testGetCode() {
@@ -49,6 +51,18 @@ public class BranchStatusTest {
 
     @Test
     public void testGetException() {
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> BranchStatus.get(NONE));
+    }
+
+
+    @Test
+    public void testGetByCode() {
+        BranchStatus branchStatusOne = BranchStatus.get(MIN_CODE);
+        Assertions.assertEquals(branchStatusOne, BranchStatus.Unknown);
+
+        BranchStatus branchStatusTwo = BranchStatus.get(Max_CODE);
+        Assertions.assertEquals(branchStatusTwo, BranchStatus.PhaseTwo_RollbackFailed_Unretryable);
+
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> BranchStatus.get(NONE));
     }
 }
