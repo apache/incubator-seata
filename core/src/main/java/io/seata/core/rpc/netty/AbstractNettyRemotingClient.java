@@ -150,7 +150,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             serverAddress = xid.substring(0, xid.lastIndexOf(":"));
 
         }
-        LOGGER.info("sendSyncRequest xid={},serverAddress={}",xid,serverAddress);
+        LOGGER.debug("sendSyncRequest xid={},serverAddress={}",xid,serverAddress);
 
         //String serverAddress =  String serverAddress = loadBalance(getTransactionServiceGroup(), msg);
         int timeoutMillis = NettyClientConfig.getRpcRequestTimeout();
