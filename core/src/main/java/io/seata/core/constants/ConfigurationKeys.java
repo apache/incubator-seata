@@ -43,6 +43,11 @@ public interface ConfigurationKeys {
     String STORE_MODE = STORE_PREFIX + "mode";
 
     /**
+     * The constant STORE_PUBLIC_KEY.
+     */
+    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+
+    /**
      * The constant STORE_FILE_PREFIX
      */
     String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
