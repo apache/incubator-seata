@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
 
 /**
  * @author funkye
@@ -30,9 +31,9 @@ public class JedisPooledFactory {
 
     public static String ACTIVATE_NAME = "store";
 
-    private static volatile JedisPool instance = null;
+    private static volatile JedisPoolAbstract instance = null;
 
-    public static JedisPool getJedisPoolInstance(JedisPool... jedisPool) {
+    public static JedisPoolAbstract getJedisPoolInstance(JedisPool... jedisPool) {
         if (instance == null) {
             synchronized (JedisPooledFactory.class) {
                 if (instance == null) {
@@ -51,7 +52,7 @@ public class JedisPooledFactory {
         return getJedisPoolInstance().getResource();
     }
 
-    private static JedisPool buildJedisPool() {
+    private static JedisPoolAbstract buildJedisPool() {
         JedisPooledProvider jedisPooledProvider = EnhancedServiceLoader.load(JedisPooledProvider.class, ACTIVATE_NAME);
         if (jedisPooledProvider == null) {
             throw new RuntimeException("jedisPooledProvider is null");

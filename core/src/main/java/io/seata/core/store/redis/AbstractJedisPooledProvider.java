@@ -35,6 +35,10 @@ public abstract class AbstractJedisPooledProvider implements JedisPooledProvider
 
     protected static final int MAXTOTAL = 100;
 
+    protected static final int SENTINEL_HOST_NUMBER = 3;
+
+    protected static final int TIMEOUT = 60000;
+
     protected static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
 }

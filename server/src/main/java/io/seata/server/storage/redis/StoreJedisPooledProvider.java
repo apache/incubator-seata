@@ -15,12 +15,19 @@
  */
 package io.seata.server.storage.redis;
 
+import io.seata.common.exception.RedisException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.redis.AbstractJedisPooledProvider;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisSentinelPool;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author funkye
@@ -29,7 +36,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public class StoreJedisPooledProvider extends AbstractJedisPooledProvider {
 
     @Override
-    public JedisPool generate() {
+    public JedisPoolAbstract generate() {
         String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
         if (StringUtils.isBlank(password)) {
             password = null;
@@ -38,10 +45,26 @@ public class StoreJedisPooledProvider extends AbstractJedisPooledProvider {
         poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN, MAXCONN));
         poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, MAXTOTAL));
-        JedisPool jedisPool =
-            new JedisPool(poolConfig, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST),
-                CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT), 60000, password,
+        String mode = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_MODE, ConfigurationKeys.REDIS_SINGLE_MODE);
+        if (mode.equals(ConfigurationKeys.REDIS_SENTINEL_MODE)) {
+            String masterName = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_MASTERNAME);
+            if (StringUtils.isBlank(masterName)) {
+                throw new RedisException("The masterName is null in redis sentinel mode");
+            }
+            Set<String> sentinels = new HashSet<>(SENTINEL_HOST_NUMBER);
+            String[] sentinelHosts = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
+            Arrays.asList(sentinelHosts).forEach(sentinelHost -> sentinels.add(sentinelHost));
+            return new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, password,
                 CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
-        return jedisPool;
+        } else if (mode.equals(ConfigurationKeys.REDIS_SINGLE_MODE)) {
+            String host = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
+            host = StringUtils.isBlank(host) ? CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : host;
+            int port = CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT);
+            port = port == 0 ? CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT) : port;
+            return new JedisPool(poolConfig, host, port,TIMEOUT , password,
+                CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
+        } else {
+            throw new RedisException("Configuration error of redis cluster mode");
+        }
     }
 }

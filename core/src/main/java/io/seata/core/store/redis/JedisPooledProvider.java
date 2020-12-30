@@ -15,13 +15,13 @@
  */
 package io.seata.core.store.redis;
 
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
 
 /**
  * @author funkye
  */
 public interface JedisPooledProvider {
 
-    JedisPool generate();
+    JedisPoolAbstract generate();
 
 }
