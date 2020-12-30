@@ -60,8 +60,6 @@ public class JedisPooledFactory {
 
     private static final int SENTINEL_HOST_NUMBER = 3;
 
-    private static final String DEFAULT_PASSWORD = "null";
-
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
 
     /**
@@ -77,7 +75,7 @@ public class JedisPooledFactory {
                         jedisPool = jedisPools[0];
                     } else {
                         String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
-                        if (StringUtils.isBlank(password) || StringUtils.equalsIgnoreCase(password, DEFAULT_PASSWORD)) {
+                        if (StringUtils.isBlank(password)) {
                             password = null;
                         } else {
                             String publicKey = CONFIGURATION.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
