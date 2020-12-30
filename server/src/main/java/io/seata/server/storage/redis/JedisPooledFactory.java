@@ -22,6 +22,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.seata.common.util.ConfigTools;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -76,6 +77,17 @@ public class JedisPooledFactory {
                         String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
                         if (StringUtils.isBlank(password)) {
                             password = null;
+                        } else {
+                            String publicKey = CONFIGURATION.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
+                            if (StringUtils.isNotBlank(publicKey)) {
+                                try {
+                                    password = ConfigTools.publicDecrypt(password, publicKey);
+                                } catch (Exception e) {
+                                    LOGGER.error(
+                                        "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: ",
+                                        e.getMessage());
+                                }
+                            }
                         }
                         JedisPoolConfig poolConfig = new JedisPoolConfig();
                         poolConfig.setMinIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MIN_CONN, MINCONN));
