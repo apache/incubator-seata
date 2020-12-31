@@ -117,9 +117,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
-    public static InetSocketAddress leaderAddress;
-    private static CliClientServiceImpl cliClientService;
-    private static List<InetSocketAddress> addressList;
+    private InetSocketAddress leaderAddress;
+    private CliClientServiceImpl cliClientService;
+    private List<InetSocketAddress> addressList;
 
     @Override
     public void init() {
@@ -140,8 +140,15 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 cliClientService.init(new CliOptions());
                 findLeader();
                 // The leader election takes 1 second
-                int cycle = 10 * 50;
-                findLeaderExecutor.scheduleAtFixedRate(() -> findLeader(), cycle, cycle, TimeUnit.MILLISECONDS);
+                int cycle = 10 * 100;
+                findLeaderExecutor.scheduleAtFixedRate(() -> {
+                    try {
+                        findLeader();
+                    } catch (Exception e) {
+                        // prevents an exception from being thrown that causes the thread to break
+                        LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
+                    }
+                }, cycle, cycle, TimeUnit.MILLISECONDS);
             }
         }
         super.init();
