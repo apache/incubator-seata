@@ -15,6 +15,11 @@
  */
 package io.seata.server.coordinator;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -46,11 +51,11 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
-import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
@@ -58,12 +63,6 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The type Default coordinator.
@@ -376,42 +375,52 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
-            try {
-                handleRetryRollbacking();
-            } catch (Exception e) {
-                LOGGER.info("Exception retry rollbacking ... ", e);
+            if(SessionHolder.retryRollbackingLock()) {
+                try {
+                    handleRetryRollbacking();
+                } catch (Exception e) {
+                    LOGGER.info("Exception retry rollbacking ... ", e);
+                }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
-            try {
-                handleRetryCommitting();
-            } catch (Exception e) {
-                LOGGER.info("Exception retry committing ... ", e);
+            if(SessionHolder.retryCommittingLock()) {
+                try {
+                    handleRetryCommitting();
+                } catch (Exception e) {
+                    LOGGER.info("Exception retry committing ... ", e);
+                }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
-            try {
-                handleAsyncCommitting();
-            } catch (Exception e) {
-                LOGGER.info("Exception async committing ... ", e);
+            if(SessionHolder.asyncCommittingLock()) {
+                try {
+                    handleAsyncCommitting();
+                } catch (Exception e) {
+                    LOGGER.info("Exception async committing ... ", e);
+                }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
-            try {
-                timeoutCheck();
-            } catch (Exception e) {
-                LOGGER.info("Exception timeout checking ... ", e);
+            if(SessionHolder.txTimeoutCheckLock()) {
+                try {
+                    timeoutCheck();
+                } catch (Exception e) {
+                    LOGGER.info("Exception timeout checking ... ", e);
+                }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(() -> {
-            try {
-                undoLogDelete();
-            } catch (Exception e) {
-                LOGGER.info("Exception undoLog deleting ... ", e);
+            if(SessionHolder.undoLogDeleteLock()) {
+                try {
+                    undoLogDelete();
+                } catch (Exception e) {
+                    LOGGER.info("Exception undoLog deleting ... ", e);
+                }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
