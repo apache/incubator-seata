@@ -15,8 +15,6 @@
  */
 package io.seata.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 
@@ -108,13 +106,6 @@ public enum BranchStatus {
         return code;
     }
 
-    private static final Map<Integer, BranchStatus> MAP = new HashMap<>(values().length);
-
-    static {
-        for (BranchStatus status : values()) {
-            MAP.put(status.getCode(), status);
-        }
-    }
 
     /**
      * Get branch status.
@@ -133,12 +124,13 @@ public enum BranchStatus {
      * @return the branch status
      */
     public static BranchStatus get(int code) {
-        BranchStatus status = MAP.get(code);
-
-        if (status == null) {
+        BranchStatus value = null;
+        try {
+            value = BranchStatus.values()[code];
+        } catch (Exception e) {
             throw new ShouldNeverHappenException("Unknown BranchStatus[" + code + "]");
         }
-
-        return status;
+        return value;
     }
+
 }
