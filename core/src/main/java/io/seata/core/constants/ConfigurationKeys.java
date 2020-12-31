@@ -43,6 +43,11 @@ public interface ConfigurationKeys {
     String STORE_MODE = STORE_PREFIX + "mode";
 
     /**
+     * The constant STORE_PUBLIC_KEY.
+     */
+    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+
+    /**
      * The constant STORE_FILE_PREFIX
      */
     String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
@@ -506,9 +511,29 @@ public interface ConfigurationKeys {
     String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
+     * The constant STORE_REDIS_MODE.
+     */
+    String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
+
+    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+
+    /**
+     * The constant STORE_REDIS_PORT.
+     */
+    String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+
+    /**
+     * The constant STORE_REDIS_SINGLE_PREFIX.
+     */
+    String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + "single.";
+
+    /**
+     * The constant STORE_REDIS_SINGLE_HOST.
+     */
+    String STORE_REDIS_SINGLE_HOST = STORE_REDIS_SINGLE_PREFIX + "host";
 
     /**
      * The constant STORE_MIN_Conn.
@@ -516,9 +541,9 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
 
     /**
-     * The constant STORE_REDIS_PORT.
+     * The constant STORE_REDIS_SINGLE_PORT.
      */
-    String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+    String STORE_REDIS_SINGLE_PORT = STORE_REDIS_SINGLE_PREFIX + "port";
 
     /**
      * The constant STORE_REDIS_MAX_CONN.
@@ -544,6 +569,31 @@ public interface ConfigurationKeys {
      * The constant STORE_REDIS_QUERY_LIMIT.
      */
     String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
+
+    /**
+     * The constant REDIS_SENTINEL_MODE.
+     */
+    String REDIS_SENTINEL_MODE = "sentinel";
+
+    /**
+     * The constant REDIS_SINGLE_MODE.
+     */
+    String REDIS_SINGLE_MODE = "single";
+
+    /**
+     * The constant STORE_REDIS_SENTINEL_PREFIX.
+     */
+    String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + "sentinel.";
+
+    /**
+     * STORE_REDIS_SENTINEL_MASTERNAME.
+     */
+    String STORE_REDIS_SENTINEL_MASTERNAME = STORE_REDIS_SENTINEL_PREFIX + "masterName";
+
+    /**
+     * STORE_REDIS_SENTINEL_HOST.
+     */
+    String STORE_REDIS_SENTINEL_HOST = STORE_REDIS_SENTINEL_PREFIX + "sentinelHosts";
 
     /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
