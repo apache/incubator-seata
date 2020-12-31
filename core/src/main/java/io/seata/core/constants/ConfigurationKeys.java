@@ -398,22 +398,22 @@ public interface ConfigurationKeys {
     /**
      * The constant MIN_SERVER_POOL_SIZE.
      */
-    String MIN_SERVER_POOL_SIZE = SERVER_PREFIX + "minServerPoolSize";
+    String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
 
     /**
      * The constant MAX_SERVER_POOL_SIZE.
      */
-    String MAX_SERVER_POOL_SIZE = SERVER_PREFIX + "maxServerPoolSize";
+    String MAX_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "maxServerPoolSize";
 
     /**
      * The constant MAX_TASK_QUEUE_SIZE.
      */
-    String MAX_TASK_QUEUE_SIZE = SERVER_PREFIX + "maxTaskQueueSize";
+    String MAX_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxTaskQueueSize";
 
     /**
      * The constant KEEP_ALIVE_TIME.
      */
-    String KEEP_ALIVE_TIME = SERVER_PREFIX + "keepAliveTime";
+    String KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "keepAliveTime";
 
     /**
      * The constant TRANSPORT_TYPE
