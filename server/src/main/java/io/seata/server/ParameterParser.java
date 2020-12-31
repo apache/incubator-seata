@@ -26,11 +26,6 @@ import io.seata.server.env.ContainerHelper;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_MIN_SERVER_POOL_SIZE;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_MAX_SERVER_POOL_SIZE;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_MAX_TASK_QUEUE_SIZE;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_KEEP_ALIVE_TIME;
-
 
 /**
  * The type Parameter parser.
@@ -56,26 +51,6 @@ public class ParameterParser {
         order = 5)
     private String seataEnv;
 
-    public int getMinServerPoolSize() {
-        return minServerPoolSize;
-    }
-
-    public int getMaxServerPoolSize() {
-        return maxServerPoolSize;
-    }
-
-    public int getMaxTaskQueueSize() {
-        return maxTaskQueueSize;
-    }
-
-    public int getKeepAliveTime() {
-        return keepAliveTime;
-    }
-
-    private int minServerPoolSize = 50;
-    private int maxServerPoolSize = 500;
-    private int maxTaskQueueSize = 20000;
-    private int keepAliveTime = 500;
     /**
      * Instantiates a new Parameter parser.
      *
@@ -109,15 +84,6 @@ public class ParameterParser {
                 storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
                     SERVER_DEFAULT_STORE_MODE);
             }
-
-            minServerPoolSize = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.MIN_SERVER_POOL_SIZE,
-                    SERVER_DEFAULT_MIN_SERVER_POOL_SIZE);
-            maxServerPoolSize = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.MAX_SERVER_POOL_SIZE,
-                    SERVER_DEFAULT_MAX_SERVER_POOL_SIZE);
-            maxTaskQueueSize = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.MAX_TASK_QUEUE_SIZE,
-                    SERVER_DEFAULT_MAX_TASK_QUEUE_SIZE);
-            keepAliveTime = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.KEEP_ALIVE_TIME,
-                    SERVER_DEFAULT_KEEP_ALIVE_TIME);
         } catch (ParameterException e) {
             printError(e);
         }

@@ -25,6 +25,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.NettyRemotingServer;
+import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.env.ContainerHelper;
 import io.seata.server.env.PortHelper;
@@ -66,10 +67,10 @@ public class Server {
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
-        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(parameterParser.getMinServerPoolSize(),
-                parameterParser.getMaxServerPoolSize(), parameterParser.getKeepAliveTime(), TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(parameterParser.getMaxTaskQueueSize()),
-                new NamedThreadFactory("ServerHandlerThread", parameterParser.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
+        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
+                NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
+                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         //server port
