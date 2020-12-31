@@ -376,6 +376,51 @@ public class SessionHolder {
         return getRootSessionManager().scheduledLock(UNDOLOG_DELETE);
     }
 
+    /**
+     * un retry rollbacking lock
+     *
+     * @return the boolean
+     */
+    public static boolean unRetryRollbackingLock() {
+        return getRootSessionManager().unScheduledLock(RETRY_ROLLBACKING);
+    }
+
+    /**
+     * un retry committing lock
+     *
+     * @return the boolean
+     */
+    public static boolean unRetryCommittingLock() {
+        return getRootSessionManager().unScheduledLock(RETRY_COMMITTING);
+    }
+
+    /**
+     * un async committing lock
+     *
+     * @return the boolean
+     */
+    public static boolean unAsyncCommittingLock() {
+        return getRootSessionManager().unScheduledLock(ASYNC_COMMITTING);
+    }
+
+    /**
+     * un tx timeout check lOck
+     *
+     * @return the boolean
+     */
+    public static boolean unTxTimeoutCheckLock() {
+        return getRootSessionManager().unScheduledLock(TX_TIMEOUT_CHECK);
+    }
+
+    /**
+     * un undolog delete lock
+     *
+     * @return the boolean
+     */
+    public static boolean unUndoLogDeleteLock() {
+        return getRootSessionManager().unScheduledLock(UNDOLOG_DELETE);
+    }
+
     public static void destroy() {
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();

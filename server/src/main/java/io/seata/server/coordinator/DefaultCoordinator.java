@@ -375,51 +375,66 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
-            if(SessionHolder.retryRollbackingLock()) {
+            boolean lock = SessionHolder.retryRollbackingLock();
+            if (lock) {
                 try {
                     handleRetryRollbacking();
                 } catch (Exception e) {
                     LOGGER.info("Exception retry rollbacking ... ", e);
+                } finally {
+                    SessionHolder.unRetryRollbackingLock();
                 }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
-            if(SessionHolder.retryCommittingLock()) {
+            boolean lock = SessionHolder.retryCommittingLock();
+            if (lock) {
                 try {
                     handleRetryCommitting();
                 } catch (Exception e) {
                     LOGGER.info("Exception retry committing ... ", e);
+                } finally {
+                    SessionHolder.unRetryCommittingLock();
                 }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
-            if(SessionHolder.asyncCommittingLock()) {
+            boolean lock = SessionHolder.asyncCommittingLock();
+            if(lock) {
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
                     LOGGER.info("Exception async committing ... ", e);
+                } finally {
+                    SessionHolder.unAsyncCommittingLock();
                 }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
-            if(SessionHolder.txTimeoutCheckLock()) {
+            boolean lock = SessionHolder.txTimeoutCheckLock();
+            if (lock) {
                 try {
                     timeoutCheck();
                 } catch (Exception e) {
                     LOGGER.info("Exception timeout checking ... ", e);
+                } finally {
+                    SessionHolder.unTxTimeoutCheckLock();
                 }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(() -> {
-            if(SessionHolder.undoLogDeleteLock()) {
+            boolean lock = SessionHolder.undoLogDeleteLock();
+            if (lock) {
                 try {
                     undoLogDelete();
                 } catch (Exception e) {
                     LOGGER.info("Exception undoLog deleting ... ", e);
+                } finally {
+                    SessionHolder.unUndoLogDeleteLock();
                 }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
