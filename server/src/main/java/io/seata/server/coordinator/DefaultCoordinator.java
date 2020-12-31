@@ -402,7 +402,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
         asyncCommitting.scheduleAtFixedRate(() -> {
             boolean lock = SessionHolder.asyncCommittingLock();
-            if(lock) {
+            if (lock) {
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
