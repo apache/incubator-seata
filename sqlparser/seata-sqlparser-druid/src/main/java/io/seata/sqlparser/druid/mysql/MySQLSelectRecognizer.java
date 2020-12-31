@@ -30,7 +30,11 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLSelectRecognizer;
 import io.seata.sqlparser.SQLType;
-
+/**
+ * The type My sql select recognizer.
+ *
+ * @author sharajava
+ */
 public class MySQLSelectRecognizer extends BaseMySQLRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;

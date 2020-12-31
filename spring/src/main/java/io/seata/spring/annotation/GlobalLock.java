@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import io.seata.core.constants.Isolation;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
@@ -30,8 +31,10 @@ import org.aopalliance.intercept.MethodInvocation;
  *
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
  *
+ * @author slievrly
+ *
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
- * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // the interceptor of GlobalLock
+ * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock) // the interceptor of GlobalLock
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // the interceptor of GlobalLockLogic and AT/XA mode
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -55,8 +58,9 @@ public @interface GlobalLock {
     int lockRetryTimes() default -1;
 
     /**
-     * if autoAddForUpdate is true
-     *  then it will check lock even the target sql do not contain for update
+     * the isolation
+     * is the isolation is not equals Isolation.READ_UNCOMMITTED, it will wait the executing tx
+     * and not it's only support Isolation.READ_UNCOMMITTED & Isolation.READ_COMMITTED
      */
-    boolean autoAddForUpdate() default false;
+    Isolation isolation() default Isolation.READ_UNCOMMITTED;
 }

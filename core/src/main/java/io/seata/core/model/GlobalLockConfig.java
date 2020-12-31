@@ -15,6 +15,8 @@
  */
 package io.seata.core.model;
 
+import io.seata.core.constants.Isolation;
+
 /**
  * @author selfishlover
  */
@@ -24,7 +26,7 @@ public class GlobalLockConfig {
 
     private int lockRetryTimes;
 
-    private boolean autoAddForUpdate;
+    private Isolation isolation;
 
     public int getLockRetryInternal() {
         return lockRetryInternal;
@@ -42,11 +44,11 @@ public class GlobalLockConfig {
         this.lockRetryTimes = lockRetryTimes;
     }
 
-    public boolean isAutoAddForUpdate() {
-        return autoAddForUpdate;
+    public Isolation getIsolation() {
+        return isolation;
     }
 
-    public void setAutoAddForUpdate(boolean autoAddForUpdate) {
-        this.autoAddForUpdate = autoAddForUpdate;
+    public void setIsolation(Isolation isolation) {
+        this.isolation = isolation;
     }
 }

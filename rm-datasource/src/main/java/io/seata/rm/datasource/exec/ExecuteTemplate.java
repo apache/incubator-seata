@@ -15,8 +15,13 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.constants.Isolation;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -24,9 +29,6 @@ import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
 
 /**
  * The type Execute template.
@@ -103,9 +105,9 @@ public class ExecuteTemplate {
                     case SELECT:
                         GlobalLockConfig config = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
 
-                        if (config.isAutoAddForUpdate()) {
-                            // if sql type is select && allow enable auto add for update
-                            // do the same thing with select for update
+                        if (config.getIsolation() != Isolation.READ_UNCOMMITTED) {
+                            // if sql type is select && isolation not equals READ_UNCOMMITTED
+                            //   it need to check lock also
                             executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                             break;
                         }
