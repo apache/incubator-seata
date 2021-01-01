@@ -51,10 +51,7 @@ public class RedisAutoInjectionTypeConvertTest {
     @Bean
     RegistryRedisProperties registryRedisProperties() {
         RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
-        CompletableFuture<Object> completableFuture = new CompletableFuture<>();
-        if (PROPERTY_BEAN_MAP.putIfAbsent(REGISTRY_REDIS_PREFIX, completableFuture) == null) {
-            completableFuture.complete(registryRedisProperties);
-        }
+        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, registryRedisProperties);
         return registryRedisProperties;
     }
 
