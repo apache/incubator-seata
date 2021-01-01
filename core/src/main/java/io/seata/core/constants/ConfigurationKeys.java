@@ -401,6 +401,26 @@ public interface ConfigurationKeys {
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
     /**
+     * The constant MIN_SERVER_POOL_SIZE.
+     */
+    String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
+
+    /**
+     * The constant MAX_SERVER_POOL_SIZE.
+     */
+    String MAX_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "maxServerPoolSize";
+
+    /**
+     * The constant MAX_TASK_QUEUE_SIZE.
+     */
+    String MAX_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxTaskQueueSize";
+
+    /**
+     * The constant KEEP_ALIVE_TIME.
+     */
+    String KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "keepAliveTime";
+
+    /**
      * The constant TRANSPORT_TYPE
      */
     String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";

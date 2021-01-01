@@ -52,6 +52,14 @@ public class NettyServerConfig extends NettyBaseConfig {
     private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
+    private static int minServerPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
+    private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
+    private static int maxTaskQueueSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
+    private static int keepAliveTime = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
 
     /**
      * The Server channel clazz.
@@ -277,5 +285,21 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public int getServerShutdownWaitTime() {
         return CONFIG.getInt(ConfigurationKeys.SHUTDOWN_WAIT, DEFAULT_SHUTDOWN_TIMEOUT_SEC);
+    }
+
+    public static int getMinServerPoolSize() {
+        return minServerPoolSize;
+    }
+
+    public static int getMaxServerPoolSize() {
+        return maxServerPoolSize;
+    }
+
+    public static int getMaxTaskQueueSize() {
+        return maxTaskQueueSize;
+    }
+
+    public static int getKeepAliveTime() {
+        return keepAliveTime;
     }
 }
