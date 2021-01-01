@@ -31,10 +31,6 @@ public class PropertyBeanPostProcessorTest {
         context = new AnnotationConfigApplicationContext(PropertyBeanPostProcessorTest.class);
     }
 
-    @Bean
-    public PropertyBeanPostProcessor propertyBeanPostProcessor() {
-        return new PropertyBeanPostProcessor();
-    }
 
     @Bean
     public SeataProperties seataProperties() {
@@ -47,15 +43,6 @@ public class PropertyBeanPostProcessorTest {
     public SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration() {
         return new SpringCloudAlibabaConfiguration();
     }
-
-    @Test
-    public void testCompletePropertyBean() throws ExecutionException, InterruptedException, TimeoutException {
-        Object object = PROPERTY_BEAN_MAP.get(SEATA_PREFIX).get(3, TimeUnit.SECONDS);
-        Assertions.assertThat(object).isInstanceOf(SeataProperties.class);
-        SeataProperties seataProperties = (SeataProperties) object;
-        Assertions.assertThat(seataProperties.getApplicationId()).isEqualTo("test-id");
-    }
-
 
     @AfterAll
     public static void closeContext() {
