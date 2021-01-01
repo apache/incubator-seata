@@ -110,7 +110,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         }
         if (valueObject == null) {
             ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
-            String key=propertyPrefix + DOT + propertySuffix;
+            String key = propertyPrefix + DOT + propertySuffix;
             valueObject = applicationContext.getEnvironment().getProperty(key.intern());
         }
         return valueObject;
