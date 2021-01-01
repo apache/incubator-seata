@@ -15,10 +15,17 @@
  */
 package io.seata.rm.datasource;
 
+import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.*;
+import java.util.Set;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
-import com.alibaba.druid.mock.MockSavepoint;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -29,7 +36,17 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint DEFAULT_SAVEPOINT = new MockSavepoint();
+    private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {
+        @Override
+        public int getSavepointId() throws SQLException {
+            return 0;
+        }
+
+        @Override
+        public String getSavepointName() throws SQLException {
+            return "DEFAULT_SEATA_SAVEPOINT";
+        }
+    };
 
     private String xid;
     private Long branchId;
@@ -39,13 +56,13 @@ public class ConnectionContext {
     /**
      * the lock keys buffer
      */
-    private Map<Savepoint, Set<String>> lockKeysBuffer = new LinkedHashMap<>();
+    private final Map<Savepoint, Set<String>> lockKeysBuffer = new LinkedHashMap<>();
     /**
      * the undo items buffer
      */
-    private Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
+    private final Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
 
-    private List<Savepoint> savepoints = new ArrayList<>(8);
+    private final List<Savepoint> savepoints = new ArrayList<>(8);
 
     /**
      * whether requires global lock in this connection
@@ -71,7 +88,7 @@ public class ConnectionContext {
      * @param lockKey the lock key
      */
     void appendLockKey(String lockKey) {
-        lockKeysBuffer.computeIfAbsent(currentSavepoint, (k) -> new HashSet<>()).add(lockKey);
+        lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>()).add(lockKey);
     }
 
     /**
@@ -80,7 +97,7 @@ public class ConnectionContext {
      * @param sqlUndoLog the sql undo log
      */
     void appendUndoItem(SQLUndoLog sqlUndoLog) {
-        sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, (k) -> new ArrayList<>()).add(sqlUndoLog);
+        sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, k -> new ArrayList<>()).add(sqlUndoLog);
     }
 
     /**
@@ -107,38 +124,29 @@ public class ConnectionContext {
         }
 
         savepoints.removeAll(afterSavepoints);
-        currentSavepoint = savepoints.size() == 0 ? null : savepoints.get(savepoints.size() - 1);
+        currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
     }
 
     public void releaseSavepoint(Savepoint savepoint) {
         List<Savepoint> afterSavepoints = getAfterSavepoints(savepoint);
+        savepoints.removeAll(afterSavepoints);
+        currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
 
-        List<SQLUndoLog> notSavepointSQLUndoLog = sqlUndoItemsBuffer.compute(DEFAULT_SAVEPOINT, (k, v) -> new ArrayList<>());
-        Set<String> notSavepointLockKeys = lockKeysBuffer.compute(DEFAULT_SAVEPOINT, (k, v) -> new HashSet<>());
+        List<SQLUndoLog> currentSavepointSQLUndoLog = sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, k -> new ArrayList<>());
+        Set<String> currentSavepointLockKeys = lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>());
 
-        // move the undo items & lock keys to default
+        // move the undo items & lock keys to current savepoint
         for (Savepoint sp : afterSavepoints) {
             List<SQLUndoLog> savepointSQLUndoLogs = sqlUndoItemsBuffer.remove(sp);
-            if (!CollectionUtils.isEmpty(savepointSQLUndoLogs)) {
-                notSavepointSQLUndoLog.addAll(savepointSQLUndoLogs);
+            if (CollectionUtils.isNotEmpty(savepointSQLUndoLogs)) {
+                currentSavepointSQLUndoLog.addAll(savepointSQLUndoLogs);
             }
 
             Set<String> savepointLockKeys = lockKeysBuffer.remove(sp);
             if (CollectionUtils.isNotEmpty(savepointLockKeys)) {
-                notSavepointLockKeys.addAll(savepointLockKeys);
+                currentSavepointLockKeys.addAll(savepointLockKeys);
             }
         }
-
-        savepoints.removeAll(afterSavepoints);
-        currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
-    }
-
-    List<Savepoint> getAfterSavepoints(Savepoint savepoint) {
-        if (null == savepoint) {
-            return new ArrayList<>(savepoints);
-        }
-
-        return new ArrayList<>(savepoints.subList(savepoints.indexOf(savepoint), savepoints.size() - 1));
     }
 
     /**
@@ -293,6 +301,20 @@ public class ConnectionContext {
             undoItems.addAll(items);
         }
         return undoItems;
+    }
+
+
+    /**
+     * Get the savepoints after target savepoint
+     * @param savepoint the target savepoint
+     * @return after savepoints
+     */
+    private List<Savepoint> getAfterSavepoints(Savepoint savepoint) {
+        if (null == savepoint) {
+            return new ArrayList<>(savepoints);
+        }
+
+        return new ArrayList<>(savepoints.subList(savepoints.indexOf(savepoint), savepoints.size()));
     }
 
     @Override
