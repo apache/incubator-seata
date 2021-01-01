@@ -132,19 +132,18 @@ public class ConnectionContext {
         savepoints.removeAll(afterSavepoints);
         currentSavepoint = savepoints.size() == 0 ? DEFAULT_SAVEPOINT : savepoints.get(savepoints.size() - 1);
 
-        List<SQLUndoLog> currentSavepointSQLUndoLog = sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, k -> new ArrayList<>());
-        Set<String> currentSavepointLockKeys = lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>());
-
         // move the undo items & lock keys to current savepoint
         for (Savepoint sp : afterSavepoints) {
             List<SQLUndoLog> savepointSQLUndoLogs = sqlUndoItemsBuffer.remove(sp);
             if (CollectionUtils.isNotEmpty(savepointSQLUndoLogs)) {
-                currentSavepointSQLUndoLog.addAll(savepointSQLUndoLogs);
+                sqlUndoItemsBuffer.computeIfAbsent(currentSavepoint, k -> new ArrayList<>(savepointSQLUndoLogs.size()))
+                        .addAll(savepointSQLUndoLogs);
             }
 
             Set<String> savepointLockKeys = lockKeysBuffer.remove(sp);
             if (CollectionUtils.isNotEmpty(savepointLockKeys)) {
-                currentSavepointLockKeys.addAll(savepointLockKeys);
+                lockKeysBuffer.computeIfAbsent(currentSavepoint, k -> new HashSet<>())
+                        .addAll(savepointLockKeys);
             }
         }
     }
@@ -305,7 +304,7 @@ public class ConnectionContext {
 
 
     /**
-     * Get the savepoints after target savepoint
+     * Get the savepoints after target savepoint(include the param savepoint)
      * @param savepoint the target savepoint
      * @return after savepoints
      */
