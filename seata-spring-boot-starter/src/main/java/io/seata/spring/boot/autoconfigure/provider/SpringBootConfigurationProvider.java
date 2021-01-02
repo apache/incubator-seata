@@ -21,12 +21,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -77,12 +79,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         });
     }
 
-    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException {
+    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException, InstantiationException {
         return get(dataId, defaultValue);
 
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException {
+    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
         Object result = get(dataId);
         if (result == null) {
             return defaultValue;
@@ -90,30 +92,58 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException {
+    private Object get(String dataId) throws IllegalAccessException, InstantiationException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
-        Object propertyObject = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         Object valueObject = null;
-        if (propertyObject != null) {
-            Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
-                f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
-            if (fieldOptional.isPresent()) {
-                Field field = fieldOptional.get();
-                field.setAccessible(true);
-                valueObject = field.get(propertyObject);
-                if (valueObject instanceof Map) {
-                    String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
-                    valueObject = ((Map) valueObject).get(key);
-                }
+        if (propertyClass != null) {
+            try {
+                Object propertyBean = applicationContext.getBean(propertyClass);
+                valueObject = getFieldValue(propertyBean, propertySuffix, dataId);
+            } catch (NoSuchBeanDefinitionException ignore) {
+
             }
+        } else {
+            throw new ShouldNeverHappenException("propertyClass should not be null.");
         }
+
         if (valueObject == null) {
-            ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
             String key = propertyPrefix + DOT + propertySuffix;
             valueObject = applicationContext.getEnvironment().getProperty(key.intern());
         }
+
+        if (valueObject == null) {
+            valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
+        }
+
         return valueObject;
+    }
+
+    /**
+     * get field value
+     *
+     * @param object
+     * @param fieldName
+     * @param dataId
+     * @return java.lang.Object
+     * @author xingfudeshi@gmail.com
+     */
+    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
+        Object value = null;
+        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields()).filter(
+            f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
+        if (fieldOptional.isPresent()) {
+            Field field = fieldOptional.get();
+            field.setAccessible(true);
+            value = field.get(object);
+            if (value instanceof Map) {
+                String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
+                value = ((Map) value).get(key);
+            }
+        }
+        return value;
     }
 
     /**

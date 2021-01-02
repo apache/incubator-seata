@@ -56,7 +56,7 @@ public interface StarterConstants {
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
     int MAP_CAPACITY = 64;
-    HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
+    HashMap<String, Class<?>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
 
     /**
      * The following special keys need to be normalized.

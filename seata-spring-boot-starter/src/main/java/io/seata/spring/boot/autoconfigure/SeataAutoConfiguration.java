@@ -103,6 +103,41 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
+    static {
+        PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
+
+        PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, RmProperties.class);
+        PROPERTY_BEAN_MAP.put(CLIENT_TM_PREFIX, TmProperties.class);
+        PROPERTY_BEAN_MAP.put(LOCK_PREFIX, LockProperties.class);
+        PROPERTY_BEAN_MAP.put(SERVICE_PREFIX, ServiceProperties.class);
+        PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
+        PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
+        PROPERTY_BEAN_MAP.put(UNDO_PREFIX, UndoProperties.class);
+        PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
+        PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
+        PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
+
+        PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_ZK_PREFIX, ConfigZooKeeperProperties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
+        PROPERTY_BEAN_MAP.put(CONFIG_CUSTOM_PREFIX, ConfigCustomProperties.class);
+
+        PROPERTY_BEAN_MAP.put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_EUREKA_PREFIX, RegistryEurekaProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_NACOS_PREFIX, RegistryNacosProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
+    }
+
+    /*
     public SeataAutoConfiguration(SeataProperties seataProperties,
                                   RmProperties rmProperties, TmProperties tmProperties, LockProperties lockProperties,
                                   ServiceProperties serviceProperties, ShutdownProperties shutdownProperties, ThreadFactoryProperties threadFactoryProperties,
@@ -145,7 +180,7 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, registryZooKeeperProperties);
         PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, registryCustomProperties);
     }
-
+    */
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
     @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
     public SpringApplicationContextProvider springApplicationContextProvider() {
