@@ -33,17 +33,33 @@ import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
  */
 public class NettyServerConfig extends NettyBaseConfig {
 
-    private int serverSelectorThreads = WORKER_THREAD_SIZE;
-    private int serverSocketSendBufSize = 153600;
-    private int serverSocketResvBufSize = 153600;
-    private int serverWorkerThreads = WORKER_THREAD_SIZE;
-    private int soBackLogSize = 1024;
-    private int writeBufferHighWaterMark = 67108864;
-    private int writeBufferLowWaterMark = 1048576;
+    private int serverSelectorThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int serverSocketSendBufSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
+    private int serverSocketResvBufSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize", String.valueOf(153600)));
+    private int serverWorkerThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverWorkerThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int soBackLogSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", String.valueOf(1024)));
+    private int writeBufferHighWaterMark = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
+    private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
     private static final int DEFAULT_LISTEN_PORT = 8091;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private int serverChannelMaxIdleTimeSeconds = 30;
+    private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
+    private static int minServerPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
+    private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
+    private static int maxTaskQueueSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
+    private static int keepAliveTime = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
 
     /**
      * The Server channel clazz.
@@ -269,5 +285,21 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public int getServerShutdownWaitTime() {
         return CONFIG.getInt(ConfigurationKeys.SHUTDOWN_WAIT, DEFAULT_SHUTDOWN_TIMEOUT_SEC);
+    }
+
+    public static int getMinServerPoolSize() {
+        return minServerPoolSize;
+    }
+
+    public static int getMaxServerPoolSize() {
+        return maxServerPoolSize;
+    }
+
+    public static int getMaxTaskQueueSize() {
+        return maxTaskQueueSize;
+    }
+
+    public static int getKeepAliveTime() {
+        return keepAliveTime;
     }
 }
