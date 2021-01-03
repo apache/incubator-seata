@@ -1,5 +1,5 @@
 server:
-  port: 8098
+  port: 9098
 
 logging:
   config: classpath:logback.xml
@@ -33,6 +33,18 @@ seata:
       name: file.conf
   registry:
     type: file
+    file:
+      ## store location dir
+      dir: sessionStore
+      maxBranchSessionSize: 16384
+      # globe session size , if exceeded throws exceptions
+      maxGlobalSessionSize: 512
+      # file buffer size , if exceeded allocate new buffer
+      fileWriteBufferCacheSize: 16384
+      # when recover batch read size
+      sessionReloadReadSize: 100
+      # async, sync
+      flushDiskMode: async
     zk:
       cluster: default
       serverAddr: 127.0.0.1:2181
@@ -72,7 +84,5 @@ seata:
       cluster: default
       group: SEATA_GROUP
       addressWaitTime: 3000
-    file:
-      name: file.conf
     
 

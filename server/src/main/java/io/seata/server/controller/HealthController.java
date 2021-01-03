@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.starter.controller;
+package io.seata.server.controller;
 
-import io.seata.server.starter.SeataServerRunner;
+import io.seata.server.ServerRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,13 +36,13 @@ public class HealthController {
     private static final String NOT_OK = "not_ok";
 
     @Autowired
-    private SeataServerRunner seataServerRunner;
+    private ServerRunner serverRunner;
 
 
     @RequestMapping("/health")
     @ResponseBody
     String healthCheck() {
-        boolean started = seataServerRunner.started();
+        boolean started = serverRunner.started();
         String result = started ? OK : NOT_OK;
         return result;
     }

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.starter;
+package io.seata.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,8 +22,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author spilledyear@outlook.com
  */
 @SpringBootApplication
-public class SeataServerApplication {
+public class ServerApplication {
     public static void main(String[] args) {
-        SpringApplication.run(SeataServerApplication.class, args);
+        SpringApplication.run(ServerApplication.class, args);
     }
 }

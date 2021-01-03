@@ -13,9 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.starter;
+package io.seata.server;
 
-import io.seata.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -25,9 +24,9 @@ import org.springframework.stereotype.Component;
  * @author spilledyear@outlook.com
  */
 @Component
-public class SeataServerRunner implements CommandLineRunner {
+public class ServerRunner implements CommandLineRunner {
 
-    final Logger logger = LoggerFactory.getLogger(SeataServerRunner.class);
+    final Logger logger = LoggerFactory.getLogger(ServerRunner.class);
 
     private Boolean started = Boolean.FALSE;
 
