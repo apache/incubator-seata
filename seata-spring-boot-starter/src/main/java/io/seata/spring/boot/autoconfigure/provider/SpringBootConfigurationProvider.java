@@ -97,12 +97,11 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         String propertySuffix = getPropertySuffix(dataId);
         ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
         Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        Object valueObject = null;
-         String key = propertyPrefix + DOT + propertySuffix;
         if (propertyClass == null) {
             throw new ShouldNeverHappenException("propertyClass should not be null.");
         }
-        valueObject = applicationContext.getEnvironment().getProperty(key.intern());
+        String key = propertyPrefix + DOT + propertySuffix;
+        Object valueObject = applicationContext.getEnvironment().getProperty(key.intern());
         if (valueObject == null) {
             valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
         }
