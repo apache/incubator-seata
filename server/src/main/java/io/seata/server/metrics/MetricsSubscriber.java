@@ -54,57 +54,57 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .increase(1);
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .decrease(1);
-        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId()))
                 .increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId()))
                 .increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_COMMITTED.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getTimer(MeterIdConstants.TIMER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId()))
                 .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .decrease(1);
-        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId()))
                 .increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId()))
                 .increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK.withTag(APP_ID_KEY, event.getApplicationId()))
                 .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusCommitFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .decrease(1);
     }
 
     private void processGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .decrease(1);
     }
 
     private void processGlobalStatusTimeoutRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .decrease(1);
     }
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getAppId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
                 .decrease(1);
     }
 
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
         if (registry != null && consumers.containsKey(event.getStatus())) {
-            if (StringUtils.isEmpty(event.getAppId())) {
-                event.setAppId(EMPTY_APP_ID);
+            if (StringUtils.isEmpty(event.getApplicationId())) {
+                event.setApplicationId(EMPTY_APP_ID);
             }
 
             consumers.get(event.getStatus()).accept(event);
