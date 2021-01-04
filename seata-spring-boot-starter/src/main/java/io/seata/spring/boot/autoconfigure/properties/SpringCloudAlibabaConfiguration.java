@@ -22,12 +22,14 @@ import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * The type Spring cloud alibaba configuration.
  *
  * @author slievrly
  */
+@Component
 @ConfigurationProperties(prefix = StarterConstants.SEATA_SPRING_CLOUD_ALIBABA_PREFIX)
 public class SpringCloudAlibabaConfiguration implements ApplicationContextAware {
 
