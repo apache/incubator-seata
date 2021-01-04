@@ -28,6 +28,7 @@ import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -96,11 +97,17 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         String propertySuffix = getPropertySuffix(dataId);
         ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
         Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        if (propertyClass == null) {
+        Object valueObject = null;
+        if (propertyClass != null) {
+            try {
+                Object propertyBean = applicationContext.getBean(propertyClass);
+                valueObject = getFieldValue(propertyBean, propertySuffix, dataId);
+            } catch (NoSuchBeanDefinitionException ignore) {
+
+            }
+        } else {
             throw new ShouldNeverHappenException("propertyClass should not be null.");
         }
-        String key = propertyPrefix + DOT + propertySuffix;
-        Object valueObject = applicationContext.getEnvironment().getProperty(key.intern());
         if (valueObject == null) {
             valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
         }

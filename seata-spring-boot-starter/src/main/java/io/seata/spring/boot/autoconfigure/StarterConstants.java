@@ -57,7 +57,6 @@ public interface StarterConstants {
 
     int MAP_CAPACITY = 64;
     HashMap<String, Class<?>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
-
     /**
      * The following special keys need to be normalized.
      */

@@ -53,7 +53,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -99,11 +98,11 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @Configuration
-@EnableConfigurationProperties({SeataProperties.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
     static {
+
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, RmProperties.class);
@@ -135,7 +134,9 @@ public class SeataAutoConfiguration {
         PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
+
     }
+
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
     @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
@@ -150,7 +151,34 @@ public class SeataAutoConfiguration {
     }
 
     @Bean
-    @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
+    @DependsOn({"seataProperties",
+        "rmProperties",
+        "tmProperties",
+        "lockProperties",
+        "serviceProperties",
+        "shutdownProperties",
+        "threadFactoryProperties",
+        "undoProperties",
+        "undoCompressProperties",
+        "logProperties",
+        "transportProperties",
+        "configProperties",
+        "configFileProperties",
+        "registryProperties",
+        "configNacosProperties",
+        "configConsulProperties",
+        "configZooKeeperProperties",
+        "configApolloProperties",
+        "configEtcd3Properties",
+        "configCustomProperties",
+        "registryConsulProperties",
+        "registryEtcd3Properties",
+        "registryEurekaProperties",
+        "registryNacosProperties",
+        "registryRedisProperties",
+        "registrySofaProperties",
+        "registryZooKeeperProperties",
+        "registryCustomProperties", BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
     public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler) {
         if (LOGGER.isInfoEnabled()) {
@@ -158,6 +186,7 @@ public class SeataAutoConfiguration {
         }
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
+
 
     /**
      * The data source configuration.
