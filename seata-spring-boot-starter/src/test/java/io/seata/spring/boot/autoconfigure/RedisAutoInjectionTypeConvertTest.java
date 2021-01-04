@@ -58,9 +58,9 @@ public class RedisAutoInjectionTypeConvertTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration =
             EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-        assertEquals(0, currentConfiguration.getInt("registry.redis.db"));
-        assertEquals("", currentConfiguration.getConfig("registry.redis.password"));
-        assertEquals("localhost:6379", currentConfiguration.getConfig("registry.redis.serverAddr"));
+        assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
+        assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
+        assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
     }
 
     @AfterAll
