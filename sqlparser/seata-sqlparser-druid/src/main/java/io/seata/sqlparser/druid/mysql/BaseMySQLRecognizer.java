@@ -15,16 +15,28 @@
  */
 package io.seata.sqlparser.druid.mysql;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
+import com.alibaba.druid.sql.ast.SQLOrderingSpecification;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * @author will
@@ -83,6 +95,71 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
         executeVisit(where, new MySqlOutputVisitor(sb));
         return sb.toString();
+    }
+
+    protected String getLimit(SQLStatement sqlStatement, SQLType sqlType, ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = null;
+        if (SQLType.UPDATE == sqlType) {
+            limit = ((MySqlUpdateStatement)sqlStatement).getLimit();
+        } else if (SQLType.DELETE == sqlType) {
+            limit = ((MySqlDeleteStatement)sqlStatement).getLimit();
+        }
+        if (limit != null) {
+            StringBuilder builder = new StringBuilder(" LIMIT ");
+            SQLIntegerExpr expr;
+            if (limit.getOffset() != null) {
+                if (limit.getOffset() instanceof SQLVariantRefExpr) {
+                    builder.append("?,");
+                    Map<Integer, ArrayList<Object>> parameters = parametersHolder.getParameters();
+                    paramAppenderList.add(parameters.get(parameters.size() - 1));
+                } else {
+                    expr = (SQLIntegerExpr)limit.getOffset();
+                    builder.append(expr.getNumber()).append(",");
+                }
+            }
+            if (limit.getRowCount() != null) {
+                if (limit.getRowCount() instanceof SQLVariantRefExpr) {
+                    builder.append("?");
+                    Map<Integer, ArrayList<Object>> parameters = parametersHolder.getParameters();
+                    paramAppenderList.add(parameters.get(parameters.size()));
+                } else {
+                    expr = (SQLIntegerExpr)limit.getRowCount();
+                    builder.append(expr.getNumber());
+                }
+            }
+            return builder.toString();
+        }
+        return null;
+    }
+
+    protected String getOrderBy(SQLStatement sqlStatement, SQLType sqlType) {
+        SQLOrderBy orderBy = null;
+        if (SQLType.UPDATE == sqlType) {
+            orderBy = ((MySqlUpdateStatement)sqlStatement).getOrderBy();
+        } else if (SQLType.DELETE == sqlType) {
+            orderBy = ((MySqlDeleteStatement)sqlStatement).getOrderBy();
+        }
+        if (orderBy != null) {
+            String space = " ";
+            String comma = ",";
+            StringBuilder builder = new StringBuilder(space).append("ORDER BY").append(space);
+            List<SQLSelectOrderByItem> items = orderBy.getItems();
+            for (int i = 0; i < items.size(); i++) {
+                SQLSelectOrderByItem item = items.get(i);
+                SQLIdentifierExpr expr = (SQLIdentifierExpr)item.getExpr();
+                builder.append(expr.getName());
+                SQLOrderingSpecification specification = item.getType();
+                if (specification != null) {
+                    builder.append(space);
+                    builder.append(specification.name);
+                }
+                if (i + 1 != items.size()) {
+                    builder.append(comma);
+                }
+            }
+            return builder.toString();
+        }
+        return null;
     }
 
 }

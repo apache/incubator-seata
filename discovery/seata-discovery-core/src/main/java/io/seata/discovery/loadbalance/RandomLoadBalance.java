@@ -20,16 +20,18 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import io.seata.common.loader.LoadLevel;
 
+import static io.seata.discovery.loadbalance.LoadBalanceFactory.RANDOM_LOAD_BALANCE;
+
 /**
  * The type Random load balance.
  *
  * @author yuoyao
  */
-@LoadLevel(name = "RandomLoadBalance", order = 2)
+@LoadLevel(name = RANDOM_LOAD_BALANCE)
 public class RandomLoadBalance extends AbstractLoadBalance {
 
     @Override
-    protected <T> T doSelect(List<T> invokers) {
+    protected <T> T doSelect(List<T> invokers, String xid) {
         int length = invokers.size();
         return invokers.get(ThreadLocalRandom.current().nextInt(length));
     }

@@ -108,7 +108,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
+            if (!branchSession.canBeCommittedAsync()) {
                 return false;
             }
         }
@@ -123,12 +123,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public boolean isSaga() {
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
+        } else {
+            return StringUtils.isNotBlank(transactionName)
+                && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX);
         }
-        else if (StringUtils.isNotBlank(transactionName)
-                && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX)) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -246,10 +244,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
+        if (!branchSession.unlock()) {
+            throw new TransactionException("Unlock branch lock failed!");
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
-        branchSession.unlock();
         remove(branchSession);
     }
 

@@ -15,12 +15,6 @@
  */
 package io.seata.rm.datasource.mock;
 
-import com.alibaba.druid.util.jdbc.ResultSetBase;
-
-import com.google.common.collect.Lists;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSetMetaData;
@@ -28,6 +22,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.alibaba.druid.util.jdbc.ResultSetBase;
+
+import com.google.common.collect.Lists;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author will
@@ -108,7 +109,16 @@ public class MockResultSet extends ResultSetBase {
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
-        return columnLabels.indexOf(columnLabel) + 1;
+        if (columnLabels.indexOf(columnLabel) != -1) {
+            return columnLabels.indexOf(columnLabel) + 1;
+        }
+        if (columnLabels.indexOf(columnLabel.toLowerCase()) != -1) {
+            return columnLabels.indexOf(columnLabel.toLowerCase()) + 1;
+        }
+        if (columnLabels.indexOf(columnLabel.toUpperCase()) != -1) {
+            return columnLabels.indexOf(columnLabel.toUpperCase()) + 1;
+        }
+        return -1;
     }
 
     @Override

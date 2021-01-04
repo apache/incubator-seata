@@ -16,9 +16,11 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.StringUtils;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
@@ -51,6 +53,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
+
 public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyRemotingClient.class);
@@ -68,6 +71,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
+
+            // Found one or more resources that were registered before initialization
+            if (resourceManager != null
+                    && !resourceManager.getManagedResources().isEmpty()
+                    && StringUtils.isNotBlank(transactionServiceGroup)) {
+                getClientChannelManager().reconnect(transactionServiceGroup);
+            }
         }
     }
 
@@ -173,6 +183,12 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @param resourceId      the db key
      */
     public void registerResource(String resourceGroupId, String resourceId) {
+
+        // Resource registration cannot be performed until the RM client is initialized
+        if (StringUtils.isBlank(transactionServiceGroup)) {
+            return;
+        }
+
         if (getClientChannelManager().getChannels().isEmpty()) {
             getClientChannelManager().reconnect(transactionServiceGroup);
             return;
@@ -234,7 +250,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-        return (serverAddress) -> {
+        return serverAddress -> {
             String resourceIds = getMergedResourceKeys();
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);

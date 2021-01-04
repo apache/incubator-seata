@@ -16,9 +16,11 @@
 package io.seata.rm.datasource.exec;
 
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -111,10 +113,16 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         if (beforeImagesMap == null || afterImagesMap == null) {
             throw new IllegalStateException("images can not be null");
         }
-        for (SQLRecognizer recognizer : beforeImagesMap.keySet()) {
-            sqlRecognizer = recognizer;
-            beforeImage = beforeImagesMap.get(recognizer);
+        SQLRecognizer recognizer;
+        for (Map.Entry<SQLRecognizer, TableRecords> entry : beforeImagesMap.entrySet()) {
+            sqlRecognizer = recognizer = entry.getKey();
+            beforeImage = entry.getValue();
             afterImage = afterImagesMap.get(recognizer);
+            if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+                if (beforeImage.getRows().size() != afterImage.getRows().size()) {
+                    throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+                }
+            }
             super.prepareUndoLog(beforeImage, afterImage);
         }
     }
