@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
@@ -42,10 +43,15 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @BeforeAll
     public static void initContext() {
-        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
         applicationContex = new AnnotationConfigApplicationContext(RedisAutoInjectionTypeConvertTest.class);
     }
 
+    @Bean
+    RegistryRedisProperties registryRedisProperties() {
+        RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
+        return registryRedisProperties;
+    }
 
     @Test
     public void testReadConfigurationItems() {
