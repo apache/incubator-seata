@@ -106,7 +106,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
             }
         } else {
-            throw new ShouldNeverHappenException("propertyClass should not be null.");
+            throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
         }
         if (valueObject == null) {
             valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
