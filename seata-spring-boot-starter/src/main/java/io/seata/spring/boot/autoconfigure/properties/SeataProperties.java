@@ -18,7 +18,6 @@ package io.seata.spring.boot.autoconfigure.properties;
 import io.seata.common.DefaultValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
@@ -28,7 +27,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
  */
 @Component
 @ConfigurationProperties(prefix = SEATA_PREFIX)
-@EnableConfigurationProperties(SpringCloudAlibabaConfiguration.class)
 public class SeataProperties {
     /**
      * whether enable auto configuration
