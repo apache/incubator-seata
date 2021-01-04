@@ -92,10 +92,6 @@ public class GlobalTransactionEvent implements Event {
         return status;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
     public GlobalTransactionEvent(long id, String role, String name, String applicationId, Long beginTime, Long endTime,
                                   GlobalStatus status) {
         this.id = id;

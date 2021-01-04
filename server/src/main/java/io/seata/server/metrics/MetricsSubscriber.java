@@ -38,8 +38,6 @@ public class MetricsSubscriber {
 
     private final Map<GlobalStatus, Consumer<GlobalTransactionEvent>> consumers;
 
-    private static final String EMPTY_APP_ID = "EMPTY_APP";
-
     public MetricsSubscriber(Registry registry) {
         this.registry = registry;
         consumers = new HashMap<>();
@@ -103,10 +101,6 @@ public class MetricsSubscriber {
     @Subscribe
     public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
         if (registry != null && consumers.containsKey(event.getStatus())) {
-            if (StringUtils.isEmpty(event.getApplicationId())) {
-                event.setApplicationId(EMPTY_APP_ID);
-            }
-
             consumers.get(event.getStatus()).accept(event);
         }
     }
