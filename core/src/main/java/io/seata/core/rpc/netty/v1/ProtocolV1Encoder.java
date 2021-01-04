@@ -87,16 +87,16 @@ public class ProtocolV1Encoder extends MessageToByteEncoder<RpcMessage> {
                 fullLength += headMapBytesLength;
             }
 
-                byte[] bodyBytes = null;
-                if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                        && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
-                    // heartbeat has no body
-                    Serializer serializer = EnhancedServiceLoader.load(Serializer.class, SerializerType.getByCode(rpcMessage.getCodec()).name());
-                    bodyBytes = serializer.serialize(rpcMessage.getBody());
-                    Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
-                    bodyBytes = compressor.compress(bodyBytes);
-                    fullLength += bodyBytes.length;
-                }
+            byte[] bodyBytes = null;
+            if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                    && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                // heartbeat has no body
+                Serializer serializer = EnhancedServiceLoader.load(Serializer.class, SerializerType.getByCode(rpcMessage.getCodec()).name());
+                bodyBytes = serializer.serialize(rpcMessage.getBody());
+                Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
+                bodyBytes = compressor.compress(bodyBytes);
+                fullLength += bodyBytes.length;
+            }
 
             if (bodyBytes != null) {
                 out.writeBytes(bodyBytes);
