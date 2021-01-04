@@ -25,13 +25,8 @@ import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
-import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_SIZE;
 
 /**
  * The type Netty server config.

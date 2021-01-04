@@ -102,9 +102,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        if (this.channelHandlers == null) {
-            throw new NullPointerException("channelHandlers is null!");
-        }
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientPipelineThreadSize(),
                 new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientPipelineThreadPrefix()),
                         nettyClientConfig.getClientPipelineThreadSize()));
@@ -138,7 +135,9 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                             new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(), nettyClientConfig.getChannelMaxWriteIdleSeconds(), nettyClientConfig.getChannelMaxAllIdleSeconds()),
                             new ProtocolV1Decoder(),
                             protocolV1Encoder);
-                    pipeline.addLast(defaultEventExecutorGroup, channelHandlers);
+                    if (channelHandlers != null) {
+                        pipeline.addLast(defaultEventExecutorGroup, channelHandlers);
+                    }
                 }
             });
 

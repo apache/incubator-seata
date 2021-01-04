@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
@@ -66,12 +65,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
-                                  EventExecutorGroup eventExecutorGroup,
                                   ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
-        this.signer = EnhancedServiceLoader.load(AuthSigner.class);
-    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+        this.signer = EnhancedServiceLoader.load(AuthSigner.class);
     }
 
     /**
@@ -120,7 +116,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                             new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                                     nettyClientConfig.getClientWorkerThreads()),
                             RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
             }
         }

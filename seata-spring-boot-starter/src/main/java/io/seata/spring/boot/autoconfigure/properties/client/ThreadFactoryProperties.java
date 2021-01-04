@@ -21,22 +21,15 @@ import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_SERVER_PIPELINE_THREAD_SIZE;
-import static io.seata.core.constants.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX_KEBAB_STYLE;
 
 /**

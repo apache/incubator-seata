@@ -23,8 +23,8 @@ import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQ
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX;
-import static io.seata.core.constants.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_PIPELINE_THREAD_SIZE;
 
 /**
  * The type Netty client config.

@@ -488,22 +488,22 @@ public interface ConfigurationKeys {
     /**
      * The constant SERVER_PIPELINE_THREAD_PREFIX
      */
-    public static final String SERVER_PIPELINE_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "serverPipelineThreadPrefix";
+    String SERVER_PIPELINE_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "serverPipelineThreadPrefix";
 
     /**
      * The constant SERVER_PIPELINE_THREAD_SIZE
      */
-    public static final String SERVER_PIPELINE_THREAD_SIZE = THREAD_FACTORY_PREFIX + "serverPipelineThreadSize";
+    String SERVER_PIPELINE_THREAD_SIZE = THREAD_FACTORY_PREFIX + "serverPipelineThreadSize";
 
     /**
      * The constant CLIENT_PIPELINE_THREAD_PREFIX
      */
-    public static final String CLIENT_PIPELINE_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientPipelineThreadPrefix";
+    String CLIENT_PIPELINE_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "clientPipelineThreadPrefix";
 
     /**
      * The constant CLIENT_PIPELINE_THREAD_SIZE
      */
-    public static final String CLIENT_PIPELINE_THREAD_SIZE = THREAD_FACTORY_PREFIX + "clientPipelineThreadSize";
+    String CLIENT_PIPELINE_THREAD_SIZE = THREAD_FACTORY_PREFIX + "clientPipelineThreadSize";
 
     /**
      * The constant SHUTDOWN_PREFIX
