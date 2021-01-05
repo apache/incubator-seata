@@ -155,6 +155,6 @@ public interface Constants {
     /**
      * The constant UNDOLOG_DELETE
      */
-    String UNDOLOG_DELETE = "UndoLogDelete";
+    String UNDOLOG_DELETE = "UndologDelete";
 
 }
