@@ -44,9 +44,9 @@ import org.slf4j.MDC;
  */
 public class MdcWrapperCoordinator implements Coordinator {
 
-    private final DefaultCoordinator coordinator;
+    private final Coordinator coordinator;
 
-    public MdcWrapperCoordinator(DefaultCoordinator coordinator) {
+    public MdcWrapperCoordinator(Coordinator coordinator) {
         this.coordinator = coordinator;
     }
 

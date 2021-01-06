@@ -26,5 +26,8 @@ import io.seata.core.rpc.TransactionMessageHandler;
  */
 public interface Coordinator extends TCInboundHandler, TransactionMessageHandler, Disposable {
 
+    /**
+     * init the coordinator
+     */
     void init();
 }
