@@ -191,8 +191,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         protected void onException(Exception e) throws Exception {
             ConnectionContext context = connection.getContext();
             //UndoItems can't use the Set collection class to prevent ABA
-            context.getUndoItems().clear();
-            context.getLockKeysBuffer().clear();
+            context.removeSavepoint(null);
             connection.getTargetConnection().rollback();
         }
 
