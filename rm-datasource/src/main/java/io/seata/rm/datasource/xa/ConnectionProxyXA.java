@@ -216,7 +216,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             // Branch Report to TC
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
                 BranchStatus.PhaseOne_Failed, null);
-            LOGGER.info(xaBranchXid + " was rolled back.");
+            LOGGER.info(xaBranchXid + " rolled back.");
         } catch (XAException xe) {
             throw new SQLException("Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId()
                 + " since " + xe.getMessage(), xe);
