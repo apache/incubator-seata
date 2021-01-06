@@ -24,6 +24,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import static io.seata.core.model.BranchType.AT;
 import static io.seata.core.model.BranchType.XA;
@@ -90,6 +91,8 @@ public class RootContext {
     public static void bind(@Nonnull String xid) {
         if (StringUtils.isBlank(xid)) {
             xid = null;
+        } else {
+            MDC.put(KEY_XID, xid);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
@@ -116,6 +119,7 @@ public class RootContext {
      */
     @Nullable
     public static String unbind() {
+        MDC.remove(KEY_XID);
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind {} ", xid);
