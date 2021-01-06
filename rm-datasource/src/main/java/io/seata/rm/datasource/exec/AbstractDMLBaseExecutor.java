@@ -136,6 +136,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         try {
             connectionProxy.setAutoCommit(false);
+            connectionProxy.seataChangeAutoCommit();
             return new LockRetryPolicy(connectionProxy).execute(() -> {
                 T result = executeAutoCommitFalse(args);
                 connectionProxy.commit();
@@ -150,7 +151,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             throw e;
         } finally {
             connectionProxy.getContext().reset();
+            connectionProxy.resetSeataChangeAutoCommitRecord();
             connectionProxy.setAutoCommit(true);
+
         }
     }
 

@@ -58,6 +58,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
+    private boolean seataChangeAutoCommit = false;
+
     /**
      * Instantiates a new Connection proxy.
      *
@@ -124,6 +126,15 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         }
     }
 
+
+    public void seataChangeAutoCommit(){
+        this.seataChangeAutoCommit = true;
+    }
+
+    public void resetSeataChangeAutoCommitRecord(){
+        this.seataChangeAutoCommit = false;
+    }
+
     /**
      * Lock query.
      *
@@ -186,7 +197,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return null;
             });
         } catch (SQLException e) {
-            if (targetConnection != null && !getAutoCommit()) {
+            if (targetConnection != null && !getAutoCommit() && !seataChangeAutoCommit) {
                 rollback();
             }
             throw e;
