@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
     <!-- logstash-appender properties -->
-    <property name="LOGSTASH_DESTINATION" value="10.1.50.106:4560"/>
+    <property name="LOGSTASH_DESTINATION" value="localhost:4560"/>
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${LOGSTASH_DESTINATION}</destination>
