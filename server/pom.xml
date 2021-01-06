@@ -26,8 +26,12 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
-    <dependencies>
 
+    <properties>
+        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
+    </properties>
+
+    <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
@@ -119,6 +123,11 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>
