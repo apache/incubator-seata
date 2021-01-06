@@ -8,7 +8,7 @@
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>
                 {
-                    "app_name": "seata-server",
+                    "app_name": "seata-server"
                 }
             </customFields>
         </encoder>
