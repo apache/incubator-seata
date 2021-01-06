@@ -44,6 +44,12 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
 
+    public StateMachineParserImpl(String jsonParserName) {
+        if (StringUtils.isNotBlank(jsonParserName)) {
+            this.jsonParserName = jsonParserName;
+        }
+    }
+
     @Override
     public StateMachine parse(String json) {
 
@@ -73,11 +79,23 @@ public class StateMachineParserImpl implements StateMachineParser {
             stateMachine.setPersist(false);
         }
 
+        // customize if update origin or append new retryStateInstLog
+        Object isRetryPersistModeUpdate = node.get("IsRetryPersistModeUpdate");
+        if (isRetryPersistModeUpdate instanceof Boolean) {
+            stateMachine.setRetryPersistModeUpdate(Boolean.TRUE.equals(isRetryPersistModeUpdate));
+        }
+
+        // customize if update last or append new compensateStateInstLog
+        Object isCompensatePersistModeUpdate = node.get("IsCompensatePersistModeUpdate");
+        if (isCompensatePersistModeUpdate instanceof Boolean) {
+            stateMachine.setCompensatePersistModeUpdate(Boolean.TRUE.equals(isCompensatePersistModeUpdate));
+        }
+
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
-        for (String stateName : statesNode.keySet()) {
-            Map<String, Object> stateNode = (Map<String, Object>) statesNode.get(stateName);
+        statesNode.forEach((stateName, value) -> {
+            Map<String, Object> stateNode = (Map<String, Object>) value;
             String stateType = (String) stateNode.get("Type");
-            StateParser stateParser = StateParserFactory.getStateParser(stateType);
+            StateParser<?> stateParser = StateParserFactory.getStateParser(stateType);
             if (stateParser == null) {
                 throw new IllegalArgumentException("State Type [" + stateType + "] is not support");
             }
@@ -90,18 +108,17 @@ public class StateMachineParserImpl implements StateMachineParser {
                 throw new IllegalArgumentException("State[name:" + stateName + "] is already exists");
             }
             stateMachine.putState(stateName, state);
-        }
+        });
 
         Map<String, State> stateMap = stateMachine.getStates();
-        for (String name : stateMap.keySet()) {
-            State state = stateMap.get(name);
+        for (State state : stateMap.values()) {
             if (state instanceof AbstractTaskState) {
                 AbstractTaskState taskState = (AbstractTaskState) state;
                 if (StringUtils.isNotBlank(taskState.getCompensateState())) {
                     taskState.setForUpdate(true);
 
                     State compState = stateMap.get(taskState.getCompensateState());
-                    if (compState != null && compState instanceof AbstractTaskState) {
+                    if (compState instanceof AbstractTaskState) {
                         ((AbstractTaskState) compState).setForCompensation(true);
                     }
                 }

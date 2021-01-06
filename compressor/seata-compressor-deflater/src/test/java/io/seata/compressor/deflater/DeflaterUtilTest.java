@@ -13,34 +13,35 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm;
+package io.seata.compressor.deflater;
 
-import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * check GlobalLockLocalTransactionlTemplate
- *
- * @author deyou
+ * @author dongzl
  */
-public class GlobalLockLocalTransactionlTemplateTest {
+public class DeflaterUtilTest {
 
-    /**
-     * Test sql recognizing.
-     *
-     * @throws Exception
-     */
     @Test
-    public void testFlag() throws Exception {
-
-        GlobalLockTemplate<Object> template = new GlobalLockTemplate<>();
-
-        template.execute(() -> {
-            Assertions.assertTrue(RootContext.requireGlobalLock(), "lock flag not set!");
-            return null;
+    public void test_compress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            DeflaterUtil.compress(null);
         });
-
-        Assertions.assertFalse(RootContext.requireGlobalLock(), "lock flag not clean!");
     }
+
+    @Test
+    public void test_decompress() {
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            DeflaterUtil.decompress(null);
+        });
+    }
+
+    @Test
+    public void test_compressEqualDecompress() {
+        byte[] compress = DeflaterUtil.compress("seata".getBytes());
+        byte[] decompress = DeflaterUtil.decompress(compress);
+        Assertions.assertEquals("seata", new String(decompress));
+    }
+
 }

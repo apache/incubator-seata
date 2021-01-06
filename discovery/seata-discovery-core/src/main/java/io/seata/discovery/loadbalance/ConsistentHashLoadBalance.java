@@ -27,13 +27,14 @@ import io.seata.config.ConfigurationFactory;
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
 import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
+import static io.seata.discovery.loadbalance.LoadBalanceFactory.CONSISTENT_HASH_LOAD_BALANCE;
 
 /**
  * The type consistent hash load balance.
  *
  * @author ph3636
  */
-@LoadLevel(name = "ConsistentHashLoadBalance")
+@LoadLevel(name = CONSISTENT_HASH_LOAD_BALANCE)
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     private static final String VIRTUAL_NODES = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalanceVirtualNodes";

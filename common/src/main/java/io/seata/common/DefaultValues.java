@@ -20,79 +20,97 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * @author xingfudeshi@gmail.com
  */
-public class DefaultValues {
-    public static final int DEFAULT_CLIENT_LOCK_RETRY_INTERVAL = 10;
-    public static final int DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES = 10;
-    public static final int DEFAULT_CLIENT_LOCK_RETRY_TIMES = 30;
-    public static final boolean DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = true;
-    public static final int DEFAULT_LOG_EXCEPTION_RATE = 100;
-    public static final int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = 10000;
-    public static final int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
-    public static final int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
-    public static final boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
-    public static final boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
-    public static final boolean DEFAULT_TM_DEGRADE_CHECK = false;
-    public static final boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
+public interface DefaultValues {
+    int DEFAULT_CLIENT_LOCK_RETRY_INTERVAL = 10;
+    int DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES = 10;
+    int DEFAULT_CLIENT_LOCK_RETRY_TIMES = 30;
+    boolean DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = true;
+    int DEFAULT_LOG_EXCEPTION_RATE = 100;
+    int DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = 10000;
+    int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
+    int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
+    boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
+    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    boolean DEFAULT_TM_DEGRADE_CHECK = false;
+    boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
+    boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
+    boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
+
     /**
      * Shutdown timeout default 3s
      */
-    public static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
-    public static final int DEFAULT_SELECTOR_THREAD_SIZE = 1;
-    public static final int DEFAULT_BOSS_THREAD_SIZE = 1;
+    int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
+    int DEFAULT_SELECTOR_THREAD_SIZE = 1;
+    int DEFAULT_BOSS_THREAD_SIZE = 1;
 
 
-    public static final String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
-    public static final String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
-    public static final boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
+    String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
+    String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
+    boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
 
 
-    public static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
-    public static final String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
-    public static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
+    String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
+    String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
+    String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
 
-    public static final boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
-    public static final boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
-    public static final String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
-    public static final boolean DEFAULT_ONLY_CARE_UPDATE_COLUMNS = true;
+    boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
+    boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
+    String DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION = "jackson";
+    boolean DEFAULT_ONLY_CARE_UPDATE_COLUMNS = true;
     /**
      * The constant  DEFAULT_TRANSACTION_UNDO_LOG_TABLE.
      */
-    public static final String DEFAULT_TRANSACTION_UNDO_LOG_TABLE = "undo_log";
+    String DEFAULT_TRANSACTION_UNDO_LOG_TABLE = "undo_log";
     /**
      * The constant DEFAULT_STORE_DB_GLOBAL_TABLE.
      */
-    public static final String DEFAULT_STORE_DB_GLOBAL_TABLE = "global_table";
+    String DEFAULT_STORE_DB_GLOBAL_TABLE = "global_table";
 
     /**
      * The constant DEFAULT_STORE_DB_BRANCH_TABLE.
      */
-    public static final String DEFAULT_STORE_DB_BRANCH_TABLE = "branch_table";
+    String DEFAULT_STORE_DB_BRANCH_TABLE = "branch_table";
 
     /**
      * The constant DEFAULT_LOCK_DB_TABLE.
      */
-    public static final String DEFAULT_LOCK_DB_TABLE = "lock_table";
+    String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
-    public static final int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
-    public static final int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
-    public static final int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
+    int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
+    int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
+    int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
-    public static final String DEFAULT_TX_GROUP = "my_test_tx_group";
-    public static final String DEFAULT_TC_CLUSTER = "default";
-    public static final String DEFAULT_GROUPLIST = "127.0.0.1:8091";
+    String DEFAULT_TX_GROUP = "my_test_tx_group";
+    String DEFAULT_TC_CLUSTER = "default";
+    String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
-    public static final String DEFAULT_DATA_SOURCE_PROXY_MODE = "AT";
+    String DEFAULT_DATA_SOURCE_PROXY_MODE = "AT";
 
-    public static final boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
+    boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
-    public static final int SERVER_DEFAULT_PORT = 8091;
-    public static final String SERVER_DEFAULT_STORE_MODE = "file";
-    public static final long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
+    int SERVER_DEFAULT_PORT = 8091;
+    String SERVER_DEFAULT_STORE_MODE = "file";
+    long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
-    public static final String DEFAULT_SAGA_JSON_PARSER = "fastjson";
+    String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
-    public static final boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
+    boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
-    public static final String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
-    public static final int VIRTUAL_NODES_DEFAULT = 10;
+    String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    int VIRTUAL_NODES_DEFAULT = 10;
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE
+     */
+    boolean DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE = true;
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_TYPE
+     */
+    String DEFAULT_CLIENT_UNDO_COMPRESS_TYPE = "zip";
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD
+     */
+    String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
 }

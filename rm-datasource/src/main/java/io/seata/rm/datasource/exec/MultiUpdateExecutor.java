@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.StringJoiner;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -36,6 +37,7 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
@@ -79,6 +81,15 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
+
+            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit(parametersHolder, paramAppenderList))) {
+                throw new NotSupportYetException("Multi update SQL with limit condition is not support yet !");
+            }
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderBy())) {
+                throw new NotSupportYetException("Multi update SQL with orderBy condition is not support yet !");
+            }
+
             List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
@@ -132,7 +143,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {
-            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(),getTableMeta().getPrimaryKeyOnlyName(),pst);
+            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
         } finally {
@@ -149,7 +160,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
-        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(),beforeImage.pkRows().size(),getDbType());
+        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {

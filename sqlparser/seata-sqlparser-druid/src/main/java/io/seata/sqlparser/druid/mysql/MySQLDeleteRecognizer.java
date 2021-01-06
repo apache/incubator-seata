@@ -93,4 +93,14 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
         return super.getWhereCondition(where);
     }
 
+    @Override
+    public String getLimit(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return super.getLimit(ast, getSQLType(), parametersHolder, paramAppenderList);
+    }
+
+    @Override
+    public String getOrderBy() {
+        return super.getOrderBy(ast, getSQLType());
+    }
+
 }

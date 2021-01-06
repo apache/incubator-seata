@@ -23,10 +23,12 @@ import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALI
 /**
  * @author Geng Zhang
  */
-public class UndoLogConstants {
+public interface UndoLogConstants {
 
-    public static final String SERIALIZER_KEY = "serializer";
+    String SERIALIZER_KEY = "serializer";
 
-    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
+    String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
         .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION);
+
+    String COMPRESSOR_TYPE_KEY = "compressorType";
 }
