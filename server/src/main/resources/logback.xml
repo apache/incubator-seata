@@ -33,6 +33,9 @@
     <!-- logstash-appender: off by default -->
     <!--<include resource="logback/logstash-appender.xml"/>-->
 
+    <!-- kafka-appender: off by default -->
+    <!--<include resource="logback/kafka-appender.xml"/>-->
+
     <root level="INFO">
         <!-- console-appender -->
         <appender-ref ref="CONSOLE"/>
@@ -44,5 +47,8 @@
 
         <!-- logstash-appender: off by default -->
         <!--<appender-ref ref="LOGSTASH"/>-->
+
+        <!-- kafka-appender: off by default -->
+        <!--<appender-ref ref="KAFKA"/>-->
     </root>
 </configuration>

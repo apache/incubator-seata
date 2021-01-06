@@ -29,6 +29,7 @@
 
     <properties>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
+        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
     </properties>
 
     <dependencies>
@@ -127,6 +128,11 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
             <version>${logstash-logback-encoder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.danielwegener</groupId>
+            <artifactId>logback-kafka-appender</artifactId>
+            <version>${kafka-appender.version}</version>
         </dependency>
     </dependencies>
 
