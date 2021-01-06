@@ -127,10 +127,16 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
 
+    /**
+     * record seata-AT mode to change the connection autoCommit field
+     */
     public void seataChangeAutoCommit(){
         this.seataChangeAutoCommit = true;
     }
 
+    /**
+     * reset seata-AT mode to change the connection autoCommit field
+     */
     public void resetSeataChangeAutoCommitRecord(){
         this.seataChangeAutoCommit = false;
     }
