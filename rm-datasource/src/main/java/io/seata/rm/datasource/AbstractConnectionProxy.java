@@ -34,7 +34,6 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
-import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.List;
@@ -242,28 +241,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public int getHoldability() throws SQLException {
         return targetConnection.getHoldability();
-    }
-
-    @Override
-    public Savepoint setSavepoint() throws SQLException {
-        return targetConnection.setSavepoint();
-    }
-
-    @Override
-    public Savepoint setSavepoint(String name) throws SQLException {
-        return targetConnection.setSavepoint(name);
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) throws SQLException {
-        targetConnection.rollback(savepoint);
-
-    }
-
-    @Override
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        targetConnection.releaseSavepoint(savepoint);
-
     }
 
     @Override
