@@ -47,6 +47,16 @@ public class RootContext {
     public static final String KEY_XID = "TX_XID";
 
     /**
+     * The constant MDC_KEY_XID for logback
+     */
+    public static final String MDC_KEY_XID = "X-TX-XID";
+
+    /**
+     * The constant MDC_KEY_BRANCH_ID for logback
+     */
+    public static final String MDC_KEY_BRANCH_ID = "X-TX-BRANCH-ID";
+
+    /**
      * The constant KEY_BRANCH_TYPE
      */
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
@@ -92,7 +102,7 @@ public class RootContext {
         if (StringUtils.isBlank(xid)) {
             xid = null;
         } else {
-            MDC.put(KEY_XID, xid);
+            MDC.put(MDC_KEY_XID, xid);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind {}", xid);
@@ -119,7 +129,7 @@ public class RootContext {
      */
     @Nullable
     public static String unbind() {
-        MDC.remove(KEY_XID);
+        MDC.remove(MDC_KEY_XID);
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind {} ", xid);

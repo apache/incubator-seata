@@ -47,10 +47,8 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.netty.ChannelManager;
-import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
@@ -68,7 +66,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Default coordinator.
  */
-public class DefaultCoordinator extends AbstractTCInboundHandler implements TransactionMessageHandler, Disposable {
+public class DefaultCoordinator extends AbstractTCInboundHandler implements Coordinator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
@@ -374,6 +372,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     /**
      * Init.
      */
+    @Override
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
             try {
