@@ -16,6 +16,7 @@
 package io.seata.server;
 
 import io.seata.common.exception.StoreException;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -44,6 +45,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * The type Abstract tc inbound handler.
@@ -56,20 +58,24 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
 
     @Override
     public GlobalBeginResponse handle(GlobalBeginRequest request, final RpcContext rpcContext) {
-        GlobalBeginResponse response = new GlobalBeginResponse();
-        exceptionHandleTemplate(new AbstractCallback<GlobalBeginRequest, GlobalBeginResponse>() {
-            @Override
-            public void execute(GlobalBeginRequest request, GlobalBeginResponse response) throws TransactionException {
-                try {
-                    doGlobalBegin(request, response, rpcContext);
-                } catch (StoreException e) {
-                    throw new TransactionException(TransactionExceptionCode.FailedStore,
-                        String.format("begin global request failed. xid=%s, msg=%s", response.getXid(), e.getMessage()),
-                        e);
+        try {
+            GlobalBeginResponse response = new GlobalBeginResponse();
+            exceptionHandleTemplate(new AbstractCallback<GlobalBeginRequest, GlobalBeginResponse>() {
+                @Override
+                public void execute(GlobalBeginRequest request, GlobalBeginResponse response) throws TransactionException {
+                    try {
+                        doGlobalBegin(request, response, rpcContext);
+                    } catch (StoreException e) {
+                        throw new TransactionException(TransactionExceptionCode.FailedStore,
+                                String.format("begin global request failed. xid=%s, msg=%s", response.getXid(), e.getMessage()),
+                                e);
+                    }
                 }
-            }
-        }, request, response);
-        return response;
+            }, request, response);
+            return response;
+        } finally {
+            MDC.remove(RootContext.MDC_KEY_XID);
+        }
     }
 
     /**
@@ -175,20 +181,24 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
 
     @Override
     public BranchRegisterResponse handle(BranchRegisterRequest request, final RpcContext rpcContext) {
-        BranchRegisterResponse response = new BranchRegisterResponse();
-        exceptionHandleTemplate(new AbstractCallback<BranchRegisterRequest, BranchRegisterResponse>() {
-            @Override
-            public void execute(BranchRegisterRequest request, BranchRegisterResponse response)
-                throws TransactionException {
-                try {
-                    doBranchRegister(request, response, rpcContext);
-                } catch (StoreException e) {
-                    throw new TransactionException(TransactionExceptionCode.FailedStore, String
-                        .format("branch register request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
+        try {
+            BranchRegisterResponse response = new BranchRegisterResponse();
+            exceptionHandleTemplate(new AbstractCallback<BranchRegisterRequest, BranchRegisterResponse>() {
+                @Override
+                public void execute(BranchRegisterRequest request, BranchRegisterResponse response)
+                        throws TransactionException {
+                    try {
+                        doBranchRegister(request, response, rpcContext);
+                    } catch (StoreException e) {
+                        throw new TransactionException(TransactionExceptionCode.FailedStore, String
+                                .format("branch register request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
+                    }
                 }
-            }
-        }, request, response);
-        return response;
+            }, request, response);
+            return response;
+        } finally {
+            MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
+        }
     }
 
     /**
