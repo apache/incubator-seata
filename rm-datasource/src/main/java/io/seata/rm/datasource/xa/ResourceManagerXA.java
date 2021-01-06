@@ -66,11 +66,11 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             try (ConnectionProxyXA connectionProxyXA = ((AbstractDataSourceProxyXA)resource).getConnectionForXAFinish(xaBranchXid)) {
                 if (committed) {
                     connectionProxyXA.xaCommit(xid, branchId, applicationData);
-                    LOGGER.info(xaBranchXid + "was committed.");
+                    LOGGER.info(xaBranchXid + " was committed.");
                     return BranchStatus.PhaseTwo_Committed;
                 } else {
                     connectionProxyXA.xaRollback(xid, branchId, applicationData);
-                    LOGGER.info(xaBranchXid + "was rollbacked");
+                    LOGGER.info(xaBranchXid + " was rollbacked");
                     return BranchStatus.PhaseTwo_Rollbacked;
                 }
             } catch (XAException | SQLException sqle) {
