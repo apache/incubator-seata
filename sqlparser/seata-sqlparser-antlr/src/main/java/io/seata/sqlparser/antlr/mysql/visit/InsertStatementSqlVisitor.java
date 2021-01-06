@@ -20,7 +20,7 @@ import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
 
 /**
- * StatementSqlVisitor
+ * InsertStatementSqlVisitor
  *
  * @author zhihou
  */
