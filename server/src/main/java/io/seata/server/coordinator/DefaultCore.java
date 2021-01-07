@@ -41,6 +41,8 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.MDC;
 
+import static io.seata.server.coordinator.SessionHandlerUtils.CONTINUE;
+
 /**
  * The type Default core.
  *
@@ -187,16 +189,16 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            for (BranchSession branchSession : globalSession.getSortedBranches()) {
+            Boolean result = SessionHandlerUtils.handleBranchSessions(globalSession.getSortedBranches(), branchSession -> {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
-                    continue;
+                    return CONTINUE;
                 }
 
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
-                    continue;
+                    return CONTINUE;
                 }
                 try {
                     BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
@@ -204,12 +206,12 @@ public class DefaultCore implements Core {
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
                             globalSession.removeBranch(branchSession);
-                            continue;
+                            return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
                             if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error(
                                     "Committing branch transaction[{}], status: PhaseTwo_CommitFailed_Unretryable, please check the business log.", branchSession.getBranchId());
-                                continue;
+                                return CONTINUE;
                             } else {
                                 SessionHelper.endCommitFailed(globalSession);
                                 LOGGER.error("Committing global transaction[{}] finally failed, caused by branch transaction[{}] commit failed.", globalSession.getXid(), branchSession.getBranchId());
@@ -223,7 +225,7 @@ public class DefaultCore implements Core {
                             if (globalSession.canBeCommittedAsync()) {
                                 LOGGER.error("Committing branch transaction[{}], status:{} and will retry later",
                                     branchSession.getBranchId(), branchStatus);
-                                continue;
+                                return CONTINUE;
                             } else {
                                 LOGGER.error(
                                     "Committing global transaction[{}] failed, caused by branch transaction[{}] commit failed, will retry later.", globalSession.getXid(), branchSession.getBranchId());
@@ -238,6 +240,11 @@ public class DefaultCore implements Core {
                         throw new TransactionException(ex);
                     }
                 }
+                return CONTINUE;
+            });
+            // Return if the result is not null
+            if (result != null) {
+                return result;
             }
             //If has branch and not all remaining branches can be committed asynchronously,
             //do print log and return false
@@ -294,11 +301,11 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
-            for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
+            Boolean result = SessionHandlerUtils.handleBranchSessions(globalSession.getReverseSortedBranches(), branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
-                    continue;
+                    return CONTINUE;
                 }
                 try {
                     BranchStatus branchStatus = branchRollback(globalSession, branchSession);
@@ -306,7 +313,7 @@ public class DefaultCore implements Core {
                         case PhaseTwo_Rollbacked:
                             globalSession.removeBranch(branchSession);
                             LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
-                            continue;
+                            return CONTINUE;
                         case PhaseTwo_RollbackFailed_Unretryable:
                             SessionHelper.endRollbackFailed(globalSession);
                             LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
@@ -327,6 +334,10 @@ public class DefaultCore implements Core {
                     }
                     throw new TransactionException(ex);
                 }
+            });
+            // Return if the result is not null
+            if (result != null) {
+                return result;
             }
 
             // In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch

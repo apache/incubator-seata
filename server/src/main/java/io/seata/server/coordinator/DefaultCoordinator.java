@@ -230,7 +230,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check begin, size: {}", allSessions.size());
         }
-        for (GlobalSession globalSession : allSessions) {
+        SessionHandlerUtils.handleGlobalSessions(allSessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                     globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
@@ -253,14 +253,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 return true;
             });
             if (!shouldTimeout) {
-                continue;
+                return;
             }
             LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
 
             globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
             SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-
-        }
+        });
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check end. ");
         }
@@ -276,11 +275,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        for (GlobalSession rollbackingSession : rollbackingSessions) {
+        SessionHandlerUtils.handleGlobalSessions(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
-                    continue;
+                    return;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
@@ -291,14 +290,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
-                    continue;
+                    return;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
-        }
+        });
     }
 
     /**
@@ -310,7 +309,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        for (GlobalSession committingSession : committingSessions) {
+        SessionHandlerUtils.handleGlobalSessions(committingSessions, committingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**
@@ -318,14 +317,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
-                    continue;
+                    return;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
             }
-        }
+        });
     }
 
     private boolean isRetryTimeout(long now, long timeout, long beginTime) {
@@ -341,18 +340,18 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        for (GlobalSession asyncCommittingSession : asyncCommittingSessions) {
+        SessionHandlerUtils.handleGlobalSessions(asyncCommittingSessions, asyncCommittingSession -> {
             try {
                 // Instruction reordering in DefaultCore#asyncCommit may cause this situation
                 if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
-                    continue;
+                    return;
                 }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
             }
-        }
+        });
     }
 
     /**
