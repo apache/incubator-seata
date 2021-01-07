@@ -49,7 +49,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
 import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
@@ -90,7 +89,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @AutoConfigureBefore({SeataAutoConfiguration.class, SeataDataSourceConfiguration.class})
-@Configuration
 public class SeataPropertiesConfiguration {
     static {
 
