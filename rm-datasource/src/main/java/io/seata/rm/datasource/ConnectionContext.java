@@ -15,20 +15,13 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.util.Set;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.util.*;
 
 /**
  * The type Connection context.
@@ -47,12 +40,6 @@ public class ConnectionContext {
             return "DEFAULT_SEATA_SAVEPOINT";
         }
     };
-
-    private String xid;
-    private Long branchId;
-    private boolean isGlobalLockRequire;
-    private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
-
     /**
      * the lock keys buffer
      */
@@ -61,8 +48,12 @@ public class ConnectionContext {
      * the undo items buffer
      */
     private final Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
-
     private final List<Savepoint> savepoints = new ArrayList<>(8);
+    private String xid;
+    private Long branchId;
+    private boolean isGlobalLockRequire;
+    private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
+    private boolean autoCommitChanged;
 
     /**
      * whether requires global lock in this connection
@@ -102,6 +93,7 @@ public class ConnectionContext {
 
     /**
      * Append savepoint
+     *
      * @param savepoint the savepoint
      */
     void appendSavepoint(Savepoint savepoint) {
@@ -164,6 +156,25 @@ public class ConnectionContext {
      */
     public boolean isBranchRegistered() {
         return branchId != null;
+    }
+
+    /**
+     * is seata change  targetConnection autoCommit
+     *
+     * @return the boolean
+     */
+    public boolean isAutoCommitChanged() {
+        return this.autoCommitChanged;
+    }
+
+    /**
+     *
+     * set seata change targetConnection autoCommit record
+     *
+     * @param autoCommitChanged the record
+     */
+    public void setAutoCommitChanged(boolean autoCommitChanged) {
+        this.autoCommitChanged = autoCommitChanged;
     }
 
     /**
@@ -255,6 +266,7 @@ public class ConnectionContext {
         this.xid = xid;
         branchId = null;
         this.isGlobalLockRequire = false;
+        this.autoCommitChanged = false;
         savepoints.clear();
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
@@ -305,6 +317,7 @@ public class ConnectionContext {
 
     /**
      * Get the savepoints after target savepoint(include the param savepoint)
+     *
      * @param savepoint the target savepoint
      * @return after savepoints
      */
@@ -319,7 +332,7 @@ public class ConnectionContext {
     @Override
     public String toString() {
         return "ConnectionContext [xid=" + xid + ", branchId=" + branchId + ", lockKeysBuffer=" + lockKeysBuffer
-            + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
+                + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
     }
 
 }
