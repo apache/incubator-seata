@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
@@ -115,13 +116,13 @@ public class RedisLocker extends AbstractLocker {
             Pipeline pipeline = jedis.pipelined();
             List<String> readyKeys = new ArrayList<>();
             needAddLock.forEach((key, value) -> {
+                pipeline.hsetnx(key, ROW_KEY, value.getRowKey());
                 pipeline.hset(key, XID, value.getXid());
                 pipeline.hset(key, TRANSACTION_ID, value.getTransactionId().toString());
                 pipeline.hset(key, BRANCH_ID, value.getBranchId().toString());
                 pipeline.hset(key, RESOURCE_ID, value.getResourceId());
                 pipeline.hset(key, TABLE_NAME, value.getTableName());
                 pipeline.hset(key, PK, value.getPk());
-                pipeline.hsetnx(key, ROW_KEY, value.getRowKey());
                 readyKeys.add(key);
             });
             List<Integer> results = (List<Integer>) (List) pipeline.syncAndReturnAll();
@@ -131,7 +132,7 @@ public class RedisLocker extends AbstractLocker {
             Integer status = SUCCEED;
             for (int i = 0; i < partitions.size(); i++) {
                 String key = readyKeys.get(i);
-                if (partitions.get(i).contains(FAILED)) {
+                if (Objects.equals(partitions.get(0),FAILED)) {
                     status = FAILED;
                 } else {
                     success.add(key);
