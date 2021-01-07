@@ -230,7 +230,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check begin, size: {}", allSessions.size());
         }
-        SessionHandlerUtils.handleGlobalSessions(allSessions, globalSession -> {
+        SessionForeachUtils.foreach(allSessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                     globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
@@ -253,6 +253,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 return true;
             });
             if (!shouldTimeout) {
+                // continue
                 return;
             }
             LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
@@ -275,10 +276,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHandlerUtils.handleGlobalSessions(rollbackingSessions, rollbackingSession -> {
+        SessionForeachUtils.foreach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                    // continue
                     return;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
@@ -290,6 +292,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
+                    // continue
                     return;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -309,7 +312,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHandlerUtils.handleGlobalSessions(committingSessions, committingSession -> {
+        SessionForeachUtils.foreach(committingSessions, committingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**
@@ -317,6 +320,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
+                    // continue
                     return;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -340,10 +344,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        SessionHandlerUtils.handleGlobalSessions(asyncCommittingSessions, asyncCommittingSession -> {
+        SessionForeachUtils.foreach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
                 // Instruction reordering in DefaultCore#asyncCommit may cause this situation
                 if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
+                    // continue
                     return;
                 }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());

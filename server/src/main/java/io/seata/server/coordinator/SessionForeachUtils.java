@@ -11,22 +11,22 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * The Session handler utils
+ * The Session foreach utils
  *
  * @author wang.liang
  */
-public class SessionHandlerUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHandlerUtils.class);
+public class SessionForeachUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionForeachUtils.class);
 
     public static final Boolean CONTINUE = null;
 
     /**
-     * Handle global sessions.
+     * Foreach global sessions.
      *
      * @param sessions the global sessions
      * @param handler  the handler
      */
-    public static void handleGlobalSessions(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+    public static void foreach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
         for (GlobalSession globalSession : sessions) {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
@@ -40,12 +40,12 @@ public class SessionHandlerUtils {
     }
 
     /**
-     * Handle branch sessions.
+     * Foreach branch sessions.
      *
      * @param sessions the branch session
      * @param handler  the handler
      */
-    public static Boolean handleBranchSessions(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+    public static Boolean foreach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
         Boolean result;
         for (BranchSession branchSession : sessions) {
             try {
