@@ -132,7 +132,7 @@ public class RedisLocker extends AbstractLocker {
             Integer status = SUCCEED;
             for (int i = 0; i < partitions.size(); i++) {
                 String key = readyKeys.get(i);
-                if (Objects.equals(partitions.get(0),FAILED)) {
+                if (Objects.equals(partitions.get(i).get(0),FAILED)) {
                     status = FAILED;
                 } else {
                     success.add(key);
