@@ -35,7 +35,9 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.concurrent.Callable;
 
-import static io.seata.common.DefaultValues.*;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 
 /**
  * The type Connection proxy.
