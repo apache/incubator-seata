@@ -26,9 +26,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
-import io.seata.server.coordinator.Coordinator;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.coordinator.MdcWrapperCoordinator;
 import io.seata.server.env.ContainerHelper;
 import io.seata.server.env.PortHelper;
 import io.seata.server.metrics.MetricsManager;
@@ -81,7 +79,7 @@ public class Server {
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getStoreMode());
 
-        Coordinator coordinator = new MdcWrapperCoordinator(new DefaultCoordinator(nettyRemotingServer));
+        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
         // register ShutdownHook
