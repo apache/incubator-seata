@@ -41,7 +41,7 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.MDC;
 
-import static io.seata.server.coordinator.SessionForeachUtils.CONTINUE;
+import static io.seata.server.session.BranchSessionHandler.CONTINUE;
 
 /**
  * The type Default core.
@@ -189,7 +189,7 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            Boolean result = SessionForeachUtils.foreach(globalSession.getSortedBranches(), branchSession -> {
+            Boolean result = SessionHelper.foreach(globalSession.getSortedBranches(), branchSession -> {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
                     return CONTINUE;
@@ -301,7 +301,7 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
-            Boolean result = SessionForeachUtils.foreach(globalSession.getReverseSortedBranches(), branchSession -> {
+            Boolean result = SessionHelper.foreach(globalSession.getReverseSortedBranches(), branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);

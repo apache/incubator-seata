@@ -1,7 +1,6 @@
-package io.seata.server.coordinator;
+package io.seata.server.session;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.server.session.BranchSession;
 
 /**
  * The Functional Interface Branch session handler
@@ -10,6 +9,8 @@ import io.seata.server.session.BranchSession;
  */
 @FunctionalInterface
 public interface BranchSessionHandler {
+
+    Boolean CONTINUE = null;
 
     /**
      * Handle branch session.

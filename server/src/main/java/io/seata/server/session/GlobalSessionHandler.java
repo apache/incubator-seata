@@ -1,7 +1,6 @@
-package io.seata.server.coordinator;
+package io.seata.server.session;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.server.session.GlobalSession;
 
 /**
  * The Functional Interface Global session handler

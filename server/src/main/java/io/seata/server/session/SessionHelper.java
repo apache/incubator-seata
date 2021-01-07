@@ -15,10 +15,16 @@
  */
 package io.seata.server.session;
 
+import java.util.Collection;
+
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * The type Session helper.
@@ -26,6 +32,7 @@ import io.seata.server.UUIDGenerator;
  * @author sharajava
  */
 public class SessionHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHelper.class);
 
     private SessionHelper() {}
 
@@ -138,5 +145,47 @@ public class SessionHelper {
                 || status == GlobalStatus.TimeoutRollbackFailed
                 || status == GlobalStatus.TimeoutRollbacking
                 || status == GlobalStatus.TimeoutRollbackRetrying;
+    }
+
+    /**
+     * Foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void foreach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        for (GlobalSession globalSession : sessions) {
+            try {
+                MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
+                handler.handle(globalSession);
+            } catch (Exception e) {
+                LOGGER.error("handle global session failed: {}", globalSession.getXid());
+            } finally {
+                MDC.remove(RootContext.MDC_KEY_XID);
+            }
+        }
+    }
+
+    /**
+     * Foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     */
+    public static Boolean foreach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+        Boolean result;
+        for (BranchSession branchSession : sessions) {
+            try {
+                MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
+                result = handler.handle(branchSession);
+                if (result == null) {
+                    continue;
+                }
+                return result;
+            } finally {
+                MDC.remove(RootContext.MDC_KEY_XID);
+            }
+        }
+        return null;
     }
 }
