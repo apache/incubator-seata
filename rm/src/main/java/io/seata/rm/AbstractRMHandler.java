@@ -15,6 +15,7 @@
  */
 package io.seata.rm;
 
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -33,6 +34,7 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * The Abstract RM event handler
@@ -46,6 +48,8 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     @Override
     public BranchCommitResponse handle(BranchCommitRequest request) {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
+        MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(request.getBranchId()));
         BranchCommitResponse response = new BranchCommitResponse();
         exceptionHandleTemplate(new AbstractCallback<BranchCommitRequest, BranchCommitResponse>() {
             @Override
@@ -59,6 +63,8 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     @Override
     public BranchRollbackResponse handle(BranchRollbackRequest request) {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
+        MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(request.getBranchId()));
         BranchRollbackResponse response = new BranchRollbackResponse();
         exceptionHandleTemplate(new AbstractCallback<BranchRollbackRequest, BranchRollbackResponse>() {
             @Override
