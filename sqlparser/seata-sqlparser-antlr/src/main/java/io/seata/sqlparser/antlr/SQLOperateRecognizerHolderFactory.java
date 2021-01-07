@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The SQLOperateRecognizerHolderFactory
  *
- * @author: Zhibei Hao
+ * @author: zhi hou
  */
 public class SQLOperateRecognizerHolderFactory {
 
