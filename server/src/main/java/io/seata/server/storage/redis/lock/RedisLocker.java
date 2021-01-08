@@ -15,17 +15,16 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-
+import com.google.common.collect.Lists;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
@@ -35,6 +34,7 @@ import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+
 
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 
@@ -116,8 +116,8 @@ public class RedisLocker extends AbstractLocker {
             Pipeline pipeline = jedis.pipelined();
             List<String> readyKeys = new ArrayList<>();
             needAddLock.forEach((key, value) -> {
-                pipeline.hsetnx(key, ROW_KEY, value.getRowKey());
-                pipeline.hset(key, XID, value.getXid());
+                pipeline.hsetnx(key, XID, value.getXid());
+                pipeline.hset(key, ROW_KEY, value.getRowKey());
                 pipeline.hset(key, TRANSACTION_ID, value.getTransactionId().toString());
                 pipeline.hset(key, BRANCH_ID, value.getBranchId().toString());
                 pipeline.hset(key, RESOURCE_ID, value.getResourceId());
