@@ -20,6 +20,7 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.model.GlobalLockConfig;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author selfishlover
  */
-class LockRetryControllerTest {
+public class LockRetryControllerTest {
 
     private GlobalLockConfig config;
 
@@ -102,5 +103,10 @@ class LockRetryControllerTest {
         config.onChangeEvent(event);
         String message4 = "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_TIMES";
         assertEquals(defaultRetryTimes, config.getGlobalLockRetryTimes(), message4);
+    }
+
+    @AfterEach
+    void tearDown() {
+        GlobalLockConfigHolder.remove();
     }
 }
