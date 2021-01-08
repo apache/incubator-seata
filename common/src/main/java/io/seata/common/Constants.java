@@ -131,4 +131,30 @@ public interface Constants {
      * The constant SAGA_TRANS_NAME_PREFIX
      */
     String SAGA_TRANS_NAME_PREFIX = "$Saga_";
+
+    /**
+     * The constant RETRY_ROLLBACKING
+     */
+    String RETRY_ROLLBACKING = "RetryRollbacking";
+
+    /**
+     * The constant RETRY_COMMITTING
+     */
+    String RETRY_COMMITTING = "RetryCommitting";
+
+    /**
+     * The constant ASYNC_COMMITTING
+     */
+    String ASYNC_COMMITTING = "AsyncCommitting";
+
+    /**
+     * The constant TX_TIMEOUT_CHECK
+     */
+    String TX_TIMEOUT_CHECK = "TxTimeoutCheck";
+
+    /**
+     * The constant UNDOLOG_DELETE
+     */
+    String UNDOLOG_DELETE = "UndologDelete";
+
 }
