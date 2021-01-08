@@ -244,7 +244,7 @@ public class ConnectionContext {
      *
      * @return the boolean
      */
-    public boolean isAutoCommitChanged(){
+    public boolean isAutoCommitChanged() {
         return this.autoCommitChanged;
     }
 
@@ -253,7 +253,7 @@ public class ConnectionContext {
      *
      * @param autoCommitChanged the boolean
      */
-    public void setAutoCommitChanged(boolean autoCommitChanged){
+    public void setAutoCommitChanged(boolean autoCommitChanged) {
         this.autoCommitChanged = autoCommitChanged;
     }
 
