@@ -15,13 +15,15 @@
  */
 package io.seata.core.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.seata.core.raft.RaftServerFactory;
 
 /**
  * The type Abstract exception handler.
@@ -31,6 +33,11 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractExceptionHandler.class);
+
+    /**
+     * The constant RAFT_SERVER_FACTORY.
+     */
+    private static final RaftServerFactory RAFT_SERVER_FACTORY = RaftServerFactory.getInstance();
 
     /**
      * The constant CONFIG.
@@ -113,6 +120,9 @@ public abstract class AbstractExceptionHandler {
      */
     public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
+            if (RAFT_SERVER_FACTORY.isRaftMode() && !RAFT_SERVER_FACTORY.isLeader()) {
+                throw new TransactionException(" tc is not leader");
+            }
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {

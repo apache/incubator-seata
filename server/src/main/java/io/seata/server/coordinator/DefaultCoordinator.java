@@ -51,7 +51,6 @@ import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
@@ -377,51 +376,66 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public void init() {
         retryRollbacking.scheduleAtFixedRate(() -> {
-            if (RaftServerFactory.getInstance().isLeader()) {
+            boolean lock = SessionHolder.retryRollbackingLock();
+            if (lock) {
                 try {
                     handleRetryRollbacking();
                 } catch (Exception e) {
-                    LOGGER.error("Exception retry rollbacking ... ", e);
+                    LOGGER.info("Exception retry rollbacking ... ", e);
+                } finally {
+                    SessionHolder.unRetryRollbackingLock();
                 }
             }
         }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
-            if (RaftServerFactory.getInstance().isLeader()) {
+            boolean lock = SessionHolder.retryCommittingLock();
+            if (lock) {
                 try {
                     handleRetryCommitting();
                 } catch (Exception e) {
-                    LOGGER.error("Exception retry committing ... ", e);
+                    LOGGER.info("Exception retry committing ... ", e);
+                } finally {
+                    SessionHolder.unRetryCommittingLock();
                 }
             }
         }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
-            if (RaftServerFactory.getInstance().isLeader()) {
+            boolean lock = SessionHolder.asyncCommittingLock();
+            if (lock) {
                 try {
                     handleAsyncCommitting();
                 } catch (Exception e) {
-                    LOGGER.error("Exception async committing ... ", e);
+                    LOGGER.info("Exception async committing ... ", e);
+                } finally {
+                    SessionHolder.unAsyncCommittingLock();
                 }
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
-            if (RaftServerFactory.getInstance().isLeader()) {
+            boolean lock = SessionHolder.txTimeoutCheckLock();
+            if (lock) {
                 try {
                     timeoutCheck();
                 } catch (Exception e) {
-                    LOGGER.error("Exception timeout checking ... ", e);
+                    LOGGER.info("Exception timeout checking ... ", e);
+                } finally {
+                    SessionHolder.unTxTimeoutCheckLock();
                 }
             }
         }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         undoLogDelete.scheduleAtFixedRate(() -> {
-            if (RaftServerFactory.getInstance().isLeader()) {
+            boolean lock = SessionHolder.undoLogDeleteLock();
+            if (lock) {
                 try {
                     undoLogDelete();
                 } catch (Exception e) {
-                    LOGGER.error("Exception undoLog deleting ... ", e);
+                    LOGGER.info("Exception undoLog deleting ... ", e);
+                } finally {
+                    SessionHolder.unUndoLogDeleteLock();
                 }
             }
         }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);

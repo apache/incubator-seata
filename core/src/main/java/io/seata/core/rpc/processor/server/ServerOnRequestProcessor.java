@@ -15,15 +15,10 @@
  */
 package io.seata.core.rpc.processor.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.entity.Task;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
@@ -46,6 +41,8 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.processor.RemotingProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * process RM/TM client request message.
@@ -91,9 +88,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (ChannelManager.isRegistered(ctx.channel())) {
-            if (raftMode && !RaftServerFactory.getInstance().isLeader()) {
-                throw new TransactionException("begin fail tc is not leader");
-            }
             onRequestMessage(ctx, rpcMessage,raftMode);
         } else {
             try {
