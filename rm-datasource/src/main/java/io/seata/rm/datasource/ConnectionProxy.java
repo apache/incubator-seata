@@ -87,19 +87,19 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     /**
-     * get global lock requires flag
-     */
-    public boolean isGlobalLockRequire() {
-        return context.isGlobalLockRequire();
-    }
-
-    /**
      * set global lock requires flag
      *
      * @param isLock whether to lock
      */
     public void setGlobalLockRequire(boolean isLock) {
         context.setGlobalLockRequire(isLock);
+    }
+
+    /**
+     * get global lock requires flag
+     */
+    public boolean isGlobalLockRequire() {
+        return context.isGlobalLockRequire();
     }
 
     /**
@@ -123,17 +123,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             recognizeLockKeyConflictException(e, lockKeys);
         }
     }
-
-    /**
-     * change connection autoCommit to false by seata
-     *
-     * @throws SQLException
-     */
-    public void changeAutoCommit() throws SQLException {
-        getContext().setAutoCommitChanged(true);
-        setAutoCommit(false);
-    }
-
 
     /**
      * Lock query.
@@ -197,7 +186,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return null;
             });
         } catch (SQLException e) {
-            if (targetConnection != null && !getAutoCommit() && !getContext().isAutoCommitChanged()) {
+            if (targetConnection != null && !getAutoCommit()) {
                 rollback();
             }
             throw e;
@@ -289,6 +278,16 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             report(false);
         }
         context.reset();
+    }
+
+    /**
+     * change connection autoCommit to false by seata
+     *
+     * @throws SQLException
+     */
+    public void changeAutoCommit() throws SQLException {
+        getContext().setAutoCommitChanged(true);
+        setAutoCommit(false);
     }
 
     @Override

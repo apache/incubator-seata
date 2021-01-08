@@ -47,6 +47,13 @@ public class ConnectionContext {
             return "DEFAULT_SEATA_SAVEPOINT";
         }
     };
+
+    private String xid;
+    private Long branchId;
+    private boolean isGlobalLockRequire;
+    private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
+    private boolean autoCommitChanged;
+
     /**
      * the lock keys buffer
      */
@@ -55,12 +62,8 @@ public class ConnectionContext {
      * the undo items buffer
      */
     private final Map<Savepoint, List<SQLUndoLog>> sqlUndoItemsBuffer = new LinkedHashMap<>();
+
     private final List<Savepoint> savepoints = new ArrayList<>(8);
-    private String xid;
-    private Long branchId;
-    private boolean isGlobalLockRequire;
-    private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
-    private boolean autoCommitChanged;
 
     /**
      * whether requires global lock in this connection
@@ -100,7 +103,6 @@ public class ConnectionContext {
 
     /**
      * Append savepoint
-     *
      * @param savepoint the savepoint
      */
     void appendSavepoint(Savepoint savepoint) {
@@ -183,6 +185,7 @@ public class ConnectionContext {
     public void setAutoCommitChanged(boolean autoCommitChanged) {
         this.autoCommitChanged = autoCommitChanged;
     }
+
 
     /**
      * Bind.
@@ -273,7 +276,6 @@ public class ConnectionContext {
         this.xid = xid;
         branchId = null;
         this.isGlobalLockRequire = false;
-        this.autoCommitChanged = false;
         savepoints.clear();
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
@@ -324,7 +326,6 @@ public class ConnectionContext {
 
     /**
      * Get the savepoints after target savepoint(include the param savepoint)
-     *
      * @param savepoint the target savepoint
      * @return after savepoints
      */
