@@ -5,7 +5,8 @@
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${LOGSTASH_DESTINATION}</destination>
-        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
+        <!--<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">-->
+        <encoder charset="UTF-8" class="io.seata.server.logging.logback.appender.OverrideLogstashEncoder">
             <customFields>
                 {
                     "app_name": "seata-server"
