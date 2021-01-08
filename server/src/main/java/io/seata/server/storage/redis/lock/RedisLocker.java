@@ -117,9 +117,9 @@ public class RedisLocker extends AbstractLocker {
             List<String> readyKeys = new ArrayList<>();
             needAddLock.forEach((key, value) -> {
                 pipeline.hsetnx(key, XID, value.getXid());
+                pipeline.hsetnx(key, TRANSACTION_ID, value.getTransactionId().toString());
+                pipeline.hsetnx(key, BRANCH_ID, value.getBranchId().toString());
                 pipeline.hset(key, ROW_KEY, value.getRowKey());
-                pipeline.hset(key, TRANSACTION_ID, value.getTransactionId().toString());
-                pipeline.hset(key, BRANCH_ID, value.getBranchId().toString());
                 pipeline.hset(key, RESOURCE_ID, value.getResourceId());
                 pipeline.hset(key, TABLE_NAME, value.getTableName());
                 pipeline.hset(key, PK, value.getPk());
