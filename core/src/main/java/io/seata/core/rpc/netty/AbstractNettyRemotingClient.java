@@ -111,7 +111,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * {@link NettyClientConfig#isEnableClientBatchSendRequest}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
-
+    private static final io.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
     private final NettyClientBootstrap clientBootstrap;
     private NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
@@ -132,9 +132,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
-        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isNotBlank(initConfStr)) {
-            String storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+            String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
             if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
                 cliClientService = new CliClientServiceImpl();
                 cliClientService.init(new CliOptions());
@@ -514,7 +514,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 return;
             }
         }
-        String initConfStr = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isNotBlank(initConfStr)) {
             StringBuilder stringBuilder = new StringBuilder();
             String seg = ",";
