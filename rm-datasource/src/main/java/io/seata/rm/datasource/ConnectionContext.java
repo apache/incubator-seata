@@ -276,6 +276,7 @@ public class ConnectionContext {
         this.xid = xid;
         branchId = null;
         this.isGlobalLockRequire = false;
+        this.autoCommitChanged = false;
         savepoints.clear();
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
