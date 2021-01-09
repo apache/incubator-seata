@@ -65,12 +65,10 @@ config:
     group: SEATA_GROUP
     username: 
     password:
-    dataId: seataServer.properties
-  
+
   consul:
     serverAddr: 127.0.0.1:8500
-    key: seataServer.properties
-  
+
   apollo:
     appId: seata-server
     apolloMeta: http://192.168.1.204:8801
