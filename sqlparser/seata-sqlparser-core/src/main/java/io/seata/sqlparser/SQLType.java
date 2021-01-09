@@ -205,9 +205,9 @@ public enum SQLType {
     SELECT_FOUND_ROWS(44),
 
     /**
-     * Insert ingore sql type.
+     * Insert ignore sql type.
      */
-    INSERT_INGORE(101),
+    INSERT_IGNORE(101),
     /**
      * Insert on duplicate update sql type.
      */

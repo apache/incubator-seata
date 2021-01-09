@@ -41,6 +41,17 @@ do
   esac
 done
 
+urlencode() {
+  for ((i=0; i < ${#1}; i++))
+  do
+    char="${1:$i:1}"
+    case $char in
+    [a-zA-Z0-9.~_-]) printf $char ;;
+    *) printf '%%%02X' "'$char" ;;
+    esac
+  done
+}
+
 if [[ -z ${host} ]]; then
     host=localhost
 fi
@@ -69,7 +80,7 @@ echo "set group=$group"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$1&group=$group&content=$2&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
+  curl -X POST -H "${contentType}" "http://$nacosAddr/nacos/v1/cs/configs?dataId=$(urlencode $1)&group=$group&content=$(urlencode $2)&tenant=$tenant&username=$username&password=$password" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat "${tempLog}") ]]; then
     echo " Please check the cluster status. "
     exit 1
