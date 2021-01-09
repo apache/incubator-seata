@@ -69,8 +69,7 @@ config:
   
   consul:
     serverAddr: 127.0.0.1:8500
-    key: seataServer.properties
-  
+
   apollo:
     appId: seata-server
     apolloMeta: http://192.168.1.204:8801
@@ -82,13 +81,12 @@ config:
     sessionTimeout: 6000
     connectTimeout: 2000
     username: 
-    password:
-    nodePath: /seata/seataServer.properties
+    password: 
   
   etcd3:
     serverAddr: http://localhost:2379
     key: seataServer.properties
-  
+
   file:
     name: file.yml
   
