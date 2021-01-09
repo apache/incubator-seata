@@ -66,10 +66,18 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     private boolean isUpdateFlag = false;
 
+    public String getSelectSQL() {
+        return selectSQL;
+    }
+
     /**
      * before image sql and after image sql,condition is unique index
      */
     private String selectSQL;
+
+    public ArrayList<List<Object>> getParamAppenderList() {
+        return paramAppenderList;
+    }
 
     /**
      * the params of selectSQL, value is the unique index
@@ -226,10 +234,10 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        Map<String, List<Object>> pkValues = getPkValues();
         if (isUpdateFlag) {
             return buildImage();
         } else {
+            Map<String, List<Object>> pkValues = getPkValues();
             return afterImageInsert(pkValues);
         }
     }
@@ -243,7 +251,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     }
 
     @Override
-    protected TableRecords beforeImage() throws SQLException {
+    public TableRecords beforeImage() throws SQLException {
         return buildImage();
     }
 
@@ -270,7 +278,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @return
      * @throws SQLException
      */
-    protected TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+    public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
@@ -293,13 +301,13 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @param tableMeta
      * @return
      */
-    private String buildImageSQL(TableMeta tableMeta) {
+    public String buildImageSQL(TableMeta tableMeta) {
         if (CollectionUtils.isEmpty(paramAppenderList)) {
             paramAppenderList = new ArrayList<>();
         }
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
-        int insertNum = buildImageParamperters(recognizer, imageParamperterMap);
+        int insertNum = recognizer.getInsertParamsValue().size();
+        Map<String, ArrayList<Object>> imageParamperterMap =  buildImageParamperters(recognizer);
         StringBuilder prefix = new StringBuilder("SELECT * ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         boolean[] isContainWhere = {false};
@@ -335,10 +343,10 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     /**
      * build sql params
      * @param recognizer
-     * @param imageParamperterMap
      * @return
      */
-    private int buildImageParamperters(SQLInsertRecognizer recognizer, Map<String, ArrayList<Object>> imageParamperterMap) {
+    public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
+        Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         List<String> insertParamsList = recognizer.getInsertParamsValue();
@@ -370,7 +378,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                 imageParamperterMap.put(m, imageListTemp);
             }
         }
-        return insertParamsList.size();
+        return imageParamperterMap;
     }
 
 }
