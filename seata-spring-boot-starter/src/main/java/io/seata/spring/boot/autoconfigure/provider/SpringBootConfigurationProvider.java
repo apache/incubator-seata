@@ -21,15 +21,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.util.StringFormatUtils.DOT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
@@ -41,7 +44,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
  * @author xingfudeshi@gmail.com
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringBootConfigurationProvider.class);
     private static final String INTERCEPT_METHOD_PREFIX = "get";
 
     @Override
@@ -74,12 +76,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         });
     }
 
-    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException {
+    private Object get(String dataId, Object defaultValue, long timeoutMills) throws IllegalAccessException, InstantiationException {
         return get(dataId, defaultValue);
 
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException {
+    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
         Object result = get(dataId);
         if (result == null) {
             return defaultValue;
@@ -87,30 +89,52 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException {
+    private Object get(String dataId) throws IllegalAccessException, InstantiationException {
         String propertyPrefix = getPropertyPrefix(dataId);
-        Object propertyObject = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        if (propertyObject != null) {
-            String propertySuffix = getPropertySuffix(dataId);
-            Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
-                f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
-            if (fieldOptional.isPresent()) {
-                Field field = fieldOptional.get();
-                field.setAccessible(true);
-                Object valueObject = field.get(propertyObject);
-                if (valueObject instanceof Map) {
-                    String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
-                    valueObject = ((Map) valueObject).get(key);
-                }
-                return valueObject;
+        String propertySuffix = getPropertySuffix(dataId);
+        ApplicationContext applicationContext = (ApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        Object valueObject = null;
+        if (propertyClass != null) {
+            try {
+                Object propertyBean = applicationContext.getBean(propertyClass);
+                valueObject = getFieldValue(propertyBean, propertySuffix, dataId);
+            } catch (NoSuchBeanDefinitionException ignore) {
+
             }
         } else {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Property bean with prefix '{}' was not found in `StarterConstants.PROPERTY_BEAN_MAP`."
-                        + " Please inform the {} committer to fix this BUG.", propertyPrefix, SEATA_PREFIX);
+            throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
+        }
+        if (valueObject == null) {
+            valueObject = getFieldValue(propertyClass.newInstance(), propertySuffix, dataId);
+        }
+
+        return valueObject;
+    }
+
+    /**
+     * get field value
+     *
+     * @param object
+     * @param fieldName
+     * @param dataId
+     * @return java.lang.Object
+     * @author xingfudeshi@gmail.com
+     */
+    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
+        Object value = null;
+        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields()).filter(
+            f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
+        if (fieldOptional.isPresent()) {
+            Field field = fieldOptional.get();
+            field.setAccessible(true);
+            value = field.get(object);
+            if (value instanceof Map) {
+                String key = StringUtils.substringAfterLast(dataId, String.valueOf(DOT));
+                value = ((Map) value).get(key);
             }
         }
-        return null;
+        return value;
     }
 
     /**
