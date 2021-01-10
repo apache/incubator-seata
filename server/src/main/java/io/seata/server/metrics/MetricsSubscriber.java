@@ -16,7 +16,6 @@
 package io.seata.server.metrics;
 
 import com.google.common.eventbus.Subscribe;
-import io.seata.common.util.StringUtils;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.registry.Registry;
