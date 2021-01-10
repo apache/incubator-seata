@@ -9,6 +9,8 @@ logging:
 seata:
   config:
     type: file
+    file:
+      name: file.conf
     apollo:
       appId: seata-server
       apolloMeta: http://localhost:8801
@@ -29,22 +31,10 @@ seata:
       password:
     etcd3:
       serverAddr: http://localhost:2379
-    file:
-      name: file.conf
   registry:
     type: file
     file:
-      ## store location dir
-      dir: sessionStore
-      maxBranchSessionSize: 16384
-      # globe session size , if exceeded throws exceptions
-      maxGlobalSessionSize: 512
-      # file buffer size , if exceeded allocate new buffer
-      fileWriteBufferCacheSize: 16384
-      # when recover batch read size
-      sessionReloadReadSize: 100
-      # async, sync
-      flushDiskMode: async
+      name: file.conf
     zk:
       cluster: default
       serverAddr: 127.0.0.1:2181
@@ -84,5 +74,61 @@ seata:
       cluster: default
       group: SEATA_GROUP
       addressWaitTime: 3000
+
+  server:
+    maxCommitRetryTimeout: -1
+    maxRollbackRetryTimeout: -1
+    rollbackRetryTimeoutUnlockEnable: false
+    recovery:
+      rollbackingRetryPeriod: 1000
+      timeoutRetryPeriod: 1000
+    undo:
+      logSaveDays: 7
+      logDeletePeriod: 86400000
+  store:
+    mode: file
+    file:
+      dir: sessionStore
+      maxBranchSessionSize: 16384
+      maxGlobalSessionSize: 512
+      fileWriteBufferCacheSize: 16384
+      flushDiskMode: async
+      sessionReloadReadSize: 100
+    db:
+      datasource: druid
+      dbType: mysql
+      driverClassName: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
+      user: root
+      password: root
+      minConn: 5
+      maxConn: 30
+      globalTable: global_table
+      branchTable: branch_table
+      lockTable: lock_table
+      queryLimit: 100
+      maxWait: 5000
+    redis:
+      mode: single
+      maxConn: 10
+      minConn: 1
+      database: 0
+      password: null
+      queryLimit:
+      sigle:
+        host: 127.0.0.1
+        port: 6379
+      sentinel:
+        masterName:
+        sentinelHosts:
+  metrics:
+    enabled: false
+    registryType: compact
+    exporterList: prometheus
+    exporterPrometheusPort: 9898
+
+
     
+
+
 

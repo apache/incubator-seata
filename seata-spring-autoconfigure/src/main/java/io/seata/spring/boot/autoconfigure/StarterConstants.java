@@ -16,7 +16,6 @@
 package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -56,9 +55,23 @@ public interface StarterConstants {
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
-    int MAP_CAPACITY = 64;
-    HashMap<String, CompletableFuture<Object>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
 
+    String SERVER_PREFIX = SEATA_PREFIX + ".server";
+    String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
+    String SERVER_RECOVERY_PREFIX = SERVER_PREFIX + ".recovery";
+
+    String METRICS_PREFIX = SEATA_PREFIX + ".metrics";
+
+    String STORE_PREFIX = SEATA_PREFIX + ".store";
+    String STORE_FILE_PREFIX = STORE_PREFIX + ".file";
+    String STORE_DB_PREFIX = STORE_PREFIX + ".db";
+    String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";
+    String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
+    String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
+
+
+    int MAP_CAPACITY = 64;
+    HashMap<String, Class<?>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
     /**
      * The following special keys need to be normalized.
      */

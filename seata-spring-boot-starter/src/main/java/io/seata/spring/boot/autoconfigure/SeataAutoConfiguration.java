@@ -19,14 +19,12 @@ import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
 import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -34,9 +32,10 @@ import org.springframework.context.annotation.DependsOn;
 
 import static io.seata.common.Constants.BEAN_NAME_FAILURE_HANDLER;
 import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
+import static io.seata.core.constants.ConfigurationKeys.SEATA_PREFIX;
 import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR;
 import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar.BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
+
 
 /**
  * @author xingfudeshi@gmail.com
@@ -44,21 +43,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @Configuration
-@EnableConfigurationProperties({SeataProperties.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
-    @Bean
-    @ConditionalOnMissingBean(PropertyBeanPostProcessor.class)
-    public PropertyBeanPostProcessor propertyBeanPostProcessor() {
-        return new PropertyBeanPostProcessor();
-    }
-
-    @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)
-    @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
-    public SpringApplicationContextProvider springApplicationContextProvider() {
-        return new SpringApplicationContextProvider();
-    }
 
     @Bean(BEAN_NAME_FAILURE_HANDLER)
     @ConditionalOnMissingBean(FailureHandler.class)
@@ -67,7 +54,34 @@ public class SeataAutoConfiguration {
     }
 
     @Bean
-    @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
+    @DependsOn({"seataProperties",
+            "rmProperties",
+            "tmProperties",
+            "lockProperties",
+            "serviceProperties",
+            "shutdownProperties",
+            "threadFactoryProperties",
+            "undoProperties",
+            "undoCompressProperties",
+            "logProperties",
+            "transportProperties",
+            "configProperties",
+            "configFileProperties",
+            "registryProperties",
+            "configNacosProperties",
+            "configConsulProperties",
+            "configZooKeeperProperties",
+            "configApolloProperties",
+            "configEtcd3Properties",
+            "configCustomProperties",
+            "registryConsulProperties",
+            "registryEtcd3Properties",
+            "registryEurekaProperties",
+            "registryNacosProperties",
+            "registryRedisProperties",
+            "registrySofaProperties",
+            "registryZooKeeperProperties",
+            "registryCustomProperties", BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
     public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler) {
         if (LOGGER.isInfoEnabled()) {
@@ -75,6 +89,7 @@ public class SeataAutoConfiguration {
         }
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
+
 
     /**
      * The data source configuration.
@@ -99,7 +114,7 @@ public class SeataAutoConfiguration {
         @ConditionalOnMissingBean(SeataAutoDataSourceProxyCreator.class)
         public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator(SeataProperties seataProperties) {
             return new SeataAutoDataSourceProxyCreator(seataProperties.isUseJdkProxy(),
-                seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
+                    seataProperties.getExcludesForAutoProxying(), seataProperties.getDataSourceProxyMode());
         }
     }
 }

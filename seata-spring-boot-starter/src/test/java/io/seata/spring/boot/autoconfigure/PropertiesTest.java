@@ -45,6 +45,14 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -271,6 +279,56 @@ public class PropertiesTest {
         assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
         assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
 
+    }
+
+    @Test
+    public void testServerProperties() {
+        assertFalse(context.getBean(ServerProperties.class).getRollbackRetryTimeoutUnlockEnable());
+    }
+
+    @Test
+    public void testServerRecoveryProperties() {
+        assertEquals(context.getBean(ServerRecoveryProperties.class).getAsynCommittingRetryPeriod(), 1000);
+    }
+
+    @Test
+    public void testServerUndoProperties() {
+        assertEquals(context.getBean(ServerUndoProperties.class).getLogDeletePeriod(), 86400000);
+    }
+
+    @Test
+    public void testMetricsProperties() {
+        assertEquals(context.getBean(MetricsProperties.class).getExporterList(), "prometheus");
+    }
+
+    @Test
+    public void testStoreProperties() {
+        assertEquals(context.getBean(StoreProperties.class).getMode(), "file");
+    }
+
+    @Test
+    public void testStoreFileProperties() {
+        assertEquals(context.getBean(StoreFileProperties.class).getDir(), "sessionStore");
+    }
+
+    @Test
+    public void testStoreDBProperties() {
+        assertEquals(context.getBean(StoreDBProperties.class).getDatasource(), "druid");
+    }
+
+    @Test
+    public void testStoreRedisProperties() {
+        assertEquals(context.getBean(StoreRedisProperties.class).getMode(), "single");
+    }
+
+    @Test
+    public void testStoreRedisPropertiesSingle() {
+        assertEquals(context.getBean(StoreRedisProperties.Single.class).getHost(), "127.0.0.1");
+    }
+
+    @Test
+    public void testStoreRedisPropertiesSentinel() {
+        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), "");
     }
 
     @AfterAll
