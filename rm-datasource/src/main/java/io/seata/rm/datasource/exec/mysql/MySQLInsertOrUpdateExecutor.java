@@ -51,10 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @version: 1.00.00
- * @description:
  * @author: yangyicong
- * @date: 2020-11-26 09:06
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
@@ -129,7 +126,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             return;
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
+        TableRecords lockKeyRecords = afterImage;
         String lockKeys = buildLockKey(lockKeyRecords);
         connectionProxy.appendLockKey(lockKeys);
         buildUndoItemAll(connectionProxy,beforeImage, afterImage);

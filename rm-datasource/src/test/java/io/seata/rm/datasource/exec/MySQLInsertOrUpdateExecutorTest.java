@@ -42,7 +42,7 @@ import java.util.*;
 import static org.mockito.Mockito.*;
 
 /**
- * @author guoyao, jsbxyyx
+ * @author: yangyicong
  */
 public class MySQLInsertOrUpdateExecutorTest {
 

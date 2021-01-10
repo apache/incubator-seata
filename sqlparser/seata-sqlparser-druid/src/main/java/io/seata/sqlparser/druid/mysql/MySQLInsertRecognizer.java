@@ -61,7 +61,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.INSERT;
+        return isDuplicateKeyUpdate() ? SQLType.INSERT_ON_DUPLICATE_UPDATE : SQLType.INSERT;
     }
 
     @Override

@@ -89,13 +89,9 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        if (JdbcConstants.MYSQL.equals(dbType) && ((SQLInsertRecognizer)sqlRecognizer).isDuplicateKeyUpdate()) {
-                            executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
-                        } else {
-                            executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
+                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
                                     new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
                                     new Object[]{statementProxy, statementCallback, sqlRecognizer});
-                        }
                         break;
                     case UPDATE:
                         executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
@@ -106,6 +102,11 @@ public class ExecuteTemplate {
                     case SELECT_FOR_UPDATE:
                         executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
+                    case INSERT_ON_DUPLICATE_UPDATE:
+                        if (JdbcConstants.MYSQL.equals(dbType)) {
+                            executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
+                        }
+                        //  break;
                     default:
                         executor = new PlainExecutor<>(statementProxy, statementCallback);
                         break;
