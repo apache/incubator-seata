@@ -28,7 +28,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SE
 @Component
 @ConfigurationProperties(prefix = STORE_REDIS_PREFIX)
 public class StoreRedisProperties {
-    // redis mode: single、sentinel
+    /**
+     * single, sentinel
+     */
     String mode = "single";
     String password = null;
     Integer maxConn = 10;
@@ -103,7 +105,7 @@ public class StoreRedisProperties {
 
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SINGLE_PREFIX)
-    public static class Single{
+    public static class Single {
         String host = "127.0.0.1";
         Integer port = 6379;
 
@@ -130,10 +132,11 @@ public class StoreRedisProperties {
 
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SENTINEL_PREFIX)
-    public static class Sentinel{
+    public static class Sentinel {
         String masterName = "";
-
-        // such as "10.28.235.65:26379,10.28.235.65:26380,10.28.235.65:26381"
+        /**
+         * such as "10.28.235.65:26379,10.28.235.65:26380,10.28.235.65:26381"
+         */
         String sentinelHosts = "";
 
         public String getMasterName() {
