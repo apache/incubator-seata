@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!-- logstash-appender properties -->
+    <property name="LOGSTASH_DESTINATION" value="localhost:4560"/>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_DESTINATION}</destination>
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>
+                {
+                    "app_name": "seata-server"
+                }
+            </customFields>
+        </encoder>
+    </appender>
+</included>
