@@ -17,7 +17,6 @@ package io.seata.server.session;
 
 import java.util.Collection;
 import java.util.List;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
@@ -123,4 +122,25 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      */
     <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException;
+
+    /**
+     * scheduled lock
+     *
+     * @param key the lock key
+     * @return the boolean
+     */
+    default boolean scheduledLock(String key) {
+        return true;
+    }
+
+    /**
+     * un scheduled lock
+     *
+     * @param key the lock key
+     * @return the boolean
+     */
+    default boolean unScheduledLock(String key) {
+        return true;
+    }
+
 }
