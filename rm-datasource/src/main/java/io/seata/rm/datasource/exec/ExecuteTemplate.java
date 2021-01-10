@@ -22,7 +22,6 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
-import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
