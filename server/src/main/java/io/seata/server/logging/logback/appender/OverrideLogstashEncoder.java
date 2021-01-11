@@ -36,12 +36,16 @@ public class OverrideLogstashEncoder extends LogstashEncoder {
     protected CompositeJsonFormatter<ILoggingEvent> createFormatter() {
         LogstashFormatter formatter = new LogstashFormatter(this);
 
-        Set<Class<?>> excludeProviderClasses = new HashSet<>();
-        // the `@version` provider
-        excludeProviderClasses.add(LogstashVersionJsonProvider.class);
+        //region There are some useless data that are not sent to logstash, Do exclude providers.
 
-        // do exclude providers
-        this.doExcludeProviders(formatter, excludeProviderClasses);
+        // The excludedProviderClasses
+        Set<Class<?>> excludedProviderClasses = new HashSet<>();
+        // The `@version` provider
+        excludedProviderClasses.add(LogstashVersionJsonProvider.class);
+        // Do exclude providers
+        this.doExcludeProviders(formatter, excludedProviderClasses);
+
+        //endregion
 
         return formatter;
     }
