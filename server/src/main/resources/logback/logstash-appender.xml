@@ -4,6 +4,7 @@
     <property name="LOGSTASH_DESTINATION" value="localhost:4560"/>
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- the TCP address of the logstash -->
         <destination>${LOGSTASH_DESTINATION}</destination>
 
         <!--<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">-->
