@@ -5,13 +5,17 @@
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${LOGSTASH_DESTINATION}</destination>
+
         <!--<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">-->
-        <encoder charset="UTF-8" class="io.seata.server.logging.logback.appender.OverrideLogstashEncoder">
+        <encoder charset="UTF-8" class="io.seata.server.logging.logback.appender.EnhancedLogstashEncoder">
             <customFields>
                 {
                     "app_name": "seata-server"
                 }
             </customFields>
         </encoder>
+
+        <!-- exclude the provider of data `@version` -->
+        <excludeProvider>LogstashVersionJsonProvider</excludeProvider>
     </appender>
 </included>
