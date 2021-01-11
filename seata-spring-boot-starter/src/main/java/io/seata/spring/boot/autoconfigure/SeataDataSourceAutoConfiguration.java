@@ -27,12 +27,12 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
 /**
- * The type Seata data source configuration.
+ * The type Seata data source auto configuration.
  *
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = {"enableAutoDataSourceProxy", "enable-auto-data-source-proxy"}, havingValue = "true", matchIfMissing = true)
-public class SeataDataSourceConfiguration {
+public class SeataDataSourceAutoConfiguration {
 
     /**
      * The bean seataDataSourceBeanPostProcessor.

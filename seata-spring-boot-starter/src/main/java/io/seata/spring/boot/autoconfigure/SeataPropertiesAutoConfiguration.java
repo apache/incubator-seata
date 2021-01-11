@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.config.springcloud.SpringApplicationContextProvider;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
@@ -43,7 +44,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -82,14 +82,14 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
- * The type Seata properties configuration
+ * The type Seata properties auto configuration
  *
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
-@AutoConfigureBefore({SeataAutoConfiguration.class, SeataDataSourceConfiguration.class})
-public class SeataPropertiesConfiguration {
+@AutoConfigureBefore({SeataAutoConfiguration.class, SeataPropertiesAutoConfiguration.class})
+public class SeataPropertiesAutoConfiguration {
     static {
 
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
