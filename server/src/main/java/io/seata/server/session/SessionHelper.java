@@ -159,8 +159,8 @@ public class SessionHelper {
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
-            } catch (Exception e) {
-                LOGGER.error("handle global session failed: {}", globalSession.getXid());
+            } catch (Throwable th) {
+                LOGGER.error("handle global session failed: {}", globalSession.getXid(), th);
             } finally {
                 MDC.remove(RootContext.MDC_KEY_XID);
             }
