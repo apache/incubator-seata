@@ -12,7 +12,7 @@
             <!-- the global custom fields -->
             <customFields>
                 {
-                    "app_name": "seata-server"
+                    "app_name": "${APPLICATION_NAME:-}"
                 }
             </customFields>
 

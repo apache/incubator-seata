@@ -10,7 +10,7 @@
             <pattern>{
     "@timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
     "level":"%p",
-    "app_name":"seata-server",
+    "app_name":"${APPLICATION_NAME:-}",
     "PORT": ${PORT:-0},
     "thread_name": "%t",
     "logger_name": "%logger",
