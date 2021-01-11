@@ -189,7 +189,7 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            Boolean result = SessionHelper.foreach(globalSession.getSortedBranches(), branchSession -> {
+            Boolean result = SessionHelper.forEach(globalSession.getSortedBranches(), branchSession -> {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
                     return CONTINUE;
@@ -301,7 +301,7 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
-            Boolean result = SessionHelper.foreach(globalSession.getReverseSortedBranches(), branchSession -> {
+            Boolean result = SessionHelper.forEach(globalSession.getReverseSortedBranches(), branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     globalSession.removeBranch(branchSession);
