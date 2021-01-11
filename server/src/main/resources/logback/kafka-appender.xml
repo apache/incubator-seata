@@ -2,7 +2,7 @@
 <included>
     <!-- kafka-appender properties -->
     <property name="KAFKA_BOOTSTRAP_SERVERS" value="localhost:9092"/>
-    <property name="KAFKA_TOPIC" value="to_logstash"/>
+    <property name="KAFKA_TOPIC" value="logback_to_logstash"/>
 
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder>
