@@ -40,22 +40,22 @@ public class OverrideLogstashEncoder extends LogstashEncoder {
         // the `@version` provider
         excludeProviderClasses.add(LogstashVersionJsonProvider.class);
 
-        // do exclude Providers
+        // do exclude providers
         this.doExcludeProviders(formatter, excludeProviderClasses);
 
         return formatter;
     }
 
     /**
-     * Exclude Providers
+     * Do exclude providers
      *
-     * @param formatter              the formatter
-     * @param excludeProviderClasses the exclude provider classes
+     * @param formatter               the formatter
+     * @param excludedProviderClasses the excluded provider classes
      */
-    private void doExcludeProviders(LogstashFormatter formatter, Set<Class<?>> excludeProviderClasses) {
+    private void doExcludeProviders(LogstashFormatter formatter, Set<Class<?>> excludedProviderClasses) {
         JsonProviders<?> providers = formatter.getProviders();
         for (JsonProvider<?> provider : new ArrayList<>(providers.getProviders())) {
-            if (excludeProviderClasses.contains(provider.getClass())) {
+            if (excludedProviderClasses.contains(provider.getClass())) {
                 providers.removeProvider((JsonProvider) provider);
             }
         }
