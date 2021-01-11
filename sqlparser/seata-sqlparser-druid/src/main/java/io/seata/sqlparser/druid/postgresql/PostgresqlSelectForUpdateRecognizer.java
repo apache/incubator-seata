@@ -113,9 +113,20 @@ public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognize
     }
 
     @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = getSelect().getLimit();
+        return super.getLimitCondition(limit, parametersHolder, paramAppenderList);
+    }
+
+    @Override
     public String getOrderByCondition() {
-        ast.getSelect().getOrderBy();
         SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
         return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 }

@@ -77,16 +77,16 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
+        String orderByCondition = buildOrderCondition(recognizer, paramAppenderList);
+        String limitCondition = buildLimitCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        String orderBy = recognizer.getOrderByCondition();
-        if (StringUtils.isNotBlank(orderBy)) {
-            suffix.append(" ").append(orderBy);
+        if (StringUtils.isNotBlank(orderByCondition)) {
+            suffix.append(" ").append(orderByCondition);
         }
-        String limit = recognizer.getLimitCondition();
-        if (StringUtils.isNotBlank(limit)) {
-            suffix.append(" ").append(limit);
+        if (StringUtils.isNotBlank(limitCondition)) {
+            suffix.append(" ").append(limitCondition);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());

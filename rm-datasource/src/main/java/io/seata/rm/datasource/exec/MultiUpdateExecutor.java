@@ -82,11 +82,10 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
 
-            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
-            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit(parametersHolder, paramAppenderList))) {
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimitCondition())) {
                 throw new NotSupportYetException("Multi update SQL with limit condition is not support yet !");
             }
-            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderBy())) {
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderByCondition())) {
                 throw new NotSupportYetException("Multi update SQL with orderBy condition is not support yet !");
             }
 

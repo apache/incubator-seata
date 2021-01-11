@@ -89,7 +89,19 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //postgre does not have limit condition in delete statement
+        return null;
+    }
+
+    @Override
     public String getOrderByCondition() {
+        //postgre does not have order by condition in delete statement
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         //postgre does not have order by condition in delete statement
         return null;
     }

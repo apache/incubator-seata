@@ -16,6 +16,7 @@
 package io.seata.sqlparser.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
@@ -79,9 +80,21 @@ public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implem
     }
 
     @Override
-    public String getOrderByCondition() {
-        //oracle does not support order by yet
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //oracle does not support limit or rownum yet
         return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
     private SQLSelectQueryBlock getSelect() {

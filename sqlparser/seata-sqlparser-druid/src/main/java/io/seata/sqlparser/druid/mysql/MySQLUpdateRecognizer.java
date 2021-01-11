@@ -140,9 +140,21 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     }
 
     @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = ast.getLimit();
+        return super.getLimitCondition(limit, parametersHolder, paramAppenderList);
+    }
+
+    @Override
     public String getOrderByCondition() {
         SQLOrderBy sqlOrderBy = ast.getOrderBy();
         return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = ast.getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
 }

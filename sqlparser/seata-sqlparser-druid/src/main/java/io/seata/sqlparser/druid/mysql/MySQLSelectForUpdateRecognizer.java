@@ -80,9 +80,21 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
     }
 
     @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLLimit limit = getSelect().getLimit();
+        return super.getLimitCondition(limit, parametersHolder, paramAppenderList);
+    }
+
+    @Override
     public String getOrderByCondition() {
         SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
         return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
     private SQLSelectQueryBlock getSelect() {

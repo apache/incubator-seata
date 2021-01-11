@@ -63,17 +63,17 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
+        String orderByCondition = buildOrderCondition(visitor, paramAppenderList);
+        String limitCondition = buildLimitCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        String orderBy = visitor.getOrderByCondition();
-        if (StringUtils.isNotBlank(orderBy)) {
-            suffix.append(" ").append(orderBy);
+        if (StringUtils.isNotBlank(orderByCondition)) {
+            suffix.append(" ").append(orderByCondition);
         }
-        String limit = visitor.getLimitCondition();
-        if (StringUtils.isNotBlank(limit)) {
-            suffix.append(" ").append(limit);
+        if (StringUtils.isNotBlank(limitCondition)) {
+            suffix.append(" ").append(limitCondition);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());

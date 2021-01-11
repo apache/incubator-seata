@@ -58,11 +58,10 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) recognizer;
 
-            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
-            if (StringUtils.isNotBlank(visitor.getLimit(parametersHolder, paramAppenderList))) {
+            if (StringUtils.isNotBlank(visitor.getLimitCondition())) {
                 throw new NotSupportYetException("Multi delete SQL with limit condition is not support yet !");
             }
-            if (StringUtils.isNotBlank(visitor.getOrderBy())) {
+            if (StringUtils.isNotBlank(visitor.getOrderByCondition())) {
                 throw new NotSupportYetException("Multi delete SQL with orderBy condition is not support yet !");
             }
 

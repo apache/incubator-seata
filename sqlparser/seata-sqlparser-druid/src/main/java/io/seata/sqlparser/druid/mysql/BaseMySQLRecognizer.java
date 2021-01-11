@@ -100,6 +100,18 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
+    protected String getLimitCondition(SQLLimit sqlLimit, final ParametersHolder parametersHolder,
+                                       final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(sqlLimit)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        executeLimit(sqlLimit, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        return sb.toString();
+    }
+
     protected String getOrderByCondition(SQLOrderBy sqlOrderBy) {
         if (Objects.isNull(sqlOrderBy)) {
             return StringUtils.EMPTY;
@@ -108,6 +120,17 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         StringBuilder sb = new StringBuilder();
         executeOrderBy(sqlOrderBy, new MySqlOutputVisitor(sb));
 
+        return sb.toString();
+    }
+
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy, final ParametersHolder parametersHolder,
+                                         final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 

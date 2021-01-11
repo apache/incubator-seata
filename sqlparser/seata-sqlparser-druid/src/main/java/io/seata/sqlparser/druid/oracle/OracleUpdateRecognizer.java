@@ -117,7 +117,19 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     }
 
     @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //oracle does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
     public String getOrderByCondition() {
+        //oracle does not support order by yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         //oracle does not support order by yet
         return null;
     }
