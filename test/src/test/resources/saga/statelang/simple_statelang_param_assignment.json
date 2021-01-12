@@ -1,0 +1,74 @@
+{
+    "Name": "simpleInputAssignmentStateMachine",
+    "Comment": "带输入输出参数赋值的测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Next": "ChoiceState",
+            "Input": [
+                {
+                    "fooInput": "$.[a]",
+                    "fooBusinessKey": "$Sequence.BUSINESS_KEY|SIMPLE"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            }
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[a] == 2",
+                    "Next":"ThirdState"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar",
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]"
+                }
+            ],
+            "Output": {
+                "barResult": "$.#root"
+            },
+            "Next": "Succeed"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Input": [
+                {
+                    "fooInput": "[fooResult][a].list[0]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "listener":"",
+            "Next": "Succeed"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

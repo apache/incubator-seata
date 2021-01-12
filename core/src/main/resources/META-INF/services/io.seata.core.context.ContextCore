@@ -1,0 +1,2 @@
+io.seata.core.context.ThreadLocalContextCore
+io.seata.core.context.FastThreadLocalContextCore

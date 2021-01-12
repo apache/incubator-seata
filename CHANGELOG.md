@@ -2,7 +2,7 @@
 
 #### FEATURES:
 
-* support standalone fescar-server.
+* support standalone seata-server.
 * support mysql automatic transaction.
 * support @GlobalTransactional spring annotation.
 * support dubbo on filter.

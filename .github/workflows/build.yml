@@ -1,0 +1,41 @@
+name: build
+
+on:
+  push:
+    branches: [ develop,master ]
+  pull_request:
+    branches: [ develop,master ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        java: [8, 11]
+        os: [ ubuntu-18.04 ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Set up ENV
+        # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+        run: if [ "${{ matrix.java }}" == "8" ]; then
+                echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
+             elif [ "${{ matrix.java }}" == "11" ]; then
+                echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
+             fi
+      - name: Build with Maven
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
+        run: if [ "${{github.event_name}}" == "push" ] && [ "${{github.ref}}" == "refs/heads/develop" ]; then
+            ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            else
+             ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+             fi
+      - name: Codecov
+        uses: codecov/codecov-action@v1

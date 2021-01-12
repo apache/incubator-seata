@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+{{- if .Values.namespace }}
+  namespace: {{ .Values.namespace }}
+{{- end}}
+  name: {{ include "seata-server.name" . }}
+  labels:
+{{ include "seata-server.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "seata-server.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "seata-server.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8091
+              protocol: TCP
+          {{- if .Values.volume }}
+          volumeMounts:
+            {{- range .Values.volume }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end}}
+          {{- end}}
+        {{- if .Values.env }}
+          env:
+          {{- if .Values.env.seataIp }}
+            - name: SEATA_IP
+              value: {{ .Values.env.seataIp  | quote }}
+          {{- end }}
+          {{- if .Values.env.seataPort }}
+            - name: SEATA_PORT
+              value: {{ .Values.env.seataPort | quote }}
+          {{- end }}
+          {{- if .Values.env.seataEnv }}
+            - name: SEATA_ENV
+              value: {{ .Values.env.seataEnv }}
+          {{- end }}
+          {{- if .Values.env.seataConfigName }}
+            - name: SEATA_CONFIG_NAME
+              value: {{ .Values.env.seataConfigName }}
+          {{- end }}
+          {{- if .Values.env.serverNode }}
+            - name: SERVER_NODE
+              value: {{ .Values.env.serverNode | quote }}
+          {{- end }}
+          {{- if .Values.env.storeMode }}
+            - name: STORE_MODE
+              value: {{ .Values.env.storeMode }}
+          {{- end }}
+        {{- end }}
+     {{- if .Values.volume }}
+      volumes:
+        {{- range .Values.volume }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .hostPath}}
+        {{- end}}
+     {{- end}}
