@@ -17,7 +17,12 @@
             </customFields>
 
             <!-- exclude the provider of data `@version` -->
-            <excludeProvider>LogstashVersionJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.LogstashVersionJsonProvider</excludeProvider>
+            <!-- exclude providers not currently needed, reduce some performance loss. -->
+            <excludeProvider>net.logstash.logback.composite.loggingevent.JsonMessageJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.loggingevent.TagsJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.loggingevent.LogstashMarkersJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider</excludeProvider>
         </encoder>
     </appender>
 </included>

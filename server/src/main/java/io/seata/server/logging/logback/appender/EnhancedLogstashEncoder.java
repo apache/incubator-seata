@@ -37,8 +37,7 @@ public class EnhancedLogstashEncoder extends LogstashEncoder {
     public void setExcludeProvider(String excludedProviderClassName) {
         JsonProviders<?> providers = getFormatter().getProviders();
         for (JsonProvider<?> provider : new ArrayList<>(providers.getProviders())) {
-            // use the `endsWith` method to simplify configuration
-            if (provider.getClass().getName().endsWith(excludedProviderClassName)) {
+            if (provider.getClass().getName().equals(excludedProviderClassName)) {
                 providers.removeProvider((JsonProvider) provider);
             }
         }
