@@ -54,3 +54,12 @@ CREATE TABLE IF NOT EXISTS `lock_table`
     KEY `idx_branch_id` (`branch_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `distribute_lock`
+(
+    `key`            CHAR(20) NOT NULL,
+    `value`          VARCHAR(20) NOT NULL,
+    `expire`         BIGINT,
+    primary key (`key`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;

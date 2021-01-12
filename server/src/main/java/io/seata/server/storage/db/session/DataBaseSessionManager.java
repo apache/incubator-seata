@@ -18,23 +18,35 @@ package io.seata.server.storage.db.session;
 import java.util.Collection;
 import java.util.List;
 
+import io.seata.common.XID;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLockStore;
+import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.storage.db.distributed.lock.DistributedLockStoreDAO;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import io.seata.common.loader.Scope;
+import jdk.internal.joptsimple.internal.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
 
 /**
  * The Data base session manager.
@@ -49,17 +61,28 @@ public class DataBaseSessionManager extends AbstractSessionManager
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(DataBaseSessionManager.class);
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * The Task name.
      */
     protected String taskName;
 
+    protected DistributedLockStore distributedLockStore;
+
     /**
      * Instantiates a new Data base session manager.
      */
     public DataBaseSessionManager() {
         super();
+
+        String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        //init dataSource
+        DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        distributedLockStore = new DistributedLockStoreDAO(logStoreDataSource);
     }
 
     /**
@@ -192,5 +215,23 @@ public class DataBaseSessionManager extends AbstractSessionManager
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException {
         return lockCallable.call();
+    }
+
+    @Override
+    public boolean scheduledLock(String key) {
+        DistributedLockDO distributedLockDO = new DistributedLockDO();
+        distributedLockDO.setKey(key);
+        distributedLockDO.setValue(XID.getIpAddress() + ":" + XID.getPort());
+        distributedLockDO.setExpire(System.currentTimeMillis() + 15 * 60 * 1000);
+        return distributedLockStore.acquireLock(distributedLockDO);
+    }
+
+    @Override
+    public boolean unScheduledLock(String key) {
+        DistributedLockDO distributedLockDO = new DistributedLockDO();
+        distributedLockDO.setKey(key);
+        distributedLockDO.setValue(Strings.EMPTY);
+        distributedLockDO.setExpire(0L);
+        return distributedLockStore.releaseLock(distributedLockDO);
     }
 }
