@@ -62,7 +62,13 @@ public class DefaultCore implements Core {
      * @param remotingServer the remoting server
      */
     public DefaultCore(RemotingServer remotingServer) {
-        LOGGER.info("test log7: {}", remotingServer);
+        if (remotingServer == null) {
+           try {
+               int i = 1/0;
+           } catch (Throwable t) {
+               LOGGER.info("test log7: {}", remotingServer, t);
+           }
+        }
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
             new Class[]{RemotingServer.class}, new Object[]{remotingServer});
         if (CollectionUtils.isNotEmpty(allCore)) {
