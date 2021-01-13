@@ -66,7 +66,8 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         });
 
         if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
+            throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed," +
+                " please check weather the table `%s` exists.", RootContext.getXID(), tableName));
         }
         return tmeta;
     }
