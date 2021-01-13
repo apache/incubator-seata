@@ -19,13 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.core.context.RootContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.CollectionUtils;
+import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
@@ -39,6 +35,8 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static io.seata.server.session.BranchSessionHandler.CONTINUE;
@@ -54,7 +52,7 @@ public class DefaultCore implements Core {
 
     private EventBus eventBus = EventBusManager.get();
 
-    private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
+    private Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
     /**
      * get the Default core.
@@ -63,18 +61,16 @@ public class DefaultCore implements Core {
      */
     public DefaultCore(RemotingServer remotingServer) {
         if (remotingServer == null) {
-           try {
-               int i = 1/0;
-           } catch (Throwable t) {
-               LOGGER.info("test log7: {}", remotingServer, t);
-           }
+            try {
+                int i = 1 / 0;
+            } catch (Throwable t) {
+                LOGGER.info("test log7: {}", remotingServer, t);
+            }
         }
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
             new Class[]{RemotingServer.class}, new Object[]{remotingServer});
-        if (CollectionUtils.isNotEmpty(allCore)) {
-            for (AbstractCore core : allCore) {
-                coreMap.put(core.getHandleBranchType(), core);
-            }
+        for (AbstractCore core : allCore) {
+            coreMap.put(core.getHandleBranchType(), core);
         }
     }
 
