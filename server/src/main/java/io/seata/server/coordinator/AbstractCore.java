@@ -62,6 +62,7 @@ public abstract class AbstractCore implements Core {
     protected RemotingServer remotingServer;
 
     public AbstractCore(RemotingServer remotingServer) {
+        LOGGER.info("test log6: {} {}", remotingServer, this.getClass().getName());
         this.remotingServer = remotingServer;
     }
 
