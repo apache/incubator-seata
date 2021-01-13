@@ -298,7 +298,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
+                LOGGER.info("Failed to retry rollbacking [{}] {}", rollbackingSession.getXid(), ex.getCode(), ex);
             }
         });
     }
