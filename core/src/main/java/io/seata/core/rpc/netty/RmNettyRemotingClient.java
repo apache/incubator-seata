@@ -16,7 +16,6 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
@@ -54,7 +53,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-@Sharable
+
 public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyRemotingClient.class);

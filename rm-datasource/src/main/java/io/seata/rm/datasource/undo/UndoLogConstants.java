@@ -29,4 +29,6 @@ public interface UndoLogConstants {
 
     String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
         .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION);
+
+    String COMPRESSOR_TYPE_KEY = "compressorType";
 }

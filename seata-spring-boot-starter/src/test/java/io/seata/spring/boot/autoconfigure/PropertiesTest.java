@@ -92,6 +92,8 @@ public class PropertiesTest {
         assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
         assertEquals(60000L,context.getBean(RmProperties.class).getTableMetaCheckerInterval());
+        assertFalse(context.getBean(RmProperties.class).isSagaRetryPersistModeUpdate());
+        assertFalse(context.getBean(RmProperties.class).isSagaCompensatePersistModeUpdate());
     }
 
     @Test
