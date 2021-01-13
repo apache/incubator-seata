@@ -22,6 +22,7 @@ client.rm.lock.retryTimes=30
 client.rm.lock.retryPolicyBranchRollbackOnConflict=true
 client.rm.reportRetryCount=5
 client.rm.tableMetaCheckEnable=false
+client.rm.tableMetaCheckerInterval=60000
 client.rm.sqlParserType=druid
 client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false

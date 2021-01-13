@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
  * The type Data source proxy.
@@ -65,7 +66,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Table meta checker interval
      */
-    private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
+    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
+            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
     private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("tableMetaChecker", 1, true));
