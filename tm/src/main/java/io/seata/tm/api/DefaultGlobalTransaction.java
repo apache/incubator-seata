@@ -181,6 +181,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public SuspendedResourcesHolder suspend() throws TransactionException {
+        // In order to associate the following logs with XID, first get and then unbind.
         String xid = RootContext.getXID();
         if (xid != null) {
             if (LOGGER.isInfoEnabled()) {
