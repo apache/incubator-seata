@@ -185,7 +185,7 @@ public class SessionHelper {
                 }
                 return result;
             } finally {
-                MDC.remove(RootContext.MDC_KEY_XID);
+                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
         return null;
