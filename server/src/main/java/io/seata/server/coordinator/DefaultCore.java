@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
@@ -52,7 +53,7 @@ public class DefaultCore implements Core {
 
     private EventBus eventBus = EventBusManager.get();
 
-    private Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
+    private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
     /**
      * get the Default core.
@@ -60,17 +61,12 @@ public class DefaultCore implements Core {
      * @param remotingServer the remoting server
      */
     public DefaultCore(RemotingServer remotingServer) {
-        if (remotingServer == null) {
-            try {
-                int i = 1 / 0;
-            } catch (Throwable t) {
-                LOGGER.info("test log7: {}", remotingServer, t);
-            }
-        }
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
             new Class[]{RemotingServer.class}, new Object[]{remotingServer});
-        for (AbstractCore core : allCore) {
-            coreMap.put(core.getHandleBranchType(), core);
+        if (CollectionUtils.isNotEmpty(allCore)) {
+            for (AbstractCore core : allCore) {
+                coreMap.put(core.getHandleBranchType(), core);
+            }
         }
     }
 

@@ -62,7 +62,6 @@ public abstract class AbstractCore implements Core {
     protected RemotingServer remotingServer;
 
     public AbstractCore(RemotingServer remotingServer) {
-        LOGGER.info("test log6: {} {}", remotingServer, this.getClass().getName());
         this.remotingServer = remotingServer;
     }
 
@@ -193,13 +192,8 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                               BranchSession branchSession) throws IOException, TimeoutException {
-        LOGGER.info("test log1:{}", request);
-        LOGGER.info("test log2:{}", globalSession);
-        LOGGER.info("test log3:{}", branchSession);
-        LOGGER.info("test log4:{}", remotingServer);
         BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request);
-        LOGGER.info("test log5:{}", response);
         return response.getBranchStatus();
     }
 

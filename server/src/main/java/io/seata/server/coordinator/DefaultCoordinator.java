@@ -253,7 +253,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 return true;
             });
             if (!shouldTimeout) {
-                // continue
+                //The function of this 'return' is 'continue'.
                 return;
             }
             LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
@@ -280,7 +280,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             try {
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
-                    // continue
+                    //The function of this 'return' is 'continue'.
                     return;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
@@ -292,13 +292,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.info("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
-                    // continue
+                    //The function of this 'return' is 'continue'.
                     return;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info("Failed to retry rollbacking [{}] {}", rollbackingSession.getXid(), ex.getCode(), ex);
+                LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         });
     }
@@ -320,7 +320,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
                     LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
-                    // continue
+                    //The function of this 'return' is 'continue'.
                     return;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -348,7 +348,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             try {
                 // Instruction reordering in DefaultCore#asyncCommit may cause this situation
                 if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
-                    // continue
+                    //The function of this 'return' is 'continue'.
                     return;
                 }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
