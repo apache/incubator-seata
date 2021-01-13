@@ -88,7 +88,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
-@AutoConfigureBefore({SeataAutoConfiguration.class, SeataPropertiesAutoConfiguration.class})
+@AutoConfigureBefore({SeataAutoConfiguration.class, SeataDataSourceAutoConfiguration.class})
 public class SeataPropertiesAutoConfiguration {
     static {
 
