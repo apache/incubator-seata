@@ -60,14 +60,14 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             try {
                 return fetchSchema(connection, tableName);
             } catch (SQLException e) {
-                LOGGER.error("get table meta error:{}", e.getMessage(), e);
+                LOGGER.error("get table meta of the table `{}` error: {}", tableName, e.getMessage(), e);
                 return null;
             }
         });
 
         if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed," +
-                " please check weather the table `%s` exists.", RootContext.getXID(), tableName));
+            throw new ShouldNeverHappenException(String.format("[xid:%s]get table meta failed," +
+                " please check whether the table `%s` exists.", RootContext.getXID(), tableName));
         }
         return tmeta;
     }
