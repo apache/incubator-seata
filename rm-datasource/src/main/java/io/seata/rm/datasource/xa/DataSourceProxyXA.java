@@ -20,10 +20,6 @@ import javax.sql.XAConnection;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-import javax.sql.XAConnection;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
