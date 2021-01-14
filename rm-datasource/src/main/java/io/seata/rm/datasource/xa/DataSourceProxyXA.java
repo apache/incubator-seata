@@ -20,6 +20,10 @@ import javax.sql.XAConnection;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -74,6 +78,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
                 LOGGER.error("Failed to create sqlServer XA DataSource errorMsg:{}", e.getMessage(), e);
             }
         }
+
+        //Set the default branch type to 'XA' in the RootContext.
+        RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     @Override

@@ -50,8 +50,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
      * @param transactionServiceGroup the transaction service group
      */
     public AbstractIdentifyRequest(String applicationId, String transactionServiceGroup) {
-        this.applicationId = applicationId;
-        this.transactionServiceGroup = transactionServiceGroup;
+        this(applicationId, transactionServiceGroup, null);
     }
 
     /**

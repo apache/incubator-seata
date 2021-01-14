@@ -45,6 +45,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-compressor-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
@@ -94,6 +99,12 @@
         <dependency>
             <groupId>de.javakaffee</groupId>
             <artifactId>kryo-serializers</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

@@ -8,12 +8,14 @@ seata:
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
   client:
     rm:
-      async-commit-buffer-limit: 1000
+      async-commit-buffer-limit: 10000
       report-retry-count: 5
       table-meta-check-enable: false
       report-success-enable: false
       saga-branch-register-enable: false
       saga-json-parser: fastjson
+      saga-retry-persist-mode-update: false
+      saga-compensate-persist-mode-update: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -30,8 +32,10 @@ seata:
       log-serialization: jackson
       log-table: undo_log
       only-care-update-columns: true
-    log:
-      exceptionRate: 100
+      compress:
+        enable: true
+        type: zip
+        threshold: 64k
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -70,8 +74,8 @@ seata:
     etcd3:
       server-addr: http://localhost:2379
     nacos:
-      namespace:
-      serverAddr: 127.0.0.1:8848
+      namespace: ""
+      server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
       username: ""
       password: ""
@@ -92,7 +96,7 @@ seata:
     consul:
       server-addr: 127.0.0.1:8500
     etcd3:
-      serverAddr: http://localhost:2379
+      server-addr: http://localhost:2379
     eureka:
       weight: 1
       service-url: http://localhost:8761/eureka
@@ -100,20 +104,20 @@ seata:
       application: seata-server
       server-addr: 127.0.0.1:8848
       group : "SEATA_GROUP"
-      namespace:
+      namespace: ""
       username: ""
       password: ""
     redis:
       server-addr: localhost:6379
       db: 0
-      password:
+      password: ""
       timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       group: SEATA_GROUP
-      addressWaitTime: 3000
+      address-wait-time: 3000
       application: default
     zk:
       server-addr: 127.0.0.1:2181
@@ -123,3 +127,5 @@ seata:
       password: ""
     custom:
       name: ""
+  log:
+    exception-rate: 100

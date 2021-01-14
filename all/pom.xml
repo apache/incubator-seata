@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -287,6 +287,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-compressor-lz4</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-deflater</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -681,11 +686,13 @@
                                     <include>io.seata:seata-saga-rm</include>
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
+                                    <!--compressor-->
                                     <include>io.seata:seata-compressor-gzip</include>
                                     <include>io.seata:seata-compressor-7z</include>
                                     <include>io.seata:seata-compressor-bzip2</include>
                                     <include>io.seata:seata-compressor-zip</include>
                                     <include>io.seata:seata-compressor-lz4</include>
+                                    <include>io.seata:seata-compressor-deflater</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
