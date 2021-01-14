@@ -24,6 +24,7 @@ import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.rpc.RemotingServer;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
@@ -58,10 +59,11 @@ public class DefaultCoreForEventBusTest {
             }
         }
         SessionHolder.init(null);
-        DefaultCoordinator coordinator = new DefaultCoordinator(null);
+        RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
+        DefaultCoordinator coordinator = new DefaultCoordinator(remotingServer);
         coordinator.init();
         try {
-            DefaultCore core = new DefaultCore(new DefaultCoordinatorTest.MockServerMessageSender());
+            DefaultCore core = new DefaultCore(remotingServer);
 
             GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
             EventBusManager.get().register(subscriber);

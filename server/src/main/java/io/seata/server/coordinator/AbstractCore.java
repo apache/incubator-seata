@@ -60,6 +60,9 @@ public abstract class AbstractCore implements Core {
     protected RemotingServer remotingServer;
 
     public AbstractCore(RemotingServer remotingServer) {
+        if (remotingServer == null) {
+            throw new IllegalArgumentException("remotingServer must be not null");
+        }
         this.remotingServer = remotingServer;
     }
 

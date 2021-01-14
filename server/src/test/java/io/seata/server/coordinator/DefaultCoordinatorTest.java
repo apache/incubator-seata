@@ -65,7 +65,6 @@ import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_D
  * @author leizhiyuan
  */
 public class DefaultCoordinatorTest {
-    private static RemotingServer remotingServer;
     private static DefaultCoordinator defaultCoordinator;
 
     private static final String applicationId = "demo-child-app";
@@ -159,7 +158,6 @@ public class DefaultCoordinatorTest {
 
     @Test
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
-        defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
@@ -186,7 +184,6 @@ public class DefaultCoordinatorTest {
     @Test
     public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
         NoSuchFieldException, IllegalAccessException {
-        defaultCoordinator = new DefaultCoordinator(remotingServer);
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 

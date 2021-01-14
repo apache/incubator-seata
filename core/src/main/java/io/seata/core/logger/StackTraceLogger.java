@@ -15,11 +15,14 @@
  */
 package io.seata.core.logger;
 
+import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
+
+import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static io.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 
@@ -34,9 +37,8 @@ public final class StackTraceLogger {
 
     public static void info(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isInfoEnabled()) {
-            int rate = getRate();
-            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
-                logger.info(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
+            if (needToPrintStackTrace()) {
+                logger.info(STACK_TRACE_LOGGER_PREFIX + format, buildNewArgs(args, cause));
             } else {
                 logger.info(format, args);
             }
@@ -45,9 +47,8 @@ public final class StackTraceLogger {
 
     public static void warn(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isWarnEnabled()) {
-            int rate = getRate();
-            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
-                logger.warn(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
+            if (needToPrintStackTrace()) {
+                logger.warn(STACK_TRACE_LOGGER_PREFIX + format, buildNewArgs(args, cause));
             } else {
                 logger.warn(format, args);
             }
@@ -56,9 +57,8 @@ public final class StackTraceLogger {
 
     public static void error(Logger logger, Throwable cause, String format, Object[] args) {
         if (logger.isErrorEnabled()) {
-            int rate = getRate();
-            if (ThreadLocalRandom.current().nextInt(rate) == 0) {
-                logger.error(STACK_TRACE_LOGGER_PREFIX + format, args, cause);
+            if (needToPrintStackTrace()) {
+                logger.error(STACK_TRACE_LOGGER_PREFIX + format, buildNewArgs(args, cause));
             } else {
                 logger.error(format, args);
             }
@@ -69,4 +69,18 @@ public final class StackTraceLogger {
         return CONFIG.getInt(ConfigurationKeys.TRANSACTION_LOG_EXCEPTION_RATE, DEFAULT_LOG_EXCEPTION_RATE);
     }
 
+    private static boolean needToPrintStackTrace() {
+        int rate = getRate();
+        return ThreadLocalRandom.current().nextInt(rate) == 0;
+    }
+
+    private static Object[] buildNewArgs(Object[] args, Throwable cause) {
+        if (CollectionUtils.isEmpty(args)) {
+            return new Object[]{cause};
+        } else {
+            Object[] newArgs = Arrays.copyOf(args, args.length + 1);
+            newArgs[args.length] = cause;
+            return newArgs;
+        }
+    }
 }
