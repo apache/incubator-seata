@@ -52,6 +52,7 @@ public class ConnectionContext {
     private Long branchId;
     private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
+    private boolean autoCommitChanged;
 
     /**
      * the lock keys buffer
@@ -238,6 +239,24 @@ public class ConnectionContext {
         this.branchId = branchId;
     }
 
+    /**
+     * is seata change targetConnection autoCommit
+     *
+     * @return the boolean
+     */
+    public boolean isAutoCommitChanged() {
+        return this.autoCommitChanged;
+    }
+
+    /**
+     * set seata change targetConnection autoCommit record
+     *
+     * @param autoCommitChanged the boolean
+     */
+    public void setAutoCommitChanged(boolean autoCommitChanged) {
+        this.autoCommitChanged = autoCommitChanged;
+    }
+
 
     /**
      * Reset.
@@ -258,6 +277,7 @@ public class ConnectionContext {
         savepoints.clear();
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
+        this.autoCommitChanged = false;
     }
 
     /**
