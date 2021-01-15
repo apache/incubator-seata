@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import io.netty.channel.Channel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -63,7 +64,7 @@ public class SagaCore extends AbstractCore {
     public BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
                                          BranchSession branchSession) throws IOException, TimeoutException {
         Map<String, Channel> channels = ChannelManager.getRmChannels();
-        if (channels == null || channels.size() == 0) {
+        if (CollectionUtils.isEmpty(channels)) {
             LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
@@ -82,7 +83,7 @@ public class SagaCore extends AbstractCore {
     public BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                            BranchSession branchSession) throws IOException, TimeoutException {
         Map<String, Channel> channels = ChannelManager.getRmChannels();
-        if (channels == null || channels.size() == 0) {
+        if (CollectionUtils.isEmpty(channels)) {
             LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }

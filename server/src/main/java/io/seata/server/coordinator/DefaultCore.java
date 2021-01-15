@@ -131,7 +131,7 @@ public class DefaultCore implements Core {
 
         // transaction start event
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
+            session.getTransactionName(), applicationId, session.getBeginTime(), null, session.getStatus()));
 
         return session.getXid();
     }
@@ -162,7 +162,8 @@ public class DefaultCore implements Core {
 
         if (shouldCommit) {
             boolean success = doGlobalCommit(globalSession, false);
-            if (success && !globalSession.getBranchSessions().isEmpty()) {
+            //If successful and all remaining branches can be committed asynchronously, do async commit.
+            if (success && globalSession.hasBranch() && globalSession.canBeCommittedAsync()) {
                 globalSession.asyncCommit();
                 return GlobalStatus.Committed;
             } else {
@@ -178,7 +179,8 @@ public class DefaultCore implements Core {
         boolean success = true;
         // start committing event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getBeginTime(),
+                null, globalSession.getStatus()));
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
@@ -235,18 +237,21 @@ public class DefaultCore implements Core {
                     }
                 }
             }
-            if (globalSession.hasBranch()) {
+            //If has branch and not all remaining branches can be committed asynchronously,
+            //do print log and return false
+            if (globalSession.hasBranch() && !globalSession.canBeCommittedAsync()) {
                 LOGGER.info("Committing global transaction is NOT done, xid = {}.", globalSession.getXid());
                 return false;
             }
         }
+        //If success and there is no branch, end the global transaction.
         if (success && globalSession.getBranchSessions().isEmpty()) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
             eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                globalSession.getStatus()));
+                globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getBeginTime(),
+                    System.currentTimeMillis(), globalSession.getStatus()));
 
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
@@ -282,7 +287,8 @@ public class DefaultCore implements Core {
         boolean success = true;
         // start rollback event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getBeginTime(),
+                null, globalSession.getStatus()));
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
@@ -339,8 +345,8 @@ public class DefaultCore implements Core {
 
             // rollbacked event
             eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-                globalSession.getStatus()));
+                globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getBeginTime(),
+                    System.currentTimeMillis(), globalSession.getStatus()));
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
         }

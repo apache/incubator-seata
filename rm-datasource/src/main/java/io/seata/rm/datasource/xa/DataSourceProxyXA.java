@@ -15,15 +15,18 @@
  */
 package io.seata.rm.datasource.xa;
 
-import io.seata.core.context.RootContext;
-import io.seata.core.model.BranchType;
-import io.seata.rm.datasource.util.JdbcUtils;
-import io.seata.rm.datasource.util.XAUtils;
-
-import javax.sql.DataSource;
-import javax.sql.XAConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
+
+import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
+import io.seata.rm.datasource.SeataDataSourceProxy;
+import io.seata.rm.datasource.util.JdbcUtils;
+import io.seata.rm.datasource.util.XAUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DataSource proxy for XA mode.
@@ -32,14 +35,23 @@ import java.sql.SQLException;
  */
 public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxyXA.class);
+
     public DataSourceProxyXA(DataSource dataSource) {
         this(dataSource, DEFAULT_RESOURCE_GROUP_ID);
     }
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
+        if (dataSource instanceof SeataDataSourceProxy) {
+            LOGGER.info("Unwrap the data source, because the type is: {}", dataSource.getClass().getName());
+            dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
+        }
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
+
+        //Set the default branch type to 'XA' in the RootContext.
+        RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     @Override
