@@ -35,6 +35,15 @@ public class LoadBalanceFactory {
 
     public static final String LOAD_BALANCE_TYPE = LOAD_BALANCE_PREFIX + "type";
 
+    public static final String RANDOM_LOAD_BALANCE = DEFAULT_LOAD_BALANCE;
+
+    public static final String ROUND_ROBIN_LOAD_BALANCE = "RoundRobinLoadBalance";
+
+    public static final String CONSISTENT_HASH_LOAD_BALANCE = "ConsistentHashLoadBalance";
+
+    public static final String LEAST_ACTIVE_LOAD_BALANCE = "LeastActiveLoadBalance";
+
+
     /**
      * Get instance.
      *

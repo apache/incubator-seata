@@ -15,6 +15,9 @@
  */
 package io.seata.saga.engine.db;
 
+import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.exception.StoreException;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.AsyncCallback;
@@ -104,6 +107,26 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithChoiceNoDefault() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("a", 3);
+
+        String stateMachineName = "simpleChoiceNoDefaultTestStateMachine";
+
+        try {
+            stateMachineEngine.start(stateMachineName, null, paramMap);
+        } catch (EngineExecutionException e) {
+            Assertions.assertTrue(FrameworkErrorCode.StateMachineNoChoiceMatched.equals(e.getErrcode()));
+            e.printStackTrace(System.out);
+        }
+        long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
     }
 
@@ -703,6 +726,111 @@ public class StateMachineDBTests extends AbstractServerTest {
         doTestStateMachineTransTimeoutAsync(paramMap);
 
         ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+    }
+
+    @Test
+    public void testStateMachineRecordFailed() {
+
+        String businessKey = "bizKey";
+
+        Assertions.assertDoesNotThrow(() -> stateMachineEngine.startWithBusinessKey("simpleTestStateMachine", null, businessKey, new HashMap<>()));
+
+        // use same biz key to mock exception
+        Assertions.assertThrows(StoreException.class, () -> stateMachineEngine.startWithBusinessKey("simpleTestStateMachine", null, businessKey, new HashMap<>()));
+        Assertions.assertNull(RootContext.getXID());
+    }
+
+    @Test
+    public void testSimpleRetryStateAsUpdateMode() throws Exception {
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleUpdateStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(inst.getStateList().size(), 2);
+    }
+
+    @Test
+    public void testSimpleCompensateStateAsUpdateMode() throws Exception {
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+        paramMap.put("compensateBarThrowException", "true");
+
+        String stateMachineName = "simpleUpdateStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(inst.getStateList().size(), 3);
+    }
+
+    @Test
+    public void testSimpleSubRetryStateAsUpdateMode() throws Exception {
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 3);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+
+        Assertions.assertEquals(inst.getStateList().size(), 2);
+    }
+
+    @Test
+    public void testSimpleSubCompensateStateAsUpdateMode() throws Exception {
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 4);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+
+        Assertions.assertEquals(inst.getStateList().size(), 2);
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {

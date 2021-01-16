@@ -25,14 +25,14 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.config.ConfigurationFactory;
 
 import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
+import static io.seata.discovery.loadbalance.LoadBalanceFactory.CONSISTENT_HASH_LOAD_BALANCE;
 import static io.seata.discovery.loadbalance.LoadBalanceFactory.LOAD_BALANCE_PREFIX;
-
 /**
  * The type consistent hash load balance.
  *
  * @author ph3636
  */
-@LoadLevel(name = "ConsistentHashLoadBalance")
+@LoadLevel(name = CONSISTENT_HASH_LOAD_BALANCE)
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
 
     /**
