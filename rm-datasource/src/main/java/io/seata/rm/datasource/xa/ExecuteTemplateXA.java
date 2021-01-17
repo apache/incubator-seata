@@ -76,7 +76,7 @@ public class ExecuteTemplateXA {
                         "Failed to commit xa branch of " + connectionProxyXA.xid + ") since " + ex.getMessage(),
                         ex);
                     // XA End & Rollback
-                    if (!(ex instanceof SQLException) || AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END != ((SQLException) ex).getSQLState()) {
+                    if (!(ex instanceof SQLException) || !AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END.equalsIgnoreCase(((SQLException) ex).getSQLState())) {
                         try {
                             connectionProxyXA.rollback();
                         } catch (SQLException sqle) {
