@@ -23,6 +23,7 @@ import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
@@ -32,7 +33,9 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.SubStateMachine;
+import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,10 +74,19 @@ public class TaskStateRouter implements StateRouter {
         //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
         String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
 
+        Object isLoopState = context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
         if (StringUtils.hasLength(next)) {
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
         } else {
-            next = state.getNext();
+            if (Boolean.TRUE.equals(isLoopState)) {
+                next = state.getName();
+            } else {
+                if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+                    return null;
+                } else {
+                    next = state.getNext();
+                }
+            }
         }
 
         //If next is empty, the state selected by the Choice state was taken.
@@ -96,6 +108,17 @@ public class TaskStateRouter implements StateRouter {
         }
 
         stateInstruction.setStateName(next);
+
+        if (!Boolean.TRUE.equals(isLoopState)) {
+            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            if (LoopTaskUtils.matchLoop(nextState)) {
+                Loop loop = LoopTaskUtils.getLoopConfig(nextState, stateMachineInstance);
+                if (null != loop) {
+                    LoopTaskUtils.createLoopContext(context, loop);
+                }
+            }
+        }
 
         return stateInstruction;
     }
@@ -127,7 +150,7 @@ public class TaskStateRouter implements StateRouter {
             StateInstance stateToBeCompensated = stateStackToBeCompensated.pop();
 
             StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
-            State state = stateMachine.getState(stateToBeCompensated.getName());
+            State state = stateMachine.getState(EngineUtils.getOriginStateName(stateToBeCompensated));
             if (state != null && state instanceof AbstractTaskState) {
 
                 AbstractTaskState taskState = (AbstractTaskState)state;
@@ -163,6 +186,8 @@ public class TaskStateRouter implements StateRouter {
                         compensateState.getName() + DomainConstants.VAR_NAME_SUB_MACHINE_PARENT_ID,
                         EngineUtils.generateParentId(stateToBeCompensated));
                 }
+
+                LoopTaskUtils.createCompensateContext(context, stateToBeCompensated);
 
                 return instruction;
             }

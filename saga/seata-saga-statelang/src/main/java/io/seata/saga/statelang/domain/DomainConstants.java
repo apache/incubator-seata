@@ -68,7 +68,20 @@ public interface DomainConstants {
     String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
     String VAR_NAME_GLOBAL_TX = "_global_transaction_";
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
+    String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
+    String VAR_NAME_IS_LOOP_ASYNC_EXECUTION = "_is_loop_async_execution_";
+    String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
+    String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
     //endregion
+
+    // region of loop
+    String LOOP_COUNTER = "loopCounter";
+    String LOOP_ASYNC_PUBLISHER = "loopAsyncPublisher";
+    String LOOP_PROCESS_CONTEXT = "loopProcessContext";
+    String NUMBER_OF_INSTANCES = "nrOfInstances";
+    String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
+    String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
+    // endregion
 
     String OPERATION_NAME_START = "start";
     String OPERATION_NAME_FORWARD = "forward";

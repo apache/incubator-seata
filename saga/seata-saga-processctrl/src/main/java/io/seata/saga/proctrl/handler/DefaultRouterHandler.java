@@ -15,7 +15,9 @@
  */
 package io.seata.saga.proctrl.handler;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
@@ -24,6 +26,7 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessRouter;
 import io.seata.saga.proctrl.ProcessType;
 import io.seata.saga.proctrl.eventing.EventPublisher;
+import io.seata.saga.statelang.domain.DomainConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +74,16 @@ public class DefaultRouterHandler implements RouterHandler {
                 LOGGER.info("route instruction is null, process end");
             } else {
                 context.setInstruction(instruction);
+
+                if (context.hasVariable(DomainConstants.LOOP_PROCESS_CONTEXT)) {
+                    List<ProcessContext> asyncProcessContextList = (List<ProcessContext>)context.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
+                    ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)context.getVariable(DomainConstants.LOOP_ASYNC_PUBLISHER);
+
+                    for (ProcessContext processContext : asyncProcessContextList) {
+                        threadPoolExecutor.execute(() -> eventPublisher.publish(processContext));
+                    }
+                    context.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
+                }
 
                 eventPublisher.publish(context);
             }

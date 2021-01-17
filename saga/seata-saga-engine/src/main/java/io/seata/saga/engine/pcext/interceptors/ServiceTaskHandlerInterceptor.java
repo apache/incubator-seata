@@ -36,6 +36,7 @@ import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
@@ -120,13 +121,18 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
         stateInstance.setStateMachineInstance(stateMachineInstance);
-        stateInstance.setName(state.getName());
+        Object isForCompensation = state.isForCompensation();
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
+            stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
+            stateInstance.setStateIdRetriedFor(LoopTaskUtils.reloadLastRetriedId(stateMachineInstance, stateInstance.getName()));
+        } else {
+            stateInstance.setName(state.getName());
+            stateInstance.setStateIdRetriedFor(
+                (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
+        }
         stateInstance.setGmtStarted(new Date());
         stateInstance.setGmtUpdated(stateInstance.getGmtStarted());
         stateInstance.setStatus(ExecutionStatus.RU);
-
-        stateInstance.setStateIdRetriedFor(
-            (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
 
         if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
 
@@ -141,7 +147,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setServiceMethod(state.getServiceMethod());
         stateInstance.setServiceType(state.getServiceType());
 
-        Object isForCompensation = state.isForCompensation();
         if (isForCompensation != null && (Boolean)isForCompensation) {
             CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
             StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(state.getName());

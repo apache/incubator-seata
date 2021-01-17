@@ -1,0 +1,73 @@
+package io.seata.saga.engine.pcext.utils;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.statelang.domain.DomainConstants;
+
+/**
+ * @author anselleeyy
+ */
+public class LoopContextHolder {
+
+    private AtomicInteger nrOfInstances = new AtomicInteger();
+    private AtomicInteger nrOfActiveInstances = new AtomicInteger();
+    private AtomicInteger nrOfCompletedInstances = new AtomicInteger();
+    private volatile boolean needCompensate = false;
+    private Map<Integer, AtomicBoolean> loopCounterContext = new ConcurrentHashMap<>();
+    private LinkedBlockingDeque<Exception> loopExpContext = new LinkedBlockingDeque<>();
+
+    public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
+        LoopContextHolder loopContextHolder = (LoopContextHolder)context.getVariable(
+            DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
+        if (null == loopContextHolder && forceCreate) {
+            synchronized (context) {
+                loopContextHolder = (LoopContextHolder)context.getVariable(
+                    DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
+                if (null == loopContextHolder) {
+                    loopContextHolder = new LoopContextHolder();
+                    context.setVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER, loopContextHolder);
+                    context.setVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
+                }
+            }
+        }
+        return loopContextHolder;
+    }
+
+    public static void clearCurrent(ProcessContext context) {
+        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
+        context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
+    }
+
+    public AtomicInteger getNrOfInstances() {
+        return nrOfInstances;
+    }
+
+    public AtomicInteger getNrOfActiveInstances() {
+        return nrOfActiveInstances;
+    }
+
+    public AtomicInteger getNrOfCompletedInstances() {
+        return nrOfCompletedInstances;
+    }
+
+    public boolean isNeedCompensate() {
+        return needCompensate;
+    }
+
+    public void setNeedCompensate(boolean needCompensate) {
+        this.needCompensate = needCompensate;
+    }
+
+    public Map<Integer, AtomicBoolean> getLoopCounterContext() {
+        return loopCounterContext;
+    }
+
+    public LinkedBlockingDeque<Exception> getLoopExpContext() {
+        return loopExpContext;
+    }
+}

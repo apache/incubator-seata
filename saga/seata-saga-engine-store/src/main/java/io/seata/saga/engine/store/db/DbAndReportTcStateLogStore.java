@@ -120,7 +120,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 // clear
                 RootContext.unbind();
                 RootContext.unbindBranchType();
-                sagaTransactionalTemplate.cleanUp();
+                if (sagaTransactionalTemplate != null) {
+                    sagaTransactionalTemplate.cleanUp();
+                }
                 throw e;
             }
         }

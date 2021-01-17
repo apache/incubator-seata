@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -55,11 +56,33 @@ public class EngineUtils {
     }
 
     /**
+     * get origin state name without suffix like fork
+     *
+     * @param stateInstance
+     * @return
+     * @see LoopTaskUtils#generateLoopStateName(ProcessContext, String)
+     */
+    public static String getOriginStateName(StateInstance stateInstance) {
+        String stateName = stateInstance.getName();
+        if (StringUtils.isNotBlank(stateName)) {
+            int end = stateName.lastIndexOf(LoopTaskUtils.LOOP_STATE_NAME_PATTERN);
+            if (end > -1) {
+                return stateName.substring(0, end);
+            }
+        }
+        return stateName;
+    }
+
+    /**
      * end StateMachine
      *
      * @param context
      */
     public static void endStateMachine(ProcessContext context) {
+
+        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+            return;
+        }
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
@@ -109,6 +132,11 @@ public class EngineUtils {
      * @param exp
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
+
+        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))
+            || Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+            return;
+        }
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);

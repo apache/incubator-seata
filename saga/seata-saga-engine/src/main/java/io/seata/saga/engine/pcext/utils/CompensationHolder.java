@@ -89,7 +89,7 @@ public class CompensationHolder {
 
             for (StateInstance stateInstance : stateInstanceList) {
                 if (stateNeedToCompensate(stateInstance)) {
-                    State state = stateMachine.getState(stateInstance.getName());
+                    State state = stateMachine.getState(EngineUtils.getOriginStateName(stateInstance));
                     AbstractTaskState taskState = null;
                     if (state instanceof AbstractTaskState) {
                         taskState = (AbstractTaskState)state;
@@ -159,5 +159,9 @@ public class CompensationHolder {
 
     public Stack<StateInstance> getStateStackNeedCompensation() {
         return stateStackNeedCompensation;
+    }
+
+    public void setStateStackNeedCompensation(Stack<StateInstance> stateStackNeedCompensation) {
+        this.stateStackNeedCompensation = stateStackNeedCompensation;
     }
 }
