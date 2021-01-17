@@ -34,8 +34,7 @@ public enum Isolation {
     /**
      * the isolation serializable
      */
-    SERIALIZABLE,
-    ;
+    SERIALIZABLE;
 
     public static boolean isSupport(Isolation isolation) {
         return isolation == READ_UNCOMMITTED || isolation == READ_COMMITTED;
