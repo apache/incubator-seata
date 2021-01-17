@@ -23,10 +23,9 @@ import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
-import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aop.target.EmptyTargetSource;
 
 /**
  * Proxy tools base on spring
@@ -34,9 +33,7 @@ import org.springframework.aop.target.EmptyTargetSource;
  * @author zhangsen
  */
 public class SpringProxyUtils {
-
     private SpringProxyUtils() {
-
     }
 
     /**
@@ -47,18 +44,14 @@ public class SpringProxyUtils {
      * @throws Exception the exception
      */
     public static Class<?> findTargetClass(Object proxy) throws Exception {
-        if (AopUtils.isAopProxy(proxy)) {
-            AdvisedSupport advised = getAdvisedSupport(proxy);
-            if (AopUtils.isJdkDynamicProxy(proxy)) {
-                TargetSource targetSource = advised.getTargetSource();
-                return targetSource instanceof EmptyTargetSource ? getFirstInterfaceByAdvised(advised)
-                    : targetSource.getTargetClass();
-            }
-            Object target = advised.getTargetSource().getTarget();
-            return findTargetClass(target);
-        } else {
-            return proxy == null ? null : proxy.getClass();
+        if (proxy == null) {
+            return null;
         }
+        if (AopUtils.isAopProxy(proxy) && proxy instanceof Advised) {
+            Object targetObject = ((Advised) proxy).getTargetSource().getTarget();
+            return findTargetClass(targetObject);
+        }
+        return proxy.getClass();
     }
 
     public static Class<?>[] findInterfaces(Object proxy) throws Exception {
@@ -74,15 +67,6 @@ public class SpringProxyUtils {
         Class<?>[] interfaces = advised.getProxiedInterfaces();
         if (interfaces.length > 0) {
             return interfaces;
-        } else {
-            throw new IllegalStateException("Find the jdk dynamic proxy class that does not implement the interface");
-        }
-    }
-
-    private static Class<?> getFirstInterfaceByAdvised(AdvisedSupport advised) {
-        Class<?>[] interfaces = advised.getProxiedInterfaces();
-        if (interfaces.length > 0) {
-            return interfaces[0];
         } else {
             throw new IllegalStateException("Find the jdk dynamic proxy class that does not implement the interface");
         }
