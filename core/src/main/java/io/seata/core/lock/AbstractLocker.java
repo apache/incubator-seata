@@ -58,7 +58,7 @@ public abstract class AbstractLocker implements Locker {
         return lockDOs;
     }
 
-    protected LockDO convertToLockDO(RowLock rowLock){
+    protected LockDO convertToLockDO(RowLock rowLock) {
         LockDO lockDO = new LockDO();
         lockDO.setBranchId(rowLock.getBranchId());
         lockDO.setPk(rowLock.getPk());

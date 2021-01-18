@@ -15,13 +15,10 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -117,7 +114,7 @@ public class RedisLocker extends AbstractLocker {
             // args index 2 placeholder
             args.add(null);
             args.add(needLockXid);
-            for (LockDO lockDO : needLockDOS){
+            for (LockDO lockDO : needLockDOS) {
                 keys.add(buildLockKey(lockDO.getRowKey()));
                 args.add(lockDO.getXid());
                 args.add(lockDO.getTransactionId().toString());
