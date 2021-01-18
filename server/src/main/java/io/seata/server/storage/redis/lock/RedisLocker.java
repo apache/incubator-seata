@@ -67,6 +67,32 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String ROW_KEY = "rowKey";
 
+    static {
+        StringBuilder sb = new StringBuilder("local array = {}; local result;");
+        sb.append("local keySize = ARGV[1];");
+        sb.append("local argSize = ARGV[2];");
+        sb.append("for i= 1, keySize do ");
+        sb.append("result = redis.call('HGET',KEYS[i],'").append(XID).append("'); ");
+        sb.append("if (not result) then array[i]='no' else if(result ~= ARGV[3]) then return 0 else array[i]= 'yes' end end; ");
+        sb.append(" end ");
+        sb.append("for i =1, keySize do ");
+        sb.append(" if(array[i] == 'no') then ");
+        sb.append("redis.call('HSET',KEYS[i],'").append(XID).append("',ARGV[(i-1)*7+4]);");
+        sb.append("redis.call('HSET',KEYS[i],'").append(TRANSACTION_ID).append("',ARGV[(i-1)*7+5]);");
+        sb.append("redis.call('HSET',KEYS[i],'").append(BRANCH_ID).append("',ARGV[(i-1)*7+6]);");
+        sb.append("redis.call('HSET',KEYS[i],'").append(RESOURCE_ID).append("',ARGV[(i-1)*7+7]);");
+        sb.append("redis.call('HSET',KEYS[i],'").append(TABLE_NAME).append("',ARGV[(i-1)*7+8]);");
+        sb.append("redis.call('HSET',KEYS[i],'").append(ROW_KEY).append("',ARGV[(i-1)*7+9]);");
+        sb.append("redis.call('HSET',KEYS[i],'").append(PK).append("',ARGV[(i-1)*7+10]);");
+        sb.append(" end ");
+        sb.append(" end ");
+        sb.append("redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]);");
+        sb.append(" return 1");
+        ACQUIRE_LOCK = sb.toString();
+    }
+
+    private static final String ACQUIRE_LOCK;
+
     /**
      * Instantiates a new Redis locker.
      */
@@ -78,78 +104,39 @@ public class RedisLocker extends AbstractLocker {
         if (CollectionUtils.isEmpty(rowLocks)) {
             return true;
         }
-        Integer status = SUCCEED;
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
-
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            List<LockDO> needLockDOS = convertToLockDO(rowLocks);
-            if (needLockDOS.size() > 1) {
-                needLockDOS = needLockDOS.stream().
-                        filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
-                        .collect(Collectors.toList());
-            }
-            List<String> needLockKeys = new ArrayList<>();
-            needLockDOS.forEach(lockDO -> needLockKeys.add(buildLockKey(lockDO.getRowKey())));
-
-            Pipeline pipeline1 = jedis.pipelined();
-            needLockKeys.stream().forEachOrdered(needLockKey -> pipeline1.hget(needLockKey, XID));
-            List<String> existedLockInfos = (List<String>) (List) pipeline1.syncAndReturnAll();
-            Map<String, LockDO> needAddLock = new HashMap<>(needLockKeys.size(), 1);
-
-            for (int i = 0; i < needLockKeys.size(); i++) {
-                String existedLockXid = existedLockInfos.get(i);
-                if (StringUtils.isEmpty(existedLockXid)) {
-                    //If empty,we need to lock this row
-                    needAddLock.put(needLockKeys.get(i), needLockDOS.get(i));
-                } else {
-                    if (!StringUtils.equals(existedLockXid, needLockXid)) {
-                        //If not equals,means the rowkey is holding by another global transaction
-                        return false;
-                    }
-                }
-            }
-
-            if (needAddLock.isEmpty()) {
-                return true;
-            }
-            Pipeline pipeline = jedis.pipelined();
-            List<String> readyKeys = new ArrayList<>();
-            needAddLock.forEach((key, value) -> {
-                pipeline.hsetnx(key, XID, value.getXid());
-                pipeline.hsetnx(key, TRANSACTION_ID, value.getTransactionId().toString());
-                pipeline.hsetnx(key, BRANCH_ID, value.getBranchId().toString());
-                pipeline.hsetnx(key, RESOURCE_ID, value.getResourceId());
-                pipeline.hsetnx(key, TABLE_NAME, value.getTableName());
-                pipeline.hsetnx(key, ROW_KEY, value.getRowKey());
-                pipeline.hsetnx(key, PK, value.getPk());
-                readyKeys.add(key);
-            });
-            List<Integer> results = (List<Integer>) (List) pipeline.syncAndReturnAll();
-            List<List<Integer>> partitions = Lists.partition(results, 7);
-
-            String[] success = new String[partitions.size()];
-            for (int i = 0; i < partitions.size(); i++) {
-                String key = readyKeys.get(i);
-                if (partitions.get(i).contains(FAILED)) {
-                    status = FAILED;
-                } else {
-                    success[0] = key;
-                }
-            }
-
-            //If someone has failed,all the lockkey which has been added need to be delete.
-            if (FAILED.equals(status)) {
-                if (success.length > 0) {
-                    jedis.del(success);
-                }
-                return false;
+            List<LockDO> needLockDOS = rowLocks.stream().filter(LambdaUtils.distinctByKey(RowLock::getRowKey))
+                    .map(rowLock -> convertToLockDO(rowLock)).collect(Collectors.toList());
+            ArrayList<String> keys = new ArrayList<>();
+            ArrayList<String> args = new ArrayList<>();
+            int size = needLockDOS.size();
+            args.add(String.valueOf(size));
+            // args index 2 placeholder
+            args.add(null);
+            args.add(needLockXid);
+            for (LockDO lockDO : needLockDOS){
+                keys.add(buildLockKey(lockDO.getRowKey()));
+                args.add(lockDO.getXid());
+                args.add(lockDO.getTransactionId().toString());
+                args.add(lockDO.getBranchId().toString());
+                args.add(lockDO.getResourceId());
+                args.add(lockDO.getTableName());
+                args.add(lockDO.getRowKey());
+                args.add(lockDO.getPk());
             }
             String xidLockKey = buildXidLockKey(needLockXid);
             StringJoiner lockKeysString = new StringJoiner(ROW_LOCK_KEY_SPLIT_CHAR);
-            needLockKeys.forEach(lockKeysString::add);
-            jedis.hset(xidLockKey, branchId.toString(), lockKeysString.toString());
-            return true;
+            needLockDOS.stream().map(lockDO -> buildLockKey(lockDO.getRowKey())).forEach(lockKeysString::add);
+            keys.add(xidLockKey);
+            keys.add(branchId.toString());
+            args.add(lockKeysString.toString());
+            args.add(String.valueOf(size));
+            // reset args index 2
+            args.set(1, String.valueOf(args.size()));
+            long result = (long)jedis.eval(ACQUIRE_LOCK, keys, args);
+            return SUCCEED == result;
         }
     }
 
