@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.saga.engine.pcext.utils;
 
 import java.util.ArrayList;
@@ -47,7 +62,7 @@ public class LoopTaskUtils {
     private static final String DEFAULT_COMPLETION_CONDITION = "[nrOfInstances] == [nrOfCompletedInstances]";
     public static final String LOOP_STATE_NAME_PATTERN = "-fork-";
 
-    private static final Map<String, ExpressionEvaluator> expressionEvaluatorMap = new ConcurrentHashMap<>();
+    private static final Map<String, ExpressionEvaluator> EXPRESSION_EVALUATOR_MAP = new ConcurrentHashMap<>();
 
     /**
      * get Loop Config from State
@@ -380,15 +395,15 @@ public class LoopTaskUtils {
         if (StringUtils.isBlank(completionCondition)) {
             completionCondition = DEFAULT_COMPLETION_CONDITION;
         }
-        if (!expressionEvaluatorMap.containsKey(completionCondition)) {
+        if (!EXPRESSION_EVALUATOR_MAP.containsKey(completionCondition)) {
             StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             ExpressionEvaluator expressionEvaluator = (ExpressionEvaluator)stateMachineConfig.getEvaluatorFactoryManager()
                 .getEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT).createEvaluator(completionCondition);
             expressionEvaluator.setRootObjectName(null);
-            expressionEvaluatorMap.put(completionCondition, expressionEvaluator);
+            EXPRESSION_EVALUATOR_MAP.put(completionCondition, expressionEvaluator);
         }
-        return expressionEvaluatorMap.get(completionCondition);
+        return EXPRESSION_EVALUATOR_MAP.get(completionCondition);
     }
 
     private static int getMaxMultiInstanceNumber(int parallelNumber, int collectionSize) {
