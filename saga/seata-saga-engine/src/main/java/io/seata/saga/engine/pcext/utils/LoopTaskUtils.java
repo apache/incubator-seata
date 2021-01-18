@@ -217,12 +217,12 @@ public class LoopTaskUtils {
             || DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(state.getType()));
     }
 
-    public static String reloadLastRetriedId(StateMachineInstance stateMachineInstance, String stateName) {
+    public static StateInstance reloadLastRetriedStateInstance(StateMachineInstance stateMachineInstance, String stateName) {
         List<StateInstance> actList = stateMachineInstance.getStateList();
         for (int i = actList.size() - 1; i >= 0; i--) {
             StateInstance stateInstance = actList.get(i);
             if (stateInstance.getName().equals(stateName)) {
-                return stateInstance.getId();
+                return stateInstance;
             }
         }
         return null;
@@ -363,6 +363,7 @@ public class LoopTaskUtils {
             copyContext.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
             copyContext.removeVariable(DomainConstants.VAR_NAME_SYNC_EXE_STACK);
             copyContext.removeVariable(DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID);
+            copyContext.removeVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD);
             copyContext.setInstruction(copyInstruction(originContext.getInstruction(StateInstruction.class)));
             asyncProcessContextList.add(copyContext);
         }

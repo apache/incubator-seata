@@ -20,8 +20,10 @@ import io.seata.saga.engine.pcext.utils.LoopContextHolder;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.slf4j.Logger;
@@ -68,6 +70,16 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
                 loop = currentState.getLoop();
+                if (context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME).equals(DomainConstants.OPERATION_NAME_FORWARD)) {
+                    StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+                        DomainConstants.VAR_NAME_STATEMACHINE_INST);
+                    StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(
+                        stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, currentState.getName()));
+                    if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
+                        lastRetriedStateInstance.getType()) && !ExecutionStatus.SU.equals(lastRetriedStateInstance.getCompensationStatus())) {
+                        context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
+                    }
+                }
             }
 
             Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
