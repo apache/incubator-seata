@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
@@ -155,10 +154,10 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         }
         if (null != loop) {
             LoopTaskUtils.createLoopContext(processContext, loop);
-            ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)processContext.getVariable(DomainConstants.LOOP_ASYNC_PUBLISHER);
-            List<ProcessContext> asyncProcessContextList = (List<ProcessContext>)processContext.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
+            processContext.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
+            List<ProcessContext> asyncProcessContextList = (List)processContext.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
             for (ProcessContext context : asyncProcessContextList) {
-                threadPoolExecutor.execute(() -> eventPublisher.publish(context));
+                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
             }
             processContext.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
         }
@@ -341,13 +340,12 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 eventPublisher = stateMachineConfig.getProcessCtrlEventPublisher();
             }
 
-
             if (null != loop) {
                 LoopTaskUtils.reloadLoopContext(context, lastForwardState);
-                ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)context.getVariable(DomainConstants.LOOP_ASYNC_PUBLISHER);
+                context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
                 List<ProcessContext> asyncProcessContextList = (List)context.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
                 for (ProcessContext processContext : asyncProcessContextList) {
-                    threadPoolExecutor.execute(() -> eventPublisher.publish(processContext));
+                    stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
                 }
                 context.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
             }

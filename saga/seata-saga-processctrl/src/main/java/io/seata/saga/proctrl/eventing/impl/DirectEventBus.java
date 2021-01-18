@@ -22,7 +22,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.EventConsumer;
-import io.seata.saga.statelang.domain.DomainConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +34,8 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectEventBus.class);
 
+    private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
+
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
         List<EventConsumer> eventHandlers = getEventConsumers(context.getClass());
@@ -46,13 +47,13 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
         }
 
         boolean isFirstEvent = false;
-        Stack<ProcessContext> currentStack = (Stack<ProcessContext>)context.getVariable(DomainConstants.VAR_NAME_SYNC_EXE_STACK);
+        Stack<ProcessContext> currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
         if (currentStack == null) {
             synchronized (context) {
-                currentStack = (Stack<ProcessContext>)context.getVariable(DomainConstants.VAR_NAME_SYNC_EXE_STACK);
+                currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
                 if (currentStack == null) {
                     currentStack = new Stack<>();
-                    context.setVariable(DomainConstants.VAR_NAME_SYNC_EXE_STACK, currentStack);
+                    context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
                     isFirstEvent = true;
                 }
             }
@@ -69,7 +70,7 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
                     }
                 }
             } finally {
-                context.removeVariable(DomainConstants.VAR_NAME_SYNC_EXE_STACK);
+                context.removeVariable(VAR_NAME_SYNC_EXE_STACK);
             }
         }
         return true;

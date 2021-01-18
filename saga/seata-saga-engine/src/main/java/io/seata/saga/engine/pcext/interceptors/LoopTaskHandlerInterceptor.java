@@ -83,7 +83,6 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                     .getStateMachine().getState(EngineUtils.getOriginStateName(stateToBeCompensated));
                 loop = compensateState.getLoop();
             } else {
-                LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
                 loop = currentState.getLoop();
                 if (context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME).equals(DomainConstants.OPERATION_NAME_FORWARD)) {
                     StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
@@ -93,6 +92,8 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                     if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
                         lastRetriedStateInstance.getType()) && !ExecutionStatus.SU.equals(lastRetriedStateInstance.getCompensationStatus())) {
                         context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
+                    } else {
+                        context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, false);
                     }
                 }
             }
@@ -133,9 +134,8 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             State compensationTriggerState = (State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
             if (compensationTriggerState != null) {
                 compensateOperation = true;
-            } else {
-                LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().decrementAndGet();
             }
+            LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().decrementAndGet();
 
             int loopCounter = LoopTaskUtils.acquireNextLoopCounter(context);
             if (!deque.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation && loopCounter < 0)) {
@@ -150,14 +150,21 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                             EngineUtils.failStateMachine(context, deque.peek());
                         }
                     }
-                    LoopContextHolder.clearCurrent(context);
                 } catch (InterruptedException exception) {
                     LOGGER.error("State: [{}] wait loop complete is interrupted, message: [{}]",
                         context.getInstruction(StateInstruction.class).getStateName(), exception.getMessage());
                     throw new EngineExecutionException(exception);
+                } finally {
+                    LoopContextHolder.clearCurrent(context);
+                    if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+                        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+                    }
                 }
-            } else if (!compensateOperation) {
-                context.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
+            } else {
+                LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
+                if (!compensateOperation) {
+                    context.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
+                }
             }
         }
     }

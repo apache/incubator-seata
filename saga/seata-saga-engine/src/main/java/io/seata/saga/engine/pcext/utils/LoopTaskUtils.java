@@ -23,13 +23,10 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
@@ -58,7 +55,6 @@ public class LoopTaskUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
 
-    private static final String LOOP_ASYNC_EXECUTOR_NAME = "async_loop_processor";
     private static final String DEFAULT_COMPLETION_CONDITION = "[nrOfInstances] == [nrOfCompletedInstances]";
     public static final String LOOP_STATE_NAME_PATTERN = "-fork-";
 
@@ -116,8 +112,8 @@ public class LoopTaskUtils {
         int asyncPublisherNumber = getMaxMultiInstanceNumber(loop.getParallel(), collection.size()) - 1;
         List<ProcessContext> asyncProcessContextList = new ArrayList<>(asyncPublisherNumber);
         buildAsyncProcessContext(context, asyncPublisherNumber, asyncProcessContextList, false);
+        loopContextHolder.getNrOfActiveInstances().set(asyncPublisherNumber + 1);
 
-        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, getExecutor(asyncPublisherNumber));
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
     }
@@ -160,8 +156,8 @@ public class LoopTaskUtils {
             collection.size() - executedNumber) - 1;
         List<ProcessContext> asyncProcessContextList = new ArrayList<>(asyncPublisherNumber);
         buildAsyncProcessContext(context, asyncPublisherNumber, asyncProcessContextList, false);
+        loopContextHolder.getNrOfActiveInstances().set(asyncPublisherNumber + 1);
 
-        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, getExecutor(asyncPublisherNumber));
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(forwardState.getName()));
     }
@@ -194,8 +190,9 @@ public class LoopTaskUtils {
             }
         }
 
-        loopContextHolder.getNrOfInstances().set(sameStateNeedToBeCompensatedSize);
         int asyncPublisherNumber = getMaxMultiInstanceNumber(loop.getParallel(), sameStateNeedToBeCompensatedSize) - 1;
+        loopContextHolder.getNrOfInstances().set(sameStateNeedToBeCompensatedSize);
+        loopContextHolder.getNrOfActiveInstances().set(asyncPublisherNumber + 1);
 
         List<ProcessContext> asyncProcessContextList = new ArrayList<>(asyncPublisherNumber);
 
@@ -214,7 +211,6 @@ public class LoopTaskUtils {
             CompensationHolder.getCurrent(tempContext, true).setStateStackNeedCompensation(stateStackToBeCompensated);
         }
 
-        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, getExecutor(asyncPublisherNumber));
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(stateToBeCompensated.getName()));
 
@@ -292,9 +288,7 @@ public class LoopTaskUtils {
             }
         }
 
-        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)context.getVariable(
-            DomainConstants.LOOP_ASYNC_PUBLISHER);
-        while (null != threadPoolExecutor && threadPoolExecutor.getActiveCount() > 0) {
+        while (LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().get() > 0) {
             TimeUnit.MILLISECONDS.sleep(2);
         }
     }
@@ -353,15 +347,6 @@ public class LoopTaskUtils {
                 && LoopContextHolder.getCurrent(context, true).isNeedCompensate();
     }
 
-    private static ThreadPoolExecutor getExecutor(int poolSize) {
-        if (poolSize <= 0) {
-            poolSize = 1;
-        }
-        return new ThreadPoolExecutor(poolSize, poolSize,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(LOOP_ASYNC_EXECUTOR_NAME, poolSize));
-    }
-
     private static void buildAsyncProcessContext(ProcessContext originContext, int asyncPublisherNumber,
                                                  List<ProcessContext> asyncProcessContextList, boolean isCompensate) {
         for (int i = 0; i < asyncPublisherNumber; i++) {
@@ -376,7 +361,6 @@ public class LoopTaskUtils {
             copyContext.setVariables(new ConcurrentHashMap<>(originContext.getVariables()));
             copyContext.setVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION, true);
             copyContext.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
-            copyContext.removeVariable(DomainConstants.VAR_NAME_SYNC_EXE_STACK);
             copyContext.removeVariable(DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID);
             copyContext.removeVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD);
             copyContext.setInstruction(copyInstruction(originContext.getInstruction(StateInstruction.class)));
