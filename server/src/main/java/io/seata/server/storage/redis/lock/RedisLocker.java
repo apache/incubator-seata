@@ -71,6 +71,7 @@ public class RedisLocker extends AbstractLocker {
         StringBuilder sb = new StringBuilder("local array = {}; local result;");
         sb.append("local keySize = ARGV[1];");
         sb.append("local argSize = ARGV[2];");
+        // Loop through all keys to see if they can be used , when a key is not available, exit
         sb.append("for i= 1, keySize do ");
         sb.append("result = redis.call('HGET',KEYS[i],'").append(XID).append("'); ");
         sb.append("if (not result) then array[i]='no' else if(result ~= ARGV[3]) then return 0 else array[i]= 'yes' end end; ");
