@@ -105,8 +105,10 @@ public class RedisLocker extends AbstractLocker {
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            List<LockDO> needLockDOS = rowLocks.stream().filter(LambdaUtils.distinctByKey(RowLock::getRowKey))
-                    .map(rowLock -> convertToLockDO(rowLock)).collect(Collectors.toList());
+            List<LockDO> needLockDOS = rowLocks.stream()
+                    .map(rowLock -> convertToLockDO(rowLock))
+                    .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
+                    .collect(Collectors.toList());
             ArrayList<String> keys = new ArrayList<>();
             ArrayList<String> args = new ArrayList<>();
             int size = needLockDOS.size();
