@@ -11,7 +11,7 @@
             "CompensateState": "CompensateFirstState",
             "Loop": {
                 "Parallel": 3,
-                "Collection": "collection",
+                "Collection": "$.[collection]",
                 "ElementVariableName": "element",
                 "ElementIndexName": "loopCounter"
             },
@@ -45,7 +45,7 @@
             "CompensateState": "CompensateSecondState",
             "Loop": {
                 "Parallel": 3,
-                "Collection": "collection",
+                "Collection": "$.[collection]",
                 "ElementVariableName": "element",
                 "CompletionCondition": "[nrOfCompletedInstances] / [nrOfInstances] >= 0.4",
                 "ElementIndexName": "loopCounter"
@@ -71,7 +71,7 @@
             "StateMachineName": "simpleChoiceTestStateMachine",
             "Loop": {
                 "Parallel": 3,
-                "Collection": "collection",
+                "Collection": "$.[collection]",
                 "ElementVariableName": "element",
                 "CompletionCondition": "[nrOfCompletedInstances] / [nrOfInstances] >= 0.4",
                 "ElementIndexName": "loopCounter"

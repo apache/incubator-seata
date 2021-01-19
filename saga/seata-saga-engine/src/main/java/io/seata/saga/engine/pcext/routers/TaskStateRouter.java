@@ -33,7 +33,6 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
@@ -110,10 +109,8 @@ public class TaskStateRouter implements StateRouter {
         stateInstruction.setStateName(next);
 
         if (!Boolean.TRUE.equals(isLoopState)) {
-            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_INST);
             if (LoopTaskUtils.matchLoop(nextState)) {
-                Loop loop = LoopTaskUtils.getLoopConfig(nextState, stateMachineInstance);
+                Loop loop = LoopTaskUtils.getLoopConfig(context, nextState);
                 if (null != loop) {
                     LoopTaskUtils.createLoopContext(context, loop);
                 }

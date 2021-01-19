@@ -73,7 +73,6 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             State compensationTriggerState = (State)context.getVariable(
                 DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
             if (compensationTriggerState != null) {
-                LoopContextHolder.getCurrent(context, true).getNrOfInstances().decrementAndGet();
                 CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
                 StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(currentState.getName());
                 if (loopCounter < 0) {
@@ -84,7 +83,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                 loop = compensateState.getLoop();
             } else {
                 loop = currentState.getLoop();
-                if (context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME).equals(DomainConstants.OPERATION_NAME_FORWARD)) {
+                if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
                     StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
                         DomainConstants.VAR_NAME_STATEMACHINE_INST);
                     StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(
@@ -98,12 +97,12 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                 }
             }
 
+            Collection collection = LoopContextHolder.getCurrent(context, true).getCollection();
+
             Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-            Collection collection = (Collection)contextVariables.get(loop.getCollection());
             Map<String, Object> copyContextVariables = new ConcurrentHashMap<>(contextVariables.size() + 2);
             nullSafeCopy(contextVariables, copyContextVariables);
-
             copyContextVariables.put(loop.getElementIndexName(), loopCounter);
             copyContextVariables.put(loop.getElementVariableName(), iterator(collection, loopCounter));
             context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
@@ -164,6 +163,8 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                 LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
                 if (!compensateOperation) {
                     context.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
+                } else {
+                    LoopContextHolder.getCurrent(context, true).getNrOfInstances().decrementAndGet();
                 }
             }
         }

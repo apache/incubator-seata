@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -35,6 +36,7 @@ public class LoopContextHolder {
     private volatile boolean needCompensate = false;
     private Map<Integer, AtomicBoolean> loopCounterContext = new ConcurrentHashMap<>();
     private LinkedBlockingDeque<Exception> loopExpContext = new LinkedBlockingDeque<>();
+    private Collection collection;
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
         LoopContextHolder loopContextHolder = (LoopContextHolder)context.getVariable(
@@ -84,5 +86,13 @@ public class LoopContextHolder {
 
     public LinkedBlockingDeque<Exception> getLoopExpContext() {
         return loopExpContext;
+    }
+
+    public Collection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(Collection collection) {
+        this.collection = collection;
     }
 }

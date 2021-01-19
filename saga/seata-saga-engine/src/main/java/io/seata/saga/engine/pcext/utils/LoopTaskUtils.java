@@ -63,25 +63,31 @@ public class LoopTaskUtils {
     /**
      * get Loop Config from State
      *
-     * @param state                currentState
-     * @param stateMachineInstance stateMachineInstance
+     * @param context
+     * @param currentState
      * @return currentState loop config if satisfied, else {@literal null}
      */
-    public static Loop getLoopConfig(State state, StateMachineInstance stateMachineInstance) {
-        if (matchLoop(state)) {
-            AbstractTaskState taskState = (AbstractTaskState)state;
+    public static Loop getLoopConfig(ProcessContext context, State currentState) {
+        if (matchLoop(currentState)) {
+            AbstractTaskState taskState = (AbstractTaskState)currentState;
 
-            Map<String, Object> startParams = stateMachineInstance.getContext();
+            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+
             if (null != taskState.getLoop()) {
                 Loop loop = taskState.getLoop();
                 String collectionName = loop.getCollection();
                 if (StringUtils.isNotBlank(collectionName)) {
-                    Object collection = startParams.get(collectionName);
+                    Object expression = ParameterUtils.createValueExpression(stateMachineConfig.getExpressionFactoryManager(), collectionName);
+                    Object collection = ParameterUtils.getValue(expression, stateMachineInstance.getContext(), null);
                     if (collection instanceof Collection && ((Collection)collection).size() > 0) {
+                        context.setVariable(DomainConstants.LOOP_COLLECTION, collection);
                         return loop;
                     }
                 }
-                LOGGER.warn("State [{}] loop collection param [{}] invalid", state.getName(), collectionName);
+                LOGGER.warn("State [{}] loop collection param [{}] invalid", currentState.getName(), collectionName);
             }
         }
         return null;
@@ -95,14 +101,11 @@ public class LoopTaskUtils {
      */
     public static void createLoopContext(ProcessContext context, Loop loop) {
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_INST);
-
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
 
-        Map<String, Object> startParams = stateMachineInstance.getContext();
-        Collection collection = (Collection)startParams.get(loop.getCollection());
+        Collection collection = (Collection)context.getVariable(DomainConstants.LOOP_COLLECTION);
         loopContextHolder.getNrOfInstances().set(collection.size());
+        loopContextHolder.setCollection(collection);
 
         Map<Integer, AtomicBoolean> loopContext = loopContextHolder.getLoopCounterContext();
         for (int i = 0; i < collection.size(); i++) {
@@ -118,7 +121,7 @@ public class LoopTaskUtils {
         context.setVariable(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
     }
 
-    public static void reloadLoopContext(ProcessContext context, StateInstance forwardState) {
+    public static void reloadLoopContext(ProcessContext context, StateInstance forwardState, Loop loop) {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
@@ -129,11 +132,10 @@ public class LoopTaskUtils {
             .filter(e -> originStateName.equals(EngineUtils.getOriginStateName(e)))
             .collect(Collectors.toList());
 
-        State state = stateMachineInstance.getStateMachine().getState(originStateName);
-        Loop loop = getLoopConfig(state, stateMachineInstance);
-        Collection collection = (Collection)stateMachineInstance.getContext().get(loop.getCollection());
-
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
+        Collection collection = (Collection)context.getVariable(DomainConstants.LOOP_COLLECTION);
+        loopContextHolder.setCollection(collection);
+
         Map<Integer, AtomicBoolean> loopContext = loopContextHolder.getLoopCounterContext();
         for (int i = 0; i < collection.size(); i++) {
             loopContext.put(i, new AtomicBoolean(false));
@@ -169,17 +171,16 @@ public class LoopTaskUtils {
             return;
         }
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
         State state = stateMachine.getState(EngineUtils.getOriginStateName(stateToBeCompensated));
-        Loop loop = getLoopConfig(state, stateMachineInstance);
+        Loop loop = getLoopConfig(context, state);
 
         if (loop == null) {
             return;
         }
 
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
+        loopContextHolder.setCollection((Collection)context.getVariable(DomainConstants.LOOP_COLLECTION));
 
         Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
             .getStateStackNeedCompensation();

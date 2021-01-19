@@ -75,6 +75,7 @@ public interface DomainConstants {
 
     // region of loop
     String LOOP_COUNTER = "loopCounter";
+    String LOOP_COLLECTION = "loopCollection";
     String LOOP_ASYNC_PUBLISHER = "loopAsyncPublisher";
     String LOOP_PROCESS_CONTEXT = "loopProcessContext";
     String NUMBER_OF_INSTANCES = "nrOfInstances";
