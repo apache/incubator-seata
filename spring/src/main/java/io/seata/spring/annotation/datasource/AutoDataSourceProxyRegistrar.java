@@ -15,15 +15,13 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.core.context.RootContext;
-import io.seata.core.model.BranchType;
+import java.util.Map;
+
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
-
-import java.util.Map;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -45,13 +43,11 @@ public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistr
         String[] excludes = (String[]) annotationAttributes.get(ATTRIBUTE_KEY_EXCLUDES);
         String dataSourceProxyMode = (String) annotationAttributes.get(ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE);
 
-        //Set the default branch type to RootContext.
-        RootContext.setDefaultBranchType(BranchType.get(dataSourceProxyMode));
-
         //register seataDataSourceBeanPostProcessor bean def
         if (!registry.containsBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR)) {
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder
                 .genericBeanDefinition(SeataDataSourceBeanPostProcessor.class)
+                .addConstructorArgValue(excludes)
                 .addConstructorArgValue(dataSourceProxyMode)
                 .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SEATA_DATA_SOURCE_BEAN_POST_PROCESSOR, beanDefinition);

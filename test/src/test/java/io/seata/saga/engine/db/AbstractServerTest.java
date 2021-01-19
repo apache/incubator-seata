@@ -25,12 +25,9 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +37,6 @@ import java.util.concurrent.TimeUnit;
  *
  * @author lorne.cl
  */
-@TestMethodOrder(value = MethodOrderer.OrderAnnotation.class)
 public abstract class AbstractServerTest {
 
 
@@ -52,44 +48,40 @@ public abstract class AbstractServerTest {
         (new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    File file = new File("sessionStore/root.data");
-                    if(file.exists()){
-                        file.delete();
-                    }
-
-                    ParameterParser parameterParser = new ParameterParser(new String[]{});
-
-                    //initialize the metrics
-                    MetricsManager.get().init();
-
-                    System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
-                    nettyServer = new NettyRemotingServer(workingThreads);
-                    //server port
-                    nettyServer.setListenPort(parameterParser.getPort());
-                    UUIDGenerator.init(parameterParser.getServerNode());
-                    //log store mode : file、db
-                    SessionHolder.init(parameterParser.getStoreMode());
-
-                    DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
-                    coordinator.init();
-                    nettyServer.setHandler(coordinator);
-                    // register ShutdownHook
-                    ShutdownHook.getInstance().addDisposable(coordinator);
-
-                    //127.0.0.1 and 0.0.0.0 are not valid here.
-                    if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-                        XID.setIpAddress(parameterParser.getHost());
-                    } else {
-                        XID.setIpAddress(NetUtil.getLocalIp());
-                    }
-                    XID.setPort(nettyServer.getListenPort());
-                    System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
-                    nettyServer.init();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                File file = new File("sessionStore/root.data");
+                if(file.exists()){
+                    file.delete();
                 }
+
+                ParameterParser parameterParser = new ParameterParser(new String[]{});
+
+                //initialize the metrics
+                MetricsManager.get().init();
+
+                System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
+
+                nettyServer = new NettyRemotingServer(workingThreads);
+                //server port
+                nettyServer.setListenPort(parameterParser.getPort());
+                UUIDGenerator.init(parameterParser.getServerNode());
+                //log store mode : file、db
+                SessionHolder.init(parameterParser.getStoreMode());
+
+                DefaultCoordinator coordinator = new DefaultCoordinator(nettyServer);
+                coordinator.init();
+                nettyServer.setHandler(coordinator);
+                // register ShutdownHook
+                ShutdownHook.getInstance().addDisposable(coordinator);
+
+                //127.0.0.1 and 0.0.0.0 are not valid here.
+                if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+                    XID.setIpAddress(parameterParser.getHost());
+                } else {
+                    XID.setIpAddress(NetUtil.getLocalIp());
+                }
+                XID.setPort(nettyServer.getListenPort());
+
+                nettyServer.init();
             }
         })).start();
         Thread.sleep(5000);
@@ -97,7 +89,6 @@ public abstract class AbstractServerTest {
 
     protected static final void stopSeataServer() throws InterruptedException {
         if(nettyServer != null){
-            System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
             nettyServer.destroy();
             Thread.sleep(5000);
         }
