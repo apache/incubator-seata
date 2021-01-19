@@ -79,6 +79,14 @@ public class RedisLocker extends AbstractLocker {
             " end end " +
             "redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]); return 1";
 
+    static {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()){
+            ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK);
+        }
+    }
+
+    private static final String ACQUIRE_LOCK_SHA;
+
     /**
      * Instantiates a new Redis locker.
      */
@@ -122,7 +130,7 @@ public class RedisLocker extends AbstractLocker {
             args.add(lockKeysString.toString());
             // reset args index 2
             args.set(1, String.valueOf(args.size()));
-            long result = (long)jedis.eval(ACQUIRE_LOCK, keys, args);
+            long result = (long)jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
             return SUCCEED == result;
         }
     }
