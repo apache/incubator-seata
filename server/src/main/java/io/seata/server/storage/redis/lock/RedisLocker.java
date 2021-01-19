@@ -79,9 +79,17 @@ public class RedisLocker extends AbstractLocker {
             " end end " +
             "redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]); return 1";
 
+    private static String ACQUIRE_LOCK_LUA_BY_FILE;
+
     static {
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()){
-            ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK);
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            // TODO
+            ACQUIRE_LOCK_LUA_BY_FILE = null;
+            if(ACQUIRE_LOCK_LUA_BY_FILE != null) {
+                ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK_LUA_BY_FILE);
+            } else {
+                ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK);
+            }
         }
     }
 
