@@ -133,8 +133,8 @@ public class EngineUtils {
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
-        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))
-            || Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+        if (Boolean.TRUE.equals(((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE))
+            || Boolean.TRUE.equals(((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
             return;
         }
 

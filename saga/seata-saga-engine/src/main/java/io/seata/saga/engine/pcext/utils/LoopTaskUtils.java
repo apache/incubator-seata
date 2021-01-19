@@ -33,6 +33,7 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
 import io.seata.saga.engine.pcext.StateInstruction;
+import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -80,7 +81,8 @@ public class LoopTaskUtils {
                 Loop loop = taskState.getLoop();
                 String collectionName = loop.getCollection();
                 if (StringUtils.isNotBlank(collectionName)) {
-                    Object expression = ParameterUtils.createValueExpression(stateMachineConfig.getExpressionFactoryManager(), collectionName);
+                    Object expression = ParameterUtils.createValueExpression(
+                        stateMachineConfig.getExpressionFactoryManager(), collectionName);
                     Object collection = ParameterUtils.getValue(expression, stateMachineInstance.getContext(), null);
                     if (collection instanceof Collection && ((Collection)collection).size() > 0) {
                         context.setVariable(DomainConstants.LOOP_COLLECTION, collection);
@@ -121,6 +123,13 @@ public class LoopTaskUtils {
         context.setVariable(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
     }
 
+    /**
+     * reload loop context while forward
+     *
+     * @param context
+     * @param forwardState
+     * @param loop
+     */
     public static void reloadLoopContext(ProcessContext context, StateInstance forwardState, Loop loop) {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
@@ -128,9 +137,8 @@ public class LoopTaskUtils {
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
         String originStateName = EngineUtils.getOriginStateName(forwardState);
-        List<StateInstance> forwardStateList = actList.stream()
-            .filter(e -> originStateName.equals(EngineUtils.getOriginStateName(e)))
-            .collect(Collectors.toList());
+        List<StateInstance> forwardStateList = actList.stream().filter(
+            e -> originStateName.equals(EngineUtils.getOriginStateName(e))).collect(Collectors.toList());
 
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
         Collection collection = (Collection)context.getVariable(DomainConstants.LOOP_COLLECTION);
@@ -164,10 +172,17 @@ public class LoopTaskUtils {
         context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(forwardState.getName()));
     }
 
+    /**
+     * create loop context for compensate
+     *
+     * @param context
+     * @param stateToBeCompensated
+     */
     public static void createCompensateContext(ProcessContext context, StateInstance stateToBeCompensated) {
 
         if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
-            context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(stateToBeCompensated.getName()));
+            ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.LOOP_COUNTER,
+                reloadLoopCounter(stateToBeCompensated.getName()));
             return;
         }
 
@@ -202,10 +217,11 @@ public class LoopTaskUtils {
         for (int i = 0; i < asyncPublisherNumber; i++) {
             StateInstance stateToBeCompensatedTemp = stateStackToBeCompensated.pop();
             int loopCounter = reloadLoopCounter(stateToBeCompensatedTemp.getName());
-            ProcessContext tempContext = asyncProcessContextList.get(i);
+            ProcessContextImpl tempContext = (ProcessContextImpl)asyncProcessContextList.get(i);
 
-            tempContext.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
-            CompensationHolder.clearCurrent(tempContext);
+            tempContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
+            tempContext.setVariableLocally(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE,
+                context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE));
             StateInstruction instruction = tempContext.getInstruction(StateInstruction.class);
             CompensationHolder.getCurrent(tempContext, true).addToBeCompensatedState(instruction.getStateName(),
                 stateToBeCompensatedTemp);
@@ -214,6 +230,9 @@ public class LoopTaskUtils {
 
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(stateToBeCompensated.getName()));
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
 
     }
 
@@ -229,7 +248,8 @@ public class LoopTaskUtils {
             || DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(state.getType()));
     }
 
-    public static StateInstance reloadLastRetriedStateInstance(StateMachineInstance stateMachineInstance, String stateName) {
+    public static StateInstance reloadLastRetriedStateInstance(StateMachineInstance stateMachineInstance,
+                                                               String stateName) {
         List<StateInstance> actList = stateMachineInstance.getStateList();
         for (int i = actList.size() - 1; i >= 0; i--) {
             StateInstance stateInstance = actList.get(i);
@@ -265,8 +285,8 @@ public class LoopTaskUtils {
         elContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
         elContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES, (double)nrOfCompletedInstances);
 
-        return nrOfCompletedInstances >= nrOfInstances ||
-            getEvaluator(context, currentState.getLoop().getCompletionCondition()).evaluate(elContext);
+        return nrOfCompletedInstances >= nrOfInstances || getEvaluator(context,
+            currentState.getLoop().getCompletionCondition()).evaluate(elContext);
     }
 
     /**
@@ -296,7 +316,8 @@ public class LoopTaskUtils {
 
     public static int acquireNextLoopCounter(ProcessContext context) {
         int loopCounter = -1;
-        Map<Integer, AtomicBoolean> loopCounterContext = LoopContextHolder.getCurrent(context, true).getLoopCounterContext();
+        Map<Integer, AtomicBoolean> loopCounterContext = LoopContextHolder.getCurrent(context, true)
+            .getLoopCounterContext();
         if (null == loopCounterContext) {
             return loopCounter;
         }
@@ -358,12 +379,12 @@ public class LoopTaskUtils {
                     break;
                 }
             }
-            ProcessContext copyContext = new ProcessContextImpl();
-            copyContext.setVariables(new ConcurrentHashMap<>(originContext.getVariables()));
-            copyContext.setVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION, true);
-            copyContext.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
-            copyContext.removeVariable(DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID);
-            copyContext.removeVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD);
+            ProcessContextImpl copyContext = new ProcessContextImpl();
+            CompensationHolder.getCurrent(copyContext, isCompensate);
+            copyContext.setParent(originContext);
+            copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
+            copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION, true);
+            copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
             copyContext.setInstruction(copyInstruction(originContext.getInstruction(StateInstruction.class)));
             asyncProcessContextList.add(copyContext);
         }
@@ -383,8 +404,9 @@ public class LoopTaskUtils {
         if (!EXPRESSION_EVALUATOR_MAP.containsKey(completionCondition)) {
             StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            ExpressionEvaluator expressionEvaluator = (ExpressionEvaluator)stateMachineConfig.getEvaluatorFactoryManager()
-                .getEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT).createEvaluator(completionCondition);
+            ExpressionEvaluator expressionEvaluator = (ExpressionEvaluator)stateMachineConfig
+                .getEvaluatorFactoryManager().getEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT)
+                .createEvaluator(completionCondition);
             expressionEvaluator.setRootObjectName(null);
             EXPRESSION_EVALUATOR_MAP.put(completionCondition, expressionEvaluator);
         }

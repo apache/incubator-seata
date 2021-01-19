@@ -33,6 +33,7 @@ import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.LoopContextHolder;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
@@ -70,7 +71,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             int loopCounter = (int)context.getVariable(DomainConstants.LOOP_COUNTER);
             Loop loop;
 
-            State compensationTriggerState = (State)context.getVariable(
+            State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
                 DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
             if (compensationTriggerState != null) {
                 CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
@@ -90,9 +91,9 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                         stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, currentState.getName()));
                     if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
                         lastRetriedStateInstance.getType()) && !ExecutionStatus.SU.equals(lastRetriedStateInstance.getCompensationStatus())) {
-                        context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
+                        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
                     } else {
-                        context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, false);
+                        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, false);
                     }
                 }
             }
@@ -105,32 +106,34 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             nullSafeCopy(contextVariables, copyContextVariables);
             copyContextVariables.put(loop.getElementIndexName(), loopCounter);
             copyContextVariables.put(loop.getElementVariableName(), iterator(collection, loopCounter));
-            context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
+            ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
         }
     }
 
     @Override
     public void postProcess(ProcessContext context, Exception e) throws EngineExecutionException {
 
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+        if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
 
             boolean compensateOperation = false;
 
             LinkedBlockingDeque<Exception> deque = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
-            Exception exp = (Exception)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
 
             if (null != exp) {
                 deque.push(exp);
-                String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
+                String next = (String)((HierarchicalProcessContext)context).getVariableLocally(
+                    DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
                 if (StringUtils.isNotBlank(next) && next.equals(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER)) {
                     LoopContextHolder.getCurrent(context, true).setNeedCompensate(true);
-                    context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
+                    ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
                 }
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfCompletedInstances().incrementAndGet();
             }
 
-            State compensationTriggerState = (State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+            State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
+                DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
             if (compensationTriggerState != null) {
                 compensateOperation = true;
             }
@@ -140,10 +143,12 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (!deque.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation && loopCounter < 0)) {
                 try {
                     LoopTaskUtils.waitForComplete(context);
+                    LOGGER.info("wait complete finish");
                     if (!deque.isEmpty()) {
-                        context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, deque.peek());
+                        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, deque.peek());
                         if (LoopTaskUtils.needCompensate(context)) {
                             context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
+                            LOGGER.info("need compensate");
                         } else {
                             context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
                             EngineUtils.failStateMachine(context, deque.peek());
@@ -155,14 +160,14 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                     throw new EngineExecutionException(exception);
                 } finally {
                     LoopContextHolder.clearCurrent(context);
-                    if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
-                        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+                    if (Boolean.TRUE.equals(((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+                        ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
                     }
                 }
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
                 if (!compensateOperation) {
-                    context.setVariable(DomainConstants.LOOP_COUNTER, loopCounter);
+                    ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
                 } else {
                     LoopContextHolder.getCurrent(context, true).getNrOfInstances().decrementAndGet();
                 }

@@ -64,23 +64,24 @@ public class TaskStateRouter implements StateRouter {
 
         //The current CompensationTriggerState can mark the compensation process is started and perform compensation
         // route processing.
-        State compensationTriggerState = (State)context.getVariable(
+        State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
             DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
         if (compensationTriggerState != null) {
             return compensateRoute(context, compensationTriggerState);
         }
 
         //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
-        String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
+        String next = (String)((HierarchicalProcessContext)context).getVariableLocally(
+            DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
 
-        Object isLoopState = context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
+        Object isLoopState = ((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE);
         if (StringUtils.hasLength(next)) {
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
         } else {
             if (Boolean.TRUE.equals(isLoopState)) {
                 next = state.getName();
             } else {
-                if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+                if (Boolean.TRUE.equals(((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
                     return null;
                 } else {
                     next = state.getNext();

@@ -44,33 +44,16 @@
 		<property name="stateMachineConfig" ref="dbStateMachineConfig"></property>
 	</bean>
 	<bean id="dbStateMachineConfig" class="io.seata.saga.engine.config.DbStateMachineConfig">
-		<property name="dataSource" ref="seataDataSource"></property>
-		<!--		<property name="dataSource" ref="dataSource"></property>-->
+		<property name="dataSource" ref="dataSource"></property>
 		<property name="resources" value="saga/statelang/*.json"></property>
 		<property name="enableAsync" value="true"></property>
 		<property name="threadPoolExecutor" ref="threadExecutor"></property>
 		<property name="applicationId" value="test_saga"></property>
 		<property name="txServiceGroup" value="my_test_tx_group"></property>
-		<property name="sagaBranchRegisterEnable" value="true"></property>
+		<property name="sagaBranchRegisterEnable" value="false"></property>
 		<property name="sagaJsonParser" value="jackson"></property>
 		<property name="sagaRetryPersistModeUpdate" value="false" />
 		<property name="sagaCompensatePersistModeUpdate" value="false" />
-	</bean>
-
-	<bean id="seataDataSource" class="com.zaxxer.hikari.HikariDataSource">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="jdbcUrl" value="jdbc:mysql://10.99.12.22:10020/yw_seata?characterEncoding=utf8&amp;useSSL=false" />
-		<property name="username" value="root" />
-		<property name="password" value="ywjf#2020" />
-		<!-- 可以同时从该池中分配的最大连接数 -->
-		<property name="maximumPoolSize" value="48" />
-		<!-- 连接池中最小的空闲的连接数，低于这个数量会被创建新的连接 -->
-		<property name="minimumIdle" value="24" />
-		<property name="connectionTimeout" value="1000" />
-		<!--  连接存活的最长时间，默认不关闭 -->
-		<property name="maxLifetime" value="14400000" />
-		<!-- 校验sql -->
-		<property name="connectionTestQuery" value="SELECT 1" />
 	</bean>
 
 	<bean id="threadExecutor"
