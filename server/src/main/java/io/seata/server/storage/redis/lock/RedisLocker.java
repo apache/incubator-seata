@@ -105,18 +105,18 @@ public class RedisLocker extends AbstractLocker {
         String needLockXid = rowLocks.get(0).getXid();
         Long branchId = rowLocks.get(0).getBranchId();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            List<LockDO> needLockDOS = rowLocks.stream()
+            List<LockDO> needLockDOs = rowLocks.stream()
                     .map(rowLock -> convertToLockDO(rowLock))
                     .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
                     .collect(Collectors.toList());
             ArrayList<String> keys = new ArrayList<>();
             ArrayList<String> args = new ArrayList<>();
-            int size = needLockDOS.size();
+            int size = needLockDOs.size();
             args.add(String.valueOf(size));
             // args index 2 placeholder
             args.add(null);
             args.add(needLockXid);
-            for (LockDO lockDO : needLockDOS) {
+            for (LockDO lockDO : needLockDOs) {
                 keys.add(buildLockKey(lockDO.getRowKey()));
                 args.add(lockDO.getXid());
                 args.add(lockDO.getTransactionId().toString());
@@ -128,7 +128,7 @@ public class RedisLocker extends AbstractLocker {
             }
             String xidLockKey = buildXidLockKey(needLockXid);
             StringJoiner lockKeysString = new StringJoiner(ROW_LOCK_KEY_SPLIT_CHAR);
-            needLockDOS.stream().map(lockDO -> buildLockKey(lockDO.getRowKey())).forEach(lockKeysString::add);
+            needLockDOs.stream().map(lockDO -> buildLockKey(lockDO.getRowKey())).forEach(lockKeysString::add);
             keys.add(xidLockKey);
             keys.add(branchId.toString());
             args.add(lockKeysString.toString());
