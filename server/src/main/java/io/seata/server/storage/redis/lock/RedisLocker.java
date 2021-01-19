@@ -64,32 +64,20 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String ROW_KEY = "rowKey";
 
-    static {
-        StringBuilder sb = new StringBuilder("local array = {}; local result;");
-        sb.append("local keySize = ARGV[1];");
-        sb.append("local argSize = ARGV[2];");
-        // Loop through all keys to see if they can be used , when a key is not available, exit
-        sb.append("for i= 1, keySize do ");
-        sb.append("result = redis.call('HGET',KEYS[i],'").append(XID).append("'); ");
-        sb.append("if (not result) then array[i]='no' else if(result ~= ARGV[3]) then return 0 else array[i]= 'yes' end end; ");
-        sb.append(" end ");
-        sb.append("for i =1, keySize do ");
-        sb.append(" if(array[i] == 'no') then ");
-        sb.append("redis.call('HSET',KEYS[i],'").append(XID).append("',ARGV[(i-1)*7+4]);");
-        sb.append("redis.call('HSET',KEYS[i],'").append(TRANSACTION_ID).append("',ARGV[(i-1)*7+5]);");
-        sb.append("redis.call('HSET',KEYS[i],'").append(BRANCH_ID).append("',ARGV[(i-1)*7+6]);");
-        sb.append("redis.call('HSET',KEYS[i],'").append(RESOURCE_ID).append("',ARGV[(i-1)*7+7]);");
-        sb.append("redis.call('HSET',KEYS[i],'").append(TABLE_NAME).append("',ARGV[(i-1)*7+8]);");
-        sb.append("redis.call('HSET',KEYS[i],'").append(ROW_KEY).append("',ARGV[(i-1)*7+9]);");
-        sb.append("redis.call('HSET',KEYS[i],'").append(PK).append("',ARGV[(i-1)*7+10]);");
-        sb.append(" end ");
-        sb.append(" end ");
-        sb.append("redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]);");
-        sb.append(" return 1");
-        ACQUIRE_LOCK = sb.toString();
-    }
-
-    private static final String ACQUIRE_LOCK;
+    private static final String ACQUIRE_LOCK = "local array = {}; local result; local keySize = ARGV[1]; local argSize = ARGV[2];" +
+            // Loop through all keys to see if they can be used , when a key is not available, exit
+            "for i= 1, keySize do result = redis.call('HGET',KEYS[i],'xid');" +
+            "if (not result) then array[i]='no' else if (result ~= ARGV[3]) then return 0 else array[i]= 'yes' end end end " +
+            "for i =1, keySize do if(array[i] == 'no') then " +
+            "redis.call('HSET',KEYS[i],'xid',ARGV[(i-1)*7+4]);" +
+            "redis.call('HSET',KEYS[i],'transactionId',ARGV[(i-1)*7+5]);" +
+            "redis.call('HSET',KEYS[i],'branchId',ARGV[(i-1)*7+6]);" +
+            "redis.call('HSET',KEYS[i],'resourceId',ARGV[(i-1)*7+7]);" +
+            "redis.call('HSET',KEYS[i],'tableName',ARGV[(i-1)*7+8]);" +
+            "redis.call('HSET',KEYS[i],'rowKey',ARGV[(i-1)*7+9]);" +
+            "redis.call('HSET',KEYS[i],'pk',ARGV[(i-1)*7+10]);" +
+            " end end " +
+            "redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]); return 1";
 
     /**
      * Instantiates a new Redis locker.
@@ -132,7 +120,6 @@ public class RedisLocker extends AbstractLocker {
             keys.add(xidLockKey);
             keys.add(branchId.toString());
             args.add(lockKeysString.toString());
-            args.add(String.valueOf(size));
             // reset args index 2
             args.set(1, String.valueOf(args.size()));
             long result = (long)jedis.eval(ACQUIRE_LOCK, keys, args);
