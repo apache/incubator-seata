@@ -36,7 +36,6 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -150,7 +149,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
-            LOGGER.info("pid info: {}", ManagementFactory.getRuntimeMXBean().getName());
             LOGGER.info("Server started, listen port: {}", listenPort);
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
@@ -164,8 +162,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     @Override
     public void shutdown() {
         try {
-            LOGGER.info("pid info: {}", ManagementFactory.getRuntimeMXBean().getName());
-            LOGGER.info("Shutting server down. ");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Shutting server down. ");
+            }
             if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
                 RegistryFactory.getInstance().close();
