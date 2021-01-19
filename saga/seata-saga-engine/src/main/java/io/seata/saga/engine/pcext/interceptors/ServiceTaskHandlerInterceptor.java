@@ -124,8 +124,10 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         Object isForCompensation = state.isForCompensation();
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
             stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
-            StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(stateMachineInstance, stateInstance.getName());
-            stateInstance.setStateIdRetriedFor(lastRetriedStateInstance == null ? null : lastRetriedStateInstance.getId());
+            StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(stateMachineInstance,
+                stateInstance.getName());
+            stateInstance.setStateIdRetriedFor(
+                lastRetriedStateInstance == null ? null : lastRetriedStateInstance.getId());
         } else {
             stateInstance.setName(state.getName());
             stateInstance.setStateIdRetriedFor(

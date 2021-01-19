@@ -146,22 +146,22 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         StateInstruction stateInstruction = processContext.getInstruction(StateInstruction.class);
         Loop loop = LoopTaskUtils.getLoopConfig(processContext, stateInstruction.getState(processContext));
 
-        ProcessCtrlEventPublisher eventPublisher;
-        if (async) {
-            eventPublisher = stateMachineConfig.getAsyncProcessCtrlEventPublisher();
-        } else {
-            eventPublisher = stateMachineConfig.getProcessCtrlEventPublisher();
-        }
         if (null != loop) {
             LoopTaskUtils.createLoopContext(processContext, loop);
-            processContext.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
-            List<ProcessContext> asyncProcessContextList = (List)processContext.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
+            List<ProcessContext> asyncProcessContextList = (List)processContext.getVariable(
+                DomainConstants.LOOP_PROCESS_CONTEXT);
             for (ProcessContext context : asyncProcessContextList) {
                 stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
             }
             processContext.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
         }
-        eventPublisher.publish(processContext);
+
+        if (async) {
+            stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
+        } else {
+            stateMachineConfig.getProcessCtrlEventPublisher().publish(processContext);
+        }
+
         return instance;
     }
 
@@ -271,14 +271,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
         Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
         if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
-            for (int i = actList.size() - 1; i >= 0; i--) {
-                StateInstance stateInstance = actList.get(i);
-                if (EngineUtils.getOriginStateName(stateInstance).equals(originStateName) && !ExecutionStatus.SU.equals(stateInstance.getStatus())) {
-                    lastForwardState = stateInstance;
-                    context.setVariable(DomainConstants.VAR_NAME_STATE_INST, lastForwardState);
-                    break;
-                }
-            }
+            context.setVariable(DomainConstants.VAR_NAME_STATE_INST,
+                LoopTaskUtils.findOutLastNeedForwardStateInstance(context));
         }
 
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
@@ -298,6 +292,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             inst.setTenantId(stateMachineInstance.getTenantId());
             inst.setStateMachineName(stateMachineInstance.getStateMachine().getName());
             if (skip || ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+
                 String next = null;
                 State state = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(lastForwardState));
                 if (state != null && state instanceof AbstractTaskState) {
@@ -333,16 +328,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
             }
 
-            ProcessCtrlEventPublisher eventPublisher;
-            if (async) {
-                eventPublisher = stateMachineConfig.getAsyncProcessCtrlEventPublisher();
-            } else {
-                eventPublisher = stateMachineConfig.getProcessCtrlEventPublisher();
-            }
-
             if (null != loop) {
                 LoopTaskUtils.reloadLoopContext(context, lastForwardState, loop);
-                context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
                 List<ProcessContext> asyncProcessContextList = (List)context.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
                 for (ProcessContext processContext : asyncProcessContextList) {
                     stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
@@ -350,7 +337,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 context.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
             }
 
-            eventPublisher.publish(context);
+            if (async) {
+                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
+            } else {
+                stateMachineConfig.getProcessCtrlEventPublisher().publish(context);
+            }
 
         } catch (EngineExecutionException e) {
             LOGGER.error("Operation [forward] failed", e);

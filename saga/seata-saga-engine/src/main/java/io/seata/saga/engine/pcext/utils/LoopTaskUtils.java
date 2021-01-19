@@ -27,11 +27,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
+import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
@@ -121,6 +123,7 @@ public class LoopTaskUtils {
 
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
+        getAsyncEventPublisher(context);
     }
 
     /**
@@ -170,6 +173,7 @@ public class LoopTaskUtils {
 
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(forwardState.getName()));
+        getAsyncEventPublisher(context);
     }
 
     /**
@@ -230,9 +234,7 @@ public class LoopTaskUtils {
 
         context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
         context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(stateToBeCompensated.getName()));
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
+        getAsyncEventPublisher(context);
 
     }
 
@@ -246,6 +248,22 @@ public class LoopTaskUtils {
         return state != null && (DomainConstants.STATE_TYPE_SERVICE_TASK.equals(state.getType())
             || DomainConstants.STATE_TYPE_SCRIPT_TASK.equals(state.getType())
             || DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(state.getType()));
+    }
+
+    public static StateInstance findOutLastNeedForwardStateInstance(ProcessContext context) {
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateInstance lastForwardState = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+
+        List<StateInstance> actList = stateMachineInstance.getStateList();
+        for (int i = actList.size() - 1; i >= 0; i--) {
+            StateInstance stateInstance = actList.get(i);
+            if (EngineUtils.getOriginStateName(stateInstance).equals(EngineUtils.getOriginStateName(lastForwardState))
+                && !ExecutionStatus.SU.equals(stateInstance.getStatus())) {
+                return stateInstance;
+            }
+        }
+        return lastForwardState;
     }
 
     public static StateInstance reloadLastRetriedStateInstance(StateMachineInstance stateMachineInstance,
@@ -388,6 +406,17 @@ public class LoopTaskUtils {
             copyContext.setInstruction(copyInstruction(originContext.getInstruction(StateInstruction.class)));
             asyncProcessContextList.add(copyContext);
         }
+    }
+
+    private static void getAsyncEventPublisher(ProcessContext context) {
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        if (!stateMachineConfig.isEnableAsync() || stateMachineConfig.getAsyncProcessCtrlEventPublisher() == null) {
+            throw new EngineExecutionException(
+                "Asynchronous start is disabled. please set StateMachineConfig.enableAsync=true first.",
+                FrameworkErrorCode.AsynchronousStartDisabled);
+        }
+        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
     }
 
     /**

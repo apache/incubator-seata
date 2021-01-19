@@ -27,6 +27,8 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 
 /**
+ * Loop Context Holder for Loop Attributes
+ *
  * @author anselleeyy
  */
 public class LoopContextHolder {

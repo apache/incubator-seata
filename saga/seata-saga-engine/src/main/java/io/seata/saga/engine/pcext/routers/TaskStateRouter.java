@@ -81,7 +81,8 @@ public class TaskStateRouter implements StateRouter {
             if (Boolean.TRUE.equals(isLoopState)) {
                 next = state.getName();
             } else {
-                if (Boolean.TRUE.equals(((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
+                if (Boolean.TRUE.equals(((HierarchicalProcessContext)context)
+                    .getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
                     return null;
                 } else {
                     next = state.getNext();
@@ -110,11 +111,9 @@ public class TaskStateRouter implements StateRouter {
         stateInstruction.setStateName(next);
 
         if (!Boolean.TRUE.equals(isLoopState)) {
-            if (LoopTaskUtils.matchLoop(nextState)) {
-                Loop loop = LoopTaskUtils.getLoopConfig(context, nextState);
-                if (null != loop) {
-                    LoopTaskUtils.createLoopContext(context, loop);
-                }
+            Loop loop = LoopTaskUtils.getLoopConfig(context, nextState);
+            if (null != loop) {
+                LoopTaskUtils.createLoopContext(context, loop);
             }
         }
 

@@ -46,6 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * State Interceptor For ServiceTask, SubStateMachine, ScriptTask With Loop Attribute
+ *
  * @author anselleeyy
  */
 @LoadLevel(name = "LoopTask", order = 90)
@@ -113,7 +115,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
     @Override
     public void postProcess(ProcessContext context, Exception e) throws EngineExecutionException {
 
-        if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
 
             boolean compensateOperation = false;
 
@@ -143,12 +145,10 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (!deque.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation && loopCounter < 0)) {
                 try {
                     LoopTaskUtils.waitForComplete(context);
-                    LOGGER.info("wait complete finish");
                     if (!deque.isEmpty()) {
                         ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, deque.peek());
                         if (LoopTaskUtils.needCompensate(context)) {
                             context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
-                            LOGGER.info("need compensate");
                         } else {
                             context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
                             EngineUtils.failStateMachine(context, deque.peek());

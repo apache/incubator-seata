@@ -77,7 +77,8 @@ public class DefaultRouterHandler implements RouterHandler {
 
                 if (context.hasVariable(DomainConstants.LOOP_PROCESS_CONTEXT)) {
                     List<ProcessContext> asyncProcessContextList = (List)context.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
-                    EventPublisher<ProcessContext> asyncEventPublisher = (EventPublisher)context.getVariable(DomainConstants.LOOP_ASYNC_PUBLISHER);
+                    EventPublisher<ProcessContext> asyncEventPublisher = (EventPublisher)context.getVariable(
+                        DomainConstants.LOOP_ASYNC_PUBLISHER);
 
                     for (ProcessContext processContext : asyncProcessContextList) {
                         asyncEventPublisher.publish(processContext);
