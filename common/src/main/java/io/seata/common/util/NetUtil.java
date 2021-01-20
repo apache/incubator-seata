@@ -15,15 +15,16 @@
  */
 package io.seata.common.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Net util.
@@ -219,11 +220,28 @@ public class NetUtil {
      * @return true if the given IP is valid
      */
     public static boolean isValidIp(String ip, boolean validLocalAndAny) {
+        ip = convertIpIfNecessary(ip);
         if (validLocalAndAny) {
             return ip != null && IP_PATTERN.matcher(ip).matches();
         } else {
             return ip != null && !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
         }
 
+    }
+    /**
+     * convert ip if necessary
+     * @param ip
+     * @return java.lang.String
+     */
+    private static String convertIpIfNecessary(String ip) {
+        if (IP_PATTERN.matcher(ip).matches()) {
+            return ip;
+        } else {
+            try {
+                return InetAddress.getByName(ip).getHostAddress();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
