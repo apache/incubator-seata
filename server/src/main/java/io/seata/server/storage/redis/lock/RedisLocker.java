@@ -69,36 +69,31 @@ public class RedisLocker extends AbstractLocker {
             "for i= 1, keySize do result = redis.call('HGET',KEYS[i],'xid');" +
             "if (not result) then array[i]='no' else if (result ~= ARGV[3]) then return 0 else array[i]= 'yes' end end end " +
             "for i =1, keySize do if(array[i] == 'no') then " +
-            "redis.call('HSET',KEYS[i],'xid',ARGV[(i-1)*7+4]);" +
-            "redis.call('HSET',KEYS[i],'transactionId',ARGV[(i-1)*7+5]);" +
-            "redis.call('HSET',KEYS[i],'branchId',ARGV[(i-1)*7+6]);" +
-            "redis.call('HSET',KEYS[i],'resourceId',ARGV[(i-1)*7+7]);" +
-            "redis.call('HSET',KEYS[i],'tableName',ARGV[(i-1)*7+8]);" +
-            "redis.call('HSET',KEYS[i],'rowKey',ARGV[(i-1)*7+9]);" +
-            "redis.call('HSET',KEYS[i],'pk',ARGV[(i-1)*7+10]);" +
+            "redis.call('HMSET',KEYS[i],'xid',ARGV[(i-1)*7+4]" +
+            ",'transactionId',ARGV[(i-1)*7+5]" +
+            ",'branchId',ARGV[(i-1)*7+6]" +
+            ",'resourceId',ARGV[(i-1)*7+7]" +
+            ",'tableName',ARGV[(i-1)*7+8]" +
+            ",'rowKey',ARGV[(i-1)*7+9]" +
+            ",'pk',ARGV[(i-1)*7+10])" +
             " end end " +
             "redis.call('HSET',KEYS[(keySize+1)],KEYS[(keySize+2)],ARGV[(argSize+0)]); return 1";
 
-    private static String ACQUIRE_LOCK_LUA_BY_FILE;
-
-    static {
-        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            // TODO
-            ACQUIRE_LOCK_LUA_BY_FILE = null;
-            if(ACQUIRE_LOCK_LUA_BY_FILE != null) {
-                ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK_LUA_BY_FILE);
-            } else {
-                ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK);
-            }
-        }
-    }
-
-    private static final String ACQUIRE_LOCK_SHA;
+    private static String ACQUIRE_LOCK_SHA;
 
     /**
      * Instantiates a new Redis locker.
      */
     public RedisLocker() {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            // TODO
+            String acquireLockLuaByFile = null;
+            if (acquireLockLuaByFile != null) {
+                ACQUIRE_LOCK_SHA = jedis.scriptLoad(acquireLockLuaByFile);
+            } else {
+                ACQUIRE_LOCK_SHA = jedis.scriptLoad(ACQUIRE_LOCK);
+            }
+        }
     }
 
     @Override
