@@ -218,7 +218,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void clean() throws TransactionException {
         if (this.hasATBranch()) {
             if (!LockerManagerFactory.getLockManager().releaseGlobalSessionLock(this)) {
-                throw new TransactionException("unLock globalSession error");
+                throw new TransactionException("UnLock globalSession error, xid = " + this.xid);
             }
         }
     }
@@ -266,7 +266,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         // because it's already unlocked at 'DefaultCore.commit()'
         if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
             if (!branchSession.unlock()) {
-                throw new TransactionException("Unlock branch lock failed!");
+                throw new TransactionException("Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
