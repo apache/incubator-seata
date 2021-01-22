@@ -16,7 +16,9 @@
 package io.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.rpc.netty.ChannelUtil;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +85,7 @@ public class RpcContext {
             }
             clientRMHolderMap = null;
         }
-        if (null != resourceSets) {
+        if (resourceSets != null) {
             resourceSets.clear();
         }
     }
@@ -122,8 +124,8 @@ public class RpcContext {
      * @param portMap    the client rm holder map
      */
     public void holdInResourceManagerChannels(String resourceId, ConcurrentMap<Integer, RpcContext> portMap) {
-        if (null == this.clientRMHolderMap) {
-            this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+        if (this.clientRMHolderMap == null) {
+            this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         portMap.put(clientPort, this);
@@ -137,11 +139,11 @@ public class RpcContext {
      * @param clientPort the client port
      */
     public void holdInResourceManagerChannels(String resourceId, Integer clientPort) {
-        if (null == this.clientRMHolderMap) {
-            this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+        if (this.clientRMHolderMap == null) {
+            this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
-        clientRMHolderMap.putIfAbsent(resourceId, new ConcurrentHashMap<Integer, RpcContext>());
-        ConcurrentMap<Integer, RpcContext> portMap = clientRMHolderMap.get(resourceId);
+        ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(clientRMHolderMap, resourceId,
+            key -> new ConcurrentHashMap<>());
         portMap.put(clientPort, this);
     }
 
@@ -290,7 +292,7 @@ public class RpcContext {
         if (StringUtils.isBlank(resource)) {
             return;
         }
-        if (null == resourceSets) {
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.add(resource);
@@ -302,8 +304,8 @@ public class RpcContext {
      * @param resources the resources
      */
     public void addResources(Set<String> resources) {
-        if (null == resources) { return; }
-        if (null == resourceSets) {
+        if (resources == null) { return; }
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.addAll(resources);

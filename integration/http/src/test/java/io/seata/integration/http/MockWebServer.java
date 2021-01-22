@@ -57,7 +57,7 @@ public class MockWebServer {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                if (null != serverSocket) {
+                if (serverSocket != null) {
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
@@ -86,7 +86,7 @@ public class MockWebServer {
             Method method = myServletClass.getDeclaredMethod(methodName, HttpTest.Person.class);
 
             /* mock request intercepter */
-            TransactionPropagationIntercepter intercepter = new TransactionPropagationIntercepter();
+            TransactionPropagationInterceptor intercepter = new TransactionPropagationInterceptor();
 
             intercepter.preHandle(request, null, null);
             Object result = method.invoke(myServlet, person);
@@ -95,7 +95,7 @@ public class MockWebServer {
         } catch (Exception e) {
             HttpHandlerExceptionResolver resolver = new HttpHandlerExceptionResolver();
             resolver.doResolveException(request, null, null, e);
-            if (StringUtils.isBlank(RootContext.getXID())) {
+            if (RootContext.getXID() == null) {
                 try {
                     return mockResponse.write("Callee remove local xid success");
                 } catch (IOException ex) {
@@ -107,7 +107,6 @@ public class MockWebServer {
     }
 
     private HttpTest.Person boxing(MockRequest myRequest) {
-
         Map params = null;
         if ("get".equals(myRequest.getMethod()))
             params = getUrlParams(myRequest.getUrl());
@@ -115,7 +114,6 @@ public class MockWebServer {
             params = getBodyParams(myRequest.getBody());
         }
         return JSONObject.parseObject(JSONObject.toJSONString(params), HttpTest.Person.class);
-
     }
 
     private Map<String, String> getBodyParams(String body) {
@@ -123,9 +121,6 @@ public class MockWebServer {
         return map;
     }
 
-    public static void main(String[] args) {
-        new MockWebServer().start(8081);
-    }
 
     public static Map<String, Object> getUrlParams(String param) {
         Map<String, Object> map = new HashMap<String, Object>(0);

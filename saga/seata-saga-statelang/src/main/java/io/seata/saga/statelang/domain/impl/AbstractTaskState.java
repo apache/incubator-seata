@@ -36,7 +36,11 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private List<Object> input;
     private Map<String, Object> output;
     private Map<String, String> status;//Map<String/* expression */, String /* status */>
+    private List<Object> inputExpressions;
+    private Map<String, Object> outputExpressions;
     private boolean isPersist = true;
+    private Boolean retryPersistModeUpdate;
+    private Boolean compensatePersistModeUpdate;
 
     @Override
     public String getCompensateState() {
@@ -110,6 +114,39 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     public void setPersist(boolean persist) {
         isPersist = persist;
     }
+
+    public Boolean isRetryPersistModeUpdate() {
+        return retryPersistModeUpdate;
+    }
+
+    public void setRetryPersistModeUpdate(Boolean retryPersistModeUpdate) {
+        this.retryPersistModeUpdate = retryPersistModeUpdate;
+    }
+
+    public Boolean isCompensatePersistModeUpdate() {
+        return compensatePersistModeUpdate;
+    }
+
+    public void setCompensatePersistModeUpdate(Boolean compensatePersistModeUpdate) {
+        this.compensatePersistModeUpdate = compensatePersistModeUpdate;
+    }
+
+    public List<Object> getInputExpressions() {
+        return inputExpressions;
+    }
+
+    public void setInputExpressions(List<Object> inputExpressions) {
+        this.inputExpressions = inputExpressions;
+    }
+
+    public Map<String, Object> getOutputExpressions() {
+        return outputExpressions;
+    }
+
+    public void setOutputExpressions(Map<String, Object> outputExpressions) {
+        this.outputExpressions = outputExpressions;
+    }
+
 
     @Override
     public Map<String, String> getStatus() {

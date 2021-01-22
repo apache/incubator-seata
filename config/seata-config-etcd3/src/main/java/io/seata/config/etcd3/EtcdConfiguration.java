@@ -42,6 +42,7 @@ import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
@@ -90,9 +91,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
      * @return instance
      */
     public static EtcdConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (EtcdConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new EtcdConfiguration();
                 }
             }
@@ -106,9 +107,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
@@ -152,27 +153,30 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         EtcdListener etcdListener = new EtcdListener(dataId, listener);
-        configListenersMap.get(dataId).add(etcdListener);
+        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(etcdListener);
         etcdListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        for (ConfigurationChangeListener entry : configChangeListeners) {
-            ConfigurationChangeListener target = ((EtcdListener)entry).getTargetListener();
-            if (listener.equals(target)) {
-                entry.onShutDown();
-                configChangeListeners.remove(entry);
-                break;
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            ConfigurationChangeListener target;
+            for (ConfigurationChangeListener entry : configListeners) {
+                target = ((EtcdListener)entry).getTargetListener();
+                if (listener.equals(target)) {
+                    entry.onShutDown();
+                    configListeners.remove(entry);
+                    break;
+                }
             }
         }
     }
@@ -188,9 +192,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
      * @return client
      */
     private static Client getClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (EtcdConfiguration.class) {
-                if (null == client) {
+                if (client == null) {
                     client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
                         .build();
                 }
@@ -213,7 +217,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 List<KeyValue> keyValues = ((GetResponse)response).getKvs();
                 if (CollectionUtils.isNotEmpty(keyValues)) {
                     ByteSequence value = keyValues.get(0).getValue();
-                    if (null != value) {
+                    if (value != null) {
                         configFuture.setResult(value.toString(UTF_8));
                     }
                 }

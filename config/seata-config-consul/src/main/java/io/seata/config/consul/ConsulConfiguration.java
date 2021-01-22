@@ -15,6 +15,7 @@
  */
 package io.seata.config.consul;
 
+import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -30,6 +31,9 @@ import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
@@ -78,9 +82,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return instance
      */
     public static ConsulConfiguration getInstance() {
-        if (null == instance) {
+        if (instance == null) {
             synchronized (ConsulConfiguration.class) {
-                if (null == instance) {
+                if (instance == null) {
                     instance = new ConsulConfiguration();
                 }
             }
@@ -89,9 +93,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
@@ -129,28 +133,32 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (null == dataId || null == listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         ConsulListener consulListener = new ConsulListener(dataId, listener);
-        configListenersMap.get(dataId).add(consulListener);
-        consulListener.onProcessEvent(new ConfigurationChangeEvent());
+        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(consulListener);
 
+        // Start config change listener for the dataId.
+        consulListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        for (ConfigurationChangeListener entry : configChangeListeners) {
-            ConfigurationChangeListener target = ((ConsulListener)entry).getTargetListener();
-            if (listener.equals(target)) {
-                entry.onShutDown();
-                configChangeListeners.remove(entry);
-                break;
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            ConfigurationChangeListener target;
+            for (ConfigurationChangeListener entry : configListeners) {
+                target = ((ConsulListener)entry).getTargetListener();
+                if (listener.equals(target)) {
+                    entry.onShutDown();
+                    configListeners.remove(entry);
+                    break;
+                }
             }
         }
     }
@@ -171,10 +179,12 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @return client
      */
     private static ConsulClient getConsulClient() {
-        if (null == client) {
+        if (client == null) {
             synchronized (ConsulConfiguration.class) {
-                if (null == client) {
-                    client = new ConsulClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY));
+                if (client == null) {
+                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
+                    client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
             }
         }
@@ -188,7 +198,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
      * @param configFuture
      */
     private void complete(Response response, ConfigFuture configFuture) {
-        if (null != response && null != response.getValue()) {
+        if (response != null && response.getValue() != null) {
             Object value = response.getValue();
             if (value instanceof GetValue) {
                 configFuture.setResult(((GetValue)value).getDecodedValue());
@@ -224,7 +234,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            if (null != listener) {
+            if (listener != null) {
                 while (true) {
                     QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
                     Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);

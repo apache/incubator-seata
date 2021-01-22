@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -215,12 +217,8 @@ public class EnhancedServiceLoader {
             if (type == null) {
                 throw new IllegalArgumentException("Enhanced Service type == null");
             }
-            InnerEnhancedServiceLoader<S> loader = (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.get(type);
-            if (loader == null) {
-                SERVICE_LOADERS.putIfAbsent(type, new InnerEnhancedServiceLoader<S>(type));
-                loader = (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.get(type);
-            }
-            return loader;
+            return (InnerEnhancedServiceLoader<S>)CollectionUtils.computeIfAbsent(SERVICE_LOADERS, type,
+                key -> new InnerEnhancedServiceLoader<>(type));
         }
 
         /**
@@ -340,8 +338,8 @@ public class EnhancedServiceLoader {
                     throw (EnhancedServiceNotFoundException)e;
                 } else {
                     throw new EnhancedServiceNotFoundException(
-                            "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                                    .getFullStackTrace(e));
+                        "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
+                            .getFullStackTrace(e));
                 }
             }
         }
@@ -373,11 +371,8 @@ public class EnhancedServiceLoader {
                 throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
             if (Scope.SINGLETON.equals(definition.getScope())) {
-                Holder<Object> holder = definitionToInstanceMap.get(definition);
-                if (holder == null) {
-                    definitionToInstanceMap.putIfAbsent(definition, new Holder<>());
-                    holder = definitionToInstanceMap.get(definition);
-                }
+                Holder<Object> holder = CollectionUtils.computeIfAbsent(definitionToInstanceMap, definition,
+                    key -> new Holder<>());
                 Object instance = holder.get();
                 if (instance == null) {
                     synchronized (holder) {
@@ -406,7 +401,6 @@ public class EnhancedServiceLoader {
         }
 
         private List<Class> loadAllExtensionClass(ClassLoader loader) {
-            List<Class> result;
             List<ExtensionDefinition> definitions = definitionsHolder.get();
             if (definitions == null) {
                 synchronized (definitionsHolder) {
@@ -467,7 +461,7 @@ public class EnhancedServiceLoader {
                 while (urls.hasMoreElements()) {
                     java.net.URL url = urls.nextElement();
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET))) {
-                        String line = null;
+                        String line;
                         while ((line = reader.readLine()) != null) {
                             final int ci = line.indexOf('#');
                             if (ci >= 0) {
@@ -476,10 +470,11 @@ public class EnhancedServiceLoader {
                             line = line.trim();
                             if (line.length() > 0) {
                                 try {
-                                    Class<?> clazz = Class.forName(line, true, loader);
-                                    ExtensionDefinition extensionDefinition = getUnloadedExtensionDefinition(clazz);
+                                    ExtensionDefinition extensionDefinition = getUnloadedExtensionDefinition(line, loader);
                                     if (extensionDefinition == null) {
-                                        LOGGER.warn("The same extension {} has already been loaded, skipped", line);
+                                        if (LOGGER.isDebugEnabled()) {
+                                            LOGGER.debug("The same extension {} has already been loaded, skipped", line);
+                                        }
                                         continue;
                                     }
                                     extensions.add(extensionDefinition);
@@ -489,48 +484,57 @@ public class EnhancedServiceLoader {
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn(e.getMessage());
+                        LOGGER.warn("load clazz instance error: {}", e.getMessage());
                     }
                 }
             }
         }
 
-        private ExtensionDefinition getUnloadedExtensionDefinition(Class<?> clazz) {
-            String serviceName = null;
-            Integer priority = 0;
-            Scope scope = Scope.SINGLETON;
-            LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
-            if (loadLevel != null) {
-                serviceName = loadLevel.name();
-                priority = loadLevel.order();
-                scope = loadLevel.scope();
-            }
+        private ExtensionDefinition getUnloadedExtensionDefinition(String className, ClassLoader loader)
+            throws ClassNotFoundException {
             //Check whether the definition has been loaded
-            if (!classToDefinitionMap.containsKey(clazz)) {
+            if (!isDefinitionContainsClazz(className, loader)) {
+                Class<?> clazz = Class.forName(className, true, loader);
+                String serviceName = null;
+                Integer priority = 0;
+                Scope scope = Scope.SINGLETON;
+                LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
+                if (loadLevel != null) {
+                    serviceName = loadLevel.name();
+                    priority = loadLevel.order();
+                    scope = loadLevel.scope();
+                }
                 ExtensionDefinition result = new ExtensionDefinition(serviceName, priority, scope, clazz);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
-                    nameToDefinitionsMap.computeIfAbsent(serviceName, e -> new ArrayList<>()).add(result);
+                    CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
+                            .add(result);
                 }
                 return result;
             }
             return null;
         }
 
+        private boolean isDefinitionContainsClazz(String className, ClassLoader loader) {
+            for (Map.Entry<Class<?>, ExtensionDefinition> entry : classToDefinitionMap.entrySet()) {
+                if (!entry.getKey().getName().equals(className)) {
+                    continue;
+                }
+                if (Objects.equals(entry.getValue().getServiceClass().getClassLoader(), loader)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private ExtensionDefinition getDefaultExtensionDefinition() {
             List<ExtensionDefinition> currentDefinitions = definitionsHolder.get();
-            if (currentDefinitions != null && currentDefinitions.size() > 0) {
-                return currentDefinitions.get(currentDefinitions.size() - 1);
-            }
-            return null;
+            return CollectionUtils.getLast(currentDefinitions);
         }
 
         private ExtensionDefinition getCachedExtensionDefinition(String activateName) {
-            if (nameToDefinitionsMap.containsKey(activateName)) {
-                List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
-                return definitions.get(definitions.size() - 1);
-            }
-            return null;
+            List<ExtensionDefinition> definitions = nameToDefinitionsMap.get(activateName);
+            return CollectionUtils.getLast(definitions);
         }
 
         /**

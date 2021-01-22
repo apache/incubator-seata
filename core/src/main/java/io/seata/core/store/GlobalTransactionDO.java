@@ -28,9 +28,9 @@ public class GlobalTransactionDO {
 
     private String xid;
 
-    private long transactionId;
+    private Long transactionId;
 
-    private int status;
+    private Integer status;
 
     private String applicationId;
 
@@ -38,9 +38,9 @@ public class GlobalTransactionDO {
 
     private String transactionName;
 
-    private int timeout;
+    private Integer timeout;
 
-    private long beginTime;
+    private Long beginTime;
 
     private String applicationData;
 
@@ -244,6 +244,38 @@ public class GlobalTransactionDO {
      */
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    /**
+     * Sets transactionId
+     * @param transactionId the transactionId
+     */
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    /**
+     * Sets status
+     * @param status the status
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * Sets timeout
+     * @param timeout the timeout
+     */
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
+    }
+
+    /**
+     * Sets begin time
+     * @param beginTime the begin time
+     */
+    public void setBeginTime(Long beginTime) {
+        this.beginTime = beginTime;
     }
 
     @Override

@@ -259,6 +259,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return Long.compare(this.branchId, o.branchId);
     }
 
+    public boolean canBeCommittedAsync() {
+        return branchType == BranchType.AT || status == BranchStatus.PhaseOne_Failed;
+    }
+
     /**
      * Gets lock holder.
      *
@@ -330,28 +334,28 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
 
-        if (null != resourceIdBytes) {
+        if (resourceIdBytes != null) {
             byteBuffer.putInt(resourceIdBytes.length);
             byteBuffer.put(resourceIdBytes);
         } else {
             byteBuffer.putInt(0);
         }
 
-        if (null != lockKeyBytes) {
+        if (lockKeyBytes != null) {
             byteBuffer.putInt(lockKeyBytes.length);
             byteBuffer.put(lockKeyBytes);
         } else {
             byteBuffer.putInt(0);
         }
 
-        if (null != clientIdBytes) {
+        if (clientIdBytes != null) {
             byteBuffer.putShort((short)clientIdBytes.length);
             byteBuffer.put(clientIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
 
-        if (null != applicationDataBytes) {
+        if (applicationDataBytes != null) {
             byteBuffer.putInt(applicationDataBytes.length);
             byteBuffer.put(applicationDataBytes);
         } else {

@@ -47,7 +47,7 @@ public class NetUtil {
      * @return the string
      */
     public static String toStringAddress(SocketAddress address) {
-        if (null == address) {
+        if (address == null) {
             return StringUtils.EMPTY;
         }
         return toStringAddress((InetSocketAddress) address);
@@ -193,7 +193,7 @@ public class NetUtil {
      * @param address the address
      */
     public static void validAddress(InetSocketAddress address) {
-        if (null == address.getHostName() || 0 == address.getPort()) {
+        if (address.getHostName() == null || 0 == address.getPort()) {
             throw new IllegalArgumentException("invalid address:" + address);
         }
     }

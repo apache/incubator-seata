@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
  */
 public class UUIDGeneratorOverflowTest {
     private static final int UUID_GENERATE_COUNT = 5;
-    private static final int SERVER_NODE_ID = 2;
+    private static final Long SERVER_NODE_ID = 1023L;
 
     /**
      * Test generate uuid.

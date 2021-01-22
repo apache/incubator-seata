@@ -15,12 +15,21 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Map;
+import java.util.Objects;
+
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -32,13 +41,8 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * The type Base transactional executor.
@@ -79,7 +83,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param sqlRecognizer     the sql recognizer
      */
     public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                     SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
@@ -90,10 +94,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      *
      * @param statementProxy    the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the multi sql recognizer
+     * @param sqlRecognizers    the multi sql recognizer
      */
     public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                     List<SQLRecognizer> sqlRecognizers) {
+        List<SQLRecognizer> sqlRecognizers) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizers = sqlRecognizers;
@@ -101,8 +105,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public T execute(Object... args) throws Throwable {
-        if (RootContext.inGlobalTransaction()) {
-            String xid = RootContext.getXID();
+        String xid = RootContext.getXID();
+        if (xid != null) {
             statementProxy.getConnectionProxy().bind(xid);
         }
 
@@ -119,21 +123,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected abstract T doExecute(Object... args) throws Throwable;
 
-    /**
-     * Build where condition by p ks string.
-     *
-     * @param pkRows the pk rows
-     * @return the string
-     * @throws SQLException the sql exception
-     */
-    protected String buildWhereConditionByPKs(List<Field> pkRows) throws SQLException {
-        StringJoiner whereConditionAppender = new StringJoiner(",", getColumnNameInSQL(pkRows.get(0).getName()) + " in (", ")");
-        for (Field field : pkRows) {
-            whereConditionAppender.add("?");
-        }
-        return whereConditionAppender.toString();
-
-    }
 
     /**
      * build buildWhereCondition
@@ -173,6 +162,26 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
+     * Gets several column name in sql.
+     *
+     * @param columnNameList the column name
+     * @return the column name in sql
+     */
+    protected String getColumnNamesInSQL(List<String> columnNameList) {
+        if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
+            return null;
+        }
+        StringBuilder columnNamesStr = new StringBuilder();
+        for (int i = 0; i < columnNameList.size(); i++) {
+            if (i > 0) {
+                columnNamesStr.append(" , ");
+            }
+            columnNamesStr.append(getColumnNameInSQL(columnNameList.get(i)));
+        }
+        return columnNamesStr.toString();
+    }
+
+    /**
      * Gets from table in sql.
      *
      * @return the from table in sql
@@ -204,7 +213,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
+            .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }
 
@@ -222,15 +231,32 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return getTableMeta().containsPK(newColumns);
     }
 
+
     /**
      * compare column name and primary key name
      *
      * @param columnName the primary key column name
-     * @return true: equal false: not equal
+     * @return true: contain false: not contain
      */
-    protected boolean equalsPK(String columnName) {
+    protected boolean containPK(String columnName) {
         String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
-        return StringUtils.equalsIgnoreCase(getTableMeta().getPkName(), newColumnName);
+        return CollectionUtils.toUpperList(getTableMeta().getPrimaryKeyOnlyName()).contains(newColumnName.toUpperCase());
+    }
+
+
+    /**
+     * get standard pk column name from user sql column name
+     *
+     * @return
+     */
+    protected String getStandardPkColumnName(String userColumnName) {
+        String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
+        for (String cn : getTableMeta().getPrimaryKeyOnlyName()) {
+            if (cn.toUpperCase().equals(newUserColumnName.toUpperCase())) {
+                return cn;
+            }
+        }
+        return null;
     }
 
     /**
@@ -244,7 +270,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
-
+        if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+            if (beforeImage.getRows().size() != afterImage.getRows().size()) {
+                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+            }
+        }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
@@ -259,7 +289,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build lockKey
      *
      * @param rowsIncludingPK the records
-     * @return the string
+     * @return the string as local key. the local key example(multi pk): "t_user:1_a,2_b"
      */
     protected String buildLockKey(TableRecords rowsIncludingPK) {
         if (rowsIncludingPK.size() == 0) {
@@ -270,11 +300,18 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
         int filedSequence = 0;
-        List<Field> pkRows = rowsIncludingPK.pkRows();
-        for (Field field : pkRows) {
-            sb.append(field.getValue());
+        List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
+        for (Map<String, Field> rowMap : pksRows) {
+            int pkSplitIndex = 0;
+            for (String pkName : getTableMeta().getPrimaryKeyOnlyName()) {
+                if (pkSplitIndex > 0) {
+                    sb.append("_");
+                }
+                sb.append(rowMap.get(pkName).getValue());
+                pkSplitIndex++;
+            }
             filedSequence++;
-            if (filedSequence < pkRows.size()) {
+            if (filedSequence < pksRows.size()) {
                 sb.append(",");
             }
         }
@@ -331,22 +368,34 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build TableRecords
      *
-     * @param pkValues the pkValues
+     * @param pkValuesMap the pkValuesMap
      * @return return TableRecords;
      * @throws SQLException
      */
-    protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
-        String pk = getTableMeta().getEscapePkName(getDbType());
-        StringJoiner pkValuesJoiner = new StringJoiner(" , ",
-                "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
-        for (Object pkValue : pkValues) {
-            pkValuesJoiner.add("?");
-        }
+    protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        StringBuilder sql = new StringBuilder()
+            .append("SELECT * FROM ")
+            .append(getFromTableInSQL())
+            .append(" WHERE ");
+        // build check sql
+        String firstKey = pkValuesMap.keySet().stream().findFirst().get();
+        int rowSize = pkValuesMap.get(firstKey).size();
+        sql.append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
 
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString())) {
-            for (int i = 1, s = pkValues.size(); i <= s; i++) {
-                ps.setObject(i, pkValues.get(i - 1));
+        try {
+            ps = statementProxy.getConnection().prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            for (int r = 0; r < rowSize; r++) {
+                for (int c = 0; c < pkColumnNameList.size(); c++) {
+                    List<Object> pkColumnValueList = pkValuesMap.get(pkColumnNameList.get(c));
+                    int dataType = tableMeta.getColumnMeta(pkColumnNameList.get(c)).getDataType();
+                    ps.setObject(paramIndex, pkColumnValueList.get(r), dataType);
+                    paramIndex++;
+                }
             }
             rs = ps.executeQuery();
             return TableRecords.buildRecords(getTableMeta(), rs);

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.xa;
 
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
@@ -22,12 +23,10 @@ import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.StatementProxyXA;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
@@ -36,6 +35,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 
 /**
  * Tests for ConnectionProxyXA
@@ -43,18 +43,6 @@ import static org.mockito.ArgumentMatchers.any;
  * @author sharajava
  */
 public class ConnectionProxyXATest {
-
-    private class ValueHolder<T> {
-        public T value;
-
-        public ValueHolder(T value) {
-            this.value = value;
-        }
-
-        public ValueHolder() {
-
-        }
-    }
 
     @Test
     public void testInit() throws Throwable {
@@ -65,67 +53,18 @@ public class ConnectionProxyXATest {
         String xid = "xxx";
 
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
-        Assertions.assertThrows(IllegalStateException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                try {
-                    connectionProxyXA.init();
-                } catch (Throwable ex) {
-                    Assertions.assertTrue(ex.getMessage().startsWith("Connection[autocommit=false]"));
-                    throw ex;
-                }
-            }
-        });
+
+        Assertions.assertThrows(IllegalStateException.class,
+                connectionProxyXA::init,
+                "Connection[autocommit=false] as default is NOT supported");
     }
 
     @Test
     public void testXABranchCommit() throws Throwable {
         Connection connection = Mockito.mock(Connection.class);
-        ValueHolder<Boolean> autoCommitOnConnection = new ValueHolder<>();
-        autoCommitOnConnection.value = true;
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                autoCommitOnConnection.value = (boolean)invocationOnMock.getArguments()[0];
-                return null;
-            }
-        }).when(connection).setAutoCommit(any(Boolean.class));
-
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return autoCommitOnConnection.value;
-            }
-        }).when(connection).getAutoCommit();
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
 
         XAResource xaResource = Mockito.mock(XAResource.class);
-        ValueHolder<Boolean> xaStarted = new ValueHolder<>();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaStarted.value = true;
-                return null;
-            }
-        }).when(xaResource).start(any(Xid.class), any(Integer.class));
-
-        ValueHolder<Boolean> xaEnded = new ValueHolder<>();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaEnded.value = true;
-                return null;
-            }
-        }).when(xaResource).end(any(Xid.class), any(Integer.class));
-
-        ValueHolder<Boolean> xaPrepared = new ValueHolder<>(false);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaPrepared.value = true;
-                return null;
-            }
-        }).when(xaResource).prepare(any(Xid.class));
-
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
         BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
@@ -140,65 +79,23 @@ public class ConnectionProxyXATest {
 
         connectionProxyXA.setAutoCommit(false);
 
-        Assertions.assertFalse(connectionProxyXA.getAutoCommit());
         // Assert setAutoCommit = false was NEVER invoked on the wrapped connection
-        Assertions.assertTrue(connection.getAutoCommit());
+        Mockito.verify(connection, times(0)).setAutoCommit(false);
         // Assert XA start was invoked
-        Assertions.assertTrue(xaStarted.value);
+        Mockito.verify(xaResource).start(any(Xid.class), any(Integer.class));
 
         connectionProxyXA.commit();
-        Assertions.assertTrue(xaEnded.value);
-        Assertions.assertTrue(xaPrepared.value);
+
+        Mockito.verify(xaResource).end(any(Xid.class), any(Integer.class));
+        Mockito.verify(xaResource).prepare(any(Xid.class));
     }
 
     @Test
     public void testXABranchRollback() throws Throwable {
         Connection connection = Mockito.mock(Connection.class);
-        ValueHolder<Boolean> autoCommitOnConnection = new ValueHolder<>();
-        autoCommitOnConnection.value = true;
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                autoCommitOnConnection.value = (boolean)invocationOnMock.getArguments()[0];
-                return null;
-            }
-        }).when(connection).setAutoCommit(any(Boolean.class));
-
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                return autoCommitOnConnection.value;
-            }
-        }).when(connection).getAutoCommit();
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
 
         XAResource xaResource = Mockito.mock(XAResource.class);
-        ValueHolder<Boolean> xaStarted = new ValueHolder<>();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaStarted.value = true;
-                return null;
-            }
-        }).when(xaResource).start(any(Xid.class), any(Integer.class));
-
-        ValueHolder<Boolean> xaEnded = new ValueHolder<>();
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaEnded.value = true;
-                return null;
-            }
-        }).when(xaResource).end(any(Xid.class), any(Integer.class));
-
-        ValueHolder<Boolean> xaPrepared = new ValueHolder<>(false);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaPrepared.value = true;
-                return null;
-            }
-        }).when(xaResource).prepare(any(Xid.class));
-
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
         BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
@@ -213,31 +110,25 @@ public class ConnectionProxyXATest {
 
         connectionProxyXA.setAutoCommit(false);
 
-        Assertions.assertFalse(connectionProxyXA.getAutoCommit());
         // Assert setAutoCommit = false was NEVER invoked on the wrapped connection
-        Assertions.assertTrue(connection.getAutoCommit());
+        Mockito.verify(connection, times(0)).setAutoCommit(false);
+
         // Assert XA start was invoked
-        Assertions.assertTrue(xaStarted.value);
+        Mockito.verify(xaResource).start(any(Xid.class), any(Integer.class));
 
         connectionProxyXA.rollback();
-        Assertions.assertTrue(xaEnded.value);
+
+        Mockito.verify(xaResource).end(any(Xid.class), any(Integer.class));
+
         // Not prepared
-        Assertions.assertFalse(xaPrepared.value);
+        Mockito.verify(xaResource, times(0)).prepare(any(Xid.class));
     }
 
     @Test
     public void testClose() throws Throwable {
         Connection connection = Mockito.mock(Connection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
-        ValueHolder<Boolean> closed = new ValueHolder<>();
-        closed.value = false;
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                closed.value = true;
-                return null;
-            }
-        }).when(connection).close();
+
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
         String xid = "xxx";
@@ -249,7 +140,7 @@ public class ConnectionProxyXATest {
         // call close on proxy
         connectionProxyXA1.close();
         // Assert the original connection was NOT closed
-        Assertions.assertFalse(closed.value);
+        Mockito.verify(connection, times(0)).close();
 
         ConnectionProxyXA connectionProxyXA2 = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         connectionProxyXA2.init();
@@ -258,7 +149,7 @@ public class ConnectionProxyXATest {
         // call close on proxy
         connectionProxyXA2.close();
         // Assert the original connection was ALSO closed
-        Assertions.assertTrue(closed.value);
+        Mockito.verify(connection).close();
     }
 
     @Test
@@ -267,24 +158,6 @@ public class ConnectionProxyXATest {
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
 
         XAResource xaResource = Mockito.mock(XAResource.class);
-        ValueHolder<Boolean> xaCommitted = new ValueHolder<>(false);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaCommitted.value = true;
-                return null;
-            }
-        }).when(xaResource).commit(any(Xid.class), any(Boolean.class));
-
-        ValueHolder<Boolean> xaRolledback = new ValueHolder<>(false);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaRolledback.value = true;
-                return null;
-            }
-        }).when(xaResource).rollback(any(Xid.class));
-
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
         BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
@@ -294,8 +167,9 @@ public class ConnectionProxyXATest {
         connectionProxyXA.init();
 
         connectionProxyXA.xaCommit("xxx", 123L, null);
-        Assertions.assertTrue(xaCommitted.value);
-        Assertions.assertFalse(xaRolledback.value);
+
+        Mockito.verify(xaResource).commit(any(Xid.class), any(Boolean.class));
+        Mockito.verify(xaResource, times(0)).rollback(any(Xid.class));
     }
 
     @Test
@@ -304,23 +178,6 @@ public class ConnectionProxyXATest {
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
 
         XAResource xaResource = Mockito.mock(XAResource.class);
-        ValueHolder<Boolean> xaCommitted = new ValueHolder<>(false);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaCommitted.value = true;
-                return null;
-            }
-        }).when(xaResource).commit(any(Xid.class), any(Boolean.class));
-
-        ValueHolder<Boolean> xaRolledback = new ValueHolder<>(false);
-        Mockito.doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                xaRolledback.value = true;
-                return null;
-            }
-        }).when(xaResource).rollback(any(Xid.class));
 
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
@@ -331,8 +188,9 @@ public class ConnectionProxyXATest {
         connectionProxyXA.init();
 
         connectionProxyXA.xaRollback("xxx", 123L, null);
-        Assertions.assertFalse(xaCommitted.value);
-        Assertions.assertTrue(xaRolledback.value);
+
+        Mockito.verify(xaResource, times(0)).commit(any(Xid.class), any(Boolean.class));
+        Mockito.verify(xaResource).rollback(any(Xid.class));
     }
 
     @Test
@@ -346,5 +204,10 @@ public class ConnectionProxyXATest {
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
         Statement statement = connectionProxyXA.createStatement();
         Assertions.assertTrue(statement instanceof StatementProxyXA);
+    }
+
+    @AfterAll
+    public static void tearDown(){
+        RootContext.unbind();
     }
 }

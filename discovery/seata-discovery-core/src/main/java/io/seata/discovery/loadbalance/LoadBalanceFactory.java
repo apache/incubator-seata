@@ -16,6 +16,11 @@
 package io.seata.discovery.loadbalance;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.ConfigurationFactory;
+
+import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
 
 /**
  * The type Load balance factory.
@@ -25,11 +30,25 @@ import io.seata.common.loader.EnhancedServiceLoader;
 public class LoadBalanceFactory {
 
     /**
-     * Gets instance.
+     * The constant LOAD_BALANCE.
+     */
+    private static final String LOAD_BALANCE = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalance";
+
+    public static final String RANDOM_LOAD_BALANCE = DEFAULT_LOAD_BALANCE;
+
+    public static final String ROUND_ROBIN_LOAD_BALANCE = "RoundRobinLoadBalance";
+
+    public static final String CONSISTENT_HASH_LOAD_BALANCE = "ConsistentHashLoadBalance";
+
+    public static final String LEAST_ACTIVE_LOAD_BALANCE = "LeastActiveLoadBalance";
+
+
+    /**
+     * Get instance.
      *
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        return EnhancedServiceLoader.load(LoadBalance.class);
+        return EnhancedServiceLoader.load(LoadBalance.class, ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE, DEFAULT_LOAD_BALANCE));
     }
 }

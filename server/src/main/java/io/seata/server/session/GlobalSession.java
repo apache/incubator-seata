@@ -24,7 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.Constants;
 import io.seata.common.XID;
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -106,7 +108,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.TCC || branchSession.getBranchType() == BranchType.XA) {
+            if (!branchSession.canBeCommittedAsync()) {
                 return false;
             }
         }
@@ -121,8 +123,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public boolean isSaga() {
         if (branchSessions.size() > 0) {
             return BranchType.SAGA == branchSessions.get(0).getBranchType();
+        } else {
+            return StringUtils.isNotBlank(transactionName)
+                && transactionName.startsWith(Constants.SAGA_TRANS_NAME_PREFIX);
         }
-        return false;
     }
 
     /**
@@ -240,10 +244,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
+        if (!branchSession.unlock()) {
+            throw new TransactionException("Unlock branch lock failed!");
+        }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
-        branchSession.unlock();
         remove(branchSession);
     }
 
@@ -486,19 +492,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != byApplicationIdBytes) {
+        if (byApplicationIdBytes != null) {
             byteBuffer.putShort((short)byApplicationIdBytes.length);
             byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byServiceGroupBytes) {
+        if (byServiceGroupBytes != null) {
             byteBuffer.putShort((short)byServiceGroupBytes.length);
             byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != byTxNameBytes) {
+        if (byTxNameBytes != null) {
             byteBuffer.putShort((short)byTxNameBytes.length);
             byteBuffer.put(byTxNameBytes);
         } else {

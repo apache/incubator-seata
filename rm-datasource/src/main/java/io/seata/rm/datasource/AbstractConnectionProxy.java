@@ -16,12 +16,12 @@
 package io.seata.rm.datasource;
 
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -34,7 +34,6 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
-import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
 import java.util.List;
@@ -108,15 +107,16 @@ public abstract class AbstractConnectionProxy implements Connection {
         String dbType = getDbType();
         // support oracle 10.2+
         PreparedStatement targetPreparedStatement = null;
-        if (RootContext.inGlobalTransaction()) {
+        if (BranchType.AT == RootContext.getBranchType()) {
             List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, dbType);
             if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-                    String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
                     TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
-                            tableName, getDataSourceProxy().getResourceId());
-                    targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
+                            sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
+                    String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
+                    tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
+                    targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
                 }
             }
         }
@@ -241,28 +241,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public int getHoldability() throws SQLException {
         return targetConnection.getHoldability();
-    }
-
-    @Override
-    public Savepoint setSavepoint() throws SQLException {
-        return targetConnection.setSavepoint();
-    }
-
-    @Override
-    public Savepoint setSavepoint(String name) throws SQLException {
-        return targetConnection.setSavepoint(name);
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) throws SQLException {
-        targetConnection.rollback(savepoint);
-
-    }
-
-    @Override
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        targetConnection.releaseSavepoint(savepoint);
-
     }
 
     @Override
