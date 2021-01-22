@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.microsoft.sqlserver.jdbc.SQLServerXAConnection;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.SeataDataSourceProxy;
@@ -106,8 +107,14 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection.unwrap(Connection.class);
-        XAConnection xaConnection = SQL_SERVER.equalsIgnoreCase(dbType) ? ((SQLServerXADataSource)dataSource).getXAConnection()
-            : XAUtils.createXAConnection(physicalConn, this);
+        XAConnection xaConnection;
+        if (!SQL_SERVER.equalsIgnoreCase(dbType)) {
+            xaConnection = XAUtils.createXAConnection(physicalConn, this);
+        } else {
+            connection.close();
+            xaConnection = ((SQLServerXADataSource)dataSource).getXAConnection();
+            connection = xaConnection.getConnection();
+        }
         ConnectionProxyXA connectionProxyXA =
             new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
