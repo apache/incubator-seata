@@ -218,11 +218,14 @@ public class NetUtil {
      * @return true if the given IP is valid
      */
     public static boolean isValidIp(String ip, boolean validLocalAndAny) {
+        if (ip == null) {
+            return false;
+        }
         ip = convertIpIfNecessary(ip);
         if (validLocalAndAny) {
-            return ip != null && IP_PATTERN.matcher(ip).matches();
+            return IP_PATTERN.matcher(ip).matches();
         } else {
-            return ip != null && !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
+            return !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
         }
 
     }
