@@ -24,6 +24,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import static io.seata.core.model.BranchType.AT;
 import static io.seata.core.model.BranchType.XA;
@@ -44,6 +45,18 @@ public class RootContext {
      * The constant KEY_XID.
      */
     public static final String KEY_XID = "TX_XID";
+
+    /**
+     * The constant MDC_KEY_XID for logback
+     * @since 1.5.0
+     */
+    public static final String MDC_KEY_XID = "X-TX-XID";
+
+    /**
+     * The constant MDC_KEY_BRANCH_ID for logback
+     * @since 1.5.0
+     */
+    public static final String MDC_KEY_BRANCH_ID = "X-TX-BRANCH-ID";
 
     /**
      * The constant KEY_BRANCH_TYPE
@@ -89,12 +102,17 @@ public class RootContext {
      */
     public static void bind(@Nonnull String xid) {
         if (StringUtils.isBlank(xid)) {
-            xid = null;
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("xid is blank, switch to unbind operation!");
+            }
+            unbind();
+        } else {
+            MDC.put(MDC_KEY_XID, xid);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("bind {}", xid);
+            }
+            CONTEXT_HOLDER.put(KEY_XID, xid);
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind {}", xid);
-        }
-        CONTEXT_HOLDER.put(KEY_XID, xid);
     }
 
     /**
@@ -117,8 +135,11 @@ public class RootContext {
     @Nullable
     public static String unbind() {
         String xid = (String) CONTEXT_HOLDER.remove(KEY_XID);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind {} ", xid);
+        if (xid != null) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("unbind {} ", xid);
+            }
+            MDC.remove(MDC_KEY_XID);
         }
         return xid;
     }
