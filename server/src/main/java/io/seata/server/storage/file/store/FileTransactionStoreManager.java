@@ -48,6 +48,9 @@ import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.file.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import static io.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
 /**
  * The type File transaction store manager.
@@ -283,11 +286,16 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
             if (branchSessIonsOverMaXTimeout != null) {
                 for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
-                    TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
-                        LogOperation.BRANCH_ADD);
-                    data = branchWriteStore.encode();
-                    if (!writeDataFrame(data)) {
-                        return false;
+                    try {
+                        MDC.put(MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
+                        TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
+                            LogOperation.BRANCH_ADD);
+                        data = branchWriteStore.encode();
+                        if (!writeDataFrame(data)) {
+                            return false;
+                        }
+                    } finally {
+                        MDC.remove(MDC_KEY_BRANCH_ID);
                     }
                 }
             }

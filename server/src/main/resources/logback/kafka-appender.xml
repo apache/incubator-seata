@@ -2,22 +2,23 @@
 <included>
     <!-- kafka-appender properties -->
     <property name="KAFKA_BOOTSTRAP_SERVERS" value="localhost:9092"/>
-    <property name="KAFKA_TOPIC" value="to_logstash"/>
+    <property name="KAFKA_TOPIC" value="logback_to_logstash"/>
 
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder>
-            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%p|seata-server|${PORT:-0}|%t|%logger|%m|%wex</pattern>-->
-            <pattern>
-                {
-                "@timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
-                "level":"%p",
-                "app_name":"seata-server",
-                "PORT": ${PORT:-0},
-                "thread_name": "%t",
-                "logger_name": "%logger",
-                "message": "%m",
-                "stack_trace": "%wex"
-                }
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%p|seata-server|${PORT:-0}|%t|%logger|%X{X-TX-XID:-}|%X{X-TX-BRANCH-ID:-}|%m|%wex</pattern>-->
+            <pattern>{
+    "@timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+    "level":"%p",
+    "app_name":"${APPLICATION_NAME:-}",
+    "PORT": ${PORT:-0},
+    "thread_name": "%t",
+    "logger_name": "%logger",
+    "X-TX-XID": "%X{X-TX-XID:-}",
+    "X-TX-BRANCH-ID": "%X{X-TX-BRANCH-ID:-}",
+    "message": "%m",
+    "stack_trace": "%wex"
+}
             </pattern>
         </encoder>
         <topic>${KAFKA_TOPIC}</topic>

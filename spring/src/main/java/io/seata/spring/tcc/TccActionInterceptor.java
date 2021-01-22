@@ -34,6 +34,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 
@@ -102,6 +103,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 if (BranchType.TCC != previousBranchType) {
                     RootContext.unbindBranchType();
                 }
+                //MDC remove branchId
+                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
         return invocation.proceed();
