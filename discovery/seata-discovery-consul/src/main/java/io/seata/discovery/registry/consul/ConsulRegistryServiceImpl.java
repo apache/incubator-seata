@@ -300,7 +300,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
                     processService();
                 } catch (Exception exception) {
                     hasError = true;
-                    LOGGER.info("consul refresh services error:{}", exception.getMessage());
+                    LOGGER.error("consul refresh services error:{}", exception.getMessage());
                 }
             }
         }
