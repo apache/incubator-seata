@@ -100,20 +100,17 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     @Override
     protected Connection getConnectionProxyXA() throws SQLException {
-        if (!SQL_SERVER.equalsIgnoreCase(dbType)) {
-            Connection connection = dataSource.getConnection();
-            return getConnectionProxyXA(connection);
-        } else {
-            return getConnectionProxyXA(null);
-        }
+        Connection connection = dataSource.getConnection();
+        return getConnectionProxyXA(connection);
     }
 
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         XAConnection xaConnection;
-        if (connection != null) {
+        if (!SQL_SERVER.equalsIgnoreCase(dbType)) {
             Connection physicalConn = connection.unwrap(Connection.class);
             xaConnection = XAUtils.createXAConnection(physicalConn, this);
         } else {
+            connection.close();
             xaConnection = ((SQLServerXADataSource)dataSource).getXAConnection();
             connection = xaConnection.getConnection();
         }
