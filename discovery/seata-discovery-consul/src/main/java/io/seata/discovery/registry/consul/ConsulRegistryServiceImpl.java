@@ -285,7 +285,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         private String cluster;
         private long consulIndex;
         private boolean running;
-        private volatile boolean hasError = false;
+        private boolean hasError = false;
 
         ConsulNotifier(String cluster, long consulIndex) {
             this.cluster = cluster;
