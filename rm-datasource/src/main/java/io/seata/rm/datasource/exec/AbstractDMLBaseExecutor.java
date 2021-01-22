@@ -135,7 +135,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     protected T executeAutoCommitTrue(Object[] args) throws Throwable {
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         try {
-            connectionProxy.setAutoCommit(false);
+            connectionProxy.changeAutoCommit();
             return new LockRetryPolicy(connectionProxy).execute(() -> {
                 T result = executeAutoCommitFalse(args);
                 connectionProxy.commit();
@@ -191,8 +191,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         protected void onException(Exception e) throws Exception {
             ConnectionContext context = connection.getContext();
             //UndoItems can't use the Set collection class to prevent ABA
-            context.getUndoItems().clear();
-            context.getLockKeysBuffer().clear();
+            context.removeSavepoint(null);
             connection.getTargetConnection().rollback();
         }
 
