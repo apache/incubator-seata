@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -91,7 +89,6 @@ public interface DefaultValues {
 
     int SERVER_DEFAULT_PORT = 8091;
     String SERVER_DEFAULT_STORE_MODE = "file";
-    long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
