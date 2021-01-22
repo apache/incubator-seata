@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.Objects;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -170,7 +171,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
             return null;
         }
-        StringBuffer columnNamesStr = new StringBuffer();
+        StringBuilder columnNamesStr = new StringBuilder();
         for (int i = 0; i < columnNameList.size(); i++) {
             if (i > 0) {
                 columnNamesStr.append(" , ");
@@ -269,7 +270,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
-
+        if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+            if (beforeImage.getRows().size() != afterImage.getRows().size()) {
+                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+            }
+        }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;

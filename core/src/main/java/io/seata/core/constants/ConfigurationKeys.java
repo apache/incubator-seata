@@ -43,6 +43,11 @@ public interface ConfigurationKeys {
     String STORE_MODE = STORE_PREFIX + "mode";
 
     /**
+     * The constant STORE_PUBLIC_KEY.
+     */
+    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+
+    /**
      * The constant STORE_FILE_PREFIX
      */
     String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
@@ -134,6 +139,16 @@ public interface ConfigurationKeys {
     String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
+     * The constant CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE.
+     */
+    String CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaRetryPersistModeUpdate";
+
+    /**
+     * The constant CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE.
+     */
+    String CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaCompensatePersistModeUpdate";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
@@ -142,6 +157,11 @@ public interface ConfigurationKeys {
      * The constant CLIENT_TABLE_META_CHECK_ENABLE.
      */
     String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
+
+    /**
+     * The constant CLIENT_TABLE_META_CHECKER_INTERVAL.
+     */
+    String CLIENT_TABLE_META_CHECKER_INTERVAL = CLIENT_RM_PREFIX + "tableMetaCheckerInterval";
 
     /**
      * The constant TCC_ACTION_INTERCEPTOR_ORDER.
@@ -513,11 +533,6 @@ public interface ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
-
-    /**
-     * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
-     */
-    String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
      * The constant SEATA_ACCESS_KEY.
