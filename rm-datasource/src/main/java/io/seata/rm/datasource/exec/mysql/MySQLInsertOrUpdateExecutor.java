@@ -157,10 +157,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                             }
                         }
                     });
-                    List<String> indexList = beforeUniqueIndexMap.get(k.toUpperCase());
-                    if (CollectionUtils.isEmpty(indexList)) {
-                        indexList = new ArrayList<>();
-                    }
+                    List<String> indexList = beforeUniqueIndexMap.computeIfAbsent(k.toUpperCase(),key->new ArrayList<>());
                     indexList.add(everyRowIndex.toString());
                     beforeUniqueIndexMap.put(k.toUpperCase(), indexList);
                 }
@@ -354,10 +351,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             for (int i = 0; i < insertColumns.size(); i++) {
                 String m = insertColumns.get(i);
                 String params = insertParamsArray[i];
-                ArrayList<Object> imageListTemp = imageParamperterMap.get(m);
-                if (imageListTemp == null) {
-                    imageListTemp = new ArrayList<>();
-                }
+                ArrayList<Object> imageListTemp = imageParamperterMap.computeIfAbsent(m,k->new ArrayList<>());
                 if ("?".equals(params.toString().trim())) {
                     ArrayList<Object> objects = parameters.get(paramsindex);
                     imageListTemp.addAll(objects);
