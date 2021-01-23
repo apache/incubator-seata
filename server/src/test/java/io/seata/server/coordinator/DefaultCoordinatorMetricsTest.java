@@ -85,7 +85,7 @@ public class DefaultCoordinatorMetricsTest {
                     "seata.transaction(applicationId=null,group=null,meter=counter,role=tc,status=committed)")
                     .getValue(), 0);
             Assertions.assertEquals(1, measurements.get(
-                    "seata.transaction(applicationId=null,group=null,,meter=summary,role=tc,statistic=count,status=committed)")
+                    "seata.transaction(applicationId=null,group=null,meter=summary,role=tc,statistic=count,status=committed)")
                     .getValue(), 0);
             Assertions.assertEquals(1, measurements.get(
                     "seata.transaction(applicationId=null,group=null,meter=summary,role=tc,statistic=total,status=committed)")
