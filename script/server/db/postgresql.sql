@@ -54,3 +54,10 @@ CREATE TABLE IF NOT EXISTS public.lock_table
 );
 
 CREATE INDEX idx_branch_id ON public.lock_table (branch_id);
+
+CREATE TABLE distribute_lock (
+    lock_key     VARCHAR(20)  NOT NULL,
+    value        VARCHAR(20)  NOT NULL,
+    expire       BIGINT       NOT NULL,
+    CONSTRAINT pk_distribute_lock_table PRIMARY KEY (lock_key)
+);
