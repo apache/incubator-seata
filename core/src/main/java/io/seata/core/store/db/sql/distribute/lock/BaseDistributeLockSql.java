@@ -27,11 +27,14 @@ public class BaseDistributeLockSql implements DistributeLockSql {
             ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE + "," + ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE;
 
     protected static final String SELECT_FOR_UPDATE_SQL = "SELECT " + ALL_COLUMNS + " FROM " + DISTRIBUTE_LOCK_TABLE_PLACE_HOLD
-            + " where " + ServerTableColumnsName.DISTRIBUTE_LOCK_KEY + " = ? FOR UPDATE";
+            + " WHERE " + ServerTableColumnsName.DISTRIBUTE_LOCK_KEY + " = ? FOR UPDATE";
 
-    protected static final String UPDATE_DISTRIBUTE_LOCK_SQL = "INSERT INTO " + DISTRIBUTE_LOCK_TABLE_PLACE_HOLD + "("
-            + ALL_COLUMNS + ") VALUE (?, ?, ?) ON DUPLICATE KEY UPDATE " + ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE + " = ?, "
-            + ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE + " = ?";
+    protected static final String INSERT_DISTRIBUTE_LOCK_SQL = "INSERT INTO " + DISTRIBUTE_LOCK_TABLE_PLACE_HOLD + "("
+            + ALL_COLUMNS + ") VALUE (?, ?, ?)";
+
+    protected static final String UPDATE_DISTRIBUTE_LOCK_SQL = "UPDATE " + DISTRIBUTE_LOCK_TABLE_PLACE_HOLD + " SET "
+            + ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE + "=?, " + ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE + "=?"
+            + " WHERE " + ServerTableColumnsName.DISTRIBUTE_LOCK_KEY + "=?";
 
     @Override
     public String getSelectDistributeForUpdateSql(String distributeLockTable) {
@@ -39,7 +42,12 @@ public class BaseDistributeLockSql implements DistributeLockSql {
     }
 
     @Override
-    public String getInsertOnDuplicateKeySql(String distributeLockTable) {
+    public String getInsertSql(String distributeLockTable) {
+        return INSERT_DISTRIBUTE_LOCK_SQL.replace(DISTRIBUTE_LOCK_TABLE_PLACE_HOLD, distributeLockTable);
+    }
+
+    @Override
+    public String getUpdateSql(String distributeLockTable) {
         return UPDATE_DISTRIBUTE_LOCK_SQL.replace(DISTRIBUTE_LOCK_TABLE_PLACE_HOLD, distributeLockTable);
     }
 }

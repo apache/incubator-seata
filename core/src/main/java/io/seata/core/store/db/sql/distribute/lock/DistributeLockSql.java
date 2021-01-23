@@ -28,9 +28,16 @@ public interface DistributeLockSql {
     String getSelectDistributeForUpdateSql(String distributeLockTable);
 
     /**
-     * Get insert on duplicate key update distribute lock sql
+     * Get insert distribute lock sql
      * @param distributeLockTable the table name of the distribute lock table
      * @return the sql
      */
-    String getInsertOnDuplicateKeySql(String distributeLockTable);
+    String getInsertSql(String distributeLockTable);
+
+    /**
+     * Get update distribute lock sql
+     * @param distributeLockTable the table name of the distribute lock table
+     * @return the sql
+     */
+    String getUpdateSql(String distributeLockTable);
 }

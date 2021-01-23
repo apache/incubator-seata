@@ -24,6 +24,8 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
+import com.alibaba.druid.util.JdbcUtils;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -65,62 +67,112 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
 
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
-        try (Connection connection = distributedLockDataSource.getConnection();
-             PreparedStatement pst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getSelectDistributeForUpdateSql(distributeLockTable));
-             PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getInsertOnDuplicateKeySql(distributeLockTable))){
-            pst.setString(1, distributedLockDO.getKey());
-            ResultSet resultSet = pst.executeQuery();
-            while (resultSet.next()) {
-                long expire = resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE);
-                String value = resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE);
-                if (expire >= System.currentTimeMillis()) {
-                    LOGGER.info("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
-                            distributedLockDO.getKey(), value);
-                    return false;
-                }
+        Connection connection = null;
+        PreparedStatement pst = null;
+        PreparedStatement insertPst = null;
+        boolean originalAutoCommit = false;
+        try {
+            connection = distributedLockDataSource.getConnection();
+            originalAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+
+            DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getKey());
+            if (null == distributedLockDOFromDB) {
+                return insertDistribute(connection, distributedLockDO);
             }
 
-            insertPst.setString(1, distributedLockDO.getKey());
-            insertPst.setString(2, distributedLockDO.getValue());
-            insertPst.setLong(3, distributedLockDO.getExpire());
-            insertPst.setString(4, distributedLockDO.getValue());
-            insertPst.setLong(5, distributedLockDO.getExpire());
+            if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()) {
+                LOGGER.info("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
+                        distributedLockDO.getKey(), distributedLockDOFromDB.getValue());
+                return false;
+            }
 
-            return insertPst.executeUpdate() > 0;
+            return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
             LOGGER.error("execute acquire lock failure, key is: {}", distributedLockDO.getKey(), ex);
             return false;
+        } finally {
+            try {
+                if (originalAutoCommit) {
+                    connection.commit();
+                    connection.setAutoCommit(true);
+                }
+                JdbcUtils.close(connection);
+            } catch (SQLException ignore) { }
         }
     }
 
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
-        try (Connection connection = distributedLockDataSource.getConnection();
-             PreparedStatement pst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getSelectDistributeForUpdateSql(distributeLockTable));
-             PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getInsertOnDuplicateKeySql(distributeLockTable))){
-            pst.setString(1, distributedLockDO.getKey());
-            ResultSet resultSet = pst.executeQuery();
-            while (resultSet.next()) {
-                long expire = resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE);
-                String value = resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE);
+        Connection connection = null;
+        boolean originalAutoCommit = false;
+        try {
+            connection = distributedLockDataSource.getConnection();
+            originalAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
 
-                if (expire >= System.currentTimeMillis() && Objects.equals(value, distributedLockDO.getValue())) {
-                    LOGGER.warn("the distribute lock for key :{} is holding by :{}, skip the release lock.",
-                            distributedLockDO.getKey(), value);
-                    return true;
-                }
+            DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getKey());
+            if (null == distributedLockDOFromDB) {
+                throw new ShouldNeverHappenException("distributeLockDO would not be null when release distribute lock");
             }
 
-            insertPst.setString(1, distributedLockDO.getKey());
-            insertPst.setString(2, distributedLockDO.getValue());
-            insertPst.setLong(3, distributedLockDO.getExpire());
-            insertPst.setString(4, distributedLockDO.getValue());
-            insertPst.setLong(5, distributedLockDO.getExpire());
+            if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()
+                    && !Objects.equals(distributedLockDOFromDB.getValue(), distributedLockDO.getValue())) {
+                LOGGER.warn("the distribute lock for key :{} is holding by :{}, skip the release lock.",
+                        distributedLockDO.getKey(), distributedLockDOFromDB.getValue());
+                return true;
+            }
 
-            return insertPst.executeUpdate() > 0;
+            return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
             LOGGER.error("execute release lock failure, key is: {}", distributedLockDO.getKey(), ex);
             return false;
+        } finally {
+            try {
+                if (originalAutoCommit) {
+                    connection.commit();
+                    connection.setAutoCommit(true);
+                }
+                JdbcUtils.close(connection);
+            } catch (SQLException ignore) { }
+        }
+    }
+
+    protected DistributedLockDO getDistributeLockDO(Connection connection, String key) throws SQLException {
+        try (PreparedStatement pst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
+                .getSelectDistributeForUpdateSql(distributeLockTable))) {
+
+            pst.setString(1, key);
+            ResultSet resultSet = pst.executeQuery();
+
+            while (resultSet.next()) {
+                DistributedLockDO distributedLock = new DistributedLockDO();
+                distributedLock.setExpire(resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE));
+                distributedLock.setValue(resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE));
+                distributedLock.setKey(key);
+                return distributedLock;
+            }
+            return null;
+        }
+    }
+
+    protected boolean insertDistribute(Connection connection, DistributedLockDO distributedLockDO) throws SQLException {
+        try (PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
+                .getInsertSql(distributeLockTable))){
+            insertPst.setString(1, distributedLockDO.getKey());
+            insertPst.setString(2, distributedLockDO.getValue());
+            insertPst.setLong(3, distributedLockDO.getExpire());
+            return insertPst.executeUpdate() > 0;
+        }
+    }
+
+    protected boolean updateDistributeLock(Connection connection, DistributedLockDO distributedLockDO) throws SQLException {
+        try (PreparedStatement updatePst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
+                .getUpdateSql(distributeLockTable))) {
+            updatePst.setString(1, distributedLockDO.getValue());
+            updatePst.setLong(2, distributedLockDO.getExpire());
+            updatePst.setString(3, distributedLockDO.getKey());
+            return updatePst.executeUpdate() > 0;
         }
     }
 }
