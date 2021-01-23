@@ -50,7 +50,7 @@ public class GlobalTransactionEvent implements Event {
     private String applicationId;
     
     /**
-     * Transaction Group
+     * Transaction Service Group
      */
     private String group;
 
@@ -86,7 +86,7 @@ public class GlobalTransactionEvent implements Event {
     }
     
     public String getGroup() {
-    	return group;
+        return group;
     }
 
     public Long getBeginTime() {
@@ -101,8 +101,8 @@ public class GlobalTransactionEvent implements Event {
         return status;
     }
 
-    public GlobalTransactionEvent(long id, String role, String name, String applicationId, String group, Long beginTime, Long endTime,
-                                  GlobalStatus status) {
+    public GlobalTransactionEvent(long id, String role, String name, String applicationId,
+            String group, Long beginTime, Long endTime, GlobalStatus status) {
         this.id = id;
         this.role = role;
         this.name = name;
