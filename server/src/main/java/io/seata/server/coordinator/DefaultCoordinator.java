@@ -236,7 +236,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 // transaction timeout and start rollbacking event
                 eventBus.post(
                     new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(), globalSession.getApplicationId(),
+                        globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
                             globalSession.getBeginTime(), null, globalSession.getStatus()));
 
                 return true;
