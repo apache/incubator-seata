@@ -68,8 +68,6 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
         Connection connection = null;
-        PreparedStatement pst = null;
-        PreparedStatement insertPst = null;
         boolean originalAutoCommit = false;
         try {
             connection = distributedLockDataSource.getConnection();
