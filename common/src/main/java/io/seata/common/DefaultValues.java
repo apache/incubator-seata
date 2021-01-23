@@ -76,6 +76,11 @@ public interface DefaultValues {
      */
     String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
+    /**
+     * the constant DEFAULT_DISTRIBUTE_LOCK_DB_TABLE
+     */
+    String DEFAULT_DISTRIBUTE_LOCK_DB_TABLE = "distribute_lock";
+
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;

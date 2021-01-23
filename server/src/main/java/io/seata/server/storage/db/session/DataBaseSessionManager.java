@@ -42,7 +42,6 @@ import io.seata.server.storage.db.distributed.lock.DistributedLockStoreDAO;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import io.seata.common.loader.Scope;
-import jdk.internal.joptsimple.internal.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,7 +229,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     public boolean unScheduledLock(String key) {
         DistributedLockDO distributedLockDO = new DistributedLockDO();
         distributedLockDO.setKey(key);
-        distributedLockDO.setValue(Strings.EMPTY);
+        distributedLockDO.setValue(StringUtils.EMPTY);
         distributedLockDO.setExpire(0L);
         return distributedLockStore.releaseLock(distributedLockDO);
     }

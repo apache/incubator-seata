@@ -210,6 +210,12 @@ public interface ConfigurationKeys {
     String STORE_DB_BRANCH_TABLE = STORE_DB_PREFIX + "branchTable";
 
     /**
+     * the constant STORE_DB_DISTRIBUTE_LOCK_TABLE
+     * @since 1.5.0
+     */
+    String STORE_DB_DISTRIBUTE_LOCK_TABLE = STORE_DB_PREFIX + "distributeLockTable";
+
+    /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
     String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";
@@ -263,6 +269,11 @@ public interface ConfigurationKeys {
      * The constant LOCK_DB_TABLE.
      */
     String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
+
+    /**
+     * the constant LOCK_DB_TABLE
+     */
+    String DISTRIBUTE_LOCK_DB_TABLE = STORE_DB_PREFIX + "distributeLockTable";
 
     /**
      * The constant SERVER_PORT.

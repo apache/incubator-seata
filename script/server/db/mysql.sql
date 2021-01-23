@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS `lock_table`
 
 CREATE TABLE IF NOT EXISTS `distribute_lock`
 (
-    `key`            CHAR(20) NOT NULL,
+    `lock_key`       CHAR(20) NOT NULL,
     `value`          VARCHAR(20) NOT NULL,
     `expire`         BIGINT,
-    primary key (`key`)
+    primary key (`lock_key`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;

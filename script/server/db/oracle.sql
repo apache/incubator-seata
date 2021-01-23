@@ -54,3 +54,10 @@ CREATE TABLE lock_table
 );
 
 CREATE INDEX idx_branch_id ON lock_table (branch_id);
+
+CREATE TABLE distribute_lock (
+    "lock_key"     VARCHAR2(20)  NOT NULL,
+    "value"        VARCHAR2(20)  NOT NULL,
+    "expire"       DECIMAL(18)   NOT NULL,
+    PRIMARY KEY ("lock_key")
+);

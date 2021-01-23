@@ -24,17 +24,30 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLockStore;
+import io.seata.core.store.db.sql.distribute.lock.DistributeLockSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTE_LOCK_DB_TABLE;
+import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTE_LOCK_DB_TABLE;
 
 /**
  * @author chd
  */
 public class DistributedLockStoreDAO implements DistributedLockStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedLockStoreDAO.class);
+
     private DataSource distributedLockDataSource;
+
+    private String distributeLockTable;
+
+    private String dbType;
 
     /**
      * Instantiates a new Log store data base dao.
@@ -42,6 +55,10 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
      * @param distributedLockDataSource the distribute lock store data source
      */
     public DistributedLockStoreDAO(DataSource distributedLockDataSource) {
+        Configuration configuration = ConfigurationFactory.getInstance();
+        distributeLockTable = configuration.getConfig(DISTRIBUTE_LOCK_DB_TABLE, DEFAULT_DISTRIBUTE_LOCK_DB_TABLE);
+        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+
         this.distributedLockDataSource = distributedLockDataSource;
     }
 
@@ -49,13 +66,13 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try (Connection connection = distributedLockDataSource.getConnection();
-             PreparedStatement pst = connection.prepareStatement("SELECT * FROM distributed_lock where `key` = ? FOR UPDATE");
-             PreparedStatement insertPst = connection.prepareStatement("INSERT INTO distributed_lock(`key`, `value`, `expire`) VALUE (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = ?, `expire` = ?")){
+             PreparedStatement pst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getSelectDistributeForUpdateSql(distributeLockTable));
+             PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getInsertOnDuplicateKeySql(distributeLockTable))){
             pst.setString(1, distributedLockDO.getKey());
             ResultSet resultSet = pst.executeQuery();
             while (resultSet.next()) {
-                long expire = resultSet.getLong("expire");
-                String value = resultSet.getString("value");
+                long expire = resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE);
+                String value = resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE);
                 if (expire >= System.currentTimeMillis()) {
                     LOGGER.info("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
                             distributedLockDO.getKey(), value);
@@ -79,17 +96,17 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
         try (Connection connection = distributedLockDataSource.getConnection();
-             PreparedStatement pst = connection.prepareStatement("SELECT * FROM distributed_lock where `key` = ? FOR UPDATE");
-             PreparedStatement insertPst = connection.prepareStatement("INSERT INTO distributed_lock(`key`, `value`, `expire`) VALUE (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = ?, `expire` = ?")){
+             PreparedStatement pst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getSelectDistributeForUpdateSql(distributeLockTable));
+             PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType).getInsertOnDuplicateKeySql(distributeLockTable))){
             pst.setString(1, distributedLockDO.getKey());
             ResultSet resultSet = pst.executeQuery();
             while (resultSet.next()) {
-                long expire = resultSet.getLong("expire");
-                String value = resultSet.getString("value");
+                long expire = resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE);
+                String value = resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE);
 
                 if (expire >= System.currentTimeMillis() && Objects.equals(value, distributedLockDO.getValue())) {
                     LOGGER.warn("the distribute lock for key :{} is holding by :{}, skip the release lock.",
-                            distributedLockDO.getKey(), resultSet.getString("value"));
+                            distributedLockDO.getKey(), value);
                     return true;
                 }
             }

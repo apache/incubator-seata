@@ -34,6 +34,7 @@ store:
     globalTable: global_table
     branchTable: branch_table
     lockTable: lock_table
+    distributeLockTable: distributed_lock
     queryLimit: 100
     maxWait: 5000
   ## redis store property

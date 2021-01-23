@@ -192,4 +192,20 @@ public interface ServerTableColumnsName {
      * The constant lock_table column name gmt_modified
      */
     String LOCK_TABLE_GMT_MODIFIED = "gmt_modified";
+
+
+
+    /**
+     * the constant distribute_lock column name key
+     */
+    String DISTRIBUTE_LOCK_KEY = "lock_key";
+
+    /**
+     * the constant distribute_lock column name value
+     */
+    String DISTRIBUTE_LOCK_VALUE = "value";
+    /**
+     * the constant distribute_lock column name expire
+     */
+    String DISTRIBUTE_LOCK_EXPIRE = "expire";
 }
