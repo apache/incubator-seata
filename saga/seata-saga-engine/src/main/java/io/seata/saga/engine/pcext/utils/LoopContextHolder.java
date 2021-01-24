@@ -16,11 +16,7 @@
 package io.seata.saga.engine.pcext.utils;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.seata.saga.proctrl.HierarchicalProcessContext;
@@ -38,10 +34,9 @@ public class LoopContextHolder {
     private AtomicInteger nrOfActiveInstances = new AtomicInteger();
     private AtomicInteger nrOfCompletedInstances = new AtomicInteger();
     private volatile boolean needCompensate = false;
-    private Map<Integer, AtomicBoolean> loopCounterContext = new ConcurrentHashMap<>();
-    private LinkedBlockingDeque<Exception> loopExpContext = new LinkedBlockingDeque<>();
-    private Collection collection;
+    private Stack<Exception> loopExpContext = new Stack<>();
     private Stack<Integer> loopIndexStack = new Stack<>();
+    private Collection collection;
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
         LoopContextHolder loopContextHolder = (LoopContextHolder)context.getVariable(
@@ -86,11 +81,7 @@ public class LoopContextHolder {
         this.needCompensate = needCompensate;
     }
 
-    public Map<Integer, AtomicBoolean> getLoopCounterContext() {
-        return loopCounterContext;
-    }
-
-    public LinkedBlockingDeque<Exception> getLoopExpContext() {
+    public Stack<Exception> getLoopExpContext() {
         return loopExpContext;
     }
 

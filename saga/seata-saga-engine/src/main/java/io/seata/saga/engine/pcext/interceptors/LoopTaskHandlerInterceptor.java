@@ -18,8 +18,8 @@ package io.seata.saga.engine.pcext.interceptors;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -117,11 +117,11 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
             boolean compensateOperation = false;
 
-            LinkedBlockingDeque<Exception> deque = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
+            Stack<Exception> expStack = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
             Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
 
             if (null != exp) {
-                deque.push(exp);
+                expStack.push(exp);
                 String next = (String)((HierarchicalProcessContext)context).getVariableLocally(
                     DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
                 if (StringUtils.isNotBlank(next) && next.equals(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER)) {
@@ -140,11 +140,11 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
 
             int loopCounter = LoopTaskUtils.acquireNextLoopCounter(context);
-            if (!deque.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation
+            if (!expStack.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation
                 && loopCounter < 0)) {
-                if (!deque.isEmpty()) {
+                if (!expStack.isEmpty()) {
                     ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION,
-                        deque.peek());
+                        expStack.peek());
                 }
                 context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
                 ((HierarchicalProcessContext)context).removeVariableLocally(
