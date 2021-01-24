@@ -964,6 +964,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    @Disabled
     public void testSimpleStateMachineWithLoopSubMachineForward() throws InterruptedException {
         long start  = System.currentTimeMillis();
 
