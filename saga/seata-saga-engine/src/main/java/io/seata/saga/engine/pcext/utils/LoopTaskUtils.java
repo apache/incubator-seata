@@ -139,17 +139,16 @@ public class LoopTaskUtils {
      * reload loop context while forward
      *
      * @param context
-     * @param forwardState
+     * @param forwardStateName
      */
-    public static void reloadLoopContext(ProcessContext context, StateInstance forwardState) {
+    public static void reloadLoopContext(ProcessContext context, String forwardStateName) {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
-        String originStateName = EngineUtils.getOriginStateName(forwardState);
         List<StateInstance> forwardStateList = actList.stream().filter(
-            e -> originStateName.equals(EngineUtils.getOriginStateName(e))).collect(Collectors.toList());
+            e -> forwardStateName.equals(EngineUtils.getOriginStateName(e))).collect(Collectors.toList());
 
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
         Collection collection = loopContextHolder.getCollection();

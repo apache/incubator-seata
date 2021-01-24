@@ -264,8 +264,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
         Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
         if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
-            context.setVariable(DomainConstants.VAR_NAME_STATE_INST,
-                LoopTaskUtils.findOutLastNeedForwardStateInstance(context));
+            lastForwardState = LoopTaskUtils.findOutLastNeedForwardStateInstance(context);
         }
 
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
@@ -321,6 +320,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
             }
 
+            loop = LoopTaskUtils.getLoopConfig(context, inst.getState(context));
             if (null != loop) {
                 inst.setTemporaryState(new LoopTriggerStateImpl());
             }

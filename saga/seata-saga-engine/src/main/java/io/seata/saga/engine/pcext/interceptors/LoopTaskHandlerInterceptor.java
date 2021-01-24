@@ -17,12 +17,15 @@ package io.seata.saga.engine.pcext.interceptors;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
@@ -89,11 +92,33 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
                 StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_INST);
+                StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+
                 StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(
                     stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, currentState.getName()));
+
                 if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
                     lastRetriedStateInstance.getType())) {
+
                     boolean isForForward = !ExecutionStatus.SU.equals(lastRetriedStateInstance.getCompensationStatus());
+
+                    if (isForForward) {
+                        while (StringUtils.isNotBlank(lastRetriedStateInstance.getStateIdRetriedFor())) {
+                            lastRetriedStateInstance = stateMachineConfig.getStateLogStore().getStateInstance(
+                                lastRetriedStateInstance.getStateIdRetriedFor(),
+                                lastRetriedStateInstance.getMachineInstanceId());
+                        }
+                        List<StateMachineInstance> subInst = stateMachineConfig.getStateLogStore()
+                            .queryStateMachineInstanceByParentId(
+                                EngineUtils.generateParentId(lastRetriedStateInstance));
+                        if (CollectionUtils.isNotEmpty(subInst)) {
+                            if (ExecutionStatus.SU.equals(subInst.get(0).getCompensationStatus())) {
+                                isForForward = false;
+                            }
+                        }
+                    }
+
                     ((HierarchicalProcessContext)context).setVariableLocally(
                         DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, isForForward);
                 }

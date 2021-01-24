@@ -82,8 +82,7 @@ public class LoopTriggerStateHandler implements StateHandler {
 
             int maxInstances;
             if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
-                StateInstance forwardState = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-                LoopTaskUtils.reloadLoopContext(context, forwardState);
+                LoopTaskUtils.reloadLoopContext(context, instruction.getState(context).getName());
                 maxInstances = Math.min(loop.getParallel(),
                     loopContextHolder.getCollection().size() - loopContextHolder.getNrOfCompletedInstances().get());
             } else if (null != compensationTriggerState) {

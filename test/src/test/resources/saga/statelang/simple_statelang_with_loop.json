@@ -68,7 +68,7 @@
         },
         "CallSubStateMachine": {
             "Type": "SubStateMachine",
-            "StateMachineName": "simpleChoiceTestStateMachine",
+            "StateMachineName": "simpleCompensationStateMachine",
             "Loop": {
                 "Parallel": 3,
                 "Collection": "$.[collection]",
