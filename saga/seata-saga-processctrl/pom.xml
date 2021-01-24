@@ -28,12 +28,4 @@
     <artifactId>seata-saga-processctrl</artifactId>
     <packaging>jar</packaging>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.seata</groupId>
-            <artifactId>seata-saga-statelang</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-
 </project>
