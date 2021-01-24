@@ -44,6 +44,7 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
+import io.seata.saga.statelang.domain.impl.LoopTriggerStateImpl;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.slf4j.Logger;
@@ -144,15 +145,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         StateInstruction stateInstruction = processContext.getInstruction(StateInstruction.class);
         Loop loop = LoopTaskUtils.getLoopConfig(processContext, stateInstruction.getState(processContext));
-
         if (null != loop) {
-            LoopTaskUtils.createLoopContext(processContext, loop);
-            List<ProcessContext> asyncProcessContextList = (List)processContext.getVariable(
-                DomainConstants.LOOP_PROCESS_CONTEXT);
-            for (ProcessContext context : asyncProcessContextList) {
-                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
-            }
-            processContext.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
+            stateInstruction.setTemporaryState(new LoopTriggerStateImpl());
         }
 
         if (async) {
@@ -328,12 +322,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
 
             if (null != loop) {
-                LoopTaskUtils.reloadLoopContext(context, lastForwardState, loop);
-                List<ProcessContext> asyncProcessContextList = (List)context.getVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
-                for (ProcessContext processContext : asyncProcessContextList) {
-                    stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
-                }
-                context.removeVariable(DomainConstants.LOOP_PROCESS_CONTEXT);
+                inst.setTemporaryState(new LoopTriggerStateImpl());
             }
 
             if (async) {

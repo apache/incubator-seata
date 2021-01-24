@@ -34,8 +34,8 @@ import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.SubStateMachine;
-import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
+import io.seata.saga.statelang.domain.impl.LoopTriggerStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -62,32 +62,26 @@ public class TaskStateRouter implements StateRouter {
             return null;
         }
 
+        //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
+        String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
+
+        // check if in loop async condition
+        Object isLoopState = context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
+        if (StringUtils.isEmpty(next) && Boolean.TRUE.equals(isLoopState)) {
+            return loopRoute(context);
+        }
+
         //The current CompensationTriggerState can mark the compensation process is started and perform compensation
         // route processing.
-        State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
-            DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+        State compensationTriggerState = (State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
         if (compensationTriggerState != null) {
             return compensateRoute(context, compensationTriggerState);
         }
 
-        //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
-        String next = (String)((HierarchicalProcessContext)context).getVariableLocally(
-            DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
-
-        Object isLoopState = ((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE);
         if (StringUtils.hasLength(next)) {
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
         } else {
-            if (Boolean.TRUE.equals(isLoopState)) {
-                next = state.getName();
-            } else {
-                if (Boolean.TRUE.equals(((HierarchicalProcessContext)context)
-                    .getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
-                    return null;
-                } else {
-                    next = state.getNext();
-                }
-            }
+            next = state.getNext();
         }
 
         //If next is empty, the state selected by the Choice state was taken.
@@ -111,9 +105,8 @@ public class TaskStateRouter implements StateRouter {
         stateInstruction.setStateName(next);
 
         if (!Boolean.TRUE.equals(isLoopState)) {
-            Loop loop = LoopTaskUtils.getLoopConfig(context, nextState);
-            if (null != loop) {
-                LoopTaskUtils.createLoopContext(context, loop);
+            if (null != LoopTaskUtils.getLoopConfig(context, nextState)) {
+                stateInstruction.setTemporaryState(new LoopTriggerStateImpl());
             }
         }
 
@@ -184,7 +177,11 @@ public class TaskStateRouter implements StateRouter {
                         EngineUtils.generateParentId(stateToBeCompensated));
                 }
 
-                LoopTaskUtils.createCompensateContext(context, stateToBeCompensated);
+                if (!Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
+                    if (null != LoopTaskUtils.getLoopConfig(context, state)) {
+                        instruction.setTemporaryState(new LoopTriggerStateImpl());
+                    }
+                }
 
                 return instruction;
             }
@@ -201,5 +198,23 @@ public class TaskStateRouter implements StateRouter {
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setStateName(compensationTriggerStateNext);
         return instruction;
+    }
+
+    private Instruction loopRoute(ProcessContext context) {
+
+        StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
+        State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
+            DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+
+        if (null != compensationTriggerState) {
+            return compensateRoute(context, compensationTriggerState);
+        } else if (((HierarchicalProcessContext)context).hasVariableLocal(
+            DomainConstants.VAR_NAME_CURRENT_LOOP_STATE)) {
+            stateInstruction.setTemporaryState((State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE));
+            return stateInstruction;
+        }
+
+        return null;
+
     }
 }

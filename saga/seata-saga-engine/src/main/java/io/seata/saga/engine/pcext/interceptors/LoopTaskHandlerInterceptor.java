@@ -42,8 +42,6 @@ import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * State Interceptor For ServiceTask, SubStateMachine, ScriptTask With Loop Attribute
@@ -52,8 +50,6 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = "LoopTask", order = 90)
 public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskHandlerInterceptor.class);
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
@@ -75,33 +71,35 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
             State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
                 DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-            if (compensationTriggerState != null) {
+
+            // get loop config
+            if (null != compensationTriggerState) {
+                // compensate condition should get stateToBeCompensated 's config
                 CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
                 StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(currentState.getName());
-                if (loopCounter < 0) {
-                    return;
-                }
                 AbstractTaskState compensateState = (AbstractTaskState)stateToBeCompensated.getStateMachineInstance()
                     .getStateMachine().getState(EngineUtils.getOriginStateName(stateToBeCompensated));
                 loop = compensateState.getLoop();
+                loopCounter = LoopTaskUtils.reloadLoopCounter(stateToBeCompensated.getName());
             } else {
                 loop = currentState.getLoop();
-                if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
-                    StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-                        DomainConstants.VAR_NAME_STATEMACHINE_INST);
-                    StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(
-                        stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, currentState.getName()));
-                    if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
-                        lastRetriedStateInstance.getType()) && !ExecutionStatus.SU.equals(lastRetriedStateInstance.getCompensationStatus())) {
-                        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
-                    } else {
-                        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, false);
-                    }
+            }
+
+            // forward with subStateMachine should check each loop state's status
+            if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
+                StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_INST);
+                StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(
+                    stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, currentState.getName()));
+                if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
+                    lastRetriedStateInstance.getType())) {
+                    boolean isForForward = !ExecutionStatus.SU.equals(lastRetriedStateInstance.getCompensationStatus());
+                    ((HierarchicalProcessContext)context).setVariableLocally(
+                        DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, isForForward);
                 }
             }
 
             Collection collection = LoopContextHolder.getCurrent(context, true).getCollection();
-
             Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
             Map<String, Object> copyContextVariables = new ConcurrentHashMap<>(contextVariables.size() + 2);
@@ -133,43 +131,30 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfCompletedInstances().incrementAndGet();
             }
+            LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().decrementAndGet();
 
             State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
                 DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
             if (compensationTriggerState != null) {
                 compensateOperation = true;
             }
-            LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().decrementAndGet();
 
             int loopCounter = LoopTaskUtils.acquireNextLoopCounter(context);
-            if (!deque.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation && loopCounter < 0)) {
-                try {
-                    LoopTaskUtils.waitForComplete(context);
-                    if (!deque.isEmpty()) {
-                        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, deque.peek());
-                        if (LoopTaskUtils.needCompensate(context)) {
-                            context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
-                        } else {
-                            context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
-                            EngineUtils.failStateMachine(context, deque.peek());
-                        }
-                    }
-                } catch (InterruptedException exception) {
-                    LOGGER.error("State: [{}] wait loop complete is interrupted, message: [{}]",
-                        context.getInstruction(StateInstruction.class).getStateName(), exception.getMessage());
-                    throw new EngineExecutionException(exception);
-                } finally {
-                    LoopContextHolder.clearCurrent(context);
-                    if (Boolean.TRUE.equals(((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
-                        ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-                    }
+            if (!deque.isEmpty() || LoopTaskUtils.isCompletionConditionSatisfied(context) || (!compensateOperation
+                && loopCounter < 0)) {
+                if (!deque.isEmpty()) {
+                    ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION,
+                        deque.peek());
                 }
+                context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+                ((HierarchicalProcessContext)context).removeVariableLocally(
+                    DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
-                if (!compensateOperation) {
-                    ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
-                } else {
+                if (compensateOperation) {
                     LoopContextHolder.getCurrent(context, true).getNrOfInstances().decrementAndGet();
+                } else {
+                    ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
                 }
             }
         }

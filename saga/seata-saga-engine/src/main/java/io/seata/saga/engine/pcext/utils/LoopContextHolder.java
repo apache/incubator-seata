@@ -17,6 +17,7 @@ package io.seata.saga.engine.pcext.utils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -40,10 +41,12 @@ public class LoopContextHolder {
     private Map<Integer, AtomicBoolean> loopCounterContext = new ConcurrentHashMap<>();
     private LinkedBlockingDeque<Exception> loopExpContext = new LinkedBlockingDeque<>();
     private Collection collection;
+    private Stack<Integer> loopIndexStack = new Stack<>();
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
         LoopContextHolder loopContextHolder = (LoopContextHolder)context.getVariable(
             DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
+
         if (null == loopContextHolder && forceCreate) {
             synchronized (context) {
                 loopContextHolder = (LoopContextHolder)context.getVariable(
@@ -51,7 +54,6 @@ public class LoopContextHolder {
                 if (null == loopContextHolder) {
                     loopContextHolder = new LoopContextHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER, loopContextHolder);
-                    context.setVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
                 }
             }
         }
@@ -61,6 +63,7 @@ public class LoopContextHolder {
     public static void clearCurrent(ProcessContext context) {
         ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
         ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE);
+        ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
     }
 
     public AtomicInteger getNrOfInstances() {
@@ -97,5 +100,9 @@ public class LoopContextHolder {
 
     public void setCollection(Collection collection) {
         this.collection = collection;
+    }
+
+    public Stack<Integer> getLoopIndexStack() {
+        return loopIndexStack;
     }
 }

@@ -31,6 +31,7 @@ public interface DomainConstants {
     String STATE_TYPE_SUB_STATE_MACHINE = "SubStateMachine";
     String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
     String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
+    String STATE_TYPE_LOOP_TRIGGER = "LoopTrigger";
     //endregion
 
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
@@ -69,15 +70,13 @@ public interface DomainConstants {
     String VAR_NAME_GLOBAL_TX = "_global_transaction_";
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
-    String VAR_NAME_IS_LOOP_ASYNC_EXECUTION = "_is_loop_async_execution_";
+    String VAR_NAME_CURRENT_LOOP_STATE = "_is_loop_for_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
     //endregion
 
     // region of loop
     String LOOP_COUNTER = "loopCounter";
-    String LOOP_COLLECTION = "loopCollection";
-    String LOOP_ASYNC_PUBLISHER = "loopAsyncPublisher";
-    String LOOP_PROCESS_CONTEXT = "loopProcessContext";
+    String LOOP_COUNT_DOWN_LATCH = "loopCountDownLatch";
     String NUMBER_OF_INSTANCES = "nrOfInstances";
     String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
     String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";

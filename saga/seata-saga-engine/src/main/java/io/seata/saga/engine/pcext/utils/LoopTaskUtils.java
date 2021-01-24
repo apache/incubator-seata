@@ -15,27 +15,22 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EmptyStackException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
-import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateInstruction;
-import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -59,7 +54,7 @@ public class LoopTaskUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
 
     private static final String DEFAULT_COMPLETION_CONDITION = "[nrOfInstances] == [nrOfCompletedInstances]";
-    public static final String LOOP_STATE_NAME_PATTERN = "-fork-";
+    public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
 
     private static final Map<String, ExpressionEvaluator> EXPRESSION_EVALUATOR_MAP = new ConcurrentHashMap<>();
 
@@ -87,7 +82,7 @@ public class LoopTaskUtils {
                         stateMachineConfig.getExpressionFactoryManager(), collectionName);
                     Object collection = ParameterUtils.getValue(expression, stateMachineInstance.getContext(), null);
                     if (collection instanceof Collection && ((Collection)collection).size() > 0) {
-                        context.setVariable(DomainConstants.LOOP_COLLECTION, collection);
+                        LoopContextHolder.getCurrent(context, true).setCollection((Collection)collection);
                         return loop;
                     }
                 }
@@ -101,29 +96,43 @@ public class LoopTaskUtils {
      * create loop context for async publisher
      *
      * @param context
-     * @param loop
      */
-    public static void createLoopContext(ProcessContext context, Loop loop) {
+    public static void createLoopContext(ProcessContext context) {
+        LoopContextHolder contextHolder = LoopContextHolder.getCurrent(context, true);
+        Collection collection = contextHolder.getCollection();
+        contextHolder.getNrOfInstances().set(collection.size());
 
-        LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
-
-        Collection collection = (Collection)context.getVariable(DomainConstants.LOOP_COLLECTION);
-        loopContextHolder.getNrOfInstances().set(collection.size());
-        loopContextHolder.setCollection(collection);
-
-        Map<Integer, AtomicBoolean> loopContext = loopContextHolder.getLoopCounterContext();
-        for (int i = 0; i < collection.size(); i++) {
-            loopContext.put(i, new AtomicBoolean(false));
+        for (int i = collection.size() - 1; i >= 0; i--) {
+            contextHolder.getLoopIndexStack().push(i);
         }
+    }
 
-        int asyncPublisherNumber = getMaxMultiInstanceNumber(loop.getParallel(), collection.size()) - 1;
-        List<ProcessContext> asyncProcessContextList = new ArrayList<>(asyncPublisherNumber);
-        buildAsyncProcessContext(context, asyncPublisherNumber, asyncProcessContextList, false);
-        loopContextHolder.getNrOfActiveInstances().set(asyncPublisherNumber + 1);
+    public static ProcessContext createLoopEventContext(ProcessContext context) {
+        ProcessContextImpl copyContext = new ProcessContextImpl();
+        copyContext.setParent(context);
+        copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
+        copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
+        copyContext.setInstruction(copyInstruction(context.getInstruction(StateInstruction.class)));
+        return copyContext;
+    }
 
-        context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
-        context.setVariable(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
-        getAsyncEventPublisher(context);
+    public static ProcessContext createCompensateLoopEventContext(ProcessContext context, StateInstance stateToBeCompensated) {
+        Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
+            .getStateStackNeedCompensation();
+        int loopCounter = reloadLoopCounter(stateToBeCompensated.getName());
+        ProcessContextImpl copyContext = new ProcessContextImpl();
+        CompensationHolder.getCurrent(copyContext, true);
+        copyContext.setParent(context);
+        copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
+        copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
+        copyContext.setVariableLocally(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE,
+            context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE));
+        copyContext.setInstruction(copyInstruction(context.getInstruction(StateInstruction.class)));
+        StateInstruction instruction = copyContext.getInstruction(StateInstruction.class);
+        CompensationHolder.getCurrent(copyContext, true).addToBeCompensatedState(instruction.getStateName(),
+            stateToBeCompensated);
+        CompensationHolder.getCurrent(copyContext, true).setStateStackNeedCompensation(stateStackToBeCompensated);
+        return copyContext;
     }
 
     /**
@@ -131,9 +140,8 @@ public class LoopTaskUtils {
      *
      * @param context
      * @param forwardState
-     * @param loop
      */
-    public static void reloadLoopContext(ProcessContext context, StateInstance forwardState, Loop loop) {
+    public static void reloadLoopContext(ProcessContext context, StateInstance forwardState) {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
@@ -144,36 +152,24 @@ public class LoopTaskUtils {
             e -> originStateName.equals(EngineUtils.getOriginStateName(e))).collect(Collectors.toList());
 
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
-        Collection collection = (Collection)context.getVariable(DomainConstants.LOOP_COLLECTION);
-        loopContextHolder.setCollection(collection);
+        Collection collection = loopContextHolder.getCollection();
 
-        Map<Integer, AtomicBoolean> loopContext = loopContextHolder.getLoopCounterContext();
+        LinkedList<Integer> list = new LinkedList<>();
         for (int i = 0; i < collection.size(); i++) {
-            loopContext.put(i, new AtomicBoolean(false));
+            list.addFirst(i);
         }
-        loopContext.get(reloadLoopCounter(forwardState.getName())).set(true);
 
         int executedNumber = 0;
         for (StateInstance stateInstance : forwardStateList) {
             if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
-                int executedLoopCounter = reloadLoopCounter(stateInstance.getName());
-                loopContext.get(executedLoopCounter).getAndSet(true);
+                list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
                 executedNumber += 1;
             }
         }
 
+        loopContextHolder.getLoopIndexStack().addAll(list);
         loopContextHolder.getNrOfInstances().set(collection.size());
         loopContextHolder.getNrOfCompletedInstances().set(executedNumber);
-
-        int asyncPublisherNumber = LoopTaskUtils.getMaxMultiInstanceNumber(loop.getParallel(),
-            collection.size() - executedNumber) - 1;
-        List<ProcessContext> asyncProcessContextList = new ArrayList<>(asyncPublisherNumber);
-        buildAsyncProcessContext(context, asyncPublisherNumber, asyncProcessContextList, false);
-        loopContextHolder.getNrOfActiveInstances().set(asyncPublisherNumber + 1);
-
-        context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
-        context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(forwardState.getName()));
-        getAsyncEventPublisher(context);
     }
 
     /**
@@ -184,22 +180,10 @@ public class LoopTaskUtils {
      */
     public static void createCompensateContext(ProcessContext context, StateInstance stateToBeCompensated) {
 
-        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
-            ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.LOOP_COUNTER,
-                reloadLoopCounter(stateToBeCompensated.getName()));
-            return;
-        }
-
         StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
         State state = stateMachine.getState(EngineUtils.getOriginStateName(stateToBeCompensated));
-        Loop loop = getLoopConfig(context, state);
-
-        if (loop == null) {
-            return;
-        }
 
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
-        loopContextHolder.setCollection((Collection)context.getVariable(DomainConstants.LOOP_COLLECTION));
 
         Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
             .getStateStackNeedCompensation();
@@ -209,32 +193,8 @@ public class LoopTaskUtils {
                 sameStateNeedToBeCompensatedSize += 1;
             }
         }
-
-        int asyncPublisherNumber = getMaxMultiInstanceNumber(loop.getParallel(), sameStateNeedToBeCompensatedSize) - 1;
         loopContextHolder.getNrOfInstances().set(sameStateNeedToBeCompensatedSize);
-        loopContextHolder.getNrOfActiveInstances().set(asyncPublisherNumber + 1);
-
-        List<ProcessContext> asyncProcessContextList = new ArrayList<>(asyncPublisherNumber);
-
-        buildAsyncProcessContext(context, asyncPublisherNumber, asyncProcessContextList, true);
-
-        for (int i = 0; i < asyncPublisherNumber; i++) {
-            StateInstance stateToBeCompensatedTemp = stateStackToBeCompensated.pop();
-            int loopCounter = reloadLoopCounter(stateToBeCompensatedTemp.getName());
-            ProcessContextImpl tempContext = (ProcessContextImpl)asyncProcessContextList.get(i);
-
-            tempContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
-            tempContext.setVariableLocally(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE,
-                context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE));
-            StateInstruction instruction = tempContext.getInstruction(StateInstruction.class);
-            CompensationHolder.getCurrent(tempContext, true).addToBeCompensatedState(instruction.getStateName(),
-                stateToBeCompensatedTemp);
-            CompensationHolder.getCurrent(tempContext, true).setStateStackNeedCompensation(stateStackToBeCompensated);
-        }
-
-        context.setVariable(DomainConstants.LOOP_PROCESS_CONTEXT, asyncProcessContextList);
-        context.setVariable(DomainConstants.LOOP_COUNTER, reloadLoopCounter(stateToBeCompensated.getName()));
-        getAsyncEventPublisher(context);
+        stateStackToBeCompensated.push(stateToBeCompensated);
 
     }
 
@@ -307,45 +267,12 @@ public class LoopTaskUtils {
             currentState.getLoop().getCompletionCondition()).evaluate(elContext);
     }
 
-    /**
-     * wait current state loop execution finished
-     *
-     * @param context
-     * @throws InterruptedException
-     */
-    public static void waitForComplete(ProcessContext context) throws InterruptedException {
-        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))) {
-            return;
-        }
-
-        LinkedBlockingDeque<Exception> deque = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
-        if (null == deque || deque.isEmpty()) {
-            boolean isSatisfied = isCompletionConditionSatisfied(context);
-            while (!isSatisfied) {
-                TimeUnit.MILLISECONDS.sleep(2);
-                isSatisfied = isCompletionConditionSatisfied(context);
-            }
-        }
-
-        while (LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().get() > 0) {
-            TimeUnit.MILLISECONDS.sleep(2);
-        }
-    }
-
     public static int acquireNextLoopCounter(ProcessContext context) {
-        int loopCounter = -1;
-        Map<Integer, AtomicBoolean> loopCounterContext = LoopContextHolder.getCurrent(context, true)
-            .getLoopCounterContext();
-        if (null == loopCounterContext) {
-            return loopCounter;
+        try {
+            return LoopContextHolder.getCurrent(context, true).getLoopIndexStack().pop();
+        } catch (EmptyStackException e) {
+            return -1;
         }
-        for (Integer counter : loopCounterContext.keySet()) {
-            if (!loopCounterContext.get(counter).getAndSet(true)) {
-                loopCounter = counter;
-                break;
-            }
-        }
-        return loopCounter;
     }
 
     /**
@@ -382,41 +309,8 @@ public class LoopTaskUtils {
     }
 
     public static boolean needCompensate(ProcessContext context) {
-        return !Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION))
-                && !context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME).equals(DomainConstants.OPERATION_NAME_COMPENSATE)
+        return !context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME).equals(DomainConstants.OPERATION_NAME_COMPENSATE)
                 && LoopContextHolder.getCurrent(context, true).isNeedCompensate();
-    }
-
-    private static void buildAsyncProcessContext(ProcessContext originContext, int asyncPublisherNumber,
-                                                 List<ProcessContext> asyncProcessContextList, boolean isCompensate) {
-        for (int i = 0; i < asyncPublisherNumber; i++) {
-            int loopCounter = -1;
-            if (!isCompensate) {
-                loopCounter = acquireNextLoopCounter(originContext);
-                if (loopCounter < 0) {
-                    break;
-                }
-            }
-            ProcessContextImpl copyContext = new ProcessContextImpl();
-            CompensationHolder.getCurrent(copyContext, isCompensate);
-            copyContext.setParent(originContext);
-            copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
-            copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_ASYNC_EXECUTION, true);
-            copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
-            copyContext.setInstruction(copyInstruction(originContext.getInstruction(StateInstruction.class)));
-            asyncProcessContextList.add(copyContext);
-        }
-    }
-
-    private static void getAsyncEventPublisher(ProcessContext context) {
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        if (!stateMachineConfig.isEnableAsync() || stateMachineConfig.getAsyncProcessCtrlEventPublisher() == null) {
-            throw new EngineExecutionException(
-                "Asynchronous start is disabled. please set StateMachineConfig.enableAsync=true first.",
-                FrameworkErrorCode.AsynchronousStartDisabled);
-        }
-        context.setVariable(DomainConstants.LOOP_ASYNC_PUBLISHER, stateMachineConfig.getAsyncProcessCtrlEventPublisher());
     }
 
     /**
@@ -440,11 +334,6 @@ public class LoopTaskUtils {
             EXPRESSION_EVALUATOR_MAP.put(completionCondition, expressionEvaluator);
         }
         return EXPRESSION_EVALUATOR_MAP.get(completionCondition);
-    }
-
-    private static int getMaxMultiInstanceNumber(int parallelNumber, int collectionSize) {
-        parallelNumber = Math.min(parallelNumber, Runtime.getRuntime().availableProcessors());
-        return Math.min(collectionSize, parallelNumber);
     }
 
     private static StateInstruction copyInstruction(StateInstruction instruction) {
