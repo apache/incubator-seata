@@ -25,7 +25,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
 import io.seata.saga.engine.pcext.handlers.CompensationTriggerStateHandler;
 import io.seata.saga.engine.pcext.handlers.FailEndStateHandler;
-import io.seata.saga.engine.pcext.handlers.LoopTriggerStateHandler;
+import io.seata.saga.engine.pcext.handlers.LoopStartStateHandler;
 import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
@@ -97,7 +97,7 @@ public class StateMachineProcessHandler implements ProcessHandler {
             stateHandlers.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
-            stateHandlers.put(DomainConstants.STATE_TYPE_LOOP_TRIGGER, new LoopTriggerStateHandler());
+            stateHandlers.put(DomainConstants.STATE_TYPE_LOOP_START, new LoopStartStateHandler());
         }
     }
 

@@ -35,7 +35,7 @@ import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
-import io.seata.saga.statelang.domain.impl.LoopTriggerStateImpl;
+import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -106,7 +106,7 @@ public class TaskStateRouter implements StateRouter {
 
         if (!Boolean.TRUE.equals(isLoopState)) {
             if (null != LoopTaskUtils.getLoopConfig(context, nextState)) {
-                stateInstruction.setTemporaryState(new LoopTriggerStateImpl());
+                stateInstruction.setTemporaryState(new LoopStartStateImpl());
             }
         }
 
@@ -179,7 +179,7 @@ public class TaskStateRouter implements StateRouter {
 
                 if (!Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
                     if (null != LoopTaskUtils.getLoopConfig(context, state)) {
-                        instruction.setTemporaryState(new LoopTriggerStateImpl());
+                        instruction.setTemporaryState(new LoopStartStateImpl());
                     }
                 }
 

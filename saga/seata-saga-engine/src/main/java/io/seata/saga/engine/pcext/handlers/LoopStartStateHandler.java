@@ -43,9 +43,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author anselleeyy
  */
-public class LoopTriggerStateHandler implements StateHandler {
+public class LoopStartStateHandler implements StateHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoopTriggerStateHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoopStartStateHandler.class);
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {

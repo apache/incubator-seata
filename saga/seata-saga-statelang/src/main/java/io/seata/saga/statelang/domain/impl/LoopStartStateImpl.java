@@ -13,13 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.statelang.domain;
+package io.seata.saga.statelang.domain.impl;
+
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.LoopStartState;
 
 /**
- * Loop Trigger
+ * Start the "loop" execution for the state with loop attribute
  *
  * @author anselleeyy
  */
-public interface LoopTriggerState extends State {
+public class LoopStartStateImpl extends BaseState implements LoopStartState {
+
+    public LoopStartStateImpl() {
+        setType(DomainConstants.STATE_TYPE_LOOP_START);
+    }
 
 }
