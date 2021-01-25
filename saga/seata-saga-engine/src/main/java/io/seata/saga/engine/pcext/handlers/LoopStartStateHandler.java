@@ -78,7 +78,8 @@ public class LoopStartStateHandler implements StateHandler {
 
             if (!stateMachineConfig.isEnableAsync() || null == stateMachineConfig.getAsyncProcessCtrlEventPublisher()) {
                 throw new EngineExecutionException(
-                    "Asynchronous start is disabled. Loop execution will run asynchronous, please set StateMachineConfig.enableAsync=true first.",
+                    "Asynchronous start is disabled. Loop execution will run asynchronous, please set "
+                        + "StateMachineConfig.enableAsync=true first.",
                     FrameworkErrorCode.AsynchronousStartDisabled);
             }
 

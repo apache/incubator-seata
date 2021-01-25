@@ -34,6 +34,7 @@ public class LoopContextHolder {
     private AtomicInteger nrOfActiveInstances = new AtomicInteger();
     private AtomicInteger nrOfCompletedInstances = new AtomicInteger();
     private volatile boolean needCompensate = false;
+    private volatile boolean failEnd = false;
     private Stack<Exception> loopExpContext = new Stack<>();
     private Stack<Integer> loopIndexStack = new Stack<>();
     private Collection collection;
@@ -79,6 +80,14 @@ public class LoopContextHolder {
 
     public void setNeedCompensate(boolean needCompensate) {
         this.needCompensate = needCompensate;
+    }
+
+    public boolean isFailEnd() {
+        return failEnd;
+    }
+
+    public void setFailEnd(boolean failEnd) {
+        this.failEnd = failEnd;
     }
 
     public Stack<Exception> getLoopExpContext() {

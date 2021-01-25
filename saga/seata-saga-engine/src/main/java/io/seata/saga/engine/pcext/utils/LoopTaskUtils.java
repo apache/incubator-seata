@@ -244,6 +244,11 @@ public class LoopTaskUtils {
      * @return
      */
     public static boolean isCompletionConditionSatisfied(ProcessContext context) {
+
+        if (!LoopContextHolder.getCurrent(context, true).getLoopExpContext().isEmpty()) {
+            return true;
+        }
+
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         AbstractTaskState currentState = (AbstractTaskState)instruction.getState(context);
 
