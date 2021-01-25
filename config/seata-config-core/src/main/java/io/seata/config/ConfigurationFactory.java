@@ -99,20 +99,15 @@ public final class ConfigurationFactory {
     }
 
     private static Configuration buildConfiguration() {
-        ConfigType configType;
-        String configTypeName;
-        try {
-            configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                    ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                            + ConfigurationKeys.FILE_ROOT_TYPE);
+        String configTypeName = CURRENT_FILE_INSTANCE.getConfig(
+                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                        + ConfigurationKeys.FILE_ROOT_TYPE);
 
-            if (StringUtils.isBlank(configTypeName)) {
-                throw new NotSupportYetException("config type can not be null");
-            }
-            configType = ConfigType.getType(configTypeName);
-        } catch (Exception e) {
-            throw e;
+        if (StringUtils.isBlank(configTypeName)) {
+            throw new NotSupportYetException("config type can not be null");
         }
+        ConfigType configType = ConfigType.getType(configTypeName);
+
         Configuration extConfiguration = null;
         Configuration configuration;
         if (ConfigType.File == configType) {
