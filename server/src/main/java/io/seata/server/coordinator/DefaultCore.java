@@ -286,11 +286,9 @@ public class DefaultCore implements Core {
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         boolean success = true;
         // start rollback event
-        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(),
-                globalSession.getApplicationId(),
-                globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(),
-                null, globalSession.getStatus()));
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
+            globalSession.getBeginTime(), null, globalSession.getStatus()));
 
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
@@ -346,12 +344,9 @@ public class DefaultCore implements Core {
             SessionHelper.endRollbacked(globalSession);
 
             // rollbacked event
-            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
-                    GlobalTransactionEvent.ROLE_TC, globalSession.getTransactionName(),
-                    globalSession.getApplicationId(),
-                    globalSession.getTransactionServiceGroup(),
-                    globalSession.getBeginTime(), System.currentTimeMillis(),
-                    globalSession.getStatus()));
+            eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                globalSession.getTransactionName(), globalSession.getApplicationId(), globalSession.getTransactionServiceGroup(),
+                globalSession.getBeginTime(), System.currentTimeMillis(), globalSession.getStatus()));
 
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
         }

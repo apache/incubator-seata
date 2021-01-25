@@ -101,8 +101,8 @@ public class GlobalTransactionEvent implements Event {
         return status;
     }
 
-    public GlobalTransactionEvent(long id, String role, String name, String applicationId,
-            String group, Long beginTime, Long endTime, GlobalStatus status) {
+    public GlobalTransactionEvent(long id, String role, String name, String applicationId, String group, Long beginTime, Long endTime,
+                                  GlobalStatus status) {
         this.id = id;
         this.role = role;
         this.name = name;
