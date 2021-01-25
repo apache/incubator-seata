@@ -234,11 +234,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
 
                 // transaction timeout and start rollbacking event
-                eventBus.post(
-                    new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(), globalSession.getApplicationId(), 
+                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
+                        GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(),
+                        globalSession.getApplicationId(),
                         globalSession.getTransactionServiceGroup(),
-                            globalSession.getBeginTime(), null, globalSession.getStatus()));
+                        globalSession.getBeginTime(), null, globalSession.getStatus()));
 
                 return true;
             });
