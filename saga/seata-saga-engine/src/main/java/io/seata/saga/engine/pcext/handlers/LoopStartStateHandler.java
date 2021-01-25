@@ -16,6 +16,7 @@
 package io.seata.saga.engine.pcext.handlers;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.StateMachineConfig;
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
 public class LoopStartStateHandler implements StateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopStartStateHandler.class);
+    private static final int AWAIT_TIMEOUT = 1000;
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
@@ -117,7 +119,13 @@ public class LoopStartStateHandler implements StateHandler {
 
         try {
             if (null != countDownLatch) {
-                countDownLatch.await();
+                boolean isFinished = false;
+                while (!isFinished) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("wait {}ms for loop state [{}] finish", AWAIT_TIMEOUT, instruction.getStateName());
+                    }
+                    isFinished = countDownLatch.await(AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
+                }
             }
         } catch (InterruptedException exception) {
             exception.printStackTrace();
