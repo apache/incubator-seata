@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 
@@ -57,9 +56,9 @@ public class LoopContextHolder {
     }
 
     public static void clearCurrent(ProcessContext context) {
-        ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
-        ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE);
-        ((HierarchicalProcessContext)context).removeVariableLocally(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
+        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
+        context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
+        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
     }
 
     public AtomicInteger getNrOfInstances() {

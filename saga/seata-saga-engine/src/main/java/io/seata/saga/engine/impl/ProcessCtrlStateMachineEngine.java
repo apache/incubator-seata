@@ -361,7 +361,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             Object serviceOutputParams = stateInstance.getOutputParams();
             if (serviceOutputParams != null) {
                 ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
-                        stateInstance.getName());
+                        EngineUtils.getOriginStateName(stateInstance));
                 if (state == null) {
                     throw new EngineExecutionException(
                             "Cannot find State by state name [" + stateInstance.getName() + "], may be this is a bug",

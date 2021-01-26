@@ -163,6 +163,8 @@ public class LoopTaskUtils {
             if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                 list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
                 executedNumber += 1;
+            } else {
+                stateInstance.setIgnoreStatus(true);
             }
         }
 

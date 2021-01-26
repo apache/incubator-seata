@@ -27,7 +27,6 @@ import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
-import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -44,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EngineUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
 
     /**
      * generate parent id
