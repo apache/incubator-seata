@@ -26,7 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -329,5 +331,76 @@ public class StateMachineTests {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoop() {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("collection", loopList);
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopCompensate() {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("collection", loopList);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+        Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.SU);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopSubMachine() {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 2);
+        paramMap.put("collection", loopList);
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
     }
 }
