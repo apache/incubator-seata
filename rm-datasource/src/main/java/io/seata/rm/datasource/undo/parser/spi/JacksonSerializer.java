@@ -24,10 +24,22 @@ import com.fasterxml.jackson.databind.JsonSerializer;
  */
 public interface JacksonSerializer<T> {
 
+    /**
+     * jackson serializer class type.
+     * @return
+     */
     Class<T> type();
 
+    /**
+     * Jackson custom serializer
+     * @return
+     */
     JsonSerializer<T> ser();
 
+    /**
+     * Jackson custom deserializer
+     * @return
+     */
     JsonDeserializer<? extends T> deser();
 
 }

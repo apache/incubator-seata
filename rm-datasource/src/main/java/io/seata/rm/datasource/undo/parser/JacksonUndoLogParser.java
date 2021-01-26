@@ -121,7 +121,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
                 }
             }
         } catch (EnhancedServiceNotFoundException e) {
-            LOGGER.info("JacksonSerializer not found children class.", e);
+            LOGGER.warn("JacksonSerializer not found children class.", e);
         }
 
         module.addSerializer(Timestamp.class, timestampSerializer);

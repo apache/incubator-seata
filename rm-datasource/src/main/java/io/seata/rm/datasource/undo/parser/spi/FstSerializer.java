@@ -23,10 +23,22 @@ import org.nustaq.serialization.FSTObjectSerializer;
  */
 public interface FstSerializer {
 
+    /**
+     * fst serializer class type
+     * @return
+     */
     Class type();
 
+    /**
+     * FSTObjectSerializer custom serializer
+     * @return
+     */
     FSTObjectSerializer ser();
 
+    /**
+     * for sub classes
+     * @return
+     */
     boolean alsoForAllSubclasses();
 
 }

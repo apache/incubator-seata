@@ -60,7 +60,7 @@ public class FstUndoLogParser implements UndoLogParser, Initialize {
                 }
             }
         } catch (EnhancedServiceNotFoundException e) {
-            LOGGER.info("FstSerializer not found children class.", e);
+            LOGGER.warn("FstSerializer not found children class.", e);
         }
     }
 

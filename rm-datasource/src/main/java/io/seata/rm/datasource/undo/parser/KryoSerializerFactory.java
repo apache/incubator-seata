@@ -76,10 +76,8 @@ public class KryoSerializerFactory implements KryoFactory {
         Kryo kryo = new Kryo();
         kryo.setRegistrationRequired(false);
 
-        if (CollectionUtils.isNotEmpty(TYPE_MAP)) {
-            for (Map.Entry<Class, Serializer> entry : TYPE_MAP.entrySet()) {
-                kryo.register(entry.getKey(), entry.getValue());
-            }
+        for (Map.Entry<Class, Serializer> entry : TYPE_MAP.entrySet()) {
+            kryo.register(entry.getKey(), entry.getValue());
         }
 
         // support clob and blob

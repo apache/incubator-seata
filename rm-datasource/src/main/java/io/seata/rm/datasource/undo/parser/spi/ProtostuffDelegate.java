@@ -23,6 +23,10 @@ import io.protostuff.runtime.Delegate;
  */
 public interface ProtostuffDelegate<T> {
 
+    /**
+     * Delegate create.
+     * @return
+     */
     Delegate<T> create();
 
 }

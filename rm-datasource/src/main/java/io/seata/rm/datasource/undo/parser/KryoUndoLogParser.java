@@ -57,7 +57,7 @@ public class KryoUndoLogParser implements UndoLogParser, Initialize {
                 }
             }
         } catch (EnhancedServiceNotFoundException e) {
-            LOGGER.info("KryoTypeSerializer not found children class.", e);
+            LOGGER.warn("KryoTypeSerializer not found children class.", e);
         }
     }
 

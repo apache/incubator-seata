@@ -23,8 +23,16 @@ import com.esotericsoftware.kryo.Serializer;
  */
 public interface KryoTypeSerializer<T> {
 
+    /**
+     * kryo serializer class type.
+     * @return
+     */
     Class<T> type();
 
+    /**
+     * kryo custom serializer.
+     * @return
+     */
     Serializer serializer();
 
 }

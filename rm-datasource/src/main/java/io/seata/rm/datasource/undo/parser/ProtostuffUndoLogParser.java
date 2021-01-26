@@ -64,14 +64,12 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             List<ProtostuffDelegate> delegates = EnhancedServiceLoader.loadAll(ProtostuffDelegate.class);
             if (CollectionUtils.isNotEmpty(delegates)) {
                 for (ProtostuffDelegate delegate : delegates) {
-                    if (delegate != null) {
-                        idStrategy.registerDelegate(delegate.create());
-                        LOGGER.info("protostuff undo log parser load [{}].", delegate.getClass().getName());
-                    }
+                    idStrategy.registerDelegate(delegate.create());
+                    LOGGER.info("protostuff undo log parser load [{}].", delegate.getClass().getName());
                 }
             }
         } catch (EnhancedServiceNotFoundException e) {
-            LOGGER.info("ProtostuffDelegate not found children class.", e);
+            LOGGER.warn("ProtostuffDelegate not found children class.", e);
         }
 
         idStrategy.registerDelegate(new DateDelegate());
