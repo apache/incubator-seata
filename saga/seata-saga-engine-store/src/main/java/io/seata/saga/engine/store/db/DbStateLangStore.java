@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.store.StateLangStore;
 import io.seata.saga.statelang.domain.RecoverStrategy;
@@ -49,10 +50,9 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
 
     @Override
     public StateMachine getLastVersionStateMachine(String stateMachineName, String tenantId) {
-
         List<StateMachine> list = selectList(stateLangStoreSqls.getQueryStateMachinesByNameAndTenantSql(dbType),
             RESULT_SET_TO_STATE_MACHINE, stateMachineName, tenantId);
-        if (list != null && list.size() > 0) {
+        if (CollectionUtils.isNotEmpty(list)) {
             return list.get(0);
         }
         return null;

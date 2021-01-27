@@ -15,8 +15,6 @@
  */
 package io.seata.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Status of global transaction.
@@ -156,15 +154,6 @@ public enum GlobalStatus {
     }
 
 
-
-    private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
-
-    static {
-        for (GlobalStatus status : values()) {
-            MAP.put(status.code, status);
-        }
-    }
-
     /**
      * Get global status.
      *
@@ -172,7 +161,7 @@ public enum GlobalStatus {
      * @return the global status
      */
     public static GlobalStatus get(byte code) {
-        return get((int)code);
+        return get((int) code);
     }
 
     /**
@@ -182,12 +171,12 @@ public enum GlobalStatus {
      * @return the global status
      */
     public static GlobalStatus get(int code) {
-        GlobalStatus status = MAP.get(code);
-
-        if (status == null) {
+        GlobalStatus value = null;
+        try {
+            value = GlobalStatus.values()[code];
+        } catch (Exception e) {
             throw new IllegalArgumentException("Unknown GlobalStatus[" + code + "]");
         }
-
-        return status;
+        return value;
     }
 }
