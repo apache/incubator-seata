@@ -492,7 +492,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     private String getSchema(Connection conn) throws SQLException {
         if ("h2".equalsIgnoreCase(dbType)) {
             return null;
-        }else if("postgresql".equalsIgnoreCase(dbType)){
+        } else if("postgresql".equalsIgnoreCase(dbType)) {
             String sql = "select current_schema";
             PreparedStatement ps = null;
             ResultSet rs = null;
@@ -510,7 +510,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             } finally {
                 IOUtil.close(rs, ps, conn);
             }
-        }else {
+        } else {
             return conn.getMetaData().getUserName();
         }
     }
