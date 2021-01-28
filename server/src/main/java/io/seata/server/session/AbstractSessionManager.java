@@ -83,10 +83,11 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
+        session.setStatus(GlobalStatus.Removed);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_REMOVE);
+            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
         }
-        writeSession(LogOperation.GLOBAL_REMOVE, session);
+        writeSession(LogOperation.GLOBAL_UPDATE, session);
     }
 
     @Override
@@ -109,10 +110,11 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession branchSession)
         throws TransactionException {
+        branchSession.setStatus(BranchStatus.Removed);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_REMOVE);
+            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
         }
-        writeSession(LogOperation.BRANCH_REMOVE, branchSession);
+        writeSession(LogOperation.BRANCH_UPDATE, branchSession);
     }
 
     @Override

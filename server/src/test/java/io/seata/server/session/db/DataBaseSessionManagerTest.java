@@ -15,13 +15,26 @@
  */
 package io.seata.server.session.db;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import io.seata.common.XID;
 import io.seata.common.util.IOUtil;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -29,17 +42,7 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.db.session.DataBaseSessionManager;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 
 /**
  * The type Data base session manager test.
@@ -210,10 +213,22 @@ public class DataBaseSessionManagerTest {
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
+                Assertions.assertEquals(rs.getInt("status"), GlobalStatus.Removed.getCode());
+            }else{
+                Assertions.assertTrue(true);
+            }
+            
+            List<GlobalSession> list = new ArrayList<>();
+            list.add(session);
+            sessionManager.removeGlobalSession(list);
+            
+            rs = conn.createStatement().executeQuery(sql);
+            if(rs.next()){
                 Assertions.assertTrue(false);
             }else{
                 Assertions.assertTrue(true);
             }
+            
             rs.close();
 
             conn.createStatement().execute(delSql);
@@ -390,6 +405,17 @@ public class DataBaseSessionManagerTest {
         try{
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
+            if(rs.next()){
+                Assertions.assertEquals(rs.getInt("status"), BranchStatus.Removed.getCode());
+            }else{
+                Assertions.assertTrue(true);
+            }
+            
+            List<BranchSession> list = new ArrayList<>();
+            list.add(branchSession);
+            sessionManager.removeBranchSession(list);
+            
+            rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
                 Assertions.assertTrue(false);
             }else{
