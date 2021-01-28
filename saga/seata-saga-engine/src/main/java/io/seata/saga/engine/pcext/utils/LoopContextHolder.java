@@ -57,8 +57,6 @@ public class LoopContextHolder {
 
     public static void clearCurrent(ProcessContext context) {
         context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
-        context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
-        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
     }
 
     public AtomicInteger getNrOfInstances() {

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
@@ -153,6 +154,16 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
             Stack<Exception> expStack = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
             Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            if (exp == null) {
+                exp = e;
+            }
+
+            if (null != e) {
+                if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.LOOP_COUNT_DOWN_LATCH)) {
+                    CountDownLatch countDownLatch = (CountDownLatch)context.removeVariable(DomainConstants.LOOP_COUNT_DOWN_LATCH);
+                    countDownLatch.countDown();
+                }
+            }
 
             if (null != exp) {
                 expStack.push(exp);
@@ -185,8 +196,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                     putContextToParent(context);
                 }
                 context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-                ((HierarchicalProcessContext)context).removeVariableLocally(
-                    DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
+                context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
                 if (compensateOperation) {

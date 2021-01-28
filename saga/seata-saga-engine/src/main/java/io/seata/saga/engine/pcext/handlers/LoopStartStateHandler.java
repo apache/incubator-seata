@@ -15,6 +15,8 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -96,9 +98,9 @@ public class LoopStartStateHandler implements StateHandler {
                 maxInstances = Math.min(loop.getParallel(), loopContextHolder.getCollection().size());
             }
             countDownLatch = new CountDownLatch(maxInstances);
-            context.setVariable(DomainConstants.LOOP_COUNT_DOWN_LATCH, countDownLatch);
 
             // publish loop tasks
+            List<ProcessContext> contextList = new ArrayList<>();
             for (int i = 0; i < maxInstances; i++) {
                 ProcessContextImpl tempContext;
                 if (null != compensationTriggerState) {
@@ -110,9 +112,12 @@ public class LoopStartStateHandler implements StateHandler {
                     tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context);
                     tempContext.setVariableLocally(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE, instruction.getState(context));
                 }
-                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(tempContext);
+                tempContext.setVariableLocally(DomainConstants.LOOP_COUNT_DOWN_LATCH, countDownLatch);
                 loopContextHolder.getNrOfActiveInstances().incrementAndGet();
+                contextList.add(tempContext);
             }
+
+            contextList.forEach(e -> stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(e));
         } else {
             LOGGER.warn("Loop config of State [{}] is illegal, will execute as normal", instruction.getStateName());
             instruction.setTemporaryState(instruction.getState(context));
@@ -128,23 +133,22 @@ public class LoopStartStateHandler implements StateHandler {
                     isFinished = countDownLatch.await(AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
                 }
             }
-        } catch (InterruptedException exception) {
-            exception.printStackTrace();
+        } catch (InterruptedException e) {
+            LOGGER.error("State: [{}] wait loop execution complete is interrupted, message: [{}]",
+                instruction.getStateName(), e.getMessage());
+            throw new EngineExecutionException(e);
         }
 
         if (LoopTaskUtils.needCompensate(context)) {
-            LoopContextHolder.clearCurrent(context);
             // route to compensationTriggerState as normally
             if (!Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_FIRST_COMPENSATION_STATE_STARTED))) {
                 context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
             }
         } else if (!loopContextHolder.getLoopExpContext().isEmpty()) {
             Exception exception = loopContextHolder.getLoopExpContext().peek();
-            LoopContextHolder.clearCurrent(context);
             EngineUtils.failStateMachine(context, exception);
-        } else {
-            LoopContextHolder.clearCurrent(context);
         }
+        LoopContextHolder.clearCurrent(context);
 
     }
 }

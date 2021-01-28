@@ -80,9 +80,11 @@ public class EngineUtils {
      */
     public static void endStateMachine(ProcessContext context) {
 
-        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
-            CountDownLatch countDownLatch = (CountDownLatch)context.getVariable(DomainConstants.LOOP_COUNT_DOWN_LATCH);
-            countDownLatch.countDown();
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+            if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.LOOP_COUNT_DOWN_LATCH)) {
+                CountDownLatch countDownLatch = (CountDownLatch)context.removeVariable(DomainConstants.LOOP_COUNT_DOWN_LATCH);
+                countDownLatch.countDown();
+            }
             return;
         }
 
