@@ -179,7 +179,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(List<BranchTransactionDO> branchTransactionDOs) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            for(BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
+            for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
                 String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
                 Map<String, String> branchTransactionDOMap = jedis.hgetAll(branchKey);
                 String xid = branchTransactionDOMap.get(REDIS_KEY_BRANCH_XID);
@@ -272,7 +272,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteGlobalTransactionDO(List<GlobalTransactionDO> globalTransactionDOs) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            for(GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
                 String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
                 Map<String, String> globalTransactionDoMap = jedis.hgetAll(globalKey);
                 String xid = globalTransactionDoMap.get(REDIS_KEY_GLOBAL_XID);
@@ -393,7 +393,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 return null;
             }
             GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
-            if(globalTransactionDO.getGmtModified().before(new Date(expiredTime))) {
+            if (globalTransactionDO.getGmtModified().before(new Date(expiredTime))) {
                 List<BranchTransactionDO> branchTransactionDOs = null;
                 if (withBranchSessions) {
                     branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);

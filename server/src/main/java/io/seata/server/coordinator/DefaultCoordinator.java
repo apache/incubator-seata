@@ -415,15 +415,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         condition.setStatus(GlobalStatus.Removed);
         List<GlobalSession> removedGlobalSessions = SessionHolder.getRootSessionManager().findGlobalSessions(condition);
         
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Clean expired removed sessions. expiredTime: {}, removeSessions: {}", expiredTime, removedGlobalSessions);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Clean expired removed sessions. expiredTime: {}, removeSessions: {}",
+                    expiredTime, removedGlobalSessions);
         }
         
-        if(CollectionUtils.isNotEmpty(removedGlobalSessions)) {
+        if (CollectionUtils.isNotEmpty(removedGlobalSessions)) {
             SessionHolder.getRootSessionManager().removeGlobalSession(removedGlobalSessions);
             List<BranchSession> branchSessions = new ArrayList<>();
-            for(GlobalSession globalSession : removedGlobalSessions) {
-                if(CollectionUtils.isNotEmpty(globalSession.getBranchSessions())) {
+            for (GlobalSession globalSession : removedGlobalSessions) {
+                if (CollectionUtils.isNotEmpty(globalSession.getBranchSessions())) {
                     branchSessions.addAll(globalSession.getBranchSessions());
                 }
             }
