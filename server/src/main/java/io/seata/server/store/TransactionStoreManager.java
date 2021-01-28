@@ -35,6 +35,15 @@ public interface TransactionStoreManager {
      * @return the boolean
      */
     boolean writeSession(LogOperation logOperation, SessionStorable session);
+    
+    /**
+     * Write sessions boolean.
+     *
+     * @param logOperation the log operation
+     * @param sessions      the sessions
+     * @return the boolean
+     */
+    boolean writeSession(LogOperation logOperation, List<SessionStorable> sessions);
 
 
     /**

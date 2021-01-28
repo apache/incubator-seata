@@ -186,6 +186,17 @@ public class WriteStoreTest {
                 public void onEnd(GlobalSession globalSession) throws TransactionException {
 
                 }
+
+                @Override
+                public void removeGlobalSession(List<GlobalSession> sessions) throws TransactionException {
+                    
+                }
+
+                @Override
+                public void removeBranchSession(List<BranchSession> sessions) throws TransactionException {
+                    
+                }
+
             });
         long beginWriteMills = System.currentTimeMillis();
         write(transactionStoreManager);

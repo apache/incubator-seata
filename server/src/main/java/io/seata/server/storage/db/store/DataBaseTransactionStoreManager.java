@@ -114,6 +114,21 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
     }
+    
+    @Override
+    public boolean writeSession(LogOperation logOperation, List<SessionStorable> sessions) {
+        if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
+            List<GlobalTransactionDO> list = new ArrayList<>();
+            sessions.forEach(s -> list.add(SessionConverter.convertGlobalTransactionDO(s)));
+            return logStore.deleteGlobalTransactionDO(list);
+        } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
+            List<BranchTransactionDO> list = new ArrayList<>();
+            sessions.forEach(s -> list.add(SessionConverter.convertBranchTransactionDO(s)));
+            return logStore.deleteBranchTransactionDO(list);
+        } else {
+            throw new StoreException("Unknown LogOperation:" + logOperation.name());
+        }
+    }
 
     /**
      * Read session global session.
@@ -191,6 +206,20 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
             .collect(Collectors.toList());
     }
+    
+    public List<GlobalSession> readSession(GlobalStatus status, long expiredTime) {
+        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryExpiredGlobalTransactionDO(expiredTime, logQueryLimit);
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return null;
+        }
+        List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
+        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
+        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
+            .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
+        return globalTransactionDOs.stream().map(globalTransactionDO ->
+            getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
+            .collect(Collectors.toList());
+    }
 
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
@@ -210,6 +239,8 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
             }
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
+        } else if (GlobalStatus.Removed.equals(sessionCondition.getStatus()) && null != sessionCondition.getExpiredTime()) {
+            return readSession(sessionCondition.getStatus(), sessionCondition.getExpiredTime());
         }
         return null;
     }

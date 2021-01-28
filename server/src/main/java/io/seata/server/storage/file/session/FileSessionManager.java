@@ -80,6 +80,11 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                 public boolean writeSession(LogOperation logOperation, SessionStorable session) {
                     return true;
                 }
+
+                @Override
+                public boolean writeSession(LogOperation logOperation, List<SessionStorable> sessions) {
+                    return true;
+                }
             };
         }
     }

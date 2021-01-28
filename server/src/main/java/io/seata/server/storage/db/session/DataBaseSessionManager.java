@@ -15,6 +15,7 @@
  */
 package io.seata.server.storage.db.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
+import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import io.seata.common.loader.Scope;
 import org.slf4j.Logger;
@@ -113,9 +115,25 @@ public class DataBaseSessionManager extends AbstractSessionManager
      */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
+        session.setStatus(GlobalStatus.Removed);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
+        }
+    }
+    
+    /**
+     * Batch remove globalSession
+     * 
+     * @param session the session
+     * @throws TransactionException
+     */
+    @Override
+    public void removeGlobalSession(List<GlobalSession> sessions) throws TransactionException {
+        List<SessionStorable> list = new ArrayList<>(sessions);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, list);
+        if (!ret) {
+            throw new StoreException("batchRemovedGlobalSession failed.");
         }
     }
 
@@ -146,9 +164,22 @@ public class DataBaseSessionManager extends AbstractSessionManager
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, session);
+        session.setStatus(BranchStatus.Removed);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("removeBranchSession failed.");
+        }
+    }
+    
+    @Override
+    public void removeBranchSession(List<BranchSession> sessions) throws TransactionException {
+        if (StringUtils.isNotBlank(taskName)) {
+            return;
+        }
+        List<SessionStorable> list = new ArrayList<>(sessions);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, list);
+        if (!ret) {
+            throw new StoreException("batchRemovedBranchSession failed.");
         }
     }
 
