@@ -120,11 +120,11 @@ public class RedisSessionManager extends AbstractSessionManager
     }
     
     @Override
-    public void removeGlobalSession(List<GlobalSession> sessions) throws TransactionException {
+    public void cleanGlobalSession(List<GlobalSession> sessions) throws TransactionException {
         List<SessionStorable> globalSessions = new ArrayList<>(sessions);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, globalSessions);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_CLEAN, globalSessions);
         if (!ret) {
-            throw new StoreException("batchRemoveGlobalSession failed.");
+            throw new StoreException("cleanGlobalSession failed.");
         }
     }
 
@@ -162,14 +162,14 @@ public class RedisSessionManager extends AbstractSessionManager
     }
     
     @Override
-    public void removeBranchSession(List<BranchSession> sessions) throws TransactionException {
+    public void cleanBranchSession(List<BranchSession> sessions) throws TransactionException {
         if (!StringUtils.isEmpty(taskName)) {
             return;
         }
         List<SessionStorable> branchSessions = new ArrayList<>(sessions);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, branchSessions);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_CLEAN, branchSessions);
         if (!ret) {
-            throw new StoreException("batchRemoveBranchSession failed.");
+            throw new StoreException("cleanBranchSession failed.");
         }
     }
 

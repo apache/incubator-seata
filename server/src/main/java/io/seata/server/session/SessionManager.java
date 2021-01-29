@@ -72,12 +72,12 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     void removeGlobalSession(GlobalSession session) throws TransactionException;
     
     /**
-     * Batch remove global session.
+     * Clean global session.
      *
      * @param session the session
      * @throws TransactionException the transaction exception
      */
-    void removeGlobalSession(List<GlobalSession> sessions) throws TransactionException;
+    void cleanGlobalSession(List<GlobalSession> sessions) throws TransactionException;
 
     /**
      * Add branch session.
@@ -107,13 +107,13 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     void removeBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException;
 
     /**
-     * Batch remove branch session.
+     * Clean branch session.
      *
      * @param globalSession the global session
      * @param session       the session
      * @throws TransactionException the transaction exception
      */
-    void removeBranchSession(List<BranchSession> sessions) throws TransactionException;
+    void cleanBranchSession(List<BranchSession> sessions) throws TransactionException;
     
     /**
      * All sessions collection.

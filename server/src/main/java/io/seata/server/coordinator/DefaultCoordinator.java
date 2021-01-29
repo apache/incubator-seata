@@ -421,14 +421,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         
         if (CollectionUtils.isNotEmpty(removedGlobalSessions)) {
-            SessionHolder.getRootSessionManager().removeGlobalSession(removedGlobalSessions);
+            SessionHolder.getRootSessionManager().cleanGlobalSession(removedGlobalSessions);
             List<BranchSession> branchSessions = new ArrayList<>();
             for (GlobalSession globalSession : removedGlobalSessions) {
                 if (CollectionUtils.isNotEmpty(globalSession.getBranchSessions())) {
                     branchSessions.addAll(globalSession.getBranchSessions());
                 }
             }
-            SessionHolder.getRootSessionManager().removeBranchSession(branchSessions);
+            SessionHolder.getRootSessionManager().cleanBranchSession(branchSessions);
         }
     }
 

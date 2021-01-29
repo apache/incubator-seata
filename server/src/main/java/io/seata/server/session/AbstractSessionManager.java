@@ -83,11 +83,10 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        session.setStatus(GlobalStatus.Removed);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
+            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_REMOVE);
         }
-        writeSession(LogOperation.GLOBAL_UPDATE, session);
+        writeSession(LogOperation.GLOBAL_REMOVE, session);
     }
 
     @Override
@@ -110,11 +109,10 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession branchSession)
         throws TransactionException {
-        branchSession.setStatus(BranchStatus.Removed);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
+            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_REMOVE);
         }
-        writeSession(LogOperation.BRANCH_UPDATE, branchSession);
+        writeSession(LogOperation.BRANCH_REMOVE, branchSession);
     }
 
     @Override
@@ -185,15 +183,15 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
     
     @Override
-    public void removeGlobalSession(List<GlobalSession> globalSessions) throws TransactionException {
+    public void cleanGlobalSession(List<GlobalSession> globalSessions) throws TransactionException {
         List<SessionStorable> sessions = new ArrayList<>(globalSessions);
-        transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, sessions);
+        transactionStoreManager.writeSession(LogOperation.GLOBAL_CLEAN, sessions);
     }
 
     @Override
-    public void removeBranchSession(List<BranchSession> branchSessions) throws TransactionException {
+    public void cleanBranchSession(List<BranchSession> branchSessions) throws TransactionException {
         List<SessionStorable> sessions = new ArrayList<>(branchSessions);
-        transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, sessions);
+        transactionStoreManager.writeSession(LogOperation.BRANCH_CLEAN, sessions);
     }
 
     /**

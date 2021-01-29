@@ -115,25 +115,24 @@ public class DataBaseSessionManager extends AbstractSessionManager
      */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        session.setStatus(GlobalStatus.Removed);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
         }
     }
     
     /**
-     * Batch remove globalSession
+     * Clean globalSession
      * 
      * @param session the session
      * @throws TransactionException
      */
     @Override
-    public void removeGlobalSession(List<GlobalSession> sessions) throws TransactionException {
+    public void cleanGlobalSession(List<GlobalSession> sessions) throws TransactionException {
         List<SessionStorable> list = new ArrayList<>(sessions);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, list);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_CLEAN, list);
         if (!ret) {
-            throw new StoreException("batchRemovedGlobalSession failed.");
+            throw new StoreException("cleanGlobalSession failed.");
         }
     }
 
@@ -172,14 +171,14 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
     
     @Override
-    public void removeBranchSession(List<BranchSession> sessions) throws TransactionException {
+    public void cleanBranchSession(List<BranchSession> sessions) throws TransactionException {
         if (StringUtils.isNotBlank(taskName)) {
             return;
         }
         List<SessionStorable> list = new ArrayList<>(sessions);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, list);
+        boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_CLEAN, list);
         if (!ret) {
-            throw new StoreException("batchRemovedBranchSession failed.");
+            throw new StoreException("cleanBranchSession failed.");
         }
     }
 

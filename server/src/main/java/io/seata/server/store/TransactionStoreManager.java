@@ -105,7 +105,15 @@ public interface TransactionStoreManager {
         /**
          * Branch remove log operation.
          */
-        BRANCH_REMOVE((byte)6);
+        BRANCH_REMOVE((byte)6),
+        /**
+         * Global clean removed log operation.
+         */
+        GLOBAL_CLEAN((byte)7),
+        /**
+         * Branch clean removed log operation.
+         */
+        BRANCH_CLEAN((byte)8);
 
         private byte code;
 

@@ -29,6 +29,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -103,13 +104,19 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
             return logStore.updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            return logStore.deleteGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
+            // Marked as removed in the database
+            GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(session);
+            globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
+            return logStore.updateGlobalTransactionDO(globalTransactionDO);
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
             return logStore.insertBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
             return logStore.updateBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
-            return logStore.deleteBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
+            // Marked as removed in the database
+            BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(session);
+            branchTransactionDO.setStatus(BranchStatus.Removed.getCode());
+            return logStore.updateBranchTransactionDO(branchTransactionDO);
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
@@ -117,11 +124,11 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     
     @Override
     public boolean writeSession(LogOperation logOperation, List<SessionStorable> sessions) {
-        if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
+        if (LogOperation.GLOBAL_CLEAN.equals(logOperation)) {
             List<GlobalTransactionDO> list = new ArrayList<>();
             sessions.forEach(s -> list.add(SessionConverter.convertGlobalTransactionDO(s)));
             return logStore.deleteGlobalTransactionDO(list);
-        } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
+        } else if (LogOperation.BRANCH_CLEAN.equals(logOperation)) {
             List<BranchTransactionDO> list = new ArrayList<>();
             sessions.forEach(s -> list.add(SessionConverter.convertBranchTransactionDO(s)));
             return logStore.deleteBranchTransactionDO(list);

@@ -33,6 +33,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.common.exception.RedisException;
 import io.seata.common.util.BeanUtils;
 import io.seata.common.XID;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
@@ -98,12 +99,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
             return updateGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            return deleteGlobalTransactionDO(SessionConverter.convertGlobalTransactionDO(session));
+            // Marked as removed
+            GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(session);
+            globalTransactionDO.setStatus(GlobalStatus.Removed.getCode());
+            return updateGlobalTransactionDO(globalTransactionDO);
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
             return insertBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
             return updateBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
+            // Marked as removed
+            BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(session);
+            branchTransactionDO.setStatus(BranchStatus.Removed.getCode());
             return deleteBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
@@ -112,11 +119,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     
     @Override
     public boolean writeSession(LogOperation logOperation, List<SessionStorable> sessions) {
-        if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
+        if (LogOperation.GLOBAL_CLEAN.equals(logOperation)) {
             List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>();
             sessions.stream().forEach(s -> globalTransactionDOs.add(SessionConverter.convertGlobalTransactionDO(s)));
             return deleteGlobalTransactionDO(globalTransactionDOs);
-        } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
+        } else if (LogOperation.BRANCH_CLEAN.equals(logOperation)) {
             List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
             sessions.stream().forEach(s -> branchTransactionDOs.add(SessionConverter.convertBranchTransactionDO(s)));
             return deleteBranchTransactionDO(branchTransactionDOs);

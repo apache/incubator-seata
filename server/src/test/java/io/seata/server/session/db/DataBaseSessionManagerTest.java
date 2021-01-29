@@ -218,7 +218,7 @@ public class DataBaseSessionManagerTest {
             
             List<GlobalSession> list = new ArrayList<>();
             list.add(session);
-            sessionManager.removeGlobalSession(list);
+            sessionManager.cleanGlobalSession(list);
             
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
@@ -410,7 +410,7 @@ public class DataBaseSessionManagerTest {
             
             List<BranchSession> list = new ArrayList<>();
             list.add(branchSession);
-            sessionManager.removeBranchSession(list);
+            sessionManager.cleanBranchSession(list);
             
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){

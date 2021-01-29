@@ -188,12 +188,12 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public void removeGlobalSession(List<GlobalSession> sessions) throws TransactionException {
+                public void cleanGlobalSession(List<GlobalSession> sessions) throws TransactionException {
                     
                 }
 
                 @Override
-                public void removeBranchSession(List<BranchSession> sessions) throws TransactionException {
+                public void cleanBranchSession(List<BranchSession> sessions) throws TransactionException {
                     
                 }
 
