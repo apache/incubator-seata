@@ -20,6 +20,7 @@ import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * The type channel manager.
@@ -44,6 +46,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelManager.class);
+
     private static final ConcurrentMap<Channel, RpcContext> IDENTIFIED_CHANNELS = new ConcurrentHashMap<>();
 
     /**
@@ -57,6 +60,16 @@ public class ChannelManager {
      */
     private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
         = new ConcurrentHashMap<>();
+
+
+    /**
+     * resourceId -> [AT, TCC, SAGA, XA]
+     */
+    private static final ConcurrentMap<String, Set<BranchType>> RM_TYPE_RECORDER = new ConcurrentHashMap<>();
+
+    public static Set<BranchType> getBranchTypeSet(String resourceId) {
+        return RM_TYPE_RECORDER.computeIfAbsent(resourceId, id -> new ConcurrentSkipListSet<>());
+    }
 
     /**
      * Is registered boolean.
@@ -138,34 +151,38 @@ public class ChannelManager {
     /**
      * Register rm channel.
      *
-     * @param resourceManagerRequest the resource manager request
+     * @param request the resource manager request
      * @param channel                the channel
      * @throws IncompatibleVersionException the incompatible  version exception
      */
-    public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel)
+    public static void registerRMChannel(RegisterRMRequest request, Channel channel)
         throws IncompatibleVersionException {
-        Version.checkVersion(resourceManagerRequest.getVersion());
-        Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
-        RpcContext rpcContext;
-        if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
-            rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
-                resourceManagerRequest.getApplicationId(), resourceManagerRequest.getTransactionServiceGroup(),
-                resourceManagerRequest.getResourceIds(), channel);
-            rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
-        } else {
-            rpcContext = IDENTIFIED_CHANNELS.get(channel);
-            rpcContext.addResources(dbkeySet);
-        }
-        if (dbkeySet == null || dbkeySet.isEmpty()) { return; }
-        for (String resourceId : dbkeySet) {
-            String clientIp;
-            ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(resourceManagerRequest.getApplicationId(), key -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(clientIp = ChannelUtil.getClientIpFromChannel(channel), key -> new ConcurrentHashMap<>());
+        Version.checkVersion(request.getVersion());
 
-            rpcContext.holdInResourceManagerChannels(resourceId, portMap);
-            updateChannelsResource(resourceId, clientIp, resourceManagerRequest.getApplicationId());
-        }
+        String resourceId = request.getResourceIds();
+        String typeName = request.getExtraData();
+        BranchType type = StringUtils.isBlank(typeName) ? null : BranchType.get(typeName);
+
+        RpcContext rpcContext = IDENTIFIED_CHANNELS.computeIfAbsent(channel, chan -> buildRpcContext(chan, request));
+        rpcContext.addResource(resourceId);
+
+        addBranchTypeToResource(resourceId, type);
+
+        String clientAppId = request.getApplicationId();
+        String clientIp = ChannelUtil.getClientIpFromChannel(channel);
+        ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, key -> new ConcurrentHashMap<>())
+                .computeIfAbsent(clientAppId, key -> new ConcurrentHashMap<>())
+                .computeIfAbsent(clientIp, key -> new ConcurrentHashMap<>());
+        rpcContext.holdInResourceManagerChannels(resourceId, portMap);
+        updateChannelsResource(resourceId, clientIp, clientAppId);
+    }
+
+    private static RpcContext buildRpcContext(Channel channel, RegisterRMRequest request) {
+        RpcContext context = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, request.getVersion(),
+                request.getApplicationId(), request.getTransactionServiceGroup(),
+                request.getResourceIds(), channel);
+        context.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
+        return context;
     }
 
     private static void updateChannelsResource(String resourceId, String clientIp, String applicationId) {
@@ -189,6 +206,14 @@ public class ChannelManager {
                 }
             }
         }
+    }
+
+    private static void addBranchTypeToResource(String resourceId, BranchType type) {
+        if (type == null) {
+            return;
+        }
+        Set<BranchType> typeSet = getBranchTypeSet(resourceId);
+        typeSet.add(type);
     }
 
     private static Set<String> dbKeytoSet(String dbkey) {
