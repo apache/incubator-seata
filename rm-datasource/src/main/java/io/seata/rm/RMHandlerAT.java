@@ -79,7 +79,7 @@ public class RMHandlerAT extends AbstractRMHandler {
         try {
             conn.close();
         } catch (SQLException closeEx) {
-            LOGGER.warn("Failed to close JDBC resource after deleting undo_log ", closeEx);
+            LOGGER.warn("Failed to close JDBC resource after deleting undo_log", closeEx);
         }
     }
 
@@ -94,7 +94,7 @@ public class RMHandlerAT extends AbstractRMHandler {
             connection.close();
         } catch (SQLException e) {
             String resourceId = dataSourceProxy.getResourceId();
-            LOGGER.warn("Failed to close JDBC resource for {}", resourceId);
+            LOGGER.warn("Failed to close JDBC resource for {}", resourceId, e);
         }
         return isExisted;
     }
