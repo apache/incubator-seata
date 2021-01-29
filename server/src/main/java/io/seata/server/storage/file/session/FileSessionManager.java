@@ -246,6 +246,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     }
                     break;
                 }
+                case GLOBAL_CLEAN:
                 case GLOBAL_REMOVE: {
                     GlobalSession globalSession = (GlobalSession)sessionStorable;
                     if (globalSession.getTransactionId() == 0) {
@@ -292,6 +293,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                     }
                     break;
                 }
+                case BRANCH_CLEAN:
                 case BRANCH_REMOVE: {
                     BranchSession branchSession = (BranchSession)sessionStorable;
                     String xid = branchSession.getXid();
