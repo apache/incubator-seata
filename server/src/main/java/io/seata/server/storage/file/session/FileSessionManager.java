@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -119,7 +120,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public Collection<GlobalSession> allSessions() {
-        return sessionMap.values();
+        return sessionMap.values().stream().filter(s -> !s.getStatus().equals(GlobalStatus.Removed)).collect(Collectors.toList());
     }
 
     @Override
