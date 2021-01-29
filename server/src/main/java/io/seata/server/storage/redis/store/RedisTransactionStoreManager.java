@@ -111,7 +111,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             // Marked as removed
             BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(session);
             branchTransactionDO.setStatus(BranchStatus.Removed.getCode());
-            return deleteBranchTransactionDO(SessionConverter.convertBranchTransactionDO(session));
+            return updateBranchTransactionDO(branchTransactionDO);
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
