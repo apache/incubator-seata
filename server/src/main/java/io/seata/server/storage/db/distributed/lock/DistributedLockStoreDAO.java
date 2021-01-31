@@ -128,7 +128,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                         distributedLockDO.getKey(), distributedLockDOFromDB.getValue());
                 return true;
             }
-            distributedLockDO.setValue(StringUtils.EMPTY);
+            distributedLockDO.setValue(StringUtils.SPACE);
             return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
             LOGGER.error("execute release lock failure, key is: {}", distributedLockDO.getKey(), ex);
