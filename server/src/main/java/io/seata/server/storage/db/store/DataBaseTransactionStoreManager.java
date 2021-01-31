@@ -185,6 +185,9 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         //reduce rpc with db when branchRegister and getGlobalStatus
         if (withBranchSessions) {
             branchTransactionDOs = logStore.queryBranchTransactionDO(globalTransactionDO.getXid());
+            branchTransactionDOs = branchTransactionDOs.stream()
+                    .filter(b -> BranchStatus.Removed.getCode() != b.getStatus())
+                    .collect(Collectors.toList());
         }
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
@@ -208,6 +211,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
         List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
         Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
+            .filter(s -> s.getStatus() != BranchStatus.Removed.getCode())
             .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
         return globalTransactionDOs.stream().map(globalTransactionDO ->
             getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))

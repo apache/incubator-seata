@@ -386,6 +386,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             List<BranchTransactionDO> branchTransactionDOs = null;
             if (withBranchSessions) {
                 branchTransactionDOs = this.readBranchSessionByXid(jedis,xid);
+                // filter removed branch transactions
+                branchTransactionDOs = branchTransactionDOs.stream()
+                        .filter(b -> BranchStatus.Removed.getCode() != b.getStatus())
+                        .collect(Collectors.toList());
             }
             return getGlobalSession(globalTransactionDO,branchTransactionDOs);
         }
