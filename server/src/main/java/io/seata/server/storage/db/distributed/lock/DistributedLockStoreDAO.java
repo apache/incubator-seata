@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -88,6 +89,13 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
             return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
             LOGGER.error("execute acquire lock failure, key is: {}", distributedLockDO.getKey(), ex);
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e) {
+                LOGGER.warn("rollback fail because of {}", e.getMessage(), e);
+            }
             return false;
         } finally {
             try {
@@ -120,10 +128,18 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                         distributedLockDO.getKey(), distributedLockDOFromDB.getValue());
                 return true;
             }
-
+            distributedLockDO.setValue(StringUtils.EMPTY);
             return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
             LOGGER.error("execute release lock failure, key is: {}", distributedLockDO.getKey(), ex);
+
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException e) {
+                LOGGER.warn("rollback fail because of {}", e.getMessage(), e);
+            }
             return false;
         } finally {
             try {

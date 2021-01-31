@@ -72,6 +72,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     protected DistributedLockStore distributedLockStore;
 
+    protected String lockValue;
+
     /**
      * Instantiates a new Data base session manager.
      */
@@ -82,6 +84,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
         //init dataSource
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         distributedLockStore = new DistributedLockStoreDAO(logStoreDataSource);
+
+        lockValue = XID.getIpAddress() + ":" + XID.getPort();
     }
 
     /**
@@ -220,7 +224,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     public boolean scheduledLock(String key) {
         DistributedLockDO distributedLockDO = new DistributedLockDO();
         distributedLockDO.setKey(key);
-        distributedLockDO.setValue(XID.getIpAddress() + ":" + XID.getPort());
+        distributedLockDO.setValue(lockValue);
         distributedLockDO.setExpire(System.currentTimeMillis() + 15 * 60 * 1000);
         return distributedLockStore.acquireLock(distributedLockDO);
     }
@@ -229,7 +233,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     public boolean unScheduledLock(String key) {
         DistributedLockDO distributedLockDO = new DistributedLockDO();
         distributedLockDO.setKey(key);
-        distributedLockDO.setValue(StringUtils.EMPTY);
+        distributedLockDO.setValue(lockValue);
         distributedLockDO.setExpire(0L);
         return distributedLockStore.releaseLock(distributedLockDO);
     }

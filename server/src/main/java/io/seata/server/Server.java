@@ -65,6 +65,16 @@ public class Server {
         //initialize the metrics
         MetricsManager.get().init();
 
+        UUIDGenerator.init(parameterParser.getServerNode());
+
+        //127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
+        XID.setPort(parameterParser.getPort());
+
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
         ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
@@ -75,7 +85,6 @@ public class Server {
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         //server port
         nettyRemotingServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db, redis
         SessionHolder.init(parameterParser.getStoreMode());
 
@@ -85,14 +94,6 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
-
-        //127.0.0.1 and 0.0.0.0 are not valid here.
-        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            XID.setIpAddress(parameterParser.getHost());
-        } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
-        }
-        XID.setPort(nettyRemotingServer.getListenPort());
 
         try {
             nettyRemotingServer.init();
