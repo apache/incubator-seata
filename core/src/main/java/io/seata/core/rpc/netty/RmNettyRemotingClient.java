@@ -182,13 +182,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             return;
         }
 
-        if (getClientChannelManager().getChannels().isEmpty()) {
-            getClientChannelManager().reconnect(transactionServiceGroup);
-            return;
+        NettyClientChannelManager channelManager = getClientChannelManager();
+        if (channelManager.getChannels().isEmpty()) {
+            channelManager.reconnect(transactionServiceGroup);
         }
 
         RegisterRMRequest message = buildRegisterRMRequest(resourceId, type);
-        Map<String, Channel> channels = getClientChannelManager().getChannels();
+        Map<String, Channel> channels = channelManager.getChannels();
         channels.forEach((serverAddress, rmChannel) -> {
             LOGGER.info("will register resource: {}", resourceId);
             sendRegisterMessage(serverAddress, rmChannel, message);
