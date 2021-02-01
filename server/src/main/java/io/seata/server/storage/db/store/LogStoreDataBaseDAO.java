@@ -465,7 +465,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {
-                    ResultSet columnRs = conn.getMetaData().getColumns(null, schema, tableName, null);
+                    ResultSet columnRs = conn.getMetaData().getColumns(null, schema, table, null);
                     while (columnRs.next()) {
                         ColumnInfo info = new ColumnInfo();
                         String columnName = columnRs.getString("COLUMN_NAME");
@@ -492,8 +492,21 @@ public class LogStoreDataBaseDAO implements LogStore {
     private String getSchema(Connection conn) throws SQLException {
         if ("h2".equalsIgnoreCase(dbType)) {
             return null;
+        } else if ("postgresql".equalsIgnoreCase(dbType)) {
+            String sql = "select current_schema";
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                String schema = null;
+                if (rs.next()) {
+                    schema = rs.getString(1);
+                }
+                return schema;
+            } catch (SQLException e) {
+                throw new StoreException(e);
+            }
+        } else {
+            return conn.getMetaData().getUserName();
         }
-        return conn.getMetaData().getUserName();
     }
 
     /**
