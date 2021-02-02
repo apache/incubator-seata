@@ -17,12 +17,10 @@ package io.seata.saga.engine.pcext.handlers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
@@ -144,7 +142,7 @@ public class LoopStartStateHandler implements StateHandler {
                     isFinished = semaphore.tryAcquire(maxInstances, AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
                 }
                 if (!loopContextHolder.isFailEnd()) {
-                    putContextToParent(contextList.get(0));
+                    LoopTaskUtils.putContextToParent(contextList.get(0));
                 }
             }
         } catch (InterruptedException e) {
@@ -164,15 +162,5 @@ public class LoopStartStateHandler implements StateHandler {
         }
         LoopContextHolder.clearCurrent(context);
 
-    }
-
-    private void putContextToParent(ProcessContext context) {
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        if (CollectionUtils.isNotEmpty(contextVariables)) {
-            Map<String, Object> parentContextVariables = (Map<String, Object>)((ProcessContextImpl)context).getParent()
-                .getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-            parentContextVariables.putAll(contextVariables);
-        }
     }
 }

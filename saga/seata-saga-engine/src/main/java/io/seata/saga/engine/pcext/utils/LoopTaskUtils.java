@@ -25,6 +25,7 @@ import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
@@ -317,6 +318,22 @@ public class LoopTaskUtils {
     public static boolean needCompensate(ProcessContext context) {
         return !context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME).equals(DomainConstants.OPERATION_NAME_COMPENSATE)
                 && LoopContextHolder.getCurrent(context, true).isNeedCompensate();
+    }
+
+    /**
+     * put loop out context to parent context
+     *
+     * @param context
+     */
+    public static void putContextToParent(ProcessContext context) {
+        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+        ProcessContextImpl processContext = (ProcessContextImpl)context;
+        if (CollectionUtils.isNotEmpty(contextVariables) && null != processContext.getParent()) {
+            Map<String, Object> parentContextVariables = (Map<String, Object>)processContext.getParent().getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+            parentContextVariables.putAll(contextVariables);
+        }
     }
 
     /**

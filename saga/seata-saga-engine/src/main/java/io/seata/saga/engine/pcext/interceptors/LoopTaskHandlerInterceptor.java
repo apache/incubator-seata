@@ -39,7 +39,6 @@ import io.seata.saga.engine.pcext.utils.LoopContextHolder;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.State;
@@ -146,7 +145,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (null != stateInstance && !LoopContextHolder.getCurrent(context, true).isFailEnd()) {
                 if (!ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     LoopContextHolder.getCurrent(context, true).setFailEnd(true);
-                    putContextToParent(context);
+                    LoopTaskUtils.putContextToParent(context);
                 }
             }
 
@@ -196,16 +195,6 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             index += 1;
         }
         return value;
-    }
-
-    private void putContextToParent(ProcessContext context) {
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        if (CollectionUtils.isNotEmpty(contextVariables)) {
-            Map<String, Object> parentContextVariables = (Map<String, Object>)((ProcessContextImpl)context).getParent()
-                .getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-            parentContextVariables.putAll(contextVariables);
-        }
     }
 
 }
