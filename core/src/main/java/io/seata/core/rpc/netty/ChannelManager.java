@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -159,22 +160,38 @@ public class ChannelManager {
         throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
 
-        String resourceId = request.getResourceIds();
+        String resourceIds = request.getResourceIds();
+        Set<String> idSet = dbKeytoSet(resourceIds);
+
         String typeName = request.getExtraData();
-        BranchType type = StringUtils.isBlank(typeName) ? null : BranchType.get(typeName);
+        BranchType type = getBranchType(typeName);
 
         RpcContext rpcContext = IDENTIFIED_CHANNELS.computeIfAbsent(channel, chan -> buildRpcContext(chan, request));
-        rpcContext.addResource(resourceId);
-
-        addBranchTypeToResource(resourceId, type);
+        rpcContext.addResources(idSet);
 
         String clientAppId = request.getApplicationId();
         String clientIp = ChannelUtil.getClientIpFromChannel(channel);
-        ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, key -> new ConcurrentHashMap<>())
-                .computeIfAbsent(clientAppId, key -> new ConcurrentHashMap<>())
-                .computeIfAbsent(clientIp, key -> new ConcurrentHashMap<>());
-        rpcContext.holdInResourceManagerChannels(resourceId, portMap);
-        updateChannelsResource(resourceId, clientIp, clientAppId);
+
+        idSet.forEach(resourceId -> {
+            addBranchTypeToResource(resourceId, type);
+            ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, key -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(clientAppId, key -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(clientIp, key -> new ConcurrentHashMap<>());
+            rpcContext.holdInResourceManagerChannels(resourceId, portMap);
+            updateChannelsResource(resourceId, clientIp, clientAppId);
+        });
+    }
+
+    private static BranchType getBranchType(String typeName) {
+        if (StringUtils.isNullOrEmpty(typeName)) {
+            return null;
+        }
+        try {
+            return BranchType.get(typeName);
+        } catch (Exception e) {
+            LOGGER.warn("Unknown BranchType: {}", typeName);
+            return null;
+        }
     }
 
     private static RpcContext buildRpcContext(Channel channel, RegisterRMRequest request) {
@@ -218,9 +235,9 @@ public class ChannelManager {
 
     private static Set<String> dbKeytoSet(String dbkey) {
         if (StringUtils.isNullOrEmpty(dbkey)) {
-            return null;
+            return Collections.emptySet();
         }
-        return new HashSet<String>(Arrays.asList(dbkey.split(Constants.DBKEYS_SPLIT_CHAR)));
+        return new HashSet<>(Arrays.asList(dbkey.split(Constants.DBKEYS_SPLIT_CHAR)));
     }
 
     /**
