@@ -18,15 +18,15 @@ package io.seata.rm.datasource.undo;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
-import static io.seata.core.constants.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
 
 /**
  * @author Geng Zhang
  */
-public class UndoLogConstants {
+public interface UndoLogConstants {
 
-    public static final String SERIALIZER_KEY = "serializer";
+    String SERIALIZER_KEY = "serializer";
 
-    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
+    String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
         .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION);
 }

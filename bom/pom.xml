@@ -66,7 +66,7 @@
         <dubbo.version>2.7.0</dubbo.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
-        <fastjson.version>1.2.60</fastjson.version>
+        <fastjson.version>1.2.73</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
         <slf4j-api.version>1.7.22</slf4j-api.version>
@@ -83,12 +83,12 @@
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
-        <apollo-client.version>1.1.0</apollo-client.version>
+        <apollo-client.version>1.6.0</apollo-client.version>
         <redis-clients.version>3.2.0</redis-clients.version>
         <mock-jedis.version>0.1.16</mock-jedis.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.2.0</nacos-client.version>
+        <nacos-client.version>1.3.3</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>27.0.1-jre</guava.version>
@@ -97,7 +97,7 @@
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <httpclient.version>4.5.8</httpclient.version>
         <httpcore.version>4.4.11</httpcore.version>
-        <druid.version>1.1.12</druid.version>
+        <druid.version>1.1.23</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.35</mysql.client.version>

@@ -42,7 +42,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String xid = RootContext.getXID();
-        String branchType = RootContext.getBranchType();
+        BranchType branchType = RootContext.getBranchType();
 
         String rpcXid = getRpcXid();
         String rpcBranchType = RpcContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
@@ -52,7 +52,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType);
+            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
@@ -69,9 +69,9 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
             return invoker.invoke(invocation);
         } finally {
             if (bind) {
+                BranchType previousBranchType = RootContext.getBranchType();
                 String unbindXid = RootContext.unbind();
-                String previousBranchType = RootContext.getBranchType();
-                if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
+                if (BranchType.TCC == previousBranchType) {
                     RootContext.unbindBranchType();
                 }
                 if (LOGGER.isDebugEnabled()) {
@@ -83,7 +83,7 @@ public class ApacheDubboTransactionPropagationFilter implements Filter {
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
-                        if (StringUtils.equals(BranchType.TCC.name(), previousBranchType)) {
+                        if (BranchType.TCC == previousBranchType) {
                             RootContext.bindBranchType(BranchType.TCC);
                             LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
                         }
