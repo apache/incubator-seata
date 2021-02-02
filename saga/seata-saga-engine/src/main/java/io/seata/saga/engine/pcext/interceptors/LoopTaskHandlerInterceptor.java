@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
@@ -150,8 +150,6 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                 }
             }
 
-            boolean compensateOperation = false;
-
             Stack<Exception> expStack = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
             Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
             if (exp == null) {
@@ -159,9 +157,9 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
 
             if (null != e) {
-                if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.LOOP_COUNT_DOWN_LATCH)) {
-                    CountDownLatch countDownLatch = (CountDownLatch)context.removeVariable(DomainConstants.LOOP_COUNT_DOWN_LATCH);
-                    countDownLatch.countDown();
+                if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.LOOP_SEMAPHORE)) {
+                    Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+                    semaphore.release();
                 }
             }
 
@@ -178,33 +176,6 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
             LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().decrementAndGet();
 
-            State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
-                DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-            if (compensationTriggerState != null) {
-                compensateOperation = true;
-            }
-
-            int loopCounter = LoopTaskUtils.acquireNextLoopCounter(context);
-            if (LoopContextHolder.getCurrent(context, true).isFailEnd()
-                    || LoopTaskUtils.isCompletionConditionSatisfied(context)
-                    || (!compensateOperation && loopCounter < 0)) {
-                if (!expStack.isEmpty()) {
-                    ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION,
-                        expStack.peek());
-                } else if (!LoopContextHolder.getCurrent(context, true).isFailEnd()) {
-                    // put one out context to parent for choice decision under normal condition
-                    putContextToParent(context);
-                }
-                context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-                context.removeVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE);
-            } else {
-                LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().incrementAndGet();
-                if (compensateOperation) {
-                    LoopContextHolder.getCurrent(context, true).getNrOfInstances().decrementAndGet();
-                } else {
-                    ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
-                }
-            }
         }
     }
 

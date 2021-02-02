@@ -16,6 +16,7 @@
 package io.seata.saga.engine.pcext.routers;
 
 import java.util.Stack;
+import java.util.concurrent.Semaphore;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.exception.EngineExecutionException;
@@ -201,20 +202,8 @@ public class TaskStateRouter implements StateRouter {
     }
 
     private Instruction loopRoute(ProcessContext context) {
-
-        StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
-        State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
-            DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-
-        if (null != compensationTriggerState) {
-            return compensateRoute(context, compensationTriggerState);
-        } else if (((HierarchicalProcessContext)context).hasVariableLocal(
-            DomainConstants.VAR_NAME_CURRENT_LOOP_STATE)) {
-            stateInstruction.setTemporaryState((State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_STATE));
-            return stateInstruction;
-        }
-
+        Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+        semaphore.release();
         return null;
-
     }
 }

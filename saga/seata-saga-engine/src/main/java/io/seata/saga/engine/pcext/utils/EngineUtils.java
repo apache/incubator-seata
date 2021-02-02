@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -81,10 +80,6 @@ public class EngineUtils {
     public static void endStateMachine(ProcessContext context) {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
-            if (((HierarchicalProcessContext)context).hasVariableLocal(DomainConstants.LOOP_COUNT_DOWN_LATCH)) {
-                CountDownLatch countDownLatch = (CountDownLatch)context.removeVariable(DomainConstants.LOOP_COUNT_DOWN_LATCH);
-                countDownLatch.countDown();
-            }
             return;
         }
 
@@ -137,7 +132,7 @@ public class EngineUtils {
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
-        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
             return;
         }
 

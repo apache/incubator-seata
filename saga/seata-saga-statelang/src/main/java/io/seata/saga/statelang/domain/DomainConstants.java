@@ -70,13 +70,12 @@ public interface DomainConstants {
     String VAR_NAME_GLOBAL_TX = "_global_transaction_";
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
-    String VAR_NAME_CURRENT_LOOP_STATE = "_is_loop_for_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
     //endregion
 
     // region of loop
     String LOOP_COUNTER = "loopCounter";
-    String LOOP_COUNT_DOWN_LATCH = "loopCountDownLatch";
+    String LOOP_SEMAPHORE = "loopSemaphore";
     String NUMBER_OF_INSTANCES = "nrOfInstances";
     String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
     String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
