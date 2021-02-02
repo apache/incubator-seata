@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import sun.misc.CompoundEnumeration;
-import sun.misc.Resource;
 
 /**
  * Used for druid isolation.
@@ -32,6 +31,7 @@ import sun.misc.Resource;
  */
 class DruidIsolationClassLoader extends URLClassLoader {
     private final static String[] DRUID_CLASS_PREFIX = new String[]{"com.alibaba.druid.", "io.seata.sqlparser.druid."};
+
     private final static String[] DRUID_RESOURCE_PREFIX = new String[]{"META-INF/seata/io.seata.sqlparser.druid", "META-INF/services/io.seata.sqlparser.druid"};
 
     private final static DruidIsolationClassLoader INSTANCE = new DruidIsolationClassLoader(DefaultDruidLoader.get());
@@ -50,6 +50,12 @@ class DruidIsolationClassLoader extends URLClassLoader {
         return super.loadClass(name, resolve);
     }
 
+    /**
+     * While loading resource files, the resources under the current layer classLoader's path and the parent
+     * classLoader's path will be loaded at the same time.{@link ClassLoader#getResources(String)}
+     * So we rewrite this method to avoid repeated loading of druid resources which in the
+     * {@link #DRUID_RESOURCE_PREFIX}
+     */
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
         for (String prefix : DRUID_RESOURCE_PREFIX) {
@@ -61,31 +67,9 @@ class DruidIsolationClassLoader extends URLClassLoader {
     }
 
     private Enumeration<URL> loadInternalResource(String name) throws IOException {
-        Enumeration<URL>[] tmp = (Enumeration<URL>[])new Enumeration<?>[2];
-//        tmp[0] = getBootstrapResources(name);
+        Enumeration<URL>[] tmp = (Enumeration<URL>[])new Enumeration<?>[1];
         tmp[0] = findResources(name);
-
         return new CompoundEnumeration<>(tmp);
-    }
-
-    /**
-     * Find resources from the VM's built-in classloader.
-     */
-    private Enumeration<URL> getBootstrapResources(String name)
-        throws IOException
-    {
-        final Enumeration<Resource> e =
-                sun.misc.Launcher.getBootstrapClassPath().getResources(name);
-        return new Enumeration<URL> () {
-            @Override
-            public URL nextElement() {
-                return e.nextElement().getURL();
-            }
-            @Override
-            public boolean hasMoreElements() {
-                return e.hasMoreElements();
-            }
-        };
     }
 
     private Class<?> loadInternalClass(String name, boolean resolve) throws ClassNotFoundException {
