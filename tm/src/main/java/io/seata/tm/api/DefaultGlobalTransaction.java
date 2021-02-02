@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -137,7 +136,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (xid.equals(RootContext.getXID())) {
-                suspend(true);
+                suspend();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -172,7 +171,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (xid.equals(RootContext.getXID())) {
-                suspend(true);
+                suspend();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -181,17 +180,18 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException {
+    public SuspendedResourcesHolder suspend() throws TransactionException {
+        // In order to associate the following logs with XID, first get and then unbind.
         String xid = RootContext.getXID();
-        if (StringUtils.isNotEmpty(xid) && unbindXid) {
-            RootContext.unbind();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction, xid = {}", xid);
+        if (xid != null) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Suspending current transaction, xid = {}", xid);
             }
+            RootContext.unbind();
+            return new SuspendedResourcesHolder(xid);
         } else {
-            xid = null;
+            return null;
         }
-        return new SuspendedResourcesHolder(xid);
     }
 
     @Override
@@ -200,11 +200,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         String xid = suspendedResourcesHolder.getXid();
-        if (StringUtils.isNotEmpty(xid)) {
-            RootContext.bind(xid);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Resumimg the transaction,xid = {}", xid);
-            }
+        RootContext.bind(xid);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Resumimg the transaction,xid = {}", xid);
         }
     }
 
@@ -236,7 +234,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         if (xid.equals(RootContext.getXID())) {
-            suspend(true);
+            suspend();
         }
     }
 
@@ -256,5 +254,4 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
     }
-
 }

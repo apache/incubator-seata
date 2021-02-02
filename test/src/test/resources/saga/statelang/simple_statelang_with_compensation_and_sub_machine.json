@@ -3,6 +3,8 @@
     "Comment": "带补偿定义和调用子状态机",
     "StartState": "FirstState",
     "Version": "0.0.1",
+    "IsRetryPersistModeUpdate": false,
+    "IsCompensatePersistModeUpdate": false,
     "States": {
         "FirstState": {
             "Type": "ServiceTask",
@@ -29,6 +31,10 @@
                 {
                     "Expression":"[a] == 2",
                     "Next":"CallSubStateMachine"
+                },
+                {
+                    "Expression": "[a] == 3 || [a] == 4",
+                    "Next": "CallSubStateMachineAsUpdate"
                 }
             ],
             "Default":"Fail"
@@ -70,6 +76,23 @@
                     "barThrowException": "$.[barThrowException]",
                     "fooThrowException": "$.[fooThrowException]",
                     "compensateFooThrowException": "$.[compensateFooThrowException]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "Succeed"
+        },
+        "CallSubStateMachineAsUpdate": {
+            "Type": "SubStateMachine",
+            "StateMachineName": "simpleUpdateStateMachine",
+            "IsRetryPersistModeUpdate": true,
+            "IsCompensatePersistModeUpdate": true,
+            "Input": [
+                {
+                    "a": "$.[a]-2",
+                    "barThrowException": "$.[barThrowException]",
+                    "compensateBarThrowException": "$.[compensateBarThrowException]"
                 }
             ],
             "Output": {

@@ -139,6 +139,7 @@ Commit content represents all content changes included in one commit. We had bet
 * avoid very large change in a commit;
 * complete and reviewable for each commit.
 * check git config(`user.name`, `user.email`) when committing to ensure that it is associated with your github ID.
+* when submitting pr, please add a brief description of the current changes to the X.X.X.md file under the 'changes/' folder
 
 
 In addition, in the code change part, we suggest that all contributors should read the [code style of Seata](#code-style).

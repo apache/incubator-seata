@@ -15,16 +15,17 @@
  */
 package io.seata.rm.datasource;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
@@ -35,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
  * The type Data source proxy.
@@ -64,7 +66,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Table meta checker interval
      */
-    private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
+    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
+            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
     private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("tableMetaChecker", 1, true));
@@ -114,6 +117,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
+
+        //Set the default branch type to 'AT' in the RootContext.
+        RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     /**
