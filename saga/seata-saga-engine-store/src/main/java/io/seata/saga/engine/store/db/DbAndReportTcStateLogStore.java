@@ -399,8 +399,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
         for (int i = 0; i < stateInstance.getStateMachineInstance().getStateList().size(); i++) {
             StateInstance aStateInstance = stateInstance.getStateMachineInstance().getStateList().get(i);
-            if (aStateInstance != stateInstance && originalCompensateStateInstId.equals(
-                aStateInstance.getStateIdCompensatedFor())) {
+            if (aStateInstance != stateInstance
+                && originalCompensateStateInstId.equals(aStateInstance.getStateIdCompensatedFor())) {
                 int idIndex = getIdIndex(aStateInstance.getId(), "-");
                 maxIndex = idIndex > maxIndex ? idIndex : maxIndex;
                 maxIndex++;
