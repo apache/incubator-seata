@@ -160,8 +160,4 @@ public class CompensationHolder {
     public Stack<StateInstance> getStateStackNeedCompensation() {
         return stateStackNeedCompensation;
     }
-
-    public void setStateStackNeedCompensation(Stack<StateInstance> stateStackNeedCompensation) {
-        this.stateStackNeedCompensation = stateStackNeedCompensation;
-    }
 }

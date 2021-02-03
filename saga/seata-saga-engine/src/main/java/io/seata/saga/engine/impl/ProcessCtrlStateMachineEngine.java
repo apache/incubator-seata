@@ -324,6 +324,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             if (null != loop) {
                 inst.setTemporaryState(new LoopStartStateImpl());
             }
+
             if (async) {
                 stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
             } else {

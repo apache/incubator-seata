@@ -63,21 +63,21 @@ public class TaskStateRouter implements StateRouter {
             return null;
         }
 
-        //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
-        String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
-
         // check if in loop async condition
-        Object isLoopState = context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
-        if (StringUtils.isEmpty(next) && Boolean.TRUE.equals(isLoopState)) {
+        if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
             return loopRoute(context);
         }
 
         //The current CompensationTriggerState can mark the compensation process is started and perform compensation
         // route processing.
-        State compensationTriggerState = (State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+        State compensationTriggerState = (State)context.getVariable(
+            DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
         if (compensationTriggerState != null) {
             return compensateRoute(context, compensationTriggerState);
         }
+
+        //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
+        String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
 
         if (StringUtils.hasLength(next)) {
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
@@ -105,10 +105,8 @@ public class TaskStateRouter implements StateRouter {
 
         stateInstruction.setStateName(next);
 
-        if (!Boolean.TRUE.equals(isLoopState)) {
-            if (null != LoopTaskUtils.getLoopConfig(context, nextState)) {
-                stateInstruction.setTemporaryState(new LoopStartStateImpl());
-            }
+        if (null != LoopTaskUtils.getLoopConfig(context, nextState)) {
+            stateInstruction.setTemporaryState(new LoopStartStateImpl());
         }
 
         return stateInstruction;

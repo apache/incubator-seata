@@ -36,6 +36,7 @@ public class LoopContextHolder {
     private volatile boolean failEnd = false;
     private Stack<Exception> loopExpContext = new Stack<>();
     private Stack<Integer> loopIndexStack = new Stack<>();
+    private Stack<Integer> failEndIndexStack = new Stack<>();
     private Collection collection;
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
@@ -91,15 +92,19 @@ public class LoopContextHolder {
         return loopExpContext;
     }
 
+    public Stack<Integer> getLoopIndexStack() {
+        return loopIndexStack;
+    }
+
+    public Stack<Integer> getFailEndIndexStack() {
+        return failEndIndexStack;
+    }
+
     public Collection getCollection() {
         return collection;
     }
 
     public void setCollection(Collection collection) {
         this.collection = collection;
-    }
-
-    public Stack<Integer> getLoopIndexStack() {
-        return loopIndexStack;
     }
 }

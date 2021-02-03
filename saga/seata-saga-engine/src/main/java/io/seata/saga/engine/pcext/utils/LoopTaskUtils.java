@@ -21,16 +21,20 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
+import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
@@ -108,31 +112,23 @@ public class LoopTaskUtils {
         }
     }
 
-    public static ProcessContext createLoopEventContext(ProcessContext context) {
+    public static ProcessContext createLoopEventContext(ProcessContext context, int loopCounter) {
         ProcessContextImpl copyContext = new ProcessContextImpl();
         copyContext.setParent(context);
-        copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
-        copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, acquireNextLoopCounter(context));
+        copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter >= 0 ? loopCounter : acquireNextLoopCounter(context));
         copyContext.setInstruction(copyInstruction(context.getInstruction(StateInstruction.class)));
         return copyContext;
     }
 
     public static ProcessContext createCompensateLoopEventContext(ProcessContext context, StateInstance stateToBeCompensated) {
-        Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
-            .getStateStackNeedCompensation();
-        int loopCounter = reloadLoopCounter(stateToBeCompensated.getName());
         ProcessContextImpl copyContext = new ProcessContextImpl();
         CompensationHolder.getCurrent(copyContext, true);
         copyContext.setParent(context);
-        copyContext.setVariableLocally(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
-        copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, loopCounter);
-        copyContext.setVariableLocally(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE,
-            context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE));
-        copyContext.setInstruction(copyInstruction(context.getInstruction(StateInstruction.class)));
-        StateInstruction instruction = copyContext.getInstruction(StateInstruction.class);
+        copyContext.setVariableLocally(DomainConstants.LOOP_COUNTER, reloadLoopCounter(stateToBeCompensated.getName()));
+        StateInstruction instruction = context.getInstruction(StateInstruction.class);
+        copyContext.setInstruction(copyInstruction(instruction));
         CompensationHolder.getCurrent(copyContext, true).addToBeCompensatedState(instruction.getStateName(),
             stateToBeCompensated);
-        CompensationHolder.getCurrent(copyContext, true).setStateStackNeedCompensation(stateStackToBeCompensated);
         return copyContext;
     }
 
@@ -160,16 +156,19 @@ public class LoopTaskUtils {
         }
 
         int executedNumber = 0;
+        Set<Integer> failEndSet = new TreeSet<>();
         for (StateInstance stateInstance : forwardStateList) {
             if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
-                list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
                 executedNumber += 1;
             } else {
                 stateInstance.setIgnoreStatus(true);
+                failEndSet.add(reloadLoopCounter(stateInstance.getName()));
             }
+            list.remove(Integer.valueOf(reloadLoopCounter(stateInstance.getName())));
         }
 
         loopContextHolder.getLoopIndexStack().addAll(list);
+        loopContextHolder.getFailEndIndexStack().addAll(failEndSet);
         loopContextHolder.getNrOfInstances().set(collection.size());
         loopContextHolder.getNrOfCompletedInstances().set(executedNumber);
     }
@@ -197,7 +196,6 @@ public class LoopTaskUtils {
         }
         loopContextHolder.getNrOfInstances().set(sameStateNeedToBeCompensatedSize);
         stateStackToBeCompensated.push(stateToBeCompensated);
-
     }
 
     /**
@@ -261,12 +259,11 @@ public class LoopTaskUtils {
         int nrOfActiveInstances = LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().get();
         int nrOfCompletedInstances = LoopContextHolder.getCurrent(context, true).getNrOfCompletedInstances().get();
 
-        State compensationTriggerState = (State)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-        if (null != compensationTriggerState) {
+        if (context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE)) {
             return nrOfInstances <= 0;
         }
 
-        elContext.put(DomainConstants.NUMBER_OF_INSTANCES, nrOfInstances);
+        elContext.put(DomainConstants.NUMBER_OF_INSTANCES, (double)nrOfInstances);
         elContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
         elContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES, (double)nrOfCompletedInstances);
 
@@ -334,6 +331,52 @@ public class LoopTaskUtils {
                 DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
             parentContextVariables.putAll(contextVariables);
         }
+    }
+
+    /**
+     * forward with subStateMachine should check each loop state's status
+     *
+     * @param context
+     * @return
+     */
+    public static boolean isForSubStateMachineForward(ProcessContext context) {
+
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateInstruction instruction = context.getInstruction(StateInstruction.class);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+
+        StateInstance lastRetriedStateInstance = LoopTaskUtils.reloadLastRetriedStateInstance(
+            stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, instruction.getStateName()));
+
+        if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
+            lastRetriedStateInstance.getType()) && !ExecutionStatus.SU.equals(
+            lastRetriedStateInstance.getCompensationStatus())) {
+
+            while (StringUtils.isNotBlank(lastRetriedStateInstance.getStateIdRetriedFor())) {
+                lastRetriedStateInstance = stateMachineConfig.getStateLogStore().getStateInstance(
+                    lastRetriedStateInstance.getStateIdRetriedFor(), lastRetriedStateInstance.getMachineInstanceId());
+            }
+
+            List<StateMachineInstance> subInst = stateMachineConfig.getStateLogStore()
+                .queryStateMachineInstanceByParentId(EngineUtils.generateParentId(lastRetriedStateInstance));
+            if (CollectionUtils.isNotEmpty(subInst)) {
+                if (ExecutionStatus.SU.equals(subInst.get(0).getCompensationStatus())) {
+                    return false;
+                }
+            }
+
+            if (ExecutionStatus.UN.equals(subInst.get(0).getCompensationStatus())) {
+                throw new ForwardInvalidException(
+                    "Last forward execution state instance is SubStateMachine and compensation status is "
+                        + "[UN], Operation[forward] denied, stateInstanceId:"
+                        + lastRetriedStateInstance.getId(), FrameworkErrorCode.OperationDenied);
+            }
+
+            return true;
+        }
+        return false;
     }
 
     /**

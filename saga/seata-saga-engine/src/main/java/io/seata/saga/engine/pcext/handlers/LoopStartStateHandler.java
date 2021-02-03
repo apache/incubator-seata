@@ -76,7 +76,7 @@ public class LoopStartStateHandler implements StateHandler {
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
         Semaphore semaphore = null;
         int maxInstances = 0;
-        List<ProcessContext> contextList = new ArrayList<>();
+        List<ProcessContext> loopContextList = new ArrayList<>();
 
         if (null != loop) {
 
@@ -99,28 +99,39 @@ public class LoopStartStateHandler implements StateHandler {
             }
             maxInstances = Math.min(loop.getParallel(), totalInstances);
             semaphore = new Semaphore(maxInstances);
+            context.setVariable(DomainConstants.LOOP_SEMAPHORE, semaphore);
+            context.setVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE, true);
 
             // publish loop tasks
             for (int i = 0; i < totalInstances; i++) {
                 try {
                     semaphore.acquire();
-                    if (loopContextHolder.isFailEnd() || LoopTaskUtils.isCompletionConditionSatisfied(context)) {
+
+                    ProcessContextImpl tempContext;
+                    // fail end inst should be forward
+                    if (!loopContextHolder.getFailEndIndexStack().isEmpty()) {
+                        int failEndLoopCounter = loopContextHolder.getFailEndIndexStack().pop();
+                        tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, failEndLoopCounter);
+                    } else if (loopContextHolder.isFailEnd() || LoopTaskUtils.isCompletionConditionSatisfied(context)) {
                         semaphore.release();
                         break;
                     } else {
-                        ProcessContextImpl tempContext;
                         if (null != compensationTriggerState) {
                             StateInstance stateInstance = CompensationHolder.getCurrent(context, true).getStateStackNeedCompensation().pop();
                             tempContext = (ProcessContextImpl)LoopTaskUtils.createCompensateLoopEventContext(context, stateInstance);
                             loopContextHolder.getNrOfInstances().decrementAndGet();
                         } else {
-                            tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context);
+                            tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, -1);
                         }
-                        tempContext.setVariableLocally(DomainConstants.LOOP_SEMAPHORE, semaphore);
-                        loopContextHolder.getNrOfActiveInstances().incrementAndGet();
-                        contextList.add(tempContext);
-                        stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(tempContext);
                     }
+
+                    if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
+                        ((HierarchicalProcessContext)context).setVariableLocally(
+                            DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, LoopTaskUtils.isForSubStateMachineForward(tempContext));
+                    }
+                    stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(tempContext);
+                    loopContextHolder.getNrOfActiveInstances().incrementAndGet();
+                    loopContextList.add(tempContext);
                 } catch (InterruptedException e) {
                     LOGGER.error("try execute loop task for State: [{}] is interrupted, message: [{}]",
                         instruction.getStateName(), e.getMessage());
@@ -141,8 +152,8 @@ public class LoopStartStateHandler implements StateHandler {
                     }
                     isFinished = semaphore.tryAcquire(maxInstances, AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
                 }
-                if (!loopContextHolder.isFailEnd()) {
-                    LoopTaskUtils.putContextToParent(contextList.get(0));
+                if (!loopContextHolder.isFailEnd() && loopContextList.size() > 0) {
+                    LoopTaskUtils.putContextToParent(loopContextList.get(0));
                 }
             }
         } catch (InterruptedException e) {
@@ -150,6 +161,9 @@ public class LoopStartStateHandler implements StateHandler {
                 instruction.getStateName(), e.getMessage());
             throw new EngineExecutionException(e);
         }
+
+        context.removeVariable(DomainConstants.LOOP_SEMAPHORE);
+        context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
 
         if (LoopTaskUtils.needCompensate(context)) {
             // route to compensationTriggerState as normally
