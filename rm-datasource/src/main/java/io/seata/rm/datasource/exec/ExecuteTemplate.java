@@ -19,6 +19,12 @@ import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.DataTraceLogUtil;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.core.constants.Seata;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
@@ -32,6 +38,8 @@ import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -95,17 +103,17 @@ public class ExecuteTemplate {
                 statementProxy.getTargetSQL(),
                 dbType);
         }
-        Executor<T> executor;
+        Executor<T> executor = null;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            if(statementProxy.getTargetSQL().trim().toLowerCase().startsWith("select")) {
+            if(isSelectSql(statementProxy.getTargetSQL(),dbType)) {
                 return statementCallback.execute(statementProxy.getTargetStatement(), args);
             }
             //只开启数据追踪，没开启seata事务，放行执行，但追踪日志输出不支持的sql
             else if("true".equals(System.getProperty("dataTrace")) && !Seata.EWELL_SEATA_STATE_IS_ON ) {
                 DataTraceLogUtil.trace("Unsupported SQL: " + statementProxy.getTargetSQL());
                 return statementCallback.execute(statementProxy.getTargetStatement(), args);
-            } else {
-                throw new UnsupportedOperationException("seata Unsupported SQL: " + statementProxy.getTargetSQL());
+            } else if( Seata.EWELL_SEATA_STATE_IS_ON ) {
+                throw new UnsupportedOperationException("seata 事务 Unsupported SQL: " + statementProxy.getTargetSQL());
 //            seata 不支持的sql直接抛出异常，否则执行后不能回滚
 //            return statementCallback.execute(statementProxy.getTargetStatement(), args);
             }
@@ -171,31 +179,48 @@ public class ExecuteTemplate {
         //保存数据前后镜像
         TableRecords beforeImage = null;
         try {
-            beforeImage = executor.beforeImage();
+            if(!(executor instanceof SelectForUpdateExecutor)) {
+                beforeImage = executor.beforeImage();
+            }
         } catch (Throwable e) {
 
         }
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
         try {
-            TableRecords afterImage = executor.afterImage(beforeImage);
-            SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizers.get(0), beforeImage, afterImage);
-            //业务数据操作前后插入到es数据库
-            String xid = String.valueOf(SeataXidWorker.xidWorker.getId());
-            BranchUndoLog branchUndoLog = new BranchUndoLog();
-            branchUndoLog.setXid(xid);
-            branchUndoLog.setSqlUndoLogs(new ArrayList<SQLUndoLog>(Arrays.asList(sQLUndoLog)));
-            branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
-            branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(), "yyyy-MM-dd HH:mm:ss"));
-            ElasticsearchUtil.addData(branchUndoLog);
+            if(!(executor instanceof SelectForUpdateExecutor)) {
+                TableRecords afterImage = executor.afterImage(beforeImage);
+                SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizers.get(0), beforeImage, afterImage);
+                //业务数据操作前后插入到es数据库
+                String xid = String.valueOf(SeataXidWorker.xidWorker.getId());
+                BranchUndoLog branchUndoLog = new BranchUndoLog();
+                branchUndoLog.setXid(xid);
+                branchUndoLog.setSqlUndoLogs(new ArrayList<SQLUndoLog>(Arrays.asList(sQLUndoLog)));
+                branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
+                branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(), "yyyy-MM-dd HH:mm:ss"));
+                ElasticsearchUtil.addData(branchUndoLog);
 
-            if (statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
-                ElasticsearchUtil.commitData();
+                if (statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
+                    ElasticsearchUtil.commitData();
+                }
             }
         } catch (Throwable e) {
 
         }
         return result;
+    }
+
+    private static boolean isSelectSql(String sql, String dbType) {
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
+        if (CollectionUtils.isEmpty(asts)) {
+            return true;
+        }
+        for (SQLStatement ast : asts) {
+            if (ast instanceof SQLSelectStatement) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
