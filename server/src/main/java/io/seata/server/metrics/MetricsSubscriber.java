@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static io.seata.metrics.IdConstants.APP_ID_KEY;
+import static io.seata.metrics.IdConstants.GROUP_KEY;
 
 /**
  * Event subscriber for metrics
@@ -51,50 +52,65 @@ public class MetricsSubscriber {
     }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .increase(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .decrease(1);
-        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId()))
-                .increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId()))
-                .increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_COMMITTED.withTag(APP_ID_KEY, event.getApplicationId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_COMMITTED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
                 .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .decrease(1);
-        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId()))
-                .increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED.withTag(APP_ID_KEY, event.getApplicationId()))
-                .increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK.withTag(APP_ID_KEY, event.getApplicationId()))
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup()))
                 .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusCommitFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processGlobalStatusTimeoutRollbacked(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId()))
-                .decrease(1);
+        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
     }
 
     @Subscribe

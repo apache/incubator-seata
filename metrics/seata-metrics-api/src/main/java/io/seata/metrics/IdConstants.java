@@ -24,6 +24,8 @@ public interface IdConstants {
     String SEATA_TRANSACTION = "seata.transaction";
 
     String APP_ID_KEY = "applicationId";
+    
+    String GROUP_KEY = "group";
 
     String NAME_KEY = "name";
 
