@@ -41,9 +41,9 @@ public class FastjsonParser implements JsonParser {
         SerializerFeature.PrettyFormat };
 
     private static final SerializerFeature[] FEATURES_PRETTY = new SerializerFeature[] {
-            SerializerFeature.DisableCircularReferenceDetect,
-            SerializerFeature.WriteDateUseDateFormat,
-            SerializerFeature.PrettyFormat };
+        SerializerFeature.DisableCircularReferenceDetect,
+        SerializerFeature.WriteDateUseDateFormat,
+        SerializerFeature.PrettyFormat };
 
     public static final String NAME = "fastjson";
 
