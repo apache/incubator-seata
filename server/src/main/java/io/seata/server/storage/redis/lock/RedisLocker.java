@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
 
 import io.seata.common.io.FileLoader;
 import io.seata.common.util.CollectionUtils;
@@ -42,7 +43,7 @@ import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
-import com.google.common.collect.Lists;
+
 
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 
