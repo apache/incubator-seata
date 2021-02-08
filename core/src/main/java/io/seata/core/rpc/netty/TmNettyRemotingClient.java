@@ -52,7 +52,7 @@ import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-@Sharable
+
 public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);
     private static volatile TmNettyRemotingClient instance;
