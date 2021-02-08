@@ -75,7 +75,6 @@ public class RedisLockManagerTest {
         Assertions.assertTrue(lockManager.releaseLock(branchSession));
     }
 
-
     @Test
     public void isLockable() throws TransactionException {
         BranchSession branchSession = new BranchSession();
