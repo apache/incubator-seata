@@ -15,16 +15,39 @@
  */
 package io.seata.metrics;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * Default clock implement use system
  *
  * @author zhengyangyong
  */
 public class SystemClock implements Clock {
+
     public static final Clock INSTANCE = new SystemClock();
+
+    private final AtomicLong time = new AtomicLong(System.currentTimeMillis());
+
+    private SystemClock() {
+        scheduleClockUpdating();
+    }
+
+    private void scheduleClockUpdating() {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "SystemClock");
+            thread.setDaemon(true);
+            return thread;
+        });
+        scheduler.scheduleAtFixedRate(() -> time.set(System.currentTimeMillis()), 1, 1, TimeUnit.MILLISECONDS);
+    }
 
     @Override
     public double getCurrentMilliseconds() {
-        return System.currentTimeMillis();
+        return time.get();
     }
+
+
 }
