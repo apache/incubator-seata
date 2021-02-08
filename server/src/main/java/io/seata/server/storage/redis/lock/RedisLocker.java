@@ -75,9 +75,13 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String ROW_KEY = "rowKey";
 
-    private static String REDIS_LUA_FILE_NAME = "redislock.lua";
+    private static final String REDIS_LUA_FILE_NAME = "redislock.lua";
 
     private static String ACQUIRE_LOCK_SHA;
+
+    private static final String WHITE_SPACE = " ";
+
+    private static final String ANNOTATION_LUA = "--";
 
     /**
      * Instantiates a new Redis locker.
@@ -92,7 +96,11 @@ public class RedisLocker extends AbstractLocker {
                         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
                         String line;
                         while ((line = br.readLine()) != null) {
+                            if (line.trim().startsWith(ANNOTATION_LUA)) {
+                                continue;
+                            }
                             acquireLockLuaByFile.append(line);
+                            acquireLockLuaByFile.append(WHITE_SPACE);
                         }
                     // If it fails to read the file, pipeline mode is used
                     } catch (IOException e) {
