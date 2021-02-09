@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
@@ -104,8 +105,10 @@ public class ExecuteTemplate {
                     case INSERT_ON_DUPLICATE_UPDATE:
                         if (JdbcConstants.MYSQL.equals(dbType)) {
                             executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
+                        } else {
+                            throw new NotSupportYetException(dbType + "not support to INSERT_ON_DUPLICATE_UPDATE");
                         }
-                        //  break;
+                        break;
                     default:
                         executor = new PlainExecutor<>(statementProxy, statementCallback);
                         break;
