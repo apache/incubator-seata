@@ -119,7 +119,6 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      *
      * @param beforeImage the before image
      * @param afterImage  the after image
-     * @throws SQLException the sql exception
      */
     protected void prepareUndoLogAll(TableRecords beforeImage, TableRecords afterImage) {
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
@@ -137,7 +136,6 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      *
      * @param beforeImage the before image
      * @param afterImage  the after image
-     * @return sql undo log
      */
     protected void buildUndoItemAll(ConnectionProxy connectionProxy, TableRecords beforeImage, TableRecords afterImage) {
         if (!isUpdateFlag) {
@@ -213,7 +211,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @param sqlType
      * @param beforeImage
      * @param afterImage
-     * @return
+     * @return sqlUndoLog the sql undo log
      */
     protected SQLUndoLog buildUndoItem(SQLType sqlType, TableRecords beforeImage, TableRecords afterImage) {
         String tableName = sqlRecognizer.getTableName();
@@ -236,6 +234,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         }
     }
 
+    /**
+     * afterImage if only happens to Insert
+     * @param pkValues
+     * @return the table records
+     * @throws SQLException
+     */
     private TableRecords afterImageInsert(Map<String, List<Object>> pkValues) throws SQLException {
         TableRecords afterImage = buildTableRecords(pkValues);
         if (afterImage == null) {
@@ -251,7 +255,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
     /**
      * build before image and after image
-     * @return
+     * @return the table records
      * @throws SQLException
      */
     protected TableRecords buildImage() throws SQLException {
@@ -269,7 +273,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @param tableMeta
      * @param selectSQL
      * @param paramAppenderList
-     * @return
+     * @return the table records
      * @throws SQLException
      */
     public TableRecords buildTableRecords2(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
@@ -293,7 +297,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     /**
      * build image sql
      * @param tableMeta
-     * @return
+     * @return image sql
      */
     public String buildImageSQL(TableMeta tableMeta) {
         if (CollectionUtils.isEmpty(paramAppenderList)) {
@@ -337,7 +341,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     /**
      * build sql params
      * @param recognizer
-     * @return
+     * @return map, key is column, value is paramperter
      */
     public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
         Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
