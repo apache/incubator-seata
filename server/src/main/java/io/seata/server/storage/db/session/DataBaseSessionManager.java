@@ -223,8 +223,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
     @Override
     public boolean scheduledLock(String key) {
         DistributedLockDO distributedLockDO = new DistributedLockDO();
-        distributedLockDO.setKey(key);
-        distributedLockDO.setValue(lockValue);
+        distributedLockDO.setLockKey(key);
+        distributedLockDO.setLockValue(lockValue);
         distributedLockDO.setExpire(System.currentTimeMillis() + 15 * 60 * 1000);
         return distributedLockStore.acquireLock(distributedLockDO);
     }
@@ -232,8 +232,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
     @Override
     public boolean unScheduledLock(String key) {
         DistributedLockDO distributedLockDO = new DistributedLockDO();
-        distributedLockDO.setKey(key);
-        distributedLockDO.setValue(lockValue);
+        distributedLockDO.setLockKey(key);
+        distributedLockDO.setLockValue(lockValue);
         distributedLockDO.setExpire(0L);
         return distributedLockStore.releaseLock(distributedLockDO);
     }

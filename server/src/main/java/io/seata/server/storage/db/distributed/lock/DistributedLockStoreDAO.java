@@ -75,20 +75,20 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
             originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
-            DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getKey());
+            DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getLockKey());
             if (null == distributedLockDOFromDB) {
                 return insertDistribute(connection, distributedLockDO);
             }
 
             if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()) {
                 LOGGER.info("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
-                        distributedLockDO.getKey(), distributedLockDOFromDB.getValue());
+                        distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
                 return false;
             }
 
             return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
-            LOGGER.error("execute acquire lock failure, key is: {}", distributedLockDO.getKey(), ex);
+            LOGGER.error("execute acquire lock failure, key is: {}", distributedLockDO.getLockKey(), ex);
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -117,21 +117,21 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
             originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
 
-            DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getKey());
+            DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getLockKey());
             if (null == distributedLockDOFromDB) {
                 throw new ShouldNeverHappenException("distributeLockDO would not be null when release distribute lock");
             }
 
             if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()
-                    && !Objects.equals(distributedLockDOFromDB.getValue(), distributedLockDO.getValue())) {
+                    && !Objects.equals(distributedLockDOFromDB.getLockValue(), distributedLockDO.getLockValue())) {
                 LOGGER.warn("the distribute lock for key :{} is holding by :{}, skip the release lock.",
-                        distributedLockDO.getKey(), distributedLockDOFromDB.getValue());
+                        distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
                 return true;
             }
-            distributedLockDO.setValue(StringUtils.SPACE);
+            distributedLockDO.setLockValue(StringUtils.SPACE);
             return updateDistributeLock(connection, distributedLockDO);
         } catch (SQLException ex) {
-            LOGGER.error("execute release lock failure, key is: {}", distributedLockDO.getKey(), ex);
+            LOGGER.error("execute release lock failure, key is: {}", distributedLockDO.getLockKey(), ex);
 
             try {
                 if (connection != null) {
@@ -162,8 +162,8 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
             while (resultSet.next()) {
                 DistributedLockDO distributedLock = new DistributedLockDO();
                 distributedLock.setExpire(resultSet.getLong(ServerTableColumnsName.DISTRIBUTE_LOCK_EXPIRE));
-                distributedLock.setValue(resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE));
-                distributedLock.setKey(key);
+                distributedLock.setLockValue(resultSet.getString(ServerTableColumnsName.DISTRIBUTE_LOCK_VALUE));
+                distributedLock.setLockKey(key);
                 return distributedLock;
             }
             return null;
@@ -173,8 +173,8 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
     protected boolean insertDistribute(Connection connection, DistributedLockDO distributedLockDO) throws SQLException {
         try (PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
                 .getInsertSql(distributeLockTable))){
-            insertPst.setString(1, distributedLockDO.getKey());
-            insertPst.setString(2, distributedLockDO.getValue());
+            insertPst.setString(1, distributedLockDO.getLockKey());
+            insertPst.setString(2, distributedLockDO.getLockValue());
             insertPst.setLong(3, distributedLockDO.getExpire());
             return insertPst.executeUpdate() > 0;
         }
@@ -183,9 +183,9 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
     protected boolean updateDistributeLock(Connection connection, DistributedLockDO distributedLockDO) throws SQLException {
         try (PreparedStatement updatePst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
                 .getUpdateSql(distributeLockTable))) {
-            updatePst.setString(1, distributedLockDO.getValue());
+            updatePst.setString(1, distributedLockDO.getLockValue());
             updatePst.setLong(2, distributedLockDO.getExpire());
-            updatePst.setString(3, distributedLockDO.getKey());
+            updatePst.setString(3, distributedLockDO.getLockKey());
             return updatePst.executeUpdate() > 0;
         }
     }

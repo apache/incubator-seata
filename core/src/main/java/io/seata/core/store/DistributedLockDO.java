@@ -24,30 +24,30 @@ public class DistributedLockDO {
     /**
      * the key of distributed lock
      */
-    private String key;
+    private String lockKey;
     /**
      * the value of distributed lock
      */
-    private String value;
+    private String lockValue;
     /**
      * the expire of distributed lock
      */
     private Long expire;
 
-    public String getKey() {
-        return key;
+    public String getLockKey() {
+        return lockKey;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setLockKey(String lockKey) {
+        this.lockKey = lockKey;
     }
 
-    public String getValue() {
-        return value;
+    public String getLockValue() {
+        return lockValue;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setLockValue(String lockValue) {
+        this.lockValue = lockValue;
     }
 
     public Long getExpire() {
