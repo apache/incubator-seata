@@ -26,6 +26,8 @@ import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
@@ -48,6 +50,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static volatile ConsulRegistryServiceImpl instance;
     private static volatile ConsulClient client;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulRegistryServiceImpl.class);
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
@@ -282,6 +285,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         private String cluster;
         private long consulIndex;
         private boolean running;
+        private boolean hasError = false;
 
         ConsulNotifier(String cluster, long consulIndex) {
             this.cluster = cluster;
@@ -292,14 +296,21 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         @Override
         public void run() {
             while (this.running) {
-                processService();
+                try {
+                    processService();
+                } catch (Exception exception) {
+                    hasError = true;
+                    LOGGER.error("consul refresh services error:{}", exception.getMessage());
+                }
             }
         }
 
         private void processService() {
             Response<List<HealthService>> response = getHealthyServices(cluster, consulIndex, DEFAULT_WATCH_TIMEOUT);
             Long currentIndex = response.getConsulIndex();
-            if (currentIndex != null && currentIndex > consulIndex) {
+
+            if ((currentIndex != null && currentIndex > consulIndex) || hasError) {
+                hasError = false;
                 List<HealthService> services = response.getValue();
                 consulIndex = currentIndex;
                 for (ConsulListener listener : listenerMap.get(cluster)) {

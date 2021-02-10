@@ -26,6 +26,7 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSI
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
+import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
@@ -37,6 +38,7 @@ public class RmProperties {
     private int asyncCommitBufferLimit = DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
     private int reportRetryCount = DEFAULT_CLIENT_REPORT_RETRY_COUNT;
     private boolean tableMetaCheckEnable = DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
+    private long tableMetaCheckerInterval = DEFAULT_TABLE_META_CHECKER_INTERVAL;
     private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
     private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
@@ -93,6 +95,15 @@ public class RmProperties {
 
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
+    }
+
+
+    public long getTableMetaCheckerInterval() {
+        return tableMetaCheckerInterval;
+    }
+
+    public void setTableMetaCheckerInterval(long tableMetaCheckerInterval) {
+        this.tableMetaCheckerInterval = tableMetaCheckerInterval;
     }
 
     public boolean isSagaRetryPersistModeUpdate() {
