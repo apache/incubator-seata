@@ -58,6 +58,8 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLInsertOrUpdateExecutor.class);
 
+    private static final String COLUMN_SEPARATOR = "|";
+
     /**
      * is updated or not
      */
@@ -151,13 +153,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     v.getValues().forEach(m -> {
                         for (Field f : r.getFields()) {
                             if (m.getColumnName().equals(f.getName())) {
-                                everyRowIndex.append(f.getValue());
+                                everyRowIndex.append(f.getValue()).append(COLUMN_SEPARATOR);
                             }
                         }
                     });
                     List<String> indexList = beforeUniqueIndexMap.computeIfAbsent(k.toUpperCase(),key -> new ArrayList<>());
                     indexList.add(everyRowIndex.toString());
-                    beforeUniqueIndexMap.put(k.toUpperCase(), indexList);
                 }
             });
         }
@@ -172,7 +173,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     v.getValues().forEach(m -> {
                         for (Field f : r.getFields()) {
                             if (m.getColumnName().equals(f.getName())) {
-                                everyRowIndex.append(f.getValue());
+                                everyRowIndex.append(f.getValue()).append(COLUMN_SEPARATOR);
                             }
                         }
                     });
