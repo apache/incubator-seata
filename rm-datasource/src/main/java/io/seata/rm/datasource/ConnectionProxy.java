@@ -249,7 +249,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction() && context.isBranchRegistered()) {
             report(false);
         }
-        context.reset();
+        context.reset(context.getXid());
     }
 
     @Override
