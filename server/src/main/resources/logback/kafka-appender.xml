@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!-- kafka-appender properties -->
+    <property name="KAFKA_BOOTSTRAP_SERVERS" value="localhost:9092"/>
+    <property name="KAFKA_TOPIC" value="logback_to_logstash"/>
+
+    <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder>
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}|%p|seata-server|${PORT:-0}|%t|%logger|%X{X-TX-XID:-}|%X{X-TX-BRANCH-ID:-}|%m|%wex</pattern>-->
+            <pattern>{
+    "@timestamp": "%d{yyyy-MM-dd HH:mm:ss.SSS}",
+    "level":"%p",
+    "app_name":"${APPLICATION_NAME:-}",
+    "PORT": ${PORT:-0},
+    "thread_name": "%t",
+    "logger_name": "%logger",
+    "X-TX-XID": "%X{X-TX-XID:-}",
+    "X-TX-BRANCH-ID": "%X{X-TX-BRANCH-ID:-}",
+    "message": "%m",
+    "stack_trace": "%wex"
+}
+            </pattern>
+        </encoder>
+        <topic>${KAFKA_TOPIC}</topic>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy"/>
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+        <producerConfig>bootstrap.servers=${KAFKA_BOOTSTRAP_SERVERS}</producerConfig>
+        <producerConfig>acks=0</producerConfig>
+        <producerConfig>linger.ms=1000</producerConfig>
+        <producerConfig>max.block.ms=0</producerConfig>
+    </appender>
+</included>

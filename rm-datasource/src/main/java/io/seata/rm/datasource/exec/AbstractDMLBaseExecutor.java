@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
@@ -35,7 +34,6 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +135,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     protected T executeAutoCommitTrue(Object[] args) throws Throwable {
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         try {
-            connectionProxy.setAutoCommit(false);
+            connectionProxy.changeAutoCommit();
             return new LockRetryPolicy(connectionProxy).execute(() -> {
                 T result = executeAutoCommitFalse(args);
                 connectionProxy.commit();
@@ -193,22 +191,12 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         protected void onException(Exception e) throws Exception {
             ConnectionContext context = connection.getContext();
             //UndoItems can't use the Set collection class to prevent ABA
-            context.getUndoItems().clear();
-            context.getLockKeysBuffer().clear();
+            context.removeSavepoint(null);
             connection.getTargetConnection().rollback();
         }
 
         public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
             return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
-        }
-    }
-
-    protected void assertContainsPKColumnName(List<String> updateColumns) {
-        for (String columnName : updateColumns) {
-            String standardColumnName = getStandardPkColumnName(columnName);
-            if (StringUtils.isNotEmpty(standardColumnName)) {
-                throw new ShouldNeverHappenException("Sorry, update pk value is not supported!");
-            }
         }
     }
 }
