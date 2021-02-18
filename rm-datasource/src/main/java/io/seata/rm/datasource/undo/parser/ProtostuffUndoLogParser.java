@@ -18,6 +18,7 @@ package io.seata.rm.datasource.undo.parser;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.util.List;
 
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
@@ -31,9 +32,15 @@ import io.protostuff.runtime.Delegate;
 import io.protostuff.runtime.RuntimeEnv;
 import io.protostuff.runtime.RuntimeSchema;
 import io.seata.common.executor.Initialize;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type protostuff based undo log parser.
@@ -43,6 +50,8 @@ import io.seata.rm.datasource.undo.UndoLogParser;
 @LoadLevel(name = ProtostuffUndoLogParser.NAME)
 public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtostuffUndoLogParser.class);
+
     public static final String NAME = "protostuff";
 
     private final DefaultIdStrategy idStrategy = (DefaultIdStrategy) RuntimeEnv.ID_STRATEGY;
@@ -51,6 +60,18 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
 
     @Override
     public void init() {
+        try {
+            List<ProtostuffDelegate> delegates = EnhancedServiceLoader.loadAll(ProtostuffDelegate.class);
+            if (CollectionUtils.isNotEmpty(delegates)) {
+                for (ProtostuffDelegate delegate : delegates) {
+                    idStrategy.registerDelegate(delegate.create());
+                    LOGGER.info("protostuff undo log parser load [{}].", delegate.getClass().getName());
+                }
+            }
+        } catch (EnhancedServiceNotFoundException e) {
+            LOGGER.warn("ProtostuffDelegate not found children class.", e);
+        }
+
         idStrategy.registerDelegate(new DateDelegate());
         idStrategy.registerDelegate(new TimestampDelegate());
         idStrategy.registerDelegate(new SqlDateDelegate());

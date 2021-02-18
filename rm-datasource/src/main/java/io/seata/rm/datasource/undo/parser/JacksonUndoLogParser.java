@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
@@ -43,9 +44,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.undo.parser.spi.JacksonSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +102,28 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
 
     @Override
     public void init() {
+        try {
+            List<JacksonSerializer> jacksonSerializers = EnhancedServiceLoader.loadAll(JacksonSerializer.class);
+            if (CollectionUtils.isNotEmpty(jacksonSerializers)) {
+                for (JacksonSerializer jacksonSerializer : jacksonSerializers) {
+                    Class type = jacksonSerializer.type();
+                    JsonSerializer ser = jacksonSerializer.ser();
+                    JsonDeserializer deser = jacksonSerializer.deser();
+                    if (type != null) {
+                        if (ser != null) {
+                            module.addSerializer(type, ser);
+                        }
+                        if (deser != null) {
+                            module.addDeserializer(type, deser);
+                        }
+                        LOGGER.info("jackson undo log parser load [{}].", jacksonSerializer.getClass().getName());
+                    }
+                }
+            }
+        } catch (EnhancedServiceNotFoundException e) {
+            LOGGER.warn("JacksonSerializer not found children class.", e);
+        }
+
         module.addSerializer(Timestamp.class, timestampSerializer);
         module.addDeserializer(Timestamp.class, timestampDeserializer);
         module.addSerializer(SerialBlob.class, blobSerializer);

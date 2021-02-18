@@ -19,6 +19,7 @@ import java.sql.Timestamp;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import org.nustaq.serialization.FSTConfiguration;
+import org.nustaq.serialization.FSTObjectSerializer;
 
 /**
  * @author funkye
@@ -37,6 +38,10 @@ public class FstSerializerFactory {
         // support clob and blob sql type
         conf.registerClass(SerialBlob.class, SerialClob.class, Timestamp.class);
         UndoLogSerializerClassRegistry.getRegisteredClasses().keySet().forEach(conf::registerClass);
+    }
+
+    public void registerSerializer(Class type, FSTObjectSerializer ser, boolean alsoForAllSubclasses) {
+        conf.registerSerializer(type, ser, alsoForAllSubclasses);
     }
 
     public <T> byte[] serialize(T t) {
