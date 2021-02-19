@@ -39,10 +39,10 @@ import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
