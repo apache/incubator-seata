@@ -16,30 +16,31 @@
 package io.seata.rm.datasource.exec;
 
 import com.google.common.collect.Lists;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOrUpdateExecutor;
-import io.seata.rm.datasource.sql.struct.*;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
+import io.seata.rm.datasource.sql.struct.IndexType;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
-import io.seata.sqlparser.struct.Null;
-import io.seata.sqlparser.struct.SqlDefaultExpr;
-import io.seata.sqlparser.struct.SqlMethodExpr;
-import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
-import static org.mockito.Mockito.*;
 
 /**
  * @author: yangyicong

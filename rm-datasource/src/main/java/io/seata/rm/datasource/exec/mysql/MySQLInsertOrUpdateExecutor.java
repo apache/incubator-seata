@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.google.common.base.Joiner;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.LoadLevel;
@@ -47,8 +46,6 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author: yangyicong
@@ -56,7 +53,6 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLInsertOrUpdateExecutor.class);
 
     private static final String COLUMN_SEPARATOR = "|";
 
