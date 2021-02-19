@@ -229,7 +229,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * GlobalLock:
      * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // GlobalLock handler
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock) // GlobalLock handler
      *
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
@@ -261,15 +261,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         return bean;
                     }
 
-                    if (interceptor == null) {
-                        if (globalTransactionalInterceptor == null) {
-                            globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                            ConfigurationCache.addConfigListener(
-                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                                (ConfigurationChangeListener)globalTransactionalInterceptor);
-                        }
-                        interceptor = globalTransactionalInterceptor;
+                    if (globalTransactionalInterceptor == null) {
+                        globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                        ConfigurationCache.addConfigListener(
+                            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                            (ConfigurationChangeListener)globalTransactionalInterceptor);
                     }
+                    interceptor = globalTransactionalInterceptor;
                 }
 
                 LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
