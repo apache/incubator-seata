@@ -39,6 +39,8 @@ import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.server.storage.redis.JedisPooledFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
@@ -52,6 +54,8 @@ import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
  * @author wangzhongxiang
  */
 public class RedisLocker extends AbstractLocker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisLocker.class);
 
     private static final Integer SUCCEED = 1;
 
@@ -88,26 +92,30 @@ public class RedisLocker extends AbstractLocker {
      */
     public RedisLocker() {
         if (ACQUIRE_LOCK_SHA == null) {
-            try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-                File luaFile = FileLoader.load(REDIS_LUA_FILE_NAME);
-                if (luaFile != null) {
-                    StringBuilder acquireLockLuaByFile = new StringBuilder();
-                    try (FileInputStream fis = new FileInputStream(luaFile)) {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            if (line.trim().startsWith(ANNOTATION_LUA)) {
-                                continue;
-                            }
-                            acquireLockLuaByFile.append(line);
-                            acquireLockLuaByFile.append(WHITE_SPACE);
+            File luaFile = FileLoader.load(REDIS_LUA_FILE_NAME);
+            if (luaFile != null) {
+                StringBuilder acquireLockLuaByFile = new StringBuilder();
+                try (FileInputStream fis = new FileInputStream(luaFile)) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (line.trim().startsWith(ANNOTATION_LUA)) {
+                            continue;
                         }
-                    // If it fails to read the file, pipeline mode is used
-                    } catch (IOException e) {
-                        return;
+                        acquireLockLuaByFile.append(line);
+                        acquireLockLuaByFile.append(WHITE_SPACE);
                     }
-                    ACQUIRE_LOCK_SHA = jedis.scriptLoad(acquireLockLuaByFile.toString());
+                // If it fails to read the file, pipeline mode is used
+                } catch (IOException e) {
+                    LOGGER.info("RedisLocker use pipeline mode");
+                    return;
                 }
+                try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+                    ACQUIRE_LOCK_SHA = jedis.scriptLoad(acquireLockLuaByFile.toString());
+                    LOGGER.info("RedisLocker use lua mode");
+                }
+            } else {
+                LOGGER.info("RedisLocker use pipeline mode");
             }
         }
     }
