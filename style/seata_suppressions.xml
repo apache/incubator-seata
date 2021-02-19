@@ -24,7 +24,11 @@
     <suppress checks="RegexpSinglelineCheck"
               files="ConfigTools.java"/>
     <suppress checks=".*"
-              files="[/\\]generated[/\\]"/>
+              files="[\\/]generated[\\/]"/>
+    <suppress checks=".*"
+              files="[\\/]antlr[\\/]mysql[\\/]parser[\\/]"/>
+    <suppress checks=".*"
+              files="[\\/]antlr[\\/]mysql[\\/]antlr[\\/]"/>
     <suppress checks=".*"
               files="io[\\/]seata[\\/]integration[\\/]grpc[\\/]interceptor[\\/]"/>
 </suppressions>
