@@ -466,16 +466,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     private List<String> lRange(Jedis jedis, String key) {
         List<String> keys = new ArrayList<>();
-        List<String> redisBranchJson;
+        List<String> values;
         int limit = 20;
         int start = 0;
         int stop = limit;
         do {
-            redisBranchJson = jedis.lrange(key, start, stop);
-            keys.addAll(redisBranchJson);
+            values = jedis.lrange(key, start, stop);
+            keys.addAll(values);
             start = keys.size();
             stop = start + limit;
-        } while (CollectionUtils.isNotEmpty(redisBranchJson));
+        } while (CollectionUtils.isNotEmpty(values));
         return keys;
     }
 
