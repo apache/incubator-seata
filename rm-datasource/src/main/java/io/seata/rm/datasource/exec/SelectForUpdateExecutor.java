@@ -17,18 +17,19 @@ package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLSelectRecognizer;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,11 +118,11 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         } finally {
             if (sp != null) {
                 try {
-                    conn.releaseSavepoint(sp);
-                } catch (SQLException e) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
+                    if (!JdbcConstants.ORACLE.equalsIgnoreCase(getDbType())) {
+                        conn.releaseSavepoint(sp);
                     }
+                } catch (SQLException e) {
+                    LOGGER.error("{} release save point error.", getDbType(), e);
                 }
             }
             if (originalAutoCommit) {
