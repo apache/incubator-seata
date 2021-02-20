@@ -22,7 +22,7 @@ import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import sun.misc.CompoundEnumeration;
+import java.util.NoSuchElementException;
 
 /**
  * Used for druid isolation.
@@ -106,5 +106,44 @@ class DruidIsolationClassLoader extends URLClassLoader {
 
     static DruidIsolationClassLoader get() {
         return INSTANCE;
+    }
+
+    /**
+     * The purpose of this class is to eliminate the difference on {@link #CompoundEnumeration} between jdk 8 and 11
+     *
+     * @param <E>
+     */
+    private static class CompoundEnumeration<E> implements Enumeration<E> {
+        private Enumeration<E>[] enums;
+        private int index = 0;
+
+        public CompoundEnumeration(Enumeration<E>[] enums) {
+            this.enums = enums;
+        }
+
+        private boolean next() {
+            while (this.index < this.enums.length) {
+                if (this.enums[this.index] != null && this.enums[this.index].hasMoreElements()) {
+                    return true;
+                }
+                index++;
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean hasMoreElements() {
+            return this.next();
+        }
+
+        @Override
+        public E nextElement() {
+            if (!this.next()) {
+                throw new NoSuchElementException();
+            } else {
+                return this.enums[this.index].nextElement();
+            }
+        }
     }
 }
