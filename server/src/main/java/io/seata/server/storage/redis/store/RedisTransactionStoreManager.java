@@ -348,17 +348,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey,0,-1));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
-            List<String> xids = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(list)) {
-                xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
-            }
             List<GlobalSession> globalSessions = new ArrayList<>();
-            xids.parallelStream().forEach(xid -> {
-                GlobalSession globalSession = this.readSession(xid, true);
-                if (globalSession != null) {
-                    globalSessions.add(globalSession);
-                }
-            });
+            if (CollectionUtils.isNotEmpty(list)) {
+                List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
+                xids.parallelStream().forEach(xid -> {
+                    GlobalSession globalSession = this.readSession(xid, true);
+                    if (globalSession != null) {
+                        globalSessions.add(globalSession);
+                    }
+                });
+            }
             return globalSessions;
         }
     }
@@ -447,7 +446,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<String> branchKeys = lRange(jedis, branchListKey);
         Pipeline pipeline = jedis.pipelined();
         if (CollectionUtils.isNotEmpty(branchKeys)) {
-            branchKeys.stream().forEachOrdered(branchKey -> pipeline.hgetAll(branchKey));
+            branchKeys.stream().forEach(branchKey -> pipeline.hgetAll(branchKey));
             List<Object> branchInfos = pipeline.syncAndReturnAll();
             for (Object branchInfo : branchInfos) {
                 if (branchInfo != null) {
