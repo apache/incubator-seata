@@ -342,29 +342,29 @@ public class RedisSessionManagerTest {
     @Test
     public void testSortEfficiency() {
         List<BranchTransactionDO> list = new ArrayList<>();
+        List<BranchTransactionDO> list2 = new ArrayList<>();
+        Date date=new Date();
         for (int i = 0; i < 1000; i++) {
             BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+            branchTransactionDO.setStatus(0);
+            branchTransactionDO.setGmtModified(date);
+            branchTransactionDO.setXid("192.168.158.80:8091:39372760251957248");
+            branchTransactionDO.setBranchId(39372760251957248L);
             branchTransactionDO
                 .setGmtCreate(new Date(System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(100000)));
             list.add(branchTransactionDO);
         }
+        list2.addAll(list);
         Long start = System.currentTimeMillis();
-        Collections.sort(list);
+        list = list.stream().sorted().collect(Collectors.toList());
         Long end = System.currentTimeMillis();
         Long sort1Time = end - start;
-        list.clear();
-        for (int i = 0; i < 1000; i++) {
-            BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-            branchTransactionDO
-                .setGmtCreate(new Date(System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(100000)));
-            list.add(branchTransactionDO);
-        }
         start = System.currentTimeMillis();
-        list = list.stream().sorted().collect(Collectors.toList());
+        Collections.sort(list2);
         end = System.currentTimeMillis();
         Long sort2Time = end - start;
-        System.out.println(sort2Time - sort1Time);
-        Assertions.assertTrue(sort2Time >= sort1Time);
+        System.out.println(sort1Time - sort2Time);
+        Assertions.assertTrue(sort1Time >= sort2Time);
     }
 
     @AfterAll
