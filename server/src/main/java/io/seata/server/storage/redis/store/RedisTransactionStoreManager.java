@@ -21,7 +21,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -348,10 +350,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, -1));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
-            List<GlobalSession> globalSessions = new ArrayList<>();
+            List<GlobalSession> globalSessions = new CopyOnWriteArrayList<>();
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
-                xids.forEach(xid -> {
+                xids.parallelStream().forEach(xid -> {
                     GlobalSession globalSession = this.readSession(xid, true);
                     if (globalSession != null) {
                         globalSessions.add(globalSession);
