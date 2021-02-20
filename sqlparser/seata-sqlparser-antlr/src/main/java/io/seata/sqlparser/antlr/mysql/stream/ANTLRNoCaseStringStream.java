@@ -13,19 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
+package io.seata.sqlparser.antlr.mysql.stream;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.IntStream;
 
 /**
- * @author ggndnn
+ * ANTLRNoCaseStringStream
+ *
+ * @author zhihou
  */
-public interface SqlParserType {
-    /**
-     * The constant SQL_PARSER_TYPE_DRUID.
-     */
-    String SQL_PARSER_TYPE_DRUID = "druid";
+public class ANTLRNoCaseStringStream extends ANTLRInputStream {
 
-    /**
-     * The constant SQL_PARSER_TYPE_ANTLR.
-     */
-    String SQL_PARSER_TYPE_ANTLR = "antlr";
+    public ANTLRNoCaseStringStream(String input) {
+        super(input);
+    }
+
+    @Override
+    public int LA(int i) {
+        int la = super.LA(i);
+        if (la == 0 || la == IntStream.EOF) {
+            return la;
+        } else {
+            return Character.toUpperCase(la);
+        }
+    }
 }
