@@ -346,17 +346,19 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey,0,-1));
+            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, -1));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
             List<GlobalSession> globalSessions = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
-                xids.parallelStream().forEach(xid -> {
-                    GlobalSession globalSession = this.readSession(xid, true);
-                    if (globalSession != null) {
-                        globalSessions.add(globalSession);
-                    }
-                });
+                if (CollectionUtils.isNotEmpty(xids)) {
+                    xids.parallelStream().forEach(xid -> {
+                        GlobalSession globalSession = this.readSession(xid, true);
+                        if (globalSession != null) {
+                            globalSessions.add(globalSession);
+                        }
+                    });
+                }
             }
             return globalSessions;
         }
