@@ -473,6 +473,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         do {
             values = jedis.lrange(key, start, stop);
             keys.addAll(values);
+            if (values != null && values.size() < limit) {
+                break;
+            }
             start = keys.size();
             stop = start + limit;
         } while (CollectionUtils.isNotEmpty(values));
