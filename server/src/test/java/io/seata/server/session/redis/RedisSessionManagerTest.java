@@ -16,6 +16,7 @@
 
 package io.seata.server.session.redis;
 
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.session.SessionCondition;
 import java.io.IOException;
 import com.github.fppt.jedismock.RedisServer;
@@ -31,7 +32,15 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -328,6 +337,34 @@ public class RedisSessionManagerTest {
 
         sessionManager.removeBranchSession(session,branchSession);
         sessionManager.removeGlobalSession(session);
+    }
+
+    @Test
+    public void testSortEfficiency() {
+        List<BranchTransactionDO> list = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+            branchTransactionDO
+                .setGmtCreate(new Date(System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(100000)));
+            list.add(branchTransactionDO);
+        }
+        Long start = System.currentTimeMillis();
+        Collections.sort(list);
+        Long end = System.currentTimeMillis();
+        Long sort1Time = end - start;
+        list.clear();
+        for (int i = 0; i < 1000; i++) {
+            BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+            branchTransactionDO
+                .setGmtCreate(new Date(System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(100000)));
+            list.add(branchTransactionDO);
+        }
+        start = System.currentTimeMillis();
+        list = list.stream().sorted().collect(Collectors.toList());
+        end = System.currentTimeMillis();
+        Long sort2Time = end - start;
+        System.out.println(sort2Time - sort1Time);
+        Assertions.assertTrue(sort2Time >= sort1Time);
     }
 
     @AfterAll
