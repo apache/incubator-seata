@@ -351,14 +351,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             List<GlobalSession> globalSessions = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
-                if (CollectionUtils.isNotEmpty(xids)) {
-                    xids.parallelStream().forEach(xid -> {
-                        GlobalSession globalSession = this.readSession(xid, true);
-                        if (globalSession != null) {
-                            globalSessions.add(globalSession);
-                        }
-                    });
-                }
+                xids.forEach(xid -> {
+                    GlobalSession globalSession = this.readSession(xid, true);
+                    if (globalSession != null) {
+                        globalSessions.add(globalSession);
+                    }
+                });
             }
             return globalSessions;
         }
