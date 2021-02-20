@@ -79,7 +79,7 @@ public class RedisLocker extends AbstractLocker {
 
     private static final String ROW_KEY = "rowKey";
 
-    private static final String REDIS_LUA_FILE_NAME = "redislock.lua";
+    private static final String REDIS_LUA_FILE_NAME = "lua/redislocker/redislock.lua";
 
     private static String ACQUIRE_LOCK_SHA;
 
@@ -105,17 +105,17 @@ public class RedisLocker extends AbstractLocker {
                         acquireLockLuaByFile.append(line);
                         acquireLockLuaByFile.append(WHITE_SPACE);
                     }
-                // If it fails to read the file, pipeline mode is used
+                // if it fails to read the file, pipeline mode is used
                 } catch (IOException e) {
-                    LOGGER.info("RedisLocker use pipeline mode");
+                    LOGGER.info("redis locker use pipeline mode");
                     return;
                 }
                 try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                     ACQUIRE_LOCK_SHA = jedis.scriptLoad(acquireLockLuaByFile.toString());
-                    LOGGER.info("RedisLocker use lua mode");
+                    LOGGER.info("redis locker use lua mode");
                 }
             } else {
-                LOGGER.info("RedisLocker use pipeline mode");
+                LOGGER.info("redis locker use pipeline mode");
             }
         }
     }
