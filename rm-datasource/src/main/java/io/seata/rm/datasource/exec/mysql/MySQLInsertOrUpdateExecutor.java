@@ -98,7 +98,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     @Override
     protected Object executeAutoCommitFalse(Object[] args) throws Exception {
         if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && getTableMeta().getPrimaryKeyOnlyName().size() > 1) {
-            throw new NotSupportYetException(" multi pk only support mysql!");
+            throw new NotSupportYetException("multi pk only support mysql!");
         }
         TableRecords beforeImage = beforeImage();
         if (CollectionUtils.isNotEmpty(beforeImage.getRows())) {
@@ -240,7 +240,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
     private TableRecords afterImageInsert(Map<String, List<Object>> pkValues) throws SQLException {
         TableRecords afterImage = buildTableRecords(pkValues);
         if (afterImage == null) {
-            throw new SQLException(" Failed to build after-image for insert");
+            throw new SQLException("Failed to build after-image for insert");
         }
         return afterImage;
     }
