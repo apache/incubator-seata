@@ -106,7 +106,7 @@ public class ExecuteTemplate {
                         if (JdbcConstants.MYSQL.equals(dbType)) {
                             executor = new MySQLInsertOrUpdateExecutor(statementProxy,statementCallback,sqlRecognizer);
                         } else {
-                            throw new NotSupportYetException(dbType + "not support to INSERT_ON_DUPLICATE_UPDATE");
+                            throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
                         }
                         break;
                     default:
