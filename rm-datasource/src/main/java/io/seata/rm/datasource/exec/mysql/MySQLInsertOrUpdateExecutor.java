@@ -322,7 +322,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                         uniqueList.add(columnName + " = ? ");
                         paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
                     }
-                    if(!columnIsNull){
+                    if (!columnIsNull) {
                         if (isContainWhere[0]) {
                             suffix.append(" OR (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
                         } else {
