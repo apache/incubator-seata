@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -452,9 +453,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             for (Object branchInfo : branchInfos) {
                 if (branchInfo != null) {
                     Map<String, String> branchInfoMap = (Map<String, String>) branchInfo;
-                    BranchTransactionDO branchTransactionDO =
-                            (BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class);
-                    branchTransactionDOs.add(branchTransactionDO);
+                    Optional<BranchTransactionDO> branchTransactionDO =
+                            Optional.ofNullable((BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
+                    branchTransactionDO.ifPresent(branchTransactionDOs::add);
                 }
             }
         }
