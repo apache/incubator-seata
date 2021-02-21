@@ -311,20 +311,24 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             List<Object> paramAppenderTempList = new ArrayList<>();
             tableMeta.getAllIndexes().forEach((k, v) -> {
                 if (!v.isNonUnique()) {
+                    boolean columnIsNull = true;
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
                         if (imageParamperterMap.get(columnName) == null || imageParamperterMap.get(columnName).get(finalI) == null) {
                             continue;
                         }
+                        columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
                         paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
                     }
-                    if (isContainWhere[0]) {
-                        suffix.append(" OR (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
-                    } else {
-                        suffix.append(" WHERE (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
-                        isContainWhere[0] = true;
+                    if(!columnIsNull){
+                        if (isContainWhere[0]) {
+                            suffix.append(" OR (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
+                        } else {
+                            suffix.append(" WHERE (").append(Joiner.on(" and ").join(uniqueList)).append(") ");
+                            isContainWhere[0] = true;
+                        }
                     }
                 }
             });
