@@ -453,7 +453,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             for (Object branchInfo : branchInfos) {
                 if (branchInfo != null) {
                     Map<String, String> branchInfoMap = (Map<String, String>) branchInfo;
-                    //maybe async_commit task has delete the map in redis,so make sure the map not null
                     Optional<BranchTransactionDO> branchTransactionDO =
                             Optional.ofNullable((BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
                     branchTransactionDO.ifPresent(branchTransactionDOs::add);
