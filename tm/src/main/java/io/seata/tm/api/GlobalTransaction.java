@@ -123,4 +123,13 @@ public interface GlobalTransaction {
      * @see GlobalStatus
      */
     GlobalStatus getLocalStatus();
+
+    /**
+     * get global transaction role.
+     *
+     * @return global transaction Role.
+     * @see GlobalTransactionRole
+     */
+    GlobalTransactionRole getGlobalTransactionRole();
+
 }

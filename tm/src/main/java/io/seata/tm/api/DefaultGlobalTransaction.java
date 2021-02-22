@@ -243,6 +243,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         return status;
     }
 
+    @Override
+    public GlobalTransactionRole getGlobalTransactionRole() {
+        return role;
+    }
+
     private void assertXIDNotNull() {
         if (xid == null) {
             throw new IllegalStateException();
