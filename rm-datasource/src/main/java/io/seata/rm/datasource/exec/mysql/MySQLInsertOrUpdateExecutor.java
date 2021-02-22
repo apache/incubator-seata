@@ -45,6 +45,7 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.Defaultable;
+import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -318,9 +319,13 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                         if (imageParamperterMap.get(columnName) == null || imageParamperterMap.get(columnName).get(finalI) == null) {
                             continue;
                         }
-                        columnIsNull = false;
-                        uniqueList.add(columnName + " = ? ");
-                        paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
+                        if (imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                            uniqueList.add(columnName + " is null ");
+                        } else {
+                            columnIsNull = false;
+                            uniqueList.add(columnName + " = ? ");
+                            paramAppenderTempList.add(imageParamperterMap.get(columnName).get(finalI));
+                        }
                     }
                     if (!columnIsNull) {
                         if (isContainWhere[0]) {
