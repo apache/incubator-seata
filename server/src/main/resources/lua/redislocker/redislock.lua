@@ -18,7 +18,7 @@ for i= 1, keySize do
                -- return fail
                return 0
            else
-               -- set 'yes' mean  There is no need to store lock information
+               -- set 'yes' mean  There is not need to store lock information
                array[i]= 'yes'
            end
     end
@@ -32,11 +32,11 @@ for i =1, keySize do
             redis.call('HSET',KEYS[i],'xid',ARGV[(i-1)*7+4]);
             -- set transactionId
             redis.call('HSET',KEYS[i],'transactionId',ARGV[(i-1)*7+5]);
-            -- set transactionId
-            redis.call('HSET',KEYS[i],'branchId',ARGV[(i-1)*7+6]);
             -- set branchId
-            redis.call('HSET',KEYS[i],'resourceId',ARGV[(i-1)*7+7]);
+            redis.call('HSET',KEYS[i],'branchId',ARGV[(i-1)*7+6]);
             -- set resourceId
+            redis.call('HSET',KEYS[i],'resourceId',ARGV[(i-1)*7+7]);
+            -- set tableName
             redis.call('HSET',KEYS[i],'tableName',ARGV[(i-1)*7+8]);
             -- set rowKey
             redis.call('HSET',KEYS[i],'rowKey',ARGV[(i-1)*7+9]);
