@@ -15,9 +15,9 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EmptyStackException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -333,19 +333,26 @@ public class LoopTaskUtils {
     }
 
     /**
-     * put loop out context to parent context
+     * put loop out params to parent context
      *
      * @param context
      */
-    public static void putContextToParent(ProcessContext context) {
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        ProcessContextImpl processContext = (ProcessContextImpl)context;
-        if (CollectionUtils.isNotEmpty(contextVariables) && null != processContext.getParent()) {
-            Map<String, Object> parentContextVariables = (Map<String, Object>)processContext.getParent().getVariable(
+    public static void putContextToParent(ProcessContext context, List<ProcessContext> subContextList) {
+        if (CollectionUtils.isNotEmpty(subContextList)) {
+            Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-            parentContextVariables.putAll(contextVariables);
+
+            List<Map<String, Object>> subContextVariables = new ArrayList<>();
+            for (ProcessContext subProcessContext : subContextList) {
+                Map<String, Object> localVariables = (Map<String, Object>)subProcessContext.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+                localVariables.remove(DomainConstants.LOOP_RESULT);
+                subContextVariables.add(localVariables);
+            }
+
+            contextVariables.put(DomainConstants.LOOP_RESULT, subContextVariables);
         }
+
     }
 
     /**

@@ -31,11 +31,11 @@
             "Type": "Choice",
             "Choices":[
                 {
-                    "Expression": "[fooResult] != null && [a] == 1",
+                    "Expression": "[loopResult].?[#this[fooResult] == null].size() == 0 && [a] == 1",
                     "Next":"SecondState"
                 },
                 {
-                    "Expression": "[fooResult] != null && [a] == 2",
+                    "Expression": "[loopResult].?[#this[fooResult] == null].size() == 0 && [a] == 2",
                     "Next":"CallSubStateMachine"
                 }
             ],
