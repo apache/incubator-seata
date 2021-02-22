@@ -246,29 +246,44 @@ public class LoopTaskUtils {
      */
     public static boolean isCompletionConditionSatisfied(ProcessContext context) {
 
-        if (!LoopContextHolder.getCurrent(context, true).getLoopExpContext().isEmpty()) {
+        StateInstruction instruction = context.getInstruction(StateInstruction.class);
+        AbstractTaskState currentState = (AbstractTaskState)instruction.getState(context);
+        LoopContextHolder currentLoopContext = LoopContextHolder.getCurrent(context, true);
+
+        if (currentLoopContext.isCompletionConditionSatisfied() || !currentLoopContext.getLoopExpContext().isEmpty()) {
             return true;
         }
 
-        StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        AbstractTaskState currentState = (AbstractTaskState)instruction.getState(context);
-
-        Map<String, Object> elContext = new HashMap<>(3);
-
-        int nrOfInstances = LoopContextHolder.getCurrent(context, true).getNrOfInstances().get();
-        int nrOfActiveInstances = LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().get();
-        int nrOfCompletedInstances = LoopContextHolder.getCurrent(context, true).getNrOfCompletedInstances().get();
-
+        // if compensate, all tasks should be compensate succeed
         if (context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE)) {
-            return nrOfInstances <= 0;
+            return currentLoopContext.getNrOfInstances().get() <= 0;
         }
 
-        elContext.put(DomainConstants.NUMBER_OF_INSTANCES, (double)nrOfInstances);
-        elContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
-        elContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES, (double)nrOfCompletedInstances);
+        int nrOfInstances = currentLoopContext.getNrOfInstances().get();
+        int nrOfActiveInstances = currentLoopContext.getNrOfActiveInstances().get();
+        int nrOfCompletedInstances = currentLoopContext.getNrOfCompletedInstances().get();
 
-        return nrOfCompletedInstances >= nrOfInstances || getEvaluator(context,
-            currentState.getLoop().getCompletionCondition()).evaluate(elContext);
+        if (!currentLoopContext.isCompletionConditionSatisfied()) {
+            synchronized (currentLoopContext) {
+                if (!currentLoopContext.isCompletionConditionSatisfied()) {
+
+                    Map<String, Object> stateMachineContext = (Map<String, Object>)context.getVariable(
+                        DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+                    // multi-instance variables should be double/float while evaluate
+                    stateMachineContext.put(DomainConstants.NUMBER_OF_INSTANCES, (double)nrOfInstances);
+                    stateMachineContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
+                    stateMachineContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES,
+                        (double)nrOfCompletedInstances);
+
+                    if (nrOfCompletedInstances >= nrOfInstances || getEvaluator(context,
+                        currentState.getLoop().getCompletionCondition()).evaluate(stateMachineContext)) {
+                        currentLoopContext.setCompletionConditionSatisfied(true);
+                    }
+                }
+            }
+        }
+
+        return currentLoopContext.isCompletionConditionSatisfied();
     }
 
     public static int acquireNextLoopCounter(ProcessContext context) {

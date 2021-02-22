@@ -34,6 +34,7 @@ public class LoopContextHolder {
     private AtomicInteger nrOfCompletedInstances = new AtomicInteger();
     private volatile boolean needCompensate = false;
     private volatile boolean failEnd = false;
+    private volatile boolean completionConditionSatisfied = false;
     private Stack<Exception> loopExpContext = new Stack<>();
     private Stack<Integer> loopIndexStack = new Stack<>();
     private Stack<Integer> failEndIndexStack = new Stack<>();
@@ -86,6 +87,14 @@ public class LoopContextHolder {
 
     public void setFailEnd(boolean failEnd) {
         this.failEnd = failEnd;
+    }
+
+    public boolean isCompletionConditionSatisfied() {
+        return completionConditionSatisfied;
+    }
+
+    public void setCompletionConditionSatisfied(boolean completionConditionSatisfied) {
+        this.completionConditionSatisfied = completionConditionSatisfied;
     }
 
     public Stack<Exception> getLoopExpContext() {
