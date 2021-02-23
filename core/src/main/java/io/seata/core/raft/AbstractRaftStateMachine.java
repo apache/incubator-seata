@@ -33,12 +33,8 @@ public abstract class AbstractRaftStateMachine extends StateMachineAdapter {
 
     protected String mode;
 
-    protected ServerOnRequestProcessor onRequestProcessor;
-
     protected boolean isLeader() {
         return this.leaderTerm.get() > 0;
     }
-
-    public abstract void setOnRequestProcessor(ServerOnRequestProcessor onRequestProcessor);
 
 }

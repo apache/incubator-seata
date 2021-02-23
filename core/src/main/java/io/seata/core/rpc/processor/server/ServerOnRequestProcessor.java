@@ -79,8 +79,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         this.transactionMessageHandler = transactionMessageHandler;
         AbstractRaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
         if (raftServer != null) {
-            AbstractRaftStateMachine machine = RaftServerFactory.getInstance().getStateMachine();
-            machine.setOnRequestProcessor(this);
             raftMode = RaftServerFactory.getInstance().isRaftMode();
         }
     }

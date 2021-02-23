@@ -74,18 +74,15 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
-    RaftLockManager raftLockManager;
+    private RaftLockManager raftLockManager;
 
-    String mode;
-
-    @Override
-    public void setOnRequestProcessor(ServerOnRequestProcessor onRequestProcessor) {
-        this.onRequestProcessor = onRequestProcessor;
-        raftLockManager = new RaftLockManager();
-    }
+    private String mode;
 
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        if (StoreMode.RAFT.getName().equals(mode)) {
+            this.raftLockManager = new RaftLockManager();
+        }
     }
 
     @Override
