@@ -318,9 +318,11 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                         String columnName = m.getColumnName();
                         if (imageParamperterMap.get(columnName) == null && m.getColumnDef() != null) {
                             uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
+                            columnIsNull = false;
                             continue;
                         }
                         if (imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                           columnIsNull = true;
                            break;
                         }
                         columnIsNull = false;
