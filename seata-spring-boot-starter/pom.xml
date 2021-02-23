@@ -46,7 +46,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-spring-autoconfigure</artifactId>
+            <artifactId>seata-spring-autoconfigure-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--seata-->
