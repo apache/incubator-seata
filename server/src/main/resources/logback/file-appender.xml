@@ -6,10 +6,10 @@
 
     <!--ALL-->
     <appender name="FILE_ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/seata-server.${PORT}.all.log</file>
+        <file>${LOG_HOME}/${APPLICATION_NAME:-}.${PORT}.all.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/history/seata-server.${PORT}.all.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/${APPLICATION_NAME:-}.${PORT}.all.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>
@@ -28,10 +28,10 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <file>${LOG_HOME}/seata-server.${PORT}.warn.log</file>
+        <file>${LOG_HOME}/${APPLICATION_NAME:-}.${PORT}.warn.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/history/seata-server.${PORT}.warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/${APPLICATION_NAME:-}.${PORT}.warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>
@@ -50,10 +50,10 @@
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <file>${LOG_HOME}/seata-server.${PORT}.error.log</file>
+        <file>${LOG_HOME}/${APPLICATION_NAME:-}.${PORT}.error.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/history/seata-server.${PORT}.error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/history/${APPLICATION_NAME:-}.${PORT}.error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>2GB</maxFileSize>
             <MaxHistory>7</MaxHistory>
             <totalSizeCap>7GB</totalSizeCap>

@@ -24,6 +24,10 @@
     <conversionRule conversionWord="wex" converterClass="io.seata.server.logging.logback.WhitespaceThrowableProxyConverter"/>
     <conversionRule conversionWord="wEx" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
+    <!-- common properties -->
+    <property name="APPLICATION_NAME" value="seata-server"/>
+
+
     <!-- console-appender -->
     <include resource="logback/console-appender.xml"/>
 
