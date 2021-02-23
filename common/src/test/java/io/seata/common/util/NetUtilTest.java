@@ -24,6 +24,7 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * The type Net util test.
@@ -157,6 +158,27 @@ public class NetUtilTest {
     @Test
     public void testGetLocalAddress() {
         assertThat(NetUtil.getLocalAddress()).isNotNull();
+    }
+
+    @Test
+    public void testIsValidIp() {
+        String localIp = "127.0.0.1";
+        String someIp = "8.210.212.91";
+        String someHostName = "seata.io";
+        String unknownHost = "knownHost";
+        assertThat(NetUtil.isValidIp(localIp, true)).isTrue();
+        assertThat(NetUtil.isValidIp(localIp, false)).isFalse();
+
+        assertThat(NetUtil.isValidIp(someIp, true)).isTrue();
+        assertThat(NetUtil.isValidIp(someIp, false)).isTrue();
+
+        assertThat(NetUtil.isValidIp(someHostName, true)).isTrue();
+        assertThat(NetUtil.isValidIp(someHostName, false)).isTrue();
+
+        assertThatThrownBy(() -> {
+            NetUtil.isValidIp(unknownHost, false);
+        }).isInstanceOf(RuntimeException.class).hasMessageContaining("UnknownHostException");
+
     }
 
 }

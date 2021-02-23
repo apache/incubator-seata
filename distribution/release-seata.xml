@@ -55,7 +55,7 @@
             <destName>LICENSE</destName>
         </file>
         <file>
-            <!--打好的jar包名称和放置目录-->
+            <!-- target jar dir-->
             <source>../server/target/seata-server.jar</source>
             <outputDirectory>target/</outputDirectory>
         </file>

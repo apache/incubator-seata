@@ -15,6 +15,12 @@
  */
 package io.seata.rm.datasource.xa;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.XAConnection;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -23,12 +29,6 @@ import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.XAConnection;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Connection proxy for XA mode.
@@ -105,9 +105,17 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public void xaRollback(String xid, long branchId, String applicationData) throws XAException {
         XAXid xaXid = XAXidBuilder.build(xid, branchId);
+        xaRollback(xaXid);
+    }
+
+    /**
+     * XA rollback
+     * @param xaXid
+     * @throws XAException
+     */
+    public void xaRollback(XAXid xaXid) throws XAException {
         xaResource.rollback(xaXid);
         releaseIfNecessary();
-
     }
 
     @Override
@@ -202,21 +210,20 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             throw new SQLException("should NOT rollback on an inactive session");
         }
         try {
-            // Branch Report to TC
-            DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(), BranchStatus.PhaseOne_Failed, null);
-
-        } catch (TransactionException te) {
-            // log and ignore the report failure
-            LOGGER.warn("Failed to report XA branch rollback on " + xid + "-" + xaBranchXid.getBranchId()
-                + " since " + te.getCode() + ":" + te.getMessage());
-        }
-        try {
             // XA End: Fail
             xaResource.end(xaBranchXid, XAResource.TMFAIL);
+            xaRollback(xaBranchXid);
+            // Branch Report to TC
+            DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
+                BranchStatus.PhaseOne_Failed, null);
+            LOGGER.info(xaBranchXid + " was rollbacked");
         } catch (XAException xe) {
-            throw new SQLException(
-                "Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId() + " since " + xe
-                    .getMessage(), xe);
+            throw new SQLException("Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId()
+                + " since " + xe.getMessage(), xe);
+        } catch (TransactionException te) {
+            // log and ignore the report failure
+            LOGGER.warn("Failed to report XA branch rollback on " + xid + "-" + xaBranchXid.getBranchId() + " since "
+                + te.getCode() + ":" + te.getMessage());
         } finally {
             cleanXABranchContext();
         }

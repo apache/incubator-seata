@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider ;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
@@ -24,9 +25,6 @@ import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBPropert
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
-import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -106,14 +104,11 @@ import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PRO
 /**
  * @author xingfudeshi@gmail.com
  */
+@ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
-@ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @Configuration
 @EnableConfigurationProperties({SeataProperties.class})
-public class SeataProviderAutoConfiguration {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataProviderAutoConfiguration.class);
-
-
+public class SeataPropertiesAutoConfiguration {
     static {
 
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
