@@ -23,4 +23,9 @@ public interface SqlParserType {
      * The constant SQL_PARSER_TYPE_DRUID.
      */
     String SQL_PARSER_TYPE_DRUID = "druid";
+
+    /**
+     * The constant SQL_PARSER_TYPE_ANTLR.
+     */
+    String SQL_PARSER_TYPE_ANTLR = "antlr";
 }

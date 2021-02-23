@@ -49,6 +49,7 @@ import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * The abstract netty remoting.
@@ -281,6 +282,8 @@ public abstract class AbstractNettyRemoting implements Disposable {
                                 pair.getFirst().process(ctx, rpcMessage);
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                            } finally {
+                                MDC.clear();
                             }
                         });
                     } catch (RejectedExecutionException e) {
