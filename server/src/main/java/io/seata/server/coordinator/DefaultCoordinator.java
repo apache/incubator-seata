@@ -17,6 +17,7 @@ package io.seata.server.coordinator;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +63,7 @@ import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +95,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
         1000L);
+
+    /**
+     * The constant FINISHED_RETRY_PERIOD
+     */
+    protected static final long FINISHED_RETRY_PERIOD = 24 * 60 * 60 * 1000;
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -129,6 +136,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("AsyncCommitting", 1));
+
+    private ScheduledThreadPoolExecutor errorStatus;
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
@@ -361,6 +370,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         });
     }
 
+    protected void handleFinished() {
+        GlobalStatus[] errorStatuses = new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Committed,
+                GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.Rollbacked,
+                GlobalStatus.RollbackFailed, GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished};
+        List<GlobalSession> finishedGlobalSessions = SessionHolder.getRootSessionManager()
+                .findGlobalSessions(new SessionCondition(errorStatuses));
+
+        SessionHelper.forEach(finishedGlobalSessions, SessionHolder::removeInErrorState);
+    }
+
     /**
      * Undo log delete.
      */
@@ -430,6 +449,21 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
+        errorStatus = new ScheduledThreadPoolExecutor(1,
+                new NamedThreadFactory("TxTimeoutCheck", 1));
+        errorStatus.scheduleAtFixedRate(() -> {
+            boolean lock = SessionHolder.finishedLock();
+            if (lock) {
+                try {
+                    handleFinished();
+                } catch (Exception e) {
+                    LOGGER.info("Exception deal finished", e);
+                } finally {
+                    SessionHolder.unFinishedLock();
+                }
+            }
+        }, 0, FINISHED_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+
         timeoutCheck.scheduleAtFixedRate(() -> {
             boolean lock = SessionHolder.txTimeoutCheckLock();
             if (lock) {
@@ -483,11 +517,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        undoLogDelete.shutdown();
+        finished.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            finished.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 
         }

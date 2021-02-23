@@ -47,19 +47,9 @@ public class SessionCondition {
     /**
      * Instantiates a new Session condition.
      *
-     * @param status the status
-     */
-    public SessionCondition(GlobalStatus status) {
-        this.status = status;
-        statuses = new GlobalStatus[] {status};
-    }
-
-    /**
-     * Instantiates a new Session condition.
-     *
      * @param statuses the statuses
      */
-    public SessionCondition(GlobalStatus[] statuses) {
+    public SessionCondition(GlobalStatus ...statuses) {
         this.statuses = statuses;
     }
 

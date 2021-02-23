@@ -153,6 +153,11 @@ public interface Constants {
     String TX_TIMEOUT_CHECK = "TxTimeoutCheck";
 
     /**
+     * the constant FINISHED
+     */
+    String FINISHED = "Finished";
+
+    /**
      * The constant UNDOLOG_DELETE
      */
     String UNDOLOG_DELETE = "UndologDelete";

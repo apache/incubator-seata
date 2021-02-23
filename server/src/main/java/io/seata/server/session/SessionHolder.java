@@ -41,6 +41,7 @@ import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.Constants.FINISHED;
 
 /**
  * The type Session holder.
@@ -195,7 +196,7 @@ public class SessionHolder {
         }
     }
 
-    private static void removeInErrorState(GlobalSession globalSession) {
+    public static void removeInErrorState(GlobalSession globalSession) {
         try {
             LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
             ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
@@ -359,12 +360,21 @@ public class SessionHolder {
     }
 
     /**
-     * tx timeout check lOck
+     * tx timeout check lock
      *
      * @return the boolean
      */
     public static boolean txTimeoutCheckLock() {
         return getRootSessionManager().scheduledLock(TX_TIMEOUT_CHECK);
+    }
+
+    /**
+     * finished lock
+     *
+     * @return the boolean
+     */
+    public static boolean finishedLock() {
+        return getRootSessionManager().scheduledLock(FINISHED);
     }
 
     /**
@@ -419,6 +429,15 @@ public class SessionHolder {
      */
     public static boolean unUndoLogDeleteLock() {
         return getRootSessionManager().unScheduledLock(UNDOLOG_DELETE);
+    }
+
+    /**
+     * un finished lock
+     *
+     * @return the boolean
+     */
+    public static boolean unFinishedLock() {
+        return getRootSessionManager().unScheduledLock(FINISHED);
     }
 
     public static void destroy() {
