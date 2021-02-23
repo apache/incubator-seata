@@ -223,7 +223,6 @@ public class RedisLocker extends AbstractLocker {
         args.add(needLockXid);
         for (LockDO lockDO : needLockDOs) {
             keys.add(buildLockKey(lockDO.getRowKey()));
-            args.add(lockDO.getXid());
             args.add(lockDO.getTransactionId().toString());
             args.add(lockDO.getBranchId().toString());
             args.add(lockDO.getResourceId());
