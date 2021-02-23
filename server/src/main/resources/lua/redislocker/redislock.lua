@@ -20,7 +20,7 @@ for i= 1, keySize do
            else
                -- set 'yes' mean  There is not need to store lock information
                array[i]= 'yes'
-           endr
+           end
     end
 end
 -- Loop through array
