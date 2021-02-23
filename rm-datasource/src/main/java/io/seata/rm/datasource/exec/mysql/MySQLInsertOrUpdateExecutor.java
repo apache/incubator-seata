@@ -316,11 +316,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                     List<String> uniqueList = new ArrayList<>();
                     for (ColumnMeta m : v.getValues()) {
                         String columnName = m.getColumnName();
-                        if (imageParamperterMap.get(columnName) == null || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
-                            if (m.getColumnDef() != null) {
-                                uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
-                            }
+                        if (imageParamperterMap.get(columnName) == null && m.getColumnDef() != null) {
+                            uniqueList.add(columnName + " = DEFAULT(" + columnName + ") ");
                             continue;
+                        }
+                        if (imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                           break;
                         }
                         columnIsNull = false;
                         uniqueList.add(columnName + " = ? ");
