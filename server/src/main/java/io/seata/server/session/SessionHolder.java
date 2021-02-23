@@ -145,15 +145,15 @@ public class SessionHolder {
      * Reload.
      */
     protected static void reload(StoreMode storeMode) {
+        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
+        if (RaftServerFactory.getInstance().isRaftMode()) {
+            return;
+        }
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
         }
 
         Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
-        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
-        if (!RaftServerFactory.getInstance().isLeader()) {
-            return;
-        }
         if (CollectionUtils.isNotEmpty(allSessions)) {
             List<GlobalSession> removeGlobalSessions = new ArrayList<>();
             Iterator<GlobalSession> iterator = allSessions.iterator();
