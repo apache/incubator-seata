@@ -321,7 +321,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                             columnIsNull = false;
                             continue;
                         }
-                        if (imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
+                        if ( (imageParamperterMap.get(columnName) == null && m.getColumnDef() == null) || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
                            columnIsNull = true;
                            break;
                         }
