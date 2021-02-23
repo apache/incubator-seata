@@ -138,7 +138,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      */
     protected void buildUndoItemAll(ConnectionProxy connectionProxy, TableRecords beforeImage, TableRecords afterImage) {
         if (!isUpdateFlag) {
-            SQLUndoLog sqlUndoLog = buildUndoItem(TableRecords.empty(getTableMeta()), afterImage);
+            SQLUndoLog sqlUndoLog = buildUndoItem(SQLType.INSERT,TableRecords.empty(getTableMeta()), afterImage);
             connectionProxy.appendUndoLog(sqlUndoLog);
             return;
         }
