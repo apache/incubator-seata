@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.rm.tcc.store.db;
 
 import io.seata.common.exception.DataAccessException;
@@ -12,7 +27,11 @@ import io.seata.rm.tcc.store.db.sql.TCCFenceStoreSqls;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 /**
  * The type TCC Fence store data base dao
@@ -85,13 +104,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public boolean updateTCCFenceDO(DataSource dataSource, String xid, Long branchId, int newStatus, int oldStatus) {
+    public boolean updateTCCFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus) {
         String sql = TCCFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(TCCFenceConfig.getLogTableName());
         PreparedStatement ps = null;
-        Connection conn = null;
         try {
-            conn = dataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setInt(1, newStatus);
             // gmt_modified
@@ -103,7 +119,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(ps, conn);
+            IOUtil.close(ps);
         }
     }
 

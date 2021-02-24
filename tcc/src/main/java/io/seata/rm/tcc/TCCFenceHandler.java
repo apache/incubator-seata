@@ -1,6 +1,22 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.rm.tcc;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.IOUtil;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.config.TCCFenceConfig;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
@@ -13,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -133,30 +151,44 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     private static boolean updateStatusAndInvokeTargetMethod(DataSource dataSource, Method method, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, int status) {
+        Connection conn = null;
         try {
-            boolean result = tccFenceDAO.updateTCCFenceDO(dataSource, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
+            conn = dataSource.getConnection();
+            conn.setAutoCommit(false);
+            boolean result = tccFenceDAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
             if (result) {
-                // invoke two phase method
                 Object ret = method.invoke(targetTCCBean, businessActionContext);
                 if (null != ret) {
                     if (ret instanceof TwoPhaseResult) {
                         result = ((TwoPhaseResult) ret).isSuccess();
-                    }else {
+                    } else {
                         result = (boolean) ret;
                     }
                 }
             }
-            if (!result) {
-                // rollback tcc fence log status
-                tccFenceDAO.updateTCCFenceDO(dataSource, xid, branchId, TCCFenceConstant.STATUS_TRIED, status);
+            if (result) {
+                conn.commit();
+                conn.setAutoCommit(true);
+            } else {
+                conn.rollback();
             }
             return result;
+
         } catch (Throwable t) {
-            throw new TCCFenceException(t);
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    LOGGER.error("Update tcc fence status failed", e);
+                }
+            }
+            return false;
+        } finally {
+            IOUtil.close(conn);
         }
     }
 
-    /**
+        /**
      * Delete TCC Fence
      * @param xid the global transaction id
      * @param branchId the branch transaction id
