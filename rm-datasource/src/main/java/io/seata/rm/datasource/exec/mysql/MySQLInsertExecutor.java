@@ -205,7 +205,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
 
         List<Object> pkValues = new ArrayList<>();
         for (int i = 0; i < updateCount; i++) {
-            pkValues.add(cursor.add(step));
+            pkValues.add(cursor);
+            cursor = cursor.add(step);
         }
 
         Map<String, List<Object>> pkValuesMap = new HashMap<>(1, 1.001f);
