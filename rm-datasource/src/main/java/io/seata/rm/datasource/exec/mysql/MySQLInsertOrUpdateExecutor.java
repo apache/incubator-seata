@@ -147,7 +147,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         List<String> befrePrimaryValues = new ArrayList<>();
         for (Row r : beforeImageRows) {
             String primaryValue = "";
-            for (Field f: r.primaryKeys()){
+            for (Field f: r.primaryKeys()) {
                 primaryValue = primaryValue + f.getValue() + COLUMN_SEPARATOR;
             }
             befrePrimaryValues.add(primaryValue);
@@ -157,12 +157,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         List<Row> afterImageRows = afterImage.getRows();
         for (Row r : afterImageRows) {
             String primaryValue = "";
-            for (Field f: r.primaryKeys()){
+            for (Field f: r.primaryKeys()) {
                 primaryValue = primaryValue + f.getValue()  + COLUMN_SEPARATOR;
             }
-            if (befrePrimaryValues.contains(primaryValue)){
+            if (befrePrimaryValues.contains(primaryValue)) {
                 updateRows.add(r);
-            }else{
+            } else {
                 insertRows.add(r);
             }
         }
@@ -255,7 +255,7 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
         });
 
         StringBuilder afterImageSql = new StringBuilder(selectSQL);
-        for(int i = 0; i < rows.size(); i++) {
+        for (int i = 0; i < rows.size(); i++) {
             int finalI = i;
             List<String> wherePrimaryList = new ArrayList<>();
             List<Object> paramAppenderTempList = new ArrayList<>();
