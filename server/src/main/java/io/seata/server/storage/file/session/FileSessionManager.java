@@ -134,8 +134,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                 }
             }
 
-            if (null != globalStatuses) {
-                if (!globalStatuses.contains(globalSession.getStatus())) {
+            if (!StringUtils.isEmpty(condition.getXid())) {
+                if (!Objects.equals(condition.getXid(), globalSession.getXid())) {
                     continue;
                 }
             }
@@ -146,8 +146,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                 }
             }
 
-            if (!StringUtils.isEmpty(condition.getXid())) {
-                if (!Objects.equals(condition.getXid(), globalSession.getXid())) {
+            if (null != globalStatuses) {
+                if (!globalStatuses.contains(globalSession.getStatus())) {
                     continue;
                 }
             }
