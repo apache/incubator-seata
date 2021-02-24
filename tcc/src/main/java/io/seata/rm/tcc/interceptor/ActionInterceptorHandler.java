@@ -23,9 +23,11 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.exception.TCCFenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -82,10 +84,23 @@ public class ActionInterceptorHandler {
             }
             argIndex++;
         }
-        //the final parameters of the try method
-        ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-        //the final result
-        ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+
+        // add idempotent and anti hanging
+        if (businessAction.useTCCFence()) {
+            try {
+                if (TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId))) {
+                    ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
+                    ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+                }
+            } catch (Throwable t) {
+                throw new TCCFenceException(t);
+            }
+        } else {
+            //the final parameters of the try method
+            ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
+            //the final result
+            ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+        }
         return ret;
     }
 

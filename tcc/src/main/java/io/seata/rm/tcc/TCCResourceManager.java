@@ -94,18 +94,24 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
-            Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
-            LOGGER.info("TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
+            Object ret;
             boolean result;
-            if (ret != null) {
-                if (ret instanceof TwoPhaseResult) {
-                    result = ((TwoPhaseResult)ret).isSuccess();
-                } else {
-                    result = (boolean)ret;
-                }
+            // add idempotent and anti hanging
+            if (tccResource.isUseTCCFence()) {
+                result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
             } else {
-                result = true;
+                ret = commitMethod.invoke(targetTCCBean, businessActionContext);
+                if (ret != null) {
+                    if (ret instanceof TwoPhaseResult) {
+                        result = ((TwoPhaseResult)ret).isSuccess();
+                    } else {
+                        result = (boolean)ret;
+                    }
+                } else {
+                    result = true;
+                }
             }
+            LOGGER.info("TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}", result, xid, branchId, resourceId);
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
@@ -141,18 +147,24 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId,
                 applicationData);
-            Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
-            LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", ret, xid, branchId, resourceId);
+            Object ret;
             boolean result;
-            if (ret != null) {
-                if (ret instanceof TwoPhaseResult) {
-                    result = ((TwoPhaseResult)ret).isSuccess();
-                } else {
-                    result = (boolean)ret;
-                }
+            // add idempotent and anti hanging
+            if (tccResource.isUseTCCFence()) {
+                result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
             } else {
-                result = true;
+                ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
+                if (ret != null) {
+                    if (ret instanceof TwoPhaseResult) {
+                        result = ((TwoPhaseResult)ret).isSuccess();
+                    } else {
+                        result = (boolean)ret;
+                    }
+                } else {
+                    result = true;
+                }
             }
+            LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", result, xid, branchId, resourceId);
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);

@@ -56,4 +56,10 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
+
+    /**
+     *  whether use TCC fence (idempotent,non_rollback,suspend)
+     * @return the boolean
+     */
+    boolean useTCCFence() default false;
 }
