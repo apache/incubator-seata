@@ -48,7 +48,7 @@ public class SessionCondition {
      *
      * @param statuses the statuses
      */
-    public SessionCondition(GlobalStatus ...statuses) {
+    public SessionCondition(GlobalStatus... statuses) {
         this.statuses = statuses;
     }
 
@@ -99,7 +99,7 @@ public class SessionCondition {
         return statuses;
     }
 
-    public void setStatuses(GlobalStatus ...statuses) {
+    public void setStatuses(GlobalStatus... statuses) {
         this.statuses = statuses;
     }
 }

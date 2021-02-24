@@ -137,8 +137,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("AsyncCommitting", 1));
 
-    private ScheduledThreadPoolExecutor errorStates = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("ErrorStates", 1));
+    private ScheduledThreadPoolExecutor finishedToDelete = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("FinishedToDelete", 1));
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
@@ -371,12 +371,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         });
     }
 
-    protected void handleErrorStates() {
-        GlobalStatus[] errorStatuses = new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Committed,
+    protected void handleFinishedToDeleteStates() {
+        GlobalStatus[] finishedStatus = new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Committed,
                 GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
                 GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished};
         List<GlobalSession> finishedGlobalSessions = SessionHolder.getRootSessionManager()
-                .findGlobalSessions(new SessionCondition(errorStatuses));
+                .findGlobalSessions(new SessionCondition(finishedStatus));
 
         SessionHelper.forEach(finishedGlobalSessions, SessionHolder::removeInErrorState);
     }
@@ -450,15 +450,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        errorStates.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.errorStateLock();
+        finishedToDelete.scheduleAtFixedRate(() -> {
+            boolean lock = SessionHolder.finishedToDeleteLock();
             if (lock) {
                 try {
-                    handleErrorStates();
+                    handleFinishedToDeleteStates();
                 } catch (Exception e) {
                     LOGGER.info("Exception deal error statuses ...", e);
                 } finally {
-                    SessionHolder.unErrorStateLock();
+                    SessionHolder.unFinishedToDeleteLock();
                 }
             }
         }, 0, ERROR_STATUS_RETRY_PERIOD, TimeUnit.MILLISECONDS);
@@ -517,14 +517,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
         undoLogDelete.shutdown();
-        errorStates.shutdown();
+        finishedToDelete.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            errorStates.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            finishedToDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 
         }

@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
@@ -41,7 +40,7 @@ import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
-import static io.seata.common.Constants.ERROR_STATE;
+import static io.seata.common.Constants.FINISHED_TO_DELETE;
 
 /**
  * The type Session holder.
@@ -369,8 +368,8 @@ public class SessionHolder {
      *
      * @return the boolean
      */
-    public static boolean errorStateLock() {
-        return getRootSessionManager().scheduledLock(ERROR_STATE);
+    public static boolean finishedToDeleteLock() {
+        return getRootSessionManager().scheduledLock(FINISHED_TO_DELETE);
     }
 
     /**
@@ -432,8 +431,8 @@ public class SessionHolder {
      *
      * @return the boolean
      */
-    public static boolean unErrorStateLock() {
-        return getRootSessionManager().unScheduledLock(ERROR_STATE);
+    public static boolean unFinishedToDeleteLock() {
+        return getRootSessionManager().unScheduledLock(FINISHED_TO_DELETE);
     }
 
     public static void destroy() {

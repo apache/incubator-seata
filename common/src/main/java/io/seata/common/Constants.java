@@ -153,9 +153,9 @@ public interface Constants {
     String TX_TIMEOUT_CHECK = "TxTimeoutCheck";
 
     /**
-     * the constant ERROR_STATE
+     * the constant FINISHED_TO_DELETE
      */
-    String ERROR_STATE = "ErrorState";
+    String FINISHED_TO_DELETE = "FinishedToDelete";
 
     /**
      * The constant UNDOLOG_DELETE
