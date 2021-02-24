@@ -32,6 +32,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
      * the key is the db's resource id
      * the value is the step
      */
-    public static final Map<String, Integer> RESOURCE_ID_STEP_CACHE = new ConcurrentHashMap<>(8);
+    public static final Map<String, BigDecimal> RESOURCE_ID_STEP_CACHE = new ConcurrentHashMap<>(8);
 
     /**
      * Instantiates a new Abstract dml base executor.
@@ -144,7 +145,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
                 // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                 if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
                     firstId.next();
-                    return autoGeneratePks(firstId.getLong(1), autoColumnName, updateCount);
+                    return autoGeneratePks(firstId.getBigDecimal(1), autoColumnName, updateCount);
                 }
             } else {
                 throw e;
@@ -189,8 +190,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         throw new NotSupportYetException();
     }
 
-    protected Map<String, List<Object>> autoGeneratePks(Long first, String autoColumnName, Integer updateCount) throws SQLException {
-        int step = 1;
+    protected Map<String, List<Object>> autoGeneratePks(BigDecimal cursor, String autoColumnName, Integer updateCount) throws SQLException {
+        BigDecimal step = BigDecimal.ONE;
         String resourceId = statementProxy.getConnectionProxy().getDataSourceProxy().getResourceId();
         if (RESOURCE_ID_STEP_CACHE.containsKey(resourceId)) {
             step = RESOURCE_ID_STEP_CACHE.get(resourceId);
@@ -198,13 +199,13 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
 
             increment.next();
-            step = increment.getInt(2);
+            step = increment.getBigDecimal(2);
             RESOURCE_ID_STEP_CACHE.put(resourceId, step);
         }
 
         List<Object> pkValues = new ArrayList<>();
         for (int i = 0; i < updateCount; i++) {
-            pkValues.add(first + i * step);
+            pkValues.add(cursor.add(step));
         }
 
         Map<String, List<Object>> pkValuesMap = new HashMap<>(1, 1.001f);
