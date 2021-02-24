@@ -181,7 +181,7 @@ public class SessionHolder {
                                     globalSession.setActive(true);
                                     break;
                                 default:
-                                    LOGGER.error("Could not handle the ");
+                                    LOGGER.error("Could not handle the global session, xid: {}", globalSession.getXid());
                                     throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
                             }
                             break;
@@ -365,7 +365,7 @@ public class SessionHolder {
     }
 
     /**
-     * finished lock
+     * error states lock
      *
      * @return the boolean
      */
@@ -428,7 +428,7 @@ public class SessionHolder {
     }
 
     /**
-     * un finished lock
+     * un error states lock
      *
      * @return the boolean
      */
