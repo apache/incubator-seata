@@ -92,7 +92,7 @@ public class MySQLInsertExecutorTest {
         when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
 
         MockResultSet resultSet = new MockResultSet(statementProxy);
-        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", BigDecimal.ONE}});
+        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", "1"}});
         when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'")).thenReturn(resultSet);
 
         StatementCallback statementCallback = mock(StatementCallback.class);
