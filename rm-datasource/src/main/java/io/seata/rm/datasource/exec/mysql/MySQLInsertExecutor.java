@@ -199,7 +199,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
 
             increment.next();
-            step = increment.getBigDecimal(2);
+            step = new BigDecimal(increment.getObject(2).toString());
             RESOURCE_ID_STEP_CACHE.put(resourceId, step);
         }
 
