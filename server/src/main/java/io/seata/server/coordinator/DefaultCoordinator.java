@@ -99,7 +99,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     /**
      * The constant FINISHED_RETRY_PERIOD
      */
-    protected static final long FINISHED_RETRY_PERIOD = 24 * 60 * 60 * 1000;
+    protected static final long ERROR_STATUS_RETRY_PERIOD = 24 * 60 * 60 * 1000;
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -137,7 +137,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("AsyncCommitting", 1));
 
-    private ScheduledThreadPoolExecutor errorStatus;
+    private ScheduledThreadPoolExecutor errorStates = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("ErrorStates", 1));
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
@@ -370,10 +371,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         });
     }
 
-    protected void handleFinished() {
+    protected void handleErrorStates() {
         GlobalStatus[] errorStatuses = new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Committed,
-                GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.Rollbacked,
-                GlobalStatus.RollbackFailed, GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished};
+                GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
+                GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished};
         List<GlobalSession> finishedGlobalSessions = SessionHolder.getRootSessionManager()
                 .findGlobalSessions(new SessionCondition(errorStatuses));
 
@@ -449,20 +450,18 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
-        errorStatus = new ScheduledThreadPoolExecutor(1,
-                new NamedThreadFactory("TxTimeoutCheck", 1));
-        errorStatus.scheduleAtFixedRate(() -> {
-            boolean lock = SessionHolder.finishedLock();
+        errorStates.scheduleAtFixedRate(() -> {
+            boolean lock = SessionHolder.errorStateLock();
             if (lock) {
                 try {
-                    handleFinished();
+                    handleErrorStates();
                 } catch (Exception e) {
-                    LOGGER.info("Exception deal finished", e);
+                    LOGGER.info("Exception deal error statuses ...", e);
                 } finally {
-                    SessionHolder.unFinishedLock();
+                    SessionHolder.unErrorStateLock();
                 }
             }
-        }, 0, FINISHED_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        }, 0, ERROR_STATUS_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
             boolean lock = SessionHolder.txTimeoutCheckLock();
@@ -518,14 +517,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
         undoLogDelete.shutdown();
-        finished.shutdown();
+        errorStates.shutdown();
         try {
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            finished.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            errorStates.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
 
         }
