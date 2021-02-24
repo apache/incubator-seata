@@ -43,6 +43,7 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -581,9 +582,9 @@ public class MySQLInsertExecutorTest {
 
     @Test
     public void test_autoGeneratePks() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = MySQLInsertExecutor.class.getDeclaredMethod("autoGeneratePks", new Class[]{Long.class, String.class, Integer.class});
+        Method method = MySQLInsertExecutor.class.getDeclaredMethod("autoGeneratePks", new Class[]{BigDecimal.class, String.class, Integer.class});
         method.setAccessible(true);
-        Object resp = method.invoke(insertExecutor, 1L, "ID", 3);
+        Object resp = method.invoke(insertExecutor, BigDecimal.ONE, "ID", 3);
 
         Assertions.assertNotNull(resp);
         Assertions.assertTrue(resp instanceof Map);
