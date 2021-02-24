@@ -97,7 +97,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         1000L);
 
     /**
-     * The constant FINISHED_RETRY_PERIOD
+     * The constant ERROR_STATUS_RETRY_PERIOD
      */
     protected static final long ERROR_STATUS_RETRY_PERIOD = 24 * 60 * 60 * 1000;
 
