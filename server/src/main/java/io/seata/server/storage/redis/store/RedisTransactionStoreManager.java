@@ -144,8 +144,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> branchTransactionDOMap = jedis.hgetAll(branchKey);
-            String xid = branchTransactionDOMap.get(REDIS_KEY_BRANCH_XID);
+            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
             if (StringUtils.isEmpty(xid)) {
                 return true;
             }
@@ -215,11 +214,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> globalTransactionDoMap = jedis.hgetAll(globalKey);
-            String xid = globalTransactionDoMap.get(REDIS_KEY_GLOBAL_XID);
+            String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
             if (StringUtils.isEmpty(xid)) {
                 LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
-                        globalTransactionDO.getXid());
+                    globalTransactionDO.getXid());
                 return true;
             }
             Pipeline pipelined = jedis.pipelined();
