@@ -145,7 +145,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
                 // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                 if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
                     firstId.next();
-                    return autoGeneratePks(firstId.getBigDecimal(1), autoColumnName, updateCount);
+                    return autoGeneratePks(new BigDecimal(firstId.getString(1)), autoColumnName, updateCount);
                 }
             } else {
                 throw e;
@@ -199,7 +199,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
 
             increment.next();
-            step = new BigDecimal(increment.getObject(2).toString());
+            step = new BigDecimal(increment.getString(2));
             RESOURCE_ID_STEP_CACHE.put(resourceId, step);
         }
 
