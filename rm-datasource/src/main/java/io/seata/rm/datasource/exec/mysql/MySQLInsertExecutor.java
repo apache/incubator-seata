@@ -41,6 +41,7 @@ import java.util.Objects;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author jsbxyyx
@@ -60,7 +61,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
      * the key is the db's resource id
      * the value is the step
      */
-    public static final Map<String, Integer> RESOURCE_ID_STEP_CACHE = new HashMap<>(8);
+    public static final Map<String, Integer> RESOURCE_ID_STEP_CACHE = new ConcurrentHashMap<>(8);
 
     /**
      * Instantiates a new Abstract dml base executor.
