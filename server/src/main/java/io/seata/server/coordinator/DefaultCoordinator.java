@@ -373,8 +373,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     protected void handleFinishedToDeleteStates() {
         GlobalStatus[] finishedStatus = new GlobalStatus[]{GlobalStatus.UnKnown, GlobalStatus.Committed,
-                GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
-                GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished};
+            GlobalStatus.CommitFailed, GlobalStatus.Rollbacked, GlobalStatus.RollbackFailed,
+            GlobalStatus.TimeoutRollbacked, GlobalStatus.TimeoutRollbackFailed, GlobalStatus.Finished};
         List<GlobalSession> finishedGlobalSessions = SessionHolder.getRootSessionManager()
                 .findGlobalSessions(new SessionCondition(finishedStatus));
 
