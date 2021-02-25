@@ -34,7 +34,11 @@ import java.util.stream.Stream;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.util.StringFormatUtils.DOT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.*;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
  * @author xingfudeshi@gmail.com
