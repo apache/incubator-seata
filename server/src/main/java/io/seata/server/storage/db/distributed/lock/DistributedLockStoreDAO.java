@@ -180,7 +180,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
 
     protected boolean insertDistribute(Connection connection, DistributedLockDO distributedLockDO) throws SQLException {
         try (PreparedStatement insertPst = connection.prepareStatement(DistributeLockSqlFactory.getDistributeLogStoreSql(dbType)
-                .getInsertSql(distributeLockTable))){
+                .getInsertSql(distributeLockTable))) {
             insertPst.setString(1, distributedLockDO.getLockKey());
             insertPst.setString(2, distributedLockDO.getLockValue());
             insertPst.setLong(3, distributedLockDO.getExpire());
