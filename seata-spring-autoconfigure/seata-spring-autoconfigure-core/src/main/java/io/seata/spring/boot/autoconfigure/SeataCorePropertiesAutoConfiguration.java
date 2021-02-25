@@ -16,6 +16,8 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
+import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.*;
 import io.seata.spring.boot.autoconfigure.properties.registry.*;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
@@ -60,6 +62,9 @@ public class SeataCorePropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
+
+        PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
+        PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
     }
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)

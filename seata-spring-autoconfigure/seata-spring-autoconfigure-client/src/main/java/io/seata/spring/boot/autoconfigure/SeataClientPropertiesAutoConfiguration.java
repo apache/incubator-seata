@@ -25,9 +25,7 @@ import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 
@@ -40,8 +38,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 
@@ -59,10 +55,8 @@ public class SeataClientPropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(LOCK_PREFIX, LockProperties.class);
         PROPERTY_BEAN_MAP.put(SERVICE_PREFIX, ServiceProperties.class);
         PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
-        PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, UndoProperties.class);
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
         PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
-        PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
     }
 }
