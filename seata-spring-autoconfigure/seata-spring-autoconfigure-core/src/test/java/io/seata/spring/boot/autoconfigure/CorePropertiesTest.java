@@ -19,15 +19,8 @@ import java.util.Map;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
-import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -45,24 +38,12 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
-import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
-import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
-import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
-import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -71,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author xingfudeshi@gmail.com
  */
-public class PropertiesTest {
+public class CorePropertiesTest {
     private static AnnotationConfigApplicationContext context;
 
     @BeforeAll
@@ -81,44 +62,6 @@ public class PropertiesTest {
         context.registerBeanDefinition("seataProperties", BeanDefinitionBuilder.genericBeanDefinition(SeataProperties.class).getBeanDefinition());
     }
 
-    @Test
-    public void testLockProperties() {
-        assertEquals(10, context.getBean(LockProperties.class).getRetryInterval());
-        assertEquals(30, context.getBean(LockProperties.class).getRetryTimes());
-        assertTrue(context.getBean(LockProperties.class).isRetryPolicyBranchRollbackOnConflict());
-    }
-
-    @Test
-    public void testLogProperties() {
-        assertEquals(100, context.getBean(LogProperties.class).getExceptionRate());
-    }
-
-    @Test
-    public void testRmProperties() {
-        assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
-        assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
-        assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
-        assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
-        assertEquals(60000L,context.getBean(RmProperties.class).getTableMetaCheckerInterval());
-        assertFalse(context.getBean(RmProperties.class).isSagaRetryPersistModeUpdate());
-        assertFalse(context.getBean(RmProperties.class).isSagaCompensatePersistModeUpdate());
-    }
-
-    @Test
-    public void testServiceProperties() {
-        ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
-        Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
-        Map<String, String> grouplist = serviceProperties.getGrouplist();
-        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
-        assertEquals("127.0.0.1:8091", grouplist.get("default"));
-        assertFalse(serviceProperties.isEnableDegrade());
-        assertFalse(serviceProperties.isDisableGlobalTransaction());
-    }
-
-    @Test
-    public void testShutdownProperties() {
-        assertEquals(3L, context.getBean(ShutdownProperties.class).getWait());
-    }
 
     @Test
     public void testThreadFactoryProperties() {
@@ -134,13 +77,6 @@ public class PropertiesTest {
     }
 
     @Test
-    public void testTmProperties() {
-        assertEquals(DEFAULT_TM_COMMIT_RETRY_COUNT, context.getBean(TmProperties.class).getCommitRetryCount());
-        assertEquals(DEFAULT_TM_ROLLBACK_RETRY_COUNT, context.getBean(TmProperties.class).getRollbackRetryCount());
-        assertEquals(DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, context.getBean(TmProperties.class).getDefaultGlobalTransactionTimeout());
-    }
-
-    @Test
     public void testTransportProperties() {
         assertEquals("TCP", context.getBean(TransportProperties.class).getType());
         assertEquals("NIO", context.getBean(TransportProperties.class).getServer());
@@ -148,13 +84,6 @@ public class PropertiesTest {
         assertEquals("seata", context.getBean(TransportProperties.class).getSerialization());
         assertEquals("none", context.getBean(TransportProperties.class).getCompressor());
         assertTrue(context.getBean(TransportProperties.class).isEnableClientBatchSendRequest());
-    }
-
-    @Test
-    public void testUndoProperties() {
-        assertTrue(context.getBean(UndoProperties.class).isDataValidation());
-        assertEquals("jackson", context.getBean(UndoProperties.class).getLogSerialization());
-        assertEquals(DEFAULT_TRANSACTION_UNDO_LOG_TABLE, context.getBean(UndoProperties.class).getLogTable());
     }
 
     @Test
@@ -282,55 +211,6 @@ public class PropertiesTest {
 
     }
 
-    @Test
-    public void testServerProperties() {
-        assertFalse(context.getBean(ServerProperties.class).getRollbackRetryTimeoutUnlockEnable());
-    }
-
-    @Test
-    public void testServerRecoveryProperties() {
-        assertEquals(context.getBean(ServerRecoveryProperties.class).getAsynCommittingRetryPeriod(), 1000);
-    }
-
-    @Test
-    public void testServerUndoProperties() {
-        assertEquals(context.getBean(ServerUndoProperties.class).getLogDeletePeriod(), 86400000);
-    }
-
-    @Test
-    public void testMetricsProperties() {
-        assertEquals(context.getBean(MetricsProperties.class).getExporterList(), "prometheus");
-    }
-
-    @Test
-    public void testStoreProperties() {
-        assertEquals(context.getBean(StoreProperties.class).getMode(), "file");
-    }
-
-    @Test
-    public void testStoreFileProperties() {
-        assertEquals(context.getBean(StoreFileProperties.class).getDir(), "sessionStore");
-    }
-
-    @Test
-    public void testStoreDBProperties() {
-        assertEquals(context.getBean(StoreDBProperties.class).getDatasource(), "druid");
-    }
-
-    @Test
-    public void testStoreRedisProperties() {
-        assertEquals(context.getBean(StoreRedisProperties.class).getMode(), "single");
-    }
-
-    @Test
-    public void testStoreRedisPropertiesSingle() {
-        assertEquals(context.getBean(StoreRedisProperties.Single.class).getHost(), "127.0.0.1");
-    }
-
-    @Test
-    public void testStoreRedisPropertiesSentinel() {
-        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), "");
-    }
 
     @AfterAll
     public static void closeContext() {
