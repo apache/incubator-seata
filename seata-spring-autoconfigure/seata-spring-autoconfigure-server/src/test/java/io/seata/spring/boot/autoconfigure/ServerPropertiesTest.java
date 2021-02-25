@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-
 import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
@@ -44,8 +43,6 @@ public class ServerPropertiesTest {
     @BeforeAll
     public static void initContext() {
         context = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
-//        context.registerBeanDefinition("springCloudAlibabaConfiguration", BeanDefinitionBuilder.genericBeanDefinition(SpringCloudAlibabaConfiguration.class).getBeanDefinition());
-//        context.registerBeanDefinition("seataProperties", BeanDefinitionBuilder.genericBeanDefinition(SeataProperties.class).getBeanDefinition());
     }
 
     @Test

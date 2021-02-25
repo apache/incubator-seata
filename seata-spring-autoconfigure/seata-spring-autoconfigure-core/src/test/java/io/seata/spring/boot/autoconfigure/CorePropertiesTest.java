@@ -15,8 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import java.util.Map;
-
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
