@@ -27,6 +27,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_
 @ConfigurationProperties(prefix = CONFIG_CONSUL_PREFIX)
 public class ConfigConsulProperties {
     private String serverAddr = "127.0.0.1:8500";
+    private String aclToken = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -37,4 +38,12 @@ public class ConfigConsulProperties {
         return this;
     }
 
+    public String getAclToken() {
+        return aclToken;
+    }
+
+    public ConfigConsulProperties setAclToken(String aclToken) {
+        this.aclToken = aclToken;
+        return this;
+    }
 }
