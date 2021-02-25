@@ -77,12 +77,15 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
 
             DistributedLockDO distributedLockDOFromDB = getDistributeLockDO(connection, distributedLockDO.getLockKey());
             if (null == distributedLockDOFromDB) {
-                return insertDistribute(connection, distributedLockDO);
+                boolean ret = insertDistribute(connection, distributedLockDO);
+                connection.commit();
+                return ret;
             }
 
             if (distributedLockDOFromDB.getExpire() >= System.currentTimeMillis()) {
                 LOGGER.info("the distribute lock for key :{} is holding by :{}, acquire lock failure.",
                         distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
+                connection.commit();
                 return false;
             }
 
@@ -128,6 +131,7 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                     && !Objects.equals(distributedLockDOFromDB.getLockValue(), distributedLockDO.getLockValue())) {
                 LOGGER.warn("the distribute lock for key :{} is holding by :{}, skip the release lock.",
                         distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
+                connection.commit();
                 return true;
             }
             distributedLockDO.setLockValue(StringUtils.SPACE);
