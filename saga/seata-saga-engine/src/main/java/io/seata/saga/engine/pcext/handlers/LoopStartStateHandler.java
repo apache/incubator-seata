@@ -153,7 +153,7 @@ public class LoopStartStateHandler implements StateHandler {
                     isFinished = semaphore.tryAcquire(maxInstances, AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
                 }
 
-                LoopTaskUtils.putContextToParent(context, loopContextList);
+                LoopTaskUtils.putContextToParent(context, loopContextList, instruction.getState(context));
             }
         } catch (InterruptedException e) {
             LOGGER.error("State: [{}] wait loop execution complete is interrupted, message: [{}]",

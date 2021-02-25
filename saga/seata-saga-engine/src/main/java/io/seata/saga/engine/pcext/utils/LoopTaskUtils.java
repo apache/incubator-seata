@@ -264,22 +264,17 @@ public class LoopTaskUtils {
         int nrOfCompletedInstances = currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            synchronized (currentLoopContext) {
-                if (!currentLoopContext.isCompletionConditionSatisfied()) {
+            Map<String, Object> stateMachineContext = (Map<String, Object>)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+            // multi-instance variables should be double/float while evaluate
+            stateMachineContext.put(DomainConstants.NUMBER_OF_INSTANCES, (double)nrOfInstances);
+            stateMachineContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
+            stateMachineContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES,
+                (double)nrOfCompletedInstances);
 
-                    Map<String, Object> stateMachineContext = (Map<String, Object>)context.getVariable(
-                        DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-                    // multi-instance variables should be double/float while evaluate
-                    stateMachineContext.put(DomainConstants.NUMBER_OF_INSTANCES, (double)nrOfInstances);
-                    stateMachineContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
-                    stateMachineContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES,
-                        (double)nrOfCompletedInstances);
-
-                    if (nrOfCompletedInstances >= nrOfInstances || getEvaluator(context,
-                        currentState.getLoop().getCompletionCondition()).evaluate(stateMachineContext)) {
-                        currentLoopContext.setCompletionConditionSatisfied(true);
-                    }
-                }
+            if (nrOfCompletedInstances >= nrOfInstances || getEvaluator(context,
+                currentState.getLoop().getCompletionCondition()).evaluate(stateMachineContext)) {
+                currentLoopContext.setCompletionConditionSatisfied(true);
             }
         }
 
@@ -337,17 +332,21 @@ public class LoopTaskUtils {
      *
      * @param context
      */
-    public static void putContextToParent(ProcessContext context, List<ProcessContext> subContextList) {
+    public static void putContextToParent(ProcessContext context, List<ProcessContext> subContextList, State state) {
         if (CollectionUtils.isNotEmpty(subContextList)) {
             Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
 
+            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+
             List<Map<String, Object>> subContextVariables = new ArrayList<>();
             for (ProcessContext subProcessContext : subContextList) {
-                Map<String, Object> localVariables = (Map<String, Object>)subProcessContext.getVariable(
-                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-                localVariables.remove(DomainConstants.LOOP_RESULT);
-                subContextVariables.add(localVariables);
+                StateInstance stateInstance = (StateInstance)subProcessContext.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+
+                Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
+                    stateMachineConfig.getExpressionFactoryManager(), (AbstractTaskState)state, stateInstance.getOutputParams());
+                subContextVariables.add(outputVariablesToContext);
             }
 
             contextVariables.put(DomainConstants.LOOP_RESULT, subContextVariables);
