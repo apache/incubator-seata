@@ -24,7 +24,7 @@ public class DistributeLockSqlFactory {
     /**
      * get the lock store sql
      *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase，it's useless now, but maybe useful later
+     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase, it's useless now, but maybe useful later
      * @return lock store sql
      */
     public static DistributeLockSql getDistributeLogStoreSql(String dbType) {
