@@ -101,6 +101,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (null != stateInstance && !LoopContextHolder.getCurrent(context, true).isFailEnd()) {
                 if (!ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     LoopContextHolder.getCurrent(context, true).setFailEnd(true);
+                    LoopTaskUtils.putContextToParent(context);
                 }
             }
 
