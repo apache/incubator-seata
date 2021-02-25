@@ -350,26 +350,18 @@ public class LoopTaskUtils {
             }
 
             contextVariables.put(DomainConstants.LOOP_RESULT, subContextVariables);
-        }
-
-    }
-
-    /**
-     * put loop out context to parent context
-     *
-     * @param context
-     */
-    public static void putContextToParent(ProcessContext context) {
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        ProcessContextImpl processContext = (ProcessContextImpl)context;
-        if (CollectionUtils.isNotEmpty(contextVariables) && null != processContext.getParent()) {
-            Map<String, Object> parentContextVariables = (Map<String, Object>)processContext.getParent().getVariable(
+        } else {
+            Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-            parentContextVariables.putAll(contextVariables);
+            ProcessContextImpl processContext = (ProcessContextImpl)context;
+            if (CollectionUtils.isNotEmpty(contextVariables) && null != processContext.getParent()) {
+                Map<String, Object> parentContextVariables = (Map<String, Object>)processContext.getParent().getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+                parentContextVariables.putAll(contextVariables);
+            }
         }
-    }
 
+    }
 
     /**
      * forward with subStateMachine should check each loop state's status
