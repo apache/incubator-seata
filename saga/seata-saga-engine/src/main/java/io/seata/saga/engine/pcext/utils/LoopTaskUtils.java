@@ -333,9 +333,9 @@ public class LoopTaskUtils {
      * @param context
      */
     public static void putContextToParent(ProcessContext context, List<ProcessContext> subContextList, State state) {
+        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
         if (CollectionUtils.isNotEmpty(subContextList)) {
-            Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
 
             StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
@@ -351,8 +351,6 @@ public class LoopTaskUtils {
 
             contextVariables.put(DomainConstants.LOOP_RESULT, subContextVariables);
         } else {
-            Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
             ProcessContextImpl processContext = (ProcessContextImpl)context;
             if (CollectionUtils.isNotEmpty(contextVariables) && null != processContext.getParent()) {
                 Map<String, Object> parentContextVariables = (Map<String, Object>)processContext.getParent().getVariable(
