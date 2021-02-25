@@ -86,7 +86,10 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                 return false;
             }
 
-            return updateDistributeLock(connection, distributedLockDO);
+            boolean ret = updateDistributeLock(connection, distributedLockDO);
+            connection.commit();
+
+            return ret;
         } catch (SQLException ex) {
             LOGGER.error("execute acquire lock failure, key is: {}", distributedLockDO.getLockKey(), ex);
             try {
@@ -100,7 +103,6 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
         } finally {
             try {
                 if (originalAutoCommit) {
-                    connection.commit();
                     connection.setAutoCommit(true);
                 }
                 JdbcUtils.close(connection);
@@ -129,7 +131,10 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
                 return true;
             }
             distributedLockDO.setLockValue(StringUtils.SPACE);
-            return updateDistributeLock(connection, distributedLockDO);
+            boolean ret = updateDistributeLock(connection, distributedLockDO);
+
+            connection.commit();
+            return ret;
         } catch (SQLException ex) {
             LOGGER.error("execute release lock failure, key is: {}", distributedLockDO.getLockKey(), ex);
 
@@ -144,7 +149,6 @@ public class DistributedLockStoreDAO implements DistributedLockStore {
         } finally {
             try {
                 if (originalAutoCommit) {
-                    connection.commit();
                     connection.setAutoCommit(true);
                 }
                 JdbcUtils.close(connection);
