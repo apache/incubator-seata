@@ -25,8 +25,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -57,6 +60,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
+
+    /**
+     * If the global session's status is Rollbacking and currentTime - createTime >= ROLLBACKING_DEAD_THRESHOLD
+     *  then the tx will be remand as need to retry rollback
+     */
+    private static final int ROLLBACKING_RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+            .getInt(ConfigurationKeys.ROLLBACKING_RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_ROLLBACKING_RETRY_DEAD_THRESHOLD);
 
     private String xid;
 
@@ -161,7 +171,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return if true force roll back
      */
     public boolean isRollbackingDead() {
-        return (System.currentTimeMillis() - beginTime) > (2 * 6000);
+        return (System.currentTimeMillis() - beginTime) > ROLLBACKING_RETRY_DEAD_THRESHOLD;
     }
 
     @Override
