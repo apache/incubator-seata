@@ -66,6 +66,8 @@ public class MessageFuture {
             throw (RuntimeException)result;
         } else if (result instanceof Throwable) {
             throw new RuntimeException((Throwable)result);
+        } else if (result == null) {
+            throw new InterruptedException("Can not connect to services-server");
         }
 
         return result;
