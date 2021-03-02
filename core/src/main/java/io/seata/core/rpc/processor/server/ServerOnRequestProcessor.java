@@ -33,7 +33,6 @@ import io.seata.core.protocol.transaction.GlobalReportRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.raft.AbstractRaftServer;
-import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftClosure;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.rpc.RemotingServer;

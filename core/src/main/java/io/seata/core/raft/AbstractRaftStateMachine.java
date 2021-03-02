@@ -16,10 +16,7 @@
 package io.seata.core.raft;
 
 import java.util.concurrent.atomic.AtomicLong;
-
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
-
-import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 
 /**
  * @author funkye
