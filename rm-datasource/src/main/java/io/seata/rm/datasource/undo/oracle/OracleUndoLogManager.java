@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.oracle;
 
 
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
