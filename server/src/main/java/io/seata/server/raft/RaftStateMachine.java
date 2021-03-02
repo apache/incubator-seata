@@ -37,7 +37,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
-import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
