@@ -350,13 +350,6 @@ public class LoopTaskUtils {
             }
 
             contextVariables.put(DomainConstants.LOOP_RESULT, subContextVariables);
-        } else {
-            ProcessContextImpl processContext = (ProcessContextImpl)context;
-            if (CollectionUtils.isNotEmpty(contextVariables) && null != processContext.getParent()) {
-                Map<String, Object> parentContextVariables = (Map<String, Object>)processContext.getParent().getVariable(
-                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-                parentContextVariables.putAll(contextVariables);
-            }
         }
 
     }

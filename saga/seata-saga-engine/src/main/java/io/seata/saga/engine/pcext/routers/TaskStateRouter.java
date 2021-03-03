@@ -16,7 +16,6 @@
 package io.seata.saga.engine.pcext.routers;
 
 import java.util.Stack;
-import java.util.concurrent.Semaphore;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.exception.EngineExecutionException;
@@ -65,7 +64,7 @@ public class TaskStateRouter implements StateRouter {
 
         // check if in loop async condition
         if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE))) {
-            return loopRoute(context);
+            return null;
         }
 
         //The current CompensationTriggerState can mark the compensation process is started and perform compensation
@@ -197,9 +196,4 @@ public class TaskStateRouter implements StateRouter {
         return instruction;
     }
 
-    private Instruction loopRoute(ProcessContext context) {
-        Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
-        semaphore.release();
-        return null;
-    }
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -80,6 +81,8 @@ public class EngineUtils {
     public static void endStateMachine(ProcessContext context) {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+            Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+            semaphore.release();
             return;
         }
 
