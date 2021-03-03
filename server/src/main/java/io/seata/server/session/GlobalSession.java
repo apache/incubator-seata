@@ -19,7 +19,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -82,6 +84,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
+    /**
+     * The high reliable session map.
+     */
+    public static Map<GlobalStatus, Set<GlobalSession>> reliableSessionMap = new ConcurrentHashMap<>();
 
     /**
      * Add boolean.
@@ -666,18 +672,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
+        // first save global session in reliable map
+        saveInReliableMap(GlobalStatus.AsyncCommitting);
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
         this.changeStatus(GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
+        // first save global session in reliable map
+        saveInReliableMap(GlobalStatus.CommitRetrying);
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
         SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
         this.changeStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
+        // first save global session in reliable map
+        saveInReliableMap(GlobalStatus.RollbackRetrying);
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
         GlobalStatus currentStatus = this.getStatus();
@@ -686,5 +698,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         } else {
             this.changeStatus(GlobalStatus.RollbackRetrying);
         }
+    }
+
+    /**
+     * Save global session in reliable map
+     * @param status global status
+     */
+    private void saveInReliableMap(GlobalStatus status) {
+        Set<GlobalSession> sessions = reliableSessionMap.get(status);
+        if (sessions == null) {
+            sessions = new HashSet<>();
+        }
+        sessions.add(this);
+        reliableSessionMap.put(status, sessions);
     }
 }
