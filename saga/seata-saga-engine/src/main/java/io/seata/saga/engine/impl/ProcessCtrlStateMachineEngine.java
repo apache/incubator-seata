@@ -330,7 +330,6 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             } else {
                 stateMachineConfig.getProcessCtrlEventPublisher().publish(context);
             }
-
         } catch (EngineExecutionException e) {
             LOGGER.error("Operation [forward] failed", e);
             throw e;
