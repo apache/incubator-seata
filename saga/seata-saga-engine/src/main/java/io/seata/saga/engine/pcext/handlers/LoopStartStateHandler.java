@@ -21,11 +21,11 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateInstruction;
-import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.LoopContextHolder;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
@@ -33,8 +33,6 @@ import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.TaskState.Loop;
 import org.slf4j.Logger;
@@ -61,18 +59,8 @@ public class LoopStartStateHandler implements StateHandler {
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         instruction.setTemporaryState(null);
-        State currentState = instruction.getState(context);
-        StateInstance stateToBeCompensated = null;
 
-        State compensationTriggerState = (State)((HierarchicalProcessContext)context).getVariableLocally(
-            DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
-        if (null != compensationTriggerState) {
-            CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
-            stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(currentState.getName());
-            currentState = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(stateToBeCompensated));
-        }
-
-        Loop loop = LoopTaskUtils.getLoopConfig(context, currentState);
+        Loop loop = LoopTaskUtils.getLoopConfig(context, instruction.getState(context));
         LoopContextHolder loopContextHolder = LoopContextHolder.getCurrent(context, true);
         Semaphore semaphore = null;
         int maxInstances = 0;
@@ -90,11 +78,8 @@ public class LoopStartStateHandler implements StateHandler {
             if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
                 LoopTaskUtils.reloadLoopContext(context, instruction.getState(context).getName());
                 totalInstances = loopContextHolder.getNrOfInstances().get() - loopContextHolder.getNrOfCompletedInstances().get();
-            } else if (null != compensationTriggerState) {
-                LoopTaskUtils.createCompensateContext(context, stateToBeCompensated);
-                totalInstances = loopContextHolder.getNrOfInstances().get();
             } else {
-                LoopTaskUtils.createLoopContext(context);
+                LoopTaskUtils.createLoopCounterContext(context);
                 totalInstances = loopContextHolder.getNrOfInstances().get();
             }
             maxInstances = Math.min(loop.getParallel(), totalInstances);
@@ -108,21 +93,15 @@ public class LoopStartStateHandler implements StateHandler {
                     semaphore.acquire();
 
                     ProcessContextImpl tempContext;
-                    // fail end inst should be forward
-                    if (!loopContextHolder.getFailEndIndexStack().isEmpty()) {
-                        int failEndLoopCounter = loopContextHolder.getFailEndIndexStack().pop();
+                    // fail end inst should be forward without completion condition check
+                    if (!loopContextHolder.getForwardCounterStack().isEmpty()) {
+                        int failEndLoopCounter = loopContextHolder.getForwardCounterStack().pop();
                         tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, failEndLoopCounter);
                     } else if (loopContextHolder.isFailEnd() || LoopTaskUtils.isCompletionConditionSatisfied(context)) {
                         semaphore.release();
                         break;
                     } else {
-                        if (null != compensationTriggerState) {
-                            StateInstance stateInstance = CompensationHolder.getCurrent(context, true).getStateStackNeedCompensation().pop();
-                            tempContext = (ProcessContextImpl)LoopTaskUtils.createCompensateLoopEventContext(context, stateInstance);
-                            loopContextHolder.getNrOfInstances().decrementAndGet();
-                        } else {
-                            tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, -1);
-                        }
+                        tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, -1);
                     }
 
                     if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
@@ -161,21 +140,26 @@ public class LoopStartStateHandler implements StateHandler {
             LOGGER.error("State: [{}] wait loop execution complete is interrupted, message: [{}]",
                 instruction.getStateName(), e.getMessage());
             throw new EngineExecutionException(e);
+        } finally {
+            context.removeVariable(DomainConstants.LOOP_SEMAPHORE);
+            context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
+            LoopContextHolder.clearCurrent(context);
         }
 
-        context.removeVariable(DomainConstants.LOOP_SEMAPHORE);
-        context.removeVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE);
-
-        if (LoopTaskUtils.needCompensate(context)) {
-            // route to compensationTriggerState as normally
-            if (!Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_FIRST_COMPENSATION_STATE_STARTED))) {
-                context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
+        if (loopContextHolder.isFailEnd()) {
+            String currentExceptionRoute = LoopTaskUtils.decideCurrentExceptionRoute(loopContextList, stateMachineInstance.getStateMachine());
+            if (StringUtils.isNotBlank(currentExceptionRoute)) {
+                ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, currentExceptionRoute);
+            } else {
+                for (ProcessContext processContext : loopContextList) {
+                    if (processContext.hasVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION)) {
+                        Exception exception = (Exception)processContext.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+                        EngineUtils.failStateMachine(context, exception);
+                        break;
+                    }
+                }
             }
-        } else if (!loopContextHolder.getLoopExpContext().isEmpty()) {
-            Exception exception = loopContextHolder.getLoopExpContext().peek();
-            EngineUtils.failStateMachine(context, exception);
         }
-        LoopContextHolder.clearCurrent(context);
 
     }
 }

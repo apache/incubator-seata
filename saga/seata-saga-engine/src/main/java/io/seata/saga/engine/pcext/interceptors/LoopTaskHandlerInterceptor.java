@@ -18,12 +18,10 @@ package io.seata.saga.engine.pcext.interceptors;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
@@ -104,7 +102,6 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                 }
             }
 
-            Stack<Exception> expStack = LoopContextHolder.getCurrent(context, true).getLoopExpContext();
             Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
             if (exp == null) {
                 exp = e;
@@ -118,12 +115,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
 
             if (null != exp) {
-                expStack.push(exp);
-                String next = (String)((HierarchicalProcessContext)context).getVariableLocally(
-                    DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
-                if (StringUtils.isNotBlank(next) && next.equals(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER)) {
-                    LoopContextHolder.getCurrent(context, true).setNeedCompensate(true);
-                }
+                LoopContextHolder.getCurrent(context, true).setFailEnd(true);
             } else {
                 LoopContextHolder.getCurrent(context, true).getNrOfCompletedInstances().incrementAndGet();
             }

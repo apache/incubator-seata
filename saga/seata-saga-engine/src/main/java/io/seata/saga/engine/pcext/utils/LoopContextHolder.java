@@ -29,15 +29,13 @@ import io.seata.saga.statelang.domain.DomainConstants;
  */
 public class LoopContextHolder {
 
-    private AtomicInteger nrOfInstances = new AtomicInteger();
-    private AtomicInteger nrOfActiveInstances = new AtomicInteger();
-    private AtomicInteger nrOfCompletedInstances = new AtomicInteger();
-    private volatile boolean needCompensate = false;
+    private final AtomicInteger nrOfInstances = new AtomicInteger();
+    private final AtomicInteger nrOfActiveInstances = new AtomicInteger();
+    private final AtomicInteger nrOfCompletedInstances = new AtomicInteger();
     private volatile boolean failEnd = false;
     private volatile boolean completionConditionSatisfied = false;
-    private Stack<Exception> loopExpContext = new Stack<>();
-    private Stack<Integer> loopIndexStack = new Stack<>();
-    private Stack<Integer> failEndIndexStack = new Stack<>();
+    private final Stack<Integer> loopCounterStack = new Stack<>();
+    private final Stack<Integer> forwardCounterStack = new Stack<>();
     private Collection collection;
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
@@ -73,14 +71,6 @@ public class LoopContextHolder {
         return nrOfCompletedInstances;
     }
 
-    public boolean isNeedCompensate() {
-        return needCompensate;
-    }
-
-    public void setNeedCompensate(boolean needCompensate) {
-        this.needCompensate = needCompensate;
-    }
-
     public boolean isFailEnd() {
         return failEnd;
     }
@@ -97,16 +87,12 @@ public class LoopContextHolder {
         this.completionConditionSatisfied = completionConditionSatisfied;
     }
 
-    public Stack<Exception> getLoopExpContext() {
-        return loopExpContext;
+    public Stack<Integer> getLoopCounterStack() {
+        return loopCounterStack;
     }
 
-    public Stack<Integer> getLoopIndexStack() {
-        return loopIndexStack;
-    }
-
-    public Stack<Integer> getFailEndIndexStack() {
-        return failEndIndexStack;
+    public Stack<Integer> getForwardCounterStack() {
+        return forwardCounterStack;
     }
 
     public Collection getCollection() {

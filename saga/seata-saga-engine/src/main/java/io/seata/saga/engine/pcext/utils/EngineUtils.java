@@ -81,8 +81,10 @@ public class EngineUtils {
     public static void endStateMachine(ProcessContext context) {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
-            Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
-            semaphore.release();
+            if (context.hasVariable(DomainConstants.LOOP_SEMAPHORE)) {
+                Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+                semaphore.release();
+            }
             return;
         }
 

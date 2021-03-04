@@ -175,10 +175,6 @@ public class TaskStateRouter implements StateRouter {
                         EngineUtils.generateParentId(stateToBeCompensated));
                 }
 
-                if (null != LoopTaskUtils.getLoopConfig(context, state)) {
-                    instruction.setTemporaryState(new LoopStartStateImpl());
-                }
-
                 return instruction;
             }
         }

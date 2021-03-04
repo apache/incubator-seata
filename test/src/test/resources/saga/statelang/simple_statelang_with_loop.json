@@ -13,7 +13,8 @@
                 "Parallel": 3,
                 "Collection": "$.[collection]",
                 "ElementVariableName": "element",
-                "ElementIndexName": "loopCounter"
+                "ElementIndexName": "loopCounter",
+                "CompletionCondition": "[nrOfCompletedInstances] == ([collection].size()-4)"
             },
             "Input": [
                 {
@@ -31,11 +32,11 @@
             "Type": "Choice",
             "Choices":[
                 {
-                    "Expression": "[a] == 1",
+                    "Expression": "[loopResult].?[#this[fooResult] == null].size() == 0 && [a] == 1",
                     "Next":"SecondState"
                 },
                 {
-                    "Expression": "[a] == 2",
+                    "Expression": "[loopResult].?[#this[fooResult] == null].size() == 0 && [a] == 2",
                     "Next":"CallSubStateMachine"
                 }
             ],
@@ -65,7 +66,7 @@
                     "Exceptions": [
                         "io.seata.saga.engine.mock.DemoException"
                     ],
-                    "Next": "CompensationTrigger"
+                    "Next": "CompensationTriggerTest"
                 }
             ]
         },
@@ -120,7 +121,7 @@
                 }
             ]
         },
-        "CompensationTrigger": {
+        "CompensationTriggerTest": {
             "Type": "CompensationTrigger",
             "Next": "Fail"
         },
