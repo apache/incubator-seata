@@ -347,7 +347,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected void handleAsyncCommitting() {
         Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getAsyncCommittingSessionManager()
-                .allSessions();
+            .allSessions();
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
