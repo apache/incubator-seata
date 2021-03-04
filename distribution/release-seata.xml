@@ -23,39 +23,30 @@
         <format>zip</format>
     </formats>
     <fileSets>
-
         <fileSet>
             <includes>
-                <include>plugins/**</include>
+                <include>seata-server-${project.version}/plugins/**</include>
+                <include>seata-server-${project.version}/conf/**</include>
+                <include>seata-server-${project.version}/lib/**</include>
+                <include>seata-server-${project.version}/logs/</include>
             </includes>
+            <excludes>
+                <exclude>seata-server-${project.version}/lib/mysql-connector-java-*.jar</exclude>
+            </excludes>
         </fileSet>
 
         <fileSet>
             <includes>
-                <include>conf/**</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
-            <includes>
-                <include>bin/*</include>
+                <include>seata-server-${project.version}/bin/*</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
 
-        <fileSet>
-            <includes>
-                <include>lib/**</include>
-            </includes>
-            <excludes>
-                <exclude>lib/mysql-connector-java-*.jar</exclude>
-            </excludes>
-        </fileSet>
     </fileSets>
     <files>
         <file>
             <source>LICENSE-BIN</source>
-            <destName>LICENSE</destName>
+            <destName>seata-server-${project.version}/LICENSE</destName>
         </file>
     </files>
 
