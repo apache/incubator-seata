@@ -17,9 +17,7 @@ package io.seata.server.coordinator;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.netty.channel.Channel;
@@ -275,12 +273,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry rollbacking.
      */
     protected void handleRetryRollbacking() {
-        Set<GlobalSession> retryRollbackingSet = getGlobalSessionFormStoreAndReliableMap(GlobalStatus.RollbackRetrying);
-        if (CollectionUtils.isEmpty(retryRollbackingSet)) {
+        Collection<GlobalSession> rollbackingSessions = SessionHolder.getRetryRollbackingSessionManager().allSessions();
+        if (CollectionUtils.isEmpty(rollbackingSessions)) {
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHelper.forEach(retryRollbackingSet, rollbackingSession -> {
+        SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
                 if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
@@ -300,10 +298,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-                boolean commitResult = core.doGlobalRollback(rollbackingSession, true);
-                if (commitResult) {
-                    GlobalSession.reliableSessionMap.remove(GlobalStatus.RollbackRetrying);
-                }
+                core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
@@ -314,12 +309,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry committing.
      */
     protected void handleRetryCommitting() {
-        Set<GlobalSession> retryCommittingSet = getGlobalSessionFormStoreAndReliableMap(GlobalStatus.CommitRetrying);
-        if (CollectionUtils.isEmpty(retryCommittingSet)) {
+        Collection<GlobalSession> committingSessions = SessionHolder.getRetryCommittingSessionManager().allSessions();
+        if (CollectionUtils.isEmpty(committingSessions)) {
             return;
         }
         long now = System.currentTimeMillis();
-        SessionHelper.forEach(retryCommittingSet, committingSession -> {
+        SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**
@@ -331,10 +326,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-                boolean commitResult = core.doGlobalCommit(committingSession, true);
-                if (commitResult) {
-                    GlobalSession.reliableSessionMap.remove(GlobalStatus.CommitRetrying);
-                }
+                core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
             }
@@ -349,11 +341,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle async committing.
      */
     protected void handleAsyncCommitting() {
-        Set<GlobalSession> asyncCommittingSet = getGlobalSessionFormStoreAndReliableMap(GlobalStatus.AsyncCommitting);
-        if (CollectionUtils.isEmpty(asyncCommittingSet)) {
+        Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getAsyncCommittingSessionManager()
+                .allSessions();
+        if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        SessionHelper.forEach(asyncCommittingSet, asyncCommittingSession -> {
+        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
                 // Instruction reordering in DefaultCore#asyncCommit may cause this situation
                 if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
@@ -361,40 +354,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-                boolean commitResult = core.doGlobalCommit(asyncCommittingSession, true);
-                if (commitResult) {
-                    GlobalSession.reliableSessionMap.remove(GlobalStatus.AsyncCommitting);
-                }
+                core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
             }
         });
-    }
-
-    /**
-     * Get global session from store and reliableMap
-     * @param status global session status
-     * @return session status set
-     */
-    private Set<GlobalSession> getGlobalSessionFormStoreAndReliableMap(GlobalStatus status) {
-        Set<GlobalSession> sessionSet = new HashSet<>();
-        Set<GlobalSession> reliableSessions = GlobalSession.reliableSessionMap.get(status);
-        Collection<GlobalSession> storeSessions = null;
-        if (GlobalStatus.CommitRetrying == status) {
-            storeSessions  = SessionHolder.getRetryCommittingSessionManager().allSessions();
-        } else if (GlobalStatus.AsyncCommitting == status) {
-            storeSessions  = SessionHolder.getAsyncCommittingSessionManager().allSessions();
-        } else if (GlobalStatus.RollbackRetrying == status) {
-            storeSessions  = SessionHolder.getRetryRollbackingSessionManager().allSessions();
-        }
-
-        if (CollectionUtils.isNotEmpty(storeSessions)) {
-            sessionSet.addAll(storeSessions);
-        }
-        if (CollectionUtils.isNotEmpty(reliableSessions)) {
-            sessionSet.addAll(reliableSessions);
-        }
-        return sessionSet;
     }
 
     /**
