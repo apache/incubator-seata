@@ -3,7 +3,7 @@ CREATE TABLE undo_log
 (
     id            NUMBER(19)    NOT NULL,
     branch_id     NUMBER(19)    NOT NULL,
-    xid           VARCHAR2(100) NOT NULL,
+    xid           VARCHAR2(128) NOT NULL,
     context       VARCHAR2(128) NOT NULL,
     rollback_info BLOB          NOT NULL,
     log_status    NUMBER(10)    NOT NULL,
