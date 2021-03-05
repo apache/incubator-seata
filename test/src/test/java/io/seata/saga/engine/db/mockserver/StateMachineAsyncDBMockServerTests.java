@@ -177,7 +177,7 @@ public class StateMachineAsyncDBMockServerTests {
     }
 
     @Test
-    public void testStateMachineWithComplextParams() {
+    public void testStateMachineWithComplexParams() {
 
         long start = System.currentTimeMillis();
 
@@ -187,7 +187,7 @@ public class StateMachineAsyncDBMockServerTests {
         people.setAge(18);
         paramMap.put("people", people);
 
-        String stateMachineName = "simpleStateMachineWithComplexParams";
+        String stateMachineName = "simpleStateMachineWithComplexParamsJackson";
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
 

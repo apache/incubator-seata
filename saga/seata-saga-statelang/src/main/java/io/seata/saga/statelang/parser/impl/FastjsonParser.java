@@ -40,6 +40,11 @@ public class FastjsonParser implements JsonParser {
         SerializerFeature.WriteClassName,
         SerializerFeature.PrettyFormat };
 
+    private static final SerializerFeature[] FEATURES_PRETTY = new SerializerFeature[] {
+        SerializerFeature.DisableCircularReferenceDetect,
+        SerializerFeature.WriteDateUseDateFormat,
+        SerializerFeature.PrettyFormat };
+
     public static final String NAME = "fastjson";
 
     @Override
@@ -49,11 +54,26 @@ public class FastjsonParser implements JsonParser {
 
     @Override
     public String toJsonString(Object o, boolean prettyPrint) {
+        return toJsonString(o, false, prettyPrint);
+    }
+
+    @Override
+    public String toJsonString(Object o, boolean ignoreAutoType, boolean prettyPrint) {
         if (prettyPrint) {
-            return JSON.toJSONString(o, SERIALIZER_FEATURES_PRETTY);
+            if (ignoreAutoType) {
+                return JSON.toJSONString(o, FEATURES_PRETTY);
+            }
+            else {
+                return JSON.toJSONString(o, SERIALIZER_FEATURES_PRETTY);
+            }
         }
         else {
-            return JSON.toJSONString(o, SERIALIZER_FEATURES);
+            if (ignoreAutoType) {
+                return JSON.toJSONString(o);
+            }
+            else {
+                return JSON.toJSONString(o, SERIALIZER_FEATURES);
+            }
         }
     }
 

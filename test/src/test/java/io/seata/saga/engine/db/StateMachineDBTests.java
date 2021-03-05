@@ -24,6 +24,8 @@ import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.mock.DemoService.Engineer;
+import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
@@ -246,6 +248,36 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertNotNull(globalTransaction);
         System.out.println(globalTransaction.getStatus());
         Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void testStateMachineWithComplexParams() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        People people = new People();
+        people.setName("lilei");
+        people.setAge(18);
+
+        Engineer engineer = new Engineer();
+        engineer.setName("programmer");
+
+        paramMap.put("people", people);
+        paramMap.put("career", engineer);
+
+        String stateMachineName = "simpleStateMachineWithComplexParamsJackson";
+
+        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
+        Assertions.assertNotNull(peopleResult);
+        Assertions.assertTrue(people.getName().equals(people.getName()));
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + instance.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
     }
 
     @Test

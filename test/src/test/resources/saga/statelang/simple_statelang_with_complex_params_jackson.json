@@ -1,6 +1,6 @@
 {
-    "Name": "simpleStateMachineWithComplexParams",
-    "Comment": "带复杂参数的测试状态机定义fastjson格式",
+    "Name": "simpleStateMachineWithComplexParamsJackson",
+    "Comment": "带复杂参数的测试状态机定义jackson格式",
     "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
@@ -14,53 +14,75 @@
                 "$.[people].name",
                 "$.[people].age",
                 {
-                    "name": "$.[people].name",
-                    "age": "$.[people].age",
+                    "@type": "io.seata.saga.engine.mock.DemoService$People",
+                    "name": "lilei",
+                    "age": 18,
                     "childrenArray": [
-                        {
-                            "name": "$.[people].name",
-                            "age": "$.[people].age"
-                        },
-                        {
-                            "name": "$.[people].name",
-                            "age": "$.[people].age"
-                        }
+                        "[Lio.seata.saga.engine.mock.DemoService$People;",
+                        [
+                            {
+                                "@type": "io.seata.saga.engine.mock.DemoService$People",
+                                "name": "lilei",
+                                "age": 18
+                            },
+                            {
+                                "@type": "io.seata.saga.engine.mock.DemoService$People",
+                                "name": "lilei",
+                                "age": 18
+                            }
+                        ]
                     ],
                     "childrenList": [
-                        {
-                            "name": "$.[people].name",
-                            "age": "$.[people].age"
-                        },
-                        {
-                            "name": "$.[people].name",
-                            "age": "$.[people].age"
-                        }
+                        "java.util.ArrayList",
+                        [
+                            {
+                                "@type": "io.seata.saga.engine.mock.DemoService$People",
+                                "name": "lilei",
+                                "age": 18
+                            },
+                            {
+                                "@type": "io.seata.saga.engine.mock.DemoService$People",
+                                "name": "lilei",
+                                "age": 18
+                            }
+                        ]
                     ],
                     "childrenMap": {
+                        "@type": "java.util.LinkedHashMap",
                         "lilei": {
-                            "name": "$.[people].name",
-                            "age": "$.[people].age"
+                            "@type": "io.seata.saga.engine.mock.DemoService$People",
+                            "name": "lilei",
+                            "age": 18
                         }
                     }
                 },
                 [
-                    {
-                        "name": "$.[people].name",
-                        "age": "$.[people].age"
-                    },
-                    {
-                        "name": "$.[people].name",
-                        "age": "$.[people].age"
-                    }
+                    "[Lio.seata.saga.engine.mock.DemoService$People;",
+                    [
+                        {
+                            "@type": "io.seata.saga.engine.mock.DemoService$People",
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        },
+                        {
+                            "@type": "io.seata.saga.engine.mock.DemoService$People",
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        }
+                    ]
                 ],
                 [
-                    {
-                        "@type": "io.seata.saga.engine.mock.DemoService$People",
-                        "name": "$.[people].name",
-                        "age": "$.[people].age"
-                    }
+                    "java.util.ArrayList",
+                    [
+                        {
+                            "@type": "io.seata.saga.engine.mock.DemoService$People",
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        }
+                    ]
                 ],
                 {
+                    "@type": "java.util.LinkedHashMap",
                     "lilei": {
                         "@type": "io.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",

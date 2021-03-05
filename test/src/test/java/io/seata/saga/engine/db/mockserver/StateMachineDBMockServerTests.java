@@ -613,7 +613,7 @@ public class StateMachineDBMockServerTests {
     }
 
     @Test
-    public void testStateMachineWithComplextParams() {
+    public void testStateMachineWithComplexParams() {
 
         long start = System.currentTimeMillis();
 
@@ -628,7 +628,7 @@ public class StateMachineDBMockServerTests {
         paramMap.put("people", people);
         paramMap.put("career", engineer);
 
-        String stateMachineName = "simpleStateMachineWithComplexParams";
+        String stateMachineName = "simpleStateMachineWithComplexParamsJackson";
 
         StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 

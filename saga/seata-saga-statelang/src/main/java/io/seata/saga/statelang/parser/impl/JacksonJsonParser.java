@@ -61,15 +61,31 @@ public class JacksonJsonParser implements JsonParser {
 
     @Override
     public String toJsonString(Object o, boolean prettyPrint) {
+        return toJsonString(o, false, prettyPrint);
+    }
+
+    @Override
+    public String toJsonString(Object o, boolean ignoreAutoType, boolean prettyPrint) {
         try {
             if (o instanceof List && ((List) o).isEmpty()) {
                 return "[]";
             }
             if (prettyPrint) {
-                return objectMapperWithAutoType.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+                if (ignoreAutoType) {
+                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+                }
+                else {
+                    return objectMapperWithAutoType.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+                }
+
             }
             else {
-                return objectMapperWithAutoType.writeValueAsString(o);
+                if (ignoreAutoType) {
+                    return objectMapper.writeValueAsString(o);
+                }
+                else {
+                    return objectMapperWithAutoType.writeValueAsString(o);
+                }
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Parse object to json error", e);
