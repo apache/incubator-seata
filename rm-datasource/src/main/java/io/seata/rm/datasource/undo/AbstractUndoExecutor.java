@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.util.BlobUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -162,7 +163,7 @@ public abstract class AbstractUndoExecutor {
             if (type == JDBCType.BLOB.getVendorTypeNumber()) {
                 SerialBlob serialBlob = (SerialBlob) value;
                 if (serialBlob != null) {
-                    undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
+                    undoPST.setBytes(undoIndex, BlobUtils.blob2Bytes(serialBlob));
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
