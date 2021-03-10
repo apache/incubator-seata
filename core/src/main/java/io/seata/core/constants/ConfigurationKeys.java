@@ -406,9 +406,9 @@ public interface ConfigurationKeys {
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
     /**
-     * the constant ROLLBACKING_RETRY_DEAD_THRESHOLD
+     * the constant RETRY_DEAD_THRESHOLD
      */
-    String ROLLBACKING_RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "rollbackingDeadRetryThreshold";
+    String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "deadRetryThreshold";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.

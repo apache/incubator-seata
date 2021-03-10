@@ -62,11 +62,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         MAX_GLOBAL_SESSION_SIZE));
 
     /**
-     * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= ROLLBACKING_DEAD_THRESHOLD
+     * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
      *  then the tx will be remand as need to retry rollback
      */
-    private static final int ROLLBACKING_RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
-            .getInt(ConfigurationKeys.ROLLBACKING_RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_ROLLBACKING_RETRY_DEAD_THRESHOLD);
+    private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+            .getInt(ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
     private String xid;
 
@@ -171,7 +171,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return if true retry commit or roll back
      */
     public boolean isDeadSession() {
-        return (System.currentTimeMillis() - beginTime) > ROLLBACKING_RETRY_DEAD_THRESHOLD;
+        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
     }
 
     @Override
