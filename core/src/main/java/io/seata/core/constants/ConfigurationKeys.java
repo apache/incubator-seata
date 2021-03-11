@@ -408,7 +408,7 @@ public interface ConfigurationKeys {
     /**
      * the constant RETRY_DEAD_THRESHOLD
      */
-    String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "deadRetryThreshold";
+    String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.
