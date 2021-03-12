@@ -15,9 +15,6 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import java.lang.reflect.Method;
-import javax.sql.DataSource;
-
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -27,6 +24,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
 import org.springframework.beans.BeanUtils;
+
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -53,15 +53,14 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        if (!RootContext.requireGlobalLock()
-                && dataSourceProxyMode != RootContext.getBranchType()) {
+        if (!RootContext.requireGlobalLock() && dataSourceProxyMode != RootContext.getBranchType()) {
             return invocation.proceed();
         }
 
         Method method = invocation.getMethod();
         Object[] args = invocation.getArguments();
         Method m = BeanUtils.findDeclaredMethod(dataSourceProxyClazz, method.getName(), method.getParameterTypes());
-        if (m != null) {
+        if (m != null && !Object.class.equals(method.getDeclaringClass())) {
             SeataDataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
             return m.invoke(dataSourceProxy, args);
         } else {
@@ -73,4 +72,6 @@ public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, Introd
     public Class<?>[] getInterfaces() {
         return new Class[]{SeataProxy.class};
     }
+
+
 }
