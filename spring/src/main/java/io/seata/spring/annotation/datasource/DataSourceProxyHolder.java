@@ -80,14 +80,19 @@ public class DataSourceProxyHolder {
             originalDataSource = dataSource;
         }
 
-        if (dataSourceProxyMap.get(originalDataSource) == null) {
+        SeataDataSourceProxy dsProxy = dataSourceProxyMap.get(originalDataSource);
+        if (dsProxy == null) {
             synchronized (dataSourceProxyMap) {
-                if (dataSourceProxyMap.get(originalDataSource) == null) {
-                    dataSourceProxyMap.put(originalDataSource, BranchType.XA == dataSourceProxyMode ?
-                            new DataSourceProxyXA(originalDataSource) : new DataSourceProxy(originalDataSource));
+                if ((dsProxy = dataSourceProxyMap.get(originalDataSource)) == null) {
+                    dsProxy = createDsProxyByMode(dataSourceProxyMode, originalDataSource);
+                    dataSourceProxyMap.put(originalDataSource, dsProxy);
                 }
             }
         }
-        return dataSourceProxyMap.get(originalDataSource);
+        return dsProxy;
+    }
+
+    private SeataDataSourceProxy createDsProxyByMode(BranchType mode, DataSource originDs) {
+        return BranchType.XA == mode ? new DataSourceProxyXA(originDs) : new DataSourceProxy(originDs);
     }
 }
