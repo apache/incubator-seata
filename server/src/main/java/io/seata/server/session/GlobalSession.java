@@ -157,10 +157,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * prevent could not handle rollbacking transaction
-     * @return if true force roll back
+     * prevent could not handle committing and rollbacking transaction
+     * @return if true retry commit or roll back
      */
-    public boolean isRollbackingDead() {
+    public boolean isDeadSession() {
         return (System.currentTimeMillis() - beginTime) > (2 * 6000);
     }
 

@@ -81,7 +81,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>1.4.0</seata.version>
+<seata.version>1.4.1</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
@@ -123,6 +123,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 ## Seata ecosystem
 
 * [Seata Ecosystem Entry](https://github.com/seata) - A GitHub group `seata` to gather all Seata relevant projects
+* [Seata GoLang](https://github.com/opentrx/seata-golang) - Seata GoLang client and server
 * [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
 * [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s

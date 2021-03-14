@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.BlobUtils;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
