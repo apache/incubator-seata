@@ -118,7 +118,7 @@ public class MySQLInsertOrUpdateExecutorTest {
 
     @Test
     public void testBuildImageSQL(){
-        String selectSQLStr = "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? )  FOR UPDATE";
+        String selectSQLStr = "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
         String paramAppenderListStr = "[[userId1, 100], [userId2, 101]]";
         mockImageParamperterMap_contain_constant();
         List<String> insertParamsList = new ArrayList<>();
