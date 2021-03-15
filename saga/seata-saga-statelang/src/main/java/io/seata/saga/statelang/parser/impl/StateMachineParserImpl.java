@@ -44,6 +44,12 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
 
+    public StateMachineParserImpl(String jsonParserName) {
+        if (StringUtils.isNotBlank(jsonParserName)) {
+            this.jsonParserName = jsonParserName;
+        }
+    }
+
     @Override
     public StateMachine parse(String json) {
 
@@ -71,6 +77,18 @@ public class StateMachineParserImpl implements StateMachineParser {
         Object isPersist = node.get("IsPersist");
         if (Boolean.FALSE.equals(isPersist)) {
             stateMachine.setPersist(false);
+        }
+
+        // customize if update origin or append new retryStateInstLog
+        Object isRetryPersistModeUpdate = node.get("IsRetryPersistModeUpdate");
+        if (isRetryPersistModeUpdate instanceof Boolean) {
+            stateMachine.setRetryPersistModeUpdate(Boolean.TRUE.equals(isRetryPersistModeUpdate));
+        }
+
+        // customize if update last or append new compensateStateInstLog
+        Object isCompensatePersistModeUpdate = node.get("IsCompensatePersistModeUpdate");
+        if (isCompensatePersistModeUpdate instanceof Boolean) {
+            stateMachine.setCompensatePersistModeUpdate(Boolean.TRUE.equals(isCompensatePersistModeUpdate));
         }
 
         Map<String, Object> statesNode = (Map<String, Object>) node.get("States");
