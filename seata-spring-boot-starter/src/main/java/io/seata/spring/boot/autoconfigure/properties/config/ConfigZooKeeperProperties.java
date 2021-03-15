@@ -31,6 +31,7 @@ public class ConfigZooKeeperProperties {
     private long connectTimeout = 2000L;
     private String username = "";
     private String password = "";
+    private String nodePath = "/seata/seata.properties";
 
     public String getServerAddr() {
         return serverAddr;
@@ -74,6 +75,15 @@ public class ConfigZooKeeperProperties {
 
     public ConfigZooKeeperProperties setPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    public String getNodePath() {
+        return nodePath;
+    }
+
+    public ConfigZooKeeperProperties setNodePath(String nodePath) {
+        this.nodePath = nodePath;
         return this;
     }
 }
