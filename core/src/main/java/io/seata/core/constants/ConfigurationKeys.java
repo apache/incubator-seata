@@ -159,6 +159,11 @@ public interface ConfigurationKeys {
     String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
 
     /**
+     * The constant CLIENT_TABLE_META_CHECKER_INTERVAL.
+     */
+    String CLIENT_TABLE_META_CHECKER_INTERVAL = CLIENT_RM_PREFIX + "tableMetaCheckerInterval";
+
+    /**
      * The constant CLIENT_TM_PREFIX.
      */
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
@@ -399,6 +404,11 @@ public interface ConfigurationKeys {
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
      */
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
+
+    /**
+     * the constant RETRY_DEAD_THRESHOLD
+     */
+    String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.

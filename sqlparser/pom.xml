@@ -29,6 +29,7 @@
 
     <modules>
         <module>seata-sqlparser-core</module>
+        <module>seata-sqlparser-antlr</module>
         <module>seata-sqlparser-druid</module>
     </modules>
 </project>
