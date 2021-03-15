@@ -186,7 +186,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return null;
             });
         } catch (SQLException e) {
-            if (targetConnection != null && !getAutoCommit()) {
+            if (targetConnection != null && !getAutoCommit() && !getContext().isAutoCommitChanged()) {
                 rollback();
             }
             throw e;
@@ -278,6 +278,16 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             report(false);
         }
         context.reset();
+    }
+
+    /**
+     * change connection autoCommit to false by seata
+     *
+     * @throws SQLException
+     */
+    public void changeAutoCommit() throws SQLException {
+        getContext().setAutoCommitChanged(true);
+        setAutoCommit(false);
     }
 
     @Override
