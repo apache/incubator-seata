@@ -42,7 +42,7 @@ CREATE INDEX idx_xid ON public.branch_table (xid);
 CREATE TABLE IF NOT EXISTS public.lock_table
 (
     row_key        VARCHAR(128) NOT NULL,
-    xid            VARCHAR(96),
+    xid            VARCHAR(128),
     transaction_id BIGINT,
     branch_id      BIGINT       NOT NULL,
     resource_id    VARCHAR(256),
