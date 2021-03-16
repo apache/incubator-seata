@@ -170,8 +170,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
             }
 
-            if (StringUtils.hasText((String) startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
-                inst.setParentId((String) startParams.get(DomainConstants.VAR_NAME_PARENT_ID));
+            if (StringUtils.hasText((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
+                inst.setParentId((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID));
                 startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
             }
         }
