@@ -4,6 +4,10 @@ store:
 
   ## store mode: file、db、redis
   mode: file
+  lock:
+    mode: file
+  session:
+    mode: file
   ## file store property
   file:
     ## store location dir
