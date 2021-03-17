@@ -16,6 +16,7 @@
 package io.seata.server.lock;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
@@ -26,11 +27,13 @@ import io.seata.core.constants.ConfigurationKeys;
  */
 public class LockerManagerFactory {
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * the lock manager
      */
     private static final LockManager LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class,
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE));
+        CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE, CONFIG.getConfig(ConfigurationKeys.STORE_MODE)));
 
     /**
      * Get lock manager.
@@ -40,4 +43,5 @@ public class LockerManagerFactory {
     public static LockManager getLockManager() {
         return LOCK_MANAGER;
     }
+
 }

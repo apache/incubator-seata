@@ -19,6 +19,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
@@ -37,6 +38,8 @@ public class ParameterParser {
     private static final String PROGRAM_NAME
         = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    
     @Parameter(names = "--help", help = true)
     private boolean help;
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
@@ -81,8 +84,8 @@ public class ParameterParser {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
             if (StringUtils.isBlank(storeMode)) {
-                storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
-                    SERVER_DEFAULT_STORE_MODE);
+                storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+                    CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
             }
         } catch (ParameterException e) {
             printError(e);

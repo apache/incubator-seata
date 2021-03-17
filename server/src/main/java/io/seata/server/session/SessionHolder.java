@@ -90,7 +90,8 @@ public class SessionHolder {
      */
     public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+            mode =
+                CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE, CONFIG.getConfig(ConfigurationKeys.STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
