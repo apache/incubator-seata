@@ -16,7 +16,7 @@
 package io.seata.core.event;
 
 /**
- * The interface fot event bus.
+ * The interface for event bus.
  *
  * @author zhengyangyong
  */
