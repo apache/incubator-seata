@@ -85,7 +85,8 @@ public class MySQLInsertExecutorTest {
     public void init() throws SQLException {
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
-        when(connectionProxy.getDataSourceProxy()).thenReturn(new DataSourceProxy(new MockDataSource()));
+        DataSourceProxy dataSourceProxy = new DataSourceProxy(new MockDataSource());
+        when(connectionProxy.getDataSourceProxy()).thenReturn(dataSourceProxy);
 
         statementProxy = mock(PreparedStatementProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
