@@ -44,6 +44,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -80,6 +81,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 
 /**
  * The type Seata properties auto configuration
@@ -107,6 +109,7 @@ public class SeataPropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
         PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
+        PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
 
         PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
         PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
