@@ -15,11 +15,17 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.mysql.jdbc.ResultSetImpl;
+import com.mysql.jdbc.util.ResultSetUtil;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
+import io.seata.rm.datasource.mock.MockDataSource;
+import io.seata.rm.datasource.mock.MockResultSet;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -35,6 +41,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -73,12 +82,19 @@ public class MySQLInsertExecutorTest {
     private HashMap<String,Integer> pkIndexMap;
 
     @BeforeEach
-    public void init() {
+    public void init() throws SQLException {
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
+        DataSourceProxy dataSourceProxy = new DataSourceProxy(new MockDataSource());
+        when(connectionProxy.getDataSourceProxy()).thenReturn(dataSourceProxy);
 
         statementProxy = mock(PreparedStatementProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+        when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
+
+        MockResultSet resultSet = new MockResultSet(statementProxy);
+        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", "1"}});
+        when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'")).thenReturn(resultSet);
 
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
@@ -563,6 +579,20 @@ public class MySQLInsertExecutorTest {
         pkValues.add(new SqlSequenceExpr());
         pkValues.add(SqlDefaultExpr.get());
         Assertions.assertFalse(insertExecutor.checkPkValuesForSinglePk(pkValues, false));
+    }
+
+    @Test
+    public void test_autoGeneratePks() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = MySQLInsertExecutor.class.getDeclaredMethod("autoGeneratePks", new Class[]{BigDecimal.class, String.class, Integer.class});
+        method.setAccessible(true);
+        Object resp = method.invoke(insertExecutor, BigDecimal.ONE, "ID", 3);
+
+        Assertions.assertNotNull(resp);
+        Assertions.assertTrue(resp instanceof Map);
+
+        Map<String, List> map = (Map<String, List>) resp;
+        Assertions.assertEquals(map.size(), 1);
+        Assertions.assertEquals(map.get("ID").size(), 3);
     }
 
     private List<String> mockInsertColumns() {
