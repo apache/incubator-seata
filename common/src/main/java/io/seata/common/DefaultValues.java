@@ -121,4 +121,9 @@ public interface DefaultValues {
      */
     String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
 
+
+    /**
+     * the constant DEFAULT_RETRY_DEAD_THRESHOLD
+     */
+    int DEFAULT_RETRY_DEAD_THRESHOLD = 2 * 60 * 1000 + 10 * 1000;
 }
