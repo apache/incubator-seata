@@ -27,10 +27,8 @@ import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.invoker.ServiceInvoker;
 import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
@@ -38,6 +36,8 @@ import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.statelang.domain.ServiceTaskState;
 import io.seata.saga.statelang.domain.TaskState.Retry;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
+import io.seata.saga.statelang.parser.JsonParser;
+import io.seata.saga.statelang.parser.JsonParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -55,6 +55,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
+    private String sagaJsonParser;
 
     @Override
     public Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable {
@@ -136,21 +137,16 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Map<Retry, AtomicInteger> retryCountMap = new HashMap<>();
         while (true) {
-
             try {
                 return invokeMethod(bean, method, args);
             } catch (Throwable e) {
-
                 Retry matchedRetryConfig = matchRetryConfig(state.getRetry(), e);
                 if (matchedRetryConfig == null) {
                     throw e;
                 }
 
-                if (!retryCountMap.containsKey(matchedRetryConfig)) {
-                    retryCountMap.put(matchedRetryConfig, new AtomicInteger(0));
-                }
-
-                AtomicInteger retryCount = retryCountMap.get(matchedRetryConfig);
+                AtomicInteger retryCount = CollectionUtils.computeIfAbsent(retryCountMap, matchedRetryConfig,
+                    key -> new AtomicInteger(0));
                 if (retryCount.intValue() >= matchedRetryConfig.getMaxAttempts()) {
                     throw e;
                 }
@@ -175,18 +171,15 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     private Retry matchRetryConfig(List<Retry> retryList, Throwable e) {
-
-        if (retryList != null && retryList.size() > 0) {
+        if (CollectionUtils.isNotEmpty(retryList)) {
             for (Retry retryConfig : retryList) {
-
                 List<String> exceptions = retryConfig.getExceptions();
-                if (exceptions == null || exceptions.size() == 0) {
+                if (CollectionUtils.isEmpty(exceptions)) {
                     // Exceptions not configured, Match current exception if it is NetException.
                     if (ExceptionUtils.isNetException(e)) {
                         return retryConfig;
                     }
                 } else {
-
                     List<Class<? extends Exception>> exceptionClasses = retryConfig.getExceptionClasses();
                     if (exceptionClasses == null) {
                         synchronized (retryConfig) {
@@ -246,8 +239,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     protected Method findMethod(Class<?> clazz, String methodName, List<String> parameterTypes) {
-
-        if (parameterTypes == null || parameterTypes.size() == 0) {
+        if (CollectionUtils.isEmpty(parameterTypes)) {
             return BeanUtils.findDeclaredMethodWithMinimalParameters(clazz, methodName);
         } else {
             Class[] paramClassTypes = new Class[parameterTypes.size()];
@@ -304,8 +296,12 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else if (isPrimitive(paramType)) {
             return value;
         } else {
-            String jsonValue = JSON.toJSONString(value);
-            return JSON.parseObject(jsonValue, paramType, Feature.SupportAutoType);
+            JsonParser jsonParser = JsonParserFactory.getJsonParser(getSagaJsonParser());
+            if (jsonParser == null) {
+                throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
+            }
+            String jsonValue = jsonParser.toJsonString(value, true, false);
+            return jsonParser.parse(jsonValue, paramType, false);
         }
     }
 
@@ -351,5 +347,13 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else {
             return null;
         }
+    }
+
+    public String getSagaJsonParser() {
+        return sagaJsonParser;
+    }
+
+    public void setSagaJsonParser(String sagaJsonParser) {
+        this.sagaJsonParser = sagaJsonParser;
     }
 }

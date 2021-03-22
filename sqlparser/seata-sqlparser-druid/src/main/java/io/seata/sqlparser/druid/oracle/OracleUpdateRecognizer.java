@@ -72,6 +72,9 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
                 SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
+                    //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
+                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
@@ -99,7 +102,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }

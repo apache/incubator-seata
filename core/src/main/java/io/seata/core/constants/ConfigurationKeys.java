@@ -23,6 +23,11 @@ package io.seata.core.constants;
 public interface ConfigurationKeys {
 
     /**
+     * The constant SEATA_PREFIX.
+     */
+    String SEATA_PREFIX = "seata.";
+
+    /**
      * The constant SERVICE_PREFIX.
      */
     String SERVICE_PREFIX = "service.";
@@ -36,6 +41,11 @@ public interface ConfigurationKeys {
      * The constant STORE_MODE.
      */
     String STORE_MODE = STORE_PREFIX + "mode";
+
+    /**
+     * The constant STORE_PUBLIC_KEY.
+     */
+    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
 
     /**
      * The constant STORE_FILE_PREFIX
@@ -129,6 +139,16 @@ public interface ConfigurationKeys {
     String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
+     * The constant CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE.
+     */
+    String CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaRetryPersistModeUpdate";
+
+    /**
+     * The constant CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE.
+     */
+    String CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaCompensatePersistModeUpdate";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
@@ -137,6 +157,11 @@ public interface ConfigurationKeys {
      * The constant CLIENT_TABLE_META_CHECK_ENABLE.
      */
     String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "tableMetaCheckEnable";
+
+    /**
+     * The constant CLIENT_TABLE_META_CHECKER_INTERVAL.
+     */
+    String CLIENT_TABLE_META_CHECKER_INTERVAL = CLIENT_RM_PREFIX + "tableMetaCheckerInterval";
 
     /**
      * The constant CLIENT_TM_PREFIX.
@@ -293,6 +318,26 @@ public interface ConfigurationKeys {
     String TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS = CLIENT_UNDO_PREFIX + "onlyCareUpdateColumns";
 
     /**
+     * the constant CLIENT_UNDO_COMPRESS_PREFIX
+     */
+    String CLIENT_UNDO_COMPRESS_PREFIX = CLIENT_UNDO_PREFIX + "compress.";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_TYPE
+     */
+    String CLIENT_UNDO_COMPRESS_TYPE = CLIENT_UNDO_COMPRESS_PREFIX + "type";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_ENABLE
+     */
+    String CLIENT_UNDO_COMPRESS_ENABLE = CLIENT_UNDO_COMPRESS_PREFIX + "enable";
+
+    /**
+     * the constant CLIENT_UNDO_COMPRESS_THRESHOLD
+     */
+    String CLIENT_UNDO_COMPRESS_THRESHOLD = CLIENT_UNDO_COMPRESS_PREFIX + "threshold";
+
+    /**
      * The constant METRICS_PREFIX.
      */
     String METRICS_PREFIX = "metrics.";
@@ -336,14 +381,14 @@ public interface ConfigurationKeys {
      */
     String TRANSACTION_UNDO_LOG_TABLE = CLIENT_UNDO_PREFIX + "logTable";
     /**
-     * The constant CLIENT_LOG_PREFIX
+     * The constant LOG_PREFIX
      */
-    String CLIENT_LOG_PREFIX = CLIENT_PREFIX + "log.";
+    String LOG_PREFIX = "log.";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_EXCEPTION_RATE
      */
-    String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_LOG_PREFIX + "exceptionRate";
+    String TRANSACTION_LOG_EXCEPTION_RATE = LOG_PREFIX + "exceptionRate";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
@@ -359,6 +404,31 @@ public interface ConfigurationKeys {
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
      */
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
+
+    /**
+     * the constant RETRY_DEAD_THRESHOLD
+     */
+    String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
+
+    /**
+     * The constant MIN_SERVER_POOL_SIZE.
+     */
+    String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
+
+    /**
+     * The constant MAX_SERVER_POOL_SIZE.
+     */
+    String MAX_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "maxServerPoolSize";
+
+    /**
+     * The constant MAX_TASK_QUEUE_SIZE.
+     */
+    String MAX_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxTaskQueueSize";
+
+    /**
+     * The constant KEEP_ALIVE_TIME.
+     */
+    String KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "keepAliveTime";
 
     /**
      * The constant TRANSPORT_TYPE
@@ -451,9 +521,29 @@ public interface ConfigurationKeys {
     String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlParserType";
 
     /**
+     * The constant STORE_REDIS_MODE.
+     */
+    String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
+
+    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
+
+    /**
+     * The constant STORE_REDIS_PORT.
+     */
+    String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+
+    /**
+     * The constant STORE_REDIS_SINGLE_PREFIX.
+     */
+    String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + "single.";
+
+    /**
+     * The constant STORE_REDIS_SINGLE_HOST.
+     */
+    String STORE_REDIS_SINGLE_HOST = STORE_REDIS_SINGLE_PREFIX + "host";
 
     /**
      * The constant STORE_MIN_Conn.
@@ -461,9 +551,9 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MIN_CONN = STORE_REDIS_PREFIX + "minConn";
 
     /**
-     * The constant STORE_REDIS_PORT.
+     * The constant STORE_REDIS_SINGLE_PORT.
      */
-    String STORE_REDIS_PORT = STORE_REDIS_PREFIX + "port";
+    String STORE_REDIS_SINGLE_PORT = STORE_REDIS_SINGLE_PREFIX + "port";
 
     /**
      * The constant STORE_REDIS_MAX_CONN.
@@ -491,6 +581,31 @@ public interface ConfigurationKeys {
     String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
 
     /**
+     * The constant REDIS_SENTINEL_MODE.
+     */
+    String REDIS_SENTINEL_MODE = "sentinel";
+
+    /**
+     * The constant REDIS_SINGLE_MODE.
+     */
+    String REDIS_SINGLE_MODE = "single";
+
+    /**
+     * The constant STORE_REDIS_SENTINEL_PREFIX.
+     */
+    String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + "sentinel.";
+
+    /**
+     * STORE_REDIS_SENTINEL_MASTERNAME.
+     */
+    String STORE_REDIS_SENTINEL_MASTERNAME = STORE_REDIS_SENTINEL_PREFIX + "masterName";
+
+    /**
+     * STORE_REDIS_SENTINEL_HOST.
+     */
+    String STORE_REDIS_SENTINEL_HOST = STORE_REDIS_SENTINEL_PREFIX + "sentinelHosts";
+
+    /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
     String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
@@ -503,6 +618,25 @@ public interface ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant SEATA_ACCESS_KEY.
+     */
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+
+    /**
+     * The constant SEATA_SECRET_KEY.
+     */
+    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+
+    /**
+     * The constant EXTRA_DATA_SPLIT_CHAR.
+     */
+    String EXTRA_DATA_SPLIT_CHAR = "\n";
+    /**
+     * The constant EXTRA_DATA_KV_CHAR.
+     */
+    String EXTRA_DATA_KV_CHAR = "=";
 
     /**
      * The constant SERVER_ENABLE_CHECK_AUTH.

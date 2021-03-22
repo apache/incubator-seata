@@ -21,6 +21,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -29,6 +30,7 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -71,6 +73,8 @@ public class ActionInterceptorHandler {
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);
         actionContext.setBranchId(branchId);
+        //MDC put branchId
+        MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
         //set the parameter whose type is BusinessActionContext
         Class<?>[] types = method.getParameterTypes();

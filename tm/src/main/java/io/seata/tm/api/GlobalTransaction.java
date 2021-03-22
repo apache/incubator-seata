@@ -77,7 +77,7 @@ public interface GlobalTransaction {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * @see SuspendedResourcesHolder
      */
-    SuspendedResourcesHolder suspend(boolean unbindXid) throws TransactionException;
+    SuspendedResourcesHolder suspend() throws TransactionException;
 
     /**
      * Resume the global transaction.
@@ -123,4 +123,13 @@ public interface GlobalTransaction {
      * @see GlobalStatus
      */
     GlobalStatus getLocalStatus();
+
+    /**
+     * get global transaction role.
+     *
+     * @return global transaction Role.
+     * @see GlobalTransactionRole
+     */
+    GlobalTransactionRole getGlobalTransactionRole();
+
 }

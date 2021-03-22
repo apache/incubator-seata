@@ -29,8 +29,6 @@ import io.seata.core.protocol.ResultCode;
  */
 public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
-    private static final int MAX_ERR_MSG_LEN = 128;
-
     @Override
     public Class<?> getMessageClassType() {
         return AbstractResultMessage.class;
@@ -46,16 +44,14 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
         if (resultCode == ResultCode.Failed) {
             if (StringUtils.isNotEmpty(resultMsg)) {
                 String msg;
-                if (resultMsg.length() > MAX_ERR_MSG_LEN) {
-                    msg = resultMsg.substring(0, MAX_ERR_MSG_LEN);
+                if (resultMsg.length() > Short.MAX_VALUE) {
+                    msg = resultMsg.substring(0, Short.MAX_VALUE);
                 } else {
                     msg = resultMsg;
                 }
                 byte[] bs = msg.getBytes(UTF8);
                 out.writeShort((short)bs.length);
-                if (bs.length > 0) {
-                    out.writeBytes(bs);
-                }
+                out.writeBytes(bs);
             } else {
                 out.writeShort((short)0);
             }
