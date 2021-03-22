@@ -53,7 +53,7 @@ class SeataAutoDataSourceProxyTest {
 
     @BeforeAll
     static void beforeAll() {
-        boolean useJdkProxy = false;
+        boolean useJdkProxy = true;
         String[] excludes = new String[0];
         String dataSourceProxyMode = BranchType.AT.name();
 
