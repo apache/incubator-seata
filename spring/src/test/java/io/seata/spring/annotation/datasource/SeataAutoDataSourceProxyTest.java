@@ -43,6 +43,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 
+/**
+ * @author selfishlover
+ */
 class SeataAutoDataSourceProxyTest {
 
     private static final String PRIMARY_NAME = "primaryDataSource";
@@ -147,8 +150,8 @@ class SeataAutoDataSourceProxyTest {
         verify(origin, never()).getConnection();
         verify(proxy, times(1)).getConnection();
 
-        enhancer.setLoginTimeout(0);
-        verify(origin, times(1)).setLoginTimeout(0);
-        verify(proxy, never()).setLoginTimeout(0);
+        enhancer.unwrap(Object.class);
+        verify(origin, times(1)).unwrap(Object.class);
+        verify(proxy, never()).unwrap(Object.class);
     }
 }
