@@ -245,10 +245,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
 
                 // transaction timeout and start rollbacking event
-                eventBus.post(
-                    new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(), globalSession.getApplicationId(),
-                            globalSession.getBeginTime(), null, globalSession.getStatus()));
+                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
+                        GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(),
+                        globalSession.getApplicationId(),
+                        globalSession.getTransactionServiceGroup(),
+                        globalSession.getBeginTime(), null, globalSession.getStatus()));
 
                 return true;
             });
@@ -279,7 +281,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isDeadSession()) {
                     //The function of this 'return' is 'continue'.
                     return;
                 }
@@ -314,6 +316,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
+                // prevent repeated commit
+                if (committingSession.getStatus().equals(GlobalStatus.Committing) && !committingSession.isDeadSession()) {
+                    //The function of this 'return' is 'continue'.
+                    return;
+                }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**
                      * Prevent thread safety issues

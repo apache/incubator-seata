@@ -112,6 +112,18 @@ public interface DefaultValues {
      */
     String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
 
+    /**
+     * the constant DEFAULT_RETRY_DEAD_THRESHOLD
+     */
+    int DEFAULT_RETRY_DEAD_THRESHOLD = 2 * 60 * 1000 + 10 * 1000;
+
+    /**
+     * the constant TM_INTERCEPTOR_ORDER
+     */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+  
+    /**
+     * the constant TCC_ACTION_INTERCEPTOR_ORDER
+     */
     int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
 }

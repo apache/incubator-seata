@@ -18,8 +18,6 @@ package io.seata.discovery.loadbalance;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
 
-import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
 import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
 
 /**
@@ -29,10 +27,13 @@ import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
  */
 public class LoadBalanceFactory {
 
+    private static final String CLIENT_PREFIX = "client.";
     /**
-     * The constant LOAD_BALANCE.
+     * The constant LOAD_BALANCE_PREFIX.
      */
-    private static final String LOAD_BALANCE = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "loadBalance";
+    public static final String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + "loadBalance.";
+
+    public static final String LOAD_BALANCE_TYPE = LOAD_BALANCE_PREFIX + "type";
 
     public static final String RANDOM_LOAD_BALANCE = DEFAULT_LOAD_BALANCE;
 
@@ -49,6 +50,7 @@ public class LoadBalanceFactory {
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        return EnhancedServiceLoader.load(LoadBalance.class, ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(LOAD_BALANCE, DEFAULT_LOAD_BALANCE));
+        String config = ConfigurationFactory.getInstance().getConfig(LOAD_BALANCE_TYPE, DEFAULT_LOAD_BALANCE);
+        return EnhancedServiceLoader.load(LoadBalance.class, config);
     }
 }
