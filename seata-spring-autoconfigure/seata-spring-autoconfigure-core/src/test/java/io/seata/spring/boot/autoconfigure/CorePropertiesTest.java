@@ -161,9 +161,8 @@ public class CorePropertiesTest {
     @Test
     public void testRegistryProperties() {
         assertEquals("file", context.getBean(RegistryProperties.class).getType());
-        assertEquals("RandomLoadBalance", context.getBean(RegistryProperties.class).getLoadBalance());
-        assertEquals(10, context.getBean(RegistryProperties.class).getLoadBalanceVirtualNodes());
     }
+
 
     @Test
     public void testRegistryRedisProperties() {

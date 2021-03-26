@@ -13,31 +13,46 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.registry;
+package io.seata.spring.boot.autoconfigure.properties.client;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
+import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
+ * @author ls9527
  */
 @Component
-@ConfigurationProperties(prefix = REGISTRY_PREFIX)
-public class RegistryProperties {
+@ConfigurationProperties(prefix = LOAD_BALANCE_PREFIX)
+public class LoadBalanceProperties {
     /**
-     * file, nacos, eureka, redis, zk, consul, etcd3, sofa
+     * the load balance
      */
-    private String type = "file";
+    private String type = DEFAULT_LOAD_BALANCE;
+    /**
+     * the load balance virtual nodes
+     */
+    private int virtualNodes = VIRTUAL_NODES_DEFAULT;
+
 
     public String getType() {
         return type;
     }
 
-    public RegistryProperties setType(String type) {
+    public LoadBalanceProperties setType(String type) {
         this.type = type;
         return this;
     }
 
+    public int getVirtualNodes() {
+        return virtualNodes;
+    }
+
+    public LoadBalanceProperties setVirtualNodes(int virtualNodes) {
+        this.virtualNodes = virtualNodes;
+        return this;
+    }
 }

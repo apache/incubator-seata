@@ -17,13 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.Map;
 
-import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.*;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -100,6 +94,12 @@ public class ClientPropertiesTest {
         assertTrue(context.getBean(UndoProperties.class).isDataValidation());
         assertEquals("jackson", context.getBean(UndoProperties.class).getLogSerialization());
         assertEquals(DEFAULT_TRANSACTION_UNDO_LOG_TABLE, context.getBean(UndoProperties.class).getLogTable());
+    }
+
+    @Test
+    public void testLoadBalanceProperties() {
+        assertEquals("RandomLoadBalance", context.getBean(LoadBalanceProperties.class).getType());
+        assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
     }
 
 

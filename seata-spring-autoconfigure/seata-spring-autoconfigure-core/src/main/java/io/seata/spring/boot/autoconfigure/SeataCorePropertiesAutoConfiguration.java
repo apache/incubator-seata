@@ -36,6 +36,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisPrope
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -65,7 +66,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
-
 
 /**
  * @author xingfudeshi@gmail.com
