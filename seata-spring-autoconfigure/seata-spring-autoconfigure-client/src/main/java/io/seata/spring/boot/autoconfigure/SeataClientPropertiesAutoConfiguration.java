@@ -16,7 +16,15 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.*;
+import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;

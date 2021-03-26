@@ -17,7 +17,14 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.Map;
 
-import io.seata.spring.boot.autoconfigure.properties.client.*;
+import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
