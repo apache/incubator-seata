@@ -92,6 +92,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String SINGLE_LOG_POSTFIX = ";";
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
+    private static final String ADDRESS_SPLIT_CHAR = ",";
+    private static final String ADDRESS_LINK_CHAR = ":";
 
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
@@ -516,29 +518,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }
         String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
         if (StringUtils.isNotBlank(initConfStr)) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String seg = ",";
-            int i = 0;
-            int defaultValue = DEFAULT_RAFT_PORT_INTERVAL;
-            while (i < inetSocketAddressList.size()) {
-                InetSocketAddress inetSocketAddress = inetSocketAddressList.get(i);
-                stringBuilder.append(inetSocketAddress.getAddress().getHostAddress().replace("/", "") + ":"
-                    + (inetSocketAddress.getPort() - defaultValue));
-                i++;
-                if (i < inetSocketAddressList.size()) {
-                    stringBuilder.append(seg);
-                }
-            }
+            String addresses = convert2RaftNode(addressList);
             if (!Objects.equals(addressList, inetSocketAddressList)) {
                 addressList = inetSocketAddressList;
                 Configuration conf = new Configuration();
-                if (!conf.parse(stringBuilder.toString())) {
-                    throw new IllegalArgumentException("Fail to parse conf:" + stringBuilder);
+                if (!conf.parse(addresses)) {
+                    throw new IllegalArgumentException("Fail to parse conf:" + addresses);
                 }
                 RouteTable.getInstance().updateConfiguration(SEATA_RAFT_GROUP, conf);
             }
             try {
-                if (!RouteTable.getInstance().refreshLeader(cliClientService, SEATA_RAFT_GROUP, defaultValue).isOk()) {
+                if (!RouteTable.getInstance()
+                    .refreshLeader(cliClientService, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL).isOk()) {
                     if (LOGGER.isErrorEnabled()) {
                         LOGGER.error("refresh leader failed");
                     }
@@ -550,7 +541,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 }
             }
             PeerId leader = RouteTable.getInstance().selectLeader(SEATA_RAFT_GROUP);
-            int port = leader.getPort() + defaultValue;
+            int port = leader.getPort() + DEFAULT_RAFT_PORT_INTERVAL;
             for (InetSocketAddress inetSocketAddress : inetSocketAddressList) {
                 if (inetSocketAddress.getPort() == port
                     && inetSocketAddress.getAddress().getHostAddress().contains(leader.getIp())) {
@@ -566,6 +557,40 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 }
             }
         }
+    }
+
+    private String convert2RaftNode(String addresses) {
+        return convert2RaftNode(addresses.split(ADDRESS_SPLIT_CHAR));
+    }
+
+    private String convert2RaftNode(String... addresses) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < addresses.length;) {
+            String[] address = addresses[i].split(ADDRESS_LINK_CHAR);
+            String ip = address[0];
+            Integer port = Integer.valueOf(address[1]) - DEFAULT_RAFT_PORT_INTERVAL;
+            stringBuilder.append(ip).append(ADDRESS_LINK_CHAR).append(port);
+            i++;
+            if (i < addresses.length) {
+                stringBuilder.append(ADDRESS_SPLIT_CHAR);
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private String convert2RaftNode(List<InetSocketAddress> addresses) {
+        StringBuilder stringBuilder = new StringBuilder();
+        int i = 0;
+        while (i < addresses.size()) {
+            InetSocketAddress inetSocketAddress = addresses.get(i);
+            stringBuilder.append(inetSocketAddress.getHostName()).append(ADDRESS_LINK_CHAR)
+                .append(inetSocketAddress.getPort());
+            i++;
+            if (i < addresses.size()) {
+                stringBuilder.append(ADDRESS_SPLIT_CHAR);
+            }
+        }
+        return convert2RaftNode(stringBuilder.toString());
     }
 
 }
