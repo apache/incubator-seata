@@ -76,6 +76,9 @@ import org.slf4j.LoggerFactory;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_PORT_INTERVAL;
 import static io.seata.common.DefaultValues.SEATA_RAFT_GROUP;
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
+import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.core.constants.ConfigurationKeys.GROUPLIST_POSTFIX;
+import static io.seata.discovery.registry.RegistryService.PREFIX_SERVICE_ROOT;
 
 /**
  * The netty remoting client.
@@ -119,9 +122,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
-    private InetSocketAddress leaderAddress;
-    private CliClientServiceImpl cliClientService;
-    private List<InetSocketAddress> addressList;
+    private static volatile InetSocketAddress LEADER_ADDRESS;
+    private static volatile CliClientServiceImpl CLI_CLIENT_SERVICE;
+    private static volatile List<InetSocketAddress> ADDRESS_LIST;
 
     @Override
     public void init() {
@@ -134,23 +137,27 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
-        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
-        if (StringUtils.isNotBlank(initConfStr)) {
-            String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-            if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
-                cliClientService = new CliClientServiceImpl();
-                cliClientService.init(new CliOptions());
-                findLeader();
-                // The leader election takes 1 second
-                int cycle = 10 * 100;
-                findLeaderExecutor.scheduleAtFixedRate(() -> {
-                    try {
-                        findLeader();
-                    } catch (Exception e) {
-                        // prevents an exception from being thrown that causes the thread to break
-                        LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
+        if (CLI_CLIENT_SERVICE == null) {
+            synchronized (FIND_LEADER_EXECUTOR) {
+                if (CLI_CLIENT_SERVICE == null) {
+                    if (StringUtils.isNotBlank(getInitAddress())) {
+                        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+                        if (Objects.equals(storeMode, StoreMode.RAFT.getName())) {
+                            CLI_CLIENT_SERVICE = new CliClientServiceImpl();
+                            CLI_CLIENT_SERVICE.init(new CliOptions());
+                            findLeader();
+                            // The leader election takes 1 second
+                            FIND_LEADER_EXECUTOR.scheduleAtFixedRate(() -> {
+                                try {
+                                    findLeader();
+                                } catch (Exception e) {
+                                    // prevents an exception from being thrown that causes the thread to break
+                                    LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
+                                }
+                            }, DEFAULT_RAFT_PORT_INTERVAL, DEFAULT_RAFT_PORT_INTERVAL, TimeUnit.MILLISECONDS);
+                        }
                     }
-                }, cycle, cycle, TimeUnit.MILLISECONDS);
+                }
             }
         }
         super.init();
@@ -286,8 +293,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            if (leaderAddress != null) {
-                address = leaderAddress;
+            if (LEADER_ADDRESS != null) {
+                address = LEADER_ADDRESS;
             } else {
                 @SuppressWarnings("unchecked")
                 List<InetSocketAddress> inetSocketAddressList =
@@ -510,18 +517,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
         }
         if (CollectionUtils.isEmpty(inetSocketAddressList) || inetSocketAddressList.size() < 3) {
-            if (addressList != null) {
-                inetSocketAddressList = addressList;
+            if (ADDRESS_LIST != null) {
+                inetSocketAddressList = ADDRESS_LIST;
             } else {
                 return;
             }
         }
-        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        String initConfStr = getInitAddress();
         if (StringUtils.isNotBlank(initConfStr)) {
-            String addresses = convert2RaftNode(addressList);
-            if (!Objects.equals(addressList, inetSocketAddressList)) {
-                addressList = inetSocketAddressList;
+            if (!Objects.equals(ADDRESS_LIST, inetSocketAddressList)) {
+                ADDRESS_LIST = inetSocketAddressList;
                 Configuration conf = new Configuration();
+                String addresses = convert2RaftNode(inetSocketAddressList);
                 if (!conf.parse(addresses)) {
                     throw new IllegalArgumentException("Fail to parse conf:" + addresses);
                 }
@@ -529,7 +536,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
             try {
                 if (!RouteTable.getInstance()
-                    .refreshLeader(cliClientService, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL).isOk()) {
+                    .refreshLeader(CLI_CLIENT_SERVICE, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL).isOk()) {
                     if (LOGGER.isErrorEnabled()) {
                         LOGGER.error("refresh leader failed");
                     }
@@ -545,8 +552,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             for (InetSocketAddress inetSocketAddress : inetSocketAddressList) {
                 if (inetSocketAddress.getPort() == port
                     && inetSocketAddress.getAddress().getHostAddress().contains(leader.getIp())) {
-                    if (leaderAddress != inetSocketAddress) {
-                        leaderAddress = inetSocketAddress;
+                    if (LEADER_ADDRESS != inetSocketAddress) {
+                        LEADER_ADDRESS = inetSocketAddress;
                         XID.setIpAddress(leader.getIp());
                         XID.setPort(leader.getPort());
                         if (LOGGER.isDebugEnabled()) {
@@ -557,6 +564,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 }
             }
         }
+    }
+
+    private String getInitAddress() {
+        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
+        if (StringUtils.isBlank(initConfStr)) {
+            String cluster = RegistryFactory.getInstance().getServiceGroup(getTransactionServiceGroup());
+            if (StringUtils.isNotBlank(cluster)) {
+                initConfStr = CONFIG.getConfig(new StringBuilder(PREFIX_SERVICE_ROOT)
+                    .append(FILE_CONFIG_SPLIT_CHAR).append(cluster).append(GROUPLIST_POSTFIX).toString());
+            }
+        }
+        return initConfStr;
     }
 
     private String convert2RaftNode(String addresses) {
