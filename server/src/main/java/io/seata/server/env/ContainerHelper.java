@@ -23,8 +23,6 @@ import java.util.stream.Stream;
 
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
-
-
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
 
 /**
