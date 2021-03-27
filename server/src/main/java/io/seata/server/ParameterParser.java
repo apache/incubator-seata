@@ -48,15 +48,16 @@ public class ParameterParser {
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
-    @Parameter(names = {"--sessionStoreMode", "-ssm"}, description = "log store mode : file, db", order = 3)
-    private String sessionStoreMode;
-    @Parameter(names = {"--lockStoreMode", "-lsm"}, description = "log store mode : file, db", order = 3)
-    private String lockStoreMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
     private String seataEnv;
+    @Parameter(names = {"--sessionStoreMode", "-ssm"}, description = "session log store mode : file, db, redis",
+        order = 6)
+    private String sessionStoreMode;
+    @Parameter(names = {"--lockStoreMode", "-lsm"}, description = "lock log store mode : file, db, redis", order = 7)
+    private String lockStoreMode;
 
     /**
      * Instantiates a new Parameter parser.
