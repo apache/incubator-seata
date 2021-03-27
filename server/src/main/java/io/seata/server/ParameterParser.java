@@ -48,6 +48,10 @@ public class ParameterParser {
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
+    @Parameter(names = {"--sessionStoreMode", "-ssm"}, description = "log store mode : file, db", order = 3)
+    private String sessionStoreMode;
+    @Parameter(names = {"--lockStoreMode", "-lsm"}, description = "log store mode : file, db", order = 3)
+    private String lockStoreMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
@@ -71,6 +75,8 @@ public class ParameterParser {
                 this.port = ContainerHelper.getPort();
                 this.serverNode = ContainerHelper.getServerNode();
                 this.storeMode = ContainerHelper.getStoreMode();
+                this.sessionStoreMode = ContainerHelper.getSessionStoreMode();
+                this.lockStoreMode = ContainerHelper.getLockStoreMode();
             } else {
                 JCommander jCommander = JCommander.newBuilder().addObject(this).build();
                 jCommander.parse(args);
@@ -125,6 +131,24 @@ public class ParameterParser {
      */
     public String getStoreMode() {
         return storeMode;
+    }
+
+    /**
+     * Gets lock store mode.
+     *
+     * @return the store mode
+     */
+    public String getLockStoreMode() {
+        return lockStoreMode;
+    }
+
+    /**
+     * Gets session store mode.
+     *
+     * @return the store mode
+     */
+    public String getSessionStoreMode() {
+        return sessionStoreMode;
     }
 
     /**
