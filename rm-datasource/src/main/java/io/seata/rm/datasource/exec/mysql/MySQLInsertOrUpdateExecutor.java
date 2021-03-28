@@ -199,48 +199,6 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        if (isUpdateFlag) {
-            return buildAfterImage(beforeImage);
-        } else {
-            Map<String, List<Object>> pkValues = getPkValues();
-            return afterImageInsert(pkValues);
-        }
-    }
-
-    /**
-     * afterImage if only happens to Insert
-     *
-     * @param pkValues
-     * @return the table records
-     * @throws SQLException
-     */
-    private TableRecords afterImageInsert(Map<String, List<Object>> pkValues) throws SQLException {
-        TableRecords afterImage = buildTableRecords(pkValues);
-        if (afterImage == null) {
-            throw new SQLException("Failed to build after-image for insert");
-        }
-        return afterImage;
-    }
-
-    @Override
-    public TableRecords beforeImage() throws SQLException {
-        TableMeta tmeta = getTableMeta();
-        //after image sql the same of before image
-        if (StringUtils.isBlank(selectSQL)) {
-            paramAppenderList = new ArrayList<>();
-            selectSQL = buildImageSQL(tmeta);
-        }
-        return buildTableRecords2(tmeta, selectSQL, paramAppenderList);
-    }
-
-    /**
-     * build before image and after image
-     *
-     * @param beforeImage
-     * @return
-     * @throws SQLException
-     */
-    protected TableRecords buildAfterImage(TableRecords beforeImage) throws SQLException {
         TableMeta tmeta = getTableMeta();
         List<Row> rows = beforeImage.getRows();
         Map<String, ArrayList<Object>> primaryValueMap = new HashMap<>();
@@ -258,13 +216,23 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             List<String> wherePrimaryList = new ArrayList<>();
             List<Object> paramAppenderTempList = new ArrayList<>();
             primaryValueMap.forEach((k, v) -> {
-                wherePrimaryList.add(k + " = ? ");
+                wherePrimaryList.add(k + " = " +  primaryValueMap.get(k).get(finalI) + " ");
                 paramAppenderTempList.add(primaryValueMap.get(k).get(finalI));
             });
             afterImageSql.append(" OR (").append(Joiner.on(" and ").join(wherePrimaryList)).append(") ");
-            paramAppenderList.add(paramAppenderTempList);
         }
         return buildTableRecords2(tmeta, afterImageSql.toString(), paramAppenderList);
+    }
+
+    @Override
+    public TableRecords beforeImage() throws SQLException {
+        TableMeta tmeta = getTableMeta();
+        //after image sql the same of before image
+        if (StringUtils.isBlank(selectSQL)) {
+            paramAppenderList = new ArrayList<>();
+            selectSQL = buildImageSQL(tmeta);
+        }
+        return buildTableRecords2(tmeta, selectSQL, paramAppenderList);
     }
 
     /**
@@ -325,7 +293,12 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
                             continue;
                         }
                         if ((imageParamperterMap.get(columnName) == null && m.getColumnDef() == null) || imageParamperterMap.get(columnName).get(finalI) == null || imageParamperterMap.get(columnName).get(finalI) instanceof Null) {
-                            columnIsNull = true;
+                            if (!"PRIMARY".equals(k.toUpperCase())) {
+                                columnIsNull = false;
+                                uniqueList.add(columnName + " is ? ");
+                                paramAppenderTempList.add("NULL");
+                                continue;
+                            }
                             break;
                         }
                         columnIsNull = false;
