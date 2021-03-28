@@ -64,7 +64,7 @@ public class ParameterParser {
      *
      * @param args the args
      */
-    public ParameterParser(String[] args) {
+    public ParameterParser(String... args) {
         this.init(args);
     }
 
