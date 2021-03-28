@@ -46,7 +46,7 @@ public class ParameterParser {
     private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
-    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
+    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db, redis", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode;
@@ -91,8 +91,13 @@ public class ParameterParser {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
             if (StringUtils.isBlank(storeMode)) {
-                storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-                    CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
+                storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+            }
+            if (StringUtils.isBlank(sessionStoreMode)) {
+                sessionStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE, storeMode);
+            }
+            if (StringUtils.isBlank(lockStoreMode)) {
+                lockStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE, storeMode);
             }
         } catch (ParameterException e) {
             printError(e);

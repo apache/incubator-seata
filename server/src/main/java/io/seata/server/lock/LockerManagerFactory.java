@@ -20,6 +20,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.store.StoreMode;
 
 /**
  * The type Lock manager factory.
@@ -55,7 +56,7 @@ public class LockerManagerFactory {
         if (LOCK_MANAGER == null) {
             synchronized (LockerManagerFactory.class) {
                 if (LOCK_MANAGER == null) {
-                    if (StringUtils.isBlank(lockMode)) {
+                    if (StringUtils.isBlank(lockMode) && StoreMode.contains(lockMode)) {
                         lockMode = CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE,
                             CONFIG.getConfig(ConfigurationKeys.STORE_MODE));
                     }

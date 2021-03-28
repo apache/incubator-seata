@@ -85,27 +85,10 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file, db
+     * @param mode the store mode: file, db, redis
      * @throws IOException the io exception
      */
     public static void init(String mode) {
-        init(mode, null);
-    }
-
-    /**
-     * Init.
-     *
-     * @param mode the store mode: file, db
-     * @throws IOException the io exception
-     */
-    public static void init(String mode, String sessionMode) {
-        if (StringUtils.isBlank(sessionMode)) {
-            sessionMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE);
-        }
-        mode = StringUtils.isBlank(sessionMode) ? mode : sessionMode;
-        if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.getName());
