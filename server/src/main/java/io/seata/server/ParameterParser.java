@@ -135,6 +135,7 @@ public class ParameterParser {
      *
      * @return the store mode
      */
+    @Deprecated
     public String getStoreMode() {
         return storeMode;
     }
