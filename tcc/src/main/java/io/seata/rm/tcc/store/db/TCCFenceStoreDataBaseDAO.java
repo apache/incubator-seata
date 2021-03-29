@@ -26,12 +26,12 @@ import io.seata.rm.tcc.store.TCCFenceStore;
 import io.seata.rm.tcc.store.db.sql.TCCFenceStoreSqls;
 import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * The type TCC Fence store data base dao
@@ -50,14 +50,11 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public TCCFenceDO queryTCCFenceDO(DataSource dataSource, String xid, Long branchId) {
+    public TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId) {
         String sql = TCCFenceStoreSqls.getQuerySQLByBranchIdAndXid(TCCFenceConfig.getLogTableName());
-        Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            conn = dataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
@@ -74,18 +71,15 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            IOUtil.close(rs, ps, conn);
+            IOUtil.close(rs, ps);
         }
     }
 
     @Override
-    public boolean insertTCCFenceDO(DataSource dataSource, TCCFenceDO tccFenceDO) {
+    public boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO) {
         String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(TCCFenceConfig.getLogTableName());
-        Connection conn = null;
         PreparedStatement ps = null;
         try {
-            conn = dataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, tccFenceDO.getXid());
             ps.setLong(2, tccFenceDO.getBranchId());
@@ -99,7 +93,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(ps, conn);
+            IOUtil.close(ps);
         }
     }
 
@@ -124,13 +118,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
     }
 
     @Override
-    public boolean deleteTCCFenceDO(DataSource dataSource, String xid, Long branchId) {
+    public boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId) {
         String sql = TCCFenceStoreSqls.getDeleteSQLByBranchIdAndXid(TCCFenceConfig.getLogTableName());
-        Connection conn = null;
         PreparedStatement ps = null;
         try {
-            conn = dataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
@@ -138,26 +129,23 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(ps, conn);
+            IOUtil.close(ps);
         }
         return true;
     }
 
     @Override
-    public boolean deleteTCCFenceDOByDate(DataSource dataSource, Timestamp datetime) {
+    public boolean deleteTCCFenceDOByDate(Connection conn, Date datetime) {
         String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(TCCFenceConfig.getLogTableName());
-        Connection conn = null;
         PreparedStatement ps = null;
         try {
-            conn = dataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setTimestamp(1, datetime);
+            ps.setTimestamp(1, new Timestamp(datetime.getTime()));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(ps, conn);
+            IOUtil.close(ps);
         }
         return true;
     }

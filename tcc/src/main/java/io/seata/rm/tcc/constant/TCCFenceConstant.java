@@ -53,6 +53,11 @@ public class TCCFenceConstant {
     public static final int DEFAULT_CLEAN_HOUR = 1;
 
     /**
+     * Clean up the tcc fence log a few minutes ago by default
+     */
+    public static final int DEFAULT_CLEAN_MINUTE = 15;
+
+    /**
      * Default tcc fence log table name
      */
     public static final String DEFAULT_LOG_TABLE_NAME = "tcc_fence_log";

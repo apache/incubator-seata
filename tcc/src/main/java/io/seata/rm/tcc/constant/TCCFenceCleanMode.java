@@ -27,15 +27,15 @@ public enum TCCFenceCleanMode {
      */
     Close,
     /**
-     * Default clean mode.
-     */
-    Default,
-    /**
      * Clean by days
      */
     Day,
     /**
      * Clean by hours
      */
-    Hour;
+    Hour,
+    /**
+     * Clean by minutes
+     */
+    Minute;
 }

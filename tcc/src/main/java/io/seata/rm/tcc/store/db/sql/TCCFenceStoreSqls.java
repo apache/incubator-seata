@@ -39,7 +39,7 @@ public class TCCFenceStoreSqls {
     /**
      * The constant QUERY_BY_BRANCH_ID_AND_XID.
      */
-    protected static final String QUERY_BY_BRANCH_ID_AND_XID = "select xid, branch_id, status "
+    protected static final String QUERY_BY_BRANCH_ID_AND_XID = "select xid, branch_id, status, gmt_create, gmt_modified "
             + "from " + LOCAL_TCC_LOG_PLACEHOLD
             + " where xid = ? and branch_id = ? ";
 

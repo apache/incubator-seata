@@ -15,9 +15,8 @@
  */
 package io.seata.rm.tcc.store;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * The TCC Fence Store
@@ -32,14 +31,14 @@ public interface TCCFenceStore {
      * @param branchId the branch transaction id
      * @return the tcc fence do
      */
-    TCCFenceDO queryTCCFenceDO(DataSource dataSource, String xid, Long branchId);
+    TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId);
 
     /**
      * Insert tcc fence do boolean.
      * @param tccFenceDO the tcc fence do
      * @return the boolean
      */
-    boolean insertTCCFenceDO(DataSource dataSource, TCCFenceDO tccFenceDO);
+    boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO);
 
     /**
      * Update tcc fence do boolean.
@@ -56,13 +55,13 @@ public interface TCCFenceStore {
      * @param branchId the branch transaction id
      * @return the boolean
      */
-    boolean deleteTCCFenceDO(DataSource dataSource, String xid, Long branchId);
+    boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId);
 
     /**
      * Delete tcc fence by datetime.
      * @param datetime datetime
      * @return the boolean
      */
-    boolean deleteTCCFenceDOByDate(DataSource dataSource, Timestamp datetime);
+    boolean deleteTCCFenceDOByDate(Connection conn, Date datetime);
 
 }

@@ -27,7 +27,6 @@ import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import io.seata.rm.tcc.exception.TCCFenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -85,19 +84,14 @@ public class ActionInterceptorHandler {
             argIndex++;
         }
 
-        // add idempotent and anti hanging
+        //the final parameters of the try method
+        ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
+
+        // Use TCC Fence
         if (businessAction.useTCCFence()) {
-            try {
-                if (TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId))) {
-                    ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-                    ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
-                }
-            } catch (Throwable t) {
-                throw new TCCFenceException(t);
-            }
+            Object ans = TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
+            ret.put(Constants.TCC_METHOD_RESULT, ans);
         } else {
-            //the final parameters of the try method
-            ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
             //the final result
             ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
         }
