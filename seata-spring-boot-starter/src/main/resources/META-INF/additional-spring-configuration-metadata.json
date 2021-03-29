@@ -269,15 +269,15 @@
       "defaultValue": 1
     },
     {
-      "name": "seata.registry.load-balance",
+      "name": "seata.client.load-balance.type",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties",
       "defaultValue": "RandomLoadBalance"
     },
     {
-      "name": "seata.registry.load-balance-virtual-nodes",
+      "name": "seata.client.load-balance.virtual-nodes",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties",
       "defaultValue": 10
     }
   ],
