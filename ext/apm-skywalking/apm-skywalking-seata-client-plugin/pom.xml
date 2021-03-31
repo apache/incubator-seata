@@ -14,21 +14,18 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>apm-skywalking</artifactId>
         <version>${revision}</version>
-        <relativePath>../..</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>apm-skywalking</artifactId>
-    <packaging>pom</packaging>
-    <name>apm-skywalking ${project.version}</name>
-    <modules>
-        <module>apm-skywalking-seata-client-plugin</module>
-        <module>apm-skywalking-seata-server-plugin</module>
-    </modules>
+    <artifactId>apm-skywalking-seata-client-plugin</artifactId>
+    <name>apm-skywalking-seata-client-plugin ${project.version}</name>
+
+    <dependencies>
+    </dependencies>
+
 </project>
