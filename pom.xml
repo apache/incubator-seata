@@ -90,7 +90,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.4.1</revision>
+        <revision>1.5.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -213,7 +213,6 @@
                             <serverId>oss_seata</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                            <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
                         </configuration>
                     </plugin>
                     <plugin>
