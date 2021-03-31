@@ -26,6 +26,12 @@
     <name>apm-skywalking-seata-client-plugin ${project.version}</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-agent-core</artifactId>
+            <version>8.4.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 </project>
