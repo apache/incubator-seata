@@ -49,6 +49,7 @@
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>
+        <module>ext/apm-skywalking</module>
     </modules>
     <packaging>pom</packaging>
 
