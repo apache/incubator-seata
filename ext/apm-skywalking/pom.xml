@@ -28,7 +28,6 @@
     <packaging>pom</packaging>
     <name>apm-skywalking ${project.version}</name>
     <modules>
-        <module>apm-skywalking-seata-client-plugin</module>
-        <module>apm-skywalking-seata-server-plugin</module>
+        <module>apm-skywalking-seata-plugin</module>
     </modules>
 </project>
