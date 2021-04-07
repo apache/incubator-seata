@@ -114,6 +114,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         if (!StringUtils.equals(StoreMode.RAFT.getName(), mode)) {
             return;
         }
+        // gets a record of the lock and session at the moment
         Map<String, Object> maps = new HashMap<>();
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
@@ -129,6 +130,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         if (maps.isEmpty()) {
             return;
         }
+        // async save
         Utils.runInThread(() -> {
             final RaftSnapshotFile snapshot = new RaftSnapshotFile(writer.getPath() + File.separator + "data");
             if (snapshot.save(maps)) {
@@ -282,7 +284,6 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             if (globalSession != null) {
                 GlobalStatus status = msg.getGlobalStatus();
                 globalSession.setStatus(status);
-                raftSessionManager.updateGlobalSessionStatus(globalSession, status);
             }
         } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
             GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
@@ -290,7 +291,6 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
                 if (branchSession != null) {
                     globalSession.removeBranch(branchSession);
-                    raftSessionManager.removeBranchSession(globalSession, branchSession);
                 }
             }
         } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
@@ -321,8 +321,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                             default:
                                 break;
                         }
+                    } else {
+                        raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
                     }
-                    raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
                 }
             }
         } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
@@ -330,7 +331,6 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
             BranchStatus status = msg.getBranchStatus();
             branchSession.setStatus(status);
-            raftSessionManager.updateBranchSessionStatus(branchSession, status);
         }
     }
 }
