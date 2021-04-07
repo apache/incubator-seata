@@ -253,8 +253,8 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        //If success and there is no branch, end the global transaction.
-        if (success && globalSession.getBranchSessions().isEmpty()) {
+        // if success and there is no branch, and is in the process of retrying the task, the global transaction end.
+        if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
             // committed event
