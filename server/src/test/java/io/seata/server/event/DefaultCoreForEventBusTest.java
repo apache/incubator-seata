@@ -66,6 +66,8 @@ public class DefaultCoreForEventBusTest {
             DefaultCore core = new DefaultCore(remotingServer);
 
             GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
+            // avoid transactional interference from other unit tests
+            Thread.sleep(1500);
             EventBusManager.get().register(subscriber);
 
             //start a transaction
