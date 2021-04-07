@@ -253,7 +253,7 @@ public class DefaultCore implements Core {
                 return false;
             }
         }
-        //if success and there is no branch, and it is in the process of retrying the task, the global transaction is ended.
+        // if it success and there is no branch, and it is in the process of retrying the task, the global transaction is ended.
         if (success && globalSession.getBranchSessions().isEmpty() && retrying) {
             SessionHelper.endCommitted(globalSession);
 
