@@ -18,9 +18,9 @@ package io.seata.server.raft;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentMap;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
@@ -45,7 +45,6 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.SessionConverter;
-import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.lock.RaftLockManager;
 import io.seata.server.storage.raft.session.RaftSessionManager;
@@ -77,6 +76,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     private RaftLockManager raftLockManager;
 
     private String mode;
+
+    private static final String BRANCH_SESSION_MAP = "branchSessionMap";
 
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
@@ -119,14 +120,19 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         Map<String, Object> maps = new HashMap<>();
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-        Map<String, byte[]> sessionByteMap = new HashMap<>();
-        sessionMap.forEach((k, v) -> sessionByteMap.put(v.getXid(), v.encode()));
-        maps.put(ROOT_SESSION_MANAGER_NAME, sessionByteMap);
-        ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
-            ConcurrentMap<Integer/* bucketId */, FileLocker.BucketLockMap>>> lockMap = FileLocker.LOCK_MAP;
-        maps.put("LOCK_MAP", lockMap);
+        Map<String, byte[]> globalSessionByteMap = new HashMap<>();
+        Map<Long, byte[]> branchSessionByteMap = new HashMap<>();
+        sessionMap.forEach((k, v) -> {
+            globalSessionByteMap.put(v.getXid(), v.encode());
+            List<BranchSession> branchSessions = v.getBranchSessions();
+            branchSessions.forEach(
+                branchSession -> branchSessionByteMap.put(branchSession.getBranchId(), branchSession.encode()));
+        });
+        maps.put(ROOT_SESSION_MANAGER_NAME, globalSessionByteMap);
+        maps.put(BRANCH_SESSION_MAP, branchSessionByteMap);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("sessionmap size:{},lock map size:{}", sessionMap.size(), lockMap.size());
+            LOGGER.info("globalSessionmap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
+                branchSessionByteMap.size());
         }
         if (maps.isEmpty()) {
             return;
@@ -165,19 +171,31 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         try {
             Map<String, Object> maps = snapshot.load();
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-            FileLocker.LOCK_MAP.putAll((Map<? extends String,
-                ? extends ConcurrentMap<String, ConcurrentMap<Integer, FileLocker.BucketLockMap>>>)maps
-                    .get("LOCK_MAP"));
-            Map<String, byte[]> sessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
+            Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
+            Map<String, byte[]> branchSessionByteMap = (Map<String, byte[]>)maps.get(BRANCH_SESSION_MAP);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
-            if (!sessionByteMap.isEmpty()) {
+            if (!globalSessionByteMap.isEmpty()) {
                 Map<String, GlobalSession> sessionMap = new HashMap<>();
-                sessionByteMap.forEach((k, v) -> {
+                globalSessionByteMap.forEach((k, v) -> {
                     GlobalSession session = new GlobalSession();
                     session.decode(v);
                     sessionMap.put(k, session);
                 });
                 rootSessionMap.putAll(sessionMap);
+                branchSessionByteMap.forEach((k, v) -> {
+                    BranchSession branchSession = new BranchSession();
+                    branchSession.decode(v);
+                    rootSessionMap.computeIfPresent(branchSession.getXid(), (key, globalSession) -> {
+                        globalSession.getBranchSessions().add(branchSession);
+                        try {
+                            branchSession.lock();
+                        } catch (TransactionException e) {
+                            LOGGER.error("failed to restore branch transaction: {} lock record: {}",
+                                branchSession.getBranchId(), branchSession.getLockKey());
+                        }
+                        return globalSession;
+                    });
+                });
                 sessionMap.forEach((k, v) -> {
                     GlobalStatus status = v.getStatus();
                     try {

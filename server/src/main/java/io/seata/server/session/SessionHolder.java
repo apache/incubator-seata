@@ -58,6 +58,7 @@ public class SessionHolder {
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * The constant ROOT_SESSION_MANAGER_NAME.
      */

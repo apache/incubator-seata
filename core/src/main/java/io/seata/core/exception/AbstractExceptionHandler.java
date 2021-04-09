@@ -121,7 +121,7 @@ public abstract class AbstractExceptionHandler {
     public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
             if (RAFT_SERVER_FACTORY.isRaftMode() && !RAFT_SERVER_FACTORY.isLeader()) {
-                throw new TransactionException(" tc is not leader");
+                throw new TransactionException("The current TC is not the leader of raft cluster，reject the request");
             }
             callback.execute(request, response);
             callback.onSuccess(request, response);
