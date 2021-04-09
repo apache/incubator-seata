@@ -38,6 +38,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
+import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -80,7 +81,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     public RaftStateMachine() {
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         if (StoreMode.RAFT.getName().equals(mode)) {
-            this.raftLockManager = new RaftLockManager();
+            this.raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
         }
     }
 
