@@ -524,6 +524,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
         }
         String initConfStr = getInitAddress();
+        RouteTable routeTable = RouteTable.getInstance();
         if (StringUtils.isNotBlank(initConfStr)) {
             if (!Objects.equals(ADDRESS_LIST, inetSocketAddressList)) {
                 ADDRESS_LIST = inetSocketAddressList;
@@ -532,11 +533,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 if (!conf.parse(addresses)) {
                     throw new IllegalArgumentException("Fail to parse conf:" + addresses);
                 }
-                RouteTable.getInstance().updateConfiguration(SEATA_RAFT_GROUP, conf);
+                if (!routeTable.getConfiguration(SEATA_RAFT_GROUP).equals(conf)) {
+                    routeTable.updateConfiguration(SEATA_RAFT_GROUP, conf);
+                }
             }
             try {
-                if (!RouteTable.getInstance()
-                    .refreshLeader(CLI_CLIENT_SERVICE, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL).isOk()) {
+
+                if (!routeTable.refreshLeader(CLI_CLIENT_SERVICE, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL)
+                    .isOk()) {
                     if (LOGGER.isErrorEnabled()) {
                         LOGGER.error("refresh leader failed");
                     }
@@ -547,7 +551,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     LOGGER.error("refresh leader failed,error msg: {}", e.getMessage());
                 }
             }
-            PeerId leader = RouteTable.getInstance().selectLeader(SEATA_RAFT_GROUP);
+            PeerId leader = routeTable.selectLeader(SEATA_RAFT_GROUP);
             int port = leader.getPort() + DEFAULT_RAFT_PORT_INTERVAL;
             for (InetSocketAddress inetSocketAddress : inetSocketAddressList) {
                 if (inetSocketAddress.getPort() == port
