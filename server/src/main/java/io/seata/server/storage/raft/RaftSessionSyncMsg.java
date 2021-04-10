@@ -108,9 +108,11 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
         this.sessionName = sessionName;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "RaftSyncMsg{" + "msgType=" + msgType + ", globalSession=" + globalSession + ", branchSession="
             + branchSession + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", sessionName='"
             + sessionName + '\'' + '}';
     }
+
 }

@@ -37,6 +37,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.StoreMode;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
@@ -291,21 +292,20 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 globalSession.add(branchSession);
             }
         } else if (ADD_BRANCH_SESSION.equals(msgType)) {
-            GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
-            BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
+            BranchTransactionDO branchTransactionDO = msg.getBranchSession();
+            GlobalSession globalSession = raftSessionManager.findGlobalSession(branchTransactionDO.getXid());
+            BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
             if (branchSession == null) {
-                branchSession = SessionConverter.convertBranchSession(msg.getBranchSession());
+                branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
                 globalSession.addBranch(branchSession);
             }
-            raftSessionManager.addBranchSession(globalSession, branchSession);
         } else if (UPDATE_GLOBAL_SESSION_STATUS.equals(msgType)) {
             GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
             if (globalSession != null) {
-                GlobalStatus status = msg.getGlobalStatus();
-                globalSession.setStatus(status);
+                globalSession.setStatus(msg.getGlobalStatus());
             }
         } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
-            GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getGlobalSession().getXid());
+            GlobalSession globalSession = raftSessionManager.findGlobalSession(msg.getBranchSession().getXid());
             if (globalSession != null) {
                 BranchSession branchSession = globalSession.getBranch(msg.getBranchSession().getBranchId());
                 if (branchSession != null) {

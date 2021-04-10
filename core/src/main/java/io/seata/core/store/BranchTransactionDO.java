@@ -53,6 +53,11 @@ public class BranchTransactionDO implements java.io.Serializable {
 
     private Date gmtModified;
 
+    public BranchTransactionDO(String xid, long branchId) {
+        this.xid = xid;
+        this.branchId = branchId;
+    }
+
     /**
      * Gets xid.
      *

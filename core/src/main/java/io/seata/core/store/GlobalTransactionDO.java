@@ -49,6 +49,10 @@ public class GlobalTransactionDO implements java.io.Serializable {
 
     private Date gmtModified;
 
+    public GlobalTransactionDO(String xid) {
+        this.xid = xid;
+    }
+
     /**
      * Gets xid.
      *
