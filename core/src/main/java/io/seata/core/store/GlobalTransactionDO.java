@@ -53,6 +53,8 @@ public class GlobalTransactionDO implements java.io.Serializable {
         this.xid = xid;
     }
 
+    public GlobalTransactionDO() {}
+
     /**
      * Gets xid.
      *

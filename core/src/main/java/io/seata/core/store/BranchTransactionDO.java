@@ -58,6 +58,8 @@ public class BranchTransactionDO implements java.io.Serializable {
         this.branchId = branchId;
     }
 
+    public BranchTransactionDO() {}
+
     /**
      * Gets xid.
      *
