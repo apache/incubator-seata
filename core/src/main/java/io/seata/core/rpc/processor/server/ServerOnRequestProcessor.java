@@ -78,14 +78,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         this.transactionMessageHandler = transactionMessageHandler;
         AbstractRaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
         if (raftServer != null) {
-            raftMode = RaftServerFactory.getInstance().isRaftMode();
+            this.raftMode = RaftServerFactory.getInstance().isRaftMode();
         }
     }
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         if (ChannelManager.isRegistered(ctx.channel())) {
-            onRequestMessage(ctx, rpcMessage,raftMode);
+            onRequestMessage(ctx, rpcMessage);
         } else {
             try {
                 if (LOGGER.isInfoEnabled()) {
@@ -102,7 +102,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
     }
 
-    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, Boolean raftMode) {
+    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object message = rpcMessage.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {

@@ -66,6 +66,7 @@ import static io.seata.server.session.SessionHolder.ASYNC_COMMITTING_SESSION_MAN
 import static io.seata.server.session.SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
+import static io.seata.core.raft.msg.RaftSyncMsg.MsgType;
 
 /**
  * @author funkye
@@ -250,7 +251,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) throws TransactionException {
-        RaftSessionSyncMsg.MsgType msgType = msg.getMsgType();
+        MsgType msgType = msg.getMsgType();
         SessionManager sessionManager = null;
         String sessionName = msg.getSessionName();
         Boolean rootManager = false;
@@ -265,8 +266,10 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             sessionManager = SessionHolder.getRetryRollbackingSessionManager();
         }
         RaftSessionManager raftSessionManager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
-        LOGGER.info("state machine synchronization,task:{},sessionManager:{}", msgType,
-            sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("state machine synchronization,task:{},sessionManager:{}", msgType,
+                sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
+        }
         if (ADD_GLOBAL_SESSION.equals(msgType)) {
             GlobalSession globalSession;
             if (!rootManager) {
