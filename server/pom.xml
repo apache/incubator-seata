@@ -26,8 +26,13 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
-    <dependencies>
 
+    <properties>
+        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
+        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
+    </properties>
+
+    <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
@@ -119,6 +124,16 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.danielwegener</groupId>
+            <artifactId>logback-kafka-appender</artifactId>
+            <version>${kafka-appender.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>
