@@ -25,7 +25,6 @@ import io.seata.common.loader.Scope;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.AbstractSessionManager;
@@ -292,12 +291,6 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             return;
         }
         this.fileSessionManager.setSessionMap(sessionMap);
-    }
-
-
-    @Override
-    public boolean scheduledLock(String key) {
-        return RaftServerFactory.getInstance().isLeader();
     }
 
 }
