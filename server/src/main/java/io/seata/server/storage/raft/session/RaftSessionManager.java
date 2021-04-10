@@ -139,7 +139,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
-                    if(LOGGER.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("onStatusChange,raftSessionManager:{}", name);
                     }
                     SessionHolder.getRootSessionManager().updateGlobalSessionStatus(globalSession, globalStatus);
@@ -161,7 +161,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
-                    if(LOGGER.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("onBranchStatusChange,raftSessionManager:{}", name);
                     }
                     SessionHolder.getRootSessionManager().updateBranchSessionStatus(branchSession, branchStatus);
@@ -170,7 +170,8 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                 }
             }
         };
-        BranchTransactionDO branchTransactionDO = new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
+        BranchTransactionDO branchTransactionDO =
+            new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
         RaftSessionSyncMsg raftSyncMsg =
             new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO, branchStatus);
         raftSyncMsg.setSessionName(this.name);
@@ -182,7 +183,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
-                    if(LOGGER.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("onAddBranch,raftSessionManager:{}", name);
                     }
                     SessionHolder.getRootSessionManager().addBranchSession(globalSession, branchSession);
@@ -192,8 +193,7 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
             }
         };
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg raftSyncMsg =
-            new RaftSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDO);
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(closure, raftSyncMsg);
     }
@@ -218,9 +218,9 @@ public class RaftSessionManager extends AbstractSessionManager implements Reload
                 }
             }
         };
-        BranchTransactionDO branchTransactionDO = new BranchTransactionDO(globalSession.getXid(),branchSession.getBranchId());
-        RaftSessionSyncMsg raftSyncMsg =
-            new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
+        BranchTransactionDO branchTransactionDO =
+            new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
+        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
         raftSyncMsg.setSessionName(this.name);
         RaftTaskUtil.createTask(closure, raftSyncMsg);
     }
