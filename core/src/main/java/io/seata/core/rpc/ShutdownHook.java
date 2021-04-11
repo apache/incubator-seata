@@ -15,12 +15,9 @@
  */
 package io.seata.core.rpc;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
-import io.seata.common.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +32,7 @@ public class ShutdownHook extends Thread {
 
     private static final ShutdownHook SHUTDOWN_HOOK = new ShutdownHook("ShutdownHook");
 
-    private Set<Disposable> disposables = new TreeSet<>();
+    private final PriorityQueue<DisposablePriorityWrapper> disposables = new PriorityQueue<>();
 
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
@@ -70,16 +67,22 @@ public class ShutdownHook extends Thread {
     }
 
     public void destroyAll() {
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("destoryAll starting");
-        }
-        if (!destroyed.compareAndSet(false, true) && CollectionUtils.isEmpty(disposables)) {
+        if (!destroyed.compareAndSet(false, true)) {
             return;
         }
-        for (Disposable disposable : disposables) {
+
+        if (disposables.isEmpty()) {
+            return;
+        }
+
+        LOGGER.debug("destoryAll starting");
+
+        while (!disposables.isEmpty()) {
+            Disposable disposable = disposables.poll();
             disposable.destroy();
         }
+
+        LOGGER.debug("destoryAll finish");
     }
 
     /**
@@ -91,63 +94,18 @@ public class ShutdownHook extends Thread {
 
     private static class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
 
-        private static AtomicLong seq = new AtomicLong();
+        private final Disposable disposable;
 
-        private Disposable disposable;
-
-        private int priority;
-
-        private long seqId;
+        private final int priority;
 
         public DisposablePriorityWrapper(Disposable disposable, int priority) {
             this.disposable = disposable;
             this.priority = priority;
-            this.seqId = seq.incrementAndGet();
         }
 
         @Override
-        public int compareTo(DisposablePriorityWrapper disposablePriorityWrapper) {
-            int cmp = priority - disposablePriorityWrapper.priority;
-            if (cmp == 0) {
-                if (seqId > disposablePriorityWrapper.seqId) {
-                    cmp = 1;
-                } else if (seqId < disposablePriorityWrapper.seqId) {
-                    cmp = -1;
-                } else {
-                    cmp = 0;
-                }
-            }
-            return cmp;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + priority;
-            result = prime * result + (int) (seqId ^ (seqId >>> 32));
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            DisposablePriorityWrapper other = (DisposablePriorityWrapper) obj;
-            if (priority != other.priority) {
-                return false;
-            }
-            if (seqId != other.seqId) {
-                return false;
-            }
-            return true;
+        public int compareTo(DisposablePriorityWrapper challenger) {
+            return priority - challenger.priority;
         }
 
         @Override
@@ -155,6 +113,5 @@ public class ShutdownHook extends Thread {
             disposable.destroy();
         }
     }
-
 }
 

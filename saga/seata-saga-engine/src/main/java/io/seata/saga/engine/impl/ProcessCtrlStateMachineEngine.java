@@ -165,13 +165,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         inst.setBusinessKey(businessKey);
 
         inst.setStartParams(startParams);
-        if (StringUtils.hasText(businessKey) && startParams != null) {
-            startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
-        }
+        if (startParams != null) {
+            if (StringUtils.hasText(businessKey)) {
+                startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
+            }
 
-        if (StringUtils.hasText((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
-            inst.setParentId((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID));
-            startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
+            String parentId = (String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID);
+            if (StringUtils.hasText(parentId)) {
+                inst.setParentId(parentId);
+                startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
+            }
         }
 
         inst.setStatus(ExecutionStatus.RU);
@@ -519,8 +522,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     }
 
     @Override
-    public StateMachineInstance skipAndForward(String stateMachineInstId) throws EngineExecutionException {
-        return forwardInternal(stateMachineInstId, null, false, true, null);
+    public StateMachineInstance skipAndForward(String stateMachineInstId, Map<String, Object> replaceParams) throws EngineExecutionException {
+        return forwardInternal(stateMachineInstId, replaceParams, false, true, null);
     }
 
     @Override
