@@ -336,7 +336,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             // the only case that not need to retry acquire lock hear is
             //    LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == true && connection#autoCommit == true
             // because it has retry acquire lock when AbstractDMLBaseExecutor#executeAutoCommitTrue
-            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT && connection.getAutoCommit()) {
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT && connection.getContext().isAutoCommitChanged()) {
                 return callable.call();
             } else {
                 // LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == false
