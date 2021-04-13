@@ -20,13 +20,13 @@ import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
 import static io.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX_KEBAB_STYLE;
 
 /**
  * @author ls9527
  */
 @Component
-@ConfigurationProperties(prefix = LOAD_BALANCE_PREFIX)
+@ConfigurationProperties(prefix = LOAD_BALANCE_PREFIX_KEBAB_STYLE)
 public class LoadBalanceProperties {
     /**
      * the load balance
