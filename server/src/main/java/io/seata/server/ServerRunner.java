@@ -41,6 +41,7 @@ public class ServerRunner implements CommandLineRunner {
             long cost = System.currentTimeMillis() - start;
             logger.info("seata server started in {} millSeconds", cost);
         } catch (Throwable e) {
+            started = Boolean.FALSE;
             logger.error("seata server start error: {} ", e.getMessage(), e);
             System.exit(-1);
         }

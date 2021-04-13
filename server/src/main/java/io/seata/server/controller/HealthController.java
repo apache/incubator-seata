@@ -16,13 +16,10 @@
 package io.seata.server.controller;
 
 import io.seata.server.ServerRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 
 /**
  * @author spilledyear@outlook.com
@@ -30,7 +27,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping
 public class HealthController {
-    private Logger logger = LoggerFactory.getLogger(HealthController.class);
 
     private static final String OK = "ok";
     private static final String NOT_OK = "not_ok";

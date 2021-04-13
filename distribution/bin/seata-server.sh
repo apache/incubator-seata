@@ -124,6 +124,11 @@ JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDI
 JAVA_OPT="${JAVA_OPT} -Dspring.config.location=${BASEDIR}/conf/application.yaml -Dlogging.config=${BASEDIR}/conf/logback.xml"
 JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
 
+
+if [ ! -x "$BASEDIR"/logs ]; then
+  mkdir "$BASEDIR"/logs
+fi
+
 # start
 echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
 nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &

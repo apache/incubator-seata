@@ -31,13 +31,13 @@ public class StoreRedisProperties {
     /**
      * single, sentinel
      */
-    String mode = "single";
-    String password = null;
-    Integer maxConn = 10;
-    Integer minConn = 1;
-    Integer database = 0;
-    Integer queryLimit = 100;
-    Integer maxTotal = 100;
+    private String mode = "single";
+    private String password = null;
+    private Integer maxConn = 10;
+    private Integer minConn = 1;
+    private Integer database = 0;
+    private Integer queryLimit = 100;
+    private Integer maxTotal = 100;
 
     public String getMode() {
         return mode;
@@ -106,8 +106,8 @@ public class StoreRedisProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SINGLE_PREFIX)
     public static class Single {
-        String host = "127.0.0.1";
-        Integer port = 6379;
+        private String host = "127.0.0.1";
+        private Integer port = 6379;
 
         public String getHost() {
             return host;
@@ -133,11 +133,11 @@ public class StoreRedisProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SENTINEL_PREFIX)
     public static class Sentinel {
-        String masterName = "";
+        private String masterName = "";
         /**
          * such as "10.28.235.65:26379,10.28.235.65:26380,10.28.235.65:26381"
          */
-        String sentinelHosts = "";
+        private String sentinelHosts = "";
 
         public String getMasterName() {
             return masterName;

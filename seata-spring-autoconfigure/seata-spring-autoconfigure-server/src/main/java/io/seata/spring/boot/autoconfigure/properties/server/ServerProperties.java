@@ -28,9 +28,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 @Component
 @ConfigurationProperties(prefix = SERVER_PREFIX)
 public class ServerProperties {
-    Duration maxCommitRetryTimeout = Duration.ofMillis(-1);
-    Duration maxRollbackRetryTimeout = Duration.ofMillis(-1);
-    Boolean rollbackRetryTimeoutUnlockEnable = false;
+    private Duration maxCommitRetryTimeout = Duration.ofMillis(-1);
+    private Duration maxRollbackRetryTimeout = Duration.ofMillis(-1);
+    private Boolean rollbackRetryTimeoutUnlockEnable = false;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;

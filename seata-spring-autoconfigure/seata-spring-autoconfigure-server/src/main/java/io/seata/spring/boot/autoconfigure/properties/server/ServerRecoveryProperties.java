@@ -26,10 +26,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVER
 @Component
 @ConfigurationProperties(prefix = SERVER_RECOVERY_PREFIX)
 public class ServerRecoveryProperties {
-    Integer committingRetryPeriod = 1000;
-    Integer asynCommittingRetryPeriod = 1000;
-    Integer rollbackingRetryPeriod = 1000;
-    Integer timeoutRetryPeriod = 1000;
+    private Integer committingRetryPeriod = 1000;
+    private Integer asynCommittingRetryPeriod = 1000;
+    private Integer rollbackingRetryPeriod = 1000;
+    private Integer timeoutRetryPeriod = 1000;
 
     public Integer getCommittingRetryPeriod() {
         return committingRetryPeriod;

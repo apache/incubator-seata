@@ -15,6 +15,12 @@
  */
 package io.seata.spring.boot.autoconfigure.provider;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
@@ -25,12 +31,6 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.context.ApplicationContext;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.util.StringFormatUtils.DOT;

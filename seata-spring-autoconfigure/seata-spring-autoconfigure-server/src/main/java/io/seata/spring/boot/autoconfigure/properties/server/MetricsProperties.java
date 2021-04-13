@@ -26,10 +26,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX
 @Component
 @ConfigurationProperties(prefix = METRICS_PREFIX)
 public class MetricsProperties {
-    Boolean enabled = false;
-    String registryType = "compact";
-    String exporterList = "prometheus";
-    Integer exporterPrometheusPort = 9898;
+    private Boolean enabled = false;
+    private String registryType = "compact";
+    private String exporterList = "prometheus";
+    private Integer exporterPrometheusPort = 9898;
 
 
     public Boolean getEnabled() {

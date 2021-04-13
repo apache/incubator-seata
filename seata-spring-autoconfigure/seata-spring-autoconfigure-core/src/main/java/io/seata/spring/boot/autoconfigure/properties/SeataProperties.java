@@ -16,17 +16,17 @@
 package io.seata.spring.boot.autoconfigure.properties;
 
 import io.seata.common.DefaultValues;
-import io.seata.spring.boot.autoconfigure.StarterConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = StarterConstants.SEATA_PREFIX)
+@ConfigurationProperties(prefix = SEATA_PREFIX)
 public class SeataProperties {
     /**
      * whether enable auto configuration

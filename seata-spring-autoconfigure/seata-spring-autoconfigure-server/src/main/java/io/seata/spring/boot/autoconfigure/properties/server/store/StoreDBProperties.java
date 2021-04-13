@@ -26,19 +26,19 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFI
 @Component
 @ConfigurationProperties(prefix = STORE_DB_PREFIX)
 public class StoreDBProperties {
-    String datasource = "druid";
-    String dbType = "mysql";
-    String driverClassName = "com.mysql.cj.jdbc.Driver";
-    String url = "jdbc:mysql://localhost:3306/seata?useUnicode=true";
-    String user = "root";
-    String password = "root";
-    Integer minConn = 5;
-    Integer maxConn = 30;
-    String globalTable = "global_table";
-    String branchTable = "branch_table";
-    String lockTable = "lock_table";
-    Integer queryLimit = 100;
-    Integer maxWait = 5000;
+    private String datasource = "druid";
+    private String dbType = "mysql";
+    private String driverClassName = "com.mysql.cj.jdbc.Driver";
+    private String url = "jdbc:mysql://localhost:3306/seata?useUnicode=true";
+    private String user = "root";
+    private String password = "root";
+    private Integer minConn = 5;
+    private Integer maxConn = 30;
+    private String globalTable = "global_table";
+    private String branchTable = "branch_table";
+    private String lockTable = "lock_table";
+    private Integer queryLimit = 100;
+    private Integer maxWait = 5000;
 
     public String getDatasource() {
         return datasource;

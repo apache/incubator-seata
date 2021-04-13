@@ -30,11 +30,11 @@
             </includes>
         </fileSet>
 
-        <fileSet>
-            <includes>
-                <include>conf/**</include>
-            </includes>
-        </fileSet>
+        <!--        <fileSet>-->
+        <!--            <includes>-->
+        <!--                <include>conf/**</include>-->
+        <!--            </includes>-->
+        <!--        </fileSet>-->
 
         <fileSet>
             <includes>
@@ -48,16 +48,35 @@
                 <include>logs/**</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>../server/src/main/resources/logback/</directory>
+            <outputDirectory>conf/logback/</outputDirectory>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
+        </fileSet>
     </fileSets>
+
     <files>
         <file>
             <source>LICENSE-BIN</source>
             <destName>LICENSE</destName>
         </file>
+
         <file>
-            <!-- target jar dir-->
             <source>../server/target/seata-server.jar</source>
             <outputDirectory>target/</outputDirectory>
+        </file>
+
+        <file>
+            <source>../server/src/main/resources/application.yaml</source>
+            <outputDirectory>conf/</outputDirectory>
+        </file>
+
+        <file>
+            <source>../server/src/main/resources/logback.xml</source>
+            <outputDirectory>conf/</outputDirectory>
         </file>
     </files>
 

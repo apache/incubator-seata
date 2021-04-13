@@ -26,12 +26,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PRE
 @Component
 @ConfigurationProperties(prefix = STORE_FILE_PREFIX)
 public class StoreFileProperties {
-    String dir = "sessionStore";
-    Integer maxBranchSessionSize = 16384;
-    Integer maxGlobalSessionSize = 512;
-    Integer fileWriteBufferCacheSize = 16384;
-    Integer sessionReloadReadSize = 100;
-    String flushDiskMode = "async";
+    private String dir = "sessionStore";
+    private Integer maxBranchSessionSize = 16384;
+    private Integer maxGlobalSessionSize = 512;
+    private Integer fileWriteBufferCacheSize = 16384;
+    private Integer sessionReloadReadSize = 100;
+    private String flushDiskMode = "async";
 
     public String getDir() {
         return dir;
