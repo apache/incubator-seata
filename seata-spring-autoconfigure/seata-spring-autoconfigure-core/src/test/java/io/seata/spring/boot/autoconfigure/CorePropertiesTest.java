@@ -19,6 +19,7 @@ import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -82,6 +83,11 @@ public class CorePropertiesTest {
         assertEquals("seata", context.getBean(TransportProperties.class).getSerialization());
         assertEquals("none", context.getBean(TransportProperties.class).getCompressor());
         assertTrue(context.getBean(TransportProperties.class).isEnableClientBatchSendRequest());
+    }
+
+    @Test
+    public void testShutdownProperties() {
+        assertEquals(3L, context.getBean(ShutdownProperties.class).getWait());
     }
 
     @Test

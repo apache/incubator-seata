@@ -21,7 +21,6 @@ import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
@@ -84,10 +83,6 @@ public class ClientPropertiesTest {
         assertFalse(serviceProperties.isDisableGlobalTransaction());
     }
 
-    @Test
-    public void testShutdownProperties() {
-        assertEquals(3L, context.getBean(ShutdownProperties.class).getWait());
-    }
 
     @Test
     public void testTmProperties() {
