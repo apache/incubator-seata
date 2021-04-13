@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -66,6 +67,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -101,6 +103,7 @@ public class SeataCorePropertiesAutoConfiguration {
 
         PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
         PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
+        PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
     }
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)

@@ -35,7 +35,7 @@ public class ServerRunner implements CommandLineRunner {
     public void run(String... args) {
         try {
             long start = System.currentTimeMillis();
-            Server.main(args);
+            Server.start(args);
             started = true;
 
             long cost = System.currentTimeMillis() - start;

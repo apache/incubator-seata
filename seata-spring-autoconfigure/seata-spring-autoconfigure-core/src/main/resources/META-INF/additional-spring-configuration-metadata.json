@@ -205,67 +205,67 @@
     {
       "name": "seata.transport.heartbeat",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TransportProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": true
     },
     {
       "name": "seata.transport.enable-client-batch-send-request",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TransportProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": true
     },
     {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ShutdownProperties",
       "defaultValue": 3
     },
     {
       "name": "seata.transport.thread-factory.boss-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyBoss"
     },
     {
       "name": "seata.transport.thread-factory.worker-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyServerNIOWorker"
     },
     {
       "name": "seata.transport.thread-factory.server-executor-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyServerBizHandler"
     },
     {
       "name": "seata.transport.thread-factory.client-selector-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyClientSelector"
     },
     {
       "name": "seata.transport.thread-factory.client-selector-thread-size",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": 1
     },
     {
       "name": "seata.transport.thread-factory.client-worker-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyClientWorkerThread"
     },
     {
       "name": "seata.transport.thread-factory.worker-thread-size",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "Default"
     },
     {
       "name": "seata.transport.thread-factory.boss-thread-size",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": 1
     },
     {

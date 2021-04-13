@@ -166,12 +166,6 @@
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties",
       "defaultValue": false
-    },
-    {
-      "name": "seata.transport.shutdown.wait",
-      "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties",
-      "defaultValue": 3
     }
   ],
   "hints": [
