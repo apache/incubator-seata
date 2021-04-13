@@ -30,12 +30,6 @@
             </includes>
         </fileSet>
 
-        <!--        <fileSet>-->
-        <!--            <includes>-->
-        <!--                <include>conf/**</include>-->
-        <!--            </includes>-->
-        <!--        </fileSet>-->
-
         <fileSet>
             <includes>
                 <include>bin/*</include>
@@ -71,6 +65,10 @@
 
         <file>
             <source>../server/src/main/resources/application.yaml</source>
+            <outputDirectory>conf/</outputDirectory>
+        </file>
+        <file>
+            <source>../server/src/main/resources/application.example.yaml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
 
