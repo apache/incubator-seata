@@ -166,29 +166,36 @@
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties",
       "defaultValue": false
+    },
+    {
+      "name": "seata.client.load-balance.type",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties",
+      "defaultValue": "RandomLoadBalance"
+    },
+    {
+      "name": "seata.client.load-balance.virtual-nodes",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties",
+      "defaultValue": 10
     }
   ],
   "hints": [
     {
-      "name": "seata.data-source-proxy-mode",
+      "name": "seata.client.load-balance.type",
       "values": [
         {
-          "value": "AT",
-          "description": "the default mode."
+          "value": "RandomLoadBalance",
+          "description": "the default load balance."
         },
         {
-          "value": "XA"
-        }
-      ]
-    },
-    {
-      "name": "seata.excludes-for-auto-proxying",
-      "providers": [
+          "value": "ConsistentHashLoadBalance"
+        },
         {
-          "name": "class-reference",
-          "parameters": {
-            "target": "javax.sql.DataSource"
-          }
+          "value": "RoundRobinLoadBalance"
+        },
+        {
+          "value": "LeastActiveLoadBalance"
         }
       ]
     },
