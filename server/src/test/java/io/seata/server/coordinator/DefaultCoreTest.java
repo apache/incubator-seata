@@ -348,7 +348,7 @@ public class DefaultCoreTest {
          * @param rollbackStatus the rollback status
          */
         public MockCore(BranchStatus commitStatus, BranchStatus rollbackStatus) {
-            super(null);
+            super(new DefaultCoordinatorTest.MockServerMessageSender());
             this.commitStatus = commitStatus;
             this.rollbackStatus = rollbackStatus;
         }

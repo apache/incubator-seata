@@ -181,11 +181,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public SuspendedResourcesHolder suspend() throws TransactionException {
-        String xid = RootContext.unbind();
+        // In order to associate the following logs with XID, first get and then unbind.
+        String xid = RootContext.getXID();
         if (xid != null) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Suspending current transaction, xid = {}", xid);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Suspending current transaction, xid = {}", xid);
             }
+            RootContext.unbind();
             return new SuspendedResourcesHolder(xid);
         } else {
             return null;
@@ -239,6 +241,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public GlobalStatus getLocalStatus() {
         return status;
+    }
+
+    @Override
+    public GlobalTransactionRole getGlobalTransactionRole() {
+        return role;
     }
 
     private void assertXIDNotNull() {
