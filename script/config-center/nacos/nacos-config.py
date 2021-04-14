@@ -5,7 +5,7 @@ import http.client
 import sys
 import urllib.parse
 
-if len(sys.argv) <= 2:
+if len(sys.argv) < 2:
     print ('python nacos-config.py nacosAddr')
     exit()
 
