@@ -16,10 +16,3 @@ seata:
   store:
     # support: file 、 db 、 redis
     mode: file
-    file:
-      dir: sessionStore
-      maxBranchSessionSize: 16384
-      maxGlobalSessionSize: 512
-      fileWriteBufferCacheSize: 16384
-      sessionReloadReadSize: 100
-      flushDiskMode: async
