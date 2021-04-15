@@ -348,9 +348,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
                 return;
             }
-
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(s).setNewValue(o.toString())
-                    .setChangeType(ConfigurationChangeType.MODIFY);
+            String dataId = s.replace(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(o.toString())
+                .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
         }
 
