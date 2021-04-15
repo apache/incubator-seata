@@ -348,15 +348,16 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
                 return;
             }
-
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(s).setNewValue(o.toString())
-                    .setChangeType(ConfigurationChangeType.MODIFY);
+            String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(o.toString())
+                .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
         }
 
         @Override
         public void handleDataDeleted(String s) {
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(s).setChangeType(
+            String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setChangeType(
                     ConfigurationChangeType.DELETE);
             listener.onProcessEvent(event);
         }
