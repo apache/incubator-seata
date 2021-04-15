@@ -78,7 +78,7 @@ public class ConnectionProxyTest {
         connectionProxy.bind(TEST_XID);
         connectionProxy.appendUndoLog(new SQLUndoLog());
         connectionProxy.appendLockKey(lockKey);
-        Assertions.assertThrows(LockConflictException.class, connectionProxy::commit);
+        Assertions.assertThrows(LockWaitTimeoutException.class, connectionProxy::commit);
         branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
 
