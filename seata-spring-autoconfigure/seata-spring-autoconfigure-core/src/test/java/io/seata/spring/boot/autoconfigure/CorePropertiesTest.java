@@ -113,7 +113,7 @@ public class CorePropertiesTest {
 
     @Test
     public void testConfigNacosProperties() {
-        assertEquals("localhost", context.getBean(ConfigNacosProperties.class).getServerAddr());
+        assertEquals("localhost:8848", context.getBean(ConfigNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(ConfigNacosProperties.class).getNamespace());
     }
 
@@ -155,7 +155,7 @@ public class CorePropertiesTest {
 
     @Test
     public void testRegistryNacosProperties() {
-        assertEquals("localhost", context.getBean(RegistryNacosProperties.class).getServerAddr());
+        assertEquals("localhost:8848", context.getBean(RegistryNacosProperties.class).getServerAddr());
         assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
         assertEquals("SEATA_GROUP", context.getBean(RegistryNacosProperties.class).getGroup());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
