@@ -276,7 +276,16 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='熙菱信息' height='40'  src='https://img.alicdn.com/tfs/TB1NJmLpA9l0K4jSZFKXXXFjpXa-195-60.png'  /img> 
     <img alt='鲸算科技' height='40'  src='https://img.alicdn.com/tfs/TB1jfCLpA9l0K4jSZFKXXXFjpXa-514-220.png'  /img> 
     <img alt='杭州沃朴物联科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1vxJ.ZVT7gK0jSZFpXXaTkpXa-309-51.png'  /img> 
-    <img alt='深圳市臻络科技有限公司' height='40' width='240' src='https://img.alicdn.com/tfs/TB1v5eiZ.T1gK0jSZFrXXcNCXXa-500-41.png'  /img> 
+    <img alt='深圳市臻络科技有限公司' height='40' src='https://img.alicdn.com/tfs/TB1v5eiZ.T1gK0jSZFrXXcNCXXa-500-41.png'  /img> 
+    <img alt='白云电气' height='40' src='https://img.alicdn.com/imgextra/i2/O1CN01QPEPnx1zaOC9n4QXE_!!6000000006730-0-tps-781-100.jpg' /img>
+    <img alt='重庆雷高科技有限公司' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN01TKiMMC1VQpSIe3n7i_!!6000000002648-2-tps-931-865.png' /img>
+    <img alt='江西群享科技有限公司' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN018AiGbE1PZdN8Vu4Fd_!!6000000001855-2-tps-630-220.png' /img>
+    <img alt='叩丁狼教育' height='40'  src='https://img.alicdn.com/imgextra/i3/O1CN01afOEp41o9rTu6mWZI_!!6000000005183-2-tps-600-275.png' /img>
+    <img alt='奇虎360' height='40'  src='https://img.alicdn.com/imgextra/i2/O1CN01M9aSuY1nQWGxoVQu9_!!6000000005084-2-tps-239-78.png' /img>
+    <img alt='深圳来电科技有限公司' height='40'  src='https://img.alicdn.com/imgextra/i2/O1CN01tgPBCl1tLpururaD7_!!6000000005886-2-tps-702-213.png' /img>
+    <img alt='收钱吧' height='40' src='https://img.alicdn.com/imgextra/i1/O1CN01PmTFnO1gZ2K7GUpgh_!!6000000004155-2-tps-2406-747.png' /img>
+    <img alt='易点生活' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN01svojxj1LuvK3hgQ5Y_!!6000000001360-2-tps-133-48.png' /img>
+    <img alt='中元健康科技有限公司' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN018aBoRi1ZOm8uiOJwA_!!6000000003185-0-tps-1659-569.jpg' /img>
 </div>
 
 
