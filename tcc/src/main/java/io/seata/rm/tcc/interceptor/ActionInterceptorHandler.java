@@ -45,6 +45,8 @@ public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
+    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
+
     /**
      * Handler the TCC Aspect
      *
@@ -82,10 +84,13 @@ public class ActionInterceptorHandler {
             }
             argIndex++;
         }
+        //share actionContext implicitly
+        ActionInterceptorHandler.setUpContext(actionContext);
         //the final parameters of the try method
         ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
         //the final result
         ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+        ActionInterceptorHandler.cleanUp();
         return ret;
     }
 
@@ -204,4 +209,15 @@ public class ActionInterceptorHandler {
         return context;
     }
 
+   public static BusinessActionContext getContext(){
+       return CONTEXT_HOLDER.get();
+   }
+
+    private static void cleanUp() {
+        CONTEXT_HOLDER.remove();
+    }
+
+    private static void setUpContext(BusinessActionContext context) {
+        CONTEXT_HOLDER.set(context);
+    }
 }

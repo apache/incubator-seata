@@ -74,6 +74,16 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
+    /**
+     * The constant UPDATE_BRANCH_STATUS_APPLICATION_DATA_POSTGRESQL.
+     */
+    public static final String UPDATE_BRANCH_STATUS_APPLICATION_DATA_POSTGRESQL = "update " + BRANCH_TABLE_PLACEHOLD
+            + "   set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?,"
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?,"
+            + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now()"
+            + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
+            + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
         return INSERT_GLOBAL_TRANSACTION_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
@@ -103,5 +113,10 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getUpdateBranchTransactionStatusSQL(String branchTable) {
         return UPDATE_BRANCH_TRANSACTION_STATUS_POSTGRESQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    @Override
+    public String getUpdateBranchTransactionStatusAppDataSQL(String branchTable) {
+        return UPDATE_BRANCH_STATUS_APPLICATION_DATA_POSTGRESQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

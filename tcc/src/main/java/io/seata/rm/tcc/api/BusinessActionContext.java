@@ -143,6 +143,16 @@ public class BusinessActionContext implements Serializable {
         this.actionName = actionName;
     }
 
+    /**
+     * add actionContext
+     *
+     * @param key   the action context's key
+     * @param value biz value
+     */
+    public void addActionContext(String key, Object value) {
+        this.actionContext.put(key, value);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
