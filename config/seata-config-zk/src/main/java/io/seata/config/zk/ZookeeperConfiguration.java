@@ -348,7 +348,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
                 return;
             }
-            String dataId = s.replace(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(o.toString())
                 .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
@@ -356,7 +356,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
         @Override
         public void handleDataDeleted(String s) {
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(s).setChangeType(
+            String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setChangeType(
                     ConfigurationChangeType.DELETE);
             listener.onProcessEvent(event);
         }
