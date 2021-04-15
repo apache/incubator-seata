@@ -7,6 +7,10 @@ logging:
     path: ${user.home}/logs
 
 seata:
+  config:
+    type: file
+  registry:
+    type: file
   store:
     mode: file
     file:
@@ -16,11 +20,3 @@ seata:
       fileWriteBufferCacheSize: 16384
       sessionReloadReadSize: 100
       flushDiskMode: async
-  metrics:
-    enabled: false
-    registryType: compact
-    exporterList: prometheus
-    exporterPrometheusPort: 9898
-
-
-
