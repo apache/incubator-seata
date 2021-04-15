@@ -19,6 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,9 +42,6 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type Base transactional executor.
@@ -279,10 +278,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
         String lockKeys = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(lockKeys);
+        if (null != lockKeys) {
+            connectionProxy.appendLockKey(lockKeys);
 
-        SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
-        connectionProxy.appendUndoLog(sqlUndoLog);
+            SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
+            connectionProxy.appendUndoLog(sqlUndoLog);
+        }
     }
 
     /**
