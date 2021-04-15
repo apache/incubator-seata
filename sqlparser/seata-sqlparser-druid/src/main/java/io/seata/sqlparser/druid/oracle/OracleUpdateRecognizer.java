@@ -143,7 +143,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
         } else if (tableSource instanceof SQLJoinTableSource) {
             visitor.visit((SQLJoinTableSource) tableSource);
         } else {
-            throw new NotSupportYetException("not support hte syntax of update with unknow");
+            throw new NotSupportYetException("not support the syntax of update with unknow");
         }
         return sb.toString();
     }
