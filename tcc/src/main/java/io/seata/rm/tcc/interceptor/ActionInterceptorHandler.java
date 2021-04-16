@@ -86,11 +86,14 @@ public class ActionInterceptorHandler {
         }
         //share actionContext implicitly
         ActionInterceptorHandler.setUpContext(actionContext);
-        //the final parameters of the try method
-        ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-        //the final result
-        ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
-        ActionInterceptorHandler.cleanUp();
+        try {
+            //the final parameters of the try method
+            ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
+            //the final result
+            ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+        } finally {
+            ActionInterceptorHandler.cleanUp();
+        }
         return ret;
     }
 
