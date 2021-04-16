@@ -28,12 +28,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFI
 public class StoreDBProperties {
     private String datasource = "druid";
     private String dbType = "mysql";
-    private String driverClassName = "com.mysql.cj.jdbc.Driver";
-    private String url = "jdbc:mysql://localhost:3306/seata?useUnicode=true";
-    private String user = "root";
-    private String password = "root";
+    private String driverClassName = "com.mysql.jdbc.Driver";
+    private String url = "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true";
+    private String user = "mysql";
+    private String password = "mysql";
     private Integer minConn = 5;
-    private Integer maxConn = 30;
+    private Integer maxConn = 100;
     private String globalTable = "global_table";
     private String branchTable = "branch_table";
     private String lockTable = "lock_table";

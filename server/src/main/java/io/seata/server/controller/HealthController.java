@@ -38,8 +38,6 @@ public class HealthController {
     @RequestMapping("/health")
     @ResponseBody
     String healthCheck() {
-        boolean started = serverRunner.started();
-        String result = started ? OK : NOT_OK;
-        return result;
+        return serverRunner.started() ? OK : NOT_OK;
     }
 }

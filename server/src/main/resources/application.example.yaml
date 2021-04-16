@@ -8,127 +8,130 @@ logging:
 
 seata:
   config:
+    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
     type: file
     nacos:
-      serverAddr: 127.0.0.1:8848
+      server-addr: 127.0.0.1:8848
       namespace:
       group: SEATA_GROUP
       username:
       password:
-      dataId: seataServer.properties
+      data-id: seataServer.properties
     consul:
-      serverAddr: 127.0.0.1:8500
-      aclToken:
+      server-addr: 127.0.0.1:8500
+      acl-token:
     apollo:
       appId: seata-server
-      apolloMeta: http://192.168.1.204:8801
-      apolloConfigService: http://192.168.1.204:8080
+      apollo-meta: http://192.168.1.204:8801
+      apollo-config-service: http://192.168.1.204:8080
       namespace: application
-      apolloAccesskeySecret:
+      apollo-access-key-secret:
       cluster: seata
     zk:
-      serverAddr: 127.0.0.1:2181
-      sessionTimeout: 6000
-      connectTimeout: 2000
+      server-addr: 127.0.0.1:2181
+      session-timeout: 6000
+      connect-timeout: 2000
       username:
       password:
-      nodePath: /seata/seata.properties
+      node-path: /seata/seata.properties
     etcd3:
-      serverAddr: http://localhost:2379
+      server-addr: http://localhost:2379
   registry:
+    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
     nacos:
       application: seata-server
-      serverAddr: 127.0.0.1:8848
+      server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
       namespace:
       cluster: default
       username:
       password:
     eureka:
-      serviceUrl: http://localhost:8761/eureka
+      service-url: http://localhost:8761/eureka
       application: default
       weight: 1
     redis:
-      serverAddr: localhost:6379
+      server-addr: localhost:6379
       db: 0
       password:
       cluster: default
       timeout: 0
     zk:
       cluster: default
-      serverAddr: 127.0.0.1:2181
-      sessionTimeout: 6000
-      connectTimeout: 2000
+      server-addr: 127.0.0.1:2181
+      session-timeout: 6000
+      connect-timeout: 2000
       username: ""
       password: ""
     consul:
       cluster: default
-      serverAddr: 127.0.0.1:8500
-      aclToken:
+      server-addr: 127.0.0.1:8500
+      acl-token:
     etcd3:
       cluster: default
-      serverAddr: http://localhost:2379
+      server-addr: http://localhost:2379
     sofa:
-      serverAddr: 127.0.0.1:9603
+      server-addr: 127.0.0.1:9603
       application: default
       region: DEFAULT_ZONE
       datacenter: DefaultDataCenter
       cluster: default
       group: SEATA_GROUP
-      addressWaitTime: 3000
+      address-wait-time: 3000
 
   server:
-    maxCommitRetryTimeout: -1
-    maxRollbackRetryTimeout: -1
-    rollbackRetryTimeoutUnlockEnable: false
+    max-commit-retry-timeout: -1
+    max-rollback-retry-timeout: -1
+    rollback-retry-timeout-unlock-enable: false
     recovery:
-      committingRetryPeriod: 1000
-      asynCommittingRetryPeriod: 1000
-      rollbackingRetryPeriod: 1000
-      timeoutRetryPeriod: 1000
+      committing-retry-period: 1000
+      asyn-committing-retry-period: 1000
+      rollbacking-retry-period: 1000
+      timeout-retry-period: 1000
     undo:
-      logSaveDays: 7
-      logDeletePeriod: 86400000
+      log-save-days: 7
+      log-delete-period: 86400000
   store:
+    # support: file 、 db 、 redis
     mode: file
     file:
       dir: sessionStore
-      maxBranchSessionSize: 16384
-      maxGlobalSessionSize: 512
-      fileWriteBufferCacheSize: 16384
-      sessionReloadReadSize: 100
-      flushDiskMode: async
+      max-branch-session-size: 16384
+      max-global-session-size: 512
+      file-write-buffer-cache-size: 16384
+      session-reload-read-size: 100
+      flush-disk-mode: async
     db:
       datasource: druid
-      dbType: mysql
-      driverClassName: com.mysql.jdbc.Driver
+      db-type: mysql
+      driver-class-name: com.mysql.jdbc.Driver
       url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
       user: mysql
       password: mysql
-      minConn: 5
-      maxConn: 100
-      globalTable: global_table
-      branchTable: branch_table
-      lockTable: lock_table
-      queryLimit: 100
-      maxWait: 5000
+      min-conn: 5
+      max-conn: 100
+      global-table: global_table
+      branch-table: branch_table
+      lock-table: lock_table
+      query-limit: 100
+      max-wait: 5000
     redis:
       mode: single
       database: 0
-      minConn: 1
-      maxConn: 10
+      min-conn: 1
+      max-conn: 10
       password:
-      maxTotal: 100
-      queryLimit: 100
+      max-total: 100
+      query-limit: 100
       sigle:
         host: 127.0.0.1
         port: 6379
       sentinel:
-        masterName:
-        sentinelHosts:
+        master-name:
+        sentinel-hosts:
   metrics:
     enabled: false
-    registryType: compact
-    exporterList: prometheus
-    exporterPrometheusPort: 9898
+    registry-type: compact
+    exporter-list: prometheus
+    exporter-prometheus-port: 9898

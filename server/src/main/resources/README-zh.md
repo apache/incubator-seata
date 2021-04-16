@@ -29,4 +29,4 @@
 - consul: 用于向 consul 中添加配置
 
 ## 打包
-mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
+./mvnw -Prelease-seata -Dmaven.test.skip=true clean install -U

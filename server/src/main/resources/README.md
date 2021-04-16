@@ -29,5 +29,5 @@
 - consul: Initialize script for consul
 
 ## build packege 
-mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
+./mvnw -Prelease-seata -Dmaven.test.skip=true clean install -U
 

@@ -26,9 +26,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServerRunner implements CommandLineRunner {
 
-    final Logger logger = LoggerFactory.getLogger(ServerRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerRunner.class);
 
-    private Boolean started = Boolean.FALSE;
+    private boolean started = Boolean.FALSE;
 
 
     @Override
@@ -39,10 +39,10 @@ public class ServerRunner implements CommandLineRunner {
             started = true;
 
             long cost = System.currentTimeMillis() - start;
-            logger.info("seata server started in {} millSeconds", cost);
+            LOGGER.info("seata server started in {} millSeconds", cost);
         } catch (Throwable e) {
             started = Boolean.FALSE;
-            logger.error("seata server start error: {} ", e.getMessage(), e);
+            LOGGER.error("seata server start error: {} ", e.getMessage(), e);
             System.exit(-1);
         }
     }
