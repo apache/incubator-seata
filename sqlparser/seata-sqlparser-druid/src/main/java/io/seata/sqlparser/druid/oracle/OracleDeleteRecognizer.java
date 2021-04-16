@@ -18,9 +18,12 @@ package io.seata.sqlparser.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -68,8 +71,26 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
                 printTableSourceExpr(x.getExpr());
                 return false;
             }
+
+            @Override
+            public boolean visit(SQLJoinTableSource x) {
+                throw new NotSupportYetException("not support the syntax of delete with join table");
+            }
         };
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
+        SQLTableSource tableSource;
+        if (ast.getFrom() == null) {
+            tableSource = ast.getTableSource();
+        } else {
+            tableSource = ast.getFrom();
+        }
+
+        if (tableSource instanceof SQLExprTableSource) {
+            visitor.visit((SQLExprTableSource) tableSource);
+        } else if (tableSource instanceof SQLJoinTableSource) {
+            visitor.visit((SQLJoinTableSource) tableSource);
+        } else {
+            throw new NotSupportYetException("not support the syntax of delete with unknow");
+        }
         return sb.toString();
     }
 
