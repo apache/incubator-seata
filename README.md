@@ -230,6 +230,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='唯小宝（江苏）网络技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1eswAZFP7gK0jSZFjXXc5aXXa-800-800.png'  /img> 
     <img alt='杭州喜团科技' height='40'  src='https://img.alicdn.com/tfs/TB1IXqgwYj1gK0jSZFuXXcrHpXa-197-58.png'  /img>
     <img alt='海典软件' height='40'  src='https://img.alicdn.com/tfs/TB1KmosZNv1gK0jSZFFXXb0sXXa-247-61.png'  /img> 
+    <img alt='中元健康科技有限公司' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN018aBoRi1ZOm8uiOJwA_!!6000000003185-0-tps-1659-569.jpg' /img>
     <img alt='宿迁民丰农商银行' height='40'  src='https://img.alicdn.com/tfs/TB1bH5fw7L0gK0jSZFAXXcA9pXa-442-39.png'  /img>
     <img alt='上海海智在线' height='40' src='https://img.alicdn.com/tfs/TB1xAJUFy_1gK0jSZFqXXcpaXXa-320-80.jpg'  /img>
     <img alt='丞家（上海）公寓管理' height='40'  src='https://image.cjia.com/website/apartment/webresource/image/logo_8f2f47fe.png'  /img>
@@ -286,7 +287,6 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='叩丁狼教育' height='40'  src='https://img.alicdn.com/imgextra/i3/O1CN01afOEp41o9rTu6mWZI_!!6000000005183-2-tps-600-275.png' /img>
     <img alt='深圳来电科技有限公司' height='40'  src='https://img.alicdn.com/imgextra/i2/O1CN01tgPBCl1tLpururaD7_!!6000000005886-2-tps-702-213.png' /img>
     <img alt='易点生活' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN01svojxj1LuvK3hgQ5Y_!!6000000001360-2-tps-133-48.png' /img>
-    <img alt='中元健康科技有限公司' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN018aBoRi1ZOm8uiOJwA_!!6000000003185-0-tps-1659-569.jpg' /img>
 </div>
 
 
