@@ -533,7 +533,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 if (!conf.parse(addresses)) {
                     throw new IllegalArgumentException("Fail to parse conf:" + addresses);
                 }
-                if (!routeTable.getConfiguration(SEATA_RAFT_GROUP).equals(conf)) {
+                if (!Objects.equals(routeTable.getConfiguration(SEATA_RAFT_GROUP), conf)) {
                     routeTable.updateConfiguration(SEATA_RAFT_GROUP, conf);
                 }
             }

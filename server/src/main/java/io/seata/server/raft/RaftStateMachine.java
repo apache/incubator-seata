@@ -278,7 +278,22 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             } else {
                 globalSession = SessionConverter.convertGlobalSession(msg.getGlobalSession());
             }
-            raftSessionManager.getFileSessionManager().addGlobalSession(globalSession);
+            switch (globalSession.getStatus()) {
+                case AsyncCommitting:
+                    globalSession.asyncCommit();
+                    break;
+                case CommitRetrying:
+                    globalSession.queueToRetryCommit();
+                    break;
+                case RollbackRetrying:
+                case TimeoutRollbackFailed:
+                    globalSession.queueToRetryRollback();
+                    break;
+                default:
+                    raftSessionManager.getFileSessionManager().addGlobalSession(globalSession);
+                    break;
+            }
+
         } else if (ACQUIRE_LOCK.equals(msgType)) {
             GlobalSession globalSession =
                 SessionHolder.getRootSessionManager().findGlobalSession(msg.getBranchSession().getXid());
@@ -326,6 +341,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             if (globalSession != null) {
                 if (globalSession != null) {
                     if (rootManager) {
+                        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                         GlobalStatus status = globalSession.getStatus();
                         switch (status) {
                             case Rollbacked:
