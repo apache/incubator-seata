@@ -228,8 +228,8 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='江西群享科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1Qcd0p79l0K4jSZFKXXXFjpXa-372-125.png'  /img> 
     <img alt='宋城独木桥网络有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1UKocmPMZ7e4jSZFOXXX7epXa-234-82.png'  /img> 
     <img alt='唯小宝（江苏）网络技术有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1eswAZFP7gK0jSZFjXXc5aXXa-800-800.png'  /img> 
-    <img alt='宿迁民丰农商银行' height='40'  src='https://img.alicdn.com/tfs/TB1bH5fw7L0gK0jSZFAXXcA9pXa-442-39.png'  /img>
     <img alt='杭州喜团科技' height='40'  src='https://img.alicdn.com/tfs/TB1IXqgwYj1gK0jSZFuXXcrHpXa-197-58.png'  /img>
+    <img alt='宿迁民丰农商银行' height='40'  src='https://img.alicdn.com/tfs/TB1bH5fw7L0gK0jSZFAXXcA9pXa-442-39.png'  /img>
     <img alt='上海海智在线' height='40' src='https://img.alicdn.com/tfs/TB1xAJUFy_1gK0jSZFqXXcpaXXa-320-80.jpg'  /img>
     <img alt='丞家（上海）公寓管理' height='40'  src='https://image.cjia.com/website/apartment/webresource/image/logo_8f2f47fe.png'  /img>
     <img alt='安徽国科新材科' height='40'  src='https://img.alicdn.com/tfs/TB1ICJfFuH2gK0jSZJnXXaT1FXa-654-232.png'  /img>
@@ -238,9 +238,9 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='钛师傅云' height='40'  src='https://www.tsfyun.com/images/logo.png'  /img>
     <img alt='广州力生信息' height='40'  src='https://img.alicdn.com/tfs/TB1m0FcFuH2gK0jSZFEXXcqMpXa-139-48.png'  /img>
     <img alt='杭州启舰科技有限公司' height='40'  src='http://www.qijian-tech.com/img/logo.33134af4.png'  /img>
+     <img alt='微链' height='40'  src='https://img.alicdn.com/tfs/TB14LhHmMgP7K4jSZFqXXamhVXa-300-135.png'  /img> 
     <img alt='上海美浮特' height='40'  src='https://img.alicdn.com/tfs/TB1uUtaFuT2gK0jSZFvXXXnFXXa-370-45.jpg'  /img>    
     <img alt='杭州中威慧云医疗科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1iqo_FaL7gK0jSZFBXXXZZpXa-361-54.jpg'  /img> 
-    <img alt='微链' height='40'  src='https://img.alicdn.com/tfs/TB14LhHmMgP7K4jSZFqXXamhVXa-300-135.png'  /img> 
     <img alt='海典软件' height='40'  src='https://img.alicdn.com/tfs/TB1KmosZNv1gK0jSZFFXXb0sXXa-247-61.png'  /img> 
     <img alt='易族智汇（北京）' height='40'  src='http://www.javamall.com.cn/images/logonew.jpg'  /img> 
     <img alt='佛山宅无限' height='40'  src='https://zwxnetwork.oss-cn-shenzhen.aliyuncs.com/static/temporary_official_website/logo.png'  /img>     
