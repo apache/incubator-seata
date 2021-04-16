@@ -190,15 +190,9 @@
                 <finalName>seata-server</finalName>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                                </manifest>
-                            </archive>
-                        </configuration>
+                        <version>3.0.2</version>
                     </plugin>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
