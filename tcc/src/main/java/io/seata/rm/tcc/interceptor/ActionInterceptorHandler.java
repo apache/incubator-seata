@@ -124,7 +124,7 @@ public class ActionInterceptorHandler {
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,
-                applicationContextStr, null);
+                    applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
             String msg = String.format("TCC branch Register error, xid: %s", xid);
@@ -181,7 +181,7 @@ public class ActionInterceptorHandler {
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
+                    BusinessActionContextParameter param = (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
@@ -190,7 +190,7 @@ public class ActionInterceptorHandler {
                     //List, get by index
                     if (index >= 0) {
                         @SuppressWarnings("unchecked")
-                        Object targetParam = ((List<Object>)paramObject).get(index);
+                        Object targetParam = ((List<Object>) paramObject).get(index);
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
                         } else {
@@ -209,9 +209,9 @@ public class ActionInterceptorHandler {
         return context;
     }
 
-   public static BusinessActionContext getContext(){
-       return CONTEXT_HOLDER.get();
-   }
+    public static BusinessActionContext getContext() {
+        return CONTEXT_HOLDER.get();
+    }
 
     private static void cleanUp() {
         CONTEXT_HOLDER.remove();
