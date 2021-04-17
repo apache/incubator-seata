@@ -70,7 +70,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                     return BranchStatus.PhaseTwo_Committed;
                 } else {
                     connectionProxyXA.xaRollback(xid, branchId, applicationData);
-                    LOGGER.info(xaBranchXid + " was rolled back.");
+                    LOGGER.info(xaBranchXid + " was rollbacked");
                     return BranchStatus.PhaseTwo_Rollbacked;
                 }
             } catch (XAException | SQLException sqle) {

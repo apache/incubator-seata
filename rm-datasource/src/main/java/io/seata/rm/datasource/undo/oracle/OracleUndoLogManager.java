@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.oracle;
 
 
-import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -87,8 +86,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             pst.setLong(1, branchID);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
-            pst.setBlob(4, inputStream);
+            pst.setBytes(4, undoLogContent);
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {

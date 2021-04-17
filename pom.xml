@@ -320,6 +320,9 @@
                             </includes>
                             <excludes>
                                 <exclude>**/generated/**</exclude>
+                                <exclude>**/antlr/mysql/parser/*.*</exclude>
+                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                             </excludes>
                             <strictCheck>true</strictCheck>
                             <mapping>
@@ -416,6 +419,9 @@
                     </rulesets>
                     <excludes>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/antlr/mysql/parser/*.*</exclude>
+                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
