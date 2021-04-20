@@ -865,6 +865,164 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertEquals(inst.getStateList().size(), 2);
     }
 
+    @Test
+    public void testSimpleStateMachineWithLoop() {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("collection", loopList);
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopForward() throws InterruptedException {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("collection", loopList);
+        paramMap.put("fooThrowException", "true");
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopCompensate() {
+        long start = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("collection", loopList);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+        Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.SU);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopCompensateForRecovery() throws InterruptedException {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 1);
+        paramMap.put("collection", loopList);
+        paramMap.put("barThrowException", "true");
+        paramMap.put("compensateFooThrowException", "true");
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+        Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(inst.getCompensationStatus(), ExecutionStatus.UN);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopSubMachine() {
+        long start = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 2);
+        paramMap.put("collection", loopList);
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.SU);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopSubMachineForward() throws InterruptedException {
+        long start  = System.currentTimeMillis();
+
+        List<Integer> loopList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            loopList.add(i);
+        }
+
+        Map<String, Object> paramMap = new HashMap<>(2);
+        paramMap.put("a", 2);
+        paramMap.put("collection", loopList);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+
+        Thread.sleep(sleepTime);
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+        Assertions.assertEquals(inst.getStatus(), ExecutionStatus.UN);
+    }
+
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {
 
         long start = System.currentTimeMillis();

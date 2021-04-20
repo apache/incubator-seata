@@ -19,13 +19,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
-import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EngineUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
 
     /**
      * generate parent id
@@ -55,11 +56,37 @@ public class EngineUtils {
     }
 
     /**
+     * get origin state name without suffix like fork
+     *
+     * @param stateInstance
+     * @return
+     * @see LoopTaskUtils#generateLoopStateName(ProcessContext, String)
+     */
+    public static String getOriginStateName(StateInstance stateInstance) {
+        String stateName = stateInstance.getName();
+        if (StringUtils.isNotBlank(stateName)) {
+            int end = stateName.lastIndexOf(LoopTaskUtils.LOOP_STATE_NAME_PATTERN);
+            if (end > -1) {
+                return stateName.substring(0, end);
+            }
+        }
+        return stateName;
+    }
+
+    /**
      * end StateMachine
      *
      * @param context
      */
     public static void endStateMachine(ProcessContext context) {
+
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+            if (context.hasVariable(DomainConstants.LOOP_SEMAPHORE)) {
+                Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+                semaphore.release();
+            }
+            return;
+        }
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
@@ -109,6 +136,10 @@ public class EngineUtils {
      * @param exp
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
+
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
+            return;
+        }
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
