@@ -50,14 +50,13 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
-
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
 
+    private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
     /**
      * Instantiates a new Connection proxy.
@@ -182,7 +181,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void commit() throws SQLException {
         try {
-            lockRetryPolicy.execute(() -> {
+            LOCK_RETRY_POLICY.execute(() -> {
                 doCommit();
                 return null;
             });
@@ -326,21 +325,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
             .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
 
-        protected final ConnectionProxy connection;
-
-        public LockRetryPolicy(ConnectionProxy connection) {
-            this.connection = connection;
-        }
-
         public <T> T execute(Callable<T> callable) throws Exception {
-            // the only case that not need to retry acquire lock hear is
-            //    LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == true && connection#autoCommit == true
-            // because it has retry acquire lock when AbstractDMLBaseExecutor#executeAutoCommitTrue
-            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT && connection.getContext().isAutoCommitChanged()) {
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
                 return callable.call();
             } else {
-                // LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == false
-                // or LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == true && autoCommit == false
                 return doRetryOnLockConflict(callable);
             }
         }

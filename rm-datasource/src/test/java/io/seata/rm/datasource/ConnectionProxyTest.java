@@ -22,8 +22,6 @@ import io.seata.core.model.ResourceManager;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockWaitTimeoutException;
-import io.seata.rm.datasource.mock.MockConnection;
-import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,11 +72,11 @@ public class ConnectionProxyTest {
     public void testLockRetryPolicyRollbackOnConflict() throws Exception {
         boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
         branchRollbackFlagField.set(null, true);
-        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, new MockConnection(new MockDriver(), "", null));
+        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, null);
         connectionProxy.bind(TEST_XID);
         connectionProxy.appendUndoLog(new SQLUndoLog());
         connectionProxy.appendLockKey(lockKey);
-        Assertions.assertThrows(LockWaitTimeoutException.class, connectionProxy::commit);
+        Assertions.assertThrows(LockConflictException.class, connectionProxy::commit);
         branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
 
