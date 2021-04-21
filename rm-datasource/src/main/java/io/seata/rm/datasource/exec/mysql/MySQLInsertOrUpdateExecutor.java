@@ -168,6 +168,9 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
             TableRecords partAfterImage = new TableRecords(afterImage.getTableMeta());
             partAfterImage.setTableName(afterImage.getTableName());
             partAfterImage.setRows(updateRows);
+            if (beforeImage.getRows().size() != partAfterImage.getRows().size()) {
+                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+            }
             connectionProxy.appendUndoLog(buildUndoItem(SQLType.UPDATE, beforeImage, partAfterImage));
         }
         if (CollectionUtils.isNotEmpty(insertRows)) {
