@@ -324,9 +324,6 @@
                                 <exclude>**/antlr/mysql/parser/*.*</exclude>
                                 <exclude>**/antlr/mysql/antlr/*.*</exclude>
                                 <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                                <exclude>**/ext/apm-seata-skywalking-plugin/src/main/java/org/apache/skywalking/apm/plugin/seata/*.*</exclude>
-                                <exclude>**/ext/apm-seata-skywalking-plugin/src/main/java/org/apache/skywalking/apm/plugin/seata/common/*.*</exclude>
-                                <exclude>**/ext/apm-seata-skywalking-plugin/src/main/java/org/apache/skywalking/apm/plugin/seata/define/*.*</exclude>
                             </excludes>
                             <strictCheck>true</strictCheck>
                             <mapping>
