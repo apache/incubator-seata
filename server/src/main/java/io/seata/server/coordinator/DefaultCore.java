@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.core.model.CommitType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
@@ -33,6 +29,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.CommitType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.server.event.EventBusManager;
