@@ -19,9 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -39,9 +42,6 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type Base transactional executor.
@@ -170,7 +170,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (Objects.isNull(columnNameList) || columnNameList.isEmpty()) {
             return null;
         }
-        StringBuffer columnNamesStr = new StringBuffer();
+        StringBuilder columnNamesStr = new StringBuilder();
         for (int i = 0; i < columnNameList.size(); i++) {
             if (i > 0) {
                 columnNamesStr.append(" , ");
@@ -269,15 +269,21 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
-
+        if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+            if (beforeImage.getRows().size() != afterImage.getRows().size()) {
+                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+            }
+        }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
         String lockKeys = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(lockKeys);
+        if (null != lockKeys) {
+            connectionProxy.appendLockKey(lockKeys);
 
-        SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
-        connectionProxy.appendUndoLog(sqlUndoLog);
+            SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
+            connectionProxy.appendUndoLog(sqlUndoLog);
+        }
     }
 
     /**

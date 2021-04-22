@@ -8,7 +8,7 @@ Seata Saga 状态机可视化图形设计器, 基于 [GGEditor](https://github.c
 
 ```sh
 $ git clone https://github.com/seata/seata.git
-$ cd saga/saga-statemachine-designer
+$ cd saga/seata-saga-statemachine-designer
 $ npm install
 $ npm start
 ```

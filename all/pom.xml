@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -216,6 +216,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-sqlparser-antlr</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -289,6 +294,11 @@
             <artifactId>seata-compressor-lz4</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-deflater</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- saga -->
         <dependency>
@@ -347,6 +357,10 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -664,6 +678,7 @@
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sqlparser-core</include>
+                                    <include>io.seata:seata-sqlparser-antlr</include>
                                     <include>io.seata:seata-sqlparser-druid</include>
                                     <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
@@ -681,11 +696,13 @@
                                     <include>io.seata:seata-saga-rm</include>
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
+                                    <!--compressor-->
                                     <include>io.seata:seata-compressor-gzip</include>
                                     <include>io.seata:seata-compressor-7z</include>
                                     <include>io.seata:seata-compressor-bzip2</include>
                                     <include>io.seata:seata-compressor-zip</include>
                                     <include>io.seata:seata-compressor-lz4</include>
+                                    <include>io.seata:seata-compressor-deflater</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
