@@ -20,25 +20,31 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 
 /**
+ * The interface Jackson serializer.
+ *
+ * @param <T> the type parameter
  * @author jsbxyyx
  */
 public interface JacksonSerializer<T> {
 
     /**
      * jackson serializer class type.
-     * @return
+     *
+     * @return class
      */
     Class<T> type();
 
     /**
      * Jackson custom serializer
-     * @return
+     *
+     * @return json serializer
      */
     JsonSerializer<T> ser();
 
     /**
      * Jackson custom deserializer
-     * @return
+     *
+     * @return json deserializer
      */
     JsonDeserializer<? extends T> deser();
 

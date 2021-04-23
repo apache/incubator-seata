@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The interface Insert executor.
+ *
+ * @param <T> the type parameter
  * @author jsbxyyx
  */
 public interface InsertExecutor<T> extends Executor<T> {
@@ -28,15 +31,15 @@ public interface InsertExecutor<T> extends Executor<T> {
      * get primary key values.
      *
      * @return The primary key value.
-     * @throws SQLException
+     * @throws SQLException the sql exception
      */
     Map<String, List<Object>> getPkValues() throws SQLException;
 
     /**
      * get primary key values by insert column.
      *
-     * @return
-     * @throws SQLException
+     * @return pk values by column
+     * @throws SQLException the sql exception
      */
     Map<String, List<Object>> getPkValuesByColumn() throws SQLException;
 

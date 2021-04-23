@@ -45,6 +45,11 @@ public class Version {
 
     }
 
+    /**
+     * Gets current.
+     *
+     * @return the current
+     */
     public static String getCurrent() {
         return CURRENT;
     }
@@ -73,7 +78,6 @@ public class Version {
      * Check version string.
      *
      * @param version the version
-     * @return the string
      * @throws IncompatibleVersionException the incompatible version exception
      */
     public static void checkVersion(String version) throws IncompatibleVersionException {

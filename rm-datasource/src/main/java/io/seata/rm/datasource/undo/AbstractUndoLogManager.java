@@ -137,9 +137,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     /**
      * batch Delete undo log.
      *
-     * @param xids
-     * @param branchIds
-     * @param conn
+     * @param xids xid
+     * @param branchIds branch Id
+     * @param conn connection
      */
     @Override
     public void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
@@ -388,7 +388,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @param branchId      the branchId
      * @param undoLogParser the undoLogParse
      * @param conn          sql connection
-     * @throws SQLException
+     * @throws SQLException SQLException
      */
     protected abstract void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser undoLogParser,
                                                             Connection conn) throws SQLException;
@@ -401,7 +401,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @param rollbackCtx    the rollbackContext
      * @param undoLogContent the undoLogContent
      * @param conn           sql connection
-     * @throws SQLException
+     * @throws SQLException SQLException
      */
     protected abstract void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
                                                     Connection conn) throws SQLException;
@@ -411,7 +411,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      *
      * @param rs
      * @return
-     * @throws SQLException
+     * @throws SQLException SQLException
      */
     protected byte[] getRollbackInfo(ResultSet rs) throws SQLException  {
         byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
@@ -425,8 +425,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     /**
      * if the undoLogContent is big enough to be compress
-     * @param undoLogContent
-     * @return
+     * @param undoLogContent undoLogContent
+     * @return boolean
      */
     protected boolean needCompress(byte[] undoLogContent) {
         return ROLLBACK_INFO_COMPRESS_ENABLE && undoLogContent.length > ROLLBACK_INFO_COMPRESS_THRESHOLD;

@@ -19,25 +19,30 @@ package io.seata.rm.datasource.undo.parser.spi;
 import org.nustaq.serialization.FSTObjectSerializer;
 
 /**
+ * The interface Fst serializer.
+ *
  * @author jsbxyyx
  */
 public interface FstSerializer {
 
     /**
      * fst serializer class type
-     * @return
+     *
+     * @return class
      */
     Class type();
 
     /**
      * FSTObjectSerializer custom serializer
-     * @return
+     *
+     * @return fst object serializer
      */
     FSTObjectSerializer ser();
 
     /**
      * for sub classes
-     * @return
+     *
+     * @return boolean
      */
     boolean alsoForAllSubclasses();
 

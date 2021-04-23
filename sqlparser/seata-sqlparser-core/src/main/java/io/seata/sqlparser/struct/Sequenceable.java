@@ -17,14 +17,16 @@ package io.seata.sqlparser.struct;
 
 /**
  * The sequence able.
+ *
  * @author jsbxyyx
  */
 public interface Sequenceable {
 
     /**
      * get sequence sql.
-     * @param expr
-     * @return
+     *
+     * @param expr the expr
+     * @return sequence sql
      */
     String getSequenceSql(SqlSequenceExpr expr);
 

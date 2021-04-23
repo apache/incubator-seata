@@ -145,8 +145,9 @@ public class TableMeta {
 
     /**
      * Gets add escape pk name.
-     * @param dbType
-     * @return
+     *
+     * @param dbType the db type
+     * @return escape pk name list
      */
     public List<String> getEscapePkNameList(String dbType) {
         return ColumnUtils.addEscape(getPrimaryKeyOnlyName(), dbType);

@@ -41,7 +41,7 @@ public interface ResourceManager extends ResourceManagerInbound, ResourceManager
     /**
      * Get all resources managed by this manager.
      *
-     * @return resourceId -> Resource Map
+     * @return resourceId -- Resource Map
      */
     Map<String, Resource> getManagedResources();
 

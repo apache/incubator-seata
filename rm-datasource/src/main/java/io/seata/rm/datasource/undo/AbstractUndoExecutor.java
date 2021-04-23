@@ -344,7 +344,7 @@ public abstract class AbstractUndoExecutor {
      * Parse pk values Field List.
      *
      * @param records the records
-     * @return List<List < Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     * @return each element represents a row. And inside a row list contains pk columns(Field).
      */
     protected Map<String, List<Field>> parsePkValues(TableRecords records) {
         return parsePkValues(records.getRows(), records.getTableMeta().getPrimaryKeyOnlyName());
@@ -355,7 +355,7 @@ public abstract class AbstractUndoExecutor {
      *
      * @param rows       pk rows
      * @param pkNameList pk column name
-     * @return List<List   <   Field>>   each element represents a row. And inside a row list contains pk columns(Field).
+     * @return each element represents a row. And inside a row list contains pk columns(Field).
      */
     protected Map<String, List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
         List<Field> pkFieldList = new ArrayList<>();
@@ -378,7 +378,7 @@ public abstract class AbstractUndoExecutor {
      *
      * @param conn the connection
      * @return the db type
-     * @throws SQLException
+     * @throws SQLException SQLException
      */
     protected String getDbType(Connection conn) throws SQLException {
         return JdbcUtils.getDbType(conn.getMetaData().getURL());

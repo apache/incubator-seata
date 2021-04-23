@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * The type My sql insert executor.
+ *
  * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)

@@ -75,8 +75,8 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
      * @param applicationData Application data bind with this branch.
-     * @return
-     * @throws TransactionException
+     * @return BranchStatus
+     * @throws TransactionException TransactionException
      */
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
@@ -122,8 +122,8 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
      * @param applicationData Application data bind with this branch.
-     * @return
-     * @throws TransactionException
+     * @return BranchStatus
+     * @throws TransactionException TransactionException
      */
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,

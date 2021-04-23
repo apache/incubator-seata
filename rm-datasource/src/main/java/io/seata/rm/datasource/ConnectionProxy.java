@@ -97,6 +97,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     /**
      * get global lock requires flag
+     *
+     * @return the boolean
      */
     public boolean isGlobalLockRequire() {
         return context.isGlobalLockRequire();
@@ -128,6 +130,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * Lock query.
      *
      * @param lockKeys the lock keys
+     * @return the boolean
      * @throws SQLException the sql exception
      */
     public boolean lockQuery(String lockKeys) throws SQLException {
@@ -283,7 +286,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * change connection autoCommit to false by seata
      *
-     * @throws SQLException
+     * @throws SQLException the sql exception
      */
     public void changeAutoCommit() throws SQLException {
         getContext().setAutoCommitChanged(true);

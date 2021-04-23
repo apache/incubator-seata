@@ -22,25 +22,22 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * The interface Message seata codec.
- *
- * @author zhangsen
  */
 public interface MessageSeataCodec {
 
     /**
-     * Gets message type.
+     * Gets message class type.
      *
-     * @return the message type
+     * @return the message class type
      */
     Class<?> getMessageClassType();
 
     /**
-     * Encode byte [ ].
+     * Encode.
      *
      * @param <T> the type parameter
      * @param t   the t
      * @param out the out
-     * @return the byte [ ]
      */
     <T> void encode(T t, ByteBuf out);
 

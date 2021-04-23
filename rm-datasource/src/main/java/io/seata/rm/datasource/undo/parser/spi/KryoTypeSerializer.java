@@ -19,19 +19,24 @@ package io.seata.rm.datasource.undo.parser.spi;
 import com.esotericsoftware.kryo.Serializer;
 
 /**
+ * The interface Kryo type serializer.
+ *
+ * @param <T> the type parameter
  * @author jsbxyyx
  */
 public interface KryoTypeSerializer<T> {
 
     /**
      * kryo serializer class type.
-     * @return
+     *
+     * @return class
      */
     Class<T> type();
 
     /**
      * kryo custom serializer.
-     * @return
+     *
+     * @return serializer
      */
     Serializer serializer();
 

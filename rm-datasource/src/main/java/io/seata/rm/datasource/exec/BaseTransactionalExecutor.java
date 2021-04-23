@@ -242,11 +242,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return CollectionUtils.toUpperList(getTableMeta().getPrimaryKeyOnlyName()).contains(newColumnName.toUpperCase());
     }
 
-
     /**
      * get standard pk column name from user sql column name
      *
-     * @return
+     * @param userColumnName the user column name
+     * @return standard pk column name
      */
     protected String getStandardPkColumnName(String userColumnName) {
         String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
@@ -371,7 +371,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      *
      * @param pkValuesMap the pkValuesMap
      * @return return TableRecords;
-     * @throws SQLException
+     * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
@@ -408,7 +408,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * get db type
      *
-     * @return
+     * @return db type
      */
     protected String getDbType() {
         return statementProxy.getConnectionProxy().getDbType();

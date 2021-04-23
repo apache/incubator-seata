@@ -24,9 +24,9 @@ import java.lang.annotation.Target;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * declare the transaction only execute in single local RM,<br/>
+ * declare the transaction only execute in single local RM
  * but the transaction need to ensure records to update(or select for update) is not in global transaction middle
- * stage<br/>
+ * stage
  *
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
  *
@@ -42,7 +42,7 @@ public @interface GlobalLock {
      * customized global lock retry internal(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
-     * @return
+     * @return lock retry internal
      */
     int lockRetryInternal() default 0;
 
@@ -50,7 +50,7 @@ public @interface GlobalLock {
      * customized global lock retry times
      * you may use this to override global config of "client.rm.lock.retryTimes"
      * note: negative number will take no effect(which mean fall back to global config)
-     * @return
+     * @return lock retry times
      */
     int lockRetryTimes() default -1;
 }

@@ -110,7 +110,8 @@ public class ColumnMeta {
 
     /**
      * Gets table schema name
-     * @return
+     *
+     * @return table schema name
      */
     protected String getTableSchemaName() {
         return tableSchemaName;
@@ -125,10 +126,10 @@ public class ColumnMeta {
         this.tableName = tableName;
     }
 
-
     /**
      * Gets table name
-     * @return
+     *
+     * @return table name
      */
     protected String getTableName() {
         return tableName;

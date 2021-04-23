@@ -135,7 +135,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     /**
      * get resource manager implement
      *
-     * @return
+     * @return resource manager
      */
     protected abstract ResourceManager getResourceManager();
 

@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The type Oracle insert executor.
+ *
  * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)

@@ -132,9 +132,9 @@ public class SpringProxyUtils {
     /**
      * Get the class type of the proxy target object, if hadn't a target object, return the interface of the proxy
      *
-     * @param proxy
-     * @return
-     * @throws Exception
+     * @param proxy the proxy
+     * @return target interface
+     * @throws Exception the exception
      */
     protected static Class<?> getTargetClass(Object proxy) throws Exception {
         if (proxy == null) {
@@ -162,8 +162,8 @@ public class SpringProxyUtils {
 
     /**
      * get the all interfaces of bean, if the bean is null, then return empty array
-     * @param bean
-     * @return
+     * @param bean the bean
+     * @return target interface
      */
     public static Class<?>[] getAllInterfaces(Object bean) {
         Set<Class<?>> interfaces = new HashSet<>();
