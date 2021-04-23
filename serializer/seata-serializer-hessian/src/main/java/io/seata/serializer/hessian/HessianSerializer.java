@@ -28,7 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * @Xin Wang
+ * @author XinWang
  */
 @LoadLevel(name = "HESSIAN")
 public class HessianSerializer implements Serializer {
