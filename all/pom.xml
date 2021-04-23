@@ -22,7 +22,6 @@
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
     <version>1.4.2</version>
-
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.
@@ -788,6 +787,7 @@
                             <serverId>oss_seata</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                             <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
                         </configuration>
                     </plugin>
                     <plugin>
