@@ -102,7 +102,7 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
     }
 
     @Override
-    public boolean isDuplicateKeyUpdate() {
-        return false;
+    public List<String> getDuplicateKeyUpdate() {
+        return null;
     }
 }

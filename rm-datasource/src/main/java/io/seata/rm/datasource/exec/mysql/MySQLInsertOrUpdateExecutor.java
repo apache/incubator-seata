@@ -332,6 +332,18 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * @return map, key is column, value is paramperter
      */
     public Map<String, ArrayList<Object>> buildImageParamperters(SQLInsertRecognizer recognizer) {
+        List<String> duplicateKeyUpdateCloms = recognizer.getDuplicateKeyUpdate();
+        if (CollectionUtils.isNotEmpty(duplicateKeyUpdateCloms)) {
+            getTableMeta().getAllIndexes().forEach((k, v) -> {
+                if ("PRIMARY".equals(k.toUpperCase())) {
+                    for (ColumnMeta m : v.getValues()) {
+                        if (duplicateKeyUpdateCloms.contains(m.getColumnName())) {
+                            throw new ShouldNeverHappenException("update pk value is not supported!");
+                        }
+                    }
+                }
+            });
+        }
         Map<String, ArrayList<Object>> imageParamperterMap = new HashMap<>();
         Map<Integer, ArrayList<Object>> parameters = ((PreparedStatementProxy) statementProxy).getParameters();
         //  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)

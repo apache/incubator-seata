@@ -157,7 +157,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
-    public boolean isDuplicateKeyUpdate() {
-        return false;
+    public List<String> getDuplicateKeyUpdate() {
+        return null;
     }
 }

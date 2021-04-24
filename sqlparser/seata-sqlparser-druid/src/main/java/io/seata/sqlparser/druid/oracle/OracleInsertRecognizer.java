@@ -148,7 +148,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     }
 
     @Override
-    public boolean isDuplicateKeyUpdate() {
-        return false;
+    public List<String> getDuplicateKeyUpdate() {
+        return null;
     }
 }

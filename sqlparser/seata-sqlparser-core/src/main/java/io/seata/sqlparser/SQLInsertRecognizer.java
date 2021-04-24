@@ -54,8 +54,9 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
     List<String> getInsertParamsValue();
 
     /**
-     * boolean duplicateKeyUpdate
-     * @return
+     * Gets DuplicateKey columns.
+     *
+     * @return the duplicateKey columns
      */
-    boolean isDuplicateKeyUpdate();
+    List<String> getDuplicateKeyUpdate();
 }
