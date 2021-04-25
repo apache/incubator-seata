@@ -14,6 +14,8 @@ seata:
       report-success-enable: false
       saga-branch-register-enable: false
       saga-json-parser: fastjson
+      saga-retry-persist-mode-update: false
+      saga-compensate-persist-mode-update: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -30,6 +32,13 @@ seata:
       log-serialization: jackson
       log-table: undo_log
       only-care-update-columns: true
+      compress:
+        enable: true
+        type: zip
+        threshold: 64k
+    load-balance:
+      type: RandomLoadBalance
+      virtual-nodes: 10
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -83,12 +92,11 @@ seata:
       name: ""
   registry:
     type: file
-    load-balance: RandomLoadBalance
-    load-balance-virtual-nodes: 10
     file:
       name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
+      acl-token: ""
     etcd3:
       server-addr: http://localhost:2379
     eureka:

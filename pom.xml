@@ -89,8 +89,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.4.1</revision>
-
+        <revision>1.4.2</revision>
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -227,7 +226,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
                                 </configuration>
                             </execution>
                         </executions>
@@ -321,6 +320,9 @@
                             </includes>
                             <excludes>
                                 <exclude>**/generated/**</exclude>
+                                <exclude>**/antlr/mysql/parser/*.*</exclude>
+                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                             </excludes>
                             <strictCheck>true</strictCheck>
                             <mapping>
@@ -417,6 +419,9 @@
                     </rulesets>
                     <excludes>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/antlr/mysql/parser/*.*</exclude>
+                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>

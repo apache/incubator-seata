@@ -87,5 +87,4 @@ public class UndoLogManagerTest {
         AbstractUndoLogManager.appendInParam(APPEND_IN_SIZE, sqlBuilder);
         assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_STRING);
     }
-
 }

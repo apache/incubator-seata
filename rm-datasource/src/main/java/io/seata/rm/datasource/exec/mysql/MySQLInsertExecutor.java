@@ -32,6 +32,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -41,8 +42,11 @@ import java.util.Objects;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * The type My sql insert executor.
+ *
  * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
@@ -54,6 +58,13 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
      * the modify for test
      */
     public static final String ERR_SQL_STATE = "S1009";
+
+    /**
+     * The cache of auto increment step of database
+     * the key is the db's resource id
+     * the value is the step
+     */
+    public static final Map<String, BigDecimal> RESOURCE_ID_STEP_CACHE = new ConcurrentHashMap<>(8);
 
     /**
      * Instantiates a new Abstract dml base executor.
@@ -127,8 +138,17 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.warn("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
-                genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+                LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, " +
+                        "statement could be polluted. Recommend you set the statement to return generated keys.");
+                int updateCount = statementProxy.getUpdateCount();
+                ResultSet firstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+
+                // If there is batch insert
+                // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
+                if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
+                    firstId.next();
+                    return autoGeneratePks(new BigDecimal(firstId.getString(1)), autoColumnName, updateCount);
+                }
             } else {
                 throw e;
             }
@@ -170,5 +190,40 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
     public List<Object> getPkValuesByDefault() throws SQLException {
         // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
         throw new NotSupportYetException();
+    }
+
+    protected Map<String, List<Object>> autoGeneratePks(BigDecimal cursor, String autoColumnName, Integer updateCount) throws SQLException {
+        BigDecimal step = BigDecimal.ONE;
+        String resourceId = statementProxy.getConnectionProxy().getDataSourceProxy().getResourceId();
+        if (RESOURCE_ID_STEP_CACHE.containsKey(resourceId)) {
+            step = RESOURCE_ID_STEP_CACHE.get(resourceId);
+        } else {
+            ResultSet increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
+
+            increment.next();
+            step = new BigDecimal(increment.getString(2));
+            RESOURCE_ID_STEP_CACHE.put(resourceId, step);
+        }
+
+        List<Object> pkValues = new ArrayList<>();
+        for (int i = 0; i < updateCount; i++) {
+            pkValues.add(cursor);
+            cursor = cursor.add(step);
+        }
+
+        Map<String, List<Object>> pkValuesMap = new HashMap<>(1, 1.001f);
+        pkValuesMap.put(autoColumnName,pkValues);
+        return pkValuesMap;
+    }
+
+    protected boolean canAutoIncrement(Map<String, ColumnMeta> primaryKeyMap) {
+        if (primaryKeyMap.size() != 1) {
+            return false;
+        }
+
+        for (ColumnMeta pk : primaryKeyMap.values()) {
+            return pk.isAutoincrement();
+        }
+        return false;
     }
 }

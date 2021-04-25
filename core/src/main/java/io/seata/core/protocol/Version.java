@@ -32,7 +32,7 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    private static final String CURRENT = "1.4.1";
+    private static final String CURRENT = "1.4.2";
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final int MAX_VERSION_DOT = 3;
 
@@ -45,6 +45,11 @@ public class Version {
 
     }
 
+    /**
+     * Gets current.
+     *
+     * @return the current
+     */
     public static String getCurrent() {
         return CURRENT;
     }
@@ -73,7 +78,6 @@ public class Version {
      * Check version string.
      *
      * @param version the version
-     * @return the string
      * @throws IncompatibleVersionException the incompatible version exception
      */
     public static void checkVersion(String version) throws IncompatibleVersionException {
