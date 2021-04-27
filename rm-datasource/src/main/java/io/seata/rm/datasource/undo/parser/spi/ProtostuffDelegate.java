@@ -19,13 +19,17 @@ package io.seata.rm.datasource.undo.parser.spi;
 import io.protostuff.runtime.Delegate;
 
 /**
+ * The interface Protostuff delegate.
+ *
+ * @param <T> the type parameter
  * @author jsbxyyx
  */
 public interface ProtostuffDelegate<T> {
 
     /**
      * Delegate create.
-     * @return
+     *
+     * @return delegate
      */
     Delegate<T> create();
 
