@@ -22,16 +22,16 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- *
- * @author lizhao
+ * The type Compress util.
  */
 public class CompressUtil {
 
     /**
-     * compress bytes
-     * @param src
-     * @return
-     * @throws IOException
+     * Compress byte [ ].
+     *
+     * @param src the src
+     * @return the byte [ ]
+     * @throws IOException the io exception
      */
     public static byte[] compress(final byte[] src) throws IOException {
         byte[] result;
@@ -48,10 +48,11 @@ public class CompressUtil {
     }
 
     /**
-     * uncompress bytes
-     * @param src
-     * @return
-     * @throws IOException
+     * Uncompress byte [ ].
+     *
+     * @param src the src
+     * @return the byte [ ]
+     * @throws IOException the io exception
      */
     public static byte[] uncompress(final byte[] src) throws IOException {
         byte[] result;
@@ -77,9 +78,10 @@ public class CompressUtil {
     }
 
     /**
-     * check magic
-     * @param bytes
-     * @return
+     * Is compress data boolean.
+     *
+     * @param bytes the bytes
+     * @return the boolean
      */
     public static boolean isCompressData(byte[] bytes) {
         if (bytes != null && bytes.length > 2) {

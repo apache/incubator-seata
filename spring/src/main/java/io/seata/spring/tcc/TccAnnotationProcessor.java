@@ -58,13 +58,12 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
         }
     }
 
-
     /**
      * Process annotation
      *
-     * @param bean
-     * @param beanName
-     * @param annotation
+     * @param bean       the bean
+     * @param beanName   the bean name
+     * @param annotation the annotation
      */
     protected void process(Object bean, String beanName, Class<? extends Annotation> annotation) {
         if (Objects.isNull(annotation) || PROXIED_SET.contains(beanName)) {
@@ -88,12 +87,11 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
     /**
      * Add TCC interceptor for tcc proxy bean
      *
-     * @param bean
-     * @param beanName
-     * @param field
-     * @param interfaceClass
-     * @return
-     * @throws IllegalAccessException
+     * @param bean           the bean
+     * @param beanName       the bean name
+     * @param field          the field
+     * @param interfaceClass the interface class
+     * @throws IllegalAccessException the illegal access exception
      */
     public void addTccAdvise(Object bean, String beanName, Field field, Class interfaceClass) throws IllegalAccessException {
         Object fieldValue = field.get(bean);
