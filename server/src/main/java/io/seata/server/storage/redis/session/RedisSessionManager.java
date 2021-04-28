@@ -197,7 +197,6 @@ public class RedisSessionManager extends AbstractSessionManager
     @Override
     public boolean scheduledLock(String lockKey) {
         String lockValue = String.join(":", XID.getIpAddress(), String.valueOf(XID.getPort()));
-        //TODO 待作为配置文件配置项
         Integer expireTime = 60;
         return RedisDistributedLocker.acquireScheduledLock(lockKey,lockValue,expireTime);
     }

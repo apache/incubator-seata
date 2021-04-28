@@ -61,7 +61,6 @@ public class RedisDistributedLocker {
             return true;
         } catch (Exception ex) {
             LOGGER.warn("The {} release the {} distributed lock failed.", lockValue, lockKey, ex);
-            //TODO ?返回true等待自然过期还是不断重试？重试到自然过期的时间然后结束？重试就需要时间比对增加了复杂性
             return true;
         }
     }
