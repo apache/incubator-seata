@@ -200,6 +200,10 @@ public class ApolloConfiguration extends AbstractConfiguration {
             String apolloConfigService = FILE_CONFIG.getConfig(getApolloConfigService());
             if (StringUtils.isNotBlank(apolloConfigService)) {
                 System.setProperty(PROP_APOLLO_CONFIG_SERVICE, apolloConfigService);
+            } else {
+                if (StringUtils.isBlank(System.getProperty(PROP_APOLLO_META))) {
+                    throw new RuntimeException("Apollo configuration initialized failed,please check the value of apolloMeta and apolloConfigService");
+                }
             }
         }
     }
