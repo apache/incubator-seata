@@ -13,28 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.saga.statelang.domain.impl;
+
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.LoopStartState;
 
 /**
- * The interface Keyword checker.
+ * Start the "loop" execution for the state with loop attribute
  *
- * @author Wu
+ * @author anselleeyy
  */
-public interface KeywordChecker {
-    /**
-     * check whether given field name and table name use keywords
-     *
-     * @param fieldOrTableName the field or table name
-     * @return boolean
-     */
-    boolean check(String fieldOrTableName);
+public class LoopStartStateImpl extends BaseState implements LoopStartState {
 
-
-    /**
-     * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName the field or table name
-     * @return true: need to escape. false: no need to escape.
-     */
-    boolean checkEscape(String fieldOrTableName);
+    public LoopStartStateImpl() {
+        setType(DomainConstants.STATE_TYPE_LOOP_START);
+    }
 
 }
