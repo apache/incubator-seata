@@ -17,6 +17,8 @@ package io.seata.server.storage.redis.session;
 
 import java.util.Collection;
 import java.util.List;
+
+import io.seata.common.XID;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -30,6 +32,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.storage.redis.lock.RedisDistributedLocker;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
@@ -190,4 +193,19 @@ public class RedisSessionManager extends AbstractSessionManager
         throws TransactionException {
         return lockCallable.call();
     }
+
+    @Override
+    public boolean scheduledLock(String lockKey) {
+        String lockValue = String.join(":", XID.getIpAddress(), String.valueOf(XID.getPort()));
+        //TODO 待作为配置文件配置项
+        Integer expireTime = 60;
+        return RedisDistributedLocker.acquireScheduledLock(lockKey,lockValue,expireTime);
+    }
+
+    @Override
+    public boolean unScheduledLock(String lockKey) {
+        String lockValue = String.join(":", XID.getIpAddress(), String.valueOf(XID.getPort()));
+        return RedisDistributedLocker.releaseScheduleLock(lockKey,lockValue);
+    }
+
 }
