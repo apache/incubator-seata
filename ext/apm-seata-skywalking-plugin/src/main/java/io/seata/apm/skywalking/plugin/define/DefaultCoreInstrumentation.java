@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata.define;
+package io.seata.apm.skywalking.plugin.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -29,11 +29,11 @@ import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName
  * @author zhaoyuguang
  */
 
-public class ServerOnRequestProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
+public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String ENHANCE_CLASS_TM = "io.seata.core.rpc.processor.server.ServerOnRequestProcessor";
+    private static final String ENHANCE_CLASS_TM = "io.seata.server.coordinator.DefaultCore";
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.ServerOnRequestProcessorProcessInterceptor";
+    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.DefaultCoreDoGlobalCommitInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -46,7 +46,7 @@ public class ServerOnRequestProcessorInstrumentation extends ClassInstanceMethod
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("process");
+                    return named("doGlobalCommit");
                 }
 
                 @Override

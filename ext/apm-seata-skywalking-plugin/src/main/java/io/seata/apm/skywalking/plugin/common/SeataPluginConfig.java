@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata.common;
+package io.seata.apm.skywalking.plugin.common;
 
 import org.apache.skywalking.apm.agent.core.boot.PluginConfig;
 

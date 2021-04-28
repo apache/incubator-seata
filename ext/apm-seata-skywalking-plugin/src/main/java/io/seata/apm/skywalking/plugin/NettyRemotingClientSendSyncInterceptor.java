@@ -13,33 +13,53 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata;
+package io.seata.apm.skywalking.plugin;
 
+import io.netty.channel.Channel;
+import io.seata.core.protocol.RpcMessage;
+import org.apache.skywalking.apm.agent.core.context.CarrierItem;
+import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
-import org.apache.skywalking.apm.plugin.seata.common.SWSeataConstants;
+import io.seata.apm.skywalking.plugin.common.SWSeataUtils;
 
 import java.lang.reflect.Method;
 
 /**
  * @author zhaoyuguang
  */
-public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsAroundInterceptor {
+public class NettyRemotingClientSendSyncInterceptor implements InstanceMethodsAroundInterceptor {
 
     @Override
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                              MethodInterceptResult result) throws Throwable {
-        AbstractSpan activeSpan = ContextManager.createLocalSpan(SWSeataConstants.SEATA_NAME + "/TC/doGlobalCommit");
+        if (allArguments[0] == null) {
+            return;
+        }
+        Channel channel = (Channel) allArguments[0];
+        String peer = SWSeataUtils.convertPeer(channel);
+        RpcMessage rpcMessage = (RpcMessage) allArguments[1];
+        String operationName = SWSeataUtils.convertOperationName(rpcMessage);
+        ContextCarrier contextCarrier = new ContextCarrier();
+        AbstractSpan activeSpan = ContextManager.createExitSpan(operationName, contextCarrier, peer);
 //        activeSpan.setComponent(ComponentsDefine.SEATA);
+        activeSpan.setPeer(peer);
+        CarrierItem next = contextCarrier.items();
+        while (next.hasNext()) {
+            next = next.next();
+            rpcMessage.getHeadMap().put(next.getHeadKey(), next.getHeadValue());
+        }
     }
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                               Object ret) throws Throwable {
-        ContextManager.stopSpan();
+        if (allArguments[0] != null) {
+            ContextManager.stopSpan();
+        }
         return ret;
     }
 

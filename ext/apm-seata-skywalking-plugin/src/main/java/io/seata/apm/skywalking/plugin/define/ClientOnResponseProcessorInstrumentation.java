@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata.define;
+package io.seata.apm.skywalking.plugin.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -30,9 +30,10 @@ import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName
 /**
  * @author zhaoyuguang
  */
-public class RmBranchRollbackProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String ENHANCE_CLASS = "io.seata.core.rpc.processor.client.RmBranchRollbackProcessor";
+public class ClientOnResponseProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
+
+    private static final String ENHANCE_CLASS = "io.seata.core.rpc.processor.client.ClientOnResponseProcessor";
 
     private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.ClientProcessorProcessInterceptor";
 

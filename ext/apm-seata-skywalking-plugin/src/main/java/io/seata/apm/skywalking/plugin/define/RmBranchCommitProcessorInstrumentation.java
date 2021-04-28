@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata.define;
+package io.seata.apm.skywalking.plugin.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -23,17 +23,18 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInst
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
+import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
 /**
  * @author zhaoyuguang
  */
+public class RmBranchCommitProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
+    private static final String ENHANCE_CLASS = "io.seata.core.rpc.processor.client.RmBranchCommitProcessor";
 
-    private static final String ENHANCE_CLASS_TM = "io.seata.server.coordinator.DefaultCore";
-
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.DefaultCoreDoGlobalCommitInterceptor";
+    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.ClientProcessorProcessInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -46,7 +47,8 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("doGlobalCommit");
+                    return named("process").and(takesArguments(2))
+                            .and(takesArgument(1, named("io.seata.core.protocol.RpcMessage")));
                 }
 
                 @Override
@@ -64,7 +66,7 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
 
     @Override
     protected ClassMatch enhanceClass() {
-        return byName(ENHANCE_CLASS_TM);
+        return byName(ENHANCE_CLASS);
     }
 
 }

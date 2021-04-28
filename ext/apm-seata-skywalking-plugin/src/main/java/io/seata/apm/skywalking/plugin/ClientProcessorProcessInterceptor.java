@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata;
+package io.seata.apm.skywalking.plugin;
 
 import io.seata.core.protocol.RpcMessage;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
@@ -23,7 +23,7 @@ import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
-import org.apache.skywalking.apm.plugin.seata.common.SWSeataUtils;
+import io.seata.apm.skywalking.plugin.common.SWSeataUtils;
 
 import java.lang.reflect.Method;
 

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.skywalking.apm.plugin.seata.define;
+package io.seata.apm.skywalking.plugin.define;
 
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
@@ -23,18 +23,17 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.ClassInst
 import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
-import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
 /**
  * @author zhaoyuguang
  */
-public class AbstractNettyRemotingInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String ENHANCE_CLASS = "io.seata.core.rpc.netty.AbstractNettyRemoting";
+public class ServerOnRequestProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.NettyRemotingClientSendSyncInterceptor";
+    private static final String ENHANCE_CLASS_TM = "io.seata.core.rpc.processor.server.ServerOnRequestProcessor";
+
+    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.ServerOnRequestProcessorProcessInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -47,28 +46,7 @@ public class AbstractNettyRemotingInstrumentation extends ClassInstanceMethodsEn
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("sendSync").and(takesArguments(3))
-                            .and(takesArgument(0, named("io.netty.channel.Channel")))
-                            .and(takesArgument(1, named("io.seata.core.protocol.RpcMessage")))
-                            .and(takesArgument(2, long.class));
-                }
-
-                @Override
-                public String getMethodsInterceptor() {
-                    return INTERCEPTOR_CLASS;
-                }
-
-                @Override
-                public boolean isOverrideArgs() {
-                    return false;
-                }
-            },
-            new InstanceMethodsInterceptPoint() {
-                @Override
-                public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("sendAsync").and(takesArguments(2))
-                            .and(takesArgument(0, named("io.netty.channel.Channel")))
-                            .and(takesArgument(1, named("io.seata.core.protocol.RpcMessage")));
+                    return named("process");
                 }
 
                 @Override
@@ -86,7 +64,7 @@ public class AbstractNettyRemotingInstrumentation extends ClassInstanceMethodsEn
 
     @Override
     protected ClassMatch enhanceClass() {
-        return byName(ENHANCE_CLASS);
+        return byName(ENHANCE_CLASS_TM);
     }
 
 }
