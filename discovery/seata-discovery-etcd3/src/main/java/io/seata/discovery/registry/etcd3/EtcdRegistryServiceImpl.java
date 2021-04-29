@@ -348,7 +348,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
                     TimeUnit.SECONDS.sleep(LIFE_KEEP_INTERVAL);
                 } catch (Exception e) {
                     LOGGER.error("EtcdLifeKeeper", e);
-                    throw new ShouldNeverHappenException("failed to renewal the lease.");
                 }
             }
         }
