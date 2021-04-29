@@ -171,8 +171,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-        writeSessionLock.lock();
         long curFileTrxNum;
+        writeSessionLock.lock();
         try {
             if (!writeDataFile(new TransactionWriteStore(session, logOperation).encode())) {
                 return false;
