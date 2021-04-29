@@ -13,11 +13,15 @@ import java.io.IOException;
 
 /**
  * @description: redis distributed lock test
- * ！！！！！warn！！！！！
+ *
+ * ！！！！！Please use a true redis server to run the following test case ！！！！！
+ * ！！！！！Please use a true redis server to run the following test case ！！！！！
  * The redis mock framework(jedis-mock) can not support set(lockKey, lockValue, SetParams.setParams().nx())，the nx() will not effective.
  * So we can not use mock to test.
  * We need a true redis server to test!
- * ！！！！！warn！！！！！
+ * ！！！！！Please use a true redis server to run the following test case ！！！！！
+ * ！！！！！Please use a true redis server to run the following test case ！！！！！
+ *
  * @author: zhongxiang.wang
  * @date: 2021-04-28 21:58
  */
@@ -28,7 +32,7 @@ public class RedisDistributedLockerTest {
     private String retryCommiting = "RetryCommiting";
     private String lockValue = "127.1.1.1:9081";
 
-    @BeforeAll
+//    @BeforeAll
     public static void start() throws IOException {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
@@ -36,7 +40,7 @@ public class RedisDistributedLockerTest {
         jedisPoolInstance = JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000));
     }
 
-    @Test
+//    @Test
     public void test_acquireScheduledLock_success() {
         boolean accquire = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue, 60);
         Assertions.assertEquals(true,accquire);
@@ -47,7 +51,7 @@ public class RedisDistributedLockerTest {
         Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
     }
 
-    @Test
+//    @Test
     public void test_acquireScheduledLock_concurrent() {
         //acquire the lock success
         boolean accquire = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue, 60);
@@ -89,7 +93,7 @@ public class RedisDistributedLockerTest {
         boolean f = RedisDistributedLocker.releaseScheduleLock(retryRollbacking, lockValue + 2);
     }
 
-    @Test
+//    @Test
     public void test_acquireScheduledLock_false() {
         String set = jedisPoolInstance.getResource().set(retryCommiting, lockValue);
         Assertions.assertEquals("OK",set);
