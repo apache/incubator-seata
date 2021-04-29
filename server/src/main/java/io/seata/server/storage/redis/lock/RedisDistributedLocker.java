@@ -56,12 +56,12 @@ public class RedisDistributedLocker {
                 multi.exec();
                 return true;
             }
-            //If other one get the lock,we release lock success too
+            //The lock hold by others,If other one get the lock,we release lock success too as for current lockKey
             jedis.unwatch();
             return true;
         } catch (Exception ex) {
             LOGGER.warn("The {} release the {} distributed lock failed.", lockValue, lockKey, ex);
-            return true;
+            return false;
         }
     }
 
