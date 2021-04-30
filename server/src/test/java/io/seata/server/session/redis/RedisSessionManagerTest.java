@@ -18,6 +18,13 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -31,10 +38,6 @@ import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
@@ -48,12 +51,14 @@ public class RedisSessionManagerTest {
 
     @BeforeAll
     public static void start() throws IOException {
-        server = new RedisServer(6789);
+        int port = ThreadLocalRandom.current().nextInt(10000, 17000);
+        server = RedisServer.builder().setting("maxheap 128M").setting("maxmemory 128M").port(port)
+            .setting("bind localhost").build();
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", port, 60000));
         RedisTransactionStoreManager transactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(transactionStoreManager);
