@@ -88,6 +88,7 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
+        tearDown();
     }
 
     @Test
@@ -121,6 +122,7 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertTrue(connectionInXA instanceof MariaDbConnection);
+        tearDown();
     }
 
     @AfterAll
