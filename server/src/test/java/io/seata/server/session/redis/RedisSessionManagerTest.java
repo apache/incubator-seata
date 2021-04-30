@@ -16,9 +16,8 @@
 
 package io.seata.server.session.redis;
 
-import io.seata.server.session.SessionCondition;
 import java.io.IOException;
-import com.github.fppt.jedismock.RedisServer;
+import java.util.List;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -27,17 +26,18 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.embedded.RedisServer;
 
 /**
  * @author funkye
@@ -48,7 +48,7 @@ public class RedisSessionManagerTest {
 
     @BeforeAll
     public static void start() throws IOException {
-        server = RedisServer.newRedisServer(6789);
+        server = new RedisServer(6789);
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
