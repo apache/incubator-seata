@@ -52,7 +52,7 @@ public class RedisSessionManagerTest {
     @BeforeAll
     public static void start() throws IOException {
         int port = ThreadLocalRandom.current().nextInt(10000, 17000);
-        server = RedisServer.builder().setting("maxheap 128M").setting("maxmemory 128M").port(port)
+        server = RedisServer.builder().setting("maxheap 32M").setting("maxmemory 32M").port(port)
             .setting("bind localhost").build();
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
