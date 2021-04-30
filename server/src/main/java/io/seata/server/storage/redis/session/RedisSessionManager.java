@@ -24,6 +24,8 @@ import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
@@ -48,6 +50,11 @@ public class RedisSessionManager extends AbstractSessionManager
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManager.class);
+
+    /**
+     * The redis distributed lock expire time
+     */
+    private static final int REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.STORE_REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME,60);
 
     /**
      * The Task name.
@@ -196,15 +203,12 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public boolean scheduledLock(String lockKey) {
-        String lockValue = String.join(":", XID.getIpAddress(), String.valueOf(XID.getPort()));
-        Integer expireTime = 60;
-        return RedisDistributedLocker.acquireScheduledLock(lockKey,lockValue,expireTime);
+        return RedisDistributedLocker.acquireScheduledLock(lockKey, XID.getIpAddressAndPort(), REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME);
     }
 
     @Override
     public boolean unScheduledLock(String lockKey) {
-        String lockValue = String.join(":", XID.getIpAddress(), String.valueOf(XID.getPort()));
-        return RedisDistributedLocker.releaseScheduleLock(lockKey,lockValue);
+        return RedisDistributedLocker.releaseScheduleLock(lockKey, XID.getIpAddressAndPort());
     }
 
 }

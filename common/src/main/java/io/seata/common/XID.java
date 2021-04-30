@@ -86,4 +86,13 @@ public class XID {
     public static String getIpAddress() {
         return ipAddress;
     }
+
+    /**
+     * Gets ipAddress:port
+     *
+     * @return eg: 127.0.0.1:8091
+     */
+    public static String getIpAddressAndPort() {
+        return ipAddress + ":" + port;
+    }
 }

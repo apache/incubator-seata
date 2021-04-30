@@ -15,12 +15,12 @@
  */
 package io.seata.server.storage.redis.lock;
 
-import io.seata.server.storage.redis.JedisPooledFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.params.SetParams;
+import io.seata.server.storage.redis.JedisPooledFactory;
 
 /**
  * @description: Redis distributed lock
@@ -31,7 +31,6 @@ public class RedisDistributedLocker {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RedisDistributedLocker.class);
     private static final String SUCCESS = "OK";
-
     /**
      * Acquire the distributed lock
      *
