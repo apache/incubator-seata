@@ -27,6 +27,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.datasource.util.XAUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,6 +181,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             // XA End: Success
             xaResource.end(xaBranchXid, XAResource.TMSUCCESS);
+            if (JdbcUtils.ORACLE.equals(this.resource.getDbType())) {
+                refreshXAResourceFor2PC();
+            }
             // XA Prepare
             xaResource.prepare(xaBranchXid);
             // Keep the Connection if necessary
@@ -202,6 +206,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
     }
 
+    private void refreshXAResourceFor2PC() throws SQLException {
+        this.originalConnection.close();
+        this.xaConnection = XAUtils.createXAConnection(
+            (this.resource).getTargetDataSource().getConnection().unwrap(Connection.class), resource);
+        this.xaResource = xaConnection.getXAResource();
+    }
+
     @Override
     public void rollback() throws SQLException {
         if (currentAutoCommitStatus) {
@@ -214,6 +225,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             // XA End: Fail
             xaResource.end(xaBranchXid, XAResource.TMFAIL);
+            if (JdbcUtils.ORACLE.equals(this.resource.getDbType())) {
+                refreshXAResourceFor2PC();
+            }
             xaRollback(xaBranchXid);
             // Branch Report to TC
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
