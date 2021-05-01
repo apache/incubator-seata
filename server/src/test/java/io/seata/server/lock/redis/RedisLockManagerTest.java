@@ -17,13 +17,6 @@
 package io.seata.server.lock.redis;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.server.lock.LockManager;
@@ -31,6 +24,10 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.lock.RedisLockManager;
 import io.seata.server.storage.redis.lock.RedisLocker;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.embedded.RedisServer;
@@ -44,8 +41,8 @@ public class RedisLockManagerTest {
 
     @BeforeAll
     public static void start() throws IOException {
-        int port = ThreadLocalRandom.current().nextInt(10000, 17000);
-        server = RedisServer.builder().setting("maxheap 16M").setting("maxmemory 16M").port(port)
+        int port = 6789;
+        server = RedisServer.builder().setting("maxheap 8M").setting("maxmemory 8M").port(port)
             .setting("bind localhost").build();
         server.start();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
