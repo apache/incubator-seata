@@ -67,12 +67,10 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
         //when there is only one pk in the table
         if (isContainsPk) {
             pkValuesMap = getPkValuesByColumn();
-        }
-        else if (containsColumns()) {
+        } else if (containsColumns()) {
             String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
             pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
-        }
-        else {
+        } else {
             pkValuesMap = getPkValuesByColumn();
         }
         return pkValuesMap;
@@ -84,11 +82,11 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
         String pkKey = pkValuesMap.keySet().iterator().next();
         List<Object> pkValues = pkValuesMap.get(pkKey);
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValuesMap.put(pkKey,getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
+            pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
         } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValuesMap.put(pkKey,getGeneratedKeys());
+            pkValuesMap.put(pkKey, getGeneratedKeys());
         } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
-            pkValuesMap.put(pkKey,getPkValuesByDefault());
+            pkValuesMap.put(pkKey, getPkValuesByDefault());
         }
 
         return pkValuesMap;
