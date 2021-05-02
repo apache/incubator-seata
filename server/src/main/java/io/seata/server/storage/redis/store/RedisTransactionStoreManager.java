@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -143,8 +142,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> branchTransactionDOMap = jedis.hgetAll(branchKey);
-            String xid = branchTransactionDOMap.get(REDIS_KEY_BRANCH_XID);
+            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
             if (StringUtils.isEmpty(xid)) {
                 return true;
             }
@@ -214,11 +212,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> globalTransactionDoMap = jedis.hgetAll(globalKey);
-            String xid = globalTransactionDoMap.get(REDIS_KEY_GLOBAL_XID);
+            String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
             if (StringUtils.isEmpty(xid)) {
                 LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
-                        globalTransactionDO.getXid());
+                    globalTransactionDO.getXid());
                 return true;
             }
             Pipeline pipelined = jedis.pipelined();
@@ -351,7 +348,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Pipeline pipelined = jedis.pipelined();
             statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, -1));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
-            List<GlobalSession> globalSessions = new CopyOnWriteArrayList<>();
+            List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
             if (CollectionUtils.isNotEmpty(list)) {
                 List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
                 xids.parallelStream().forEach(xid -> {
