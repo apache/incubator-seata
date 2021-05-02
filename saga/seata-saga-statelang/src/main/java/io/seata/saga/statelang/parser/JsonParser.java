@@ -40,6 +40,15 @@ public interface JsonParser {
     String toJsonString(Object o, boolean prettyPrint);
 
     /**
+     * Object to Json string
+     * @param o
+     * @param ignoreAutoType
+     * @param prettyPrint
+     * @return
+     */
+    String toJsonString(Object o, boolean ignoreAutoType, boolean prettyPrint);
+
+    /**
      * parse json string to Object
      *
      * @param json
