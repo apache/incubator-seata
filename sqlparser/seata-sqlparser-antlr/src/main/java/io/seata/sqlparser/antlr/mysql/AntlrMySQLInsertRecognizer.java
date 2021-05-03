@@ -95,4 +95,14 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
     public List<List<Object>> getInsertRows(Collection<Integer> primaryKeyIndex) {
         return null;
     }
+
+    @Override
+    public List<String> getInsertParamsValue() {
+        return null;
+    }
+
+    @Override
+    public List<String> getDuplicateKeyUpdate() {
+        return null;
+    }
 }

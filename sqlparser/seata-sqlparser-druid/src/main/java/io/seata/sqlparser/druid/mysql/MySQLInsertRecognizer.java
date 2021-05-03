@@ -22,6 +22,7 @@ import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
@@ -61,7 +62,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.INSERT;
+        return CollectionUtils.isNotEmpty(ast.getDuplicateKeyUpdate()) ? SQLType.INSERT_ON_DUPLICATE_UPDATE : SQLType.INSERT;
     }
 
     @Override
@@ -134,5 +135,38 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
             }
         }
         return rows;
+    }
+
+    @Override
+    public List<String> getInsertParamsValue() {
+        List<SQLInsertStatement.ValuesClause> valuesList = ast.getValuesList();
+        List<String> list = new ArrayList<>();
+        for (SQLInsertStatement.ValuesClause m: valuesList) {
+            String values = m.toString().replace("VALUES", "").trim();
+            // when all params is constant, the length of values less than 1
+            if (values.length() > 1) {
+                values = values.substring(1,values.length() - 1);
+            }
+            list.add(values);
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getDuplicateKeyUpdate() {
+        List<SQLExpr> columnSQLExprs = ast.getDuplicateKeyUpdate();
+        if (columnSQLExprs.isEmpty()) {
+            return null;
+        }
+        List<String> list = new ArrayList<>(columnSQLExprs.size());
+        for (SQLExpr exprLeft : columnSQLExprs) {
+            SQLExpr expr = ((SQLBinaryOpExpr)exprLeft).getLeft();
+            if (expr instanceof SQLIdentifierExpr) {
+                list.add(((SQLIdentifierExpr)expr).getName());
+            } else {
+                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+            }
+        }
+        return list;
     }
 }
