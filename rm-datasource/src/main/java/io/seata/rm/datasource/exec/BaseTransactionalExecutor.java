@@ -302,9 +302,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sb.append(":");
         int filedSequence = 0;
         List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
+        List<String> primaryKeysOnlyName = getTableMeta().getPrimaryKeyOnlyName();
         for (Map<String, Field> rowMap : pksRows) {
             int pkSplitIndex = 0;
-            for (String pkName : getTableMeta().getPrimaryKeyOnlyName()) {
+            for (String pkName : primaryKeysOnlyName) {
                 if (pkSplitIndex > 0) {
                     sb.append("_");
                 }
