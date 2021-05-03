@@ -39,7 +39,7 @@ public class ParameterParser {
         = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-    
+
     @Parameter(names = "--help", help = true)
     private boolean help;
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
@@ -146,7 +146,7 @@ public class ParameterParser {
      * @return the store mode
      */
     public String getLockStoreMode() {
-        return lockStoreMode;
+        return StringUtils.isNotEmpty(lockStoreMode) ? lockStoreMode : storeMode;
     }
 
     /**
@@ -155,7 +155,7 @@ public class ParameterParser {
      * @return the store mode
      */
     public String getSessionStoreMode() {
-        return sessionStoreMode;
+        return StringUtils.isNotEmpty(sessionStoreMode) ? sessionStoreMode : storeMode;
     }
 
     /**
