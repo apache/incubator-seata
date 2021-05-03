@@ -17,7 +17,12 @@ package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.*;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
@@ -148,7 +153,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     }
 
     @Override
-    public List<String> getDuplicateKeyUpdate(){
+    public List<String> getDuplicateKeyUpdate() {
         List<SQLExpr> columnSQLExprs = ast.getDuplicateKeyUpdate();
         if (columnSQLExprs.isEmpty()) {
             return null;
