@@ -40,7 +40,7 @@ public interface RemotingClient {
      *
      * @param msg transaction message {@link io.seata.core.protocol}
      * @return server result message
-     * @throws TimeoutException
+     * @throws TimeoutException TimeoutException
      */
     Object sendSyncRequest(Object msg) throws TimeoutException;
 
@@ -50,7 +50,7 @@ public interface RemotingClient {
      * @param channel client channel
      * @param msg     transaction message {@link io.seata.core.protocol}
      * @return server result message
-     * @throws TimeoutException
+     * @throws TimeoutException TimeoutException
      */
     Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
 
