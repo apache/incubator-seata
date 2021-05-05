@@ -41,6 +41,7 @@ import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 
 /**
  * The type Session holder.
@@ -85,12 +86,13 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file, db
+     * @param mode the store mode: file, db, redis
      * @throws IOException the io exception
      */
     public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+            mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+                CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
