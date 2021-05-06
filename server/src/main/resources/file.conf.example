@@ -56,7 +56,8 @@ store {
     ## mysql/oracle/postgresql/h2/oceanbase etc.
     dbType = "mysql"
     driverClassName = "com.mysql.jdbc.Driver"
-    url = "jdbc:mysql://127.0.0.1:3306/seata"
+    ## if using mysql to store the data, recommend add rewriteBatchedStatements=true in jdbc connection param
+    url = "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true"
     user = "mysql"
     password = "mysql"
     minConn = 5
@@ -90,6 +91,7 @@ server {
   maxCommitRetryTimeout = "-1"
   maxRollbackRetryTimeout = "-1"
   rollbackRetryTimeoutUnlockEnable = false
+  retryDeadThreshold = 130000
 }
 
 ## metrics configuration, only used in server side
