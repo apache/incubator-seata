@@ -32,7 +32,7 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnBean(DataSource.class)
-@ConditionalOnExpression("${seata.enable:true} && ${seata.enableAutoDataSourceProxy:true} && ${seata.enable-auto-data-source-proxy:true}")
+@ConditionalOnExpression("${seata.enabled:true} && ${seata.enableAutoDataSourceProxy:true} && ${seata.enable-auto-data-source-proxy:true}")
 public class SeataDataSourceAutoConfiguration {
 
     /**
