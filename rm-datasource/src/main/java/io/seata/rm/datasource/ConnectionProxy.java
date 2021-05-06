@@ -48,7 +48,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxy.class);
 
-    private ConnectionContext context = new ConnectionContext();
+    private final ConnectionContext context = new ConnectionContext();
 
     private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
 
@@ -57,7 +57,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
-
 
     /**
      * Instantiates a new Connection proxy.
@@ -98,6 +97,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     /**
      * get global lock requires flag
+     *
+     * @return the boolean
      */
     public boolean isGlobalLockRequire() {
         return context.isGlobalLockRequire();
@@ -129,6 +130,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * Lock query.
      *
      * @param lockKeys the lock keys
+     * @return the boolean
      * @throws SQLException the sql exception
      */
     public boolean lockQuery(String lockKeys) throws SQLException {
@@ -284,7 +286,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * change connection autoCommit to false by seata
      *
-     * @throws SQLException
+     * @throws SQLException the sql exception
      */
     public void changeAutoCommit() throws SQLException {
         getContext().setAutoCommitChanged(true);
