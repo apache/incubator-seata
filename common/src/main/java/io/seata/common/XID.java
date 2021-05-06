@@ -51,7 +51,7 @@ public class XID {
      * @return the string
      */
     public static String generateXID(long tranId) {
-        return ipAddress + ":" + port + ":" + tranId;
+        return new StringBuilder().append(ipAddress).append(":").append(port).append(":").append(tranId).toString();
     }
 
     /**
@@ -93,6 +93,6 @@ public class XID {
      * @return eg: 127.0.0.1:8091
      */
     public static String getIpAddressAndPort() {
-        return ipAddress + ":" + port;
+        return new StringBuilder().append(ipAddress).append(":").append(port).toString();
     }
 }

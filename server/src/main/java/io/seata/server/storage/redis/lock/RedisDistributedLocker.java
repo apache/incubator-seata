@@ -48,7 +48,7 @@ public class RedisDistributedLocker {
             }
             return false;
         } catch (Exception ex) {
-            LOGGER.warn("The {} acquired the {} distributed lock failed.", lockValue, lockKey, ex);
+            LOGGER.error("The {} acquired the {} distributed lock failed.", lockValue, lockKey, ex);
             return false;
         }
     }
@@ -74,7 +74,7 @@ public class RedisDistributedLocker {
             jedis.unwatch();
             return true;
         } catch (Exception ex) {
-            LOGGER.warn("The {} release the {} distributed lock failed.", lockValue, lockKey, ex);
+            LOGGER.error("The {} release the {} distributed lock failed.", lockValue, lockKey, ex);
             return false;
         }
     }
