@@ -19,10 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.util.NumberUtils;
 import io.seata.saga.statelang.domain.TaskState.ExceptionMatch;
+import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.TaskState.Retry;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.ExceptionMatchImpl;
+import io.seata.saga.statelang.domain.impl.AbstractTaskState.LoopImpl;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.RetryImpl;
 
 /**
@@ -82,6 +85,11 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         if (statusMap != null) {
             state.setStatus(statusMap);
         }
+
+        Object loopObj = nodeMap.get("Loop");
+        if (loopObj != null) {
+            state.setLoop(parseLoop(loopObj));
+        }
     }
 
     protected List<Retry> parseRetry(List<Object> retryList) {
@@ -123,5 +131,21 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
             exceptionMatchList.add(exceptionMatch);
         }
         return exceptionMatchList;
+    }
+
+    protected Loop parseLoop(Object loopObj) {
+        Map<String, Object> loopMap = (Map<String, Object>)loopObj;
+        LoopImpl loop = new LoopImpl();
+
+        Object parallel = loopMap.get("Parallel");
+        loop.setParallel(NumberUtils.toInt(parallel.toString(), 1));
+
+        loop.setCollection((String)loopMap.get("Collection"));
+        loop.setElementVariableName((String)loopMap.getOrDefault("ElementVariableName", "loopElement"));
+        loop.setElementIndexName((String)loopMap.getOrDefault("ElementIndexName", "loopCounter"));
+        loop.setCompletionCondition(
+            (String)loopMap.getOrDefault("CompletionCondition", "[nrOfInstances] == [nrOfCompletedInstances]"));
+        return loop;
+
     }
 }
