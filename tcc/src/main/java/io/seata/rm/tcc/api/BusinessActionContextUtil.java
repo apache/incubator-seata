@@ -16,6 +16,7 @@
 package io.seata.rm.tcc.api;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -49,20 +50,32 @@ public class BusinessActionContextUtil {
         if (!Objects.isNull(value)) {
             BusinessActionContext actionContext = ActionInterceptorHandler.getContext();
             actionContext.addActionContext(key, value);
-            String newContext = JSON.toJSONString(actionContext);
-            try {
-                DefaultResourceManager.get().branchReport(
-                        BranchType.TCC,
-                        actionContext.getXid(),
-                        actionContext.getBranchId(),
-                        BranchStatus.Registered,
-                        newContext
-                );
-            } catch (TransactionException e) {
-                String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
-                LOGGER.error(msg, e);
-                throw new FrameworkException(e);
+            //if delay report, params will be finally reported after phase 1 execution
+            if ((boolean) actionContext.getActionContext().get(Constants.DELAY_REPORT)){
+                return;
             }
+            reportContext(actionContext);
+        }
+    }
+
+    /**
+     * to do branch report sharing actionContext
+     *
+     * @param actionContext the context
+     */
+    public static void reportContext(BusinessActionContext actionContext){
+        try {
+            DefaultResourceManager.get().branchReport(
+                    BranchType.TCC,
+                    actionContext.getXid(),
+                    actionContext.getBranchId(),
+                    BranchStatus.Registered,
+                    JSON.toJSONString(actionContext)
+            );
+        } catch (TransactionException e) {
+            String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
+            LOGGER.error(msg, e);
+            throw new FrameworkException(e);
         }
     }
 }

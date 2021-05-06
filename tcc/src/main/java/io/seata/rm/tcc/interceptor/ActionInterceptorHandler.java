@@ -25,6 +25,7 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +79,7 @@ public class ActionInterceptorHandler {
         Class<?>[] types = method.getParameterTypes();
         int argIndex = 0;
         for (Class<?> cls : types) {
-            if (cls.getName().equals(BusinessActionContext.class.getName())) {
+            if (cls.isAssignableFrom(BusinessActionContext.class)) {
                 arguments[argIndex] = actionContext;
                 break;
             }
@@ -91,7 +92,12 @@ public class ActionInterceptorHandler {
             ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
             //the final result
             ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+            //to report all business context
         } finally {
+            //to report business action context finally.
+            if (businessAction.isDelayReport()) {
+                BusinessActionContextUtil.reportContext(actionContext);
+            }
             ActionInterceptorHandler.cleanUp();
         }
         return ret;
@@ -167,6 +173,7 @@ public class ActionInterceptorHandler {
             context.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
             context.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
             context.put(Constants.ACTION_NAME, businessAction.name());
+            context.put(Constants.DELAY_REPORT, businessAction.isDelayReport());
         }
     }
 
