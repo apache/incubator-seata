@@ -578,9 +578,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         for (InetSocketAddress inetSocketAddress : inetSocketAddressList) {
                             if (inetSocketAddress.getPort() == port
                                 && inetSocketAddress.getAddress().getHostAddress().contains(leader.getIp())) {
-                                if (LEADER_ADDRESS.getInetSocketAddress() != inetSocketAddress) {
+                                if (!Objects.equals(LEADER_ADDRESS.getInetSocketAddress(), inetSocketAddress)) {
                                     LEADER_ADDRESS.setInetSocketAddress(inetSocketAddress);
-                                    LEADER_ADDRESS.setTimestamp(System.currentTimeMillis());
                                     XID.setIpAddress(leader.getIp());
                                     XID.setPort(leader.getPort());
                                     if (LOGGER.isDebugEnabled()) {

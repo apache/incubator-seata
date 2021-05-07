@@ -34,6 +34,7 @@ public class RaftLeader {
 
     public void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
         this.inetSocketAddress = inetSocketAddress;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public Long getTimestamp() {
