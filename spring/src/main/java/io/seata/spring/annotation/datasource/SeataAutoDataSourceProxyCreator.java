@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
-import org.springframework.beans.BeansException;
 
 /**
  * @author xingfudeshi@gmail.com
