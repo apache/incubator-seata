@@ -34,30 +34,11 @@ public final class ColumnUtils {
     private static final String DOT = ".";
 
     /**
-     * The escape
-     */
-    public enum Escape {
-        /**
-         * standard escape
-         */
-        STANDARD('"'),
-        /**
-         * mysql series escape
-         */
-        MYSQL('`');
-        public final char value;
-
-        Escape(char value) {
-            this.value = value;
-        }
-    }
-
-    /**
      * del escape by db type
      *
      * @param cols   the cols
      * @param dbType the db type
-     * @return
+     * @return list
      */
     public static List<String> delEscape(List<String> cols, String dbType) {
         // sql standard
@@ -69,6 +50,21 @@ public final class ColumnUtils {
             newCols = delEscape(newCols, Escape.MYSQL);
         }
         return newCols;
+    }
+
+    /**
+     * del escape by db type
+     *
+     * @param colName the column name
+     * @param dbType  the db type
+     * @return string string
+     */
+    public static String delEscape(String colName, String dbType) {
+        String newColName = delEscape(colName, Escape.STANDARD);
+        if (isMysqlSeries(dbType)) {
+            newColName = delEscape(newColName, Escape.MYSQL);
+        }
+        return newColName;
     }
 
     /**
@@ -92,26 +88,11 @@ public final class ColumnUtils {
     }
 
     /**
-     * del escape by db type
-     *
-     * @param colName the column name
-     * @param dbType  the db type
-     * @return
-     */
-    public static String delEscape(String colName, String dbType) {
-        String newColName = delEscape(colName, Escape.STANDARD);
-        if (isMysqlSeries(dbType)) {
-            newColName = delEscape(newColName, Escape.MYSQL);
-        }
-        return newColName;
-    }
-
-    /**
      * del escape by escape
      *
      * @param colName the column name
      * @param escape  the escape
-     * @return
+     * @return string string
      */
     public static String delEscape(String colName, Escape escape) {
         if (colName == null || colName.isEmpty()) {
@@ -156,7 +137,7 @@ public final class ColumnUtils {
      *
      * @param cols   the column name list
      * @param dbType the db type
-     * @return
+     * @return list list
      */
     public static List<String> addEscape(List<String> cols, String dbType) {
         if (CollectionUtils.isEmpty(cols)) {
@@ -169,6 +150,28 @@ public final class ColumnUtils {
             newCols.add(col);
         }
         return newCols;
+    }
+
+    /**
+     * The escape
+     */
+    public enum Escape {
+        /**
+         * standard escape
+         */
+        STANDARD('"'),
+        /**
+         * mysql series escape
+         */
+        MYSQL('`');
+        /**
+         * The Value.
+         */
+        public final char value;
+
+        Escape(char value) {
+            this.value = value;
+        }
     }
 
     /**

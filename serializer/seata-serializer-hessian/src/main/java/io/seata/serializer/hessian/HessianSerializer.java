@@ -15,6 +15,9 @@
  */
 package io.seata.serializer.hessian;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.SerializerFactory;
@@ -23,12 +26,8 @@ import io.seata.core.serializer.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 /**
- * @Xin Wang
+ * @author XinWang
  */
 @LoadLevel(name = "HESSIAN")
 public class HessianSerializer implements Serializer {
