@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://seata.io/schema/seata"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            targetNamespace="http://seata.io/schema/seata">
+
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+
+    <xsd:element name="application">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:element ref="gtx" minOccurs="0" maxOccurs="unbounded"/>
+                    </xsd:sequence>
+                    <xsd:attribute name="applicationId" type="xsd:string" use="required"/>
+                    <xsd:attribute name="txServiceGroup" type="xsd:string" use="required"/>
+                    <xsd:attribute name="failureHandler" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="mode" type="xsd:int" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="gtx">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="timeoutMills" type="xsd:int" use="optional"/>
+                    <xsd:attribute name="name" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="rollbackFor" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="rollbackForClassName" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="noRollbackFor" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="noRollbackForClassName" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="propagation" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="lockRetry-internal" type="xsd:int" use="optional"/>
+                    <xsd:attribute name="lockRetry-times" type="xsd:int" use="optional"/>
+                    <xsd:attribute name="scanPackage" type="xsd:string" use="required"/>
+                    <xsd:attribute name="methodMatch" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="classMatch" type="xsd:string" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+
+</xsd:schema>
