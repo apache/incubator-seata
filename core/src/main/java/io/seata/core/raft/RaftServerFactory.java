@@ -123,7 +123,7 @@ public class RaftServerFactory {
     }
 
     public Boolean isNotRaftModeLeader() {
-        return (!isLeader() && isRaftMode());
+        return !isLeader() && isRaftMode();
     }
 
     private static class SingletonHandler {

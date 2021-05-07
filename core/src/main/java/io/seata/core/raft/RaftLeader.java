@@ -46,7 +46,7 @@ public class RaftLeader {
     }
 
     public boolean isExpired() {
-        return (this.timestamp == null || System.currentTimeMillis() - this.timestamp < DEFAULT_RAFT_PORT_INTERVAL);
+        return this.timestamp == null || (System.currentTimeMillis() - this.timestamp < DEFAULT_RAFT_PORT_INTERVAL);
     }
 
     public boolean isNotExpired() {
