@@ -15,14 +15,13 @@
  */
 package io.seata.rm.datasource;
 
+import java.util.ArrayList;
+import java.util.List;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * column utils
@@ -32,6 +31,21 @@ import java.util.List;
 public final class ColumnUtils {
 
     private static final String DOT = ".";
+
+    /**
+     * del escape by db type
+     *
+     * @param colName the column name
+     * @param dbType  the db type
+     * @return string string
+     */
+    public static String delEscape(String colName, String dbType) {
+        String newColName = delEscape(colName, Escape.STANDARD);
+        if (isMysqlSeries(dbType)) {
+            newColName = delEscape(newColName, Escape.MYSQL);
+        }
+        return newColName;
+    }
 
     /**
      * del escape by db type
@@ -53,21 +67,6 @@ public final class ColumnUtils {
     }
 
     /**
-     * del escape by db type
-     *
-     * @param colName the column name
-     * @param dbType  the db type
-     * @return string string
-     */
-    public static String delEscape(String colName, String dbType) {
-        String newColName = delEscape(colName, Escape.STANDARD);
-        if (isMysqlSeries(dbType)) {
-            newColName = delEscape(newColName, Escape.MYSQL);
-        }
-        return newColName;
-    }
-
-    /**
      * del escape
      *
      * @param cols   the cols
@@ -85,6 +84,28 @@ public final class ColumnUtils {
             newCols.add(col);
         }
         return newCols;
+    }
+
+    /**
+     * The escape
+     */
+    public enum Escape {
+        /**
+         * standard escape
+         */
+        STANDARD('"'),
+        /**
+         * mysql series escape
+         */
+        MYSQL('`');
+        /**
+         * The Value.
+         */
+        public final char value;
+
+        Escape(char value) {
+            this.value = value;
+        }
     }
 
     /**
@@ -150,28 +171,6 @@ public final class ColumnUtils {
             newCols.add(col);
         }
         return newCols;
-    }
-
-    /**
-     * The escape
-     */
-    public enum Escape {
-        /**
-         * standard escape
-         */
-        STANDARD('"'),
-        /**
-         * mysql series escape
-         */
-        MYSQL('`');
-        /**
-         * The Value.
-         */
-        public final char value;
-
-        Escape(char value) {
-            this.value = value;
-        }
     }
 
     /**

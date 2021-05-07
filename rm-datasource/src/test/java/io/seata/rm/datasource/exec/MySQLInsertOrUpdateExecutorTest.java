@@ -52,15 +52,24 @@ public class MySQLInsertOrUpdateExecutorTest {
     private static final String USER_NAME_COLUMN = "user_name";
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
-    private final int pkIndex = 0;
+
     private StatementProxy statementProxy;
+
     private SQLInsertRecognizer sqlInsertRecognizer;
+
     private TableMeta tableMeta;
+
     private MySQLInsertOrUpdateExecutor insertOrUpdateExecutor;
+
     private boolean isUpdateFlag = false;
+
     private String selectSQL;
+
     private ArrayList<List<Object>> paramAppenderList;
+
     private Map<String, List<String>> beforeUniqueIndexMap = new HashMap<>();
+
+    private final int pkIndex = 0;
     private HashMap<String,Integer> pkIndexMap;
 
     @BeforeEach

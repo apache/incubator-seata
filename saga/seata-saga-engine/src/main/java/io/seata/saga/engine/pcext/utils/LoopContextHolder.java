@@ -32,10 +32,10 @@ public class LoopContextHolder {
     private final AtomicInteger nrOfInstances = new AtomicInteger();
     private final AtomicInteger nrOfActiveInstances = new AtomicInteger();
     private final AtomicInteger nrOfCompletedInstances = new AtomicInteger();
-    private final Stack<Integer> loopCounterStack = new Stack<>();
-    private final Stack<Integer> forwardCounterStack = new Stack<>();
     private volatile boolean failEnd = false;
     private volatile boolean completionConditionSatisfied = false;
+    private final Stack<Integer> loopCounterStack = new Stack<>();
+    private final Stack<Integer> forwardCounterStack = new Stack<>();
     private Collection collection;
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {

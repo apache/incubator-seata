@@ -53,9 +53,11 @@ import org.slf4j.LoggerFactory;
  */
 public class LoopTaskUtils {
 
-    public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
+
     private static final String DEFAULT_COMPLETION_CONDITION = "[nrOfInstances] == [nrOfCompletedInstances]";
+    public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
+
     private static final Map<String, ExpressionEvaluator> EXPRESSION_EVALUATOR_MAP = new ConcurrentHashMap<>();
 
     /**

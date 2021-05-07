@@ -61,14 +61,25 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
      * is updated or not
      */
     private boolean isUpdateFlag = false;
+
+    public String getSelectSQL() {
+        return selectSQL;
+    }
+
     /**
      * before image sql and after image sql,condition is unique index
      */
     private String selectSQL;
+
+    public ArrayList<List<Object>> getParamAppenderList() {
+        return paramAppenderList;
+    }
+
     /**
      * the params of selectSQL, value is the unique index
      */
     private ArrayList<List<Object>> paramAppenderList;
+
     /**
      * key is unique index name, value is unique index
      */
@@ -76,14 +87,6 @@ public class MySQLInsertOrUpdateExecutor extends MySQLInsertExecutor implements 
 
     public MySQLInsertOrUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
-    }
-
-    public String getSelectSQL() {
-        return selectSQL;
-    }
-
-    public ArrayList<List<Object>> getParamAppenderList() {
-        return paramAppenderList;
     }
 
     /**
