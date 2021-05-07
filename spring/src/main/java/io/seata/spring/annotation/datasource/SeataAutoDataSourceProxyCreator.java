@@ -72,15 +72,15 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         // we only care DataSource bean
         if (!(bean instanceof DataSource)) {
             return bean;
         }
 
-        // when this bean is just native DataSource, not SeataDataSourceProxy
+        // when this bean is just a simple DataSource, not SeataDataSourceProxy
         if (!(bean instanceof SeataDataSourceProxy)) {
-            Object enhancer = super.postProcessAfterInitialization(bean, beanName);
+            Object enhancer = super.wrapIfNecessary(bean, beanName, cacheKey);
             // this mean this bean is either excluded by user or had been proxy before
             if (bean == enhancer) {
                 return bean;
@@ -97,10 +97,10 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
          * if you insist on doing so, you must make sure your method return type is DataSource,
          * because this processor will never return any subclass of SeataDataSourceProxy
          */
-        LOGGER.warn("register SeataDataSourceProxy(or its subclass) bean is discouraged! bean name: {}", beanName);
+        LOGGER.warn("Manually register SeataDataSourceProxy(or its subclass) bean is discouraged! bean name: {}", beanName);
         SeataDataSourceProxy proxy = (SeataDataSourceProxy) bean;
         DataSource origin = proxy.getTargetDataSource();
-        Object originEnhancer = super.postProcessAfterInitialization(origin, beanName);
+        Object originEnhancer = super.wrapIfNecessary(origin, beanName, cacheKey);
         // this mean origin is either excluded by user or had been proxy before
         if (origin == originEnhancer) {
             return origin;
