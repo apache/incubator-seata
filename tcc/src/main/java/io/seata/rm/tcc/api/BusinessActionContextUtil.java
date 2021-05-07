@@ -16,7 +16,6 @@
 package io.seata.rm.tcc.api;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -44,14 +43,17 @@ public class BusinessActionContextUtil {
     /**
      * add business action context and share it to tcc phase2
      *
+     * @param key the key of new context
      * @param value new context
      */
     public static void addContext(String key, Object value) {
         if (!Objects.isNull(value)) {
             BusinessActionContext actionContext = ActionInterceptorHandler.getContext();
+            //once add context, action context will be marked as 'updated' .
+            actionContext.setUpdated(true);
             actionContext.addActionContext(key, value);
             //if delay report, params will be finally reported after phase 1 execution
-            if ((boolean) actionContext.getActionContext().get(Constants.DELAY_REPORT)){
+            if (actionContext.getDelayReport()) {
                 return;
             }
             reportContext(actionContext);
@@ -63,7 +65,7 @@ public class BusinessActionContextUtil {
      *
      * @param actionContext the context
      */
-    public static void reportContext(BusinessActionContext actionContext){
+    public static void reportContext(BusinessActionContext actionContext) {
         try {
             DefaultResourceManager.get().branchReport(
                     BranchType.TCC,

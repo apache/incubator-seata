@@ -36,6 +36,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -92,13 +93,12 @@ public class ActionInterceptorHandler {
             ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
             //the final result
             ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
-            //to report all business context
         } finally {
+            ActionInterceptorHandler.cleanUp();
             //to report business action context finally.
-            if (businessAction.isDelayReport()) {
+            if (businessAction.isDelayReport() && Optional.ofNullable(actionContext.getUpdated()).orElse(false)) {
                 BusinessActionContextUtil.reportContext(actionContext);
             }
-            ActionInterceptorHandler.cleanUp();
         }
         return ret;
     }
@@ -116,7 +116,7 @@ public class ActionInterceptorHandler {
                                          BusinessActionContext actionContext) {
         String actionName = actionContext.getActionName();
         String xid = actionContext.getXid();
-        //
+
         Map<String, Object> context = fetchActionRequestContext(method, arguments);
         context.put(Constants.ACTION_START_TIME, System.currentTimeMillis());
 
@@ -124,6 +124,7 @@ public class ActionInterceptorHandler {
         initBusinessContext(context, method, businessAction);
         //Init running environment context
         initFrameworkContext(context);
+        actionContext.setDelayReport(businessAction.isDelayReport());
         actionContext.setActionContext(context);
 
         //init applicationData
@@ -173,7 +174,6 @@ public class ActionInterceptorHandler {
             context.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
             context.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
             context.put(Constants.ACTION_NAME, businessAction.name());
-            context.put(Constants.DELAY_REPORT, businessAction.isDelayReport());
         }
     }
 

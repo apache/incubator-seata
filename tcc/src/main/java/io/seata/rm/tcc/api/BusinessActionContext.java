@@ -31,6 +31,10 @@ public class BusinessActionContext implements Serializable {
 
     private String actionName;
 
+    private Boolean isDelayReport;
+
+    private Boolean isUpdated;
+
     private Map<String, Object> actionContext;
 
     /**
@@ -153,13 +157,32 @@ public class BusinessActionContext implements Serializable {
         this.actionContext.put(key, value);
     }
 
+    public Boolean getDelayReport() {
+        return isDelayReport;
+    }
+
+    public void setDelayReport(Boolean delayReport) {
+        isDelayReport = delayReport;
+    }
+
+    public Boolean getUpdated() {
+        return isUpdated;
+    }
+
+    public void setUpdated(Boolean updated) {
+        isUpdated = updated;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[xid:").append(xid)
-            .append(",branch_Id:").append(branchId).append(",action_name:").append(actionName)
-            .append(",action_context:")
-            .append(actionContext).append("]");
+                .append(",branch_Id:").append(branchId)
+                .append(",action_name:").append(actionName)
+                .append(",is_delay_report:").append(isDelayReport)
+                .append(",is_updated:").append(isDelayReport)
+                .append(",action_context:")
+                .append(actionContext).append("]");
         return sb.toString();
     }
 }

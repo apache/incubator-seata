@@ -67,11 +67,6 @@ public interface Constants {
     String ACTION_NAME = "actionName";
 
     /**
-     * delay report name
-     */
-    String DELAY_REPORT = "isDelayReport";
-
-    /**
      * phase one method name
      */
     String PREPARE_METHOD = "sys::prepare";
