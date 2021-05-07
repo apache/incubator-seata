@@ -34,7 +34,7 @@ public interface DefaultValues {
     long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
-    int DEFAULT_RAFT_PORT_INTERVAL = 1000;
+    int DEFAULT_RAFT_PORT_INTERVAL = 5000;
     /**
      * The default session store dir
      */

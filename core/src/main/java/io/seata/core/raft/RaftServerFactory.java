@@ -122,6 +122,10 @@ public class RaftServerFactory {
         return raftMode;
     }
 
+    public Boolean isNotRaftModeLeader() {
+        return (!isLeader() && isRaftMode());
+    }
+
     private static class SingletonHandler {
         private static RaftServerFactory instance = new RaftServerFactory();
     }
