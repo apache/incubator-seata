@@ -308,7 +308,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            if (LEADER_ADDRESS.getInetSocketAddress() != null) {
+            if (LEADER_ADDRESS != null && LEADER_ADDRESS.getInetSocketAddress() != null) {
                 address = LEADER_ADDRESS.getInetSocketAddress();
             } else {
                 @SuppressWarnings("unchecked")
