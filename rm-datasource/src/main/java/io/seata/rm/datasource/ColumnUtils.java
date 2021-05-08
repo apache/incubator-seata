@@ -15,13 +15,14 @@
  */
 package io.seata.rm.datasource;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * column utils
@@ -33,18 +34,25 @@ public final class ColumnUtils {
     private static final String DOT = ".";
 
     /**
-     * del escape by db type
-     *
-     * @param colName the column name
-     * @param dbType  the db type
-     * @return string string
+     * The escape
      */
-    public static String delEscape(String colName, String dbType) {
-        String newColName = delEscape(colName, Escape.STANDARD);
-        if (isMysqlSeries(dbType)) {
-            newColName = delEscape(newColName, Escape.MYSQL);
+    public enum Escape {
+        /**
+         * standard escape
+         */
+        STANDARD('"'),
+        /**
+         * mysql series escape
+         */
+        MYSQL('`');
+        /**
+         * The Value.
+         */
+        public final char value;
+
+        Escape(char value) {
+            this.value = value;
         }
-        return newColName;
     }
 
     /**
@@ -87,25 +95,18 @@ public final class ColumnUtils {
     }
 
     /**
-     * The escape
+     * del escape by db type
+     *
+     * @param colName the column name
+     * @param dbType  the db type
+     * @return string string
      */
-    public enum Escape {
-        /**
-         * standard escape
-         */
-        STANDARD('"'),
-        /**
-         * mysql series escape
-         */
-        MYSQL('`');
-        /**
-         * The Value.
-         */
-        public final char value;
-
-        Escape(char value) {
-            this.value = value;
+    public static String delEscape(String colName, String dbType) {
+        String newColName = delEscape(colName, Escape.STANDARD);
+        if (isMysqlSeries(dbType)) {
+            newColName = delEscape(newColName, Escape.MYSQL);
         }
+        return newColName;
     }
 
     /**
