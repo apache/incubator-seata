@@ -1,17 +1,18 @@
 package io.seata.spring.schema;
 
-import java.util.List;
+import java.util.Set;
 
 /**
+ * The type application config
+ *
  * @author xingfudeshi@gmail.com
- * @date 2021/05/06
  */
-public class ApplicationBean {
+public class ApplicationConfig {
     private String applicationId;
     private String txServiceGroup;
     private String failureHandler;
     private int mode;
-    private List<GtxBean> gtx;
+    private Set<GtxConfig> gtxConfigs;
 
     public String getApplicationId() {
         return applicationId;
@@ -45,22 +46,24 @@ public class ApplicationBean {
         this.mode = mode;
     }
 
-    public List<GtxBean> getGtx() {
-        return gtx;
+    public Set<GtxConfig> getGtxConfigs() {
+        return gtxConfigs;
     }
 
-    public void setGtx(List<GtxBean> gtx) {
-        this.gtx = gtx;
+    public void setGtxConfigs(Set<GtxConfig> gtxConfigs) {
+        this.gtxConfigs = gtxConfigs;
     }
 
     @Override
     public String toString() {
-        return "ApplicationBean{" +
+        return "ApplicationConfig{" +
             "applicationId='" + applicationId + '\'' +
             ", txServiceGroup='" + txServiceGroup + '\'' +
             ", failureHandler='" + failureHandler + '\'' +
             ", mode=" + mode +
-            ", gtx=" + gtx +
+            ", gtxConfigs=" + gtxConfigs +
             '}';
     }
+
+
 }

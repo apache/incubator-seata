@@ -35,12 +35,14 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
 import io.seata.core.model.GlobalLockConfig;
+import io.seata.rm.GlobalLockExecutor;
+import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.event.DegradeCheckEvent;
+import io.seata.spring.schema.GtxTarget;
+import io.seata.spring.schema.GtxTargetHolder;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
-import io.seata.rm.GlobalLockExecutor;
-import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
@@ -92,14 +94,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             int defaultGlobalTransactionTimeout;
             try {
                 defaultGlobalTransactionTimeout = ConfigurationFactory.getInstance().getInt(
-                        ConfigurationKeys.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+                    ConfigurationKeys.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
             } catch (Exception e) {
                 LOGGER.error("Illegal global transaction timeout value: " + e.getMessage());
                 defaultGlobalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
             }
             if (defaultGlobalTransactionTimeout <= 0) {
                 LOGGER.warn("Global transaction timeout value '{}' is illegal, and has been reset to the default value '{}'",
-                        defaultGlobalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+                    defaultGlobalTransactionTimeout, DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
                 defaultGlobalTransactionTimeout = DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
             }
             GlobalTransactionalInterceptor.defaultGlobalTransactionTimeout = defaultGlobalTransactionTimeout;
@@ -111,8 +113,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     /**
      * Instantiates a new Global transactional interceptor.
      *
-     * @param failureHandler
-     *            the failure handler
+     * @param failureHandler the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
@@ -141,12 +142,15 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
             final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
+            final GtxTarget gtxTarget = GtxTargetHolder.INSTANCE.tryFind(targetClass, method);
             final GlobalTransactional globalTransactionalAnnotation =
                 getAnnotation(method, targetClass, GlobalTransactional.class);
             final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
             boolean localDisable = disable || (degradeCheck && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
-                if (globalTransactionalAnnotation != null) {
+                if (gtxTarget != null) {
+                    return handleGlobalTransaction(methodInvocation, gtxTarget);
+                } else if (globalTransactionalAnnotation != null) {
                     return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
                 } else if (globalLockAnnotation != null) {
                     return handleGlobalLock(methodInvocation, globalLockAnnotation);
@@ -157,7 +161,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     Object handleGlobalLock(final MethodInvocation methodInvocation,
-        final GlobalLock globalLockAnno) throws Throwable {
+                            final GlobalLock globalLockAnno) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {
@@ -175,7 +179,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     }
 
     Object handleGlobalTransaction(final MethodInvocation methodInvocation,
-        final GlobalTransactional globalTrxAnno) throws Throwable {
+                                   final GlobalTransactional globalTrxAnno) throws Throwable {
         boolean succeed = true;
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
@@ -217,6 +221,83 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
                     for (String rbRule : globalTrxAnno.noRollbackForClassName()) {
+                        rollbackRules.add(new NoRollbackRule(rbRule));
+                    }
+                    transactionInfo.setRollbackRules(rollbackRules);
+                    return transactionInfo;
+                }
+            });
+        } catch (TransactionalExecutor.ExecutionException e) {
+            TransactionalExecutor.Code code = e.getCode();
+            switch (code) {
+                case RollbackDone:
+                    throw e.getOriginalException();
+                case BeginFailure:
+                    succeed = false;
+                    failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case CommitFailure:
+                    succeed = false;
+                    failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case RollbackFailure:
+                    failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
+                    throw e.getOriginalException();
+                case RollbackRetrying:
+                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
+                    throw e.getOriginalException();
+                default:
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
+            }
+        } finally {
+            if (degradeCheck) {
+                EVENT_BUS.post(new DegradeCheckEvent(succeed));
+            }
+        }
+    }
+
+    Object handleGlobalTransaction(final MethodInvocation methodInvocation, final GtxTarget gtxTarget) throws Throwable {
+        boolean succeed = true;
+        try {
+            return transactionalTemplate.execute(new TransactionalExecutor() {
+                @Override
+                public Object execute() throws Throwable {
+                    return methodInvocation.proceed();
+                }
+
+                public String name() {
+                    String name = gtxTarget.getGtxConfig().getName();
+                    if (!StringUtils.isNullOrEmpty(name)) {
+                        return name;
+                    }
+                    return formatMethod(methodInvocation.getMethod());
+                }
+
+                @Override
+                public TransactionInfo getTransactionInfo() {
+                    // reset the value of timeout
+                    int timeout = gtxTarget.getGtxConfig().getTimeoutMills();
+                    if (timeout <= 0 || timeout == DEFAULT_GLOBAL_TRANSACTION_TIMEOUT) {
+                        timeout = defaultGlobalTransactionTimeout;
+                    }
+
+                    TransactionInfo transactionInfo = new TransactionInfo();
+                    transactionInfo.setTimeOut(timeout);
+                    transactionInfo.setName(name());
+                    transactionInfo.setPropagation(gtxTarget.getGtxConfig().getPropagation());
+                    transactionInfo.setLockRetryInternal(gtxTarget.getGtxConfig().getLockRetryInternal());
+                    transactionInfo.setLockRetryTimes(gtxTarget.getGtxConfig().getLockRetryTimes());
+                    Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
+                    for (Class<?> rbRule : gtxTarget.getGtxConfig().getRollbackFor()) {
+                        rollbackRules.add(new RollbackRule(rbRule));
+                    }
+                    for (String rbRule : gtxTarget.getGtxConfig().getRollbackForClassName()) {
+                        rollbackRules.add(new RollbackRule(rbRule));
+                    }
+                    for (Class<?> rbRule : gtxTarget.getGtxConfig().getNoRollbackFor()) {
+                        rollbackRules.add(new NoRollbackRule(rbRule));
+                    }
+                    for (String rbRule : gtxTarget.getGtxConfig().getNoRollbackForClassName()) {
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
                     transactionInfo.setRollbackRules(rollbackRules);

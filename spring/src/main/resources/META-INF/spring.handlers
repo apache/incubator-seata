@@ -1,1 +1,1 @@
-http\://seata.io/schema/seata=io.seata.spring.schema.NamespaceHandler
+http\://seata.io/schema/seata=io.seata.spring.schema.SeataNamespaceHandler
