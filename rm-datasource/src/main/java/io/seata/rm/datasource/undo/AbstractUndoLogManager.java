@@ -229,14 +229,14 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         UndoLogParser parser = UndoLogParserFactory.getInstance();
         byte[] undoLogContent = parser.encode(branchUndoLog);
 
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
+        }
+
         CompressorType compressorType = CompressorType.NONE;
         if (needCompress(undoLogContent)) {
             compressorType = ROLLBACK_INFO_COMPRESS_TYPE;
             undoLogContent = CompressorFactory.getCompressor(compressorType.getCode()).compress(undoLogContent);
-        }
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
         insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName(), compressorType), undoLogContent, cp.getTargetConnection());
