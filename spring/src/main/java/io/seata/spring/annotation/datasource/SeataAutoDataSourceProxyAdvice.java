@@ -20,58 +20,66 @@ import java.lang.reflect.Method;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.SeataDataSourceProxy;
-import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @author xingfudeshi@gmail.com
+ * @author selfishlover
  */
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
 
-    private final BranchType dataSourceProxyMode;
-    private final Class<? extends SeataDataSourceProxy> dataSourceProxyClazz;
+    private final BranchType branchType;
+
+    private final Class<?>[] attachedInterfaces = new Class[]{SeataProxy.class};
 
     public SeataAutoDataSourceProxyAdvice(String dataSourceProxyMode) {
-        if (BranchType.AT.name().equalsIgnoreCase(dataSourceProxyMode)) {
-            this.dataSourceProxyMode = BranchType.AT;
-            this.dataSourceProxyClazz = DataSourceProxy.class;
-        } else if (BranchType.XA.name().equalsIgnoreCase(dataSourceProxyMode)) {
-            this.dataSourceProxyMode = BranchType.XA;
-            this.dataSourceProxyClazz = DataSourceProxyXA.class;
-        } else {
-            throw new IllegalArgumentException("Unknown dataSourceProxyMode: " + dataSourceProxyMode);
-        }
+        this.branchType = BranchType.get(dataSourceProxyMode);
 
         //Set the default branch type in the RootContext.
-        RootContext.setDefaultBranchType(this.dataSourceProxyMode);
+        RootContext.setDefaultBranchType(this.branchType);
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        if (!RootContext.requireGlobalLock() && dataSourceProxyMode != RootContext.getBranchType()) {
+        // check whether current context is expected
+        if (!inExpectedContext()) {
             return invocation.proceed();
         }
 
         Method method = invocation.getMethod();
-        Object[] args = invocation.getArguments();
-        Method m = BeanUtils.findDeclaredMethod(dataSourceProxyClazz, method.getName(), method.getParameterTypes());
-        if (m != null && DataSource.class.isAssignableFrom(method.getDeclaringClass())) {
-            SeataDataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) invocation.getThis(), dataSourceProxyMode);
-            return m.invoke(dataSourceProxy, args);
-        } else {
+        String name = method.getName();
+        Class<?>[] parameterTypes = method.getParameterTypes();
+
+        Method declared;
+        try {
+            declared = DataSource.class.getDeclaredMethod(name, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            // mean this method is not declared by DataSource
             return invocation.proceed();
         }
+
+        // switch invoke instance to its proxy
+        DataSource origin = (DataSource) invocation.getThis();
+        SeataDataSourceProxy proxy = DataSourceProxyHolder.get(origin);
+        Object[] args = invocation.getArguments();
+        return declared.invoke(proxy, args);
     }
 
     @Override
     public Class<?>[] getInterfaces() {
-        return new Class[]{SeataProxy.class};
+        return attachedInterfaces;
     }
 
-
+    boolean inExpectedContext() {
+        if (RootContext.requireGlobalLock()) {
+            return true;
+        }
+        if (!RootContext.inGlobalTransaction()) {
+            return false;
+        }
+        return branchType == RootContext.getBranchType();
+    }
 }
