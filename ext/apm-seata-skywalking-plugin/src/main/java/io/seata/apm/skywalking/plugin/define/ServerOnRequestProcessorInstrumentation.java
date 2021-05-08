@@ -33,7 +33,7 @@ public class ServerOnRequestProcessorInstrumentation extends ClassInstanceMethod
 
     private static final String ENHANCE_CLASS_TM = "io.seata.core.rpc.processor.server.ServerOnRequestProcessor";
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.ServerOnRequestProcessorProcessInterceptor";
+    private static final String INTERCEPTOR_CLASS = "io.seata.apm.skywalking.plugin.ServerOnRequestProcessorProcessInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {

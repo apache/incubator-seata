@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-seata=org.apache.skywalking.apm.plugin.seata.define.AbstractNettyRemotingInstrumentation
-seata=org.apache.skywalking.apm.plugin.seata.define.ClientOnResponseProcessorInstrumentation
-seata=org.apache.skywalking.apm.plugin.seata.define.RmBranchCommitProcessorInstrumentation
-seata=org.apache.skywalking.apm.plugin.seata.define.RmBranchRollbackProcessorInstrumentation
-seata=org.apache.skywalking.apm.plugin.seata.define.DefaultCoreInstrumentation
-seata=org.apache.skywalking.apm.plugin.seata.define.ServerOnRequestProcessorInstrumentation
+seata=io.seata.apm.skywalking.plugin.define.AbstractNettyRemotingInstrumentation
+seata=io.seata.apm.skywalking.plugin.define.ClientOnResponseProcessorInstrumentation
+seata=io.seata.apm.skywalking.plugin.define.RmBranchCommitProcessorInstrumentation
+seata=io.seata.apm.skywalking.plugin.define.RmBranchRollbackProcessorInstrumentation
+seata=io.seata.apm.skywalking.plugin.define.DefaultCoreInstrumentation
+seata=io.seata.apm.skywalking.plugin.define.ServerOnRequestProcessorInstrumentation

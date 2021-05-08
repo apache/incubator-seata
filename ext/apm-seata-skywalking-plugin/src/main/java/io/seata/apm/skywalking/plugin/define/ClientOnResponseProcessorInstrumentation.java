@@ -35,7 +35,7 @@ public class ClientOnResponseProcessorInstrumentation extends ClassInstanceMetho
 
     private static final String ENHANCE_CLASS = "io.seata.core.rpc.processor.client.ClientOnResponseProcessor";
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.ClientProcessorProcessInterceptor";
+    private static final String INTERCEPTOR_CLASS = "io.seata.apm.skywalking.plugin.ClientProcessorProcessInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {

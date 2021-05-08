@@ -34,7 +34,7 @@ public class AbstractNettyRemotingInstrumentation extends ClassInstanceMethodsEn
 
     private static final String ENHANCE_CLASS = "io.seata.core.rpc.netty.AbstractNettyRemoting";
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.NettyRemotingClientSendSyncInterceptor";
+    private static final String INTERCEPTOR_CLASS = "io.seata.apm.skywalking.plugin.NettyRemotingClientSendSyncInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {

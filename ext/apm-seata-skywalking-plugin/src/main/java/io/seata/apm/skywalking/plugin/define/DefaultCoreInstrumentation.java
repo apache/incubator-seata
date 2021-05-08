@@ -33,7 +33,7 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
 
     private static final String ENHANCE_CLASS_TM = "io.seata.server.coordinator.DefaultCore";
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.skywalking.apm.plugin.seata.DefaultCoreDoGlobalCommitInterceptor";
+    private static final String INTERCEPTOR_CLASS = "io.seata.apm.skywalking.plugin.DefaultCoreDoGlobalCommitInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
