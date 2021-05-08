@@ -16,22 +16,28 @@
 
 package io.seata.server.session.redis;
 
-import io.seata.server.session.SessionCondition;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -328,6 +334,33 @@ public class RedisSessionManagerTest {
 
         sessionManager.removeBranchSession(session,branchSession);
         sessionManager.removeGlobalSession(session);
+    }
+
+    @Test
+    public void testSortEfficiency() {
+        List<BranchTransactionDO> list = new ArrayList<>();
+        List<BranchTransactionDO> list2 = new ArrayList<>();
+        Date date=new Date();
+        for (int i = 0; i < 1000; i++) {
+            BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+            branchTransactionDO.setStatus(0);
+            branchTransactionDO.setGmtModified(date);
+            branchTransactionDO.setXid("192.168.158.80:8091:39372760251957248");
+            branchTransactionDO.setBranchId(39372760251957248L);
+            branchTransactionDO
+                .setGmtCreate(new Date(System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(100000)));
+            list.add(branchTransactionDO);
+        }
+        list2.addAll(list);
+        Long start = System.currentTimeMillis();
+        list = list.stream().sorted().collect(Collectors.toList());
+        Long end = System.currentTimeMillis();
+        Long sort1Time = end - start;
+        start = System.currentTimeMillis();
+        Collections.sort(list2);
+        end = System.currentTimeMillis();
+        Long sort2Time = end - start;
+        Assertions.assertTrue(sort1Time >= sort2Time);
     }
 
     @AfterAll
