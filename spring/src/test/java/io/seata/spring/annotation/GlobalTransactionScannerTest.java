@@ -119,8 +119,8 @@ public class GlobalTransactionScannerTest {
      */
     static Stream<Arguments> schemaBeanProvider() {
         Business business = new SimpleBusinessImpl();
-        String beanName = "business";
-        String cacheKey = "business-key";
+        String beanName = "schemaBean";
+        String cacheKey = "schemaBean-key";
         return Stream.of(
             Arguments.of(business, beanName, cacheKey)
         );
