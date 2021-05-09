@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class SWSeataConstants {
 
-    public static final Map<String, String> OPERATION_NAME_MAPPING = new HashMap<>(100);
+    public static final Map<String, String> OPERATION_NAME_MAPPING = new HashMap<>();
     public static final String SEATA_NAME = "SEATA";
 
     static {

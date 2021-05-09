@@ -15,7 +15,7 @@ SkyWalking is APM. Currently, by adding Seata plug-in `apm-seata-skywalking-plug
 
 ## How to use?
 
-1. In the root directory of Seata, by using the command `mvn clean package`, Seata's SkyWalking plug-in `seata/ext/apm-seata-skywalking-plugin/target/apm-seata-skywalking-plugin-*.jar` will be typed in the following location by using the command `mvn clean package` `
+1. In the root directory of Seata, by using the command `mvn clean package`, Seata's SkyWalking plug-in `seata/ext/apm-seata-skywalking-plugin/target/apm-seata-skywalking-plugin-*.jar` will be typed in the following location by using the command `mvn clean package`
 2. Put the plug-in into the SkyWalking plug-in package to complete.
 
 
