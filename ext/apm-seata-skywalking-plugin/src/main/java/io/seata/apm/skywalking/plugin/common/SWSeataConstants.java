@@ -39,5 +39,7 @@ public class SWSeataConstants {
         OPERATION_NAME_MAPPING.put("BranchRollbackResponse", SEATA_NAME + "/RM/" + "BranchRollbackResponse");
         OPERATION_NAME_MAPPING.put("BranchCommitRequest", SEATA_NAME + "/RM/" + "BranchCommitRequest");
         OPERATION_NAME_MAPPING.put("BranchCommitResponse", SEATA_NAME + "/RM/" + "BranchCommitResponse");
+        OPERATION_NAME_MAPPING.put("BranchReportRequest", SEATA_NAME + "/RM/" + "BranchReportRequest");
+        OPERATION_NAME_MAPPING.put("BranchReportResponse", SEATA_NAME + "/RM/" + "BranchReportResponse");
     }
 }
