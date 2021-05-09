@@ -187,7 +187,7 @@
       "deprecation": {
         "level": "error",
         "replacement": "seata.log.exception-rate",
-        "reason": "The location of this configuration has been changed to 'seata.log.exception-rate'."
+        "reason": "Please configure to 'seata.log.exception-rate'."
       }
     },
     {
@@ -272,12 +272,34 @@
       "name": "seata.registry.load-balance",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",
-      "defaultValue": "RandomLoadBalance"
+      "defaultValue": "RandomLoadBalance",
+      "deprecation": {
+        "level": "error",
+        "replacement": "seata.client.load-balance.type",
+        "reason": "Please configure to 'seata.client.load-balance.type'."
+      }
     },
     {
       "name": "seata.registry.load-balance-virtual-nodes",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",
+      "defaultValue": 10,
+      "deprecation": {
+        "level": "error",
+        "replacement": "seata.client.load-balance.virtual-nodes",
+        "reason": "Please configure to 'seata.client.load-balance.virtual-nodes'."
+      }
+    },
+    {
+      "name": "seata.client.load-balance.type",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties",
+      "defaultValue": "RandomLoadBalance"
+    },
+    {
+      "name": "seata.client.load-balance.virtual-nodes",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties",
       "defaultValue": 10
     }
   ],
@@ -305,7 +327,7 @@
       ]
     },
     {
-      "name": "seata.registry.load-balance",
+      "name": "seata.client.load-balance.type",
       "values": [
         {
           "value": "RandomLoadBalance",
