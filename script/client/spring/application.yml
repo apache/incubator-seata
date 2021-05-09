@@ -36,6 +36,9 @@ seata:
         enable: true
         type: zip
         threshold: 64k
+    load-balance:
+      type: RandomLoadBalance
+      virtual-nodes: 10
   service:
     vgroup-mapping:
       my_test_tx_group: default
@@ -79,18 +82,18 @@ seata:
       group: SEATA_GROUP
       username: ""
       password: ""
+      data-id: seata.properties
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
       username: ""
       password: ""
+      node-path: /seata/seata.properties
     custom:
       name: ""
   registry:
     type: file
-    load-balance: RandomLoadBalance
-    load-balance-virtual-nodes: 10
     file:
       name: file.conf
     consul:

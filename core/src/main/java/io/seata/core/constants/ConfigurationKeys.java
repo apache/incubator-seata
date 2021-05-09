@@ -38,14 +38,29 @@ public interface ConfigurationKeys {
     String STORE_PREFIX = "store.";
 
     /**
+     * The constant MODE.
+     */
+    String MODE = "mode";
+
+    /**
      * The constant STORE_MODE.
      */
-    String STORE_MODE = STORE_PREFIX + "mode";
+    String STORE_MODE = STORE_PREFIX + MODE;
+
+    /**
+     * The constant STORE_LOCK_MODE.
+     */
+    String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
+
+    /**
+     * The constant STORE_SESSION_MODE.
+     */
+    String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
      */
-    public static final String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
+    String STORE_PUBLIC_KEY = STORE_PREFIX + "publicKey";
 
     /**
      * The constant STORE_FILE_PREFIX
@@ -404,6 +419,11 @@ public interface ConfigurationKeys {
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
      */
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
+
+    /**
+     * the constant RETRY_DEAD_THRESHOLD
+     */
+    String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
 
     /**
      * The constant MIN_SERVER_POOL_SIZE.

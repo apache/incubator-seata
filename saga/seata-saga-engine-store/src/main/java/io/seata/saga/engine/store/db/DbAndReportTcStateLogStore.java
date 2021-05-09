@@ -120,7 +120,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 // clear
                 RootContext.unbind();
                 RootContext.unbindBranchType();
-                sagaTransactionalTemplate.cleanUp();
+                if (sagaTransactionalTemplate != null) {
+                    sagaTransactionalTemplate.cleanUp();
+                }
                 throw e;
             }
         }
@@ -394,7 +396,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
         if (isUpdateMode) {
             return originalCompensateStateInstId + "-" + maxIndex;
         }
-        for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
+
+        for (int i = 0; i < stateInstance.getStateMachineInstance().getStateList().size(); i++) {
+            StateInstance aStateInstance = stateInstance.getStateMachineInstance().getStateList().get(i);
             if (aStateInstance != stateInstance
                     && originalCompensateStateInstId.equals(aStateInstance.getStateIdCompensatedFor())) {
                 int idIndex = getIdIndex(aStateInstance.getId(), "-");
@@ -439,7 +443,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
         } else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
 
             // find if this compensate has been executed
-            for (StateInstance aStateInstance : stateInstance.getStateMachineInstance().getStateList()) {
+            for (int i = 0; i < stateInstance.getStateMachineInstance().getStateList().size(); i++) {
+                StateInstance aStateInstance = stateInstance.getStateMachineInstance().getStateList().get(i);
                 if (aStateInstance.isForCompensation() && aStateInstance.getName().equals(stateInstance.getName())) {
                     if (null != state.isCompensatePersistModeUpdate()) {
                         return state.isCompensatePersistModeUpdate();

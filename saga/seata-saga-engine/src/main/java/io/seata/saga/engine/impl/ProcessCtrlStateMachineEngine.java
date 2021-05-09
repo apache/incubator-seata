@@ -30,6 +30,7 @@ import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ProcessContextBuilder;
 import io.seata.saga.proctrl.ProcessContext;
@@ -40,8 +41,10 @@ import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
+import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.slf4j.Logger;
@@ -140,6 +143,12 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
         }
 
+        StateInstruction stateInstruction = processContext.getInstruction(StateInstruction.class);
+        Loop loop = LoopTaskUtils.getLoopConfig(processContext, stateInstruction.getState(processContext));
+        if (null != loop) {
+            stateInstruction.setTemporaryState(new LoopStartStateImpl());
+        }
+
         if (async) {
             stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
         } else {
@@ -165,13 +174,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         inst.setBusinessKey(businessKey);
 
         inst.setStartParams(startParams);
-        if (StringUtils.hasText(businessKey) && startParams != null) {
-            startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
-        }
+        if (startParams != null) {
+            if (StringUtils.hasText(businessKey)) {
+                startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
+            }
 
-        if (StringUtils.hasText((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
-            inst.setParentId((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID));
-            startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
+            String parentId = (String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID);
+            if (StringUtils.hasText(parentId)) {
+                inst.setParentId(parentId);
+                startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
+            }
         }
 
         inst.setStatus(ExecutionStatus.RU);
@@ -251,6 +263,13 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, concurrentContextVariables);
         stateMachineInstance.setContext(concurrentContextVariables);
 
+        String originStateName = EngineUtils.getOriginStateName(lastForwardState);
+        State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
+        Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
+        if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+            lastForwardState = LoopTaskUtils.findOutLastNeedForwardStateInstance(context);
+        }
+
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
             lastForwardState.getId());
         if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(lastForwardState.getType()) && !ExecutionStatus.SU
@@ -270,7 +289,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             if (skip || ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
 
                 String next = null;
-                State state = stateMachineInstance.getStateMachine().getState(lastForwardState.getName());
+                State state = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(lastForwardState));
                 if (state != null && state instanceof AbstractTaskState) {
                     next = ((AbstractTaskState)state).getNext();
                 }
@@ -289,7 +308,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                             "State [" + lastForwardState.getName() + "] is running, operation[forward] denied", FrameworkErrorCode.OperationDenied);
                 }
 
-                inst.setStateName(lastForwardState.getName());
+                inst.setStateName(EngineUtils.getOriginStateName(lastForwardState));
             }
             context.setInstruction(inst);
 
@@ -302,6 +321,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
             if (stateMachineInstance.getStateMachine().isPersist()) {
                 stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
+            }
+
+            loop = LoopTaskUtils.getLoopConfig(context, inst.getState(context));
+            if (null != loop) {
+                inst.setTemporaryState(new LoopStartStateImpl());
             }
 
             if (async) {
@@ -339,7 +363,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             Object serviceOutputParams = stateInstance.getOutputParams();
             if (serviceOutputParams != null) {
                 ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
-                        stateInstance.getName());
+                        EngineUtils.getOriginStateName(stateInstance));
                 if (state == null) {
                     throw new EngineExecutionException(
                             "Cannot find State by state name [" + stateInstance.getName() + "], may be this is a bug",
