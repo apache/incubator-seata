@@ -25,6 +25,8 @@ import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -47,11 +49,25 @@ public class BusinessActionContextUtil {
      * @param value new context
      */
     public static void addContext(String key, Object value) {
-        if (!Objects.isNull(value)) {
+        Map<String, Object> newContext = new HashMap<>(1, 1);
+        newContext.put(key, value);
+        addContext(newContext);
+    }
+
+    /**
+     * batch share new context to tcc phase 2
+     *
+     * @param context the new context
+     */
+    public static void addContext(Map<String, Object> context) {
+        if (context != null) {
             BusinessActionContext actionContext = ActionInterceptorHandler.getContext();
-            //once add context, action context will be marked as 'updated' .
-            actionContext.setUpdated(true);
-            actionContext.addActionContext(key, value);
+            context.forEach((key, value) -> {
+                if (!Objects.isNull(value)) {
+                    actionContext.setUpdated(true);
+                    actionContext.addActionContext(key, value);
+                }
+            });
             //if delay report, params will be finally reported after phase 1 execution
             if (actionContext.getDelayReport()) {
                 return;
@@ -59,6 +75,7 @@ public class BusinessActionContextUtil {
             reportContext(actionContext);
         }
     }
+
 
     /**
      * to do branch report sharing actionContext
