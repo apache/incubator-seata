@@ -91,6 +91,7 @@ server {
   maxCommitRetryTimeout = "-1"
   maxRollbackRetryTimeout = "-1"
   rollbackRetryTimeoutUnlockEnable = false
+  retryDeadThreshold = 130000
 }
 
 ## metrics configuration, only used in server side
