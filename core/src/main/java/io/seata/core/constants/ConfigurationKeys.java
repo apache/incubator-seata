@@ -38,9 +38,24 @@ public interface ConfigurationKeys {
     String STORE_PREFIX = "store.";
 
     /**
+     * The constant MODE.
+     */
+    String MODE = "mode";
+
+    /**
      * The constant STORE_MODE.
      */
-    String STORE_MODE = STORE_PREFIX + "mode";
+    String STORE_MODE = STORE_PREFIX + MODE;
+
+    /**
+     * The constant STORE_LOCK_MODE.
+     */
+    String STORE_LOCK_MODE = STORE_PREFIX + "lock." + MODE;
+
+    /**
+     * The constant STORE_SESSION_MODE.
+     */
+    String STORE_SESSION_MODE = STORE_PREFIX + "session." + MODE;
 
     /**
      * The constant STORE_PUBLIC_KEY.
