@@ -99,13 +99,13 @@ public @interface GlobalTransactional {
     Propagation propagation() default Propagation.REQUIRED;
 
     /**
-     * customized global lock retry internal(unit: ms)
+     * customized global lock retry interval(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
      *
      * @return int
      */
-    int lockRetryInternal() default 0;
+    int lockRetryInterval() default 0;
 
     /**
      * customized global lock retry times
