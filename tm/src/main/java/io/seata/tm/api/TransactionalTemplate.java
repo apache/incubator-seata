@@ -19,6 +19,7 @@ import java.util.List;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
@@ -131,6 +132,12 @@ public class TransactionalTemplate {
                     throw ex;
                 }
 
+                // 3.1 the manual way to rollback.
+                if(RootContext.isBranchRollbackManual()){
+                    completeTransactionAfterManual(txInfo, tx);
+                    return rs;
+                }
+
                 // 4. everything is fine, commit.
                 commitTransaction(tx);
 
@@ -188,6 +195,17 @@ public class TransactionalTemplate {
         }
     }
 
+    private void completeTransactionAfterManual(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+        try {
+            rollbackTransaction(tx, null);
+        } catch (TransactionException txe) {
+            // Failed to rollback
+            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.RollbackFailure);
+        }
+    }
+
+
+
     private void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
             triggerBeforeCommit();
@@ -204,9 +222,12 @@ public class TransactionalTemplate {
         triggerBeforeRollback();
         tx.rollback();
         triggerAfterRollback();
-        // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-            ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+        // manual or exception trigger callback
+        if(originalException != null){
+            // 3.1 Successfully rolled back
+            throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
+                ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+        }
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {

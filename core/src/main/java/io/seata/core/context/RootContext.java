@@ -73,6 +73,11 @@ public class RootContext {
 
     private static BranchType DEFAULT_BRANCH_TYPE;
 
+    /**
+     * the flag to support manual way to rollback without exception
+     */
+    private static boolean BRANCH_ROLLBACK_MANUAL = false;
+
     public static void setDefaultBranchType(BranchType defaultBranchType) {
         if (defaultBranchType != AT && defaultBranchType != XA) {
             throw new IllegalArgumentException("The default branch type must be " + AT + " or " + XA + "." +
@@ -83,6 +88,14 @@ public class RootContext {
                 RootContext.class.getSimpleName(), DEFAULT_BRANCH_TYPE, defaultBranchType);
         }
         DEFAULT_BRANCH_TYPE = defaultBranchType;
+    }
+
+    public static void setBranchRollbackManual(boolean branchRollbackManual) {
+        BRANCH_ROLLBACK_MANUAL = branchRollbackManual;
+    }
+
+    public static boolean isBranchRollbackManual() {
+        return BRANCH_ROLLBACK_MANUAL;
     }
 
     /**
