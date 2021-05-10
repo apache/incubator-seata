@@ -304,9 +304,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private int findAddAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
         // Get mustBeLowerThanTransactional, mustBeHigherThanTransactional
         Advice seataAdvice = seataAdvisor.getAdvice();
-        SeataInterceptorPosition position = SeataInterceptorPosition.Any;
+        SeataInterceptorPosition position;
         if (seataAdvice instanceof SeataInterceptor) {
             position = ((SeataInterceptor) seataAdvice).getPosition();
+        } else {
+            position = SeataInterceptorPosition.Any;
         }
 
         // Get order
