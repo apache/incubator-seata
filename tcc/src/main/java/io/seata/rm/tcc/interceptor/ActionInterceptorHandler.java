@@ -36,7 +36,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -96,7 +95,7 @@ public class ActionInterceptorHandler {
         } finally {
             ActionInterceptorHandler.cleanUp();
             //to report business action context finally.
-            if (businessAction.isDelayReport() && Optional.ofNullable(actionContext.getUpdated()).orElse(false)) {
+            if (businessAction.isDelayReport() && Boolean.FALSE.equals(actionContext.getUpdated())) {
                 BusinessActionContextUtil.reportContext(actionContext);
             }
         }

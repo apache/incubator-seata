@@ -69,7 +69,7 @@ public class BusinessActionContextUtil {
                 }
             });
             //if delay report, params will be finally reported after phase 1 execution
-            if (actionContext.getDelayReport()) {
+            if (Boolean.FALSE.equals(actionContext.getDelayReport())) {
                 return;
             }
             reportContext(actionContext);
