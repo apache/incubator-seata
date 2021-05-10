@@ -77,6 +77,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
+    private static final String SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME = "org.springframework.transaction.interceptor.TransactionInterceptor";
+
     private static final Set<String> PROXYED_SET = new HashSet<>();
 
     private MethodInterceptor interceptor;
@@ -329,18 +331,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         boolean isTransactionInterceptor;
         for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
             otherAdvisor = advised.getAdvisors()[i];
-            isTransactionInterceptor = "TransactionInterceptor".equals(otherAdvisor.getAdvice().getClass().getSimpleName());
+            isTransactionInterceptor = SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(otherAdvisor.getAdvice().getClass().getName());
 
-            // If current otherAdvisor is lower or equals than seataAdvisor
-            if (OrderUtil.lowerOrEquals(otherAdvisor, seataAdvisor)) {
+            // If current seataAdvisor is higher or equals than otherAdvisor
+            if (OrderUtil.higherOrEquals(seataAdvisor, otherAdvisor)) {
                 // If isTransactionInterceptor && must be lower than transactional, reset seataOrder to lower order, and returns i+1
                 if (isTransactionInterceptor && position == SeataInterceptorPosition.AfterTransaction) {
+                    // Reset seataAdvisor's order
                     int transactionOrder = OrderUtil.getOrder(otherAdvisor);
                     int newSeataOrder = OrderUtil.lower(transactionOrder, 1);
-                    LOGGER.warn("The {}'s order '{}' is higher than {}'s order '{}' , reset {}'s order to higher order '{}'.",
-                            seataAdvice.getClass().getSimpleName(), seataOrder, otherAdvisor.getAdvice().getClass().getSimpleName(), transactionOrder,
-                            seataAdvice.getClass().getSimpleName(), newSeataOrder);
-                    ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
+                    ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
+                                seataAdvice.getClass().getSimpleName(), seataOrder,
+                                otherAdvisor.getAdvice().getClass().getSimpleName(), transactionOrder,
+                                seataAdvice.getClass().getSimpleName(), newSeataOrder);
+                    }
                     // the position after TransactionInterceptor
                     return i + 1;
                 } else {
@@ -350,12 +356,16 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             } else {
                 // If isTransactionInterceptor && must be higher than transactional, reset seataOrder to higher order, and returns current i.
                 if (isTransactionInterceptor && position == SeataInterceptorPosition.BeforeTransaction) {
+                    // Reset seataAdvisor's order
                     int otherOrder = OrderUtil.getOrder(otherAdvisor);
                     int newSeataOrder = OrderUtil.higher(otherOrder, 1);
-                    LOGGER.warn("The {}'s order '{}' is lower than {}'s order '{}' , reset {}'s order to lower order '{}'.",
-                            seataAdvice.getClass().getSimpleName(), seataOrder, otherAdvisor.getAdvice().getClass().getSimpleName(), otherOrder,
-                            seataAdvice.getClass().getSimpleName(), newSeataOrder);
                     ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("The {}'s order '{}' is lower than {}'s order '{}' , reset {}'s order to higher order '{}'.",
+                                seataAdvice.getClass().getSimpleName(), seataOrder,
+                                otherAdvisor.getAdvice().getClass().getSimpleName(), otherOrder,
+                                seataAdvice.getClass().getSimpleName(), newSeataOrder);
+                    }
                     // the position before TransactionInterceptor
                     return i;
                 }
