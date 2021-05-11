@@ -25,7 +25,7 @@ import io.seata.core.model.BranchStatus;
  *
  * @author zhangsen
  */
-public class BranchTransactionDO implements java.io.Serializable {
+public class BranchTransactionDO implements Comparable<BranchTransactionDO>, java.io.Serializable {
 
     private static final long serialVersionUID = -2108665795230590896L;
 
@@ -269,6 +269,11 @@ public class BranchTransactionDO implements java.io.Serializable {
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override
+    public int compareTo(BranchTransactionDO branchTransactionDO) {
+        return this.getGmtCreate().compareTo(branchTransactionDO.getGmtCreate());
     }
 
 }
