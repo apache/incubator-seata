@@ -6,7 +6,7 @@ transport {
   #enable heartbeat
   heartbeat = true
   # the client batch send request enable
-  enableClientBatchSendRequest = false
+  enableClientBatchSendRequest = true
   #thread factory for netty
   threadFactory {
     bossThreadPrefix = "NettyBoss"
