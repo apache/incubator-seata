@@ -28,15 +28,15 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
 
     private static final long serialVersionUID = -6737504033652157760L;
 
-    GlobalTransactionDO globalSession;
+    private GlobalTransactionDO globalSession;
 
-    BranchTransactionDO branchSession;
+    private BranchTransactionDO branchSession;
 
-    GlobalStatus globalStatus;
+    private GlobalStatus globalStatus;
 
-    BranchStatus branchStatus;
+    private BranchStatus branchStatus;
 
-    String sessionName;
+    private String sessionName;
 
     public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
