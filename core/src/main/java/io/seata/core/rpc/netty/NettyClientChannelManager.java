@@ -246,7 +246,7 @@ class NettyClientChannelManager {
             int i = 0;
             for (; i < NettyClientConfig.getMaxCheckAliveRetry(); i++) {
                 try {
-                    Thread.sleep(NettyClientConfig.getCheckAliveInternal());
+                    Thread.sleep(NettyClientConfig.getCheckAliveInterval());
                 } catch (InterruptedException exx) {
                     LOGGER.error(exx.getMessage());
                 }
