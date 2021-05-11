@@ -21,11 +21,7 @@ import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
+import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
@@ -37,13 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oracle update recognizer.
+ * The type dm update recognizer.
  *
- * @author ccg
+ * @author chengxiaoxiao
  */
 public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRecognizer {
 
-    private OracleUpdateStatement ast;
+    private SQLUpdateStatement ast;
 
     /**
      * Instantiates a new My sql update recognizer.
@@ -53,7 +49,7 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
      */
     public DmUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (OracleUpdateStatement)ast;
+        this.ast = (SQLUpdateStatement)ast;
     }
 
     @Override

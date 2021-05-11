@@ -22,9 +22,9 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
-/** * The Type OracleOperateRecognizerHolder
+/** * The Type DmOperateRecognizerHolder
  *
- * @author: Zhibei Hao
+ * @author: chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM)
 public class DmOperateRecognizerHolder implements SQLOperateRecognizerHolder {
@@ -36,12 +36,12 @@ public class DmOperateRecognizerHolder implements SQLOperateRecognizerHolder {
 
     @Override
     public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
-        return new DmDeleteRecognizer(sql, ast);
+        return new DmInsertRecognizer(sql, ast);
     }
 
     @Override
     public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
-        return new DmDeleteRecognizer(sql, ast);
+        return new DmUpdateRecognizer(sql, ast);
     }
 
     @Override

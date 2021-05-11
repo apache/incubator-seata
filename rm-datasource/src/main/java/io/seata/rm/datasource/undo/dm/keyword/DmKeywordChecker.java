@@ -38,6 +38,9 @@ public class DmKeywordChecker implements KeywordChecker {
      */
     private enum DmKeyword {
 
+        /**
+         * ABORT
+         */
         ABORT("ABORT"),
         ABSOLUTE("ABSOLUTE"),
         ABSTRACT("ABSTRACT"),

@@ -20,7 +20,6 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.*;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
@@ -36,13 +35,13 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * The type racle insert recognizer.
+ * The type dm insert recognizer.
  *
- * @author ccg
+ * @author chengxiaoxiao
  */
 public class DmInsertRecognizer extends BaseDmRecognizer implements SQLInsertRecognizer {
 
-    private final OracleInsertStatement ast;
+    private final SQLInsertStatement ast;
 
     /**
      * Instantiates a new My sql insert recognizer.
@@ -52,7 +51,7 @@ public class DmInsertRecognizer extends BaseDmRecognizer implements SQLInsertRec
      */
     public DmInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (OracleInsertStatement)ast;
+        this.ast = (SQLInsertStatement)ast;
     }
 
     @Override
@@ -135,5 +134,15 @@ public class DmInsertRecognizer extends BaseDmRecognizer implements SQLInsertRec
             }
         }
         return rows;
+    }
+
+    @Override
+    public List<String> getInsertParamsValue() {
+        return null;
+    }
+
+    @Override
+    public List<String> getDuplicateKeyUpdate() {
+        return null;
     }
 }

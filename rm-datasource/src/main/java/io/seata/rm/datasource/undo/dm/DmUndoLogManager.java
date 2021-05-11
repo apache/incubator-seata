@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo.dm;
 
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.BlobUtils;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -25,9 +26,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Date;
 
 /**
@@ -41,7 +40,7 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
 
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
             " (" + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
-            + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
+            + ClientTableColumnsName.UNDO_LOG_XID + ", \"" + ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase() + "\", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
             + "VALUES (?, ?, ?, ?, ?, sysdate, sysdate)";
@@ -79,6 +78,12 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
                 State.GlobalFinished, conn);
     }
 
+    @Override
+    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
+        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+        return rollbackInfo;
+    }
 
     private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
                                State state, Connection conn) throws SQLException {

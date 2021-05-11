@@ -17,10 +17,10 @@ package io.seata.sqlparser.druid.dm;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
@@ -31,13 +31,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oracle delete recognizer.
+ * The type dm delete recognizer.
  *
- * @author ccg
+ * @author chengxiaoxiao
  */
 public class DmDeleteRecognizer extends BaseDmRecognizer implements SQLDeleteRecognizer {
 
-    private final OracleDeleteStatement ast;
+    private final SQLDeleteStatement ast;
 
     /**
      * Instantiates a new My sql delete recognizer.
@@ -47,7 +47,7 @@ public class DmDeleteRecognizer extends BaseDmRecognizer implements SQLDeleteRec
      */
     public DmDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (OracleDeleteStatement)ast;
+        this.ast = (SQLDeleteStatement)ast;
     }
 
     @Override
