@@ -23,6 +23,7 @@ import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
@@ -48,8 +49,12 @@ public class SpringProxyUtils {
             return null;
         }
         if (AopUtils.isAopProxy(proxy) && proxy instanceof Advised) {
-            Object targetObject = ((Advised) proxy).getTargetSource().getTarget();
-            return findTargetClass(targetObject);
+            // #issue 3709
+            final TargetSource targetSource = ((Advised) proxy).getTargetSource();
+            if (!targetSource.isStatic()) {
+                return targetSource.getTargetClass();
+            }
+            return findTargetClass(targetSource.getTarget());
         }
         return proxy.getClass();
     }
