@@ -84,7 +84,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         Boolean isContainsPk = containsPK();
         //when there is only one pk in the table
-        if (getTableMeta().getPrimaryKeyOnlyName().size() == 1) {
+        if (pkColumnNameList.size() == 1) {
             if (isContainsPk) {
                 pkValuesMap = getPkValuesByColumn();
             }

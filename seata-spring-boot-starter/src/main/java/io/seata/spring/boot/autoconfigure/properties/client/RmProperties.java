@@ -27,6 +27,7 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MO
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
+import static io.seata.common.DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
@@ -44,6 +45,7 @@ public class RmProperties {
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
     private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
     private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+    private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -120,5 +122,14 @@ public class RmProperties {
 
     public void setSagaCompensatePersistModeUpdate(boolean sagaCompensatePersistModeUpdate) {
         this.sagaCompensatePersistModeUpdate = sagaCompensatePersistModeUpdate;
+    }
+
+    public int getTccActionInterceptorOrder() {
+        return tccActionInterceptorOrder;
+    }
+
+    public RmProperties setTccActionInterceptorOrder(int tccActionInterceptorOrder) {
+        this.tccActionInterceptorOrder = tccActionInterceptorOrder;
+        return this;
     }
 }
