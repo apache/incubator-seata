@@ -69,7 +69,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private static final int MAX_SHUTDOWN_RETRY = 3;
 
-    private static final int SHUTDOWN_CHECK_INTERNAL = 1 * 1000;
+    private static final int SHUTDOWN_CHECK_INTERVAL = 1 * 1000;
 
     private static final int MAX_WRITE_RETRY = 5;
 
@@ -326,7 +326,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             while (!fileWriteExecutor.isTerminated() && retry < MAX_SHUTDOWN_RETRY) {
                 ++retry;
                 try {
-                    Thread.sleep(SHUTDOWN_CHECK_INTERNAL);
+                    Thread.sleep(SHUTDOWN_CHECK_INTERVAL);
                 } catch (InterruptedException ignore) {
                 }
             }
