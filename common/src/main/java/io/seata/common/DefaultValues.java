@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -91,7 +89,6 @@ public interface DefaultValues {
 
     int SERVER_DEFAULT_PORT = 8091;
     String SERVER_DEFAULT_STORE_MODE = "file";
-    long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
@@ -119,4 +116,14 @@ public interface DefaultValues {
      * the constant DEFAULT_RETRY_DEAD_THRESHOLD
      */
     int DEFAULT_RETRY_DEAD_THRESHOLD = 2 * 60 * 1000 + 10 * 1000;
+
+    /**
+     * the constant TM_INTERCEPTOR_ORDER
+     */
+    int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+  
+    /**
+     * the constant TCC_ACTION_INTERCEPTOR_ORDER
+     */
+    int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
 }

@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -33,10 +33,12 @@ import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.tcc.TccActionInterceptor;
+import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -52,6 +54,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
 
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
@@ -73,6 +76,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
+
+    private static final String SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME = "org.springframework.transaction.interceptor.TransactionInterceptor";
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
 
@@ -276,8 +281,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 } else {
                     AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
                     Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
+                    int pos;
                     for (Advisor avr : advisor) {
-                        advised.addAdvisor(0, avr);
+                        // Find the position based on the advisor's order, and add to advisors by pos
+                        pos = findAddSeataAdvisorPosition(advised, avr);
+                        advised.addAdvisor(pos, avr);
                     }
                 }
                 PROXYED_SET.add(beanName);
@@ -287,6 +295,121 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             throw new RuntimeException(exx);
         }
     }
+
+
+    //region the methods about findAddSeataAdvisorPosition  START
+
+    /**
+     * Find pos for `advised.addAdvisor(pos, avr);`
+     *
+     * @param advised      the advised
+     * @param seataAdvisor the seata advisor
+     * @return the pos
+     */
+    private int findAddSeataAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
+        // Get seataAdvisor's order and interceptorPosition
+        int seataOrder = OrderUtil.getOrder(seataAdvisor);
+        SeataInterceptorPosition seataInterceptorPosition = getSeataInterceptorPosition(seataAdvisor);
+
+        // If the interceptorPosition is any, check lowest or highest.
+        if (SeataInterceptorPosition.Any == seataInterceptorPosition) {
+            if (seataOrder == Ordered.LOWEST_PRECEDENCE) {
+                // the last position
+                return advised.getAdvisors().length;
+            } else if (seataOrder == Ordered.HIGHEST_PRECEDENCE) {
+                // the first position
+                return 0;
+            }
+        } else {
+            // If the interceptorPosition is not any, compute position if has TransactionInterceptor.
+            Integer position = computePositionIfHasTransactionInterceptor(advised, seataAdvisor, seataInterceptorPosition, seataOrder);
+            if (position != null) {
+                // the position before or after TransactionInterceptor
+                return position;
+            }
+        }
+
+        // Find position
+        return this.findPositionInAdvisors(advised.getAdvisors(), seataAdvisor);
+    }
+
+    @Nullable
+    private Integer computePositionIfHasTransactionInterceptor(AdvisedSupport advised, Advisor seataAdvisor, SeataInterceptorPosition seataInterceptorPosition, int seataOrder) {
+        // Find the TransactionInterceptor's advisor, order and position
+        Advisor otherAdvisor = null;
+        Integer transactionInterceptorPosition = null;
+        Integer transactionInterceptorOrder = null;
+        for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
+            otherAdvisor = advised.getAdvisors()[i];
+            if (isTransactionInterceptor(otherAdvisor)) {
+                transactionInterceptorPosition = i;
+                transactionInterceptorOrder = OrderUtil.getOrder(otherAdvisor);
+                break;
+            }
+        }
+        // If the TransactionInterceptor does not exist, return null
+        if (transactionInterceptorPosition == null) {
+            return null;
+        }
+
+        // Reset seataOrder if the seataOrder is not match the position
+        Advice seataAdvice = seataAdvisor.getAdvice();
+        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherThan(seataOrder, transactionInterceptorOrder)) {
+            int newSeataOrder = OrderUtil.lower(transactionInterceptorOrder, 1);
+            ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
+                        seataAdvice.getClass().getSimpleName(), seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+            }
+            // the position after the TransactionInterceptor's advisor
+            return transactionInterceptorPosition + 1;
+        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerThan(seataOrder, transactionInterceptorOrder)) {
+            int newSeataOrder = OrderUtil.higher(transactionInterceptorOrder, 1);
+            ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("The {}'s order '{}' is lower or equals than {}'s order '{}' , reset {}'s order to higher order '{}'.",
+                        seataAdvice.getClass().getSimpleName(), seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+            }
+            // the position before the TransactionInterceptor's advisor
+            return transactionInterceptorPosition;
+        }
+
+        return null;
+    }
+
+    private int findPositionInAdvisors(Advisor[] advisors, Advisor seataAdvisor) {
+        Advisor advisor;
+        for (int i = 0, l = advisors.length; i < l; ++i) {
+            advisor = advisors[i];
+            if (OrderUtil.higherOrEquals(seataAdvisor, advisor)) {
+                // the position before the current advisor
+                return i;
+            }
+        }
+
+        // the last position, after all the advisors
+        return advisors.length;
+    }
+
+    private SeataInterceptorPosition getSeataInterceptorPosition(Advisor seataAdvisor) {
+        Advice seataAdvice = seataAdvisor.getAdvice();
+        if (seataAdvice instanceof SeataInterceptor) {
+            return ((SeataInterceptor)seataAdvice).getPosition();
+        } else {
+            return SeataInterceptorPosition.Any;
+        }
+    }
+
+    private boolean isTransactionInterceptor(Advisor advisor) {
+        return SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(advisor.getAdvice().getClass().getName());
+    }
+
+    //endregion the methods about findAddSeataAdvisorPosition  END
+
 
     private boolean existsAnnotation(Class<?>[] classes) {
         if (CollectionUtils.isNotEmpty(classes)) {
