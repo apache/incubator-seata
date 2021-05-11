@@ -13,30 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.spring.annotation;
 
 /**
- * @author selfishlover
+ * The enum Seata interceptor position.
+ *
+ * @author wang.liang
  */
-public class GlobalLockConfig {
+public enum SeataInterceptorPosition {
 
-    private int lockRetryInterval;
+    /**
+     * Any position.
+     */
+    Any,
 
-    private int lockRetryTimes;
+    /**
+     * Must be before/higherThan/outsideOf TransactionInterceptor.<br/>
+     * The SeataInterceptor's order must be smaller than TransactionInterceptor's order.
+     */
+    BeforeTransaction,
 
-    public int getLockRetryInterval() {
-        return lockRetryInterval;
-    }
-
-    public void setLockRetryInterval(int lockRetryInterval) {
-        this.lockRetryInterval = lockRetryInterval;
-    }
-
-    public int getLockRetryTimes() {
-        return lockRetryTimes;
-    }
-
-    public void setLockRetryTimes(int lockRetryTimes) {
-        this.lockRetryTimes = lockRetryTimes;
-    }
+    /**
+     * Must be after/lowerThan/insideOf TransactionInterceptor.<br/>
+     * The SeataInterceptor's order must be bigger than TransactionInterceptor's order.
+     */
+    AfterTransaction
 }

@@ -13,30 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.spring.util;
+
+import org.springframework.core.annotation.Order;
 
 /**
- * @author selfishlover
+ * @author wang.liang
  */
-public class GlobalLockConfig {
-
-    private int lockRetryInterval;
-
-    private int lockRetryTimes;
-
-    public int getLockRetryInterval() {
-        return lockRetryInterval;
-    }
-
-    public void setLockRetryInterval(int lockRetryInterval) {
-        this.lockRetryInterval = lockRetryInterval;
-    }
-
-    public int getLockRetryTimes() {
-        return lockRetryTimes;
-    }
-
-    public void setLockRetryTimes(int lockRetryTimes) {
-        this.lockRetryTimes = lockRetryTimes;
-    }
+@Order(1)
+public class MockAnnotationOrdered {
 }

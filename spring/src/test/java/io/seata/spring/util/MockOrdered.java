@@ -13,30 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.spring.util;
+
+import org.springframework.core.Ordered;
 
 /**
- * @author selfishlover
+ * @author wang.liang
  */
-public class GlobalLockConfig {
+public class MockOrdered implements Ordered {
 
-    private int lockRetryInterval;
+    private Integer order;
 
-    private int lockRetryTimes;
-
-    public int getLockRetryInterval() {
-        return lockRetryInterval;
+    public MockOrdered(Integer order) {
+        this.order = order;
     }
 
-    public void setLockRetryInterval(int lockRetryInterval) {
-        this.lockRetryInterval = lockRetryInterval;
-    }
-
-    public int getLockRetryTimes() {
-        return lockRetryTimes;
-    }
-
-    public void setLockRetryTimes(int lockRetryTimes) {
-        this.lockRetryTimes = lockRetryTimes;
+    @Override
+    public int getOrder() {
+        return order;
     }
 }
