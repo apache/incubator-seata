@@ -34,7 +34,7 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
  */
 public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
 
-    private static final ThreadPoolExecutor executor =
+    private static final ThreadPoolExecutor EXECUTOR =
         new ThreadPoolExecutor(1, 1, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2048),
             new NamedThreadFactory("RaftMsgHandle", 1), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -47,38 +47,36 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
     }
 
     @Override
-    public Boolean execute(Object... args) throws Throwable {
-        executor.execute(() -> {
+    public Boolean execute(Object... args) {
+        EXECUTOR.execute(() -> {
             GlobalSession globalSession =
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
             if (globalSession != null) {
-                if (globalSession != null) {
-                    try {
-                        if (root) {
-                            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-                            GlobalStatus status = globalSession.getStatus();
-                            switch (status) {
-                                case Rollbacked:
-                                    SessionHelper.endRollbacked(globalSession);
-                                    break;
-                                case Committed:
-                                    SessionHelper.endCommitted(globalSession);
-                                    break;
-                                case CommitFailed:
-                                    SessionHelper.endCommitFailed(globalSession);
-                                    break;
-                                case RollbackFailed:
-                                    SessionHelper.endRollbackFailed(globalSession);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        } else {
-                            raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
+                try {
+                    if (root) {
+                        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+                        GlobalStatus status = globalSession.getStatus();
+                        switch (status) {
+                            case Rollbacked:
+                                SessionHelper.endRollbacked(globalSession);
+                                break;
+                            case Committed:
+                                SessionHelper.endCommitted(globalSession);
+                                break;
+                            case CommitFailed:
+                                SessionHelper.endCommitFailed(globalSession);
+                                break;
+                            case RollbackFailed:
+                                SessionHelper.endRollbackFailed(globalSession);
+                                break;
+                            default:
+                                break;
                         }
-                    } catch (TransactionException e) {
-                        LOGGER.error("remove global fail error:{}", e.getMessage());
+                    } else {
+                        raftSessionManager.getFileSessionManager().removeGlobalSession(globalSession);
                     }
+                } catch (TransactionException e) {
+                    LOGGER.error("remove global fail error:{}", e.getMessage());
                 }
             }
         });
