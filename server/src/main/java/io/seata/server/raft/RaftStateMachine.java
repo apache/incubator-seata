@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
@@ -37,15 +36,15 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
-import io.seata.server.raft.execute.branch.UpdateBranchSessionExecute;
-import io.seata.server.raft.execute.lock.AcquireLockExecute;
-import io.seata.server.raft.execute.branch.AddBranchSessionExecute;
-import io.seata.server.raft.execute.global.AddGlobalSessionExecute;
 import io.seata.server.raft.execute.RaftMsgExecute;
-import io.seata.server.raft.execute.lock.ReleaseLockExecute;
+import io.seata.server.raft.execute.branch.AddBranchSessionExecute;
 import io.seata.server.raft.execute.branch.RemoveBranchSessionExecute;
+import io.seata.server.raft.execute.branch.UpdateBranchSessionExecute;
+import io.seata.server.raft.execute.global.AddGlobalSessionExecute;
 import io.seata.server.raft.execute.global.RemoveGlobalSessionExecute;
 import io.seata.server.raft.execute.global.UpdateGlobalSessionExecute;
+import io.seata.server.raft.execute.lock.AcquireLockExecute;
+import io.seata.server.raft.execute.lock.ReleaseLockExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -253,14 +252,14 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         SessionManager sessionManager = null;
         String sessionName = msg.getSessionName();
         Boolean rootManager = false;
-        if (Objects.equals(sessionName, ROOT_SESSION_MANAGER_NAME)) {
+        if (StringUtils.equalsIgnoreCase(sessionName, ROOT_SESSION_MANAGER_NAME)) {
             sessionManager = SessionHolder.getRootSessionManager();
             rootManager = true;
-        } else if (Objects.equals(sessionName, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
+        } else if (StringUtils.equalsIgnoreCase(sessionName, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
             sessionManager = SessionHolder.getAsyncCommittingSessionManager();
-        } else if (Objects.equals(sessionName, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
+        } else if (StringUtils.equalsIgnoreCase(sessionName, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
             sessionManager = SessionHolder.getRetryCommittingSessionManager();
-        } else if (Objects.equals(sessionName, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
+        } else if (StringUtils.equalsIgnoreCase(sessionName, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
             sessionManager = SessionHolder.getRetryRollbackingSessionManager();
         }
         RaftSessionManager raftSessionManager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
