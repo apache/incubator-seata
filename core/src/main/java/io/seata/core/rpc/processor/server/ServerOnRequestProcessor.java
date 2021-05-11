@@ -15,8 +15,13 @@
  */
 package io.seata.core.rpc.processor.server;
 
+import io.seata.core.exception.TransactionExceptionCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.entity.Task;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
@@ -24,6 +29,7 @@ import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -40,8 +46,6 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * process RM/TM client request message.
@@ -122,13 +126,22 @@ public class ServerOnRequestProcessor implements RemotingProcessor {
         }
         if (message instanceof MergedWarpMessage) {
             AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
+            boolean notLeaderError = false;
             for (int i = 0; i < results.length; i++) {
-                final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
-                results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
+                final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(i);
+                AbstractResultMessage result = transactionMessageHandler.onRequest(subMessage, rpcContext);
+                results[i] = result;
+                if (result instanceof AbstractTransactionResponse) {
+                    notLeaderError = ((AbstractTransactionResponse)result).getTransactionExceptionCode()
+                        .equals(TransactionExceptionCode.NotRaftLeader) ? true : false;
+                    if (notLeaderError) {
+                        break;
+                    }
+                }
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            if (!raftMode) {
+            if (!raftMode || notLeaderError) {
                 remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
             } else {
                 RaftClosure closure = new RaftClosure() {

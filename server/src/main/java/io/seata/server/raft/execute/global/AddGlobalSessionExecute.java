@@ -15,6 +15,9 @@
  */
 package io.seata.server.raft.execute.global;
 
+import java.util.Optional;
+
+import io.seata.core.model.GlobalStatus;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -41,9 +44,12 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
         if (!root) {
             globalSession =
                 SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
+            Optional.ofNullable(globalSession).ifPresent(
+                session -> session.setStatus(GlobalStatus.get(sessionSyncMsg.getGlobalSession().getStatus())));
         } else {
             globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
         }
+        LOGGER.info("xid: {},status:{}",globalSession.getXid(),globalSession.getStatus());
         switch (globalSession.getStatus()) {
             case AsyncCommitting:
                 globalSession.asyncCommit();
@@ -51,8 +57,10 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
             case CommitRetrying:
                 globalSession.queueToRetryCommit();
                 break;
+            case TimeoutRollbacking:
             case RollbackRetrying:
             case TimeoutRollbackFailed:
+                LOGGER.info("TimeoutRollbackFailed");
                 globalSession.queueToRetryRollback();
                 break;
             default:

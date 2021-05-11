@@ -156,7 +156,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         // prevents an exception from being thrown that causes the thread to break
                         LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
                     }
-                }, DEFAULT_RAFT_PORT_INTERVAL, DEFAULT_RAFT_PORT_INTERVAL, TimeUnit.MILLISECONDS);
+                }, 50 * 100, 50 * 100, TimeUnit.MILLISECONDS);
             }
         }
         super.init();
@@ -523,9 +523,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     private void findLeader() {
-        if (LEADER_ADDRESS.isNotExpired()) {
+        if (LEADER_ADDRESS.isExpired()) {
             synchronized (LEADER_ADDRESS) {
-                if (LEADER_ADDRESS.isNotExpired()) {
+                if (LEADER_ADDRESS.isExpired()) {
                     List<InetSocketAddress> inetSocketAddressList = null;
                     try {
                         inetSocketAddressList = RegistryFactory.getInstance().lookup(getTransactionServiceGroup());

@@ -262,8 +262,8 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             sessionManager = SessionHolder.getRetryRollbackingSessionManager();
         }
         RaftSessionManager raftSessionManager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("state machine synchronization,task:{},sessionManager:{}", msgType,
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("state machine synchronization,task:{},sessionManager:{}", msgType,
                 sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
         }
         RaftMsgExecute execute = null;

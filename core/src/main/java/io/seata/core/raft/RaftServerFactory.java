@@ -67,9 +67,8 @@ public class RaftServerFactory {
         }
         String colon = ":";
         String serverIdStr = new StringBuilder(host).append(colon).append(port - DEFAULT_RAFT_PORT_INTERVAL).toString();
-        final String dataPath =
-            config.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
-                + serverIdStr.split(colon)[1];
+        final String dataPath = config.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+            + separator + serverIdStr.split(colon)[1];
         final NodeOptions nodeOptions = new NodeOptions();
         // set the election timeout to 1 second
         nodeOptions.setElectionTimeoutMs(DEFAULT_RAFT_PORT_INTERVAL);
