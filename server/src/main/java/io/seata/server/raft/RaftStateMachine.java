@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
@@ -88,9 +89,9 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     @Override
     public void onApply(Iterator iterator) {
         while (iterator.hasNext()) {
-            Closure processor = null;
+            Closure closure = null;
             if (iterator.done() != null) {
-                processor = iterator.done();
+                closure = iterator.done();
             } else {
                 try {
                     ByteBuffer byteBuffer = iterator.getData();
@@ -103,9 +104,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                     LOGGER.error("Message synchronization failure", e);
                 }
             }
-            if (processor != null) {
-                processor.run(Status.OK());
-            }
+            Optional.ofNullable(closure).ifPresent(processor -> processor.run(Status.OK()));
             iterator.next();
         }
     }
