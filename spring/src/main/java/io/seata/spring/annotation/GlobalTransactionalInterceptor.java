@@ -167,7 +167,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             @Override
             public GlobalLockConfig getGlobalLockConfig() {
                 GlobalLockConfig config = new GlobalLockConfig();
-                config.setLockRetryInternal(globalLockAnno.lockRetryInternal());
+                config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
                 config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
                 return config;
             }
@@ -204,7 +204,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setTimeOut(timeout);
                     transactionInfo.setName(name());
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
-                    transactionInfo.setLockRetryInternal(globalTrxAnno.lockRetryInternal());
+                    transactionInfo.setLockRetryInterval(globalTrxAnno.lockRetryInterval());
                     transactionInfo.setLockRetryTimes(globalTrxAnno.lockRetryTimes());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
