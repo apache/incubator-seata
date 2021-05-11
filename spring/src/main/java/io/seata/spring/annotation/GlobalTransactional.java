@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import io.seata.common.DefaultValues;
 import io.seata.tm.api.transaction.Propagation;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * The interface Global transactional.
@@ -106,6 +107,17 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryInterval() default 0;
+
+    /**
+     * customized global lock retry interval(unit: ms)
+     * you may use this to override global config of "client.rm.lock.retryInterval"
+     * note: 0 or negative number will take no effect(which mean fall back to global config)
+     *
+     * @return int
+     */
+    @Deprecated
+    @AliasFor("lockRetryInterval")
+    int lockRetryInternal() default 0;
 
     /**
      * customized global lock retry times

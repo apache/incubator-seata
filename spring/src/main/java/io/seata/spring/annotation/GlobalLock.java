@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * declare the transaction only execute in single local RM
@@ -42,9 +43,19 @@ public @interface GlobalLock {
      * customized global lock retry interval(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
-     * @return lock retry internal
+     * @return lock retry interval
      */
     int lockRetryInterval() default 0;
+
+    /**
+     * customized global lock retry interval(unit: ms)
+     * you may use this to override global config of "client.rm.lock.retryInterval"
+     * note: 0 or negative number will take no effect(which mean fall back to global config)
+     * @return lock retry interval
+     */
+    @Deprecated
+    @AliasFor("lockRetryInterval")
+    int lockRetryInternal() default 0;
 
     /**
      * customized global lock retry times
