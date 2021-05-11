@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author will
+ * @author chengxiaoxiao
  */
 public abstract class BaseDmRecognizer extends BaseRecognizer {
 

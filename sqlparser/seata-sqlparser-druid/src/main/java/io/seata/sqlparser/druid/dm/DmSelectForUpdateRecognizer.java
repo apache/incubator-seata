@@ -17,7 +17,11 @@ package io.seata.sqlparser.druid.dm;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLSelect;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
@@ -28,9 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oracle select for update recognizer.
+ * The type dm select for update recognizer.
  *
- * @author ccg
+ * @author chengxiaoxiao
  */
 public class DmSelectForUpdateRecognizer extends BaseDmRecognizer implements SQLSelectRecognizer {
 
