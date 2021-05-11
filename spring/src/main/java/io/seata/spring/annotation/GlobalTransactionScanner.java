@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -284,7 +284,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     int pos;
                     for (Advisor avr : advisor) {
                         // Find the position based on the advisor's order, and add to advisors by pos
-                        pos = findAddAdvisorPosition(advised, avr);
+                        pos = findAddSeataAdvisorPosition(advised, avr);
                         advised.addAdvisor(pos, avr);
                     }
                 }
@@ -296,27 +296,23 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
     }
 
+
+    //region the methods about findAddSeataAdvisorPosition  START
+
     /**
      * Find pos for `advised.addAdvisor(pos, avr);`
      *
      * @param advised      the advised
      * @param seataAdvisor the seata advisor
-     * @return
+     * @return the pos
      */
-    private int findAddAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
-        // Get mustBeLowerThanTransactional, mustBeHigherThanTransactional
-        Advice seataAdvice = seataAdvisor.getAdvice();
-        SeataInterceptorPosition position;
-        if (seataAdvice instanceof SeataInterceptor) {
-            position = ((SeataInterceptor) seataAdvice).getPosition();
-        } else {
-            position = SeataInterceptorPosition.Any;
-        }
-
-        // Get order
+    private int findAddSeataAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
+        // Get seataAdvisor's order and interceptorPosition
         int seataOrder = OrderUtil.getOrder(seataAdvisor);
-        // When the position is any, check lowest or highest.
-        if (SeataInterceptorPosition.Any == position) {
+        SeataInterceptorPosition seataInterceptorPosition = getSeataInterceptorPosition(seataAdvisor);
+
+        // If the interceptorPosition is any, check lowest or highest.
+        if (SeataInterceptorPosition.Any == seataInterceptorPosition) {
             if (seataOrder == Ordered.LOWEST_PRECEDENCE) {
                 // the last position
                 return advised.getAdvisors().length;
@@ -324,57 +320,96 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 // the first position
                 return 0;
             }
-        }
-
-        // Find position
-        Advisor otherAdvisor;
-        boolean isTransactionInterceptor;
-        for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
-            otherAdvisor = advised.getAdvisors()[i];
-            isTransactionInterceptor = SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(otherAdvisor.getAdvice().getClass().getName());
-
-            // If current seataAdvisor is higher or equals than otherAdvisor
-            if (OrderUtil.higherOrEquals(seataAdvisor, otherAdvisor)) {
-                // If isTransactionInterceptor && must be lower than transactional, reset seataOrder to lower order, and returns i+1
-                if (isTransactionInterceptor && position == SeataInterceptorPosition.AfterTransaction) {
-                    // Reset seataAdvisor's order
-                    int transactionOrder = OrderUtil.getOrder(otherAdvisor);
-                    int newSeataOrder = OrderUtil.lower(transactionOrder, 1);
-                    ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
-                                seataAdvice.getClass().getSimpleName(), seataOrder,
-                                otherAdvisor.getAdvice().getClass().getSimpleName(), transactionOrder,
-                                seataAdvice.getClass().getSimpleName(), newSeataOrder);
-                    }
-                    // the position after TransactionInterceptor
-                    return i + 1;
-                } else {
-                    // the position before lower or equals advisor
-                    return i;
-                }
-            } else {
-                // If isTransactionInterceptor && must be higher than transactional, reset seataOrder to higher order, and returns current i.
-                if (isTransactionInterceptor && position == SeataInterceptorPosition.BeforeTransaction) {
-                    // Reset seataAdvisor's order
-                    int otherOrder = OrderUtil.getOrder(otherAdvisor);
-                    int newSeataOrder = OrderUtil.higher(otherOrder, 1);
-                    ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("The {}'s order '{}' is lower than {}'s order '{}' , reset {}'s order to higher order '{}'.",
-                                seataAdvice.getClass().getSimpleName(), seataOrder,
-                                otherAdvisor.getAdvice().getClass().getSimpleName(), otherOrder,
-                                seataAdvice.getClass().getSimpleName(), newSeataOrder);
-                    }
-                    // the position before TransactionInterceptor
-                    return i;
-                }
+        } else {
+            // If the interceptorPosition is not any, compute position if has TransactionInterceptor.
+            Integer position = computePositionIfHasTransactionInterceptor(advised, seataAdvisor, seataInterceptorPosition, seataOrder);
+            if (position != null) {
+                // the position before or after TransactionInterceptor
+                return position;
             }
         }
 
-        // the last position
-        return advised.getAdvisors().length;
+        // Find position
+        return this.findPositionInAdvisors(advised.getAdvisors(), seataAdvisor);
     }
+
+    @Nullable
+    private Integer computePositionIfHasTransactionInterceptor(AdvisedSupport advised, Advisor seataAdvisor, SeataInterceptorPosition seataInterceptorPosition, int seataOrder) {
+        // Find the TransactionInterceptor's advisor, order and position
+        Advisor otherAdvisor = null;
+        Integer transactionInterceptorPosition = null;
+        Integer transactionInterceptorOrder = null;
+        for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
+            otherAdvisor = advised.getAdvisors()[i];
+            if (isTransactionInterceptor(otherAdvisor)) {
+                transactionInterceptorPosition = i;
+                transactionInterceptorOrder = OrderUtil.getOrder(otherAdvisor);
+                break;
+            }
+        }
+        // If the TransactionInterceptor does not exist, return null
+        if (transactionInterceptorPosition == null) {
+            return null;
+        }
+
+        // Reset seataOrder if the seataOrder is not match the position
+        Advice seataAdvice = seataAdvisor.getAdvice();
+        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherThan(seataOrder, transactionInterceptorOrder)) {
+            int newSeataOrder = OrderUtil.lower(transactionInterceptorOrder, 1);
+            ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
+                        seataAdvice.getClass().getSimpleName(), seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+            }
+            // the position after the TransactionInterceptor's advisor
+            return transactionInterceptorPosition + 1;
+        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerThan(seataOrder, transactionInterceptorOrder)) {
+            int newSeataOrder = OrderUtil.higher(transactionInterceptorOrder, 1);
+            ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("The {}'s order '{}' is lower or equals than {}'s order '{}' , reset {}'s order to higher order '{}'.",
+                        seataAdvice.getClass().getSimpleName(), seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+            }
+            // the position before the TransactionInterceptor's advisor
+            return transactionInterceptorPosition;
+        }
+
+        return null;
+    }
+
+    private int findPositionInAdvisors(Advisor[] advisors, Advisor seataAdvisor) {
+        Advisor advisor;
+        for (int i = 0, l = advisors.length; i < l; ++i) {
+            advisor = advisors[i];
+            if (OrderUtil.higherOrEquals(seataAdvisor, advisor)) {
+                // the position before the current advisor
+                return i;
+            }
+        }
+
+        // the last position, after all the advisors
+        return advisors.length;
+    }
+
+    private SeataInterceptorPosition getSeataInterceptorPosition(Advisor seataAdvisor) {
+        Advice seataAdvice = seataAdvisor.getAdvice();
+        if (seataAdvice instanceof SeataInterceptor) {
+            return ((SeataInterceptor)seataAdvice).getPosition();
+        } else {
+            return SeataInterceptorPosition.Any;
+        }
+    }
+
+    private boolean isTransactionInterceptor(Advisor advisor) {
+        return SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(advisor.getAdvice().getClass().getName());
+    }
+
+    //endregion the methods about findAddSeataAdvisorPosition  END
+
 
     private boolean existsAnnotation(Class<?>[] classes) {
         if (CollectionUtils.isNotEmpty(classes)) {
