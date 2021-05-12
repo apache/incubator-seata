@@ -91,7 +91,6 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
-        session.setStatus(status);
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
@@ -124,9 +123,6 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
-        if (!StringUtils.isEmpty(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
