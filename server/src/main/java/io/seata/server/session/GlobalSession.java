@@ -189,6 +189,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
+            return;
         }
     }
 
@@ -198,6 +199,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         branchSession.setStatus(status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
+            return;
         }
     }
 
@@ -267,6 +269,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void addBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onAddBranch(this, branchSession);
+            break;
         }
         branchSession.setStatus(BranchStatus.Registered);
         add(branchSession);
@@ -283,6 +286,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
+            break;
         }
         remove(branchSession);
     }

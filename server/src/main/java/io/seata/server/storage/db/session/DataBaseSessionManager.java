@@ -94,10 +94,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
-        session.setStatus(status);
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateGlobalSessionStatus failed.");
@@ -121,9 +117,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, session);
         if (!ret) {
             throw new StoreException("addBranchSession failed.");
@@ -132,9 +125,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
@@ -143,9 +133,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeBranchSession failed.");
