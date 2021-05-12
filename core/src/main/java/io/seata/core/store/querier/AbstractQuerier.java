@@ -54,36 +54,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     public abstract <D extends T> int compareByFieldName(D a, D b, String sortFieldName);
 
 
-    //region Override methods: doPaging, doSort
-
-    /**
-     * Do paging.
-     *
-     * @param list the list
-     * @return the list after paging
-     */
-    @Override
-    public <D extends T> List<D> doPaging(List<D> list) {
-        if (list == null) {
-            return Collections.emptyList();
-        }
-
-        if (list.isEmpty() || getPageSize() <= 0) {
-            return list;
-        }
-
-        int fromIndex = this.getFromIndex();
-        if (fromIndex >= list.size()) {
-            return Collections.emptyList();
-        }
-
-        int toIndex = this.getToIndex(fromIndex);
-        if (toIndex > list.size()) {
-            toIndex = list.size();
-        }
-
-        return list.subList(fromIndex, toIndex);
-    }
+    //region Override methods: doSort, doPaging
 
     /**
      * Do sort.
@@ -117,6 +88,35 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
             return 0;
         });
         return list;
+    }
+
+    /**
+     * Do paging.
+     *
+     * @param list the list
+     * @return the list after paging
+     */
+    @Override
+    public <D extends T> List<D> doPaging(List<D> list) {
+        if (list == null) {
+            return Collections.emptyList();
+        }
+
+        if (list.isEmpty() || getPageSize() <= 0) {
+            return list;
+        }
+
+        int fromIndex = this.getFromIndex();
+        if (fromIndex >= list.size()) {
+            return Collections.emptyList();
+        }
+
+        int toIndex = this.getToIndex(fromIndex);
+        if (toIndex > list.size()) {
+            toIndex = list.size();
+        }
+
+        return list.subList(fromIndex, toIndex);
     }
 
     //endregion
