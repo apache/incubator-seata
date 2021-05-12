@@ -224,6 +224,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onEnd(this);
+            return;
         }
     }
 
