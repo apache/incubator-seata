@@ -109,6 +109,9 @@ public class DataBaseSessionManager extends AbstractSessionManager
      */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
+        if (StringUtils.isNotBlank(taskName)) {
+            return;
+        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
