@@ -189,6 +189,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
+            return;
         }
     }
 
@@ -198,6 +199,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         branchSession.setStatus(status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
+            return;
         }
     }
 
