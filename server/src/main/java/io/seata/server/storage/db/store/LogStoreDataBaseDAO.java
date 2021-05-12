@@ -321,7 +321,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setString(4, branchTransactionDO.getResourceGroupId());
             ps.setString(5, branchTransactionDO.getResourceId());
             ps.setString(6, branchTransactionDO.getBranchType());
-            ps.setInt(7, branchTransactionDO.getStatus());
+            ps.setInt(7, branchTransactionDO.getStatusCode());
             ps.setString(8, branchTransactionDO.getClientId());
             ps.setString(9, branchTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
@@ -341,7 +341,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, branchTransactionDO.getStatus());
+            ps.setInt(1, branchTransactionDO.getStatusCode());
             ps.setString(2, branchTransactionDO.getXid());
             ps.setLong(3, branchTransactionDO.getBranchId());
             return ps.executeUpdate() > 0;
@@ -425,7 +425,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     private BranchTransactionDO convertBranchTransactionDO(ResultSet rs) throws SQLException {
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
         branchTransactionDO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
-        branchTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
+        branchTransactionDO.setStatusCode(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
         branchTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
         branchTransactionDO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
         branchTransactionDO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));

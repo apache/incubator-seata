@@ -80,7 +80,7 @@ public class SessionConverterTest {
         branchTransactionDO.setResourceGroupId("t1");
         branchTransactionDO.setResourceId("jdbc:mysql://116.62.62.62/seata-storage");
         branchTransactionDO.setBranchType(BranchType.AT.name());
-        branchTransactionDO.setStatus(1);
+        branchTransactionDO.setStatusCode(1);
         branchTransactionDO.setClientId("storage-server:192.168.158.80:11934");
         branchTransactionDO.setApplicationData("");
         branchTransactionDO.setGmtCreate(date);
@@ -93,7 +93,7 @@ public class SessionConverterTest {
         Assertions.assertEquals(branchTransactionDO.getResourceGroupId(),branchSession.getResourceGroupId());
         Assertions.assertEquals(branchTransactionDO.getResourceId(),branchSession.getResourceId());
         Assertions.assertEquals(branchTransactionDO.getBranchType(),branchSession.getBranchType().name());
-        Assertions.assertEquals(branchTransactionDO.getStatus(),branchSession.getStatus().getCode());
+        Assertions.assertEquals(branchTransactionDO.getStatusCode(),branchSession.getStatus().getCode());
         Assertions.assertEquals(branchTransactionDO.getClientId(),branchSession.getClientId());
         Assertions.assertEquals(branchTransactionDO.getApplicationData(),branchSession.getApplicationData());
     }
@@ -160,7 +160,7 @@ public class SessionConverterTest {
         Assertions.assertEquals(branchSession.getBranchType().name(),branchTransactionDO.getBranchType());
         Assertions.assertEquals(branchSession.getResourceGroupId(),branchTransactionDO.getResourceGroupId());
         Assertions.assertEquals(branchSession.getClientId(),branchTransactionDO.getClientId());
-        Assertions.assertEquals(branchSession.getStatus().getCode(),branchTransactionDO.getStatus());
+        Assertions.assertEquals(branchSession.getStatus().getCode(),branchTransactionDO.getStatusCode());
         Assertions.assertEquals(branchSession.getApplicationData(),branchTransactionDO.getApplicationData());
     }
 

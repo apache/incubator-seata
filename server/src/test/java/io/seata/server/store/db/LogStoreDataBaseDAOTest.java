@@ -17,6 +17,7 @@ package io.seata.server.store.db;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
@@ -447,7 +448,7 @@ public class LogStoreDataBaseDAOTest {
             branchTransactionDO.setResourceGroupId("abc");
             branchTransactionDO.setResourceGroupId("a");
             branchTransactionDO.setClientId("1.1.1.1");
-            branchTransactionDO.setStatus(1);
+            branchTransactionDO.setStatus(BranchStatus.Registered);
             branchTransactionDO.setApplicationData("abc=123");
             branchTransactionDO.setResourceGroupId("test");
 
@@ -465,7 +466,7 @@ public class LogStoreDataBaseDAOTest {
             branchTransactionDO.setResourceGroupId("abc");
             branchTransactionDO.setResourceGroupId("a");
             branchTransactionDO.setClientId("1.1.1.1");
-            branchTransactionDO.setStatus(1);
+            branchTransactionDO.setStatus(BranchStatus.Registered);
             branchTransactionDO.setApplicationData("abc=123");
             branchTransactionDO.setResourceGroupId("test");
 
@@ -508,7 +509,7 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setResourceGroupId("abc");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
-        branchTransactionDO.setStatus(1);
+        branchTransactionDO.setStatus(BranchStatus.Registered);
         branchTransactionDO.setApplicationData("abc=123");
         branchTransactionDO.setResourceGroupId("test");
 
@@ -547,14 +548,14 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setResourceGroupId("abc");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
-        branchTransactionDO.setStatus(1);
+        branchTransactionDO.setStatus(BranchStatus.Registered);
         branchTransactionDO.setApplicationData("abc=123");
         branchTransactionDO.setResourceGroupId("test");
 
         boolean ret = logStoreDataBaseDAO.insertBranchTransactionDO(branchTransactionDO);
         Assertions.assertTrue(ret);
 
-        branchTransactionDO.setStatus(3);
+        branchTransactionDO.setStatus(BranchStatus.PhaseOne_Failed);
         Assertions.assertTrue(logStoreDataBaseDAO.updateBranchTransactionDO(branchTransactionDO));
 
         String sql = "select * from branch_table where xid= 'abc-123:8888' and branch_id = 343434318";
@@ -588,7 +589,7 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setResourceGroupId("abc");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
-        branchTransactionDO.setStatus(1);
+        branchTransactionDO.setStatus(BranchStatus.Registered);
         branchTransactionDO.setApplicationData("abc=123");
         branchTransactionDO.setResourceGroupId("test");
 

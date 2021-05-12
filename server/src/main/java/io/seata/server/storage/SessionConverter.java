@@ -61,7 +61,7 @@ public class SessionConverter {
         branchSession.setResourceId(branchTransactionDO.getResourceId());
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
-        branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
+        branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatusCode()));
         return branchSession;
     }
 
@@ -100,7 +100,7 @@ public class SessionConverter {
         branchTransactionDO.setTransactionId(branchSession.getTransactionId());
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
         branchTransactionDO.setResourceId(branchSession.getResourceId());
-        branchTransactionDO.setStatus(branchSession.getStatus().getCode());
+        branchTransactionDO.setStatus(branchSession.getStatus());
         return branchTransactionDO;
     }
 

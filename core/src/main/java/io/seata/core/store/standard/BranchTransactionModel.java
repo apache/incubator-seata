@@ -15,6 +15,10 @@
  */
 package io.seata.core.store.standard;
 
+import javax.annotation.Nonnull;
+
+import io.seata.core.model.BranchStatus;
+
 /**
  * The type Branch transaction model.
  *
@@ -46,9 +50,13 @@ public interface BranchTransactionModel extends BaseModel {
 
     void setBranchType(String branchType);
 
-    int getStatus();
+    int getStatusCode();
 
-    void setStatus(int status);
+    void setStatusCode(int statusCode);
+
+    default void setStatus(@Nonnull BranchStatus status) {
+        setStatusCode(status.getCode());
+    }
 
     String getClientId();
 

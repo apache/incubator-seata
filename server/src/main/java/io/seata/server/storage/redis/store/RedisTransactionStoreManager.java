@@ -170,7 +170,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
             Map<String,String> map = new HashMap<>(2,1);
-            map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
+            map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatusCode()));
             map.put(REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
             jedis.hmset(branchKey, map);
             return true;

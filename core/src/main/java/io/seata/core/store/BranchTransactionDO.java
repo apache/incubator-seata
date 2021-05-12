@@ -40,7 +40,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO>, Bra
 
     private String branchType;
 
-    private Integer status = BranchStatus.Unknown.getCode();
+    private Integer statusCode = BranchStatus.Unknown.getCode();
 
     private String clientId;
 
@@ -171,23 +171,23 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO>, Bra
     }
 
     /**
-     * Gets status.
+     * Gets status code.
      *
-     * @return the status
+     * @return the status code
      */
     @Override
-    public int getStatus() {
-        return status;
+    public int getStatusCode() {
+        return statusCode;
     }
 
     /**
-     * Sets status.
+     * Sets status code.
      *
-     * @param status the status
+     * @param statusCode the status code
      */
     @Override
-    public void setStatus(int status) {
-        this.status = status;
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 
     /**
