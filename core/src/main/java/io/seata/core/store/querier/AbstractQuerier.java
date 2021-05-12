@@ -54,7 +54,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     public abstract <D extends T> int compareByFieldName(D a, D b, String sortFieldName);
 
 
-    //region Override doPaging, doSort
+    //region Override methods: doPaging, doSort
 
     /**
      * Do paging.
@@ -86,22 +86,22 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     }
 
     /**
-     * do sort
+     * Do sort.
      *
-     * @param globalTransactionDOs the global transactions
-     * @return the after sort list
+     * @param list the list
+     * @return the list after sort
      */
     @Override
-    public <D extends T> List<D> doSort(List<D> globalTransactionDOs) {
-        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+    public <D extends T> List<D> doSort(List<D> list) {
+        if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
 
-        if (!this.isNeedSort(globalTransactionDOs)) {
-            return globalTransactionDOs;
+        if (!this.isNeedSort(list)) {
+            return list;
         }
 
-        globalTransactionDOs.sort((a, b) -> {
+        list.sort((a, b) -> {
             int ret;
             for (SortParam sortParam : this.getSortParams()) {
                 ret = this.compareByFieldName(a, b, sortParam.getSortFieldName());
@@ -116,7 +116,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
             }
             return 0;
         });
-        return globalTransactionDOs;
+        return list;
     }
 
     //endregion
