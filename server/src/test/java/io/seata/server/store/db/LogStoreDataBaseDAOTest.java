@@ -15,25 +15,25 @@
  */
 package io.seata.server.store.db;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import org.apache.commons.dbcp2.BasicDataSource;
-
-import org.h2.store.fs.FileUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.h2.store.fs.FileUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 
 /**
@@ -100,7 +100,7 @@ public class LogStoreDataBaseDAOTest {
         globalTransactionDO.setTimeout(20);
         globalTransactionDO.setBeginTime(System.currentTimeMillis());
         globalTransactionDO.setApplicationId("test");
-        globalTransactionDO.setStatusCode(1);
+        globalTransactionDO.setStatus(GlobalStatus.Begin);
 
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
@@ -143,7 +143,7 @@ public class LogStoreDataBaseDAOTest {
         globalTransactionDO.setTimeout(20);
         globalTransactionDO.setBeginTime(System.currentTimeMillis());
         globalTransactionDO.setApplicationId("test");
-        globalTransactionDO.setStatusCode(1);
+        globalTransactionDO.setStatus(GlobalStatus.Begin);
 
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
@@ -186,7 +186,7 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setTimeout(20);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
             globalTransactionDO.setApplicationId("test");
-            globalTransactionDO.setStatusCode(1);
+            globalTransactionDO.setStatus(GlobalStatus.Begin);
 
             Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO));
         }
@@ -200,7 +200,7 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setTimeout(20);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
             globalTransactionDO.setApplicationId("test");
-            globalTransactionDO.setStatusCode(2);
+            globalTransactionDO.setStatus(GlobalStatus.Committing);
 
             boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
             Assertions.assertTrue(ret);
@@ -215,7 +215,7 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setTimeout(20);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
             globalTransactionDO.setApplicationId("test");
-            globalTransactionDO.setStatusCode(1);
+            globalTransactionDO.setStatus(GlobalStatus.Begin);
 
             boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
             Assertions.assertTrue(ret);
@@ -255,7 +255,7 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setTimeout(20);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
             globalTransactionDO.setApplicationId("test");
-            globalTransactionDO.setStatusCode(1);
+            globalTransactionDO.setStatus(GlobalStatus.Begin);
 
             Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO));
         }
@@ -269,7 +269,7 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setTimeout(20);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
             globalTransactionDO.setApplicationId("test");
-            globalTransactionDO.setStatusCode(2);
+            globalTransactionDO.setStatus(GlobalStatus.Committing);
 
             boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
             Assertions.assertTrue(ret);
@@ -284,7 +284,7 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setTimeout(20);
             globalTransactionDO.setBeginTime(System.currentTimeMillis());
             globalTransactionDO.setApplicationId("test");
-            globalTransactionDO.setStatusCode(1);
+            globalTransactionDO.setStatus(GlobalStatus.Begin);
 
             boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
             Assertions.assertTrue(ret);
@@ -322,7 +322,7 @@ public class LogStoreDataBaseDAOTest {
         globalTransactionDO.setTimeout(20);
         globalTransactionDO.setBeginTime(System.currentTimeMillis());
         globalTransactionDO.setApplicationId("test");
-        globalTransactionDO.setStatusCode(1);
+        globalTransactionDO.setStatus(GlobalStatus.Begin);
 
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
@@ -357,7 +357,7 @@ public class LogStoreDataBaseDAOTest {
         globalTransactionDO.setTimeout(20);
         globalTransactionDO.setBeginTime(System.currentTimeMillis());
         globalTransactionDO.setApplicationId("test");
-        globalTransactionDO.setStatusCode(1);
+        globalTransactionDO.setStatus(GlobalStatus.Begin);
 
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
@@ -377,7 +377,7 @@ public class LogStoreDataBaseDAOTest {
             rs.close();
 
             //update
-            globalTransactionDO.setStatusCode(2);
+            globalTransactionDO.setStatus(GlobalStatus.Committing);
             Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO));
 
             rs = conn.createStatement().executeQuery(sql);
@@ -409,7 +409,7 @@ public class LogStoreDataBaseDAOTest {
         globalTransactionDO.setTimeout(20);
         globalTransactionDO.setBeginTime(System.currentTimeMillis());
         globalTransactionDO.setApplicationId("test");
-        globalTransactionDO.setStatusCode(1);
+        globalTransactionDO.setStatus(GlobalStatus.Begin);
 
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);

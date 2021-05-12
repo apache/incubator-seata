@@ -41,7 +41,7 @@ public class SessionConverterTest {
         long now = date.getTime();
         globalTransactionDO.setXid("192.168.158.80:8091:39372760251957248");
         globalTransactionDO.setTransactionId(39372760251957248L);
-        globalTransactionDO.setStatusCode(1);
+        globalTransactionDO.setStatus(GlobalStatus.Begin);
         globalTransactionDO.setApplicationId("credit");
         globalTransactionDO.setTransactionServiceGroup("fsp_tx");
         globalTransactionDO.setTransactionName("createOrder");
@@ -80,7 +80,7 @@ public class SessionConverterTest {
         branchTransactionDO.setResourceGroupId("t1");
         branchTransactionDO.setResourceId("jdbc:mysql://116.62.62.62/seata-storage");
         branchTransactionDO.setBranchType(BranchType.AT.name());
-        branchTransactionDO.setStatusCode(1);
+        branchTransactionDO.setStatus(BranchStatus.Registered);
         branchTransactionDO.setClientId("storage-server:192.168.158.80:11934");
         branchTransactionDO.setApplicationData("");
         branchTransactionDO.setGmtCreate(date);

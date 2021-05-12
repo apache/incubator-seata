@@ -66,7 +66,7 @@ public class SessionConverter {
     }
 
     public static GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
-        if (session == null || !(session instanceof GlobalSession)) {
+        if (!(session instanceof GlobalSession)) {
             throw new IllegalArgumentException(
                     "The parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
         }
@@ -74,7 +74,7 @@ public class SessionConverter {
 
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(globalSession.getXid());
-        globalTransactionDO.setStatusCode(globalSession.getStatus().getCode());
+        globalTransactionDO.setStatus(globalSession.getStatus());
         globalTransactionDO.setApplicationId(globalSession.getApplicationId());
         globalTransactionDO.setBeginTime(globalSession.getBeginTime());
         globalTransactionDO.setTimeout(globalSession.getTimeout());
@@ -86,7 +86,7 @@ public class SessionConverter {
     }
 
     public static BranchTransactionDO convertBranchTransactionDO(SessionStorable session) {
-        if (session == null || !(session instanceof BranchSession)) {
+        if (!(session instanceof BranchSession)) {
             throw new IllegalArgumentException(
                     "The parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
         }
