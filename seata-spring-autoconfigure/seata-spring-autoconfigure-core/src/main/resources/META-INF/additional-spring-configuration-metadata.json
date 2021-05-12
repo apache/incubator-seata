@@ -68,25 +68,19 @@
       "defaultValue": 1
     },
     {
-      "name": "seata.registry.load-balance",
-      "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",
-      "defaultValue": "RandomLoadBalance",
-      "deprecation": {
-        "level": "error",
-        "replacement": "seata.client.load-balance.type",
-        "reason": "Please configure to 'seata.client.load-balance.type'."
-      }
+      "name": "seata.log.exception-rate",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "defaultValue": 100
     },
     {
-      "name": "seata.registry.load-balance-virtual-nodes",
+      "name": "seata.client.log.exception-rate",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties",
-      "defaultValue": 10,
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
       "deprecation": {
         "level": "error",
-        "replacement": "seata.client.load-balance.virtual-nodes",
-        "reason": "Please configure to 'seata.client.load-balance.virtual-nodes'."
+        "replacement": "seata.log.exception-rate",
+        "reason": "Please configure to 'seata.log.exception-rate'."
       }
     }
   ],
