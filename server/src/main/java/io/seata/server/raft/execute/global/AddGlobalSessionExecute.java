@@ -49,7 +49,6 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
         } else {
             globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
         }
-        LOGGER.info("xid: {},status:{}",globalSession.getXid(),globalSession.getStatus());
         switch (globalSession.getStatus()) {
             case AsyncCommitting:
                 globalSession.asyncCommit();
@@ -60,7 +59,6 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
             case TimeoutRollbacking:
             case RollbackRetrying:
             case TimeoutRollbackFailed:
-                LOGGER.info("TimeoutRollbackFailed");
                 globalSession.queueToRetryRollback();
                 break;
             default:
