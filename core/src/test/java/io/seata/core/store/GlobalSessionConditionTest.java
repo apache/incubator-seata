@@ -188,18 +188,18 @@ public class GlobalSessionConditionTest {
         list0.add(obj);
 
         GlobalSessionCondition condition = new GlobalSessionCondition();
-        condition.setPageIndex(2);
+        condition.setPageNumber(2);
         condition.setPageSize(3);
         List<GlobalTransactionDO> list1 = condition.doPaging(list0);
         Assertions.assertEquals(list1.size(), 1);
         Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.AsyncCommitting.getCode());
 
-        condition.setPageIndex(3);
+        condition.setPageNumber(3);
         condition.setPageSize(3);
         list1 = condition.doPaging(list0);
         Assertions.assertEquals(list1.size(), 0);
 
-        condition.setPageIndex(1);
+        condition.setPageNumber(1);
         condition.setPageSize(4);
         list1 = condition.doPaging(list0);
         Assertions.assertEquals(list1.size(), 4);
@@ -239,7 +239,7 @@ public class GlobalSessionConditionTest {
         // sort params
         condition.setSortFields(STATUS, TIMEOUT);
         // paging params
-        condition.setPageIndex(1);
+        condition.setPageNumber(1);
         condition.setPageSize(2);
 
         // do query
@@ -267,13 +267,19 @@ public class GlobalSessionConditionTest {
     @Test
     public void test_getFromIndex_getToIndex() {
         GlobalSessionCondition condition = new GlobalSessionCondition();
-        condition.setPageIndex(2);
-        condition.setPageSize(2);
 
+        condition.setPageNumber(2);
+        condition.setPageSize(2);
         int fromIndex = condition.getFromIndex();
         int toIndex = condition.getToIndex(fromIndex);
-
         Assertions.assertEquals(fromIndex, 2);
         Assertions.assertEquals(toIndex, 4);
+
+        condition.setPageNumber(6);
+        condition.setPageSize(7);
+        fromIndex = condition.getFromIndex();
+        toIndex = condition.getToIndex(fromIndex);
+        Assertions.assertEquals(fromIndex, 35);
+        Assertions.assertEquals(toIndex, 42);
     }
 }

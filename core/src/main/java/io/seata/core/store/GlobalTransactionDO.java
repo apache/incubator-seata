@@ -16,7 +16,6 @@
 package io.seata.core.store;
 
 import io.seata.common.util.StringUtils;
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.standard.GlobalTransactionModel;
 
 import java.util.Date;
@@ -30,9 +29,9 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
 
     private String xid;
 
-    private long transactionId;
+    private Long transactionId;
 
-    private int status = GlobalStatus.UnKnown.getCode();
+    private Integer status;
 
     private String applicationId;
 
@@ -40,9 +39,9 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
 
     private String transactionName;
 
-    private int timeout;
+    private Integer timeout;
 
-    private long beginTime;
+    private Long beginTime;
 
     private String applicationData;
 

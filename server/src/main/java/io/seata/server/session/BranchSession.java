@@ -48,9 +48,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String xid;
 
-    private Long transactionId;
+    private long transactionId;
 
-    private Long branchId;
+    private long branchId;
 
     private String resourceGroupId;
 

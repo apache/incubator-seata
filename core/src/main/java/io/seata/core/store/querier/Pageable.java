@@ -21,18 +21,18 @@ package io.seata.core.store.querier;
 public interface Pageable {
 
     /**
-     * Gets page index
+     * Gets page number
      *
-     * @return the page index
+     * @return the page number
      */
-    int getPageIndex();
+    int getPageNumber();
 
     /**
-     * Sets page index
+     * Sets page number
      *
-     * @param pageIndex the page index
+     * @param pageNumber the page number
      */
-    void setPageIndex(int pageIndex);
+    void setPageNumber(int pageNumber);
 
     /**
      * Gets page size

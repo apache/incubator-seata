@@ -15,24 +15,46 @@
  */
 package io.seata.core.store.querier;
 
-import io.seata.common.util.CollectionUtils;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static io.seata.common.DefaultValues.FIRST_PAGE_INDEX;
+import io.seata.common.util.CollectionUtils;
+
+import static io.seata.common.DefaultValues.FIRST_PAGE_NUMBER;
 
 /**
  * @author wang.liang
  */
 public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageable {
 
-    // sort params
+    /**
+     * The sort params
+     */
     protected SortParam[] sortParams;
 
-    // page params
-    protected int pageIndex = FIRST_PAGE_INDEX;
+    /**
+     * The page number
+     */
+    protected int pageNumber = FIRST_PAGE_NUMBER;
+
+    /**
+     * The page size
+     */
     protected int pageSize = 0;
+
+    /**
+     * Compare by field name.
+     *
+     * @param a             the object a
+     * @param b             the object b
+     * @param sortFieldName the sort field name
+     * @return the compare result
+     */
+    public abstract <D extends T> int compareByFieldName(D a, D b, String sortFieldName);
+
+
+    //region Override doPaging, doSort
 
     /**
      * Do paging.
@@ -43,7 +65,7 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     @Override
     public <D extends T> List<D> doPaging(List<D> list) {
         if (list == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         if (list.isEmpty() || getPageSize() <= 0) {
@@ -51,25 +73,16 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
         }
 
         int fromIndex = this.getFromIndex();
-        int toIndex = this.getToIndex(fromIndex);
-
         if (fromIndex >= list.size()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
+        int toIndex = this.getToIndex(fromIndex);
         if (toIndex > list.size()) {
             toIndex = list.size();
         }
 
         return list.subList(fromIndex, toIndex);
-    }
-
-    public int getFromIndex() {
-        return (pageIndex - FIRST_PAGE_INDEX) * pageSize;
-    }
-
-    public int getToIndex(int fromIndex) {
-        return fromIndex + pageSize;
     }
 
     /**
@@ -106,15 +119,27 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
         return globalTransactionDOs;
     }
 
+    //endregion
+
     /**
-     * Compare by field name.
+     * The starting index of the current page
      *
-     * @param a             the object a
-     * @param b             the object b
-     * @param sortFieldName the sort field name
-     * @return the compare result
+     * @return fromIndex
      */
-    public abstract <D extends T> int compareByFieldName(D a, D b, String sortFieldName);
+    public int getFromIndex() {
+        return (pageNumber - FIRST_PAGE_NUMBER) * pageSize;
+    }
+
+    /**
+     * The end index of the current page
+     *
+     * @return toIndex
+     */
+    public int getToIndex(int fromIndex) {
+        return fromIndex + pageSize;
+    }
+
+    //region Gets and Sets
 
     @Override
     public SortParam[] getSortParams() {
@@ -127,13 +152,13 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     }
 
     @Override
-    public int getPageIndex() {
-        return pageIndex;
+    public int getPageNumber() {
+        return pageNumber;
     }
 
     @Override
-    public void setPageIndex(int pageIndex) {
-        this.pageIndex = pageIndex;
+    public void setPageNumber(int pageNumber) {
+        this.pageNumber = pageNumber;
     }
 
     @Override
@@ -145,4 +170,6 @@ public abstract class AbstractQuerier<T> implements Querier<T>, Sortable, Pageab
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
     }
+
+    //endregion
 }

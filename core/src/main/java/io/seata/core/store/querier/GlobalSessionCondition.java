@@ -104,12 +104,12 @@ public class GlobalSessionCondition extends AbstractQuerier<GlobalTransactionMod
     /**
      * Instantiates a new condition.
      *
-     * @param status    the status
-     * @param pageIndex the page index
-     * @param pageSize  the page size
+     * @param status     the status
+     * @param pageNumber the page number
+     * @param pageSize   the page size
      */
-    public GlobalSessionCondition(GlobalStatus status, int pageIndex, int pageSize) {
-        this(new GlobalStatus[]{status}, pageIndex, pageSize);
+    public GlobalSessionCondition(GlobalStatus status, int pageNumber, int pageSize) {
+        this(new GlobalStatus[]{status}, pageNumber, pageSize);
     }
 
     /**
@@ -126,13 +126,13 @@ public class GlobalSessionCondition extends AbstractQuerier<GlobalTransactionMod
     /**
      * Instantiates a new condition.
      *
-     * @param statuses  the statuses
-     * @param pageIndex the page index
-     * @param pageSize  the page size
+     * @param statuses   the statuses
+     * @param pageNumber the page number
+     * @param pageSize   the page size
      */
-    public GlobalSessionCondition(GlobalStatus[] statuses, int pageIndex, int pageSize) {
+    public GlobalSessionCondition(GlobalStatus[] statuses, int pageNumber, int pageSize) {
         this.statuses = statuses;
-        this.pageIndex = pageIndex;
+        this.pageNumber = pageNumber;
         this.pageSize = pageSize;
     }
 
