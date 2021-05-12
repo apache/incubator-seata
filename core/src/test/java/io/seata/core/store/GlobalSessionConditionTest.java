@@ -31,11 +31,11 @@ import static io.seata.core.store.standard.GlobalTableField.TIMEOUT;
 /**
  * @author wang.liang
  */
-public class GlobalSessionConditionTest {
+class GlobalSessionConditionTest {
     private static final String DEFAULT_XID = "1234567890";
 
     @Test
-    public void test_isMatch() throws InterruptedException {
+    void test_isMatch() throws InterruptedException {
         GlobalSessionCondition condition = new GlobalSessionCondition();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
@@ -48,7 +48,7 @@ public class GlobalSessionConditionTest {
 
         // condition: statuses
         condition.setStatuses(GlobalStatus.Finished);
-        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setStatus(GlobalStatus.Begin);
         Assertions.assertFalse(condition.isMatch(obj));
         condition.setStatuses(GlobalStatus.Begin);
         Assertions.assertTrue(condition.isMatch(obj));
@@ -83,7 +83,7 @@ public class GlobalSessionConditionTest {
     }
 
     @Test
-    public void test_doCount_doFilter() throws InterruptedException {
+    void test_doCount_doFilter() throws InterruptedException {
         GlobalSessionCondition condition = new GlobalSessionCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
@@ -92,7 +92,7 @@ public class GlobalSessionConditionTest {
         List<GlobalTransactionDO> list = new ArrayList<>();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setStatus(GlobalStatus.Begin);
         obj.setBeginTime(System.currentTimeMillis());
         obj.setTimeout(100);
         list.add(obj);
@@ -123,29 +123,29 @@ public class GlobalSessionConditionTest {
     }
 
     @Test
-    public void test_doSort() {
+    void test_doSort() {
         List<GlobalTransactionDO> list0 = new ArrayList<>();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Finished.getCode());
+        obj.setStatus(GlobalStatus.Finished);
         obj.setTimeout(0);
         obj.setBeginTime(0);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
+        obj.setStatus(GlobalStatus.AsyncCommitting);
         obj.setTimeout(1);
         obj.setBeginTime(0);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setStatus(GlobalStatus.Begin);
         obj.setTimeout(0);
         obj.setBeginTime(0);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.UnKnown.getCode());
+        obj.setStatus(GlobalStatus.UnKnown);
         obj.setTimeout(1);
         obj.setBeginTime(1);
         list0.add(obj);
@@ -161,30 +161,30 @@ public class GlobalSessionConditionTest {
 
         // check
         Assertions.assertEquals(list1.size(), size);
-        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Begin.getCode());
-        Assertions.assertEquals(list1.get(1).getStatus(), GlobalStatus.Finished.getCode());
-        Assertions.assertEquals(list1.get(2).getStatus(), GlobalStatus.AsyncCommitting.getCode());
-        Assertions.assertEquals(list1.get(3).getStatus(), GlobalStatus.UnKnown.getCode());
+        Assertions.assertEquals(list1.get(0).getStatusCode(), GlobalStatus.Begin.getCode());
+        Assertions.assertEquals(list1.get(1).getStatusCode(), GlobalStatus.Finished.getCode());
+        Assertions.assertEquals(list1.get(2).getStatusCode(), GlobalStatus.AsyncCommitting.getCode());
+        Assertions.assertEquals(list1.get(3).getStatusCode(), GlobalStatus.UnKnown.getCode());
     }
 
     @Test
-    public void test_doPaging() {
+    void test_doPaging() {
         List<GlobalTransactionDO> list0 = new ArrayList<>();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setStatus(GlobalStatus.Begin);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.UnKnown.getCode());
+        obj.setStatus(GlobalStatus.UnKnown);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Finished.getCode());
+        obj.setStatus(GlobalStatus.Finished);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
+        obj.setStatus(GlobalStatus.AsyncCommitting);
         list0.add(obj);
 
         GlobalSessionCondition condition = new GlobalSessionCondition();
@@ -192,7 +192,7 @@ public class GlobalSessionConditionTest {
         condition.setPageSize(3);
         List<GlobalTransactionDO> list1 = condition.doPaging(list0);
         Assertions.assertEquals(list1.size(), 1);
-        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.AsyncCommitting.getCode());
+        Assertions.assertEquals(list1.get(0).getStatusCode(), GlobalStatus.AsyncCommitting.getCode());
 
         condition.setPageNumber(3);
         condition.setPageSize(3);
@@ -203,33 +203,33 @@ public class GlobalSessionConditionTest {
         condition.setPageSize(4);
         list1 = condition.doPaging(list0);
         Assertions.assertEquals(list1.size(), 4);
-        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Begin.getCode());
-        Assertions.assertEquals(list1.get(1).getStatus(), GlobalStatus.UnKnown.getCode());
-        Assertions.assertEquals(list1.get(2).getStatus(), GlobalStatus.Finished.getCode());
-        Assertions.assertEquals(list1.get(3).getStatus(), GlobalStatus.AsyncCommitting.getCode());
+        Assertions.assertEquals(list1.get(0).getStatusCode(), GlobalStatus.Begin.getCode());
+        Assertions.assertEquals(list1.get(1).getStatusCode(), GlobalStatus.UnKnown.getCode());
+        Assertions.assertEquals(list1.get(2).getStatusCode(), GlobalStatus.Finished.getCode());
+        Assertions.assertEquals(list1.get(3).getStatusCode(), GlobalStatus.AsyncCommitting.getCode());
     }
 
     @Test
-    public void test_doQuery() {
+    void test_doQuery() {
         List<GlobalTransactionDO> list0 = new ArrayList<>();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setStatus(GlobalStatus.Begin);
         obj.setTimeout(1);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Begin.getCode());
+        obj.setStatus(GlobalStatus.Begin);
         obj.setTimeout(0);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.Finished.getCode());
+        obj.setStatus(GlobalStatus.Finished);
         obj.setTimeout(0);
         list0.add(obj);
 
         obj = new GlobalTransactionDO();
-        obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
+        obj.setStatus(GlobalStatus.AsyncCommitting);
         obj.setTimeout(0);
         list0.add(obj);
 
@@ -245,7 +245,7 @@ public class GlobalSessionConditionTest {
         // do query
         List<GlobalTransactionDO> list1 = condition.doQuery(list0);
         Assertions.assertEquals(list1.size(), 2);
-        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Begin.getCode());
+        Assertions.assertEquals(list1.get(0).getStatusCode(), GlobalStatus.Begin.getCode());
         Assertions.assertEquals(list1.get(0).getTimeout(), 0);
         Assertions.assertEquals(list1.get(1).getTimeout(), 1);
 
@@ -254,7 +254,7 @@ public class GlobalSessionConditionTest {
         // do query
         list1 = condition.doQuery(list0);
         Assertions.assertEquals(list1.size(), 1);
-        Assertions.assertEquals(list1.get(0).getStatus(), GlobalStatus.Finished.getCode());
+        Assertions.assertEquals(list1.get(0).getStatusCode(), GlobalStatus.Finished.getCode());
 
         // change condition
         condition.setStatuses(GlobalStatus.Committed);
@@ -265,7 +265,7 @@ public class GlobalSessionConditionTest {
 
 
     @Test
-    public void test_getFromIndex_getToIndex() {
+    void test_getFromIndex_getToIndex() {
         GlobalSessionCondition condition = new GlobalSessionCondition();
 
         condition.setPageNumber(2);

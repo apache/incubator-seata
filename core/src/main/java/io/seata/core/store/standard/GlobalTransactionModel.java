@@ -15,6 +15,10 @@
  */
 package io.seata.core.store.standard;
 
+import javax.annotation.Nonnull;
+
+import io.seata.core.model.GlobalStatus;
+
 /**
  * The type Global transaction model.
  *
@@ -30,9 +34,13 @@ public interface GlobalTransactionModel extends BaseModel {
 
     void setTransactionId(long transactionId);
 
-    int getStatus();
+    int getStatusCode();
 
-    void setStatus(int status);
+    void setStatusCode(int statusCode);
+
+    default void setStatus(@Nonnull GlobalStatus status) {
+        setStatusCode(status.getCode());
+    }
 
     String getApplicationId();
 

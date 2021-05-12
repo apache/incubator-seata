@@ -196,7 +196,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps = conn.prepareStatement(sql);
             ps.setString(1, globalTransactionDO.getXid());
             ps.setLong(2, globalTransactionDO.getTransactionId());
-            ps.setInt(3, globalTransactionDO.getStatus());
+            ps.setInt(3, globalTransactionDO.getStatusCode());
             ps.setString(4, globalTransactionDO.getApplicationId());
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
@@ -223,7 +223,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, globalTransactionDO.getStatus());
+            ps.setInt(1, globalTransactionDO.getStatusCode());
             ps.setString(2, globalTransactionDO.getXid());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -408,7 +408,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
-        globalTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
+        globalTransactionDO.setStatusCode(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
         globalTransactionDO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
         globalTransactionDO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
         globalTransactionDO.setTimeout(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));

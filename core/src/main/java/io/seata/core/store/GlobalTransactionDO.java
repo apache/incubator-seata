@@ -31,7 +31,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
 
     private Long transactionId;
 
-    private Integer status;
+    private Integer statusCode;
 
     private String applicationId;
 
@@ -70,23 +70,23 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
     }
 
     /**
-     * Gets status.
+     * Gets status code.
      *
-     * @return the status
+     * @return the status code
      */
     @Override
-    public int getStatus() {
-        return status;
+    public int getStatusCode() {
+        return statusCode;
     }
 
     /**
      * Sets status.
      *
-     * @param status the status
+     * @param statusCode the status
      */
     @Override
-    public void setStatus(int status) {
-        this.status = status;
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
     }
 
     /**
@@ -278,11 +278,11 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
     }
 
     /**
-     * Sets status
-     * @param status the status
+     * Sets status code
+     * @param statusCode the status code
      */
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
     }
 
     /**

@@ -41,7 +41,7 @@ public class SessionConverterTest {
         long now = date.getTime();
         globalTransactionDO.setXid("192.168.158.80:8091:39372760251957248");
         globalTransactionDO.setTransactionId(39372760251957248L);
-        globalTransactionDO.setStatus(1);
+        globalTransactionDO.setStatusCode(1);
         globalTransactionDO.setApplicationId("credit");
         globalTransactionDO.setTransactionServiceGroup("fsp_tx");
         globalTransactionDO.setTransactionName("createOrder");
@@ -54,7 +54,7 @@ public class SessionConverterTest {
         GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
         Assertions.assertEquals(globalTransactionDO.getXid(),globalSession.getXid());
         Assertions.assertEquals(globalTransactionDO.getTransactionId(),globalSession.getTransactionId());
-        Assertions.assertEquals(globalTransactionDO.getStatus(),globalSession.getStatus().getCode());
+        Assertions.assertEquals(globalTransactionDO.getStatusCode(),globalSession.getStatus().getCode());
         Assertions.assertEquals(globalTransactionDO.getApplicationId(),globalSession.getApplicationId());
         Assertions.assertEquals(globalTransactionDO.getTransactionServiceGroup(),globalSession.getTransactionServiceGroup());
         Assertions.assertEquals(globalTransactionDO.getTransactionName(),globalSession.getTransactionName());
@@ -119,7 +119,7 @@ public class SessionConverterTest {
 
         Assertions.assertEquals(globalSession.getXid(),globalTransactionDO.getXid());
         Assertions.assertEquals(globalSession.getTransactionId(),globalTransactionDO.getTransactionId());
-        Assertions.assertEquals(globalSession.getStatus().getCode(),globalTransactionDO.getStatus());
+        Assertions.assertEquals(globalSession.getStatus().getCode(),globalTransactionDO.getStatusCode());
         Assertions.assertEquals(globalSession.getTransactionName(),globalTransactionDO.getTransactionName());
         Assertions.assertEquals(globalSession.getApplicationId(),globalTransactionDO.getApplicationId());
         Assertions.assertEquals(globalSession.getTransactionServiceGroup(),globalTransactionDO.getTransactionServiceGroup());
