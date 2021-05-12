@@ -25,7 +25,7 @@ import io.seata.core.model.BranchStatus;
  *
  * @author zhangsen
  */
-public class BranchTransactionDO implements BranchTransactionModel {
+public class BranchTransactionDO implements Comparable<BranchTransactionDO>, BranchTransactionModel {
 
     private String xid;
 
@@ -250,6 +250,11 @@ public class BranchTransactionDO implements BranchTransactionModel {
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override
+    public int compareTo(BranchTransactionDO branchTransactionDO) {
+        return this.getGmtCreate().compareTo(branchTransactionDO.getGmtCreate());
     }
 
 }

@@ -52,6 +52,8 @@
 		<property name="txServiceGroup" value="my_test_tx_group"></property>
 		<property name="sagaBranchRegisterEnable" value="false"></property>
 		<property name="sagaJsonParser" value="jackson"></property>
+		<property name="sagaRetryPersistModeUpdate" value="false" />
+		<property name="sagaCompensatePersistModeUpdate" value="false" />
 	</bean>
 
 	<bean id="threadExecutor"

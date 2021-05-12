@@ -18,15 +18,15 @@ package io.seata.spring.boot.autoconfigure.properties;
 import io.seata.common.DefaultValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
+@Component
 @ConfigurationProperties(prefix = SEATA_PREFIX)
-@EnableConfigurationProperties(SpringCloudAlibabaConfiguration.class)
 public class SeataProperties {
     /**
      * whether enable auto configuration
@@ -52,6 +52,14 @@ public class SeataProperties {
      * Whether use JDK proxy instead of CGLIB proxy
      */
     private boolean useJdkProxy = false;
+    /**
+     * The scan packages. If empty, will scan all beans.
+     */
+    private String[] scanPackages = {};
+    /**
+     * Specifies beans that won't be scanned in the GlobalTransactionScanner
+     */
+    private String[] excludesForScanning = {};
     /**
      * Specifies which datasource bean are not eligible for auto-proxying
      */
@@ -125,6 +133,24 @@ public class SeataProperties {
 
     public SeataProperties setExcludesForAutoProxying(String[] excludesForAutoProxying) {
         this.excludesForAutoProxying = excludesForAutoProxying;
+        return this;
+    }
+
+    public String[] getScanPackages() {
+        return scanPackages;
+    }
+
+    public SeataProperties setScanPackages(String[] scanPackages) {
+        this.scanPackages = scanPackages;
+        return this;
+    }
+
+    public String[] getExcludesForScanning() {
+        return excludesForScanning;
+    }
+
+    public SeataProperties setExcludesForScanning(String[] excludesForScanning) {
+        this.excludesForScanning = excludesForScanning;
         return this;
     }
 }

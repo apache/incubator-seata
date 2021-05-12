@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.util.concurrent.FastThreadLocalThread;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Named thread factory.
@@ -30,7 +31,8 @@ import io.netty.util.concurrent.FastThreadLocalThread;
  */
 public class NamedThreadFactory implements ThreadFactory {
     private final static Map<String, AtomicInteger> PREFIX_COUNTER = new ConcurrentHashMap<>();
-    private AtomicInteger counter = new AtomicInteger(0);
+    private final ThreadGroup group;
+    private final AtomicInteger counter = new AtomicInteger(0);
     private final String prefix;
     private final int totalSize;
     private final boolean makeDaemons;
@@ -43,8 +45,10 @@ public class NamedThreadFactory implements ThreadFactory {
      * @param makeDaemons the make daemons
      */
     public NamedThreadFactory(String prefix, int totalSize, boolean makeDaemons) {
-        PREFIX_COUNTER.putIfAbsent(prefix, new AtomicInteger(0));
-        int prefixCounter = PREFIX_COUNTER.get(prefix).incrementAndGet();
+        int prefixCounter = CollectionUtils.computeIfAbsent(PREFIX_COUNTER, prefix, key -> new AtomicInteger(0))
+                .incrementAndGet();
+        SecurityManager securityManager = System.getSecurityManager();
+        group = (securityManager != null) ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
         this.prefix = prefix + "_" + prefixCounter;
         this.makeDaemons = makeDaemons;
         this.totalSize = totalSize;
@@ -76,7 +80,7 @@ public class NamedThreadFactory implements ThreadFactory {
         if (totalSize > 1) {
             name += "_" + totalSize;
         }
-        Thread thread = new FastThreadLocalThread(r, name);
+        Thread thread = new FastThreadLocalThread(group, r, name);
 
         thread.setDaemon(makeDaemons);
         if (thread.getPriority() != Thread.NORM_PRIORITY) {

@@ -25,10 +25,13 @@ import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
@@ -72,6 +75,9 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
                 SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
+                    //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
+                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
@@ -99,7 +105,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
@@ -125,9 +131,20 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
                 printTableSourceExpr(x.getExpr());
                 return false;
             }
+
+            @Override
+            public boolean visit(SQLJoinTableSource x) {
+                throw new NotSupportYetException("not support the syntax of update with join table");
+            }
         };
-        SQLExprTableSource tableSource = (SQLExprTableSource)ast.getTableSource();
-        visitor.visit(tableSource);
+        SQLTableSource tableSource = ast.getTableSource();
+        if (tableSource instanceof SQLExprTableSource) {
+            visitor.visit((SQLExprTableSource) tableSource);
+        } else if (tableSource instanceof SQLJoinTableSource) {
+            visitor.visit((SQLJoinTableSource) tableSource);
+        } else {
+            throw new NotSupportYetException("not support the syntax of update with unknow");
+        }
         return sb.toString();
     }
 

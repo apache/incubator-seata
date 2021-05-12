@@ -17,18 +17,19 @@ package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLSelectRecognizer;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,10 +61,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         DatabaseMetaData dbmd = conn.getMetaData();
         T rs;
         Savepoint sp = null;
-        LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
                 /*
@@ -82,6 +80,9 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 throw new SQLException("not support savepoint. please check your db version");
             }
 
+            LockRetryController lockRetryController = new LockRetryController();
+            ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
+            String selectPKSQL = buildSelectSQL(paramAppenderList);
             while (true) {
                 try {
                     // #870
@@ -96,13 +97,10 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                         break;
                     }
 
-                    if (RootContext.inGlobalTransaction()) {
-                        //do as usual
+                    if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
+                        // Do the same thing under either @GlobalTransactional or @GlobalLock, 
+                        // that only check the global lock  here.
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
-                    } else if (RootContext.requireGlobalLock()) {
-                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
-                        // not reentrant)
-                        statementProxy.getConnectionProxy().appendLockKey(lockKeys);
                     } else {
                         throw new RuntimeException("Unknown situation!");
                     }
@@ -113,17 +111,18 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         conn.rollback();
                     }
+                    // trigger retry
                     lockRetryController.sleep(lce);
                 }
             }
         } finally {
             if (sp != null) {
                 try {
-                    conn.releaseSavepoint(sp);
-                } catch (SQLException e) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
+                    if (!JdbcConstants.ORACLE.equalsIgnoreCase(getDbType())) {
+                        conn.releaseSavepoint(sp);
                     }
+                } catch (SQLException e) {
+                    LOGGER.error("{} release save point error.", getDbType(), e);
                 }
             }
             if (originalAutoCommit) {

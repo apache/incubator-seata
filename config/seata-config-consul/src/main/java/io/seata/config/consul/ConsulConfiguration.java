@@ -31,7 +31,9 @@ import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
@@ -54,13 +56,14 @@ public class ConsulConfiguration extends AbstractConfiguration {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "consul";
+    private static final String ACL_TOKEN = "aclToken";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-        + FILE_CONFIG_SPLIT_CHAR;
+            + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ExecutorService consulNotifierExecutor;
     private ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
-        MAP_INITIAL_CAPACITY);
+            MAP_INITIAL_CAPACITY);
 
     /**
      * default watch timeout in second
@@ -70,8 +73,8 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     private ConsulConfiguration() {
         consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
     }
 
     /**
@@ -92,67 +95,71 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+        String value = getConfigFromSysPro(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-            timeoutMills);
-        consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId), configFuture));
-        return (String)configFuture.get();
+                timeoutMills);
+        consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId, getAclToken()), configFuture));
+        return (String) configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(dataId, content), configFuture));
-        return (Boolean)configFuture.get();
+        consulNotifierExecutor.execute(() -> complete(getConsulClient().setKVValue(dataId, content, getAclToken(), null), configFuture));
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT,
-            timeoutMills);
+                timeoutMills);
         consulNotifierExecutor.execute(() -> {
             PutParams putParams = new PutParams();
             //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
             putParams.setCas(CAS);
-            complete(getConsulClient().setKVValue(dataId, content, putParams), configFuture);
+            complete(getConsulClient().setKVValue(dataId, content, getAclToken(), putParams), configFuture);
         });
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
-        consulNotifierExecutor.execute(() -> complete(getConsulClient().deleteKVValue(dataId), configFuture));
-        return (Boolean)configFuture.get();
+        consulNotifierExecutor.execute(() -> complete(getConsulClient().deleteKVValue(dataId, getAclToken()), configFuture));
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (dataId == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         ConsulListener consulListener = new ConsulListener(dataId, listener);
-        configListenersMap.get(dataId).add(consulListener);
-        consulListener.onProcessEvent(new ConfigurationChangeEvent());
+        configListenersMap.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
+                .add(consulListener);
 
+        // Start config change listener for the dataId.
+        consulListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null || listener == null) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        for (ConfigurationChangeListener entry : configChangeListeners) {
-            ConfigurationChangeListener target = ((ConsulListener)entry).getTargetListener();
-            if (listener.equals(target)) {
-                entry.onShutDown();
-                configChangeListeners.remove(entry);
-                break;
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            ConfigurationChangeListener target;
+            for (ConfigurationChangeListener entry : configListeners) {
+                target = ((ConsulListener) entry).getTargetListener();
+                if (listener.equals(target)) {
+                    entry.onShutDown();
+                    configListeners.remove(entry);
+                    break;
+                }
             }
         }
     }
@@ -186,6 +193,17 @@ public class ConsulConfiguration extends AbstractConfiguration {
     }
 
     /**
+     * get consul acl-token
+     *
+     * @return acl-token
+     */
+    private static String getAclToken() {
+        String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
+                : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
+        return StringUtils.isNotBlank(aclToken) ? aclToken : null;
+    }
+
+    /**
      * complete the future
      *
      * @param response
@@ -195,7 +213,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         if (response != null && response.getValue() != null) {
             Object value = response.getValue();
             if (value instanceof GetValue) {
-                configFuture.setResult(((GetValue)value).getDecodedValue());
+                configFuture.setResult(((GetValue) value).getDecodedValue());
             } else {
                 configFuture.setResult(value);
             }
@@ -211,8 +229,8 @@ public class ConsulConfiguration extends AbstractConfiguration {
         private final String dataId;
         private long consulIndex;
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("consulListener", MAX_LISTENER_THREAD));
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("consulListener", MAX_LISTENER_THREAD));
 
         /**
          * Instantiates a new Consul listener.
@@ -223,7 +241,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         public ConsulListener(String dataId, ConfigurationChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
-            this.consulIndex = getConsulClient().getKVValue(dataId).getConsulIndex();
+            this.consulIndex = getConsulClient().getKVValue(dataId, getAclToken()).getConsulIndex();
         }
 
         @Override
@@ -231,7 +249,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
             if (listener != null) {
                 while (true) {
                     QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
-                    Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
+                    Response<GetValue> response = getConsulClient().getKVValue(this.dataId, getAclToken(), queryParams);
                     Long currentIndex = response.getConsulIndex();
                     if (currentIndex != null && currentIndex > consulIndex) {
                         GetValue getValue = response.getValue();

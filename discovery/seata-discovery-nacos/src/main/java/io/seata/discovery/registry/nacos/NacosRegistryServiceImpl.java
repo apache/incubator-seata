@@ -21,6 +21,7 @@ import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
+import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -81,13 +82,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        validAddress(address);
+        NetUtil.validAddress(address);
         getNamingInstance().registerInstance(getServiceName(), getServiceGroup(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
-        validAddress(address);
+        NetUtil.validAddress(address);
         getNamingInstance().deregisterInstance(getServiceName(), getServiceGroup(), address.getAddress().getHostAddress(), address.getPort(), getClusterName());
     }
 
@@ -95,8 +96,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public void subscribe(String cluster, EventListener listener) throws Exception {
         List<String> clusters = new ArrayList<>();
         clusters.add(cluster);
-        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
-        LISTENER_SERVICE_MAP.get(cluster).add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+                .add(listener);
         getNamingInstance().subscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
@@ -154,12 +155,6 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     @Override
     public void close() throws Exception {
 
-    }
-
-    private void validAddress(InetSocketAddress address) {
-        if (address.getHostName() == null || 0 == address.getPort()) {
-            throw new IllegalArgumentException("invalid address:" + address);
-        }
     }
 
     /**

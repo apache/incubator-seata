@@ -71,7 +71,7 @@
                                         </artifactItem>
                                     </artifactItems>
                                     <outputDirectory>
-                                        ${basedir}/lib/jdbc
+                                        ${basedir}/seata-server-${revision}/lib/jdbc
                                     </outputDirectory>
                                 </configuration>
                             </execution>
