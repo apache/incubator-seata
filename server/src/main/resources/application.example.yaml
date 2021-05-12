@@ -84,6 +84,8 @@ seata:
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
+    enableCheckAuth: true
+    retryDeadThreshold: 130000
     recovery:
       committing-retry-period: 1000
       asyn-committing-retry-period: 1000

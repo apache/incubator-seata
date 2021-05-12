@@ -31,6 +31,8 @@ public class ServerProperties {
     private Duration maxCommitRetryTimeout = Duration.ofMillis(-1);
     private Duration maxRollbackRetryTimeout = Duration.ofMillis(-1);
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
+    private Boolean enableCheckAuth = true;
+    private Integer retryDeadThreshold = 130000;
 
     public Duration getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
@@ -56,6 +58,24 @@ public class ServerProperties {
 
     public ServerProperties setRollbackRetryTimeoutUnlockEnable(Boolean rollbackRetryTimeoutUnlockEnable) {
         this.rollbackRetryTimeoutUnlockEnable = rollbackRetryTimeoutUnlockEnable;
+        return this;
+    }
+
+    public Boolean getEnableCheckAuth() {
+        return enableCheckAuth;
+    }
+
+    public ServerProperties setEnableCheckAuth(Boolean enableCheckAuth) {
+        this.enableCheckAuth = enableCheckAuth;
+        return this;
+    }
+
+    public Integer getRetryDeadThreshold() {
+        return retryDeadThreshold;
+    }
+
+    public ServerProperties setRetryDeadThreshold(Integer retryDeadThreshold) {
+        this.retryDeadThreshold = retryDeadThreshold;
         return this;
     }
 }

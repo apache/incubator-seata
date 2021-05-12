@@ -19,6 +19,8 @@
 
 @echo off
 
+chcp 65001
+
 set ERROR_CODE=0
 
 :init
