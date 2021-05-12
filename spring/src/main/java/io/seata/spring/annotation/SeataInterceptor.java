@@ -13,30 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.spring.annotation;
+
+import org.springframework.core.Ordered;
 
 /**
- * @author selfishlover
+ * The interface Seata interceptor.
+ *
+ * @author wang.liang
  */
-public class GlobalLockConfig {
+public interface SeataInterceptor extends Ordered {
 
-    private int lockRetryInterval;
+    /**
+     * Sets order.
+     *
+     * @param order the order
+     */
+    void setOrder(int order);
 
-    private int lockRetryTimes;
-
-    public int getLockRetryInterval() {
-        return lockRetryInterval;
-    }
-
-    public void setLockRetryInterval(int lockRetryInterval) {
-        this.lockRetryInterval = lockRetryInterval;
-    }
-
-    public int getLockRetryTimes() {
-        return lockRetryTimes;
-    }
-
-    public void setLockRetryTimes(int lockRetryTimes) {
-        this.lockRetryTimes = lockRetryTimes;
-    }
+    /**
+     * Get position.
+     *
+     * @return the position
+     */
+    SeataInterceptorPosition getPosition();
 }

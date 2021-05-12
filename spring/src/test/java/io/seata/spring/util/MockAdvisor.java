@@ -13,30 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.spring.util;
+
+import org.aopalliance.aop.Advice;
+import org.springframework.aop.Advisor;
+import org.springframework.core.Ordered;
 
 /**
- * @author selfishlover
+ * @author wang.liang
  */
-public class GlobalLockConfig {
+public class MockAdvisor implements Advisor, Ordered {
 
-    private int lockRetryInterval;
+    private Integer order;
+    private Advice advice;
 
-    private int lockRetryTimes;
-
-    public int getLockRetryInterval() {
-        return lockRetryInterval;
+    public MockAdvisor(Integer order, Advice advice) {
+        this.order = order;
+        this.advice = advice;
     }
 
-    public void setLockRetryInterval(int lockRetryInterval) {
-        this.lockRetryInterval = lockRetryInterval;
+    @Override
+    public int getOrder() {
+        return order;
     }
 
-    public int getLockRetryTimes() {
-        return lockRetryTimes;
+    @Override
+    public Advice getAdvice() {
+        return advice;
     }
 
-    public void setLockRetryTimes(int lockRetryTimes) {
-        this.lockRetryTimes = lockRetryTimes;
+    @Override
+    public boolean isPerInstance() {
+        return false;
     }
 }
