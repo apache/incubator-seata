@@ -2,6 +2,42 @@
   "groups": [],
   "properties": [
     {
+      "name": "seata.application-id",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
+      "defaultValue": "${spring.application.name:}"
+    },
+    {
+      "name": "seata.data-source-proxy-mode",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
+      "defaultValue": "AT"
+    },
+    {
+      "name": "spring.cloud.alibaba.seata.application-id",
+      "type": "java.lang.String",
+      "description": "The application id, default value if '${spring.application.name}'.",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration",
+      "defaultValue": "${spring.application.name:}",
+      "deprecation": {
+        "level": "warning",
+        "replacement": "seata.application-id",
+        "reason": "It may be removed in a future release, please configure to 'seata.application-id'."
+      }
+    },
+    {
+      "name": "spring.cloud.alibaba.seata.tx-service-group",
+      "type": "java.lang.String",
+      "description": "The tx-service-group.",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration",
+      "deprecation": {
+        "level": "warning",
+        "replacement": "seata.tx-service-group",
+        "reason": "It may be removed in a future release, please configure to 'seata.tx-service-group'."
+      }
+    },
+
+    {
       "name": "seata.client.rm.async-commit-buffer-limit",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
@@ -48,6 +84,12 @@
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
       "defaultValue": false
+    },
+    {
+      "name": "seata.client.rm.tcc-action-interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": -2147482648
     },
     {
       "name": "seata.client.rm.lock.retry-interval",
@@ -104,6 +146,12 @@
       "defaultValue": 10
     },
     {
+      "name": "seata.client.tm.interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": -2147482648
+    },
+    {
       "name": "seata.client.undo.data-validation",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.UndoProperties",
@@ -152,7 +200,7 @@
       "deprecation": {
         "level": "error",
         "replacement": "seata.log.exception-rate",
-        "reason": "The location of this configuration has been changed to 'seata.log.exception-rate'."
+        "reason": "Please configure to 'seata.log.exception-rate'."
       }
     },
     {
@@ -181,6 +229,30 @@
     }
   ],
   "hints": [
+    {
+      "name": "seata.data-source-proxy-mode",
+      "values": [
+        {
+          "value": "AT",
+          "description": "the default mode."
+        },
+        {
+          "value": "XA"
+        }
+      ]
+    },
+    {
+      "name": "seata.excludes-for-auto-proxying",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.sql.DataSource"
+          }
+        }
+      ]
+    },
+
     {
       "name": "seata.client.load-balance.type",
       "values": [

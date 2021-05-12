@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
@@ -25,7 +24,6 @@ import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFilePrope
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,6 +34,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
@@ -49,7 +49,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SE
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @Configuration
-@EnableConfigurationProperties({SeataProperties.class})
 public class SeataServerPropertiesAutoConfiguration {
     static {
 
@@ -58,6 +57,8 @@ public class SeataServerPropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(SERVER_RECOVERY_PREFIX, ServerRecoveryProperties.class);
         PROPERTY_BEAN_MAP.put(METRICS_PREFIX, MetricsProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
+        PROPERTY_BEAN_MAP.put(STORE_SESSION_PREFIX, StoreProperties.Session.class);
+        PROPERTY_BEAN_MAP.put(STORE_LOCK_PREFIX, StoreProperties.Lock.class);
         PROPERTY_BEAN_MAP.put(STORE_FILE_PREFIX, StoreFileProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_DB_PREFIX, StoreDBProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);

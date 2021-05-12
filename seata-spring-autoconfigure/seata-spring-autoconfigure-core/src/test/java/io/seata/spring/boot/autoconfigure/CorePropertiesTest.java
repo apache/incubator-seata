@@ -15,11 +15,10 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
+import io.seata.spring.boot.autoconfigure.properties.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -40,12 +39,10 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -57,8 +54,6 @@ public class CorePropertiesTest {
     @BeforeAll
     public static void initContext() {
         context = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
-        context.registerBeanDefinition("springCloudAlibabaConfiguration", BeanDefinitionBuilder.genericBeanDefinition(SpringCloudAlibabaConfiguration.class).getBeanDefinition());
-        context.registerBeanDefinition("seataProperties", BeanDefinitionBuilder.genericBeanDefinition(SeataProperties.class).getBeanDefinition());
     }
 
 
@@ -88,6 +83,11 @@ public class CorePropertiesTest {
     @Test
     public void testShutdownProperties() {
         assertEquals(3L, context.getBean(ShutdownProperties.class).getWait());
+    }
+
+    @Test
+    public void testLogProperties() {
+        assertEquals(100, context.getBean(LogProperties.class).getExceptionRate());
     }
 
     @Test
@@ -201,17 +201,6 @@ public class CorePropertiesTest {
     @Test
     public void testRegistryCustomProperties() {
         assertEquals("", context.getBean(RegistryCustomProperties.class).getName());
-    }
-
-    @Test
-    public void testSeataProperties() {
-        assertTrue(context.getBean(SeataProperties.class).isEnabled());
-        assertNull(context.getBean(SeataProperties.class).getApplicationId());
-        assertEquals("null-seata-service-group", context.getBean(SeataProperties.class).getTxServiceGroup());
-        assertTrue(context.getBean(SeataProperties.class).isEnableAutoDataSourceProxy());
-        assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
-        assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
-
     }
 
 

@@ -18,12 +18,12 @@ package io.seata.spring.boot.autoconfigure;
 import java.util.Map;
 
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
+import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,9 +34,11 @@ import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -49,16 +51,23 @@ public class ClientPropertiesTest {
         context = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
     }
 
+
+    @Test
+    public void testSeataProperties() {
+        assertTrue(context.getBean(SeataProperties.class).isEnabled());
+        assertNull(context.getBean(SeataProperties.class).getApplicationId());
+        assertEquals("null-seata-service-group", context.getBean(SeataProperties.class).getTxServiceGroup());
+        assertTrue(context.getBean(SeataProperties.class).isEnableAutoDataSourceProxy());
+        assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
+        assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
+    }
+
+
     @Test
     public void testLockProperties() {
         assertEquals(10, context.getBean(LockProperties.class).getRetryInterval());
         assertEquals(30, context.getBean(LockProperties.class).getRetryTimes());
         assertTrue(context.getBean(LockProperties.class).isRetryPolicyBranchRollbackOnConflict());
-    }
-
-    @Test
-    public void testLogProperties() {
-        assertEquals(100, context.getBean(LogProperties.class).getExceptionRate());
     }
 
     @Test

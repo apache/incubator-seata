@@ -17,7 +17,6 @@ package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
@@ -25,7 +24,6 @@ import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperti
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,7 +32,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREF
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
@@ -47,16 +44,16 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_P
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @Configuration
-@EnableConfigurationProperties({SeataProperties.class})
 public class SeataClientPropertiesAutoConfiguration {
     static {
+        PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
+
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, RmProperties.class);
         PROPERTY_BEAN_MAP.put(CLIENT_TM_PREFIX, TmProperties.class);
         PROPERTY_BEAN_MAP.put(LOCK_PREFIX, LockProperties.class);
         PROPERTY_BEAN_MAP.put(SERVICE_PREFIX, ServiceProperties.class);
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, UndoProperties.class);
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
-        PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
     }
 }

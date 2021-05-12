@@ -15,10 +15,10 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
+import io.seata.spring.boot.autoconfigure.properties.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
@@ -40,7 +40,6 @@ import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvi
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -68,6 +67,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTO
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -75,11 +75,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFI
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @Configuration
-@EnableConfigurationProperties({SeataProperties.class})
 public class SeataCorePropertiesAutoConfiguration {
     static {
-
-        PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
 
         PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
         PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
@@ -104,6 +101,7 @@ public class SeataCorePropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
         PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
         PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
+        PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
     }
 
     @Bean(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)

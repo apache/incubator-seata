@@ -95,6 +95,10 @@ seata:
   store:
     # support: file 、 db 、 redis
     mode: file
+    session:
+      mode: file
+    lock:
+      mode: file
     file:
       dir: sessionStore
       max-branch-session-size: 16384

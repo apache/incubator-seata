@@ -2,41 +2,6 @@
   "groups": [],
   "properties": [
     {
-      "name": "spring.cloud.alibaba.seata.application-id",
-      "type": "java.lang.String",
-      "description": "The application id, default value if '${spring.application.name}'.",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration",
-      "defaultValue": "${spring.application.name:}",
-      "deprecation": {
-        "level": "warning",
-        "replacement": "seata.application-id",
-        "reason": "It may be removed in a future release, please configure to 'seata.application-id'."
-      }
-    },
-    {
-      "name": "spring.cloud.alibaba.seata.tx-service-group",
-      "type": "java.lang.String",
-      "description": "The tx-service-group.",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration",
-      "deprecation": {
-        "level": "warning",
-        "replacement": "seata.tx-service-group",
-        "reason": "It may be removed in a future release, please configure to 'seata.tx-service-group'."
-      }
-    },
-    {
-      "name": "seata.application-id",
-      "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
-      "defaultValue": "${spring.application.name:}"
-    },
-    {
-      "name": "seata.data-source-proxy-mode",
-      "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.SeataProperties",
-      "defaultValue": "AT"
-    },
-    {
       "name": "seata.transport.heartbeat",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
@@ -144,29 +109,6 @@
           "name": "handle-as",
           "parameters": {
             "target": "io.seata.discovery.registry.RegistryType"
-          }
-        }
-      ]
-    },
-    {
-      "name": "seata.data-source-proxy-mode",
-      "values": [
-        {
-          "value": "AT",
-          "description": "the default mode."
-        },
-        {
-          "value": "XA"
-        }
-      ]
-    },
-    {
-      "name": "seata.excludes-for-auto-proxying",
-      "providers": [
-        {
-          "name": "class-reference",
-          "parameters": {
-            "target": "javax.sql.DataSource"
           }
         }
       ]

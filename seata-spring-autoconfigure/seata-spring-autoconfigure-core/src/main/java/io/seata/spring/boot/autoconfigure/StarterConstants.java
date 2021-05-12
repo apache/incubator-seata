@@ -65,6 +65,8 @@ public interface StarterConstants {
     String METRICS_PREFIX = SEATA_PREFIX + ".metrics";
 
     String STORE_PREFIX = SEATA_PREFIX + ".store";
+    String STORE_SESSION_PREFIX = STORE_PREFIX + ".session";
+    String STORE_LOCK_PREFIX = STORE_PREFIX + ".lock";
     String STORE_FILE_PREFIX = STORE_PREFIX + ".file";
     String STORE_DB_PREFIX = STORE_PREFIX + ".db";
     String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";

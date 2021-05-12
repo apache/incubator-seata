@@ -28,7 +28,7 @@
     <name>seata-server ${project.version}</name>
 
     <properties>
-        <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.3.10.RELEASE</spring-boot.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
     </properties>

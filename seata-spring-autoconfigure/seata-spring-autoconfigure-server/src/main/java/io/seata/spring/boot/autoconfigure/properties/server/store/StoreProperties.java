@@ -19,6 +19,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
 
 /**
  * @author spilledyear@outlook.com
@@ -49,5 +51,37 @@ public class StoreProperties {
     public StoreProperties setPublicKey(String publicKey) {
         this.publicKey = publicKey;
         return this;
+    }
+
+
+    @Component
+    @ConfigurationProperties(prefix = STORE_SESSION_PREFIX)
+    public static class Session {
+        private String mode = "file";
+
+        public String getMode() {
+            return mode;
+        }
+
+        public StoreProperties.Session setMode(String mode) {
+            this.mode = mode;
+            return this;
+        }
+    }
+
+
+    @Component
+    @ConfigurationProperties(prefix = STORE_LOCK_PREFIX)
+    public static class Lock {
+        private String mode = "file";
+
+        public String getMode() {
+            return mode;
+        }
+
+        public StoreProperties.Lock setMode(String mode) {
+            this.mode = mode;
+            return this;
+        }
     }
 }
