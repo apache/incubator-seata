@@ -170,7 +170,7 @@ public class GlobalSessionCondition extends AbstractQuerier<GlobalTransactionMod
         }
         // status in (?, ?, ..., ?)
         if (statuses != null && statuses.length > 0) {
-            if (!this.hasStatus(globalTransaction.getStatus())) {
+            if (!this.hasStatus(globalTransaction.getStatusCode())) {
                 return false; // un match
             }
         }
@@ -216,7 +216,7 @@ public class GlobalSessionCondition extends AbstractQuerier<GlobalTransactionMod
             case GLOBAL_TABLE_TRANSACTION_ID:
                 return ComparableUtils.compare(a.getTransactionId(), b.getTransactionId());
             case GLOBAL_TABLE_STATUS:
-                return ComparableUtils.compare(a.getStatus(), b.getStatus());
+                return ComparableUtils.compare(a.getStatusCode(), b.getStatusCode());
             case GLOBAL_TABLE_APPLICATION_ID:
                 return ComparableUtils.compare(a.getApplicationId(), b.getApplicationId());
             case GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP:
