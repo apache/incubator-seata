@@ -34,7 +34,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalCondition;
+import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -118,7 +118,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     }
 
     @Override
-    public List<GlobalSession> findGlobalSessions(GlobalCondition condition) {
+    public List<GlobalSession> findGlobalSessions(GlobalSessionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
         for (GlobalSession globalSession : sessionMap.values()) {
             if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {

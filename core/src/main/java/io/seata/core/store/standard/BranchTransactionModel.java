@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store;
+package io.seata.core.store.standard;
 
 /**
- * The type Global transaction model.
+ * The type Branch transaction model.
  *
  * @author wang.liang
  */
-public interface GlobalTransactionModel extends BaseModel {
+public interface BranchTransactionModel extends BaseModel {
 
     String getXid();
 
@@ -30,29 +30,29 @@ public interface GlobalTransactionModel extends BaseModel {
 
     void setTransactionId(long transactionId);
 
+    long getBranchId();
+
+    void setBranchId(long branchId);
+
+    String getResourceGroupId();
+
+    void setResourceGroupId(String resourceGroupId);
+
+    String getResourceId();
+
+    void setResourceId(String resourceId);
+
+    String getBranchType();
+
+    void setBranchType(String branchType);
+
     int getStatus();
 
     void setStatus(int status);
 
-    String getApplicationId();
+    String getClientId();
 
-    void setApplicationId(String applicationId);
-
-    String getTransactionServiceGroup();
-
-    void setTransactionServiceGroup(String transactionServiceGroup);
-
-    String getTransactionName();
-
-    void setTransactionName(String transactionName);
-
-    int getTimeout();
-
-    void setTimeout(int timeout);
-
-    long getBeginTime();
-
-    void setBeginTime(long beginTime);
+    void setClientId(String clientId);
 
     String getApplicationData();
 

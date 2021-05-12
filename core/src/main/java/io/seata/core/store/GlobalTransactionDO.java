@@ -17,6 +17,7 @@ package io.seata.core.store;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.standard.GlobalTransactionModel;
 
 import java.util.Date;
 
@@ -54,6 +55,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the xid
      */
+    @Override
     public String getXid() {
         return xid;
     }
@@ -63,6 +65,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param xid the xid
      */
+    @Override
     public void setXid(String xid) {
         this.xid = xid;
     }
@@ -72,6 +75,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the status
      */
+    @Override
     public int getStatus() {
         return status;
     }
@@ -81,6 +85,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param status the status
      */
+    @Override
     public void setStatus(int status) {
         this.status = status;
     }
@@ -90,6 +95,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the application id
      */
+    @Override
     public String getApplicationId() {
         return applicationId;
     }
@@ -99,6 +105,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param applicationId the application id
      */
+    @Override
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
@@ -108,6 +115,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the transaction service group
      */
+    @Override
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
@@ -117,6 +125,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param transactionServiceGroup the transaction service group
      */
+    @Override
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
     }
@@ -126,6 +135,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the transaction name
      */
+    @Override
     public String getTransactionName() {
         return transactionName;
     }
@@ -135,6 +145,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param transactionName the transaction name
      */
+    @Override
     public void setTransactionName(String transactionName) {
         this.transactionName = transactionName;
     }
@@ -144,6 +155,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the timeout
      */
+    @Override
     public int getTimeout() {
         return timeout;
     }
@@ -153,6 +165,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param timeout the timeout
      */
+    @Override
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
@@ -162,6 +175,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the begin time
      */
+    @Override
     public long getBeginTime() {
         return beginTime;
     }
@@ -171,6 +185,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param beginTime the begin time
      */
+    @Override
     public void setBeginTime(long beginTime) {
         this.beginTime = beginTime;
     }
@@ -180,6 +195,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the transaction id
      */
+    @Override
     public long getTransactionId() {
         return transactionId;
     }
@@ -189,6 +205,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param transactionId the transaction id
      */
+    @Override
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
@@ -198,6 +215,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the application data
      */
+    @Override
     public String getApplicationData() {
         return applicationData;
     }
@@ -207,6 +225,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param applicationData the application data
      */
+    @Override
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }
@@ -216,6 +235,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the gmt create
      */
+    @Override
     public Date getGmtCreate() {
         return gmtCreate;
     }
@@ -225,6 +245,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param gmtCreate the gmt create
      */
+    @Override
     public void setGmtCreate(Date gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
@@ -234,6 +255,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @return the gmt modified
      */
+    @Override
     public Date getGmtModified() {
         return gmtModified;
     }
@@ -243,6 +265,7 @@ public class GlobalTransactionDO implements GlobalTransactionModel {
      *
      * @param gmtModified the gmt modified
      */
+    @Override
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
     }

@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store;
+package io.seata.core.store.querier;
 
+import io.seata.common.util.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.List;
@@ -53,6 +54,6 @@ public interface Sortable {
      * @return the boolean
      */
     default boolean isNeedSort(List<?> dataList) {
-        return this.hasSortParams() && dataList != null && dataList.size() > 1;
+        return CollectionUtils.isNotEmpty(dataList) && this.hasSortParams();
     }
 }

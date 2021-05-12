@@ -24,28 +24,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Transaction;
+import io.seata.common.XID;
+import io.seata.common.exception.RedisException;
 import io.seata.common.exception.StoreException;
+import io.seata.common.util.BeanUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.common.exception.RedisException;
-import io.seata.common.util.BeanUtils;
-import io.seata.common.XID;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalCondition;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Transaction;
 
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
@@ -369,7 +368,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @return the global sessions
      */
     @Override
-    public List<GlobalSession> readSession(GlobalCondition sessionCondition) {
+    public List<GlobalSession> readSession(GlobalSessionCondition sessionCondition) {
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (StringUtils.isNotEmpty(sessionCondition.getXid())) {
             GlobalSession globalSession = this.readSession(sessionCondition.getXid(), true);
@@ -377,17 +376,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 globalSessions.add(globalSession);
             }
             return globalSessions;
-        } else if (sessionCondition.getTransactionId() != null) {
-            GlobalSession globalSession = this
-                    .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
-            if (globalSession != null) {
-                globalSessions.add(globalSession);
-            }
-            return globalSessions;
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
-        } else if (sessionCondition.getStatus() != null) {
-            return readSession(new GlobalStatus[]{sessionCondition.getStatus()});
+        } else if (sessionCondition.getStatuses() != null && sessionCondition.getStatuses().length > 0) {
+            return readSession(sessionCondition.getStatuses());
         }
         return null;
     }

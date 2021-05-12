@@ -75,6 +75,9 @@ public interface DefaultValues {
      */
     String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
+    /**
+     * The constant FIRST_PAGE_INDEX
+     */
     int FIRST_PAGE_INDEX = 1;
 
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;

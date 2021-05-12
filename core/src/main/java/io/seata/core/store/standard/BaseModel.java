@@ -13,38 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store;
+package io.seata.core.store.standard;
+
+import java.util.Date;
 
 /**
+ * The type Base model.
+ *
  * @author wang.liang
  */
-public interface Pageable {
+public interface BaseModel {
 
-    /**
-     * Gets page index
-     *
-     * @return the page index
-     */
-    int getPageIndex();
+    Date getGmtCreate();
 
-    /**
-     * Sets page index
-     *
-     * @param pageIndex the page index
-     */
-    void setPageIndex(int pageIndex);
+    void setGmtCreate(Date gmtCreate);
 
-    /**
-     * Gets page size
-     *
-     * @return the page size
-     */
-    int getPageSize();
+    Date getGmtModified();
 
-    /**
-     * Sets page size
-     *
-     * @param pageSize the page size
-     */
-    void setPageSize(int pageSize);
+    void setGmtModified(Date gmtModified);
 }

@@ -13,13 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store;
+package io.seata.core.store.querier;
+
+import java.util.Date;
 
 import io.seata.common.util.ComparableUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.GlobalStatus;
-
-import java.util.Date;
+import io.seata.core.store.standard.GlobalTableField;
+import io.seata.core.store.standard.GlobalTransactionModel;
 
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA;
 import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID;
@@ -38,9 +40,9 @@ import static io.seata.core.constants.ServerTableColumnsName.GLOBAL_TABLE_XID;
  *
  * @author wang.liang
  */
-public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
+public class GlobalSessionCondition extends AbstractQuerier<GlobalTransactionModel> {
 
-    //region Fields
+    //region Condition fields
 
     /**
      * condition: xid = ?
@@ -54,7 +56,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     /**
      * filter is timeout or not timeout data
-     * -  null: all..............   no this condition
+     * -  null: all..............   // pass this condition
      * -  true: timeout data.....   condition: begin_time  < System.currentTimeMillis() - timeout
      * - false: not timeout data.   condition: begin_time >= System.currentTimeMillis() - timeout
      */
@@ -63,7 +65,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
     /**
      * condition: begin_time < System.currentTimeMillis() - :overTimeAliveMills
      */
-    protected long overTimeAliveMills = 0;
+    protected long overTimeAliveMills = 0L;
 
     /**
      * condition: gmt_modified >= :minGmtModified
@@ -77,7 +79,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
     /**
      * Instantiates a new condition.
      */
-    public GlobalCondition() {
+    public GlobalSessionCondition() {
     }
 
     /**
@@ -85,7 +87,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      *
      * @param statuses the statuses
      */
-    public GlobalCondition(GlobalStatus... statuses) {
+    public GlobalSessionCondition(GlobalStatus... statuses) {
         this.statuses = statuses;
     }
 
@@ -95,7 +97,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      * @param status   the status
      * @param pageSize the page size
      */
-    public GlobalCondition(GlobalStatus status, int pageSize) {
+    public GlobalSessionCondition(GlobalStatus status, int pageSize) {
         this(new GlobalStatus[]{status}, pageSize);
     }
 
@@ -106,7 +108,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      * @param pageIndex the page index
      * @param pageSize  the page size
      */
-    public GlobalCondition(GlobalStatus status, int pageIndex, int pageSize) {
+    public GlobalSessionCondition(GlobalStatus status, int pageIndex, int pageSize) {
         this(new GlobalStatus[]{status}, pageIndex, pageSize);
     }
 
@@ -116,7 +118,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      * @param statuses the statuses
      * @param pageSize the page size
      */
-    public GlobalCondition(GlobalStatus[] statuses, int pageSize) {
+    public GlobalSessionCondition(GlobalStatus[] statuses, int pageSize) {
         this.statuses = statuses;
         this.pageSize = pageSize;
     }
@@ -128,7 +130,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      * @param pageIndex the page index
      * @param pageSize  the page size
      */
-    public GlobalCondition(GlobalStatus[] statuses, int pageIndex, int pageSize) {
+    public GlobalSessionCondition(GlobalStatus[] statuses, int pageIndex, int pageSize) {
         this.statuses = statuses;
         this.pageIndex = pageIndex;
         this.pageSize = pageSize;
@@ -139,7 +141,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      *
      * @param overTimeAliveMills the over time alive mills
      */
-    public GlobalCondition(long overTimeAliveMills) {
+    public GlobalSessionCondition(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
@@ -166,7 +168,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
                 return false; // un match
             }
         }
-        // status in (?, ?, ?)
+        // status in (?, ?, ..., ?)
         if (statuses != null && statuses.length > 0) {
             if (!this.hasStatus(globalTransaction.getStatus())) {
                 return false; // un match
@@ -194,6 +196,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
             }
         }
 
+        // is match
         return true;
     }
 
@@ -206,7 +209,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      * @return the compare result
      */
     @Override
-    public  <D extends GlobalTransactionModel> int compareByFieldName(D a, D b, String sortFieldName) {
+    public <D extends GlobalTransactionModel> int compareByFieldName(D a, D b, String sortFieldName) {
         switch (sortFieldName) {
             case GLOBAL_TABLE_XID:
                 return ComparableUtils.compare(a.getXid(), b.getXid());
@@ -237,7 +240,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     //endregion
 
-    //region Private
+    //region Private methods
 
     private boolean hasStatus(int statusCode) {
         for (GlobalStatus status : statuses) {
@@ -250,13 +253,13 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
 
     //endregion
 
-    //region Gets and Sets
+    //region Gets and Sets methods
 
     public String getXid() {
         return xid;
     }
 
-    public GlobalCondition setXid(String xid) {
+    public GlobalSessionCondition setXid(String xid) {
         this.xid = xid;
         return this;
     }
@@ -265,7 +268,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
         return statuses;
     }
 
-    public GlobalCondition setStatuses(GlobalStatus... statuses) {
+    public GlobalSessionCondition setStatuses(GlobalStatus... statuses) {
         this.statuses = statuses;
         return this;
     }
@@ -274,7 +277,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
         return isTimeoutData;
     }
 
-    public GlobalCondition setTimeoutData(Boolean timeoutData) {
+    public GlobalSessionCondition setTimeoutData(Boolean timeoutData) {
         isTimeoutData = timeoutData;
         return this;
     }
@@ -283,7 +286,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
         return overTimeAliveMills;
     }
 
-    public GlobalCondition setOverTimeAliveMills(long overTimeAliveMills) {
+    public GlobalSessionCondition setOverTimeAliveMills(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
         return this;
     }
@@ -292,7 +295,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
         return minGmtModified;
     }
 
-    public GlobalCondition setMinGmtModified(Date minGmtModified) {
+    public GlobalSessionCondition setMinGmtModified(Date minGmtModified) {
         this.minGmtModified = minGmtModified;
         return this;
     }
@@ -304,7 +307,7 @@ public class GlobalCondition extends AbstractQuerier<GlobalTransactionModel> {
      *
      * @param sortFields the sort fields
      */
-    public GlobalCondition setSortFields(GlobalTableField... sortFields) {
+    public GlobalSessionCondition setSortFields(GlobalTableField... sortFields) {
         if (sortFields.length == 0) {
             return this;
         }

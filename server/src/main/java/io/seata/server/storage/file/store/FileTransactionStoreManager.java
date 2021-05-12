@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.seata.common.exception.StoreException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.store.GlobalCondition;
+import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionManager;
@@ -273,7 +273,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private boolean findTimeoutAndSave() throws IOException {
         List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
-            new GlobalCondition(MAX_TRX_TIMEOUT_MILLS));
+            new GlobalSessionCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;
         }
@@ -313,7 +313,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalCondition sessionCondition) {
+    public List<GlobalSession> readSession(GlobalSessionCondition sessionCondition) {
         throw new StoreException("unsupport for read from file");
     }
 

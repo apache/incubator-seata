@@ -16,6 +16,7 @@
 package io.seata.core.store;
 
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.querier.GlobalSessionCondition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -23,19 +24,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static io.seata.core.store.GlobalTableField.BEGIN_TIME;
-import static io.seata.core.store.GlobalTableField.STATUS;
-import static io.seata.core.store.GlobalTableField.TIMEOUT;
+import static io.seata.core.store.standard.GlobalTableField.BEGIN_TIME;
+import static io.seata.core.store.standard.GlobalTableField.STATUS;
+import static io.seata.core.store.standard.GlobalTableField.TIMEOUT;
 
 /**
  * @author wang.liang
  */
-public class GlobalConditionTest {
+public class GlobalSessionConditionTest {
     private static final String DEFAULT_XID = "1234567890";
 
     @Test
     public void test_isMatch() throws InterruptedException {
-        GlobalCondition condition = new GlobalCondition();
+        GlobalSessionCondition condition = new GlobalSessionCondition();
 
         GlobalTransactionDO obj = new GlobalTransactionDO();
 
@@ -83,7 +84,7 @@ public class GlobalConditionTest {
 
     @Test
     public void test_doCount_doFilter() throws InterruptedException {
-        GlobalCondition condition = new GlobalCondition();
+        GlobalSessionCondition condition = new GlobalSessionCondition();
         condition.setStatuses(GlobalStatus.Finished);
         condition.setOverTimeAliveMills(10);
         condition.setTimeoutData(true);
@@ -103,6 +104,7 @@ public class GlobalConditionTest {
         Assertions.assertEquals(count1, 0);
         Assertions.assertEquals(list1.size(), 0);
 
+        // sleep and make the data timeout
         Thread.sleep(102);
         // do count
         count1 = condition.doCount(list);
@@ -151,7 +153,7 @@ public class GlobalConditionTest {
         int size = list0.size();
 
         // set sort fields
-        GlobalCondition condition = new GlobalCondition();
+        GlobalSessionCondition condition = new GlobalSessionCondition();
         condition.setSortFields(TIMEOUT, BEGIN_TIME, STATUS); // sort by multi fields
 
         // do sort
@@ -185,7 +187,7 @@ public class GlobalConditionTest {
         obj.setStatus(GlobalStatus.AsyncCommitting.getCode());
         list0.add(obj);
 
-        GlobalCondition condition = new GlobalCondition();
+        GlobalSessionCondition condition = new GlobalSessionCondition();
         condition.setPageIndex(2);
         condition.setPageSize(3);
         List<GlobalTransactionDO> list1 = condition.doPaging(list0);
@@ -231,7 +233,7 @@ public class GlobalConditionTest {
         obj.setTimeout(0);
         list0.add(obj);
 
-        GlobalCondition condition = new GlobalCondition();
+        GlobalSessionCondition condition = new GlobalSessionCondition();
         // condition
         condition.setStatuses(GlobalStatus.Begin);
         // sort params
@@ -264,7 +266,7 @@ public class GlobalConditionTest {
 
     @Test
     public void test_getFromIndex_getToIndex() {
-        GlobalCondition condition = new GlobalCondition();
+        GlobalSessionCondition condition = new GlobalSessionCondition();
         condition.setPageIndex(2);
         condition.setPageSize(2);
 

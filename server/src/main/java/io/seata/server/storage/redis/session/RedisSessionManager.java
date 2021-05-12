@@ -17,6 +17,7 @@ package io.seata.server.storage.redis.session;
 
 import java.util.Collection;
 import java.util.List;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -25,11 +26,10 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.GlobalCondition;
+import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -165,15 +165,15 @@ public class RedisSessionManager extends AbstractSessionManager
     public Collection<GlobalSession> allSessions() {
         // get by taskName
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new GlobalCondition(GlobalStatus.AsyncCommitting));
+            return findGlobalSessions(new GlobalSessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new GlobalCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
+            return findGlobalSessions(new GlobalSessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committing}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new GlobalCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
+            return findGlobalSessions(new GlobalSessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
                 GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             // all data
-            return findGlobalSessions(new GlobalCondition(new GlobalStatus[] {GlobalStatus.UnKnown, GlobalStatus.Begin,
+            return findGlobalSessions(new GlobalSessionCondition(new GlobalStatus[] {GlobalStatus.UnKnown, GlobalStatus.Begin,
                 GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
                 GlobalStatus.RollbackRetrying, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
                 GlobalStatus.AsyncCommitting}));
@@ -181,7 +181,7 @@ public class RedisSessionManager extends AbstractSessionManager
     }
 
     @Override
-    public List<GlobalSession> findGlobalSessions(GlobalCondition condition) {
+    public List<GlobalSession> findGlobalSessions(GlobalSessionCondition condition) {
         // nothing need to do
         return transactionStoreManager.readSession(condition);
     }

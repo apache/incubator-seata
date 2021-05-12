@@ -24,13 +24,12 @@ import javax.sql.DataSource;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalCondition;
+import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceProvider;
@@ -192,7 +191,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalCondition sessionCondition) {
+    public List<GlobalSession> readSession(GlobalSessionCondition sessionCondition) {
         if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
         }

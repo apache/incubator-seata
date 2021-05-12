@@ -31,16 +31,22 @@ public class ComparableUtilsTest {
      */
     @Test
     public void test_compare() {
+        // equals
         assertEquals(ComparableUtils.compare(null, null), 0);
         assertEquals(ComparableUtils.compare(1, 1), 0);
+        assertEquals(ComparableUtils.compare(1L, 1L), 0);
         assertEquals(ComparableUtils.compare("1", "1"), 0);
 
+        // left < right
         assertEquals(ComparableUtils.compare(null, 1), -1);
         assertEquals(ComparableUtils.compare(1, 2), -1);
+        assertEquals(ComparableUtils.compare(1L, 2L), -1);
         assertEquals(ComparableUtils.compare("1", "2"), -1);
 
+        // left > right
         assertEquals(ComparableUtils.compare(1, null), 1);
         assertEquals(ComparableUtils.compare(2, 1), 1);
+        assertEquals(ComparableUtils.compare(2L, 1L), 1);
         assertEquals(ComparableUtils.compare("2", "1"), 1);
     }
 }

@@ -20,7 +20,7 @@ package io.seata.common.util;
  *
  * @author wang.liang
  */
-public class ComparableUtils {
+public final class ComparableUtils {
 
     private ComparableUtils() {
     }
@@ -42,5 +42,41 @@ public class ComparableUtils {
         }
 
         return a.compareTo(b);
+    }
+
+    /**
+     * Compare a and b.
+     * Add this overload method to avoid frequent packaging of primitive data.
+     *
+     * @param a the comparable object a
+     * @param b the comparable object b
+     * @return 0: equals    -1: a < b    1: a > b
+     */
+    public static int compare(int a, int b) {
+        if (a == b) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * Compare a and b.
+     * Add this overload method to avoid frequent packaging of primitive data.
+     *
+     * @param a the comparable object a
+     * @param b the comparable object b
+     * @return 0: equals    -1: a < b    1: a > b
+     */
+    public static int compare(long a, long b) {
+        if (a == b) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 }
