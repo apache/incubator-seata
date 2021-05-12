@@ -25,10 +25,10 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
@@ -231,7 +231,7 @@ public class RedisSessionManagerTest {
         branchSession.setClientId("storage-server:192.168.158.80:11934");
         sessionManager.addBranchSession(session, branchSession);
 
-        GlobalSessionCondition condition = new GlobalSessionCondition();
+        SessionCondition condition = new SessionCondition();
         condition.setXid(xid);
 
         List<GlobalSession> globalSessions = sessionManager.findGlobalSessions(condition);
@@ -242,6 +242,7 @@ public class RedisSessionManagerTest {
         Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
         condition.setXid(null);
+        condition.setTransactionId(session.getTransactionId());
         globalSessions = sessionManager.findGlobalSessions(condition);
         Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());
         Assertions.assertEquals(session.getTransactionId(),globalSessions.get(0).getTransactionId());
@@ -249,6 +250,7 @@ public class RedisSessionManagerTest {
         Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
         Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
+        condition.setTransactionId(null);
         globalSessions = sessionManager.findGlobalSessions(condition);
         Assertions.assertNull(globalSessions);
 
@@ -279,11 +281,11 @@ public class RedisSessionManagerTest {
         branchSession.setClientId("storage-server:192.168.158.80:11934");
         sessionManager.addBranchSession(session, branchSession);
 
-        GlobalSessionCondition condition = new GlobalSessionCondition();
-        condition.setStatuses(GlobalStatus.Begin);
+        SessionCondition condition = new SessionCondition();
+        condition.setStatus(GlobalStatus.Begin);
         sessionManager.findGlobalSessions(condition);
 
-        condition.setStatuses(null);
+        condition.setStatus(null);
         GlobalStatus[] statuses = {GlobalStatus.Begin};
         condition.setStatuses(statuses);
         sessionManager.findGlobalSessions(condition);

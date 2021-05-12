@@ -15,6 +15,7 @@
  */
 package io.seata.server.storage.db.store;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +25,17 @@ import javax.sql.DataSource;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
@@ -191,8 +193,22 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalSessionCondition sessionCondition) {
-        if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
+    public List<GlobalSession> readSession(SessionCondition sessionCondition) {
+        if (StringUtils.isNotBlank(sessionCondition.getXid())) {
+            GlobalSession globalSession = readSession(sessionCondition.getXid());
+            if (globalSession != null) {
+                List<GlobalSession> globalSessions = new ArrayList<>();
+                globalSessions.add(globalSession);
+                return globalSessions;
+            }
+        } else if (sessionCondition.getTransactionId() != null) {
+            GlobalSession globalSession = readSession(sessionCondition.getTransactionId());
+            if (globalSession != null) {
+                List<GlobalSession> globalSessions = new ArrayList<>();
+                globalSessions.add(globalSession);
+                return globalSessions;
+            }
+        } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             return readSession(sessionCondition.getStatuses());
         }
         return null;

@@ -32,7 +32,7 @@ public final class ComparableUtils {
      * @param b the comparable object b
      * @return 0: equals    -1: a < b    1: a > b
      */
-    public static int compare(Comparable a, Comparable b) {
+    public static <T extends Comparable> int compare(T a, T b) {
         if (a == b) {
             return 0;
         } else if (a == null) {
@@ -46,7 +46,7 @@ public final class ComparableUtils {
 
     /**
      * Compare a and b.
-     * Add this overload method to avoid frequent packaging of primitive data.
+     * This overload method to avoid frequent packaging of primitive data.
      *
      * @param a the comparable object a
      * @param b the comparable object b
@@ -64,7 +64,7 @@ public final class ComparableUtils {
 
     /**
      * Compare a and b.
-     * Add this overload method to avoid frequent packaging of primitive data.
+     * This overload method to avoid frequent packaging of primitive data.
      *
      * @param a the comparable object a
      * @param b the comparable object b

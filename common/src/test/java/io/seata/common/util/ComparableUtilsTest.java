@@ -24,13 +24,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author wang.liang
  */
-public class ComparableUtilsTest {
+class ComparableUtilsTest {
 
     /**
      * Test compare.
      */
     @Test
-    public void test_compare() {
+    void testCompare() {
         // equals
         assertEquals(ComparableUtils.compare(null, null), 0);
         assertEquals(ComparableUtils.compare(1, 1), 0);

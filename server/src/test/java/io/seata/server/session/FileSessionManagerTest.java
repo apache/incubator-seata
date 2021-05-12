@@ -24,7 +24,6 @@ import io.seata.common.XID;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.querier.GlobalSessionCondition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -219,7 +218,7 @@ public class FileSessionManagerTest {
             for (GlobalSession globalSession : globalSessions) {
                 sessionManager.addGlobalSession(globalSession);
             }
-            GlobalSessionCondition sessionCondition = new GlobalSessionCondition(30 * 24 * 3600);
+            SessionCondition sessionCondition = new SessionCondition(30 * 24 * 3600);
             Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
             Assertions.assertNotNull(expectedGlobalSessions);
             Assertions.assertEquals(2, expectedGlobalSessions.size());

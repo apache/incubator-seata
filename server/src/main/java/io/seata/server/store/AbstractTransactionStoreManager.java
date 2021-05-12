@@ -15,8 +15,8 @@
  */
 package io.seata.server.store;
 
-import io.seata.core.store.querier.GlobalSessionCondition;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 
 import java.util.List;
 
@@ -38,7 +38,7 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
     }
 
     @Override
-    public List<GlobalSession> readSession(GlobalSessionCondition sessionCondition) {
+    public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         return null;
     }
 

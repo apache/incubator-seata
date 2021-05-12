@@ -21,7 +21,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.Disposable;
-import io.seata.core.store.querier.GlobalSessionCondition;
 
 /**
  * The interface Session manager.
@@ -112,7 +111,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param condition the condition
      * @return the list
      */
-    List<GlobalSession> findGlobalSessions(GlobalSessionCondition condition);
+    List<GlobalSession> findGlobalSessions(SessionCondition condition);
 
     /**
      * lock and execute
