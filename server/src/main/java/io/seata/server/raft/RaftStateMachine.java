@@ -280,7 +280,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
         } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
             execute = new ReleaseLockExecute(msg, raftSessionManager);
         } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
-            execute = new RemoveGlobalSessionExecute(msg, raftSessionManager, rootManager);
+            execute = new RemoveGlobalSessionExecute(msg, raftSessionManager);
         } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
             execute = new UpdateBranchSessionExecute(msg, raftSessionManager);
         }

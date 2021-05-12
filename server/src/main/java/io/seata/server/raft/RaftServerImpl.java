@@ -66,7 +66,7 @@ public class RaftServerImpl extends AbstractRaftServer implements ConfigurationC
         nodeOptions.setRaftMetaUri(dataPath + File.separator + "raft_meta");
         // Snapshot, optional, is generally recommended
         nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
-        nodeOptions.setElectionTimeoutMs(30000);
+        nodeOptions.setElectionTimeoutMs(2000);
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
         this.cliService = RaftServiceFactory.createAndInitCliService(new CliOptions());

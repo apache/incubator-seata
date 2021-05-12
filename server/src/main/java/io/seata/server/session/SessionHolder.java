@@ -116,7 +116,8 @@ public class SessionHolder {
                 new Class[] {String.class, String.class}, new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.getName(),
                 new Class[] {String.class, String.class}, new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
-            if (StoreMode.RAFT.equals(storeMode)) {
+            if (StoreMode.RAFT.equals(storeMode) || StoreMode.RAFT.getName()
+                .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
                 ASYNC_COMMITTING_SESSION_MANAGER =
