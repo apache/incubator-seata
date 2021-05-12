@@ -78,4 +78,6 @@ public class SeataAutoConfiguration {
         // create global transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
+
+
 }

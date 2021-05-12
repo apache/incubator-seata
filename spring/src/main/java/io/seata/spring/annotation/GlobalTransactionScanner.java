@@ -324,7 +324,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         // failed check, do not scan this bean
                         return false;
                     }
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     LOGGER.error("Do check failed: beanName={}, checker={}",
                             beanName, checker.getClass().getSimpleName(), e);
                 }

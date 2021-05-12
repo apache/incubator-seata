@@ -17,6 +17,7 @@ package io.seata.spring.annotation.scannercheckers;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Nullable;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.spring.annotation.GlobalLock;
@@ -45,6 +46,8 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScopeBeansScannerChecker.class);
     private static final Set<String> EXCLUDE_SCOPE_SET = new HashSet<>();
+
+    private static final String SCOPE_NAME = "scopeName";
 
     public static final String REQUEST_SCOPE_NAME = "request";
     public static final String SESSION_SCOPE_NAME = "session";
@@ -79,7 +82,7 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
      * Match the '@Scope' beans, and check whether exclusion is required.
      */
     @Override
-    public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
+    public boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory) throws Exception {
         if (beanFactory == null) {
             // the beanFactory is null, pass this checker
             return true;
@@ -125,13 +128,13 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
             return false;
         }
 
-        if (scopeAttributes.containsKey("scopeName")) {
-            Object scopeName = scopeAttributes.getFirst("scopeName");
+        if (scopeAttributes.containsKey(SCOPE_NAME)) {
+            Object scopeName = scopeAttributes.getFirst(SCOPE_NAME);
             if (scopeName != null) {
                 if (EXCLUDE_SCOPE_SET.contains(scopeName.toString().toLowerCase())) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Exclude bean '{}' from the {}, cause of @Scope(scopeName = \"{}\"). " +
-                            "@{} and @{} will be invalid in this bean. If used, please refactor the code.",
+                        LOGGER.info("Exclude bean `{}` from the `{}`, cause of `@Scope(scopeName = \"{}\")`. " +
+                                        "`@{}` and `@{}` will be invalid in this bean. Please refactor the code if you want to continue using it.",
                                 beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString(),
                                 GlobalTransactional.class.getSimpleName(), GlobalLock.class.getSimpleName());
                     }

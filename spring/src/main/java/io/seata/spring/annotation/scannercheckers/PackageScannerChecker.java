@@ -18,6 +18,8 @@ package io.seata.spring.annotation.scannercheckers;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import io.seata.common.loader.LoadLevel;
 import io.seata.spring.annotation.ScannerChecker;
 import org.apache.commons.lang.ArrayUtils;
@@ -55,7 +57,7 @@ public class PackageScannerChecker implements ScannerChecker {
     }
 
     @Override
-    public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
+    public boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory) throws Exception {
         if (SCANNABLE_PACKAGE_SET.isEmpty()) {
             // if empty, pass this checker
             return true;

@@ -15,6 +15,8 @@
  */
 package io.seata.spring.annotation.scannercheckers;
 
+import javax.annotation.Nullable;
+
 import io.seata.common.loader.LoadLevel;
 import io.seata.spring.annotation.ScannerChecker;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -28,8 +30,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 public class ConfigBeansScannerChecker implements ScannerChecker {
 
     @Override
-    public boolean check(Object bean, String beanName, ConfigurableListableBeanFactory beanFactory) throws Throwable {
-        if (beanName != null && (beanName.endsWith("AutoConfiguration") || beanName.endsWith("Properties"))) {
+    public boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory) throws Exception {
+        if (beanName != null && (beanName.endsWith("Configuration") || beanName.endsWith("Properties") || beanName.endsWith("Config"))) {
             // do not scan the config beans
             return false;
         }
