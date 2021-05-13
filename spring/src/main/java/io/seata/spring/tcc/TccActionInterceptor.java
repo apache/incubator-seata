@@ -79,7 +79,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
         if (!RootContext.inGlobalTransaction() || disable || RootContext.inSagaBranch()) {
-            //not in transaction
+            //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = getActionInterfaceMethod(invocation);
@@ -96,7 +96,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             }
             try {
                 Object[] methodArgs = invocation.getArguments();
-                //Handler the TCC Aspect
+                //Handler the TCC Aspect， and return the business result
                 return actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
                         invocation::proceed);
             } finally {
@@ -108,6 +108,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
+
+        //not TCC try method
         return invocation.proceed();
     }
 
