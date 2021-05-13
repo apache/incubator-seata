@@ -137,6 +137,7 @@ public abstract class AbstractCore implements Core {
             throw new BranchTransactionException(BranchTransactionNotExist,
                     String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
         }
+        branchSession.setApplicationData(applicationData);
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
 

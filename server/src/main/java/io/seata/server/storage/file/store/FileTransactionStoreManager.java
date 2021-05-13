@@ -171,8 +171,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-        writeSessionLock.lock();
         long curFileTrxNum;
+        writeSessionLock.lock();
         try {
             if (!writeDataFile(new TransactionWriteStore(session, logOperation).encode())) {
                 return false;
@@ -180,7 +180,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             lastModifiedTime = System.currentTimeMillis();
             curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
             if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0
-                && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+                    && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
                 return saveHistory();
             }
         } catch (Exception exx) {
