@@ -62,7 +62,7 @@ public class ActionInterceptorHandler {
      */
     public Object proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        //Get action context from arguments or create a new one, then reset to arguments
+        //Get action context from arguments, or create a new one and then reset to arguments
         BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(arguments);
 
         //TCC name
@@ -80,6 +80,7 @@ public class ActionInterceptorHandler {
         //share actionContext implicitly
         ActionInterceptorHandler.setUpContext(actionContext);
         try {
+            //Execute business
             return targetCallback.execute();
         } finally {
             ActionInterceptorHandler.cleanUp();
@@ -99,16 +100,15 @@ public class ActionInterceptorHandler {
     protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Object[] arguments) {
         BusinessActionContext actionContext = null;
         int argIndex = -1;
+        boolean existsActionContext = false;
 
         // get the action context from arguments
         for (Object arg : arguments) {
-            try {
-                if (arg != null && BusinessActionContext.class.isAssignableFrom(arg.getClass())) {
-                    actionContext = (BusinessActionContext)arg;
-                    break;
-                }
-            } finally {
-                argIndex++;
+            argIndex++;
+            if (arg != null && BusinessActionContext.class.isAssignableFrom(arg.getClass())) {
+                actionContext = (BusinessActionContext)arg;
+                existsActionContext = true;
+                break;
             }
         }
 
@@ -116,7 +116,7 @@ public class ActionInterceptorHandler {
         if (actionContext == null) {
             actionContext = new BusinessActionContext();
             //If the action context exists in arguments but is null, reset the action context to the arguments
-            if (argIndex >= 0) {
+            if (existsActionContext) {
                 arguments[argIndex] = actionContext;
             }
         }
