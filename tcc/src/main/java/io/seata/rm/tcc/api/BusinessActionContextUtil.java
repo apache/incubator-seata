@@ -60,6 +60,7 @@ public final class BusinessActionContextUtil {
      *
      * @param context the new context
      */
+    @SuppressWarnings("deprecation")
     public static void addContext(Map<String, Object> context) {
         if (context != null) {
             BusinessActionContext actionContext = ActionInterceptorHandler.getContext();

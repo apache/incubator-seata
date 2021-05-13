@@ -193,7 +193,9 @@ public class BusinessActionContext implements Serializable {
      *
      * @param key   the action context's key
      * @param value biz value
+     * @deprecated Don't use this method in the `Try` method. Please use {@link BusinessActionContextUtil#addContext}
      */
+    @Deprecated
     public void addActionContext(String key, Object value) {
         this.actionContext.put(key, value);
     }
