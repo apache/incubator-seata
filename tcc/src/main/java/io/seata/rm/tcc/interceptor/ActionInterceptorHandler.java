@@ -99,11 +99,10 @@ public class ActionInterceptorHandler {
      */
     protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {
         BusinessActionContext actionContext = null;
-        int argIndex = -1;
 
         // get the action context from arguments
+        int argIndex = 0;
         for (Class<?> parameterType : parameterTypes) {
-            argIndex++;
             if (BusinessActionContext.class.isAssignableFrom(parameterType)) {
                 actionContext = (BusinessActionContext)arguments[argIndex];
                 //If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
@@ -113,6 +112,7 @@ public class ActionInterceptorHandler {
                 }
                 break;
             }
+            argIndex++;
         }
 
         // if null, create a new one
