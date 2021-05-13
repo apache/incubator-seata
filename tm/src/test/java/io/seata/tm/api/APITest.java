@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Api test.
  */
-public class APITest {
+class APITest {
 
     private static final String DEFAULT_XID = "1234567890";
     private static final String TX_NAME = "test";
@@ -83,11 +83,11 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testCurrent() throws Exception {
+    void testCurrent() throws Exception {
         RootContext.bind(DEFAULT_XID);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assertions.assertEquals(tx.getXid(), DEFAULT_XID);
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(DEFAULT_XID,tx.getXid());
+        Assertions.assertEquals(GlobalStatus.Begin,tx.getStatus());
 
     }
 
@@ -97,9 +97,9 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNewTx() throws Exception {
+    void testNewTx() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.UnKnown);
+        Assertions.assertEquals( GlobalStatus.UnKnown,tx.getStatus());
         Assertions.assertNull(tx.getXid());
     }
 
@@ -109,10 +109,10 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testBegin() throws Exception {
+    void testBegin() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(GlobalStatus.Begin,tx.getStatus());
         Assertions.assertNotNull(tx.getXid());
 
     }
@@ -123,9 +123,9 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedCommit() throws Throwable {
+    void testNestedCommit() throws Throwable {
         TransactionalTemplate template = new TransactionalTemplate();
-        template.execute(new AbstractTransactionalExecutor() {
+        Object result = template.execute(new AbstractTransactionalExecutor() {
             @Override
             public Object execute() throws Throwable {
 
@@ -147,6 +147,8 @@ public class APITest {
                 return null;
             }
         });
+        Assertions.assertNull(result);
+
     }
 
     /**
@@ -155,7 +157,7 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedRollback() throws Throwable {
+    void testNestedRollback() throws Throwable {
 
         final String oexMsg = "xxx";
 
@@ -198,21 +200,19 @@ public class APITest {
     }
 
     @Test
-    public void testGlobalReport() throws Exception {
+    void testGlobalReport() throws Exception {
         RootContext.bind(DEFAULT_XID);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.globalReport(tx.getStatus());
 
         Assertions.assertThrows(IllegalStateException.class, () ->  tx.globalReport(null));
-        Assertions.assertThrows(IllegalStateException.class, () -> {
-            RootContext.unbind();
-            GlobalTransaction tx2 = GlobalTransactionContext.getCurrentOrCreate();
-            tx2.globalReport(tx2.getStatus());
-        });
+        RootContext.unbind();
+        GlobalTransaction tx2 = GlobalTransactionContext.getCurrentOrCreate();
+        GlobalStatus tx2Status = tx2.getStatus();
+        Assertions.assertThrows(IllegalStateException.class, () -> tx2.globalReport(tx2Status));
 
-        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(GlobalStatus.Begin,tx.getStatus());
         Assertions.assertNotNull(tx.getXid());
-
     }
 
 
