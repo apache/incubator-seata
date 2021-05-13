@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The type oracle undo delete executor.
+ * The type dm undo delete executor.
  *
  * @author chengxiaoxiao
  */
@@ -42,7 +42,7 @@ public class DmUndoDeleteExecutor extends AbstractUndoExecutor {
     private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
 
     /**
-     * Instantiates a new oracle undo delete executor.
+     * Instantiates a new dm undo delete executor.
      *
      * @param sqlUndoLog the sql undo log
      */

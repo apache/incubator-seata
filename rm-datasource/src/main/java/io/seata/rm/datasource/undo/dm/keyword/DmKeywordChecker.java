@@ -806,7 +806,7 @@ public class DmKeywordChecker implements KeywordChecker {
     @Override
     public boolean checkEscape(String fieldOrTableName) {
         boolean check = check(fieldOrTableName);
-        // oracle
+        // dm
         // we are recommend table name and column name must uppercase.
         // if exists full uppercase, the table name or column name does't bundle escape symbol.
         if (!check && isUppercase(fieldOrTableName)) {

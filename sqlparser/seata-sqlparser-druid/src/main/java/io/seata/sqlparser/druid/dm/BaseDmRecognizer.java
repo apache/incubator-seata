@@ -33,7 +33,7 @@ import java.util.Objects;
 public abstract class BaseDmRecognizer extends BaseRecognizer {
 
     /**
-     * Instantiates a new oracle base recognizer
+     * Instantiates a new dm base recognizer
      *
      * @param originalSql the original sql
      */

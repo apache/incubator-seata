@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The type oralce undo insert executor.
+ * The type dm undo insert executor.
  *
  * @author chengxiaoxiao
  */
