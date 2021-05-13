@@ -17,6 +17,7 @@ package io.seata.core.store;
 
 /**
  * @description: Distributed locker
+ * @author zhongxiang.wang 
  * @author chd
  */
 public interface DistributedLocker {
