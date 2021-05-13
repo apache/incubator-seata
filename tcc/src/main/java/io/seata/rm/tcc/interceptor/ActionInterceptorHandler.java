@@ -63,7 +63,7 @@ public class ActionInterceptorHandler {
     public Object proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
         //Get action context from arguments, or create a new one and then reset to arguments
-        BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(arguments);
+        BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(method.getParameterTypes(), arguments);
 
         //TCC name
         String actionName = businessAction.name();
@@ -97,28 +97,27 @@ public class ActionInterceptorHandler {
      * @param arguments the arguments
      * @return the action context
      */
-    protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Object[] arguments) {
+    protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {
         BusinessActionContext actionContext = null;
         int argIndex = -1;
-        boolean existsActionContext = false;
 
         // get the action context from arguments
-        for (Object arg : arguments) {
+        for (Class<?> parameterType : parameterTypes) {
             argIndex++;
-            if (arg != null && BusinessActionContext.class.isAssignableFrom(arg.getClass())) {
-                actionContext = (BusinessActionContext)arg;
-                existsActionContext = true;
+            if (BusinessActionContext.class.isAssignableFrom(parameterType)) {
+                actionContext = (BusinessActionContext)arguments[argIndex];
+                //If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
+                if (actionContext == null) {
+                    actionContext = new BusinessActionContext();
+                    arguments[argIndex] = actionContext;
+                }
                 break;
             }
         }
 
-        // if null, create a new action context
+        // if null, create a new one
         if (actionContext == null) {
             actionContext = new BusinessActionContext();
-            //If the action context exists in arguments but is null, reset the action context to the arguments
-            if (existsActionContext) {
-                arguments[argIndex] = actionContext;
-            }
         }
         return actionContext;
     }
