@@ -100,14 +100,6 @@ public class BusinessActionContext implements Serializable {
             return null;
         }
 
-        if (valueClazz.isAssignableFrom(value.getClass())) {
-            return (T)value;
-        }
-
-        if (String.class.equals(valueClazz)) {
-            return (T)value.toString();
-        }
-
         try {
             return (T)value;
         } catch (ClassCastException e) {
