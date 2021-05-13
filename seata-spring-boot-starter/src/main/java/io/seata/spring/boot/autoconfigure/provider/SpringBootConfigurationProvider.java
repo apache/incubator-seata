@@ -17,15 +17,12 @@ package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
-import io.seata.common.util.EnumUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
@@ -54,7 +51,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return (Configuration) Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
             @Override
             public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
-                    throws Throwable {
+                throws Throwable {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result = null;
                     String rawDataId = (String) args[0];
@@ -66,15 +63,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                         result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
                     }
                     if (result != null) {
-                        //If the return type is String/Array/List/Enum, need to convert.
+                        //If the return type is String,need to convert the object to string
                         if (method.getReturnType().equals(String.class)) {
                             return String.valueOf(result);
-                        } else if (method.getReturnType().isArray()) {
-                            return String.valueOf(result).split((String) args[1]);
-                        } else if (List.class.equals(method.getReturnType())) {
-                            return Arrays.asList(String.valueOf(result).split((String) args[1]));
-                        } else if (method.getReturnType().isEnum()) {
-                            return EnumUtils.getEnum((Class<Enum>) method.getReturnType(), String.valueOf(result));
                         }
                         return result;
                     }

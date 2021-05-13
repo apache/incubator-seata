@@ -75,14 +75,14 @@ public interface ProtocolConstants {
      * 
      * @see SerializerType#SEATA
      */
-    byte CONFIGURED_CODEC = ConfigurationFactory.getInstance().getEnum(ConfigurationKeys.SERIALIZE_FOR_RPC,
-            SerializerType.class, SerializerType.SEATA).getCode();
+    byte CONFIGURED_CODEC = SerializerType.getByName(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name())).getCode();
 
     /**
      * Configured compressor by user, default is NONE
      *
      * @see CompressorType#NONE
      */
-    byte CONFIGURED_COMPRESSOR = ConfigurationFactory.getInstance().getEnum(ConfigurationKeys.COMPRESSOR_FOR_RPC,
-            CompressorType.class, CompressorType.NONE).getCode();
+    byte CONFIGURED_COMPRESSOR = CompressorType.getByName(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.COMPRESSOR_FOR_RPC, CompressorType.NONE.name())).getCode();
 }

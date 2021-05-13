@@ -32,6 +32,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import static io.seata.common.Constants.ASYNC_COMMITTING;
@@ -47,6 +49,8 @@ import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
  * @author sharajava
  */
 public class SessionHolder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionHolder.class);
 
     /**
      * The constant CONFIG.

@@ -27,7 +27,7 @@ public class CustomConfigurationTest {
     @Test
     public void testCustomConfigLoad() throws Exception {
         Configuration configuration = ConfigurationFactory.getInstance();
-        Assertions.assertNotNull(configuration);
+        Assertions.assertTrue(null != configuration);
         Properties properties;
         try (InputStream input = CustomConfigurationForTest.class.getClassLoader().getResourceAsStream("custom_for_test.properties")) {
             properties = new Properties();
@@ -37,7 +37,7 @@ public class CustomConfigurationTest {
         for (String name : properties.stringPropertyNames()) {
             String value = properties.getProperty(name);
             Assertions.assertNotNull(value);
-            Assertions.assertEquals(value.toLowerCase(), configuration.getConfig(name).toLowerCase());
+            Assertions.assertEquals(value, configuration.getConfig(name));
         }
     }
 }

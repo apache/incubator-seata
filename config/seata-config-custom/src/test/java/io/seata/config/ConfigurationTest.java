@@ -16,8 +16,6 @@
 package io.seata.config;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,92 +24,65 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author wang.liang
  */
-public class ConfigurationTest {
+class ConfigurationTest {
 
     private static final String NULL_POSTFIX = "_null";
+    private static final String DEFAULT_POSTFIX = "_default";
 
     private static final String STRING_VALUE = "aaaa";
-    private static final short SHORT_VALUE = (short) 1;
+    private static final short SHORT_VALUE = (short)1;
     private static final int INT_VALUE = 2;
     private static final long LONG_VALUE = 3L;
-    private static final Duration DURATION_VALUE = Duration.ofSeconds(10);
+    private static final Duration DURATION_VALUE = Duration.ofSeconds(4);
     private static final boolean BOOLEAN_VALUE = true;
-    private static final ConfigType ENUM_VALUE = ConfigType.File;
-    private static final String[] ARRAY_VALUE = new String[]{"a", "b", "c"};
-    private static final List<String> LIST_VALUE = Arrays.asList("d", "e", "f");
 
     private static final String DEFAULT_STRING_VALUE = "BBBB";
-    private static final short DEFAULT_SHORT_VALUE = (short) 2;
+    private static final short DEFAULT_SHORT_VALUE = (short)2;
     private static final int DEFAULT_INT_VALUE = 3;
     private static final long DEFAULT_LONG_VALUE = 4L;
-    private static final Duration DEFAULT_DURATION_VALUE = Duration.ofSeconds(200);
+    private static final Duration DEFAULT_DURATION_VALUE = Duration.ofSeconds(5);
     private static final boolean DEFAULT_BOOLEAN_VALUE = true;
-    private static final ConfigType DEFAULT_ENUM_VALUE = ConfigType.Nacos;
-    private static final String[] DEFAULT_ARRAY_VALUE = new String[]{"b", "c", "d"};
-    private static final List<String> DEFAULT_LIST_VALUE = Arrays.asList("e", "f", "g");
 
     @Test
-    public void test_getMethods() {
-        String dataId, splitCode;
+    void test_getConfig_Methods() {
+        String dataId;
         Configuration configuration = ConfigurationFactory.getInstance();
 
         //string
         dataId = "string";
         assertThat(configuration.getConfig(dataId)).isEqualTo(STRING_VALUE);
         assertThat(configuration.getConfig(dataId + NULL_POSTFIX)).isNull();
-        assertThat(configuration.getConfig(dataId + NULL_POSTFIX, DEFAULT_STRING_VALUE)).isEqualTo(DEFAULT_STRING_VALUE);
+        assertThat(configuration.getConfig(dataId + DEFAULT_POSTFIX, DEFAULT_STRING_VALUE)).isEqualTo(DEFAULT_STRING_VALUE);
 
         //short
         dataId = "short";
         assertThat(configuration.getShort(dataId)).isEqualTo(SHORT_VALUE);
-        //assertThat(configuration.getShort(dataId + NULL_POSTFIX)).isEqualTo((short) 0);
-        assertThat(configuration.getShort(dataId + NULL_POSTFIX, DEFAULT_SHORT_VALUE)).isEqualTo(DEFAULT_SHORT_VALUE);
+        assertThat(configuration.getShort(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_SHORT);
+        assertThat(configuration.getShort(dataId + DEFAULT_POSTFIX, DEFAULT_SHORT_VALUE)).isEqualTo(DEFAULT_SHORT_VALUE);
 
         //int
         dataId = "int";
         assertThat(configuration.getInt(dataId)).isEqualTo(INT_VALUE);
-        //assertThat(configuration.getInt(dataId + NULL_POSTFIX)).isEqualTo(0);
-        assertThat(configuration.getInt(dataId + NULL_POSTFIX, DEFAULT_INT_VALUE)).isEqualTo(DEFAULT_INT_VALUE);
+        assertThat(configuration.getInt(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_INT);
+        assertThat(configuration.getInt(dataId + DEFAULT_POSTFIX, DEFAULT_INT_VALUE)).isEqualTo(DEFAULT_INT_VALUE);
 
         //long
         dataId = "long";
         assertThat(configuration.getLong(dataId)).isEqualTo(LONG_VALUE);
-        //assertThat(configuration.getLong(dataId + NULL_POSTFIX)).isEqualTo(0L);
-        assertThat(configuration.getLong(dataId + NULL_POSTFIX, DEFAULT_LONG_VALUE)).isEqualTo(DEFAULT_LONG_VALUE);
+        assertThat(configuration.getLong(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_LONG);
+        assertThat(configuration.getLong(dataId + DEFAULT_POSTFIX, DEFAULT_LONG_VALUE)).isEqualTo(DEFAULT_LONG_VALUE);
+
+        //duration
+        dataId = "duration";
+        assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE);
+        assertThat(configuration.getDuration(dataId, DURATION_VALUE)).isEqualTo(DURATION_VALUE);
+        assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_DURATION);
+        assertThat(configuration.getDuration(dataId + DEFAULT_POSTFIX, DEFAULT_DURATION_VALUE)).isEqualTo(DEFAULT_DURATION_VALUE);
 
         //boolean
         dataId = "boolean";
         assertThat(configuration.getBoolean(dataId)).isEqualTo(BOOLEAN_VALUE);
-        //assertThat(configuration.getBoolean(dataId + NULL_POSTFIX)).isFalse();
-        assertThat(configuration.getBoolean(dataId + NULL_POSTFIX, DEFAULT_BOOLEAN_VALUE)).isEqualTo(DEFAULT_BOOLEAN_VALUE);
-
-        //enum
-        dataId = "enum";
-        assertThat(configuration.getEnum(dataId, ConfigType.class)).isEqualTo(ENUM_VALUE);
-        assertThat(configuration.getEnum(dataId + NULL_POSTFIX, ConfigType.class)).isNull();
-        assertThat(configuration.getEnum(dataId + NULL_POSTFIX, ConfigType.class, DEFAULT_ENUM_VALUE)).isEqualTo(DEFAULT_ENUM_VALUE);
-
-        //duration
-        dataId = "duration";
-        //assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE); // can't pass the CI
-        assertThat(configuration.getDuration(dataId, DURATION_VALUE)).isEqualTo(DURATION_VALUE);
-        //assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(Duration.ZERO);
-        assertThat(configuration.getDuration(dataId + NULL_POSTFIX, DEFAULT_DURATION_VALUE)).isEqualTo(DEFAULT_DURATION_VALUE);
-
-        //array
-        dataId = "array";
-        splitCode = "\\|";
-        //assertThat(configuration.getArray(dataId, splitCode)).isEqualTo(ARRAY_VALUE); // can't pass the CI
-        assertThat(configuration.getArray(dataId, splitCode, ARRAY_VALUE)).isEqualTo(ARRAY_VALUE);
-        //assertThat(configuration.getArray(dataId + NULL_POSTFIX, splitCode)).isEmpty();
-        assertThat(configuration.getArray(dataId + NULL_POSTFIX, splitCode, DEFAULT_ARRAY_VALUE)).isEqualTo(DEFAULT_ARRAY_VALUE);
-
-        //list
-        dataId = "list";
-        splitCode = ";";
-        //assertThat(configuration.getList(dataId, splitCode)).isEqualTo(LIST_VALUE); // can't pass the CI
-        assertThat(configuration.getList(dataId, splitCode, LIST_VALUE)).isEqualTo(LIST_VALUE);
-        //assertThat(configuration.getList(dataId + NULL_POSTFIX, splitCode)).isEmpty();
-        assertThat(configuration.getList(dataId + NULL_POSTFIX, splitCode, DEFAULT_LIST_VALUE)).isEqualTo(DEFAULT_LIST_VALUE);
+        assertThat(configuration.getBoolean(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_BOOLEAN);
+        assertThat(configuration.getBoolean(dataId + DEFAULT_POSTFIX, DEFAULT_BOOLEAN_VALUE)).isEqualTo(DEFAULT_BOOLEAN_VALUE);
     }
 }
