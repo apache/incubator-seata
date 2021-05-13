@@ -17,6 +17,10 @@ package io.seata.rm.tcc.api;
 
 import java.io.Serializable;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * The type Business action context.
@@ -46,6 +50,9 @@ public class BusinessActionContext implements Serializable {
      */
     private Boolean isUpdated;
 
+    /**
+     * action context
+     */
     private Map<String, Object> actionContext;
 
     /**
@@ -64,18 +71,48 @@ public class BusinessActionContext implements Serializable {
     public BusinessActionContext(String xid, String branchId, Map<String, Object> actionContext) {
         this.xid = xid;
         this.branchId = branchId;
-        this.setActionContext(actionContext);
+        this.actionContext = actionContext;
     }
 
     /**
      * Gets action context.
-     * if you get actionContext in tcc phase-2 , it would be a map object.
      *
      * @param key the key
      * @return the action context
      */
+    @Nullable
     public Object getActionContext(String key) {
         return actionContext.get(key);
+    }
+
+    /**
+     * Gets action context.
+     *
+     * @param key        the key
+     * @param valueClazz the action context class
+     * @param <T>        the action context type
+     * @return the action context
+     */
+    @Nullable
+    public <T> T getActionContext(String key, @Nonnull Class<T> valueClazz) {
+        Object value = actionContext.get(key);
+        if (value == null) {
+            return null;
+        }
+
+        if (valueClazz.isAssignableFrom(value.getClass())) {
+            return (T)value;
+        }
+
+        if (String.class.equals(valueClazz)) {
+            return (T)value.toString();
+        }
+
+        try {
+            return (T)value;
+        } catch (ClassCastException e) {
+            return JSON.parseObject(value.toString(), valueClazz);
+        }
     }
 
     /**
@@ -94,6 +131,15 @@ public class BusinessActionContext implements Serializable {
      */
     public void setBranchId(long branchId) {
         this.branchId = String.valueOf(branchId);
+    }
+
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
+    public void setBranchId(String branchId) {
+        this.branchId = branchId;
     }
 
     /**
@@ -130,15 +176,6 @@ public class BusinessActionContext implements Serializable {
      */
     public void setXid(String xid) {
         this.xid = xid;
-    }
-
-    /**
-     * Sets branch id.
-     *
-     * @param branchId the branch id
-     */
-    public void setBranchId(String branchId) {
-        this.branchId = branchId;
     }
 
     /**

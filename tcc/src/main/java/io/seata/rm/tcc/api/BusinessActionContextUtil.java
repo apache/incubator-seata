@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.annotation.Nonnull;
 
 /**
  * the api of sharing business action context to tcc phase 2
@@ -35,7 +36,7 @@ import java.util.Objects;
  * @author tanzj
  * @date 2021/4/16
  */
-public class BusinessActionContextUtil {
+public final class BusinessActionContextUtil {
 
     private BusinessActionContextUtil() {
     }
@@ -45,7 +46,7 @@ public class BusinessActionContextUtil {
     /**
      * add business action context and share it to tcc phase2
      *
-     * @param key the key of new context
+     * @param key   the key of new context
      * @param value new context
      */
     public static void addContext(String key, Object value) {
@@ -65,7 +66,7 @@ public class BusinessActionContextUtil {
             context.forEach((key, value) -> {
                 if (!Objects.isNull(value)) {
                     actionContext.setUpdated(true);
-                    actionContext.addActionContext(key, value);
+                    actionContext.addActionContext(key, handleValue(value));
                 }
             });
             //if delay report, params will be finally reported after phase 1 execution
@@ -76,6 +77,21 @@ public class BusinessActionContextUtil {
         }
     }
 
+    /**
+     * Handle the value.
+     * It is convenient to convert type in phase 2.
+     *
+     * @param value the value
+     * @return the value or json string
+     * @see BusinessActionContext#getActionContext(String, Class)
+     */
+    private static Object handleValue(@Nonnull Object value) {
+        if (value instanceof CharSequence || value instanceof Number || value instanceof Boolean) {
+            return value;
+        } else {
+            return JSON.toJSONString(value);
+        }
+    }
 
     /**
      * to do branch report sharing actionContext
