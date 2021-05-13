@@ -36,6 +36,7 @@ import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.LoadBalanceProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
@@ -91,6 +92,9 @@ public class PropertiesTest {
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
         assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
+        assertEquals(60000L,context.getBean(RmProperties.class).getTableMetaCheckerInterval());
+        assertFalse(context.getBean(RmProperties.class).isSagaRetryPersistModeUpdate());
+        assertFalse(context.getBean(RmProperties.class).isSagaCompensatePersistModeUpdate());
     }
 
     @Test
@@ -223,8 +227,13 @@ public class PropertiesTest {
     @Test
     public void testRegistryProperties() {
         assertEquals("file", context.getBean(RegistryProperties.class).getType());
-        assertEquals("RandomLoadBalance", context.getBean(RegistryProperties.class).getLoadBalance());
-        assertEquals(10, context.getBean(RegistryProperties.class).getLoadBalanceVirtualNodes());
+    }
+
+
+    @Test
+    public void testLoadBalanceProperties() {
+        assertEquals("RandomLoadBalance", context.getBean(LoadBalanceProperties.class).getType());
+        assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
     }
 
     @Test

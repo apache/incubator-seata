@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -31,8 +29,12 @@ public interface DefaultValues {
     int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
     boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
+    boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
+    boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
+
     /**
      * Shutdown timeout default 3s
      */
@@ -87,7 +89,6 @@ public interface DefaultValues {
 
     int SERVER_DEFAULT_PORT = 8091;
     String SERVER_DEFAULT_STORE_MODE = "file";
-    long SERVER_DEFAULT_NODE = ThreadLocalRandom.current().nextLong(1024);
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
@@ -95,4 +96,34 @@ public interface DefaultValues {
 
     String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
     int VIRTUAL_NODES_DEFAULT = 10;
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE
+     */
+    boolean DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE = true;
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_TYPE
+     */
+    String DEFAULT_CLIENT_UNDO_COMPRESS_TYPE = "zip";
+
+    /**
+     * the constant DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD
+     */
+    String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
+
+    /**
+     * the constant DEFAULT_RETRY_DEAD_THRESHOLD
+     */
+    int DEFAULT_RETRY_DEAD_THRESHOLD = 2 * 60 * 1000 + 10 * 1000;
+
+    /**
+     * the constant TM_INTERCEPTOR_ORDER
+     */
+    int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+  
+    /**
+     * the constant TCC_ACTION_INTERCEPTOR_ORDER
+     */
+    int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
 }

@@ -67,6 +67,7 @@
             <id>Seata</id>
             <name>Seata</name>
             <url>https://seata.io</url>
+            <email>dev-seata@googlegroups.com</email>
         </developer>
     </developers>
 
@@ -88,7 +89,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.4.0-SNAPSHOT</revision>
+        <revision>1.5.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -225,7 +226,7 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
                                 </configuration>
                             </execution>
                         </executions>
@@ -319,6 +320,9 @@
                             </includes>
                             <excludes>
                                 <exclude>**/generated/**</exclude>
+                                <exclude>**/antlr/mysql/parser/*.*</exclude>
+                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                             </excludes>
                             <strictCheck>true</strictCheck>
                             <mapping>
@@ -415,6 +419,9 @@
                     </rulesets>
                     <excludes>
                         <exclude>**/generated/*.java</exclude>
+                        <exclude>**/antlr/mysql/parser/*.*</exclude>
+                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
