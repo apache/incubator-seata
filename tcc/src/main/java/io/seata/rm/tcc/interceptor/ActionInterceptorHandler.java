@@ -60,13 +60,13 @@ public class ActionInterceptorHandler {
      * @return map map
      * @throws Throwable the throwable
      */
-    public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
+    public Object proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        Map<String, Object> ret = new HashMap<>(4);
+        //Get action context from arguments or create a new one, then reset to arguments
+        BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(arguments);
 
         //TCC name
         String actionName = businessAction.name();
-        BusinessActionContext actionContext = new BusinessActionContext();
         actionContext.setXid(xid);
         //set action name
         actionContext.setActionName(actionName);
@@ -77,23 +77,10 @@ public class ActionInterceptorHandler {
         //MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
-        //set the parameter whose type is BusinessActionContext
-        Class<?>[] types = method.getParameterTypes();
-        int argIndex = 0;
-        for (Class<?> cls : types) {
-            if (cls.isAssignableFrom(BusinessActionContext.class)) {
-                arguments[argIndex] = actionContext;
-                break;
-            }
-            argIndex++;
-        }
         //share actionContext implicitly
         ActionInterceptorHandler.setUpContext(actionContext);
         try {
-            //the final parameters of the try method
-            ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-            //the final result
-            ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+            return targetCallback.execute();
         } finally {
             ActionInterceptorHandler.cleanUp();
             //to report business action context finally.
@@ -101,7 +88,39 @@ public class ActionInterceptorHandler {
                 BusinessActionContextUtil.reportContext(actionContext);
             }
         }
-        return ret;
+    }
+
+    /**
+     * Get or create action context, and reset to arguments
+     *
+     * @param arguments the arguments
+     * @return the action context
+     */
+    protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Object[] arguments) {
+        BusinessActionContext actionContext = null;
+        int argIndex = -1;
+
+        // get the action context from arguments
+        for (Object arg : arguments) {
+            try {
+                if (arg != null && BusinessActionContext.class.isAssignableFrom(arg.getClass())) {
+                    actionContext = (BusinessActionContext)arg;
+                    break;
+                }
+            } finally {
+                argIndex++;
+            }
+        }
+
+        // if null, create a new action context
+        if (actionContext == null) {
+            actionContext = new BusinessActionContext();
+            //If the action context exists in arguments but is null, reset the action context to the arguments
+            if (argIndex >= 0) {
+                arguments[argIndex] = actionContext;
+            }
+        }
+        return actionContext;
     }
 
     /**
