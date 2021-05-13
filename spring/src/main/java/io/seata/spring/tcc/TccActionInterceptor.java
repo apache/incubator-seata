@@ -96,7 +96,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             }
             try {
                 Object[] methodArgs = invocation.getArguments();
-                //Handler the TCC Aspect， and return the business result
+                //Handler the TCC Aspect, and return the business result
                 return actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
                         invocation::proceed);
             } finally {

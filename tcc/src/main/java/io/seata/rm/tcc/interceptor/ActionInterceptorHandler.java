@@ -57,7 +57,7 @@ public class ActionInterceptorHandler {
      * @param arguments      the arguments
      * @param businessAction the business action
      * @param targetCallback the target callback
-     * @return map map
+     * @return the business result
      * @throws Throwable the throwable
      */
     public Object proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
@@ -129,7 +129,7 @@ public class ActionInterceptorHandler {
      * @param arguments      the arguments
      * @param businessAction the business action
      * @param actionContext  the action context
-     * @return the string
+     * @return the branchId
      */
     protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction,
                                          BusinessActionContext actionContext) {
@@ -139,12 +139,19 @@ public class ActionInterceptorHandler {
         Map<String, Object> context = fetchActionRequestContext(method, arguments);
         context.put(Constants.ACTION_START_TIME, System.currentTimeMillis());
 
-        //init business context
+        //Init business context
         initBusinessContext(context, method, businessAction);
         //Init running environment context
         initFrameworkContext(context);
         actionContext.setDelayReport(businessAction.isDelayReport());
-        actionContext.setActionContext(context);
+        //Merge context and origin context if it exists
+        Map<String, Object> originContext = actionContext.getActionContext();
+        if (originContext == null) {
+            actionContext.setActionContext(context);
+        } else {
+            originContext.putAll(context);
+            context = originContext;
+        }
 
         //init applicationData
         Map<String, Object> applicationContext = new HashMap<>(4);
@@ -201,7 +208,7 @@ public class ActionInterceptorHandler {
      *
      * @param method    the method
      * @param arguments the arguments
-     * @return map map
+     * @return the context
      */
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<>(8);
