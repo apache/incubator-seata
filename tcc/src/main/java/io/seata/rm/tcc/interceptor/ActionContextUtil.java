@@ -66,11 +66,11 @@ public class ActionContextUtil {
                             context.putAll(fetchContextFromObject(paramObject));
                         }
                     } else {
-                        if (StringUtils.isBlank(annotation.paramName())) {
-                            context.put(fieldName, paramObject);
-                        } else {
-                            context.put(annotation.paramName(), paramObject);
+                        String paramName = annotation.paramName();
+                        if (StringUtils.isBlank(paramName)) {
+                            paramName = fieldName;
                         }
+                        context.put(paramName, paramObject);
                     }
                 }
             }

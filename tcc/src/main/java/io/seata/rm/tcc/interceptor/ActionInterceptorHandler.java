@@ -20,6 +20,7 @@ import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -33,6 +34,7 @@ import org.slf4j.MDC;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +188,7 @@ public class ActionInterceptorHandler {
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<>(8);
 
+        Parameter[] parameters = method.getParameters();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
@@ -203,13 +206,21 @@ public class ActionInterceptorHandler {
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
                         } else {
-                            context.put(param.paramName(), targetParam);
+                            String paramName = param.paramName();
+                            if (StringUtils.isBlank(paramName)) {
+                                paramName = parameters[i].getName();
+                            }
+                            context.put(paramName, targetParam);
                         }
                     } else {
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(paramObject));
                         } else {
-                            context.put(param.paramName(), paramObject);
+                            String paramName = param.paramName();
+                            if (StringUtils.isBlank(paramName)) {
+                                paramName = parameters[i].getName();
+                            }
+                            context.put(paramName, paramObject);
                         }
                     }
                 }
