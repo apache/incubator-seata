@@ -110,8 +110,8 @@ public final class BusinessActionContextUtil {
             );
         } catch (TransactionException e) {
             String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
-            LOGGER.error(msg, e);
-            throw new FrameworkException(e);
+            LOGGER.error("{}, error: {}", msg, e.getMessage());
+            throw new FrameworkException(e, msg);
         }
     }
 }
