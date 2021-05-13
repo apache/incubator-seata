@@ -16,9 +16,7 @@
 package io.seata.spring.tcc;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
