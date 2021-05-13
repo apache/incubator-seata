@@ -17,6 +17,7 @@ package io.seata.common;
 
 import java.util.Random;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,5 +65,15 @@ public class XIDTest {
     public void testGetTransactionId() {
         assertThat(XID.getTransactionId(null)).isEqualTo(-1);
         assertThat(XID.getTransactionId("127.0.0.1:8080:8577662204289747564")).isEqualTo(8577662204289747564L);
+    }
+
+    /**
+     * Test get ipAddress:port
+     */
+    @Test
+    public void testGetIpAddressAndPort() {
+        XID.setPort(8080);
+        XID.setIpAddress("127.0.0.1");
+        Assertions.assertEquals("127.0.0.1:8080",XID.getIpAddressAndPort());
     }
 }
