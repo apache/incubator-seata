@@ -87,16 +87,6 @@ public interface Constants {
     String HOST_NAME = "host-name";
 
     /**
-     * The constant TCC_METHOD_RESULT.
-     */
-    String TCC_METHOD_RESULT = "result";
-
-    /**
-     * The constant TCC_METHOD_ARGUMENTS.
-     */
-    String TCC_METHOD_ARGUMENTS = "arguments";
-
-    /**
      * transaction context
      */
     String TCC_ACTIVITY_CONTEXT = "activityContext";
