@@ -233,7 +233,8 @@ public class ActionInterceptorHandler {
 
                     if (parameterNames == null && StringUtils.isBlank(annotation.paramName()) && !annotation.isParamInProperty()) {
                         String errorMsg = String.format("Unable to get parameter names from the method `%s.%s(...)`." +
-                                        " Please execute 'javac -parameters' to re-compile of the method code, or set the field `paramName` of the `@%s` by yourself",
+                                        " Please execute 'javac -parameters' to re-compile of the method code," +
+                                        " or set the field `paramName` of the `@%s` by yourself",
                                 method.getDeclaringClass().getSimpleName(), method.getName(), BusinessActionContextParameter.class.getSimpleName());
                         throw new FrameworkException(errorMsg);
                     }
