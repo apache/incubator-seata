@@ -213,7 +213,7 @@ public class ActionInterceptorHandler {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (!(parameterAnnotations[i][j] instanceof BusinessActionContextParameter)) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     BusinessActionContextParameter annotation = (BusinessActionContextParameter)parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
