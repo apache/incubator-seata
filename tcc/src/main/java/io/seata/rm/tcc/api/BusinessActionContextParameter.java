@@ -41,21 +41,21 @@ public @interface BusinessActionContextParameter {
     /**
      * if it is a sharding param ?
      *
-     * @return boolean boolean
+     * @return the boolean
      */
     boolean isShardingParam() default false;
 
     /**
      * Specify the index of the parameter in the List
      *
-     * @return int int
+     * @return the int
      */
     int index() default -1;
 
     /**
      * if get the parameter from the property of the object ?
      *
-     * @return boolean boolean
+     * @return the boolean
      */
     boolean isParamInProperty() default false;
 }

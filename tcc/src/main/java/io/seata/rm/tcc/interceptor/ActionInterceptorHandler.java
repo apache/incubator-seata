@@ -215,37 +215,20 @@ public class ActionInterceptorHandler {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter) parameterAnnotations[i][j];
+                if (!(parameterAnnotations[i][j] instanceof BusinessActionContextParameter)) {
+                    BusinessActionContextParameter annotation = (BusinessActionContextParameter)parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
+
                     Object paramObject = arguments[i];
-                    int index = param.index();
-                    //List, get by index
-                    if (index >= 0) {
-                        @SuppressWarnings("unchecked")
-                        Object targetParam = ((List<Object>) paramObject).get(index);
-                        if (param.isParamInProperty()) {
-                            ActionContextUtil.putActionContext(context, ActionContextUtil.fetchContextFromObject(targetParam));
-                        } else {
-                            String paramName = param.paramName();
-                            if (StringUtils.isBlank(paramName)) {
-                                paramName = parameters[i].getName();
-                            }
-                            ActionContextUtil.putActionContext(context, paramName, targetParam);
-                        }
-                    } else {
-                        if (param.isParamInProperty()) {
-                            ActionContextUtil.putActionContext(context, ActionContextUtil.fetchContextFromObject(paramObject));
-                        } else {
-                            String paramName = param.paramName();
-                            if (StringUtils.isBlank(paramName)) {
-                                paramName = parameters[i].getName();
-                            }
-                            ActionContextUtil.putActionContext(context, paramName, paramObject);
-                        }
+                    if (paramObject == null) {
+                        continue;
                     }
+
+                    // load param by the config of annotation, and then put to the context
+                    String paramName = parameters[i].getName();
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext(context, paramName, paramObject, annotation);
                 }
             }
         }

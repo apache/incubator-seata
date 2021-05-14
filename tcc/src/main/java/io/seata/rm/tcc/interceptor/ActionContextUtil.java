@@ -28,6 +28,8 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Extracting TCC Context from Method
@@ -38,6 +40,8 @@ public final class ActionContextUtil {
 
     private ActionContextUtil() {
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActionContextUtil.class);
 
     /**
      * Extracting context data from parameters
@@ -52,33 +56,64 @@ public final class ActionContextUtil {
             getAllField(targetParam.getClass(), fields);
 
             for (Field f : fields) {
-                String fieldName = f.getName();
                 BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
-
-                if (annotation != null) {
-                    f.setAccessible(true);
-                    Object paramObject = f.get(targetParam);
-                    int index = annotation.index();
-                    if (annotation.isParamInProperty()) {
-                        if (index >= 0) {
-                            @SuppressWarnings("unchecked")
-                            Object targetObject = ((List<Object>) paramObject).get(index);
-                            context.putAll(fetchContextFromObject(targetObject));
-                        } else {
-                            context.putAll(fetchContextFromObject(paramObject));
-                        }
-                    } else {
-                        String paramName = annotation.paramName();
-                        if (StringUtils.isBlank(paramName)) {
-                            paramName = fieldName;
-                        }
-                        context.put(paramName, paramObject);
-                    }
+                if (annotation == null) {
+                    continue;
                 }
+
+                f.setAccessible(true);
+                Object paramObject = f.get(targetParam);
+
+                // load param by the config of annotation, and then put to the context
+                String paramName = f.getName();
+                loadParamByAnnotationAndPutToContext(context, paramName, paramObject, annotation);
             }
             return context;
         } catch (Throwable t) {
             throw new FrameworkException(t, "fetchContextFromObject failover");
+        }
+    }
+
+    /**
+     * load param by the config of annotation, and then put to the context
+     *
+     * @param context     the action context
+     * @param paramName    the param key
+     * @param paramObject the param object
+     * @param annotation  the annotation
+     */
+    public static void loadParamByAnnotationAndPutToContext(Map<String, Object> context, @Nonnull String paramName, Object paramObject, BusinessActionContextParameter annotation) {
+        if (paramObject == null) {
+            return;
+        }
+
+        if (annotation.isParamInProperty()) {
+            // If is `List`, get by index
+            if (annotation.index() >= 0) {
+                if (!(paramObject instanceof List)) {
+                    LOGGER.warn("the param named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                            paramName, BusinessActionContextParameter.class.getSimpleName());
+                    return;
+                }
+
+                List<Object> listParamObject = (List<Object>)paramObject;
+                if (listParamObject.isEmpty()) {
+                    return;
+                }
+
+                paramObject = listParamObject.get(annotation.index());
+                if (paramObject == null) {
+                    return;
+                }
+            }
+
+            // Put action context
+            context.putAll(fetchContextFromObject(paramObject));
+        } else {
+            if (StringUtils.isNotBlank(annotation.paramName())) {
+                paramName = annotation.paramName();
+            }
+            context.put(paramName, paramObject);
         }
     }
 
