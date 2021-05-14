@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.exception.FrameworkException;
 
 /**
  * The type Business action context.
@@ -94,16 +95,37 @@ public class BusinessActionContext implements Serializable {
      * @return the action context
      */
     @Nullable
+    @SuppressWarnings("unchecked")
     public <T> T getActionContext(String key, @Nonnull Class<T> valueClazz) {
+        if (valueClazz == null) {
+            throw new IllegalArgumentException("valueClazz must be not null");
+        }
+
         Object value = actionContext.get(key);
         if (value == null) {
             return null;
         }
 
-        try {
+        // same class, or super class, can cast directly
+        if (valueClazz.isAssignableFrom(value.getClass())) {
             return (T)value;
-        } catch (ClassCastException e) {
-            return JSON.parseObject(value.toString(), valueClazz);
+        }
+
+        // String class
+        if (String.class.equals(valueClazz)) {
+            return (T)value.toString();
+        }
+
+        try {
+            try {
+                return (T)value;
+            } catch (ClassCastException ignore) {
+                return JSON.parseObject(value.toString(), valueClazz);
+            }
+        } catch (RuntimeException e) {
+            String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
+                    key, value.getClass().getName(), valueClazz.getName());
+            throw new FrameworkException(e, errorMsg);
         }
     }
 
