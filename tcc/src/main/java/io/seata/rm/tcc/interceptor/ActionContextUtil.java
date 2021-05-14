@@ -132,7 +132,7 @@ public final class ActionContextUtil {
                 // @since: above 1.4.2
                 context.put(annotation.paramName(), paramContext);
             } else {
-                // Merge the param context
+                // Merge the param context into context
                 // Warn: This may cause values with the same name to be overridden
                 context.putAll(paramContext);
             }
