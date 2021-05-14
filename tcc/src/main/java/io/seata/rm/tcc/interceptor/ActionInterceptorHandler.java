@@ -15,6 +15,11 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
@@ -30,11 +35,6 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -83,7 +83,7 @@ public class ActionInterceptorHandler {
         //share actionContext implicitly
         BusinessActionContextUtil.setContext(actionContext);
         try {
-            //Execute business
+            //Execute business, and return business result
             return targetCallback.execute();
         } finally {
             BusinessActionContextUtil.clear();
