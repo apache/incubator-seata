@@ -15,6 +15,12 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
@@ -31,12 +37,6 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -221,11 +221,13 @@ public class ActionInterceptorHandler {
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                    // get annotation
                     BusinessActionContextParameter annotation = (BusinessActionContextParameter)parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
 
+                    // get param
                     Object paramObject = arguments[i];
                     if (paramObject == null) {
                         continue;
