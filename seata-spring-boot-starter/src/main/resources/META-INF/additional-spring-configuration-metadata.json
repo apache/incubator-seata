@@ -85,6 +85,12 @@
       "defaultValue": false
     },
     {
+      "name": "seata.client.rm.tcc-action-interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": -2147482648
+    },
+    {
       "name": "seata.client.rm.lock.retry-interval",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LockProperties",
@@ -137,6 +143,12 @@
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
       "defaultValue": 10
+    },
+    {
+      "name": "seata.client.tm.interceptor-order",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.TmProperties",
+      "defaultValue": -2147482648
     },
     {
       "name": "seata.client.undo.data-validation",

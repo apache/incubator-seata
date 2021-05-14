@@ -46,7 +46,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static int maxInactiveChannelCheck = 10;
     private static final int MAX_NOT_WRITEABLE_RETRY = 2000;
     private static final int MAX_CHECK_ALIVE_RETRY = 300;
-    private static final int CHECK_ALIVE_INTERNAL = 10;
+    private static final int CHECK_ALIVE_INTERVAL = 10;
     private static final String SOCKET_ADDRESS_START_CHAR = "/";
     private static final long MAX_ACQUIRE_CONN_MILLS = 60 * 1000L;
     private static final String RPC_DISPATCH_THREAD_PREFIX = "rpcDispatch";
@@ -314,12 +314,12 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Gets check alive internal.
+     * Gets check alive interval.
      *
-     * @return the check alive internal
+     * @return the check alive interval
      */
-    public static int getCheckAliveInternal() {
-        return CHECK_ALIVE_INTERNAL;
+    public static int getCheckAliveInterval() {
+        return CHECK_ALIVE_INTERVAL;
     }
 
     /**
