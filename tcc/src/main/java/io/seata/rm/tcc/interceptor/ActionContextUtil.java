@@ -61,12 +61,13 @@ public final class ActionContextUtil {
                     continue;
                 }
 
+                // get the field value
                 f.setAccessible(true);
-                Object paramObject = f.get(targetParam);
+                Object fieldValue = f.get(targetParam);
 
                 // load param by the config of annotation, and then put to the context
-                String paramName = f.getName();
-                loadParamByAnnotationAndPutToContext(context, paramName, paramObject, annotation);
+                String fieldName = f.getName();
+                loadParamByAnnotationAndPutToContext(context, fieldName, fieldValue, annotation);
             }
             return context;
         } catch (Throwable t) {
@@ -87,15 +88,9 @@ public final class ActionContextUtil {
             return;
         }
 
-        if (annotation.isParamInProperty()) {
-            // If is `List`, get by index
-            if (annotation.index() >= 0) {
-                if (!(paramObject instanceof List)) {
-                    LOGGER.warn("the param named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
-                            paramName, BusinessActionContextParameter.class.getSimpleName());
-                    return;
-                }
-
+        // If is `List`, get by index
+        if (annotation.index() >= 0) {
+            if (paramObject instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> listParamObject = (List<Object>)paramObject;
                 if (listParamObject.isEmpty()) {
@@ -106,9 +101,13 @@ public final class ActionContextUtil {
                 if (paramObject == null) {
                     return;
                 }
+            } else {
+                LOGGER.warn("the param named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                        paramName, BusinessActionContextParameter.class.getSimpleName());
             }
+        }
 
-            // Put action context
+        if (annotation.isParamInProperty()) {
             context.putAll(fetchContextFromObject(paramObject));
         } else {
             if (StringUtils.isNotBlank(annotation.paramName())) {
