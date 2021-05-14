@@ -67,7 +67,7 @@ public final class ActionContextUtil {
 
                 // load param by the config of annotation, and then put to the context
                 String fieldName = f.getName();
-                loadParamByAnnotationAndPutToContext(context, fieldName, fieldValue, annotation);
+                loadParamByAnnotationAndPutToContext(fieldName, fieldValue, annotation, context);
             }
             return context;
         } catch (Throwable t) {
@@ -78,12 +78,13 @@ public final class ActionContextUtil {
     /**
      * load param by the config of annotation, and then put to the context
      *
-     * @param context     the action context
-     * @param paramName    the param key
+     * @param paramName   the param key
      * @param paramObject the param object
      * @param annotation  the annotation
+     * @param context     the action context
      */
-    public static void loadParamByAnnotationAndPutToContext(Map<String, Object> context, @Nonnull String paramName, Object paramObject, BusinessActionContextParameter annotation) {
+    public static void loadParamByAnnotationAndPutToContext(String paramName, Object paramObject,
+            BusinessActionContextParameter annotation, Map<String, Object> context) {
         if (paramObject == null) {
             return;
         }

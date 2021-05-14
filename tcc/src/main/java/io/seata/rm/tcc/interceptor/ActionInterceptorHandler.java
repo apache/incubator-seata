@@ -226,7 +226,7 @@ public class ActionInterceptorHandler {
 
                     // load param by the config of annotation, and then put to the context
                     String paramName = parameters[i].getName();
-                    ActionContextUtil.loadParamByAnnotationAndPutToContext(context, paramName, paramObject, annotation);
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext(paramName, paramObject, annotation, context);
                 }
             }
         }
