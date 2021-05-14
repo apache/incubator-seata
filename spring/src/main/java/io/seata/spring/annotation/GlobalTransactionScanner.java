@@ -36,9 +36,9 @@ import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
-import io.seata.spring.schema.GtxTarget;
-import io.seata.spring.schema.GtxTargetHolder;
-import io.seata.spring.schema.GtxTargetType;
+import io.seata.spring.schema.SeataTarget;
+import io.seata.spring.schema.SeataTargetHolder;
+import io.seata.spring.schema.SeataTargetType;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
@@ -462,8 +462,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (trxAnno != null) {
                     return true;
                 }
-                GtxTarget gtxClassTarget = GtxTargetHolder.INSTANCE.find(GtxTargetType.CLASS, clazz.getName());
-                if (gtxClassTarget != null) {
+                SeataTarget seataClassTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.CLASS, clazz.getName());
+                if (seataClassTarget != null) {
                     return true;
                 }
                 Method[] methods = clazz.getMethods();
@@ -472,8 +472,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     if (trxAnno != null) {
                         return true;
                     }
-                    GtxTarget gtxMethodTarget = GtxTargetHolder.INSTANCE.find(GtxTargetType.METHOD, method.getName());
-                    if (gtxMethodTarget != null) {
+                    SeataTarget seataMethodTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.METHOD, method.getName());
+                    if (seataMethodTarget != null) {
                         return true;
                     }
                     GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);

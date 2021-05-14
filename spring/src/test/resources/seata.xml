@@ -23,7 +23,7 @@
        http://seata.io/schema/seata.xsd">
 
     <seata:application applicationId="test" txServiceGroup="testaa" mode="1" failureHandler="defaultHandler">
-        <seata:gtx name="test" scanPackage="io.seata.spring.schema" pattern="@METHOD:*Biz"/>
+        <seata:globalTransactional name="test" scanPackage="io.seata.spring.schema" pattern="@METHOD:*Biz"/>
     </seata:application>
 
     <bean id="defaultHandler" class="io.seata.tm.api.DefaultFailureHandlerImpl"/>

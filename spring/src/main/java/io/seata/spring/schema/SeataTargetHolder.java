@@ -21,66 +21,66 @@ import java.util.Set;
 import io.netty.util.internal.ConcurrentSet;
 
 /**
- * The type gtx target holder
+ * The type seata target holder
  *
  * @author xingfudeshi@gmail.com
  */
-public enum GtxTargetHolder {
+public enum SeataTargetHolder {
     /**
      * instance
      */
     INSTANCE;
-    private Set<GtxTarget> gtxTargets;
+    private Set<SeataTarget> seataTargets;
 
-    GtxTargetHolder() {
-        this.gtxTargets = new ConcurrentSet<>();
+    SeataTargetHolder() {
+        this.seataTargets = new ConcurrentSet<>();
     }
 
     /**
      * add
      *
-     * @param gtxTarget
+     * @param seataTarget
      * @return boolean
      * @author xingfudeshi@gmail.com
      */
-    public boolean add(GtxTarget gtxTarget) {
-        return this.gtxTargets.add(gtxTarget);
+    public boolean add(SeataTarget seataTarget) {
+        return this.seataTargets.add(seataTarget);
     }
 
     /**
      * contains
      *
-     * @param gtxTarget
+     * @param seataTarget
      * @return boolean
      * @author xingfudeshi@gmail.com
      */
-    public boolean contains(GtxTarget gtxTarget) {
-        return this.gtxTargets.contains(gtxTarget);
+    public boolean contains(SeataTarget seataTarget) {
+        return this.seataTargets.contains(seataTarget);
     }
 
     /**
      * remove
      *
-     * @param gtxTarget
+     * @param seataTarget
      * @return boolean
      * @author xingfudeshi@gmail.com
      */
-    public boolean remove(GtxTarget gtxTarget) {
-        return this.gtxTargets.remove(gtxTarget);
+    public boolean remove(SeataTarget seataTarget) {
+        return this.seataTargets.remove(seataTarget);
     }
 
     /**
      * find
      *
-     * @param gtxTargetType
+     * @param seataTargetType
      * @param targetName
-     * @return io.seata.spring.schema.GtxTarget
+     * @return io.seata.spring.schema.SeataTarget
      * @author xingfudeshi@gmail.com
      */
-    public GtxTarget find(GtxTargetType gtxTargetType, String targetName) {
-        return this.gtxTargets
+    public SeataTarget find(SeataTargetType seataTargetType, String targetName) {
+        return this.seataTargets
             .stream()
-            .filter(gtxTarget -> gtxTarget.getGtxTargetType().equals(gtxTargetType) && gtxTarget.getTargetName().equals(targetName))
+            .filter(seataTarget -> seataTarget.getSeataTargetType().equals(seataTargetType) && seataTarget.getTargetName().equals(targetName))
             .findAny().orElse(null);
     }
 
@@ -89,18 +89,18 @@ public enum GtxTargetHolder {
      *
      * @param clasz
      * @param method
-     * @return io.seata.spring.schema.GtxTarget
+     * @return io.seata.spring.schema.SeataTarget
      * @author xingfudeshi@gmail.com
      */
-    public GtxTarget tryFind(Class<?> clasz, Method method) {
-        GtxTarget gtxTarget = null;
+    public SeataTarget tryFind(Class<?> clasz, Method method) {
+        SeataTarget seataTarget = null;
         if (clasz != null) {
-            gtxTarget = GtxTargetHolder.INSTANCE.find(GtxTargetType.CLASS, clasz.getName());
+            seataTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.CLASS, clasz.getName());
         }
-        if (method != null && gtxTarget == null) {
-            gtxTarget = GtxTargetHolder.INSTANCE.find(GtxTargetType.METHOD, method.getName());
+        if (method != null && seataTarget == null) {
+            seataTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.METHOD, method.getName());
         }
-        return gtxTarget;
+        return seataTarget;
     }
 
 

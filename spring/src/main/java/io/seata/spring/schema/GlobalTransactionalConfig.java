@@ -21,11 +21,11 @@ import java.util.Objects;
 import io.seata.tm.api.transaction.Propagation;
 
 /**
- * The type gtx config
+ * The type global transactional config
  *
  * @author xingfudeshi@gmail.com
  */
-public class GtxConfig {
+public class GlobalTransactionalConfig {
     private int timeoutMills;
     private String name;
     private Class<? extends Throwable>[] rollbackFor = new Class[0];
@@ -128,7 +128,7 @@ public class GtxConfig {
 
     @Override
     public String toString() {
-        return "GtxConfig{" +
+        return "GlobalTransactionalConfig{" +
             "timeoutMills=" + timeoutMills +
             ", name='" + name + '\'' +
             ", rollbackFor=" + Arrays.toString(rollbackFor) +
@@ -151,8 +151,8 @@ public class GtxConfig {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        GtxConfig gtxConfig = (GtxConfig) o;
-        return Objects.equals(scanPackage, gtxConfig.scanPackage) && Objects.equals(pattern, gtxConfig.pattern);
+        GlobalTransactionalConfig globalTransactionalConfig = (GlobalTransactionalConfig) o;
+        return Objects.equals(scanPackage, globalTransactionalConfig.scanPackage) && Objects.equals(pattern, globalTransactionalConfig.pattern);
     }
 
     @Override

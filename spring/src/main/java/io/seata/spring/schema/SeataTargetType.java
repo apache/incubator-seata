@@ -16,10 +16,10 @@
 package io.seata.spring.schema;
 
 /**
- * The type gtx target type
+ * The type seata target type
  * @author xingfudeshi@gmail.com
  */
-public enum GtxTargetType {
+public enum SeataTargetType {
     /**
      * class
      */

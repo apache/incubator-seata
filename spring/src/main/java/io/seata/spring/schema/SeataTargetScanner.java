@@ -33,18 +33,18 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.PatternMatchUtils;
 
 /**
- * The type gtx target scanner
+ * The type seata target scanner
  *
  * @author xingfudeshi@gmail.com
  */
-public class GtxTargetScanner implements ResourceLoaderAware {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GtxTargetScanner.class);
+public class SeataTargetScanner implements ResourceLoaderAware {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataTargetScanner.class);
     private static final String PATTERN_CLASS = "@CLASS";
     private static final String PATTERN_METHOD = "@METHOD";
-    private final Set<GtxConfig> gtxConfigs;
+    private final Set<GlobalTransactionalConfig> globalTransactionalConfigs;
 
-    public GtxTargetScanner(Set<GtxConfig> gtxConfigs) {
-        this.gtxConfigs = gtxConfigs;
+    public SeataTargetScanner(Set<GlobalTransactionalConfig> globalTransactionalConfigs) {
+        this.globalTransactionalConfigs = globalTransactionalConfigs;
     }
 
     @Override
@@ -53,21 +53,21 @@ public class GtxTargetScanner implements ResourceLoaderAware {
             ResourcePatternResolver resolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
             MetadataReaderFactory metaReader = new CachingMetadataReaderFactory(resourceLoader);
 
-            for (GtxConfig gtxConfig : this.gtxConfigs) {
-                Resource[] resources = resolver.getResources("classpath*:" + formatPackageName(gtxConfig.getScanPackage()) + "/*.class");
+            for (GlobalTransactionalConfig globalTransactionalConfig : this.globalTransactionalConfigs) {
+                Resource[] resources = resolver.getResources("classpath*:" + formatPackageName(globalTransactionalConfig.getScanPackage()) + "/*.class");
                 for (Resource r : resources) {
                     MetadataReader reader = metaReader.getMetadataReader(r);
                     String className = reader.getClassMetadata().getClassName();
 
-                    String pattern = gtxConfig.getPattern();
+                    String pattern = globalTransactionalConfig.getPattern();
                     if (StringUtils.startsWith(pattern, PATTERN_CLASS)) {
                         String regex = StringUtils.split(pattern, ":")[1];
                         if (PatternMatchUtils.simpleMatch(regex, className)) {
-                            GtxTarget gtxTarget = new GtxTarget();
-                            gtxTarget.setGtxConfig(gtxConfig);
-                            gtxTarget.setGtxTargetType(GtxTargetType.CLASS);
-                            gtxTarget.setTargetName(className);
-                            GtxTargetHolder.INSTANCE.add(gtxTarget);
+                            SeataTarget seataTarget = new SeataTarget();
+                            seataTarget.setGlobalTransactionalConfig(globalTransactionalConfig);
+                            seataTarget.setSeataTargetType(SeataTargetType.CLASS);
+                            seataTarget.setTargetName(className);
+                            SeataTargetHolder.INSTANCE.add(seataTarget);
                         }
 
 
@@ -78,11 +78,11 @@ public class GtxTargetScanner implements ResourceLoaderAware {
                         for (Method method : methods) {
                             String name = method.getName();
                             if (PatternMatchUtils.simpleMatch(regex, name)) {
-                                GtxTarget gtxTarget = new GtxTarget();
-                                gtxTarget.setGtxConfig(gtxConfig);
-                                gtxTarget.setGtxTargetType(GtxTargetType.METHOD);
-                                gtxTarget.setTargetName(name);
-                                GtxTargetHolder.INSTANCE.add(gtxTarget);
+                                SeataTarget seataTarget = new SeataTarget();
+                                seataTarget.setGlobalTransactionalConfig(globalTransactionalConfig);
+                                seataTarget.setSeataTargetType(SeataTargetType.METHOD);
+                                seataTarget.setTargetName(name);
+                                SeataTargetHolder.INSTANCE.add(seataTarget);
                             }
                         }
 

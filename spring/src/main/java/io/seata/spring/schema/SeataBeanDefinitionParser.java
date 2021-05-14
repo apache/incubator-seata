@@ -62,7 +62,7 @@ public class SeataBeanDefinitionParser implements BeanDefinitionParser {
      * @author xingfudeshi@gmail.com
      */
     private static BeanDefinition doParse(Element element, ParserContext parserContext, Class<?> beanClass) {
-        registerGtxTargetScanner(parserContext, element);
+        registerSeataTargetScanner(parserContext, element);
         RootBeanDefinition beanDefinition = new RootBeanDefinition();
         beanDefinition.setBeanClass(beanClass);
         beanDefinition.setLazyInit(false);
@@ -72,86 +72,86 @@ public class SeataBeanDefinitionParser implements BeanDefinitionParser {
     }
 
     /**
-     * registwr gtx target scanner
+     * registwr seata target scanner
      *
      * @param parserContext
      * @param element
      * @return void
      * @author xingfudeshi@gmail.com
      */
-    private static void registerGtxTargetScanner(ParserContext parserContext, Element element) {
+    private static void registerSeataTargetScanner(ParserContext parserContext, Element element) {
         RootBeanDefinition beanDefinition = new RootBeanDefinition();
-        beanDefinition.setBeanClass(GtxTargetScanner.class);
+        beanDefinition.setBeanClass(SeataTargetScanner.class);
         beanDefinition.setLazyInit(false);
         ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
-        constructorArgumentValues.addIndexedArgumentValue(0, getGtxConfig(element));
+        constructorArgumentValues.addIndexedArgumentValue(0, getSeataConfig(element));
         beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
-        parserContext.getRegistry().registerBeanDefinition(GtxTargetScanner.class.getName(), beanDefinition);
+        parserContext.getRegistry().registerBeanDefinition(SeataTargetScanner.class.getName(), beanDefinition);
     }
 
     /**
-     * get gtx config
+     * get seata config
      *
      * @param element
-     * @return java.util.List<io.seata.spring.schema.GtxConfig>
+     * @return java.util.List<io.seata.spring.schema.GlobalTransactionalConfig>
      * @author xingfudeshi@gmail.com
      */
-    private static Set<GtxConfig> getGtxConfig(Element element) {
+    private static Set<GlobalTransactionalConfig> getSeataConfig(Element element) {
         NodeList nodeList = element.getChildNodes();
         int length = nodeList.getLength();
-        Set<GtxConfig> gtxConfigs = new HashSet<>();
+        Set<GlobalTransactionalConfig> globalTransactionalConfigs = new HashSet<>();
         for (int i = 0; i < length; i++) {
             Node node = nodeList.item(i);
             if (node instanceof Element) {
                 Element ele = (Element) node;
-                GtxConfig gtxConfig = new GtxConfig();
-                gtxConfig.setScanPackage(ele.getAttribute("scanPackage"));
-                gtxConfig.setPattern(ele.getAttribute("pattern"));
+                GlobalTransactionalConfig globalTransactionalConfig = new GlobalTransactionalConfig();
+                globalTransactionalConfig.setScanPackage(ele.getAttribute("scanPackage"));
+                globalTransactionalConfig.setPattern(ele.getAttribute("pattern"));
                 String timeoutMills = ele.getAttribute("timeoutMills");
                 if (StringUtils.isNotBlank(timeoutMills)) {
-                    gtxConfig.setTimeoutMills(Integer.parseInt(timeoutMills));
+                    globalTransactionalConfig.setTimeoutMills(Integer.parseInt(timeoutMills));
                 } else {
-                    gtxConfig.setTimeoutMills(DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+                    globalTransactionalConfig.setTimeoutMills(DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
                 }
-                gtxConfig.setName(ele.getAttribute("name"));
+                globalTransactionalConfig.setName(ele.getAttribute("name"));
                 String rollbackFor = ele.getAttribute("rollbackFor");
                 if (StringUtils.isNotBlank(rollbackFor)) {
-                    gtxConfig.setRollbackFor(convertClass(rollbackFor));
+                    globalTransactionalConfig.setRollbackFor(convertClass(rollbackFor));
                 }
                 String rollbackForClassName = ele.getAttribute("rollbackForClassName");
                 if (StringUtils.isNotBlank(rollbackForClassName)) {
-                    gtxConfig.setRollbackForClassName(rollbackForClassName.split(","));
+                    globalTransactionalConfig.setRollbackForClassName(rollbackForClassName.split(","));
                 }
                 String noRollbackFor = ele.getAttribute("noRollbackFor");
                 if (StringUtils.isNotBlank(noRollbackFor)) {
-                    gtxConfig.setNoRollbackFor(convertClass(noRollbackFor));
+                    globalTransactionalConfig.setNoRollbackFor(convertClass(noRollbackFor));
                 }
                 String noRollbackForClassName = ele.getAttribute("noRollbackForClassName");
                 if (StringUtils.isNotBlank(noRollbackForClassName)) {
-                    gtxConfig.setNoRollbackForClassName(noRollbackForClassName.split(","));
+                    globalTransactionalConfig.setNoRollbackForClassName(noRollbackForClassName.split(","));
                 }
                 String propagation = ele.getAttribute("propagation");
                 if (StringUtils.isNotBlank(propagation)) {
-                    gtxConfig.setPropagation(Propagation.valueOf(propagation));
+                    globalTransactionalConfig.setPropagation(Propagation.valueOf(propagation));
                 } else {
-                    gtxConfig.setPropagation(Propagation.REQUIRED);
+                    globalTransactionalConfig.setPropagation(Propagation.REQUIRED);
                 }
                 String lockRetryInternal = ele.getAttribute("lockRetryInternal");
                 if (StringUtils.isNotBlank(lockRetryInternal)) {
-                    gtxConfig.setLockRetryInternal(Integer.parseInt(lockRetryInternal));
+                    globalTransactionalConfig.setLockRetryInternal(Integer.parseInt(lockRetryInternal));
                 } else {
-                    gtxConfig.setLockRetryInternal(0);
+                    globalTransactionalConfig.setLockRetryInternal(0);
                 }
                 String lockRetryTimes = ele.getAttribute("lockRetryTimes");
                 if (StringUtils.isNotBlank(lockRetryTimes)) {
-                    gtxConfig.setLockRetryTimes(Integer.parseInt(lockRetryTimes));
+                    globalTransactionalConfig.setLockRetryTimes(Integer.parseInt(lockRetryTimes));
                 } else {
-                    gtxConfig.setLockRetryTimes(-1);
+                    globalTransactionalConfig.setLockRetryTimes(-1);
                 }
-                gtxConfigs.add(gtxConfig);
+                globalTransactionalConfigs.add(globalTransactionalConfig);
             }
         }
-        return gtxConfigs;
+        return globalTransactionalConfigs;
     }
 
     /**

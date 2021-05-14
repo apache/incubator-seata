@@ -28,7 +28,7 @@
             <xsd:complexContent>
                 <xsd:extension base="beans:identifiedType">
                     <xsd:sequence>
-                        <xsd:element ref="gtx" minOccurs="0" maxOccurs="unbounded"/>
+                        <xsd:element ref="globalTransactional" minOccurs="0" maxOccurs="unbounded"/>
                     </xsd:sequence>
                     <xsd:attribute name="applicationId" type="xsd:string" use="required"/>
                     <xsd:attribute name="txServiceGroup" type="xsd:string" use="required"/>
@@ -40,7 +40,7 @@
     </xsd:element>
 
 
-    <xsd:element name="gtx">
+    <xsd:element name="globalTransactional">
         <xsd:complexType>
             <xsd:attribute name="timeoutMills" type="xsd:int" use="optional"/>
             <xsd:attribute name="name" type="xsd:string" use="optional"/>

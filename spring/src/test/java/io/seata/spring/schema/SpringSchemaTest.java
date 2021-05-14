@@ -43,9 +43,9 @@ public class SpringSchemaTest {
     }
 
     @Test
-    public void testGtxTargetHolder() {
-        GtxTarget gtxTarget = GtxTargetHolder.INSTANCE.find(GtxTargetType.METHOD, "doBiz");
-        Assertions.assertThat(gtxTarget).isNotNull();
-        Assertions.assertThat(gtxTarget.getTargetName()).isEqualTo("doBiz");
+    public void testSeataTargetHolder() {
+        SeataTarget seataTarget = SeataTargetHolder.INSTANCE.find(SeataTargetType.METHOD, "doBiz");
+        Assertions.assertThat(seataTarget).isNotNull();
+        Assertions.assertThat(seataTarget.getTargetName()).isEqualTo("doBiz");
     }
 }
