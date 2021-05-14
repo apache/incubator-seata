@@ -96,6 +96,7 @@ public final class ActionContextUtil {
                     return;
                 }
 
+                @SuppressWarnings("unchecked")
                 List<Object> listParamObject = (List<Object>)paramObject;
                 if (listParamObject.isEmpty()) {
                     return;
