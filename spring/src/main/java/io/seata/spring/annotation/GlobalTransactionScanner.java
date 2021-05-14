@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +23,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -35,10 +35,10 @@ import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
+import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.schema.GtxTarget;
 import io.seata.spring.schema.GtxTargetHolder;
 import io.seata.spring.schema.GtxTargetType;
-import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
@@ -228,10 +228,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private void registerSpringShutdownHook() {
-        if (applicationContext instanceof 
-        
-        
-        ) {
+        if (applicationContext instanceof ConfigurableApplicationContext) {
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
