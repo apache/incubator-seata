@@ -15,6 +15,7 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Extracting TCC Context from Method
@@ -107,21 +109,31 @@ public final class ActionContextUtil {
         }
 
         // If is `List`, get by index
-        if (annotation.index() >= 0) {
+        int index = annotation.index();
+        if (index >= 0) {
+            if (paramObject.getClass().isArray()) {
+                // The `index` field supports `Array`
+                // @since above 1.4.2
+                if (Array.getLength(paramObject) == 0) {
+                    return;
+                }
+                paramObject = CollectionUtils.arrayToList(paramObject);
+            }
+
             if (paramObject instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> listParamObject = (List<Object>)paramObject;
                 if (listParamObject.isEmpty()) {
                     return;
                 }
-
-                paramObject = listParamObject.get(annotation.index());
-                if (paramObject == null) {
-                    return;
-                }
+                paramObject = listParamObject.get(index);
             } else {
                 LOGGER.warn("the param named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
                         paramName, BusinessActionContextParameter.class.getSimpleName());
+            }
+
+            if (paramObject == null) {
+                return;
             }
         }
 

@@ -34,16 +34,20 @@ public interface TccAction {
      * Prepare boolean.
      *
      * @param actionContext the action context
-     * @param a             the a
-     * @param b             the b
-     * @param tccParam      the tcc param
+     * @param a             the int a
+     * @param b             the list b
+     * @param c             the array c
+     * @param d             the object d
+     * @param e             the object e
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest" , commitMethod = "commit", rollbackMethod = "rollback")
+    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext actionContext,
-                           @BusinessActionContextParameter(paramName = "a") int a,
-                           @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                           @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
+                    @BusinessActionContextParameter(paramName = "a") int a,
+                    @BusinessActionContextParameter(paramName = "b", index = 0) List b,
+                    @BusinessActionContextParameter(paramName = "c", index = 1) long[] c,
+                    @BusinessActionContextParameter(isParamInProperty = true) TccParam d,
+                    @BusinessActionContextParameter(paramName = "e", isParamInProperty = true) TccParam e);
 
     /**
      * Commit boolean.
