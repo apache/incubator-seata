@@ -48,8 +48,6 @@ public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
-    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
-
     /**
      * Handler the TCC Aspect
      *
@@ -78,12 +76,12 @@ public class ActionInterceptorHandler {
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
         //share actionContext implicitly
-        ActionInterceptorHandler.setUpContext(actionContext);
+        BusinessActionContextUtil.setContext(actionContext);
         try {
             //Execute business
             return targetCallback.execute();
         } finally {
-            ActionInterceptorHandler.cleanUp();
+            BusinessActionContextUtil.clear();
             //to report business action context finally.
             if (businessAction.isDelayReport() && Boolean.TRUE.equals(actionContext.getUpdated())) {
                 BusinessActionContextUtil.reportContext(actionContext);
@@ -252,17 +250,5 @@ public class ActionInterceptorHandler {
             }
         }
         return context;
-    }
-
-    public static BusinessActionContext getContext() {
-        return CONTEXT_HOLDER.get();
-    }
-
-    private static void cleanUp() {
-        CONTEXT_HOLDER.remove();
-    }
-
-    private static void setUpContext(BusinessActionContext context) {
-        CONTEXT_HOLDER.set(context);
     }
 }

@@ -87,11 +87,6 @@ public interface Constants {
     String HOST_NAME = "host-name";
 
     /**
-     * transaction context
-     */
-    String TCC_ACTIVITY_CONTEXT = "activityContext";
-
-    /**
      * branch context
      */
     String TCC_ACTION_CONTEXT = "actionContext";

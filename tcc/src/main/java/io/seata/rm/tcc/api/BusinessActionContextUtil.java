@@ -21,7 +21,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +42,8 @@ public final class BusinessActionContextUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessActionContextUtil.class);
 
+    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
+
     /**
      * add business action context and share it to tcc phase2
      *
@@ -63,7 +64,7 @@ public final class BusinessActionContextUtil {
     @SuppressWarnings("deprecation")
     public static void addContext(Map<String, Object> context) {
         if (context != null) {
-            BusinessActionContext actionContext = ActionInterceptorHandler.getContext();
+            BusinessActionContext actionContext = getContext();
             context.forEach((key, value) -> {
                 if (!Objects.isNull(value)) {
                     actionContext.setUpdated(true);
@@ -113,5 +114,17 @@ public final class BusinessActionContextUtil {
             LOGGER.error("{}, error: {}", msg, e.getMessage());
             throw new FrameworkException(e, msg);
         }
+    }
+
+    public static BusinessActionContext getContext() {
+        return CONTEXT_HOLDER.get();
+    }
+
+    public static void setContext(BusinessActionContext context) {
+        CONTEXT_HOLDER.set(context);
+    }
+
+    public static void clear() {
+        CONTEXT_HOLDER.remove();
     }
 }
