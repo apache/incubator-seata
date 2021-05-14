@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author wang.liang
  */
-public class OrderUtilTest {
+class OrderUtilTest {
 
     @Test
-    public void test_getOrder() {
+    void test_getOrder() {
         // get from Ordered
         MockOrdered ordered = new MockOrdered(100);
         assertThat(OrderUtil.getOrder(ordered)).isEqualTo(100);
@@ -43,7 +43,7 @@ public class OrderUtilTest {
     }
 
     @Test
-    public void test_lowerThan() {
+    void test_lowerThan() {
         assertThat(OrderUtil.lowerThan(Ordered.LOWEST_PRECEDENCE, Ordered.HIGHEST_PRECEDENCE)).isTrue();
         assertThat(OrderUtil.lowerThan(1, 0)).isTrue();
         assertThat(OrderUtil.lowerThan(1, 1)).isFalse();
@@ -68,7 +68,7 @@ public class OrderUtilTest {
     }
 
     @Test
-    public void test_higherThan() {
+    void test_higherThan() {
         assertThat(OrderUtil.higherThan(Ordered.HIGHEST_PRECEDENCE, Ordered.LOWEST_PRECEDENCE)).isTrue();
         assertThat(OrderUtil.higherThan(0, 1)).isTrue();
         assertThat(OrderUtil.higherThan(1, 1)).isFalse();
@@ -93,7 +93,7 @@ public class OrderUtilTest {
     }
 
     @Test
-    public void test_lower() {
+    void test_lower() {
         assertThat(OrderUtil.lower(1, 1)).isEqualTo(2);
         assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE - 1, 2)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
         assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE, 1)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
@@ -102,8 +102,8 @@ public class OrderUtilTest {
     }
 
     @Test
-    public void test_higher() {
-        assertThat(OrderUtil.higher(1, 1)).isEqualTo(0);
+    void test_higher() {
+        assertThat(OrderUtil.higher(1, 1)).isZero();
         assertThat(OrderUtil.higher(Ordered.HIGHEST_PRECEDENCE + 1, 2)).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
         assertThat(OrderUtil.higher(Ordered.HIGHEST_PRECEDENCE, 1)).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 

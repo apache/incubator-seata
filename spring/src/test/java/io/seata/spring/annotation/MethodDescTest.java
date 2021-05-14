@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Wu
  */
-public class MethodDescTest {
+class MethodDescTest {
 
     private static final GlobalTransactionScanner GLOBAL_TRANSACTION_SCANNER = new GlobalTransactionScanner(
         "global-trans-scanner-test");
@@ -45,12 +45,12 @@ public class MethodDescTest {
     }
 
     @Test
-    public void testGetAnnotation() throws NoSuchMethodException {
+    void testGetAnnotation() throws NoSuchMethodException {
         GlobalTransactionalInterceptor globalTransactionalInterceptor = new GlobalTransactionalInterceptor(null);
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
-        Assertions.assertEquals(transactional.timeoutMills(), 300000);
+        Assertions.assertEquals(300000,transactional.timeoutMills());
         method = null;
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
         Assertions.assertEquals(transactional.timeoutMills(), DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT * 2);
@@ -61,16 +61,16 @@ public class MethodDescTest {
         targetClass = Mockito.mock(MockMethodAnnotation.class).getClass();
         method = MockMethodAnnotation.class.getDeclaredMethod("doBiz", String.class);
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
-        Assertions.assertEquals(transactional.name(), "doBiz");
+        Assertions.assertEquals("doBiz",transactional.name());
         // only method has Annotation, class is not null
         targetClass = Mockito.mock(MockClassAnnotation.class).getClass();
         method = MockClassAnnotation.class.getDeclaredMethod("doBiz", String.class);
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
-        Assertions.assertEquals(transactional.name(), "MockClassAnnotation");
+        Assertions.assertEquals("MockClassAnnotation",transactional.name());
     }
 
     @Test
-    public void testGlobalTransactional() throws NoSuchMethodException {
+    void testGlobalTransactional() throws NoSuchMethodException {
         MockClassAnnotation mockClassAnnotation = new MockClassAnnotation();
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTarget(mockClassAnnotation);
@@ -91,7 +91,7 @@ public class MethodDescTest {
     }
 
     @Test
-    public void testGetTransactionAnnotation()
+    void testGetTransactionAnnotation()
         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getTransactionAnnotation()).isEqualTo(transactional);
@@ -99,13 +99,13 @@ public class MethodDescTest {
     }
 
     @Test
-    public void testGetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testGetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getMethod()).isEqualTo(method);
     }
 
     @Test
-    public void testSetTransactionAnnotation()
+    void testSetTransactionAnnotation()
         throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getTransactionAnnotation()).isNotNull();
@@ -114,7 +114,7 @@ public class MethodDescTest {
     }
 
     @Test
-    public void testSetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testSetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getMethod()).isNotNull();
         methodDesc.setMethod(null);
