@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The type Oracle insert executor.
+ *
  * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
@@ -62,12 +64,10 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
         //when there is only one pk in the table
         if (isContainsPk) {
             pkValuesMap = getPkValuesByColumn();
-        }
-        else if (containsColumns()) {
+        } else if (containsColumns()) {
             String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
             pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
-        }
-        else {
+        } else {
             pkValuesMap = getPkValuesByColumn();
         }
         return pkValuesMap;
@@ -80,9 +80,9 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
         List<Object> pkValues = pkValuesMap.get(pkKey);
 
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValuesMap.put(pkKey,getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
+            pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
         } else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValuesMap.put(pkKey,getGeneratedKeys());
+            pkValuesMap.put(pkKey, getGeneratedKeys());
         } else if (pkValues.size() == 1 && pkValues.get(0) instanceof Null) {
             throw new NotSupportYetException("oracle not support null");
         }

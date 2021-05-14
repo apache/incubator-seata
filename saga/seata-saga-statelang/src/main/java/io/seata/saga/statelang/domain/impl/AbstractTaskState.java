@@ -41,6 +41,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private boolean isPersist = true;
     private Boolean retryPersistModeUpdate;
     private Boolean compensatePersistModeUpdate;
+    private Loop loop;
 
     @Override
     public String getCompensateState() {
@@ -147,7 +148,6 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         this.outputExpressions = outputExpressions;
     }
 
-
     @Override
     public Map<String, String> getStatus() {
         return status;
@@ -155,6 +155,15 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
     public void setStatus(Map<String, String> status) {
         this.status = status;
+    }
+
+    @Override
+    public Loop getLoop() {
+        return loop;
+    }
+
+    public void setLoop(Loop loop) {
+        this.loop = loop;
     }
 
     public static class RetryImpl implements Retry {
@@ -244,6 +253,60 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
         public void setNext(String next) {
             this.next = next;
+        }
+    }
+
+    public static class LoopImpl implements Loop {
+
+        private int parallel;
+        private String collection;
+        private String elementVariableName;
+        private String elementIndexName;
+        private String completionCondition;
+
+        @Override
+        public int getParallel() {
+            return parallel;
+        }
+
+        public void setParallel(int parallel) {
+            this.parallel = parallel;
+        }
+
+        @Override
+        public String getCollection() {
+            return collection;
+        }
+
+        public void setCollection(String collection) {
+            this.collection = collection;
+        }
+
+        @Override
+        public String getElementVariableName() {
+            return elementVariableName;
+        }
+
+        public void setElementVariableName(String elementVariableName) {
+            this.elementVariableName = elementVariableName;
+        }
+
+        @Override
+        public String getElementIndexName() {
+            return elementIndexName;
+        }
+
+        public void setElementIndexName(String elementIndexName) {
+            this.elementIndexName = elementIndexName;
+        }
+
+        @Override
+        public String getCompletionCondition() {
+            return completionCondition;
+        }
+
+        public void setCompletionCondition(String completionCondition) {
+            this.completionCondition = completionCondition;
         }
     }
 }

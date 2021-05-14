@@ -155,8 +155,9 @@ public class DefaultRemotingParser {
     /**
      * parse the remoting bean info
      *
-     * @param bean     the bean
-     * @param beanName the bean name
+     * @param bean           the bean
+     * @param beanName       the bean name
+     * @param remotingParser the remoting parser
      * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName, RemotingParser remotingParser) {

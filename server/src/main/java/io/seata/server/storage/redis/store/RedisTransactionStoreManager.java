@@ -16,13 +16,14 @@
 package io.seata.server.storage.redis.store;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -51,12 +52,13 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
 
 /**
  * The redis transaction store manager
  *
  * @author funkye
- * @author wangzhongxiang 
+ * @author wangzhongxiang
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
@@ -64,7 +66,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**the prefix of the branch transactions*/
     private static final String REDIS_SEATA_BRANCHES_PREFIX = "SEATA_BRANCHES_";
-    
+
     /**the prefix of the branch transaction*/
     private static final String REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
 
@@ -141,8 +143,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> branchTransactionDOMap = jedis.hgetAll(branchKey);
-            String xid = branchTransactionDOMap.get(REDIS_KEY_BRANCH_XID);
+            String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
             if (StringUtils.isEmpty(xid)) {
                 return true;
             }
@@ -169,9 +170,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (StringUtils.isEmpty(previousBranchStatus)) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
-            Map<String,String> map = new HashMap<>(2,1);
-            map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatus()));
-            map.put(REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            Map<String, String> map = new HashMap<>(3, 1);
+            map.put(REDIS_KEY_BRANCH_STATUS, String.valueOf(branchTransactionDO.getStatus()));
+            map.put(REDIS_KEY_BRANCH_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
+                map.put(REDIS_KEY_BRANCH_APPLICATION_DATA, String.valueOf(branchTransactionDO.getApplicationData()));
+            }
             jedis.hmset(branchKey, map);
             return true;
         } catch (Exception ex) {
@@ -212,11 +216,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> globalTransactionDoMap = jedis.hgetAll(globalKey);
-            String xid = globalTransactionDoMap.get(REDIS_KEY_GLOBAL_XID);
+            String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
             if (StringUtils.isEmpty(xid)) {
                 LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
-                        globalTransactionDO.getXid());
+                    globalTransactionDO.getXid());
                 return true;
             }
             Pipeline pipelined = jedis.pipelined();
@@ -347,19 +350,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Pipeline pipelined = jedis.pipelined();
-            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey,0,-1));
+            statusKeys.stream().forEach(statusKey -> pipelined.lrange(statusKey, 0, -1));
             List<List<String>> list = (List<List<String>>)(List)pipelined.syncAndReturnAll();
-            List<String> xids = new ArrayList<>();
+            List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
             if (CollectionUtils.isNotEmpty(list)) {
-                xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
+                List<String> xids = list.stream().flatMap(ll -> ll.stream()).collect(Collectors.toList());
+                xids.parallelStream().forEach(xid -> {
+                    GlobalSession globalSession = this.readSession(xid, true);
+                    if (globalSession != null) {
+                        globalSessions.add(globalSession);
+                    }
+                });
             }
-            List<GlobalSession> globalSessions = new ArrayList<>();
-            xids.parallelStream().forEach(xid -> {
-                GlobalSession globalSession = this.readSession(xid, true);
-                if (globalSession != null) {
-                    globalSessions.add(globalSession);
-                }
-            });
             return globalSessions;
         }
     }
@@ -420,7 +422,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String globalKey = buildGlobalKeyByTransactionId(transactionId);
         String xid = null;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> map  = jedis.hgetAll(globalKey);
+            Map<String, String> map = jedis.hgetAll(globalKey);
             if (CollectionUtils.isEmpty(map)) {
                 return null;
             }
@@ -445,10 +447,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis,String xid) {
         List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
         String branchListKey = buildBranchListKeyByXid(xid);
-        List<String> branchKeys = jedis.lrange(branchListKey, 0, -1);
+        List<String> branchKeys = lRange(jedis, branchListKey);
         Pipeline pipeline = jedis.pipelined();
         if (CollectionUtils.isNotEmpty(branchKeys)) {
-            branchKeys.stream().forEachOrdered(branchKey -> pipeline.hgetAll(branchKey));
+            branchKeys.stream().forEach(branchKey -> pipeline.hgetAll(branchKey));
             List<Object> branchInfos = pipeline.syncAndReturnAll();
             for (Object branchInfo : branchInfos) {
                 if (branchInfo != null) {
@@ -460,10 +462,27 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
         }
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
-            branchTransactionDOs = branchTransactionDOs.stream().sorted(Comparator.comparing(BranchTransactionDO::getGmtCreate))
-                    .collect(Collectors.toList());
+            Collections.sort(branchTransactionDOs);
         }
         return branchTransactionDOs;
+    }
+
+    private List<String> lRange(Jedis jedis, String key) {
+        List<String> keys = new ArrayList<>();
+        List<String> values;
+        int limit = 20;
+        int start = 0;
+        int stop = limit;
+        for (;;) {
+            values = jedis.lrange(key, start, stop);
+            keys.addAll(values);
+            if (CollectionUtils.isEmpty(values) || values.size() < limit) {
+                break;
+            }
+            start = keys.size();
+            stop = start + limit;
+        }
+        return keys;
     }
 
     private String buildBranchListKeyByXid(String xid) {
@@ -481,4 +500,5 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     private String buildGlobalStatus(Integer status) {
         return REDIS_SEATA_STATUS_PREFIX + status;
     }
+
 }
