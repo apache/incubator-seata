@@ -77,7 +77,7 @@ public class ActionInterceptorHandler {
         //share actionContext implicitly
         BusinessActionContextUtil.setContext(actionContext);
         try {
-            //Execute business
+            //Execute business, and return business result
             return targetCallback.execute();
         } finally {
             BusinessActionContextUtil.clear();
