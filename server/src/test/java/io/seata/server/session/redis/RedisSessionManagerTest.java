@@ -18,6 +18,7 @@ package io.seata.server.session.redis;
 
 import java.io.IOException;
 import java.util.List;
+
 import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -331,6 +332,7 @@ public class RedisSessionManagerTest {
         sessionManager.removeBranchSession(session,branchSession);
         sessionManager.removeGlobalSession(session);
     }
+
 
     @AfterAll
     public static void after() {
