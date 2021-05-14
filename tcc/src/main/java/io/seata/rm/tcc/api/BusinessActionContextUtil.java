@@ -15,19 +15,19 @@
  */
 package io.seata.rm.tcc.api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * the api of sharing business action context to tcc phase 2
@@ -35,20 +35,26 @@ import java.util.Objects;
  * @author tanzj
  * @date 2021/4/16
  */
-public class BusinessActionContextUtil {
+public final class BusinessActionContextUtil {
 
     private BusinessActionContextUtil() {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessActionContextUtil.class);
 
+    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
+
     /**
      * add business action context and share it to tcc phase2
      *
-     * @param key the key of new context
+     * @param key   the key of new context
      * @param value new context
      */
     public static void addContext(String key, Object value) {
+        if (value == null) {
+            return;
+        }
+
         Map<String, Object> newContext = new HashMap<>(1, 1);
         newContext.put(key, value);
         addContext(newContext);
@@ -59,23 +65,29 @@ public class BusinessActionContextUtil {
      *
      * @param context the new context
      */
+    @SuppressWarnings("deprecation")
     public static void addContext(Map<String, Object> context) {
-        if (context != null) {
-            BusinessActionContext actionContext = ActionInterceptorHandler.getContext();
-            context.forEach((key, value) -> {
-                if (!Objects.isNull(value)) {
-                    actionContext.setUpdated(true);
-                    actionContext.addActionContext(key, value);
-                }
-            });
-            //if delay report, params will be finally reported after phase 1 execution
-            if (Boolean.FALSE.equals(actionContext.getDelayReport())) {
-                return;
-            }
-            reportContext(actionContext);
+        if (CollectionUtils.isEmpty(context)) {
+            return;
         }
-    }
 
+        // put action context
+        BusinessActionContext actionContext = BusinessActionContextUtil.getContext();
+        if (!ActionContextUtil.putActionContext(actionContext.getActionContext(), context)) {
+            // the action context is not changed, do not report
+            return;
+        }
+        // set updated
+        actionContext.setUpdated(true);
+
+        // if delay report, params will be finally reported after phase 1 execution
+        if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
+            return;
+        }
+
+        // do branch report
+        reportContext(actionContext);
+    }
 
     /**
      * to do branch report sharing actionContext
@@ -83,7 +95,13 @@ public class BusinessActionContextUtil {
      * @param actionContext the context
      */
     public static void reportContext(BusinessActionContext actionContext) {
+        // check is updated
+        if (!Boolean.TRUE.equals(actionContext.getUpdated())) {
+            return;
+        }
+
         try {
+            // branch report
             DefaultResourceManager.get().branchReport(
                     BranchType.TCC,
                     actionContext.getXid(),
@@ -91,10 +109,25 @@ public class BusinessActionContextUtil {
                     BranchStatus.Registered,
                     JSON.toJSONString(actionContext)
             );
+
+            // reset to un_updated
+            actionContext.setUpdated(null);
         } catch (TransactionException e) {
             String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
-            LOGGER.error(msg, e);
-            throw new FrameworkException(e);
+            LOGGER.error("{}, error: {}", msg, e.getMessage());
+            throw new FrameworkException(e, msg);
         }
+    }
+
+    public static BusinessActionContext getContext() {
+        return CONTEXT_HOLDER.get();
+    }
+
+    public static void setContext(BusinessActionContext context) {
+        CONTEXT_HOLDER.set(context);
+    }
+
+    public static void clear() {
+        CONTEXT_HOLDER.remove();
     }
 }

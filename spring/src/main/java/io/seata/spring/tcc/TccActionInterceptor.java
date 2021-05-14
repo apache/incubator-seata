@@ -16,9 +16,7 @@
 package io.seata.spring.tcc;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
-import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -39,13 +37,13 @@ import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
-
 import static io.seata.core.constants.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 
 /**
  * TCC Interceptor
  *
  * @author zhangsen
+ * @author wang.liang
  */
 public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener, Ordered {
 
@@ -81,7 +79,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
         if (!RootContext.inGlobalTransaction() || disable || RootContext.inSagaBranch()) {
-            //not in transaction
+            //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = getActionInterfaceMethod(invocation);
@@ -98,13 +96,10 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             }
             try {
                 Object[] methodArgs = invocation.getArguments();
-                //Handler the TCC Aspect
-                Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
+                //Handler the TCC Aspect, and return the business result
+                return actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
                         invocation::proceed);
-                //return the final result
-                return ret.get(Constants.TCC_METHOD_RESULT);
-            }
-            finally {
+            } finally {
                 //if not TCC, unbind branchType
                 if (BranchType.TCC != previousBranchType) {
                     RootContext.unbindBranchType();
@@ -113,6 +108,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
+
+        //not TCC try method
         return invocation.proceed();
     }
 
