@@ -20,8 +20,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.alibaba.fastjson.JSON;
-import io.seata.common.exception.FrameworkException;
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
 
 /**
  * The type Business action context.
@@ -89,44 +88,15 @@ public class BusinessActionContext implements Serializable {
     /**
      * Gets action context.
      *
-     * @param key        the key
-     * @param valueClazz the action context class
-     * @param <T>        the action context type
-     * @return the action context
+     * @param key         the key
+     * @param targetClazz the target class
+     * @param <T>         the target type
+     * @return the action context of the target type
      */
     @Nullable
-    @SuppressWarnings("unchecked")
-    public <T> T getActionContext(String key, @Nonnull Class<T> valueClazz) {
-        if (valueClazz == null) {
-            throw new IllegalArgumentException("valueClazz must be not null");
-        }
-
+    public <T> T getActionContext(String key, @Nonnull Class<T> targetClazz) {
         Object value = actionContext.get(key);
-        if (value == null) {
-            return null;
-        }
-
-        // same class, or super class, can cast directly
-        if (valueClazz.isAssignableFrom(value.getClass())) {
-            return (T)value;
-        }
-
-        // String class
-        if (String.class.equals(valueClazz)) {
-            return (T)value.toString();
-        }
-
-        try {
-            try {
-                return (T)value;
-            } catch (ClassCastException ignore) {
-                return JSON.parseObject(value.toString(), valueClazz);
-            }
-        } catch (RuntimeException e) {
-            String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
-                    key, value.getClass().getName(), valueClazz.getName());
-            throw new FrameworkException(e, errorMsg);
-        }
+        return ActionContextUtil.convertActionContext(key, value, targetClazz);
     }
 
     /**
@@ -215,12 +185,18 @@ public class BusinessActionContext implements Serializable {
      *
      * @param key   the action context's key
      * @param value biz value
+     * @return the action context is changed
      * @see BusinessActionContextUtil // the TCC API utils
      * @deprecated Don't use this method in the `Try` method. Please use {@link BusinessActionContextUtil#addContext}
      */
     @Deprecated
-    public void addActionContext(String key, Object value) {
-        this.actionContext.put(key, value);
+    public boolean addActionContext(String key, Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        Object previousValue = this.actionContext.put(key, value);
+        return value != previousValue;
     }
 
     public Boolean getDelayReport() {

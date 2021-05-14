@@ -21,9 +21,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
+import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
@@ -31,10 +34,9 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
  *
  * @author zhangsen
  */
-public class ActionContextUtil {
+public final class ActionContextUtil {
 
     private ActionContextUtil() {
-
     }
 
     /**
@@ -95,4 +97,93 @@ public class ActionContextUtil {
         getAllField(interFace.getSuperclass(), fields);
     }
 
+    /**
+     * put the action context after handle
+     *
+     * @param actionContext the action context
+     * @param key           the actionContext's key
+     * @param value         the actionContext's key
+     * @return the action context is changed
+     */
+    public static boolean putActionContext(Map<String, Object> actionContext, String key, Object value) {
+        if (value == null) {
+            return false;
+        }
+
+        value = handleActionContext(value);
+        Object previousValue = actionContext.put(key, value);
+        return value != previousValue;
+    }
+
+    /**
+     * put the action context after handle
+     *
+     * @param actionContext    the action context
+     * @param actionContextMap the actionContextMap
+     * @return the action context is changed
+     */
+    public static boolean putActionContext(Map<String, Object> actionContext, Map<String, Object> actionContextMap) {
+        boolean isUpdated = false;
+        for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
+            if (putActionContext(actionContext, entry.getKey(), entry.getValue())) {
+                isUpdated = true;
+            }
+        }
+        return isUpdated;
+    }
+
+    /**
+     * Handle the action context.
+     * It is convenient to convert type in phase 2.
+     *
+     * @param actionContext the action context
+     * @return the action context or JSON string
+     * @see #convertActionContext(String, Object, Class)
+     * @see BusinessActionContext#getActionContext(String, Class)
+     */
+    public static Object handleActionContext(@Nonnull Object actionContext) {
+        if (actionContext instanceof CharSequence || actionContext instanceof Number || actionContext instanceof Boolean) {
+            return actionContext;
+        } else {
+            return JSON.toJSONString(actionContext);
+        }
+    }
+
+    /**
+     * Convert action context
+     *
+     * @param key         the actionContext's key
+     * @param value       the actionContext's value
+     * @param targetClazz the target class
+     * @param <T>         the target type
+     * @return the action context of the target type
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T convertActionContext(String key, Object value, @Nonnull Class<T> targetClazz) {
+        if (value == null) {
+            return null;
+        }
+
+        // same class, or super class, can cast directly
+        if (targetClazz.isAssignableFrom(value.getClass())) {
+            return (T)value;
+        }
+
+        // String class
+        if (String.class.equals(targetClazz)) {
+            return (T)value.toString();
+        }
+
+        try {
+            try {
+                return (T)value;
+            } catch (ClassCastException ignore) {
+                return JSON.parseObject(value.toString(), targetClazz);
+            }
+        } catch (RuntimeException e) {
+            String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
+                    key, value.getClass().getName(), targetClazz.getName());
+            throw new FrameworkException(e, errorMsg);
+        }
+    }
 }

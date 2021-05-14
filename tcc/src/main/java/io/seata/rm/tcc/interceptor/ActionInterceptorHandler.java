@@ -227,23 +227,23 @@ public class ActionInterceptorHandler {
                         @SuppressWarnings("unchecked")
                         Object targetParam = ((List<Object>) paramObject).get(index);
                         if (param.isParamInProperty()) {
-                            context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
+                            ActionContextUtil.putActionContext(context, ActionContextUtil.fetchContextFromObject(targetParam));
                         } else {
                             String paramName = param.paramName();
                             if (StringUtils.isBlank(paramName)) {
                                 paramName = parameters[i].getName();
                             }
-                            context.put(paramName, targetParam);
+                            ActionContextUtil.putActionContext(context, paramName, targetParam);
                         }
                     } else {
                         if (param.isParamInProperty()) {
-                            context.putAll(ActionContextUtil.fetchContextFromObject(paramObject));
+                            ActionContextUtil.putActionContext(context, ActionContextUtil.fetchContextFromObject(paramObject));
                         } else {
                             String paramName = param.paramName();
                             if (StringUtils.isBlank(paramName)) {
                                 paramName = parameters[i].getName();
                             }
-                            context.put(paramName, paramObject);
+                            ActionContextUtil.putActionContext(context, paramName, paramObject);
                         }
                     }
                 }

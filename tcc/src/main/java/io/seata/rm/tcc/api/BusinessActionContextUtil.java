@@ -15,19 +15,19 @@
  */
 package io.seata.rm.tcc.api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.interceptor.ActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import javax.annotation.Nonnull;
 
 /**
  * the api of sharing business action context to tcc phase 2
@@ -51,6 +51,10 @@ public final class BusinessActionContextUtil {
      * @param value new context
      */
     public static void addContext(String key, Object value) {
+        if (value == null) {
+            return;
+        }
+
         Map<String, Object> newContext = new HashMap<>(1, 1);
         newContext.put(key, value);
         addContext(newContext);
@@ -63,36 +67,26 @@ public final class BusinessActionContextUtil {
      */
     @SuppressWarnings("deprecation")
     public static void addContext(Map<String, Object> context) {
-        if (context != null) {
-            BusinessActionContext actionContext = getContext();
-            context.forEach((key, value) -> {
-                if (!Objects.isNull(value)) {
-                    actionContext.setUpdated(true);
-                    actionContext.addActionContext(key, handleValue(value));
-                }
-            });
-            //if delay report, params will be finally reported after phase 1 execution
-            if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
-                return;
-            }
-            reportContext(actionContext);
+        if (CollectionUtils.isEmpty(context)) {
+            return;
         }
-    }
 
-    /**
-     * Handle the value.
-     * It is convenient to convert type in phase 2.
-     *
-     * @param value the value
-     * @return the value or json string
-     * @see BusinessActionContext#getActionContext(String, Class)
-     */
-    private static Object handleValue(@Nonnull Object value) {
-        if (value instanceof CharSequence || value instanceof Number || value instanceof Boolean) {
-            return value;
-        } else {
-            return JSON.toJSONString(value);
+        // put action context
+        BusinessActionContext actionContext = BusinessActionContextUtil.getContext();
+        if (!ActionContextUtil.putActionContext(actionContext.getActionContext(), context)) {
+            // the action context is not changed, do not report
+            return;
         }
+        // set updated
+        actionContext.setUpdated(true);
+
+        // if delay report, params will be finally reported after phase 1 execution
+        if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
+            return;
+        }
+
+        // do branch report
+        reportContext(actionContext);
     }
 
     /**
@@ -101,7 +95,13 @@ public final class BusinessActionContextUtil {
      * @param actionContext the context
      */
     public static void reportContext(BusinessActionContext actionContext) {
+        // check is updated
+        if (!Boolean.TRUE.equals(actionContext.getUpdated())) {
+            return;
+        }
+
         try {
+            // branch report
             DefaultResourceManager.get().branchReport(
                     BranchType.TCC,
                     actionContext.getXid(),
@@ -109,6 +109,9 @@ public final class BusinessActionContextUtil {
                     BranchStatus.Registered,
                     JSON.toJSONString(actionContext)
             );
+
+            // reset to un_updated
+            actionContext.setUpdated(null);
         } catch (TransactionException e) {
             String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
             LOGGER.error("{}, error: {}", msg, e.getMessage());
