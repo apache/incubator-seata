@@ -25,8 +25,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -41,6 +44,10 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.core.model.GlobalStatus.AsyncCommitting;
+import static io.seata.core.model.GlobalStatus.CommitRetrying;
+import static io.seata.core.model.GlobalStatus.Committing;
+
 /**
  * The type Global session.
  *
@@ -54,6 +61,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
+
+    /**
+     * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
+     *  then the tx will be remand as need to retry rollback
+     */
+    private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+            .getInt(ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
     private String xid;
 
@@ -121,6 +135,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Has AT branch
+     *
+     * @return the boolean
+     */
+    public boolean hasATBranch() {
+        for (BranchSession branchSession : branchSessions) {
+            if (branchSession.getBranchType() == BranchType.AT) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Is saga type transaction
      *
      * @return is saga
@@ -162,11 +190,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * prevent could not handle rollbacking transaction
-     * @return if true force roll back
+     * prevent could not handle committing and rollbacking transaction
+     * @return if true retry commit or roll back
      */
-    public boolean isRollbackingDead() {
-        return (System.currentTimeMillis() - beginTime) > (2 * 6000);
+    public boolean isDeadSession() {
+        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
     }
 
     @Override
@@ -552,7 +580,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public byte[] encode() {
-
         byte[] byApplicationIdBytes = applicationId != null ? applicationId.getBytes() : null;
 
         byte[] byServiceGroupBytes = transactionServiceGroup != null ? transactionServiceGroup.getBytes() : null;
@@ -717,7 +744,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         public void unlock() {
             globalSessionLock.unlock();
         }
-
     }
 
     @FunctionalInterface
@@ -738,24 +764,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
+        this.setStatus(GlobalStatus.AsyncCommitting);
         SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
-        this.changeStatus(GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
+        this.setStatus(GlobalStatus.CommitRetrying);
         SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
-        this.changeStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
         GlobalStatus currentStatus = this.getStatus();
         if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
-            this.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
+            this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
         } else {
-            this.changeStatus(GlobalStatus.RollbackRetrying);
+            this.setStatus(GlobalStatus.RollbackRetrying);
         }
+        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
     }
 }

@@ -3,13 +3,13 @@
 CREATE TABLE IF NOT EXISTS `global_table`
 (
     `xid`                       VARCHAR(128) NOT NULL,
-    `transaction_id`            BIGINT       NOT NULL,
+    `transaction_id`            BIGINT,
     `status`                    TINYINT      NOT NULL,
     `application_id`            VARCHAR(32),
     `transaction_service_group` VARCHAR(32),
     `transaction_name`          VARCHAR(128),
-    `timeout`                   INT          NOT NULL,
-    `begin_time`                BIGINT       NOT NULL,
+    `timeout`                   INT,
+    `begin_time`                BIGINT,
     `application_data`          VARCHAR(2000),
     `suspended_end_time`        BIGINT       NOT NULL,
     `stopped_reason`            TINYINT      NOT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE IF NOT EXISTS `branch_table`
 (
     `branch_id`         BIGINT       NOT NULL,
     `xid`               VARCHAR(128) NOT NULL,
-    `transaction_id`    BIGINT       NOT NULL,
+    `transaction_id`    BIGINT,
     `resource_group_id` VARCHAR(32),
     `resource_id`       VARCHAR(256),
     `branch_type`       VARCHAR(8),
-    `status`            TINYINT      NOT NULL,
+    `status`            TINYINT,
     `client_id`         VARCHAR(64),
     `application_data`  VARCHAR(2000),
     `retry_strategy`    VARCHAR(256),
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `branch_table`
 CREATE TABLE IF NOT EXISTS `lock_table`
 (
     `row_key`        VARCHAR(128) NOT NULL,
-    `xid`            VARCHAR(96),
-    `transaction_id` BIGINT       NOT NULL,
+    `xid`            VARCHAR(128),
+    `transaction_id` BIGINT,
     `branch_id`      BIGINT       NOT NULL,
     `resource_id`    VARCHAR(256),
     `table_name`     VARCHAR(32),

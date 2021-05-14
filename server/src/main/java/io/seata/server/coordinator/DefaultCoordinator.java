@@ -177,30 +177,35 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext)
         throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.commit(request.getXid()));
     }
 
     @Override
     protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response,
                                     RpcContext rpcContext) throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.rollback(request.getXid()));
     }
 
     @Override
     protected void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext)
         throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.getStatus(request.getXid()));
     }
 
     @Override
     protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext)
         throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.globalReport(request.getXid(), request.getGlobalStatus()));
     }
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setBranchId(
             core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
                 request.getXid(), request.getApplicationData(), request.getLockKey()));
@@ -209,6 +214,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
         throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
+        MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(request.getBranchId()));
         core.branchReport(request.getBranchType(), request.getXid(), request.getBranchId(), request.getStatus(),
             request.getApplicationData());
     }
@@ -216,6 +223,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext)
         throws TransactionException {
+        MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setLockable(
             core.lockQuery(request.getBranchType(), request.getResourceId(), request.getXid(), request.getLockKey()));
     }
@@ -233,37 +241,37 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check begin, size: {}", allSessions.size());
         }
-        for (GlobalSession globalSession : allSessions) {
+        SessionHelper.forEach(allSessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                     globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
                         + globalSession.getTimeout());
             }
-            boolean shouldTimeout = SessionHolder.lockAndExecute(globalSession, () -> {
+            SessionHolder.lockAndExecute(globalSession, () -> {
                 if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
                     return false;
                 }
+
+                LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
+
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
-                globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+                globalSession.setStatus(GlobalStatus.TimeoutRollbacking);
+
+                globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+                SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
-                eventBus.post(
-                    new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                        globalSession.getTransactionName(), globalSession.getBeginTime(), null,
-                        globalSession.getStatus()));
+                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
+                        GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(),
+                        globalSession.getApplicationId(),
+                        globalSession.getTransactionServiceGroup(),
+                        globalSession.getBeginTime(), null, globalSession.getStatus()));
 
                 return true;
             });
-            if (!shouldTimeout) {
-                continue;
-            }
-            LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
-
-            globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-
-        }
+        });
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check end. ");
         }
@@ -316,10 +324,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             try {
                 // skip stopped and suspended
                 if (rollbackingSession.isStopped() || rollbackingSession.isSuspended()) {
-                    continue;
+                    return;
                 }
                 // prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isDeadSession()) {
                     //The function of this 'return' is 'continue'.
                     return;
                 }
@@ -354,9 +362,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
+                // prevent repeated commit
+                if (committingSession.getStatus().equals(GlobalStatus.Committing) && !committingSession.isDeadSession()) {
+                    //The function of this 'return' is 'continue'.
+                    return;
+                }
                 // skip stopped and suspended
                 if (committingSession.isStopped() || committingSession.isSuspended()) {
-                    continue;
+                    return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**

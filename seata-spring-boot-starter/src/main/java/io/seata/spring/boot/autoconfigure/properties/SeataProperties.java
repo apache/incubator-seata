@@ -53,6 +53,14 @@ public class SeataProperties {
      */
     private boolean useJdkProxy = false;
     /**
+     * The scan packages. If empty, will scan all beans.
+     */
+    private String[] scanPackages = {};
+    /**
+     * Specifies beans that won't be scanned in the GlobalTransactionScanner
+     */
+    private String[] excludesForScanning = {};
+    /**
      * Specifies which datasource bean are not eligible for auto-proxying
      */
     private String[] excludesForAutoProxying = {};
@@ -125,6 +133,24 @@ public class SeataProperties {
 
     public SeataProperties setExcludesForAutoProxying(String[] excludesForAutoProxying) {
         this.excludesForAutoProxying = excludesForAutoProxying;
+        return this;
+    }
+
+    public String[] getScanPackages() {
+        return scanPackages;
+    }
+
+    public SeataProperties setScanPackages(String[] scanPackages) {
+        this.scanPackages = scanPackages;
+        return this;
+    }
+
+    public String[] getExcludesForScanning() {
+        return excludesForScanning;
+    }
+
+    public SeataProperties setExcludesForScanning(String[] excludesForScanning) {
+        this.excludesForScanning = excludesForScanning;
         return this;
     }
 }

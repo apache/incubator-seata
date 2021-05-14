@@ -33,13 +33,13 @@ public class LockRetryControllerTest {
 
     private GlobalLockConfig config;
 
-    private final int defaultRetryInternal = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
+    private final int defaultRetryInterval = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
     private final int defaultRetryTimes = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
 
     @BeforeEach
     void setUp() {
         config = new GlobalLockConfig();
-        config.setLockRetryInternal(10);
+        config.setLockRetryInterval(10);
         config.setLockRetryTimes(3);
         GlobalLockConfigHolder.setAndReturnPrevious(config);
     }
@@ -69,7 +69,7 @@ public class LockRetryControllerTest {
         GlobalLockConfigHolder.remove();
         LockRetryController controller = new LockRetryController();
         String message = "should use global config when there is no customized config";
-        assertEquals(defaultRetryInternal, controller.getLockRetryInternal(), message);
+        assertEquals(defaultRetryInterval, controller.getLockRetryInterval(), message);
         assertEquals(defaultRetryTimes, controller.getLockRetryTimes(), message);
     }
 
@@ -83,7 +83,7 @@ public class LockRetryControllerTest {
         event.setNewValue(retryInterval + "");
         config.onChangeEvent(event);
         String message1 = "lock config listener fail to update latest value of CLIENT_LOCK_RETRY_INTERVAL";
-        assertEquals(retryInterval, config.getGlobalLockRetryInternal(), message1);
+        assertEquals(retryInterval, config.getGlobalLockRetryInterval(), message1);
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES);
         int retryTimes = 5;
@@ -96,7 +96,7 @@ public class LockRetryControllerTest {
         event.setNewValue("not a number");
         config.onChangeEvent(event);
         String message3 = "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_INTERVAL";
-        assertEquals(defaultRetryInternal, config.getGlobalLockRetryInternal(), message3);
+        assertEquals(defaultRetryInterval, config.getGlobalLockRetryInterval(), message3);
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES);
         event.setNewValue("not a number");
