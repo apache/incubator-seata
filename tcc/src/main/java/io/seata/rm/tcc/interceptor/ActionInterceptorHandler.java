@@ -20,6 +20,7 @@ import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -209,7 +210,13 @@ public class ActionInterceptorHandler {
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<>(8);
 
-        Parameter[] parameters = method.getParameters();
+        // get the parameter names
+        String[] parameterNames = ActionContextUtil.getParameterNames(method);
+        Parameter[] parameters = null;
+        if (parameterNames == null) {
+            parameters = method.getParameters();
+        }
+
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
@@ -224,8 +231,15 @@ public class ActionInterceptorHandler {
                         continue;
                     }
 
+                    if (parameterNames == null && StringUtils.isBlank(annotation.paramName())) {
+                        String errorMsg = String.format("Unable to get parameter names from the method `%s.%s(...)`." +
+                                        " Please execute 'javac -parameters' to re-compile of the method code, or set the field `paramName` of the `@%s` by yourself",
+                                method.getDeclaringClass().getSimpleName(), method.getName(), BusinessActionContextParameter.class.getSimpleName());
+                        throw new FrameworkException(errorMsg);
+                    }
+
                     // load param by the config of annotation, and then put to the context
-                    String paramName = parameters[i].getName();
+                    String paramName = parameterNames != null ? parameterNames[i] : parameters[i].getName();
                     ActionContextUtil.loadParamByAnnotationAndPutToContext(paramName, paramObject, annotation, context);
                 }
             }

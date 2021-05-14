@@ -16,12 +16,14 @@
 package io.seata.rm.tcc.interceptor;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
@@ -30,6 +32,7 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 
 /**
  * Extracting TCC Context from Method
@@ -42,6 +45,19 @@ public final class ActionContextUtil {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionContextUtil.class);
+
+    public static final DefaultParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
+
+    /**
+     * Get parameter names of the method
+     *
+     * @param method the method
+     * @return the parameter names
+     */
+    @Nullable
+    public static String[] getParameterNames(Method method) {
+        return PARAMETER_NAME_DISCOVERER.getParameterNames(method);
+    }
 
     /**
      * Extracting context data from parameters

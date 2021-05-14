@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author zhangsen
  */
-public class ActionInterceptorHandlerTest {
+class ActionInterceptorHandlerTest {
 
     /**
      * The Action interceptor handler.
@@ -44,12 +44,12 @@ public class ActionInterceptorHandlerTest {
      * @throws NoSuchMethodException the no such method exception
      */
     @Test
-    public void testBusinessActionContext() throws NoSuchMethodException {
+    void testBusinessActionContext() throws NoSuchMethodException {
         Method prepareMethod = TccAction.class.getDeclaredMethod("prepare",
                 BusinessActionContext.class, int.class, List.class, TccParam.class);
         List<Object> list = new ArrayList<>();
         list.add("b");
-        TccParam tccParam = new TccParam (1, "abc@ali.com");
+        TccParam tccParam = new TccParam (1, "abc", "15900000000", "abc@ali.com", null);
 
         Map<String, Object>  paramContext = actionInterceptorHandler.fetchActionRequestContext(prepareMethod,
                 new Object[]{null, 10, list, tccParam});
@@ -57,7 +57,12 @@ public class ActionInterceptorHandlerTest {
 
         Assertions.assertEquals(10, paramContext.get("a"));
         Assertions.assertEquals("b", paramContext.get("b"));
-        Assertions.assertEquals("abc@ali.com", paramContext.get("email"));
+
+        Assertions.assertEquals(1, paramContext.get("num"));
+        Assertions.assertFalse(paramContext.containsKey("name"));
+        Assertions.assertEquals("15900000000", paramContext.get("phone"));
+        Assertions.assertEquals("abc@ali.com", paramContext.get("email0"));
+        Assertions.assertFalse(paramContext.containsKey("remark"));
     }
 
 }
