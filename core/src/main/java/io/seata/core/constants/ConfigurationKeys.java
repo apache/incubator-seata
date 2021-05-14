@@ -431,6 +431,11 @@ public interface ConfigurationKeys {
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
 
     /**
+     * the constant DISTRIBUTED_LOCK_EXPIRE_TIME
+     */
+    String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
+
+    /**
      * The constant MIN_SERVER_POOL_SIZE.
      */
     String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
