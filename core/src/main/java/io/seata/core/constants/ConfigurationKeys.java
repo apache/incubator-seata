@@ -179,6 +179,11 @@ public interface ConfigurationKeys {
     String CLIENT_TABLE_META_CHECKER_INTERVAL = CLIENT_RM_PREFIX + "tableMetaCheckerInterval";
 
     /**
+     * The constant TCC_ACTION_INTERCEPTOR_ORDER.
+     */
+    String TCC_ACTION_INTERCEPTOR_ORDER = CLIENT_RM_PREFIX + "tccActionInterceptorOrder";
+
+    /**
      * The constant CLIENT_TM_PREFIX.
      */
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + "tm.";
@@ -426,6 +431,11 @@ public interface ConfigurationKeys {
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
 
     /**
+     * the constant DISTRIBUTED_LOCK_EXPIRE_TIME
+     */
+    String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
+
+    /**
      * The constant MIN_SERVER_POOL_SIZE.
      */
     String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
@@ -633,6 +643,11 @@ public interface ConfigurationKeys {
      * The constant CLIENT_DEGRADE_CHECK_ALLOW_TIMES.
      */
     String CLIENT_DEGRADE_CHECK_ALLOW_TIMES = CLIENT_TM_PREFIX + "degradeCheckAllowTimes";
+
+    /**
+     * The constant GLOBAL_TRANSACTION_INTERCEPTOR_ORDER.
+     */
+    String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
      * The constant SEATA_ACCESS_KEY.
