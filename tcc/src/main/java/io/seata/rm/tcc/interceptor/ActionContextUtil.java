@@ -38,6 +38,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
  * Extracting TCC Context from Method
  *
  * @author zhangsen
+ * @author wang.liang
  */
 public final class ActionContextUtil {
 
@@ -125,7 +126,16 @@ public final class ActionContextUtil {
         }
 
         if (annotation.isParamInProperty()) {
-            context.putAll(fetchContextFromObject(paramObject));
+            Map<String, Object> paramContext = fetchContextFromObject(paramObject);
+            if (StringUtils.isNotBlank(annotation.paramName())) {
+                // If the `paramName` of "@BusinessActionContextParameter" is not blank, put the param context in it
+                // @since: above 1.4.2
+                context.put(annotation.paramName(), paramContext);
+            } else {
+                // Merge the param context
+                // Warn: This may cause values with the same name to be overridden
+                context.putAll(paramContext);
+            }
         } else {
             if (StringUtils.isNotBlank(annotation.paramName())) {
                 paramName = annotation.paramName();

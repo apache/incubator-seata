@@ -41,7 +41,7 @@ public interface TccAction {
      */
     @TwoPhaseBusinessAction(name = "tccActionForTest" , commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext actionContext,
-                           @BusinessActionContextParameter int a,
+                           @BusinessActionContextParameter(paramName = "a") int a,
                            @BusinessActionContextParameter(paramName = "b", index = 0) List b,
                            @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
 

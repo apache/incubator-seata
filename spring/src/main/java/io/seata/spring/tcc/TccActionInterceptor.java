@@ -44,6 +44,7 @@ import static io.seata.core.constants.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_O
  * TCC Interceptor
  *
  * @author zhangsen
+ * @author wang.liang
  */
 public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener, Ordered {
 
