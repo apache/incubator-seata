@@ -57,6 +57,7 @@ public final class ActionContextUtil {
             getAllField(targetParam.getClass(), fields);
 
             for (Field f : fields) {
+                // get annotation
                 BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
                 if (annotation == null) {
                     continue;
