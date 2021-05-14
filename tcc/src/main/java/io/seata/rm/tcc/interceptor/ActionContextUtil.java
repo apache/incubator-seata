@@ -186,7 +186,7 @@ public final class ActionContextUtil {
 
         value = handleActionContext(value);
         Object previousValue = actionContext.put(key, value);
-        return value != previousValue;
+        return !value.equals(previousValue);
     }
 
     /**
@@ -197,13 +197,13 @@ public final class ActionContextUtil {
      * @return the action context is changed
      */
     public static boolean putActionContext(Map<String, Object> actionContext, Map<String, Object> actionContextMap) {
-        boolean isUpdated = false;
+        boolean isChanged = false;
         for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
             if (putActionContext(actionContext, entry.getKey(), entry.getValue())) {
-                isUpdated = true;
+                isChanged = true;
             }
         }
-        return isUpdated;
+        return isChanged;
     }
 
     /**
