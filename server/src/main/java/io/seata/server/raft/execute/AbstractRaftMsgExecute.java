@@ -15,6 +15,7 @@
  */
 package io.seata.server.raft.execute;
 
+import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
@@ -29,11 +30,10 @@ public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> 
 
     protected RaftSessionSyncMsg sessionSyncMsg;
 
-    protected RaftSessionManager raftSessionManager;
+    protected RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
 
-    public AbstractRaftMsgExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
+    public AbstractRaftMsgExecute(RaftSessionSyncMsg sessionSyncMsg) {
         this.sessionSyncMsg = sessionSyncMsg;
-        this.raftSessionManager = raftSessionManager;
     }
 
 }

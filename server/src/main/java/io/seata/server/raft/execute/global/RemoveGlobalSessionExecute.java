@@ -22,9 +22,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
@@ -35,23 +33,25 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
         new ThreadPoolExecutor(1, 1, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(2048),
             new NamedThreadFactory("RaftMsgHandle", 1), new ThreadPoolExecutor.CallerRunsPolicy());
 
-    public RemoveGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
-        super(sessionSyncMsg, raftSessionManager);
+    public RemoveGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
     public Boolean execute(Object... args) {
         EXECUTOR.execute(() -> {
+            LOGGER.info("remove start session map size:{}",raftSessionManager.getSessionMap().size());
             GlobalSession globalSession =
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
             if (globalSession != null) {
                 try {
-                    globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                     globalSession.end();
+                    LOGGER.info("end xid: {}", globalSession.getXid());
                 } catch (TransactionException e) {
                     LOGGER.error("remove global fail error:{}", e.getMessage());
                 }
             }
+            LOGGER.info("remove end session map size:{}",raftSessionManager.getSessionMap().size());
         });
         return true;
     }

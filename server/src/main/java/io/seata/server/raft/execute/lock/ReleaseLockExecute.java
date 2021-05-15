@@ -20,15 +20,14 @@ import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
 public class ReleaseLockExecute extends AbstractRaftMsgExecute {
 
-    public ReleaseLockExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
-        super(sessionSyncMsg, raftSessionManager);
+    public ReleaseLockExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
@@ -36,6 +35,7 @@ public class ReleaseLockExecute extends AbstractRaftMsgExecute {
         GlobalSession globalSession =
             SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
+            LOGGER.info("releaseGlobalSessionLock xid: {}", globalSession.getXid());
             return LockerManagerFactory.getLockManager().releaseGlobalSessionLock(globalSession);
         }
         return false;

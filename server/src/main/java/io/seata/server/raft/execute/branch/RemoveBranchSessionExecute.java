@@ -16,28 +16,25 @@
 package io.seata.server.raft.execute.branch;
 
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
-import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
 public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
 
-    public RemoveBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
-        super(sessionSyncMsg, raftSessionManager);
+    public RemoveBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
     public Boolean execute(Object... args) throws Throwable {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         if (globalSession != null) {
-            BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
-            if (branchSession != null) {
-                globalSession.removeBranch(branchSession);
-            }
+            globalSession.removeBranch(sessionSyncMsg.getBranchSession().getBranchId());
+            LOGGER.info("removeBranch xid: {},branchId: {}", globalSession.getXid(),
+                sessionSyncMsg.getBranchSession().getBranchId());
         }
         return true;
     }

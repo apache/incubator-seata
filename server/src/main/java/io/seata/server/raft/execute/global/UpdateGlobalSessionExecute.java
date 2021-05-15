@@ -18,15 +18,14 @@ package io.seata.server.raft.execute.global;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
 public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
 
-    public UpdateGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
-        super(sessionSyncMsg, raftSessionManager);
+    public UpdateGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
@@ -34,6 +33,7 @@ public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {
             globalSession.setStatus(sessionSyncMsg.getGlobalStatus());
+            LOGGER.info("xid: {},status: {}",globalSession.getXid(),globalSession.getStatus());
         }
         return true;
     }

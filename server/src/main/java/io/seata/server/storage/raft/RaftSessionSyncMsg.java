@@ -36,8 +36,6 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
 
     private BranchStatus branchStatus;
 
-    private String sessionName;
-
     public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
@@ -100,19 +98,10 @@ public class RaftSessionSyncMsg extends RaftSyncMsg implements java.io.Serializa
         this.branchStatus = branchStatus;
     }
 
-    public String getSessionName() {
-        return sessionName;
-    }
-
-    public void setSessionName(String sessionName) {
-        this.sessionName = sessionName;
-    }
-
     @Override
     public String toString() {
-        return "RaftSyncMsg{" + "msgType=" + msgType + ", globalSession=" + globalSession + ", branchSession="
-            + branchSession + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", sessionName='"
-            + sessionName + '\'' + '}';
+        return "RaftSessionSyncMsg{" + "globalSession=" + globalSession + ", branchSession=" + branchSession
+            + ", globalStatus=" + globalStatus + ", branchStatus=" + branchStatus + ", msgType=" + msgType + '}';
     }
 
 }

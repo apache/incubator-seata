@@ -19,24 +19,22 @@ import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
 public class AcquireLockExecute extends AbstractRaftMsgExecute {
 
-    public AcquireLockExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
-        super(sessionSyncMsg, raftSessionManager);
+    public AcquireLockExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
     public Boolean execute(Object... args) throws Throwable {
         GlobalSession globalSession =
-            SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
+            raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
         boolean include = false;
         if (branchSession != null) {
@@ -46,6 +44,7 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
             branchSession = SessionConverter.convertBranchSession(sessionSyncMsg.getBranchSession());
         }
         Boolean owner = LockerManagerFactory.getLockManager().acquireLock(branchSession);
+        LOGGER.info("acquireLock xid: {}", branchSession.getXid());
         if (owner && !include) {
             globalSession.add(branchSession);
         }

@@ -37,14 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static java.io.File.separator;
 import static io.seata.common.Constants.ASYNC_COMMITTING;
 import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import static java.io.File.separator;
 
 /**
  * The type Session holder.
@@ -120,7 +120,7 @@ public class SessionHolder {
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
-                ASYNC_COMMITTING_SESSION_MANAGER =
+               /* ASYNC_COMMITTING_SESSION_MANAGER =
                     EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                         new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, ASYNC_COMMITTING_SESSION_MANAGER});
                 RETRY_COMMITTING_SESSION_MANAGER =
@@ -128,7 +128,7 @@ public class SessionHolder {
                         new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, RETRY_COMMITTING_SESSION_MANAGER});
                 RETRY_ROLLBACKING_SESSION_MANAGER =
                     EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
-                        new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, RETRY_ROLLBACKING_SESSION_MANAGER});
+                        new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, RETRY_ROLLBACKING_SESSION_MANAGER});*/
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
@@ -142,6 +142,10 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
+        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
+        if (RaftServerFactory.getInstance().isRaftMode()) {
+            return;
+        }
         reload(storeMode);
     }
 
@@ -149,15 +153,17 @@ public class SessionHolder {
      * Reload.
      */
     protected static void reload(StoreMode storeMode) {
-        RaftServerFactory.getInstance().init(XID.getIpAddress(), XID.getPort());
-        if (RaftServerFactory.getInstance().isRaftMode()) {
-            return;
-        }
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable) ROOT_SESSION_MANAGER).reload();
+            ((Reloadable)ROOT_SESSION_MANAGER).reload();
         }
+        reload(ROOT_SESSION_MANAGER.allSessions(), storeMode);
+    }
 
-        Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
+    public static void reload(Collection<GlobalSession> allSessions, StoreMode storeMode) {
+        reload(allSessions, storeMode, true);
+    }
+
+    public static void reload(Collection<GlobalSession> allSessions, StoreMode storeMode, boolean acquireLock) {
         if (CollectionUtils.isNotEmpty(allSessions)) {
             List<GlobalSession> removeGlobalSessions = new ArrayList<>();
             Iterator<GlobalSession> iterator = allSessions.iterator();
@@ -182,8 +188,9 @@ public class SessionHolder {
                         break;
                     default: {
                         if (storeMode == StoreMode.FILE) {
-                            lockBranchSessions(globalSession.getSortedBranches());
-
+                            if (acquireLock) {
+                                lockBranchSessions(globalSession.getSortedBranches());
+                            }
                             switch (globalStatus) {
                                 case Committing:
                                 case CommitRetrying:

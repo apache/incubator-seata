@@ -15,56 +15,27 @@
  */
 package io.seata.server.raft.execute.global;
 
-import java.util.Optional;
-
-import io.seata.core.model.GlobalStatus;
 import io.seata.server.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
 public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
-    private boolean root;
-
-    public AddGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager,
-        boolean root) {
-        super(sessionSyncMsg, raftSessionManager);
-        this.root = root;
+    public AddGlobalSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
     public Boolean execute(Object... objects) throws Throwable {
-        GlobalSession globalSession;
-        if (!root) {
-            globalSession =
-                SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
-            Optional.ofNullable(globalSession).ifPresent(
-                session -> session.setStatus(GlobalStatus.get(sessionSyncMsg.getGlobalSession().getStatus())));
-        } else {
-            globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
-        }
-        switch (globalSession.getStatus()) {
-            case AsyncCommitting:
-                globalSession.asyncCommit();
-                break;
-            case CommitRetrying:
-                globalSession.queueToRetryCommit();
-                break;
-            case TimeoutRollbacking:
-            case RollbackRetrying:
-            case TimeoutRollbackFailed:
-                globalSession.queueToRetryRollback();
-                break;
-            default:
-                raftSessionManager.getFileSessionManager().addGlobalSession(globalSession);
-                break;
-        }
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
+        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        raftSessionManager.addGlobalSession(globalSession);
+        LOGGER.info("addGlobalSession xid: {},status: {}",globalSession.getXid(),globalSession.getStatus());
         return true;
     }
 

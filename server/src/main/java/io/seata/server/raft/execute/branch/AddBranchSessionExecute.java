@@ -21,25 +21,26 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
  * @author jianbin.chen
  */
 public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
 
-    public AddBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg, RaftSessionManager raftSessionManager) {
-        super(sessionSyncMsg, raftSessionManager);
+    public AddBranchSessionExecute(RaftSessionSyncMsg sessionSyncMsg) {
+        super(sessionSyncMsg);
     }
 
     @Override
     public Boolean execute(Object... args) throws Throwable {
         BranchTransactionDO branchTransactionDO = sessionSyncMsg.getBranchSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(branchTransactionDO.getXid());
-        BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
+            BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
         if (branchSession == null) {
             branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
             globalSession.addBranch(branchSession);
+            LOGGER.info("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
+                branchTransactionDO.getBranchId());
         }
         return true;
     }

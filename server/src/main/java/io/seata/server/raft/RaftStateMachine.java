@@ -32,8 +32,6 @@ import com.alipay.sofa.jraft.util.Utils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.raft.AbstractRaftStateMachine;
 import io.seata.core.raft.RaftServerFactory;
 import io.seata.core.store.StoreMode;
@@ -49,7 +47,6 @@ import io.seata.server.raft.execute.lock.ReleaseLockExecute;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.session.SessionManager;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
@@ -66,9 +63,6 @@ import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
 import static io.seata.core.raft.msg.RaftSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
-import static io.seata.server.session.SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME;
-import static io.seata.server.session.SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME;
-import static io.seata.server.session.SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME;
 import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 
 /**
@@ -170,13 +164,14 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
             Map<String, Object> maps = snapshot.load();
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
             Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(ROOT_SESSION_MANAGER_NAME);
-            Map<String, byte[]> branchSessionByteMap = (Map<String, byte[]>)maps.get(BRANCH_SESSION_MAP);
+            Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
             if (!globalSessionByteMap.isEmpty()) {
                 Map<String, GlobalSession> sessionMap = new HashMap<>();
                 globalSessionByteMap.forEach((k, v) -> {
                     GlobalSession session = new GlobalSession();
                     session.decode(v);
+                    session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                     sessionMap.put(k, session);
                 });
                 rootSessionMap.putAll(sessionMap);
@@ -185,29 +180,10 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                     branchSession.decode(v);
                     rootSessionMap.computeIfPresent(branchSession.getXid(), (key, globalSession) -> {
                         globalSession.getBranchSessions().add(branchSession);
-                        try {
-                            branchSession.lock();
-                        } catch (TransactionException e) {
-                            LOGGER.error("failed to restore branch transaction: {} lock record: {}",
-                                branchSession.getBranchId(), branchSession.getLockKey());
-                        }
                         return globalSession;
                     });
                 });
-                sessionMap.forEach((k, v) -> {
-                    GlobalStatus status = v.getStatus();
-                    try {
-                        if (status == GlobalStatus.AsyncCommitting) {
-                            SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(v);
-                        } else if (status == GlobalStatus.CommitRetrying) {
-                            SessionHolder.getRetryCommittingSessionManager().addGlobalSession(v);
-                        } else if (status == GlobalStatus.RollbackRetrying) {
-                            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(v);
-                        }
-                    } catch (TransactionException e) {
-                        LOGGER.error("fail to load global session from {},error:{}", v.getXid(), e.getMessage(), e);
-                    }
-                });
+                SessionHolder.reload(rootSessionMap.values(), StoreMode.FILE);
             }
             return true;
         } catch (final Exception e) {
@@ -221,20 +197,7 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
     public void onLeaderStart(final long term) {
         // become the leader again,reloading global session
         if (!isLeader() && RaftServerFactory.getInstance().isRaftMode()) {
-            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
-            Map<String, GlobalSession> retryRollbackingMap =
-                ((RaftSessionManager)SessionHolder.getRetryRollbackingSessionManager()).getSessionMap();
-            Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-            sessionMap.forEach((k, v) -> {
-                GlobalStatus status = v.getStatus();
-                if (status == GlobalStatus.RollbackRetrying || status == GlobalStatus.Rollbacking
-                    || status == GlobalStatus.TimeoutRollbacking || status == GlobalStatus.TimeoutRollbackRetrying) {
-                    retryRollbackingMap.computeIfAbsent(v.getXid(), session -> {
-                        v.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-                        return v;
-                    });
-                }
-            });
+            SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreMode.FILE, false);
         }
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
@@ -248,41 +211,23 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) throws Throwable {
         MsgType msgType = msg.getMsgType();
-        SessionManager sessionManager = null;
-        String sessionName = msg.getSessionName();
-        Boolean rootManager = false;
-        if (StringUtils.equalsIgnoreCase(sessionName, ROOT_SESSION_MANAGER_NAME)) {
-            sessionManager = SessionHolder.getRootSessionManager();
-            rootManager = true;
-        } else if (StringUtils.equalsIgnoreCase(sessionName, ASYNC_COMMITTING_SESSION_MANAGER_NAME)) {
-            sessionManager = SessionHolder.getAsyncCommittingSessionManager();
-        } else if (StringUtils.equalsIgnoreCase(sessionName, RETRY_COMMITTING_SESSION_MANAGER_NAME)) {
-            sessionManager = SessionHolder.getRetryCommittingSessionManager();
-        } else if (StringUtils.equalsIgnoreCase(sessionName, RETRY_ROLLBACKING_SESSION_MANAGER_NAME)) {
-            sessionManager = SessionHolder.getRetryRollbackingSessionManager();
-        }
-        RaftSessionManager raftSessionManager = sessionManager != null ? (RaftSessionManager)sessionManager : null;
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("state machine synchronization,task:{},sessionManager:{}", msgType,
-                sessionName != null ? sessionName : ROOT_SESSION_MANAGER_NAME);
-        }
         RaftMsgExecute execute = null;
         if (ADD_GLOBAL_SESSION.equals(msgType)) {
-            execute = new AddGlobalSessionExecute(msg, raftSessionManager, rootManager);
+            execute = new AddGlobalSessionExecute(msg);
         } else if (ACQUIRE_LOCK.equals(msgType)) {
-            execute = new AcquireLockExecute(msg, raftSessionManager);
+            execute = new AcquireLockExecute(msg);
         } else if (ADD_BRANCH_SESSION.equals(msgType)) {
-            execute = new AddBranchSessionExecute(msg, raftSessionManager);
+            execute = new AddBranchSessionExecute(msg);
         } else if (UPDATE_GLOBAL_SESSION_STATUS.equals(msgType)) {
-            execute = new UpdateGlobalSessionExecute(msg, raftSessionManager);
+            execute = new UpdateGlobalSessionExecute(msg);
         } else if (REMOVE_BRANCH_SESSION.equals(msgType)) {
-            execute = new RemoveBranchSessionExecute(msg, raftSessionManager);
+            execute = new RemoveBranchSessionExecute(msg);
         } else if (RELEASE_GLOBAL_SESSION_LOCK.equals(msgType)) {
-            execute = new ReleaseLockExecute(msg, raftSessionManager);
+            execute = new ReleaseLockExecute(msg);
         } else if (REMOVE_GLOBAL_SESSION.equals(msgType)) {
-            execute = new RemoveGlobalSessionExecute(msg, raftSessionManager);
+            execute = new RemoveGlobalSessionExecute(msg);
         } else if (UPDATE_BRANCH_SESSION_STATUS.equals(msgType)) {
-            execute = new UpdateBranchSessionExecute(msg, raftSessionManager);
+            execute = new UpdateBranchSessionExecute(msg);
         }
 
         execute.execute();
