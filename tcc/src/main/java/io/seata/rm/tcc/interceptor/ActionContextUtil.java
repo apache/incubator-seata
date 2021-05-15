@@ -119,7 +119,7 @@ public final class ActionContextUtil {
                 if (Array.getLength(objValue) == 0) {
                     return;
                 }
-                objValue = CollectionUtils.arrayToList(paramObject);
+                objValue = CollectionUtils.arrayToList(objValue);
             }
 
             if (objValue instanceof List) {
