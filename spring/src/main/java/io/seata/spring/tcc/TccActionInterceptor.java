@@ -16,7 +16,6 @@
 package io.seata.spring.tcc;
 
 import java.lang.reflect.Method;
-
 import javax.annotation.Nullable;
 
 import io.seata.common.DefaultValues;
@@ -97,9 +96,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 RootContext.bindBranchType(BranchType.TCC);
             }
             try {
-                Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect, and return the business result
-                return actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
+                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessAction,
                         invocation::proceed);
             } finally {
                 //if not TCC, unbind branchType
