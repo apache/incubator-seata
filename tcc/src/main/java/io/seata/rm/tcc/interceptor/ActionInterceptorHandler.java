@@ -62,10 +62,10 @@ public class ActionInterceptorHandler {
         //Get action context from arguments, or create a new one and then reset to arguments
         BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(method.getParameterTypes(), arguments);
 
-        //TCC name
-        String actionName = businessAction.name();
+        //Set the xid
         actionContext.setXid(xid);
-        //set action name
+        //Set the action name
+        String actionName = businessAction.name();
         actionContext.setActionName(actionName);
 
         //Creating Branch Record
@@ -234,6 +234,7 @@ public class ActionInterceptorHandler {
                         continue;
                     }
 
+                    // if the parameter names is null, print log
                     if (parameterNames == null && StringUtils.isBlank(annotation.paramName()) && !annotation.isParamInProperty()) {
                         String errorMsg = String.format("Unable to get parameter names from the method `%s.%s(...)`." +
                                         " Please execute 'javac -parameters' to re-compile of the method code," +

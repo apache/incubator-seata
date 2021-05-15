@@ -34,7 +34,6 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Extracting TCC Context from Method
@@ -110,18 +109,9 @@ public final class ActionContextUtil {
             return;
         }
 
-        // If is `List`, get by index
+        // If is `List` or `Array`, get by index
         int index = annotation.index();
         if (index >= 0) {
-            if (objValue.getClass().isArray()) {
-                // The `index` field supports `Array`
-                // @since above 1.4.2
-                if (Array.getLength(objValue) == 0) {
-                    return;
-                }
-                objValue = CollectionUtils.arrayToList(objValue);
-            }
-
             if (objValue instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> list = (List<Object>)objValue;
@@ -136,6 +126,21 @@ public final class ActionContextUtil {
                     return;
                 }
                 objValue = list.get(index);
+            } else if (objValue.getClass().isArray()) {
+                // The `index` field supports `Array`
+                // @since above 1.4.2
+                int length = Array.getLength(objValue);
+                if (length == 0) {
+                    return;
+                }
+                if (length <= index) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The index '{}' is out of bounds for the array {} named '{}'," +
+                                " whose size is '{}', so pass this {}", index, objType, objName, length, objType);
+                    }
+                    return;
+                }
+                objValue = Array.get(objValue, index);
             } else {
                 LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
                         objType, objName, BusinessActionContextParameter.class.getSimpleName());
