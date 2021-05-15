@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  * add this annotation on the parameters of the try method, and the parameters will be passed to the action context
  *
  * @author zhangsen
+ * @see io.seata.rm.tcc.interceptor.ActionContextUtil
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.FIELD})
@@ -46,7 +47,7 @@ public @interface BusinessActionContextParameter {
     boolean isShardingParam() default false;
 
     /**
-     * Specify the index of the parameter in the List
+     * Specify the index of the parameter in the List or Array
      *
      * @return the int
      */
@@ -54,6 +55,7 @@ public @interface BusinessActionContextParameter {
 
     /**
      * if get the parameter from the property of the object ?
+     * if {@code index >= 0}, the object get from the List or Array and then do get the parameter from the property of the object
      *
      * @return the boolean
      */
