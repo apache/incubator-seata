@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  * @author tianming.xm @gmail.com
  * @since 2019 /1/23
  */
-public class BranchSessionTest {
+class BranchSessionTest {
 
     /**
      * Codec test.
@@ -39,7 +39,7 @@ public class BranchSessionTest {
      */
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
-    public void codecTest(BranchSession branchSession) {
+    void codecTest(BranchSession branchSession) {
         byte[] result = branchSession.encode();
         Assertions.assertNotNull(result);
         BranchSession expected = new BranchSession();

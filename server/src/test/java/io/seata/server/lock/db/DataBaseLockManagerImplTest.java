@@ -38,7 +38,7 @@ import java.sql.Statement;
 /**
  * @author zhangsen
  */
-public class DataBaseLockManagerImplTest {
+class DataBaseLockManagerImplTest {
 
     static LockManager lockManager = null;
 
@@ -83,7 +83,7 @@ public class DataBaseLockManagerImplTest {
     }
 
     @Test
-    public void acquireLock() throws TransactionException, SQLException {
+    void acquireLock() throws TransactionException, SQLException {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid("abc-123:786756");
         branchSession.setTransactionId(123543465);
@@ -125,7 +125,7 @@ public class DataBaseLockManagerImplTest {
     }
 
     @Test
-    public void re_acquireLock() throws TransactionException, SQLException {
+    void re_acquireLock() throws TransactionException, SQLException {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid("abc-123:65867978");
         branchSession.setTransactionId(123543465);
@@ -165,7 +165,7 @@ public class DataBaseLockManagerImplTest {
     }
 
     @Test
-    public void unLock() throws TransactionException, SQLException {
+    void unLock() throws TransactionException, SQLException {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid("abc-123:56867");
         branchSession.setTransactionId(1236765);
@@ -219,7 +219,7 @@ public class DataBaseLockManagerImplTest {
     }
 
     @Test
-    public void isLockable() throws TransactionException, SQLException {
+    void isLockable() throws TransactionException, SQLException {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid("abc-123:56877898");
         branchSession.setTransactionId(245686786);

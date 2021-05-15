@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * @author zhangsen
  */
-public class DataBaseLockStoreDAOTest {
+class DataBaseLockStoreDAOTest {
 
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
 
@@ -76,7 +76,7 @@ public class DataBaseLockStoreDAOTest {
     }
 
     @Test
-    public void test_acquireLocks() throws SQLException {
+    void test_acquireLocks() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
         for(int i = 0; i < 3; i++){
             LockDO lock = new LockDO();
@@ -113,7 +113,7 @@ public class DataBaseLockStoreDAOTest {
 
 
     @Test
-    public void test_re_acquireLocks() throws SQLException {
+    void test_re_acquireLocks() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
         for(int i = 0; i < 3; i++){
             LockDO lock = new LockDO();
@@ -152,7 +152,7 @@ public class DataBaseLockStoreDAOTest {
     }
 
     @Test
-    public void tes_unLocks() throws SQLException {
+    void tes_unLocks() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
         for(int i = 0; i < 3; i++){
             LockDO lock = new LockDO();
@@ -200,7 +200,7 @@ public class DataBaseLockStoreDAOTest {
 
 
     @Test
-    public void test_isLockable_can(){
+    void test_isLockable_can(){
         List<LockDO> lockDOs = new ArrayList<>();
         for(int i = 0; i < 3; i++){
             LockDO lock = new LockDO();
@@ -222,7 +222,7 @@ public class DataBaseLockStoreDAOTest {
     }
 
     @Test
-    public void test_isLockable_cannot() throws SQLException {
+    void test_isLockable_cannot() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
         for(int i = 0; i < 3; i++){
             LockDO lock = new LockDO();

@@ -64,7 +64,7 @@ import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_D
  *
  * @author leizhiyuan
  */
-public class DefaultCoordinatorTest {
+class DefaultCoordinatorTest {
     private static DefaultCoordinator defaultCoordinator;
 
     private static final String applicationId = "demo-child-app";
@@ -106,7 +106,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    public void branchCommit() throws TransactionException {
+    void branchCommit() throws TransactionException {
         BranchStatus result = null;
         String xid = null;
         GlobalSession globalSession = null;
@@ -124,10 +124,12 @@ public class DefaultCoordinatorTest {
         globalSession.end();
     }
 
+
+
     @Disabled
     @ParameterizedTest
     @MethodSource("xidAndBranchIdProviderForRollback")
-    public void branchRollback(String xid, Long branchId) {
+    void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         try {
@@ -140,14 +142,14 @@ public class DefaultCoordinatorTest {
 
 
     @Test
-    public void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
+    void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
 
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         Assertions.assertNotNull(branchId);
 
-        Thread.sleep(100);
+        TimeUnit.MILLISECONDS.sleep(100);
         defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();
 
@@ -157,7 +159,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
+    void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
@@ -182,7 +184,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
+    void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
         NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
@@ -201,7 +203,7 @@ public class DefaultCoordinatorTest {
 
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
-            Assertions.assertTrue(lockSize == 0);
+            Assertions.assertEquals(0, lockSize);
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",

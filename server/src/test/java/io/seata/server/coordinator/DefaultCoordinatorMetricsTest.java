@@ -18,6 +18,7 @@ package io.seata.server.coordinator;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -42,9 +43,9 @@ import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessa
  *
  * @author zhengyangyong
  */
-public class DefaultCoordinatorMetricsTest {
+class DefaultCoordinatorMetricsTest {
     @Test
-    public void test() throws IOException, TransactionException, InterruptedException {
+    void test() throws IOException, TransactionException, InterruptedException {
         SessionHolder.init(null);
         DefaultCoordinator coordinator = new DefaultCoordinator(new MockServerMessageSender());
         coordinator.init();
@@ -72,7 +73,7 @@ public class DefaultCoordinatorMetricsTest {
             coordinator.doGlobalCommit(commitRequest, new GlobalCommitResponse(), new RpcContext());
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
-            Thread.sleep(200);
+            TimeUnit.MILLISECONDS.sleep(200);
 
             measurements.clear();
             MetricsManager.get().getRegistry().measure().forEach(
@@ -105,7 +106,7 @@ public class DefaultCoordinatorMetricsTest {
             rollbackRequest.setXid(response.getXid());
             coordinator.doGlobalRollback(rollbackRequest, new GlobalRollbackResponse(), new RpcContext());
 
-            Thread.sleep(200);
+            TimeUnit.MILLISECONDS.sleep(200);
 
             measurements.clear();
             MetricsManager.get().getRegistry().measure().forEach(

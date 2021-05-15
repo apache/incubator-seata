@@ -46,7 +46,7 @@ import java.util.Collection;
  *
  * @author zhangsen
  */
-public class DataBaseSessionManagerTest {
+class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
 
@@ -109,7 +109,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_addGlobalSession() throws TransactionException, SQLException {
+    void test_addGlobalSession() throws TransactionException, SQLException {
         GlobalSession session = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -143,7 +143,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
+    void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
         GlobalSession session = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -180,7 +180,7 @@ public class DataBaseSessionManagerTest {
     }
 
     @Test
-    public void test_removeGlobalSession() throws Exception {
+    void test_removeGlobalSession() throws Exception {
         GlobalSession session = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -225,7 +225,7 @@ public class DataBaseSessionManagerTest {
     }
 
     @Test
-    public void test_findGlobalSession() throws Exception {
+    void test_findGlobalSession() throws Exception {
         GlobalSession session = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -264,7 +264,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_addBranchSession() throws Exception {
+    void test_addBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
@@ -309,7 +309,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_updateBranchSessionStatus() throws Exception {
+    void test_updateBranchSessionStatus() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
@@ -346,7 +346,7 @@ public class DataBaseSessionManagerTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(rs.getInt("status"), BranchStatus.PhaseOne_Timeout.getCode());
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -358,7 +358,7 @@ public class DataBaseSessionManagerTest {
     }
 
     @Test
-    public void test_removeBranchSession() throws Exception {
+    void test_removeBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
@@ -406,7 +406,7 @@ public class DataBaseSessionManagerTest {
 
 
     @Test
-    public void test_allSessions() throws Exception {
+    void test_allSessions() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
                 "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
@@ -474,7 +474,7 @@ public class DataBaseSessionManagerTest {
     }
 
     @Test
-    public void test_findGlobalSessions() throws TransactionException, SQLException {
+    void test_findGlobalSessions() throws TransactionException, SQLException {
         String xid = null;
         {
             GlobalSession globalSession = GlobalSession.createGlobalSession("test",
@@ -557,7 +557,7 @@ public class DataBaseSessionManagerTest {
     }
 
     @Test
-    public void test_transactionNameGreaterDbSize() throws Exception {
+    void test_transactionNameGreaterDbSize() throws Exception {
 
         int transactionNameColumnSize = logStoreDataBaseDAO.getTransactionNameColumnSize();
         StringBuilder sb = new StringBuilder("test");

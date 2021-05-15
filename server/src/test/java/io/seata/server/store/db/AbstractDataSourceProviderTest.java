@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 /**
  * @author: will
  */
-public class AbstractDataSourceProviderTest {
+class AbstractDataSourceProviderTest {
 
     private final String dbcpDatasourceType = "dbcp";
 
@@ -34,19 +34,19 @@ public class AbstractDataSourceProviderTest {
     private final String hikariDatasourceType = "hikari";
 
     @Test
-    public void testDbcpDataSourceProvider() {
+    void testDbcpDataSourceProvider() {
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
         Assertions.assertNotNull(dataSource);
     }
 
     @Test
-    public void testDruidDataSourceProvider() {
+    void testDruidDataSourceProvider() {
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, druidDatasourceType).provide();
         Assertions.assertNotNull(dataSource);
     }
 
     @Test
-    public void testHikariDataSourceProvider() {
+    void testHikariDataSourceProvider() {
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType).provide();
         Assertions.assertNotNull(dataSource);
     }
