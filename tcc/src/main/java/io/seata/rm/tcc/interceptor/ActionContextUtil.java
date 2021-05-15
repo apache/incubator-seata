@@ -102,8 +102,8 @@ public final class ActionContextUtil {
                     return;
                 }
                 if (listParamObject.size() <= index) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("The index '{}' is out of bounds for the list {} named '{}'," +
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
                                 " whose size is '{}', so pass this {}", index, objType, objName, listParamObject.size(), objType);
                     }
                     return;
