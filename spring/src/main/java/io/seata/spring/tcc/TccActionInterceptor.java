@@ -16,6 +16,7 @@
 package io.seata.spring.tcc;
 
 import java.lang.reflect.Method;
+import javax.annotation.Nullable;
 
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationChangeEvent;
@@ -95,9 +96,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 RootContext.bindBranchType(BranchType.TCC);
             }
             try {
-                Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect, and return the business result
-                return actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
+                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessAction,
                         invocation::proceed);
             } finally {
                 //if not TCC, unbind branchType
@@ -127,7 +127,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             } else {
                 interfaceType = remotingDesc.getInterfaceClass();
             }
-            if (interfaceType == null && remotingDesc.getInterfaceClassName() != null) {
+            if (interfaceType == null && remotingDesc != null && remotingDesc.getInterfaceClassName() != null) {
                 interfaceType = Class.forName(remotingDesc.getInterfaceClassName(), true,
                     Thread.currentThread().getContextClassLoader());
             }
@@ -137,7 +137,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
             return interfaceType.getMethod(invocation.getMethod().getName(),
                 invocation.getMethod().getParameterTypes());
         } catch (NoSuchMethodException e) {
-            if (interfaceType != null && !invocation.getMethod().getName().equals("toString")) {
+            if (interfaceType != null && !"toString".equals(invocation.getMethod().getName())) {
                 LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
             }
             return invocation.getMethod();
@@ -154,6 +154,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
      * @return proxy interface
      * @throws Exception the exception
      */
+    @Nullable
     protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
         if (DubboUtil.isDubboProxyName(proxyBean.getClass().getName())) {
             //dubbo javaassist proxy
