@@ -195,7 +195,7 @@ public class ActionInterceptorHandler {
                     }
 
                     // load param by the config of annotation, and then put to the context
-                    ActionContextUtil.loadParamByAnnotationAndPutToContext("", paramObject, annotation, context);
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext("param", "", paramObject, annotation, context);
                 }
             }
         }

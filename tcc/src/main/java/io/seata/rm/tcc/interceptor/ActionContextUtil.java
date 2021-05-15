@@ -69,7 +69,7 @@ public final class ActionContextUtil {
 
                 // load param by the config of annotation, and then put to the context
                 String fieldName = f.getName();
-                loadParamByAnnotationAndPutToContext(fieldName, fieldValue, annotation, context);
+                loadParamByAnnotationAndPutToContext("field", fieldName, fieldValue, annotation, context);
             }
             return context;
         } catch (Throwable t) {
@@ -80,45 +80,53 @@ public final class ActionContextUtil {
     /**
      * load param by the config of annotation, and then put to the context
      *
-     * @param paramName   the param key
-     * @param paramObject the param object
-     * @param annotation  the annotation
-     * @param context     the action context
+     * @param objType    the object type, 'param' or 'field'
+     * @param objName    the object key
+     * @param objValue   the object value
+     * @param annotation the annotation on the param or field
+     * @param context    the action context
      */
-    public static void loadParamByAnnotationAndPutToContext(String paramName, Object paramObject,
-            BusinessActionContextParameter annotation, Map<String, Object> context) {
-        if (paramObject == null) {
+    public static void loadParamByAnnotationAndPutToContext(@Nonnull String objType, String objName, Object objValue,
+                                                            BusinessActionContextParameter annotation, Map<String, Object> context) {
+        if (objValue == null) {
             return;
         }
 
         // If is `List`, get by index
         int index = annotation.index();
         if (index >= 0) {
-            if (paramObject instanceof List) {
+            if (objValue instanceof List) {
                 @SuppressWarnings("unchecked")
-                List<Object> listParamObject = (List<Object>)paramObject;
+                List<Object> listParamObject = (List<Object>)objValue;
                 if (listParamObject.isEmpty()) {
                     return;
                 }
-                paramObject = listParamObject.get(index);
+                if (listParamObject.size() <= index) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("The index '{}' is out of bounds for the list {} named '{}'," +
+                                " whose size is '{}', so pass this {}", index, objType, objName, listParamObject.size(), objType);
+                    }
+                    return;
+                }
+                objValue = listParamObject.get(index);
             } else {
-                LOGGER.warn("the param named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
-                        paramName, BusinessActionContextParameter.class.getSimpleName());
+                LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                        objType, objName, BusinessActionContextParameter.class.getSimpleName());
             }
 
-            if (paramObject == null) {
+            if (objValue == null) {
                 return;
             }
         }
 
         if (annotation.isParamInProperty()) {
-            Map<String, Object> paramContext = fetchContextFromObject(paramObject);
+            Map<String, Object> paramContext = fetchContextFromObject(objValue);
             context.putAll(paramContext);
         } else {
             if (StringUtils.isNotBlank(annotation.paramName())) {
-                paramName = annotation.paramName();
+                objName = annotation.paramName();
             }
-            context.put(paramName, paramObject);
+            context.put(objName, objValue);
         }
     }
 
