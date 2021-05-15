@@ -97,18 +97,18 @@ public final class ActionContextUtil {
         if (index >= 0) {
             if (objValue instanceof List) {
                 @SuppressWarnings("unchecked")
-                List<Object> listParamObject = (List<Object>)objValue;
-                if (listParamObject.isEmpty()) {
+                List<Object> list = (List<Object>)objValue;
+                if (list.isEmpty()) {
                     return;
                 }
-                if (listParamObject.size() <= index) {
+                if (list.size() <= index) {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
-                                " whose size is '{}', so pass this {}", index, objType, objName, listParamObject.size(), objType);
+                                " whose size is '{}', so pass this {}", index, objType, objName, list.size(), objType);
                     }
                     return;
                 }
-                objValue = listParamObject.get(index);
+                objValue = list.get(index);
             } else {
                 LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
                         objType, objName, BusinessActionContextParameter.class.getSimpleName());
