@@ -154,6 +154,33 @@ public class DefaultCoordinatorTest {
         Assertions.assertNull(SessionHolder.findGlobalSession(xid));
     }
 
+    @Test
+    public void branchRegistryNotConcession() throws TransactionException {
+        BranchStatus result;
+        String xid = null;
+        GlobalSession globalSession = null;
+        Long branchId = null;
+        String xid2 = null;
+        try {
+            xid2 = core.begin(applicationId, txServiceGroup, txName, timeout);
+            xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+            branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+            globalSession = SessionHolder.findGlobalSession(xid);
+            globalSession.changeStatus(GlobalStatus.CommitRetrying);
+            core.branchRegister(BranchType.AT, resourceId, clientId, xid2, applicationData, lockKeys_1);
+        } catch (TransactionException e) {
+            core.rollback(xid2);
+            Assertions.assertTrue(e.getCode() == TransactionExceptionCode.LockKeyConflict);
+        }
+        result = core.branchRollback(globalSession, globalSession.getBranch(branchId));
+        Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        globalSession.end();
+        Assertions.assertNull(SessionHolder.findGlobalSession(xid2));
+        Assertions.assertNull(SessionHolder.findGlobalSession(xid));
+    }
+
 
     @Disabled
     @ParameterizedTest
