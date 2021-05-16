@@ -172,12 +172,11 @@ public class FileLocker extends AbstractLocker {
         return xids;
     }
 
-
     @Override
     public Set<String> getLockOwners(List<RowLock> rowLock) {
-        return null;
+        return isLockable(rowLock, false);
     }
-    
+
     @Override
     public void cleanAllLocks() {
         LOCK_MAP.clear();

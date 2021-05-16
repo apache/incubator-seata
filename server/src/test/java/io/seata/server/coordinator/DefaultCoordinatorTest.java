@@ -15,27 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import io.netty.channel.Channel;
-import io.seata.common.XID;
-import io.seata.common.util.DurationUtil;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.ReflectionUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.transaction.BranchCommitRequest;
-import io.seata.core.protocol.transaction.BranchCommitResponse;
-import io.seata.core.protocol.transaction.BranchRollbackRequest;
-import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.store.StoreMode;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHolder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,6 +25,30 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
+
+import io.netty.channel.Channel;
+import io.seata.common.XID;
+import io.seata.common.util.DurationUtil;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.ReflectionUtil;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.BranchCommitRequest;
+import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.BranchRollbackRequest;
+import io.seata.core.protocol.transaction.BranchRollbackResponse;
+import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.processor.RemotingProcessor;
+import io.seata.core.store.StoreMode;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -123,6 +126,34 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
+
+    @Test
+    public void branchRegistryConcession() throws TransactionException {
+        BranchStatus result;
+        String xid = null;
+        GlobalSession globalSession = null;
+        Long branchId = null;
+        String xid2 = null;
+        try {
+            xid2 = core.begin(applicationId, txServiceGroup, txName, timeout);
+            xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+            branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+            globalSession = SessionHolder.findGlobalSession(xid);
+            globalSession.changeStatus(GlobalStatus.RollbackRetrying);
+            core.branchRegister(BranchType.AT, resourceId, clientId, xid2, applicationData, lockKeys_1);
+        } catch (TransactionException e) {
+            core.rollback(xid2);
+            Assertions.assertTrue(e.getCode() == TransactionExceptionCode.LockKeyConflictFailFast);
+        }
+        result = core.branchRollback(globalSession, globalSession.getBranch(branchId));
+        Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        globalSession.end();
+        Assertions.assertNull(SessionHolder.findGlobalSession(xid2));
+        Assertions.assertNull(SessionHolder.findGlobalSession(xid));
+    }
+
 
     @Disabled
     @ParameterizedTest
