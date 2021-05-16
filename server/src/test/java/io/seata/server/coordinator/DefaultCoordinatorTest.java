@@ -172,8 +172,8 @@ public class DefaultCoordinatorTest {
             core.rollback(xid2);
             Assertions.assertTrue(e.getCode() == TransactionExceptionCode.LockKeyConflict);
         }
-        result = core.branchRollback(globalSession, globalSession.getBranch(branchId));
-        Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
+        result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
+        Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
         globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
