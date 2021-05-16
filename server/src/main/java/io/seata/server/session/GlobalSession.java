@@ -92,6 +92,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
+    public GlobalSession(String xid) {
+        this.xid = xid;
+    }
 
     /**
      * Add boolean.

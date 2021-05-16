@@ -17,6 +17,10 @@ package io.seata.server.lock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.seata.common.XID;
 import io.seata.common.util.CollectionUtils;
@@ -25,8 +29,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract lock manager.
@@ -57,6 +59,25 @@ public abstract class AbstractLockManager implements LockManager {
             return true;
         }
         return getLocker(branchSession).acquireLock(locks);
+    }
+
+    @Override
+    public Set<String> getLockOwners(BranchSession branchSession) {
+        if (branchSession == null) {
+            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
+        }
+        String lockKey = branchSession.getLockKey();
+        if (StringUtils.isNullOrEmpty(lockKey)) {
+            // no lock
+            return null;
+        }
+        // get locks of branch
+        List<RowLock> locks = collectRowLocks(branchSession);
+        if (CollectionUtils.isEmpty(locks)) {
+            // no lock
+            return null;
+        }
+        return getLocker(branchSession).getLockOwners(locks);
     }
 
     @Override

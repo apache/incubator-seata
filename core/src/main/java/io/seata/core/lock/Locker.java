@@ -16,6 +16,7 @@
 package io.seata.core.lock;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * The interface Locker.
@@ -68,5 +69,12 @@ public interface Locker {
      * Clean all locks.
      */
     void cleanAllLocks();
+
+    /**
+     * get lock owners
+     * @param rowLock the row lock
+     * @return the lock owners
+     */
+    Set<String> getLockOwners(List<RowLock> rowLock);
 }
 

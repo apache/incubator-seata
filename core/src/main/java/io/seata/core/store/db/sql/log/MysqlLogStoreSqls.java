@@ -50,6 +50,16 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
             + " limit ?";
 
     /**
+     * The constant QUERY_GLOBAL_TRANSACTION_BY_xis_and_STATUS.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_MYSQL = "select " + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " and " + ServerTableColumnsName.GLOBAL_TABLE_XID + " in (" + XIDS_PLACEHOLD + ")"
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " limit ?";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL = "select " + ALL_GLOBAL_COLUMNS
@@ -95,6 +105,13 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
             .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    @Override
+    public String getQueryGlobalTransactionSQLByXidsAndStatus(String globalTable, String xidsParamsPlaceHolder,
+        String paramsPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+            .replace(XIDS_PLACEHOLD, xidsParamsPlaceHolder).replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     @Override

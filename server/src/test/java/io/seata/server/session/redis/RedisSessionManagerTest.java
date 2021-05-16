@@ -241,7 +241,7 @@ public class RedisSessionManagerTest {
         Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
         Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
-        condition.setXid(null);
+        condition.setXids(null);
         condition.setTransactionId(session.getTransactionId());
         globalSessions = sessionManager.findGlobalSessions(condition);
         Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());

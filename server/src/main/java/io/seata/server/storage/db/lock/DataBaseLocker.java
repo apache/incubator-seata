@@ -16,6 +16,7 @@
 package io.seata.server.storage.db.lock;
 
 import java.util.List;
+import java.util.Set;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.DataAccessException;
@@ -123,6 +124,15 @@ public class DataBaseLocker extends AbstractLocker {
             LOGGER.error("isLockable error, locks:{}", CollectionUtils.toString(locks), t);
             return false;
         }
+    }
+
+    @Override
+    public Set<String> getLockOwners(List<RowLock> rowLock) {
+        if (CollectionUtils.isEmpty(rowLock)) {
+            // no lock
+            return null;
+        }
+        return lockStore.getLockOwners(convertToLockDO(rowLock));
     }
 
     /**

@@ -18,6 +18,7 @@ package io.seata.server.storage.file.session;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -120,8 +121,17 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     @Override
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
+        List<GlobalStatus> statusKeys = null;
+        if (CollectionUtils.isNotEmpty(condition.getStatuses())) {
+            statusKeys = Arrays.asList(condition.getStatuses());
+        }
         for (GlobalSession globalSession : sessionMap.values()) {
-            if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+            if (CollectionUtils.isNotEmpty(statusKeys) && CollectionUtils.isNotEmpty(condition.getXids())) {
+                if (condition.getXids().contains(globalSession.getXid())
+                    && statusKeys.contains(globalSession.getStatus())) {
+                    found.add(globalSession);
+                }
+            } else if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
                 found.add(globalSession);
             }
         }

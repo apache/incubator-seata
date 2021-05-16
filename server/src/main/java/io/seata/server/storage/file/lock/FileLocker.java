@@ -15,12 +15,12 @@
  */
 package io.seata.server.storage.file.lock;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
@@ -78,9 +78,9 @@ public class FileLocker extends AbstractLocker {
             int bucketId = pk.hashCode() % BUCKET_PER_TABLE;
             BucketLockMap bucketLockMap = CollectionUtils.computeIfAbsent(tableLockMap, bucketId,
                 key -> new BucketLockMap());
-            Long previousLockTransactionId = bucketLockMap.get().putIfAbsent(pk, transactionId);
+            Long previousLockTransactionId = bucketLockMap.get().putIfAbsent(pk, branchSession).getBranchId();
             if (previousLockTransactionId == null) {
-                //No existing lock, and now locked by myself
+                // No existing lock, and now locked by myself
                 Set<String> keysInHolder = CollectionUtils.computeIfAbsent(bucketHolder, bucketLockMap,
                     key -> new ConcurrentSet<>());
                 keysInHolder.add(pk);
@@ -116,7 +116,7 @@ public class FileLocker extends AbstractLocker {
             Set<String> keys = entry.getValue();
             for (String key : keys) {
                 // remove lock only if it locked by myself
-                bucket.get().remove(key, branchSession.getTransactionId());
+                bucket.get().remove(key, branchSession);
             }
         }
         lockHolder.clear();
@@ -125,15 +125,20 @@ public class FileLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
+        return CollectionUtils.isEmpty(isLockable(rowLocks, true));
+    }
+
+    public Set<String> isLockable(List<RowLock> rowLocks, boolean failFast) {
         if (CollectionUtils.isEmpty(rowLocks)) {
-            //no lock
-            return true;
+            // no lock
+            return null;
         }
+        Set<String> xids=null;
         Long transactionId = rowLocks.get(0).getTransactionId();
         String resourceId = rowLocks.get(0).getResourceId();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.get(resourceId);
         if (dbLockMap == null) {
-            return true;
+            return null;
         }
         for (RowLock rowLock : rowLocks) {
             String tableName = rowLock.getTableName();
@@ -148,18 +153,31 @@ public class FileLocker extends AbstractLocker {
             if (bucketLockMap == null) {
                 continue;
             }
-            Long lockingTransactionId = bucketLockMap.get().get(pk);
-            if (lockingTransactionId == null || lockingTransactionId.longValue() == transactionId) {
+            BranchSession branchSession = bucketLockMap.get().get(pk);
+            if (branchSession == null || branchSession.getBranchId() == transactionId) {
                 // Locked by me
                 continue;
             } else {
-                LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + lockingTransactionId);
-                return false;
+                LOGGER
+                    .info("Global lock on [" + tableName + ":" + pk + "] is holding by " + branchSession.getBranchId());
+                if (xids == null) {
+                    xids = new HashSet<>();
+                }
+                xids.add(branchSession.getXid());
+                if (failFast) {
+                    return xids;
+                }
             }
         }
-        return true;
+        return null;
     }
 
+
+    @Override
+    public Set<String> getLockOwners(List<RowLock> rowLock) {
+        return null;
+    }
+    
     @Override
     public void cleanAllLocks() {
         LOCK_MAP.clear();
@@ -172,10 +190,10 @@ public class FileLocker extends AbstractLocker {
      * HashMap(lockHolder).
      */
     public static class BucketLockMap {
-        private final ConcurrentHashMap<String/* pk */, Long/* transactionId */> bucketLockMap
+        private final ConcurrentHashMap<String/* pk */, BranchSession/* branchSession */> bucketLockMap
             = new ConcurrentHashMap<>();
 
-        ConcurrentHashMap<String, Long> get() {
+        ConcurrentHashMap<String, BranchSession> get() {
             return bucketLockMap;
         }
 

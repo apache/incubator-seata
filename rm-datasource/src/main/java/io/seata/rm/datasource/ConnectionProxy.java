@@ -150,13 +150,14 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void recognizeLockKeyConflictException(TransactionException te, String lockKeys) throws SQLException {
-        if (te.getCode() == TransactionExceptionCode.LockKeyConflict) {
+        if (te.getCode() == TransactionExceptionCode.LockKeyConflict
+            || te.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
             StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:");
             reasonBuilder.append(context.getXid());
             if (StringUtils.isNotBlank(lockKeys)) {
                 reasonBuilder.append(", lockKeys:").append(lockKeys);
             }
-            throw new LockConflictException(reasonBuilder.toString());
+            throw new LockConflictException(reasonBuilder.toString(), te.getCode());
         } else {
             throw new SQLException(te);
         }
@@ -354,6 +355,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                     return callable.call();
                 } catch (LockConflictException lockConflict) {
                     onException(lockConflict);
+                    // AbstractDMLBaseExecutor#executeAutoCommitTrue the local lock is released
+                    if (lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast
+                        && connection.getContext().isAutoCommitChanged()) {
+                        lockConflict.setCode(TransactionExceptionCode.LockKeyConflict);
+                    }
                     lockRetryController.sleep(lockConflict);
                 } catch (Exception e) {
                     onException(e);

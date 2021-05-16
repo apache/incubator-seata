@@ -15,15 +15,24 @@
  */
 package io.seata.server.transaction.at;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.server.coordinator.AbstractCore;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionHolder;
+
 
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type at core.
@@ -44,9 +53,24 @@ public class ATCore extends AbstractCore {
     @Override
     protected void branchSessionLock(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         if (!branchSession.lock()) {
-            throw new BranchTransactionException(LockKeyConflict, String
-                    .format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
-                            branchSession.getBranchId()));
+            Set<String> xids = lockManager.getLockOwners(branchSession);
+            if (CollectionUtils.isNotEmpty(xids)) {
+                SessionCondition condition = new SessionCondition();
+                List<String> list = new ArrayList<>();
+                list.addAll(xids);
+                condition.setStatuses(new GlobalStatus[] {GlobalStatus.RollbackRetrying, GlobalStatus.RollbackFailed,
+                    GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
+                    GlobalStatus.TimeoutRollbackFailed});
+                condition.setXids(list);
+              if(CollectionUtils.isNotEmpty(SessionHolder.getRootSessionManager().findGlobalSessions(condition))){
+                  throw new BranchTransactionException(LockKeyConflictFailFast,
+                      String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
+                          branchSession.getBranchId()));
+              }
+            }
+            throw new BranchTransactionException(LockKeyConflict,
+                String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
+                    branchSession.getBranchId()));
         }
     }
 

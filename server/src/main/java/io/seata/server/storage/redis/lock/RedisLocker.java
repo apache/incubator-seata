@@ -305,10 +305,15 @@ public class RedisLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
+        return CollectionUtils.isEmpty(isLockable(rowLocks,true));
+    }
+
+    public Set<String> isLockable(List<RowLock> rowLocks, boolean failFast) {
         if (CollectionUtils.isEmpty(rowLocks)) {
-            return true;
+            return null;
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Set<String> xidOwners = null;
             List<LockDO> locks = convertToLockDO(rowLocks);
             Set<String> lockKeys = new HashSet<>();
             for (LockDO rowlock : locks) {
@@ -318,9 +323,27 @@ public class RedisLocker extends AbstractLocker {
             String xid = rowLocks.get(0).getXid();
             Pipeline pipeline = jedis.pipelined();
             lockKeys.forEach(key -> pipeline.hget(key, XID));
-            List<String> existedXids = (List<String>) (List) pipeline.syncAndReturnAll();
-            return existedXids.stream().allMatch(existedXid -> existedXid == null || xid.equals(existedXid));
+            List<String> existedXids = (List<String>)(List)pipeline.syncAndReturnAll();
+            if (CollectionUtils.isNotEmpty(existedXids)) {
+                for (String existedXid : existedXids) {
+                    if (!existedXid.equals(xid)) {
+                        if (xidOwners == null) {
+                            xidOwners = new HashSet<>();
+                        }
+                        xidOwners.add(existedXid);
+                        if (failFast) {
+                            break;
+                        }
+                    }
+                }
+            }
+            return xidOwners;
         }
+    }
+
+    @Override
+    public Set<String> getLockOwners(List<RowLock> rowLock) {
+        return isLockable(rowLock, false);
     }
 
     private String buildXidLockKey(String xid) {

@@ -38,6 +38,11 @@ public enum TransactionExceptionCode {
     LockKeyConflict,
 
     /**
+     * Lock key conflict fail fast transaction exception code.
+     */
+    LockKeyConflictFailFast,
+
+    /**
      * Io transaction exception code.
      */
     IO,

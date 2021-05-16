@@ -50,6 +50,16 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
             + " limit ?";
 
     /**
+     * This constant QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_POSTGRESQL.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " and " + ServerTableColumnsName.GLOBAL_TABLE_XID + " in (" + XIDS_PLACEHOLD + ")"
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " limit ?";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS
@@ -98,6 +108,13 @@ public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
             .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    @Override
+    public String getQueryGlobalTransactionSQLByXidsAndStatus(String globalTable, String xidsParamsPlaceHolder,
+        String paramsPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_BY_XIDS_AND_STATUS_POSTGRESQL.replace(xidsParamsPlaceHolder, XIDS_PLACEHOLD)
+            .replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     @Override

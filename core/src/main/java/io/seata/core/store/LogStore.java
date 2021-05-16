@@ -123,4 +123,13 @@ public interface LogStore {
      */
     long getCurrentMaxSessionId(long high, long low);
 
+    /**
+     * Query global transaction do list.
+     * @param xids the xids
+     * @param status the status
+     * @param limit  the limit
+     * @return the list
+     */
+    List<GlobalTransactionDO> queryGlobalTransactionDO(List<String> xids, int[] status, int limit);
+
 }

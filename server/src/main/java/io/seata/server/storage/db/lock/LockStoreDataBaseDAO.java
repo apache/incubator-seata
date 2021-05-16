@@ -15,7 +15,6 @@
  */
 package io.seata.server.storage.db.lock;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-
+import javax.sql.DataSource;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.CollectionUtils;
@@ -290,6 +289,20 @@ public class LockStoreDataBaseDAO implements LockStore {
         }
     }
 
+    @Override
+    public Set<String> getLockOwners(List<LockDO> lockDOs) {
+        Connection conn = null;
+        try {
+            conn = lockStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            return checkLockable(conn, lockDOs, false);
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(conn);
+        }
+    }
+
     /**
      * Do acquire lock boolean.
      *
@@ -359,6 +372,19 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @return the boolean
      */
     protected boolean checkLockable(Connection conn, List<LockDO> lockDOs) {
+        Set<String> xidOwners = checkLockable(conn, lockDOs, true);
+        return CollectionUtils.isEmpty(xidOwners);
+    }
+
+    /**
+     * Check lock boolean.
+     *
+     * @param conn    the conn
+     * @param lockDOs the lock do
+     * @return the boolean
+     */
+    protected Set<String> checkLockable(Connection conn, List<LockDO> lockDOs, boolean failFast) {
+        Set<String> xidOwners = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -377,10 +403,16 @@ public class LockStoreDataBaseDAO implements LockStore {
             while (rs.next()) {
                 String xid = rs.getString("xid");
                 if (!StringUtils.equals(xid, lockDOs.get(0).getXid())) {
-                    return false;
+                    if (xidOwners == null) {
+                        xidOwners = new HashSet<>();
+                    }
+                    xidOwners.add(xid);
+                    if (failFast) {
+                        break;
+                    }
                 }
             }
-            return true;
+            return xidOwners;
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {

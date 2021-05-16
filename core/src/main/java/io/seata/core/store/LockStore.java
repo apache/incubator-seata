@@ -16,6 +16,7 @@
 package io.seata.core.store;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * The interface Lock store.
@@ -68,4 +69,13 @@ public interface LockStore {
      * @return the boolean
      */
     boolean isLockable(List<LockDO> lockDOs);
+
+    /**
+     * get lock owners .
+     *
+     * @param lockDOs the lock do
+     * @return the lock owners
+     */
+    Set<String> getLockOwners(List<LockDO> lockDOs);
+
 }

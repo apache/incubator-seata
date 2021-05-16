@@ -186,6 +186,41 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(List<String> xids, int[] statuses, int limit) {
+        List<GlobalTransactionDO> ret = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+
+            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);
+            String xidsParamsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", xids.size());
+            String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType)
+                .getQueryGlobalTransactionSQLByXidsAndStatus(globalTable, xidsParamsPlaceHolder, paramsPlaceHolder);
+            ps = conn.prepareStatement(sql);
+            int i = 0;
+            for (String xid : xids) {
+                ps.setString(++i, xid);
+            }
+            for (int status : statuses) {
+                ps.setInt(++i, status);
+            }
+            ps.setInt(++i, limit);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ret.add(convertGlobalTransactionDO(rs));
+            }
+            return ret;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps, conn);
+        }
+    }
+
+    @Override
     public boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getInsertGlobalTransactionSQL(globalTable);
         Connection conn = null;
