@@ -78,17 +78,17 @@ public class FileLocker extends AbstractLocker {
             int bucketId = pk.hashCode() % BUCKET_PER_TABLE;
             BucketLockMap bucketLockMap = CollectionUtils.computeIfAbsent(tableLockMap, bucketId,
                 key -> new BucketLockMap());
-            Long previousLockTransactionId = bucketLockMap.get().putIfAbsent(pk, branchSession).getBranchId();
-            if (previousLockTransactionId == null) {
+            BranchSession previousLockBranchSession = bucketLockMap.get().putIfAbsent(pk, branchSession);
+            if (previousLockBranchSession == null) {
                 // No existing lock, and now locked by myself
                 Set<String> keysInHolder = CollectionUtils.computeIfAbsent(bucketHolder, bucketLockMap,
                     key -> new ConcurrentSet<>());
                 keysInHolder.add(pk);
-            } else if (previousLockTransactionId == transactionId) {
+            } else if (previousLockBranchSession.getBranchId() == transactionId) {
                 // Locked by me before
                 continue;
             } else {
-                LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockTransactionId);
+                LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockBranchSession.getBranchId());
                 try {
                     // Release all acquired locks.
                     branchSession.unlock();
