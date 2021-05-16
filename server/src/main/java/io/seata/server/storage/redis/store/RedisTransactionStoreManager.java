@@ -52,6 +52,7 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
 
 /**
  * The redis transaction store manager
@@ -169,9 +170,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (StringUtils.isEmpty(previousBranchStatus)) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
-            Map<String,String> map = new HashMap<>(2,1);
-            map.put(REDIS_KEY_BRANCH_STATUS,String.valueOf(branchTransactionDO.getStatusCode()));
-            map.put(REDIS_KEY_BRANCH_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
+            Map<String, String> map = new HashMap<>(3, 1);
+            map.put(REDIS_KEY_BRANCH_STATUS, String.valueOf(branchTransactionDO.getStatusCode()));
+            map.put(REDIS_KEY_BRANCH_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
+            if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
+                map.put(REDIS_KEY_BRANCH_APPLICATION_DATA, String.valueOf(branchTransactionDO.getApplicationData()));
+            }
             jedis.hmset(branchKey, map);
             return true;
         } catch (Exception ex) {
