@@ -169,7 +169,7 @@ public class FileLocker extends AbstractLocker {
                 }
             }
         }
-        return null;
+        return xids;
     }
 
 
