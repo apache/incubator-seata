@@ -33,7 +33,7 @@ public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
         GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
         if (globalSession != null) {
             globalSession.removeBranch(sessionSyncMsg.getBranchSession().getBranchId());
-            LOGGER.info("removeBranch xid: {},branchId: {}", globalSession.getXid(),
+            logger.info("removeBranch xid: {},branchId: {}", globalSession.getXid(),
                 sessionSyncMsg.getBranchSession().getBranchId());
         }
         return true;

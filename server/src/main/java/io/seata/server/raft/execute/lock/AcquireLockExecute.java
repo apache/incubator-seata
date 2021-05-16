@@ -44,7 +44,7 @@ public class AcquireLockExecute extends AbstractRaftMsgExecute {
             branchSession = SessionConverter.convertBranchSession(sessionSyncMsg.getBranchSession());
         }
         Boolean owner = LockerManagerFactory.getLockManager().acquireLock(branchSession);
-        LOGGER.info("acquireLock xid: {}", branchSession.getXid());
+        logger.info("acquireLock xid: {}", branchSession.getXid());
         if (owner && !include) {
             globalSession.add(branchSession);
         }

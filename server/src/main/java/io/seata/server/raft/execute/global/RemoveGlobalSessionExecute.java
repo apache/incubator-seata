@@ -40,18 +40,18 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
     @Override
     public Boolean execute(Object... args) {
         EXECUTOR.execute(() -> {
-            LOGGER.info("remove start session map size:{}",raftSessionManager.getSessionMap().size());
+            logger.info("remove start session map size:{}",raftSessionManager.getSessionMap().size());
             GlobalSession globalSession =
                 raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
             if (globalSession != null) {
                 try {
                     globalSession.end();
-                    LOGGER.info("end xid: {}", globalSession.getXid());
+                    logger.info("end xid: {}", globalSession.getXid());
                 } catch (TransactionException e) {
-                    LOGGER.error("remove global fail error:{}", e.getMessage());
+                    logger.error("remove global fail error:{}", e.getMessage());
                 }
             }
-            LOGGER.info("remove end session map size:{}",raftSessionManager.getSessionMap().size());
+            logger.info("remove end session map size:{}",raftSessionManager.getSessionMap().size());
         });
         return true;
     }

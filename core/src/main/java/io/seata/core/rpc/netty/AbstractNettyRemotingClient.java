@@ -156,7 +156,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         // prevents an exception from being thrown that causes the thread to break
                         LOGGER.error("failed to get the leader address,error:{}", e.getMessage());
                     }
-                }, 50 * 100, 50 * 100, TimeUnit.MILLISECONDS);
+                }, DEFAULT_RAFT_PORT_INTERVAL * 5, DEFAULT_RAFT_PORT_INTERVAL * 5, TimeUnit.MILLISECONDS);
             }
         }
         super.init();
@@ -563,15 +563,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                             if (!routeTable
                                 .refreshLeader(CLI_CLIENT_SERVICE, SEATA_RAFT_GROUP, DEFAULT_RAFT_PORT_INTERVAL)
                                 .isOk()) {
-                                if (LOGGER.isErrorEnabled()) {
-                                    LOGGER.error("refresh leader failed");
+                                if (LOGGER.isWarnEnabled()) {
+                                    LOGGER.warn("refresh leader failed");
                                 }
                                 return;
                             }
                         } catch (Exception e) {
-                            if (LOGGER.isErrorEnabled()) {
-                                LOGGER.error("refresh leader failed,error msg: {}", e.getMessage());
-                            }
+                            LOGGER.error("refresh leader failed,error msg: {}", e.getMessage());
                         }
                         PeerId leader = routeTable.selectLeader(SEATA_RAFT_GROUP);
                         int port = leader.getPort() + DEFAULT_RAFT_PORT_INTERVAL;

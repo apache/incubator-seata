@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected RaftSessionSyncMsg sessionSyncMsg;
 

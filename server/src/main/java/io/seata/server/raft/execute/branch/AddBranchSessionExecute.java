@@ -35,11 +35,11 @@ public class AddBranchSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(Object... args) throws Throwable {
         BranchTransactionDO branchTransactionDO = sessionSyncMsg.getBranchSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(branchTransactionDO.getXid());
-            BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
+        BranchSession branchSession = globalSession.getBranch(branchTransactionDO.getBranchId());
         if (branchSession == null) {
             branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
             globalSession.addBranch(branchSession);
-            LOGGER.info("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
+            logger.info("addBranch xid: {},branchId: {}", branchTransactionDO.getXid(),
                 branchTransactionDO.getBranchId());
         }
         return true;
