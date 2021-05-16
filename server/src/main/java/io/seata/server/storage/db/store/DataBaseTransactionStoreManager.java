@@ -171,13 +171,13 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * @param statuses the statuses
      * @return the list
      */
-    public List<GlobalSession> readSession(List<String> xids, GlobalStatus[] statuses) {
+    public List<GlobalSession> readSession(List<String> xids, GlobalStatus[] statuses, Integer limit) {
         int[] states = new int[statuses.length];
         for (int i = 0; i < statuses.length; i++) {
             states[i] = statuses[i].getCode();
         }
         //global transaction
-        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(xids, states, 1);
+        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(xids, states, limit);
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
             return null;
         }
@@ -215,7 +215,8 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         if (CollectionUtils.isNotEmpty(sessionCondition.getXids())) {
             if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())&&sessionCondition.getXids().size() > 0) {
-                return readSession(sessionCondition.getXids(), sessionCondition.getStatuses());
+                return readSession(sessionCondition.getXids(), sessionCondition.getStatuses(),
+                    sessionCondition.getLimit());
             } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
                 GlobalSession globalSession = readSession(sessionCondition.getXids().get(0));
                 if (globalSession != null) {

@@ -377,7 +377,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<GlobalSession> globalSessions = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(sessionCondition.getXids())) {
             if (sessionCondition.getStatuses() != null && sessionCondition.getXids().size() > 0) {
-               globalSessions = readSession(sessionCondition.getXids(), sessionCondition.getStatuses());
+                globalSessions = readSession(sessionCondition.getXids(), sessionCondition.getStatuses(),
+                    sessionCondition.getLimit());
             } else {
                 GlobalSession globalSession = this.readSession(sessionCondition.getXids().get(0), true);
                 if (globalSession != null) {
@@ -406,7 +407,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * @param statuses the statuses
      * @return the list
      */
-    public List<GlobalSession> readSession(List<String> xids, GlobalStatus[] statuses) {
+    public List<GlobalSession> readSession(List<String> xids, GlobalStatus[] statuses, Integer limit) {
         List<GlobalSession> requiredGlobalList = null;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipeline = jedis.pipelined()) {
             for (String xid : xids) {
@@ -429,6 +430,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                         }
                         requiredGlobalList.add(SessionConverter.convertGlobalSession(
                             (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class)));
+                        if (limit != null && requiredGlobalList.size() == limit) {
+                            break;
+                        }
                     }
                 }
             }

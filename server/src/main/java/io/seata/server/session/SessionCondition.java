@@ -30,6 +30,7 @@ public class SessionCondition {
     private GlobalStatus status;
     private GlobalStatus[] statuses;
     private long overTimeAliveMills;
+    private Integer limit;
 
     /**
      * Instantiates a new Session condition.
@@ -143,4 +144,13 @@ public class SessionCondition {
     public void setStatuses(GlobalStatus[] statuses) {
         this.statuses = statuses;
     }
+
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+
 }

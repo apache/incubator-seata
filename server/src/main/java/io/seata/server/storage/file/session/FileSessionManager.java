@@ -130,6 +130,9 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
                 if (condition.getXids().contains(globalSession.getXid())
                     && statusKeys.contains(globalSession.getStatus())) {
                     found.add(globalSession);
+                    if (condition.getLimit() != null && found.size() == condition.getLimit()) {
+                        break;
+                    }
                 }
             } else if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
                 found.add(globalSession);

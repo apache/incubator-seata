@@ -62,6 +62,7 @@ public class ATCore extends AbstractCore {
                     GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
                     GlobalStatus.TimeoutRollbackFailed});
                 condition.setXids(list);
+                condition.setLimit(1);
               if(CollectionUtils.isNotEmpty(SessionHolder.getRootSessionManager().findGlobalSessions(condition))){
                   throw new BranchTransactionException(LockKeyConflictFailFast,
                       String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
