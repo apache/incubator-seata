@@ -75,7 +75,7 @@ public class RaftServerFactory {
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
         // snapshot should be made every 30 seconds
-        Integer snapshotInterval = config.getInt(ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL, 30);
+        Integer snapshotInterval = config.getInt(ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         // analytic parameter
         final PeerId serverId = new PeerId();
