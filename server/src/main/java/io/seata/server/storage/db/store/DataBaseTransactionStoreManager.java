@@ -215,10 +215,10 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         if (CollectionUtils.isNotEmpty(sessionCondition.getXids())) {
-            if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses()) && sessionCondition.getXids().size() > 0) {
+            if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
                 return readSession(sessionCondition.getXids(), sessionCondition.getStatuses(),
                     sessionCondition.getLimit());
-            } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
+            } else {
                 GlobalSession globalSession = readSession(sessionCondition.getXids().get(0));
                 if (globalSession != null) {
                     List<GlobalSession> globalSessions = new ArrayList<>();

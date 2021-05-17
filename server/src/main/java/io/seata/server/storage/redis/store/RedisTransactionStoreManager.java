@@ -374,22 +374,24 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        List<GlobalSession> globalSessions = new ArrayList<>();
+        List<GlobalSession> globalSessions = null;
         if (CollectionUtils.isNotEmpty(sessionCondition.getXids())) {
-            if (sessionCondition.getStatuses() != null && sessionCondition.getXids().size() > 0) {
+            if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
                 globalSessions = readSession(sessionCondition.getXids(), sessionCondition.getStatuses(),
                     sessionCondition.getLimit());
             } else {
                 GlobalSession globalSession = this.readSession(sessionCondition.getXids().get(0), true);
                 if (globalSession != null) {
+                    globalSessions = new ArrayList<>();
                     globalSessions.add(globalSession);
                 }
             }
             return globalSessions;
         } else if (sessionCondition.getTransactionId() != null) {
-            GlobalSession globalSession = this
-                    .readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
+            GlobalSession globalSession =
+                this.readSessionByTransactionId(sessionCondition.getTransactionId().toString(), true);
             if (globalSession != null) {
+                globalSessions = new ArrayList<>();
                 globalSessions.add(globalSession);
             }
             return globalSessions;
