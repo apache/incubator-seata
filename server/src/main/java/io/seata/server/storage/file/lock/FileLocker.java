@@ -133,7 +133,7 @@ public class FileLocker extends AbstractLocker {
             // no lock
             return null;
         }
-        Set<String> xids=null;
+        Set<String> xids = null;
         Long transactionId = rowLocks.get(0).getTransactionId();
         String resourceId = rowLocks.get(0).getResourceId();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.get(resourceId);

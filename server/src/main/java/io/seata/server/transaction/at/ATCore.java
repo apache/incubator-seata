@@ -63,11 +63,11 @@ public class ATCore extends AbstractCore {
                     GlobalStatus.TimeoutRollbackFailed});
                 condition.setXids(list);
                 condition.setLimit(1);
-              if(CollectionUtils.isNotEmpty(SessionHolder.getRootSessionManager().findGlobalSessions(condition))){
-                  throw new BranchTransactionException(LockKeyConflictFailFast,
-                      String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
-                          branchSession.getBranchId()));
-              }
+                if (CollectionUtils.isNotEmpty(SessionHolder.getRootSessionManager().findGlobalSessions(condition))) {
+                    throw new BranchTransactionException(LockKeyConflictFailFast,
+                        String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
+                            branchSession.getBranchId()));
+                }
             }
             throw new BranchTransactionException(LockKeyConflict,
                 String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
