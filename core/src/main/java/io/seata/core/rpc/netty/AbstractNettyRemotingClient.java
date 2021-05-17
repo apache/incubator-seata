@@ -257,7 +257,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         try {
             @SuppressWarnings("unchecked")
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
+            if (CollectionUtils.isNotEmpty(inetSocketAddressList)) {
+                if (inetSocketAddressList.size() > 1) {
+                    address = LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
+                } else {
+                    address = inetSocketAddressList.get(0);
+                }
+            }
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
