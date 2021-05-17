@@ -120,15 +120,6 @@ public class SessionHolder {
                 .equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE))) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, ROOT_SESSION_MANAGER});
-               /* ASYNC_COMMITTING_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
-                        new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, ASYNC_COMMITTING_SESSION_MANAGER});
-                RETRY_COMMITTING_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
-                        new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, RETRY_COMMITTING_SESSION_MANAGER});
-                RETRY_ROLLBACKING_SESSION_MANAGER =
-                    EnhancedServiceLoader.load(SessionManager.class, StoreMode.RAFT.getName(),
-                        new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, RETRY_ROLLBACKING_SESSION_MANAGER});*/
             }
         } else if (StoreMode.REDIS.equals(storeMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.REDIS.getName());
