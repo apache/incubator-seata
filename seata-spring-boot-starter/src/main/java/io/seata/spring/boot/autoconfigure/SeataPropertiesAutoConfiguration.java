@@ -16,10 +16,12 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.config.springcloud.SpringApplicationContextProvider;
+import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ThreadFactoryProperties;
@@ -75,6 +77,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
@@ -110,6 +114,8 @@ public class SeataPropertiesAutoConfiguration {
         PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
         PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
+        PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
+        PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
 
         PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
         PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
