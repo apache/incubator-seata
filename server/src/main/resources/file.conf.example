@@ -70,6 +70,11 @@ store {
 }
 ## server configuration, only used in server side
 server {
+  raft{
+    cluster = ""
+    #snapshot interval units are seconds
+    snapshotInterval = 600
+  }
   recovery {
     #schedule committing retry period in milliseconds
     committingRetryPeriod = 1000

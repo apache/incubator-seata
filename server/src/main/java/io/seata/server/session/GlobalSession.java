@@ -249,7 +249,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @param sessionLifecycleListener the session lifecycle listener
      */
     public void addSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
-        lifecycleListeners.add(sessionLifecycleListener);
+        if (!lifecycleListeners.contains(sessionLifecycleListener)) {
+            lifecycleListeners.add(sessionLifecycleListener);
+        }
     }
 
     /**
@@ -268,6 +270,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         branchSession.setStatus(BranchStatus.Registered);
         add(branchSession);
+    }
+
+    @Override
+    public void removeBranch(Long branchId) throws TransactionException {
+        removeBranch(getBranch(branchId));
     }
 
     @Override
