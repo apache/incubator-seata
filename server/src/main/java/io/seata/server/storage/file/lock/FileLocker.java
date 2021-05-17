@@ -84,7 +84,7 @@ public class FileLocker extends AbstractLocker {
                 Set<String> keysInHolder = CollectionUtils.computeIfAbsent(bucketHolder, bucketLockMap,
                     key -> new ConcurrentSet<>());
                 keysInHolder.add(pk);
-            } else if (previousLockBranchSession.getBranchId() == transactionId) {
+            } else if (previousLockBranchSession.getTransactionId() == transactionId) {
                 // Locked by me before
                 continue;
             } else {
@@ -154,12 +154,12 @@ public class FileLocker extends AbstractLocker {
                 continue;
             }
             BranchSession branchSession = bucketLockMap.get().get(pk);
-            if (branchSession == null || branchSession.getBranchId() == transactionId) {
+            if (branchSession == null || branchSession.getTransactionId() == transactionId) {
                 // Locked by me
                 continue;
             } else {
                 LOGGER
-                    .info("Global lock on [" + tableName + ":" + pk + "] is holding by " + branchSession.getBranchId());
+                    .info("Global lock on [" + tableName + ":" + pk + "] is holding by " + branchSession.getTransactionId());
                 if (xids == null) {
                     xids = new HashSet<>();
                 }
