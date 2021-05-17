@@ -17,6 +17,7 @@ package io.seata.rm.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.concurrent.Callable;
 
 import io.seata.common.util.StringUtils;
@@ -47,15 +48,15 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxy.class);
 
-    private ConnectionContext context = new ConnectionContext();
+    private final ConnectionContext context = new ConnectionContext();
+
+    private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
 
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
-
-    private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
     /**
      * Instantiates a new Connection proxy.
@@ -96,6 +97,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     /**
      * get global lock requires flag
+     *
+     * @return the boolean
      */
     public boolean isGlobalLockRequire() {
         return context.isGlobalLockRequire();
@@ -127,6 +130,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * Lock query.
      *
      * @param lockKeys the lock keys
+     * @return the boolean
      * @throws SQLException the sql exception
      */
     public boolean lockQuery(String lockKeys) throws SQLException {
@@ -180,12 +184,12 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void commit() throws SQLException {
         try {
-            LOCK_RETRY_POLICY.execute(() -> {
+            lockRetryPolicy.execute(() -> {
                 doCommit();
                 return null;
             });
         } catch (SQLException e) {
-            if (targetConnection != null && !getAutoCommit()) {
+            if (targetConnection != null && !getAutoCommit() && !getContext().isAutoCommitChanged()) {
                 rollback();
             }
             throw e;
@@ -193,6 +197,33 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             throw new SQLException(e);
         }
     }
+
+    @Override
+    public Savepoint setSavepoint() throws SQLException {
+        Savepoint savepoint = targetConnection.setSavepoint();
+        context.appendSavepoint(savepoint);
+        return savepoint;
+    }
+
+    @Override
+    public Savepoint setSavepoint(String name) throws SQLException {
+        Savepoint savepoint = targetConnection.setSavepoint(name);
+        context.appendSavepoint(savepoint);
+        return savepoint;
+    }
+
+    @Override
+    public void rollback(Savepoint savepoint) throws SQLException {
+        targetConnection.rollback(savepoint);
+        context.removeSavepoint(savepoint);
+    }
+
+    @Override
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        targetConnection.releaseSavepoint(savepoint);
+        context.releaseSavepoint(savepoint);
+    }
+
 
     private void doCommit() throws SQLException {
         if (context.inGlobalTransaction()) {
@@ -235,7 +266,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void register() throws TransactionException {
-        if (!context.hasUndoLog() || context.getLockKeysBuffer().isEmpty()) {
+        if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
@@ -250,6 +281,16 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             report(false);
         }
         context.reset();
+    }
+
+    /**
+     * change connection autoCommit to false by seata
+     *
+     * @throws SQLException the sql exception
+     */
+    public void changeAutoCommit() throws SQLException {
+        getContext().setAutoCommitChanged(true);
+        setAutoCommit(false);
     }
 
     @Override
@@ -287,10 +328,21 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
             .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT);
 
+        protected final ConnectionProxy connection;
+
+        public LockRetryPolicy(ConnectionProxy connection) {
+            this.connection = connection;
+        }
+
         public <T> T execute(Callable<T> callable) throws Exception {
-            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
+            // the only case that not need to retry acquire lock hear is
+            //    LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == true && connection#autoCommit == true
+            // because it has retry acquire lock when AbstractDMLBaseExecutor#executeAutoCommitTrue
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT && connection.getContext().isAutoCommitChanged()) {
                 return callable.call();
             } else {
+                // LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == false
+                // or LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT == true && autoCommit == false
                 return doRetryOnLockConflict(callable);
             }
         }

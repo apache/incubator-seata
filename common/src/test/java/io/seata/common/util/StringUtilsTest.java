@@ -89,13 +89,8 @@ public class StringUtilsTest {
     }
 
     @Test
-    void testCycleDependency() {
-        CycleDependency A = CycleDependency.A;
-        try {
-            StringUtils.toString(A);
-        } catch (StackOverflowError e) {
-            Assertions.fail("stack overflow error");
-        }
+    void testCycleDependency() throws StackOverflowError{
+        StringUtils.toString(CycleDependency.A);
     }
 
     static class CycleDependency {

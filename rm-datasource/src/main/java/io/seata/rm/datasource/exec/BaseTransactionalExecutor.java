@@ -19,9 +19,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -39,9 +42,6 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.WhereRecognizer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type Base transactional executor.
@@ -242,11 +242,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return CollectionUtils.toUpperList(getTableMeta().getPrimaryKeyOnlyName()).contains(newColumnName.toUpperCase());
     }
 
-
     /**
      * get standard pk column name from user sql column name
      *
-     * @return
+     * @param userColumnName the user column name
+     * @return standard pk column name
      */
     protected String getStandardPkColumnName(String userColumnName) {
         String newUserColumnName = ColumnUtils.delEscape(userColumnName, getDbType());
@@ -269,15 +269,21 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
-
+        if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+            if (beforeImage.getRows().size() != afterImage.getRows().size()) {
+                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+            }
+        }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
 
         TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
         String lockKeys = buildLockKey(lockKeyRecords);
-        connectionProxy.appendLockKey(lockKeys);
+        if (null != lockKeys) {
+            connectionProxy.appendLockKey(lockKeys);
 
-        SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
-        connectionProxy.appendUndoLog(sqlUndoLog);
+            SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
+            connectionProxy.appendUndoLog(sqlUndoLog);
+        }
     }
 
     /**
@@ -296,9 +302,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sb.append(":");
         int filedSequence = 0;
         List<Map<String, Field>> pksRows = rowsIncludingPK.pkRows();
+        List<String> primaryKeysOnlyName = getTableMeta().getPrimaryKeyOnlyName();
         for (Map<String, Field> rowMap : pksRows) {
             int pkSplitIndex = 0;
-            for (String pkName : getTableMeta().getPrimaryKeyOnlyName()) {
+            for (String pkName : primaryKeysOnlyName) {
                 if (pkSplitIndex > 0) {
                     sb.append("_");
                 }
@@ -365,7 +372,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      *
      * @param pkValuesMap the pkValuesMap
      * @return return TableRecords;
-     * @throws SQLException
+     * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
@@ -402,7 +409,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * get db type
      *
-     * @return
+     * @return db type
      */
     protected String getDbType() {
         return statementProxy.getConnectionProxy().getDbType();

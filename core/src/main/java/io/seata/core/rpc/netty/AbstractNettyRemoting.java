@@ -34,6 +34,7 @@ import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -88,7 +89,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * The Now mills.
      */
     protected volatile long nowMills = 0;
-    private static final int TIMEOUT_CHECK_INTERNAL = 3000;
+    private static final int TIMEOUT_CHECK_INTERVAL = 3000;
     protected final Object lock = new Object();
     /**
      * The Is sending.
@@ -120,7 +121,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
                 nowMills = System.currentTimeMillis();
             }
-        }, TIMEOUT_CHECK_INTERNAL, TIMEOUT_CHECK_INTERNAL, TimeUnit.MILLISECONDS);
+        }, TIMEOUT_CHECK_INTERVAL, TIMEOUT_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public AbstractNettyRemoting(ThreadPoolExecutor messageExecutor) {
@@ -278,6 +279,8 @@ public abstract class AbstractNettyRemoting implements Disposable {
                                 pair.getFirst().process(ctx, rpcMessage);
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
+                            } finally {
+                                MDC.clear();
                             }
                         });
                     } catch (RejectedExecutionException e) {

@@ -29,17 +29,16 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class GlobalLockTemplateTest {
 
-    private GlobalLockTemplate template = new GlobalLockTemplate();
+    private final GlobalLockTemplate template = new GlobalLockTemplate();
 
-    private GlobalLockConfig config1 = generateGlobalLockConfig();
+    private final GlobalLockConfig config1 = generateGlobalLockConfig();
 
-    private GlobalLockConfig config2 = generateGlobalLockConfig();
+    private final GlobalLockConfig config2 = generateGlobalLockConfig();
 
     @BeforeEach
     void setUp() {
-        assertFalse(RootContext.requireGlobalLock(), "initial global lock flag should be false");
-        assertNull(GlobalLockConfigHolder.getCurrentGlobalLockConfig(),
-                "initial global lock config should be null");
+        RootContext.unbindGlobalLockFlag();
+        GlobalLockConfigHolder.remove();
     }
 
     @Test
@@ -109,7 +108,7 @@ public class GlobalLockTemplateTest {
 
     private GlobalLockConfig generateGlobalLockConfig() {
         GlobalLockConfig config = new GlobalLockConfig();
-        config.setLockRetryInternal(100);
+        config.setLockRetryInterval(100);
         config.setLockRetryTimes(3);
         return config;
     }

@@ -36,6 +36,8 @@ import org.springframework.util.StringUtils;
 
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
@@ -55,7 +57,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private SagaTransactionalTemplate sagaTransactionalTemplate;
     private boolean rmReportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
     private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-    private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
 
 
     public DbStateMachineConfig() {
@@ -64,9 +65,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             if (configuration != null) {
                 this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
                 this.sagaBranchRegisterEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
-                this.sagaJsonParser = configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER);
+                setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+                setSagaRetryPersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
+                    DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE));
+                setSagaCompensatePersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,
+                    DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE));
             }
         } catch (Exception e) {
             LOGGER.warn("Load SEATA configuration failed, use default configuration instead.", e);
@@ -93,9 +98,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
             dbStateLogStore.setSeqGenerator(getSeqGenerator());
 
-            if (StringUtils.hasLength(sagaJsonParser)) {
+            if (StringUtils.hasLength(getSagaJsonParser())) {
                 ParamsSerializer paramsSerializer = new ParamsSerializer();
-                paramsSerializer.setJsonParserName(sagaJsonParser);
+                paramsSerializer.setJsonParserName(getSagaJsonParser());
                 dbStateLogStore.setParamsSerializer(paramsSerializer);
             }
 
@@ -191,13 +196,5 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
         this.rmReportSuccessEnable = rmReportSuccessEnable;
-    }
-
-    public String getSagaJsonParser() {
-        return sagaJsonParser;
-    }
-
-    public void setSagaJsonParser(String sagaJsonParser) {
-        this.sagaJsonParser = sagaJsonParser;
     }
 }

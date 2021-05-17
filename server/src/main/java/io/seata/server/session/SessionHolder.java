@@ -35,6 +35,14 @@ import io.seata.core.store.StoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+import static io.seata.common.Constants.ASYNC_COMMITTING;
+import static io.seata.common.Constants.RETRY_COMMITTING;
+import static io.seata.common.Constants.RETRY_ROLLBACKING;
+import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
+import static io.seata.common.Constants.UNDOLOG_DELETE;
+import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+
 /**
  * The type Session holder.
  *
@@ -78,12 +86,13 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file, db
+     * @param mode the store mode: file, db, redis
      * @throws IOException the io exception
      */
     public static void init(String mode) {
         if (StringUtils.isBlank(mode)) {
-            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+            mode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE,
+                CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE));
         }
         StoreMode storeMode = StoreMode.get(mode);
         if (StoreMode.DB.equals(storeMode)) {
@@ -322,6 +331,96 @@ public class SessionHolder {
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException {
         return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
+    }
+
+    /**
+     * retry rollbacking lock
+     *
+     * @return the boolean
+     */
+    public static boolean retryRollbackingLock() {
+        return getRootSessionManager().scheduledLock(RETRY_ROLLBACKING);
+    }
+
+    /**
+     * retry committing lock
+     *
+     * @return the boolean
+     */
+    public static boolean retryCommittingLock() {
+        return getRootSessionManager().scheduledLock(RETRY_COMMITTING);
+    }
+
+    /**
+     * async committing lock
+     *
+     * @return the boolean
+     */
+    public static boolean asyncCommittingLock() {
+        return getRootSessionManager().scheduledLock(ASYNC_COMMITTING);
+    }
+
+    /**
+     * tx timeout check lOck
+     *
+     * @return the boolean
+     */
+    public static boolean txTimeoutCheckLock() {
+        return getRootSessionManager().scheduledLock(TX_TIMEOUT_CHECK);
+    }
+
+    /**
+     * undolog delete lock
+     *
+     * @return the boolean
+     */
+    public static boolean undoLogDeleteLock() {
+        return getRootSessionManager().scheduledLock(UNDOLOG_DELETE);
+    }
+
+    /**
+     * un retry rollbacking lock
+     *
+     * @return the boolean
+     */
+    public static boolean unRetryRollbackingLock() {
+        return getRootSessionManager().unScheduledLock(RETRY_ROLLBACKING);
+    }
+
+    /**
+     * un retry committing lock
+     *
+     * @return the boolean
+     */
+    public static boolean unRetryCommittingLock() {
+        return getRootSessionManager().unScheduledLock(RETRY_COMMITTING);
+    }
+
+    /**
+     * un async committing lock
+     *
+     * @return the boolean
+     */
+    public static boolean unAsyncCommittingLock() {
+        return getRootSessionManager().unScheduledLock(ASYNC_COMMITTING);
+    }
+
+    /**
+     * un tx timeout check lOck
+     *
+     * @return the boolean
+     */
+    public static boolean unTxTimeoutCheckLock() {
+        return getRootSessionManager().unScheduledLock(TX_TIMEOUT_CHECK);
+    }
+
+    /**
+     * un undolog delete lock
+     *
+     * @return the boolean
+     */
+    public static boolean unUndoLogDeleteLock() {
+        return getRootSessionManager().unScheduledLock(UNDOLOG_DELETE);
     }
 
     public static void destroy() {

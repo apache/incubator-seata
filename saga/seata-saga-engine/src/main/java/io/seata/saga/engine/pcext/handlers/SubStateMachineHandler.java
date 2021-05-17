@@ -144,7 +144,7 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
     private StateMachineInstance callSubStateMachine(Map<String, Object> startParams, StateMachineEngine engine,
                                                      ProcessContext context, StateInstance stateInstance,
                                                      SubStateMachine subStateMachine) {
-        if (!context.hasVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD)) {
+        if (!Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD))) {
             return startNewStateMachine(startParams, engine, stateInstance, subStateMachine);
         } else {
             context.removeVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD);
@@ -190,9 +190,8 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
 
             return engine.forward(subInstId, startParams);
         } else {
-            throw new ForwardInvalidException(
-                "Cannot find sub statemachine [" + subStateMachine.getStateMachineName() + "]",
-                FrameworkErrorCode.ObjectNotExists);
+            originalStateInst.setStateMachineInstance(stateInstance.getStateMachineInstance());
+            return startNewStateMachine(startParams, engine, originalStateInst, subStateMachine);
         }
     }
 
