@@ -23,8 +23,10 @@ import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.constant.TCCFenceCleanMode;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
+import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -37,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * TCC Fence Config
  *
- * @author cebbank
+ * @author kaka2code
  */
-public class TCCFenceConfig implements Disposable {
+public class TCCFenceConfig implements InitializingBean, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceConfig.class);
 
@@ -56,95 +58,39 @@ public class TCCFenceConfig implements Disposable {
     /**
      * TCC fence log table name
      */
-    private static String logTableName = TCCFenceConstant.DEFAULT_LOG_TABLE_NAME;
+    private String logTableName;
 
     /**
      * TCC fence datasource
      */
-    private static DataSource dataSource;
-
-    /**
-     * Spring transaction template
-     */
-    private static TransactionTemplate transactionTemplate;
+    private DataSource dataSource;
 
     /**
      * TCC fence clean scheduled thread pool
      */
-    private ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("tccFenceClean", 1));
 
-    public TCCFenceConfig(DataSource dataSource, TCCFenceCleanMode cleanMode, int cleanPeriod) {
-        this.cleanMode = cleanMode;
-        this.cleanPeriod = cleanPeriod;
-        TCCFenceConfig.dataSource = dataSource;
-        // init transaction template
-        initTransTemplate();
-        // init tcc fence clean task
-        initCleanTask();
-    }
-
-    public TCCFenceConfig(Builder builder) {
-        this.cleanMode = builder.cleanMode;
-        this.cleanPeriod = builder.cleanPeriod;
-        TCCFenceConfig.logTableName = builder.logTableName;
-        TCCFenceConfig.dataSource = builder.dataSource;
-        initTransTemplate();
-        // init tcc fence clean task
-        initCleanTask();
-    }
-
-    public static DataSource getDataSource() {
+    public DataSource getDataSource() {
         return dataSource;
     }
 
     public void setDataSource(DataSource dataSource) {
-        TCCFenceConfig.dataSource = dataSource;
-    }
-
-    public static TransactionTemplate getTransactionTemplate() {
-        return transactionTemplate;
-    }
-
-    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-        TCCFenceConfig.transactionTemplate = transactionTemplate;
-    }
-
-    public TCCFenceCleanMode getCleanMode() {
-        return cleanMode;
+        this.dataSource = dataSource;
     }
 
     public void setCleanMode(TCCFenceCleanMode cleanMode) {
         this.cleanMode = cleanMode;
     }
 
-    public int getCleanPeriod() {
-        return cleanPeriod;
-    }
-
     public void setCleanPeriod(int cleanPeriod) {
         this.cleanPeriod = cleanPeriod;
     }
 
-    public static String getLogTableName() {
-        return logTableName;
-    }
-
     public void setLogTableName(String logTableName) {
-        TCCFenceConfig.logTableName = logTableName;
+        this.logTableName = logTableName;
     }
 
-    /**
-     * init transaction template
-     */
-    private void initTransTemplate() {
-        if (dataSource != null) {
-            PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-            TCCFenceConfig.transactionTemplate = new TransactionTemplate(transactionManager);
-        } else {
-            throw new TCCFenceException(FrameworkErrorCode.DateSourceNeedInjected);
-        }
-    }
     /**
      * init tcc fence clean task
      */
@@ -169,7 +115,7 @@ public class TCCFenceConfig implements Disposable {
                     cleanPeriod = TCCFenceConstant.DEFAULT_CLEAN_DAY;
                 }
             }
-            tccFenceClean.scheduleAtFixedRate(() -> {
+            tccFenceClean.scheduleWithFixedDelay(() -> {
                 Date timeBefore;
                 if (TCCFenceCleanMode.Hour.equals(cleanMode)) {
                     timeBefore = DateUtils.getHourBefore(cleanPeriod);
@@ -193,34 +139,23 @@ public class TCCFenceConfig implements Disposable {
         tccFenceClean.shutdown();
     }
 
-    /**
-     * TCC fence config builder
-     */
-    public static class Builder {
-        private TCCFenceCleanMode cleanMode = TCCFenceCleanMode.Day;
-        private int cleanPeriod = 0;
-        private String logTableName = TCCFenceConstant.DEFAULT_LOG_TABLE_NAME;
-        private DataSource dataSource = null;
-
-        public Builder cleanMode(TCCFenceCleanMode val) {
-            cleanMode = val;
-            return this;
+    @Override
+    public void afterPropertiesSet() {
+        // set log table name
+        if (logTableName != null) {
+            TCCFenceStoreDataBaseDAO.getInstance().setLogTableName(logTableName);
         }
-        public Builder cleanPeriod(int val) {
-            cleanPeriod = val;
-            return this;
+        if (dataSource != null) {
+            // set dataSource
+            TCCFenceHandler.setDataSource(dataSource);
+            // set transaction template
+            PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
+            TCCFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
+        } else {
+            throw new TCCFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }
-        public Builder dateSource(DataSource val) {
-            dataSource = val;
-            return this;
-        }
-        public Builder logTableName(String val) {
-            logTableName = val;
-            return this;
-        }
-        public TCCFenceConfig build() {
-            return new TCCFenceConfig(this);
-        }
+        // init tcc fence clean task
+        initCleanTask();
     }
 }
 

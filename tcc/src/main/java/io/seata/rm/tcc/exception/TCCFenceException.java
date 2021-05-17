@@ -21,7 +21,7 @@ import io.seata.common.exception.FrameworkException;
 /**
  * TCC Fence Exception
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class TCCFenceException extends FrameworkException {
 

@@ -19,7 +19,7 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
-import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
 import io.seata.rm.tcc.store.TCCFenceStore;
@@ -36,22 +36,33 @@ import java.util.Date;
 /**
  * The type TCC Fence store data base dao
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
-    private static TCCFenceStoreDataBaseDAO instance = null;
+    /**
+     * TCC fence log table name
+     */
+    private String logTableName = TCCFenceConstant.DEFAULT_LOG_TABLE_NAME;
 
-    public static synchronized TCCFenceStore getInstance() {
+    private static volatile TCCFenceStoreDataBaseDAO instance = null;
+
+    private TCCFenceStoreDataBaseDAO() {}
+
+    public static TCCFenceStore getInstance() {
         if (instance == null) {
-            instance = new TCCFenceStoreDataBaseDAO();
+            synchronized (TCCFenceStore.class) {
+                if (instance == null) {
+                    instance = new TCCFenceStoreDataBaseDAO();
+                }
+            }
         }
         return instance;
     }
 
     @Override
     public TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId) {
-        String sql = TCCFenceStoreSqls.getQuerySQLByBranchIdAndXid(TCCFenceConfig.getLogTableName());
+        String sql = TCCFenceStoreSqls.getQuerySQLByBranchIdAndXid(logTableName);
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -77,7 +88,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO) {
-        String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(TCCFenceConfig.getLogTableName());
+        String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(logTableName);
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -99,7 +110,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean updateTCCFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus) {
-        String sql = TCCFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(TCCFenceConfig.getLogTableName());
+        String sql = TCCFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(logTableName);
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -119,7 +130,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId) {
-        String sql = TCCFenceStoreSqls.getDeleteSQLByBranchIdAndXid(TCCFenceConfig.getLogTableName());
+        String sql = TCCFenceStoreSqls.getDeleteSQLByBranchIdAndXid(logTableName);
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -136,7 +147,7 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean deleteTCCFenceDOByDate(Connection conn, Date datetime) {
-        String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(TCCFenceConfig.getLogTableName());
+        String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -148,5 +159,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
             IOUtil.close(ps);
         }
         return true;
+    }
+
+    @Override
+    public void setLogTableName(String logTableName) {
+        this.logTableName = logTableName;
     }
 }

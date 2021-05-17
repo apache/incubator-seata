@@ -20,7 +20,7 @@ import io.seata.rm.tcc.constant.TCCFenceConstant;
 /**
  * TCC Fence Store Sqls
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class TCCFenceStoreSqls {
 
@@ -41,7 +41,7 @@ public class TCCFenceStoreSqls {
      */
     protected static final String QUERY_BY_BRANCH_ID_AND_XID = "select xid, branch_id, status, gmt_create, gmt_modified "
             + "from " + LOCAL_TCC_LOG_PLACEHOLD
-            + " where xid = ? and branch_id = ? ";
+            + " where xid = ? and branch_id = ? for update";
 
     /**
      * The constant UPDATE_STATUS_BY_BRANCH_ID_AND_XID.

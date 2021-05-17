@@ -21,12 +21,12 @@ import java.util.Date;
 /**
  * The datetime utils
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class DateUtils {
 
     /**
-     * a few days ago
+     * few days ago
      *
      * @param day day
      * @return date
@@ -39,7 +39,7 @@ public class DateUtils {
     }
 
     /**
-     * a few hours ago
+     * few hours ago
      * @param hour hour
      * @return date
      */
@@ -51,9 +51,9 @@ public class DateUtils {
     }
 
     /**
-     * a few minute ago
-     * @param minute
-     * @return
+     * few minute ago
+     * @param minute minute
+     * @return date
      */
     public static Date getMinuteBefore(int minute) {
         Calendar now = Calendar.getInstance();
@@ -63,9 +63,9 @@ public class DateUtils {
     }
 
     /**
-     * a few seconds ago
+     * few seconds ago
      * @param second second
-     * @return
+     * @return date
      */
     public static Date getSecondBefore(int second) {
         Calendar now = Calendar.getInstance();

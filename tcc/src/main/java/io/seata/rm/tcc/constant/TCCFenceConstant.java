@@ -18,7 +18,7 @@ package io.seata.rm.tcc.constant;
 /**
  * TCC Fence Constant
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class TCCFenceConstant {
 

@@ -9,3 +9,4 @@ CREATE TABLE IF NOT EXISTS public.tcc_fence_log
     CONSTRAINT pk_tcc_fence_log PRIMARY KEY (xid, branch_id)
 );
 CREATE INDEX idx_gmt_modified ON public.tcc_fence_log (gmt_modified);
+CREATE INDEX idx_status ON public.tcc_fence_log (status);

@@ -18,7 +18,6 @@ package io.seata.rm.tcc;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.executor.Callback;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.config.TCCFenceConfig;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.TCCFenceDO;
@@ -37,12 +36,24 @@ import java.util.Date;
 /**
  * TCC Fence Handler(idempotent, non_rollback, suspend)
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class TCCFenceHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
 
     private static TCCFenceStore tccFenceDAO = TCCFenceStoreDataBaseDAO.getInstance();
+
+    private static DataSource dataSource;
+
+    private static TransactionTemplate transactionTemplate;
+
+    public static void setDataSource(DataSource dataSource) {
+        TCCFenceHandler.dataSource = dataSource;
+    }
+
+    public static void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+        TCCFenceHandler.transactionTemplate = transactionTemplate;
+    }
 
     /**
      * tcc prepare method enhanced
@@ -51,8 +62,6 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static Object prepareFence(String xid, Long branchId, Callback<Object> targetCallback) {
-        DataSource dataSource = TCCFenceConfig.getDataSource();
-        TransactionTemplate transactionTemplate = TCCFenceConfig.getTransactionTemplate();
         return transactionTemplate.execute(status -> {
             Object ret = null;
             try {
@@ -66,7 +75,6 @@ public class TCCFenceHandler {
                 if (result) {
                     ret = targetCallback.execute();
                 } else {
-                    LOGGER.warn("Insert tcc fence record error, prepare fence failed. xid: {}, branchId: {}", xid, branchId);
                     throw new TCCFenceException(String.format("Insert tcc fence record error, prepare fence failed. xid= %s, branchId= %s", xid, branchId),
                             FrameworkErrorCode.InsertRecordError);
                 }
@@ -88,8 +96,6 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
-        DataSource dataSource = TCCFenceConfig.getDataSource();
-        TransactionTemplate transactionTemplate = TCCFenceConfig.getTransactionTemplate();
         return transactionTemplate.execute(status -> {
             boolean ret = false;
             try {
@@ -104,7 +110,9 @@ public class TCCFenceHandler {
                     return true;
                 }
                 if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
-                    LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}", xid, branchId);
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}", xid, branchId);
+                    }
                     return false;
                 }
                 ret = updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED);
@@ -127,8 +135,6 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
-        DataSource dataSource = TCCFenceConfig.getDataSource();
-        TransactionTemplate transactionTemplate = TCCFenceConfig.getTransactionTemplate();
         return transactionTemplate.execute(status -> {
             boolean ret = false;
             try {
@@ -143,17 +149,18 @@ public class TCCFenceHandler {
                     boolean result = tccFenceDAO.insertTCCFenceDO(conn, tccFenceDO);
                     LOGGER.info("Insert tcc fence record result: {}. xid: {}, branchId: {}", result, xid, branchId);
                     if (!result) {
-                        LOGGER.warn("Insert tcc fence record error, rollback fence method failed. xid: {}, branchId: {}", xid, branchId);
                         throw new TCCFenceException(String.format("Insert tcc fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
                                 FrameworkErrorCode.InsertRecordError);
                     }
                     return true;
                 } else {
                     if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
-                        LOGGER.info("Branch transaction status is unexpected. xid: {}, branchId: {}", xid, branchId);
+                        if (LOGGER.isWarnEnabled()) {
+                            LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}", xid, branchId);
+                        }
                         return false;
                     }
-                    if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus()) {
+                    if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
                         LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}", xid, branchId);
                         return true;
                     }
@@ -201,8 +208,6 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static boolean deleteFence(String xid, Long branchId) {
-        DataSource dataSource = TCCFenceConfig.getDataSource();
-        TransactionTemplate transactionTemplate = TCCFenceConfig.getTransactionTemplate();
         return transactionTemplate.execute(status -> {
             boolean ret = false;
             try {
@@ -221,8 +226,6 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static boolean deleteFenceByDate(Date datetime) {
-        DataSource dataSource = TCCFenceConfig.getDataSource();
-        TransactionTemplate transactionTemplate = TCCFenceConfig.getTransactionTemplate();
         return transactionTemplate.execute(status -> {
             boolean ret = false;
             try {

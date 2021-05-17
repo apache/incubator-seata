@@ -20,7 +20,7 @@ import java.util.Date;
 /**
  * TCC Fence Domain
  *
- * @author cebbank
+ * @author kaka2code
  */
 public class TCCFenceDO {
 

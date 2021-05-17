@@ -8,3 +8,4 @@ CREATE TABLE tcc_fence_log
     PRIMARY KEY (xid, branch_id)
 );
 CREATE INDEX idx_gmt_modified ON tcc_fence_log (gmt_modified);
+CREATE INDEX idx_status ON tcc_fence_log (status);

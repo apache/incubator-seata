@@ -21,7 +21,7 @@ import java.util.Date;
 /**
  * The TCC Fence Store
  *
- * @author cebbank
+ * @author kaka2code
  */
 public interface TCCFenceStore {
 
@@ -63,5 +63,11 @@ public interface TCCFenceStore {
      * @return the boolean
      */
     boolean deleteTCCFenceDOByDate(Connection conn, Date datetime);
+
+    /**
+     * Set LogTable Name
+     * @param logTableName logTableName
+     */
+    void setLogTableName(String logTableName);
 
 }

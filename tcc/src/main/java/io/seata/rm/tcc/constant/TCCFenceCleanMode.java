@@ -18,7 +18,7 @@ package io.seata.rm.tcc.constant;
 /**
  * TCC Fence clean mode
  *
- * @author cebbank
+ * @author kaka2code
  */
 public enum TCCFenceCleanMode {
 
