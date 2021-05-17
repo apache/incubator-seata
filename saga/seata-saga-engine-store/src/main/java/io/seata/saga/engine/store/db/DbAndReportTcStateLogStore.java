@@ -98,6 +98,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 beginTransaction(machineInstance, context);
             }
 
+            Exception ex = null;
             try {
                 if (StringUtils.isEmpty(machineInstance.getId()) && seqGenerator != null) {
                     machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
@@ -115,19 +116,24 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                         FrameworkErrorCode.OperationDenied);
                 }
             } catch (StoreException e) {
+                ex = e;
                 LOGGER.error("Record statemachine start error: {}, StateMachine: {}, XID: {}, Reason: {}",
                     e.getErrcode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
-                // clear
-                RootContext.unbind();
-                RootContext.unbindBranchType();
-                if (sagaTransactionalTemplate != null) {
-                    sagaTransactionalTemplate.cleanUp();
+                throw e;
+            } catch (RuntimeException e) {
+                ex = e;
+                LOGGER.error("Record statemachine start error: StateMachine: {}, XID: {}, Reason: {}",
+                    machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
+                throw e;
+            } finally {
+                // if thrown exception, do clear
+                if (ex != null) {
+                    RootContext.unbind();
+                    RootContext.unbindBranchType();
+                    if (sagaTransactionalTemplate != null) {
+                        sagaTransactionalTemplate.cleanUp();
+                    }
                 }
-                throw e;
-            } catch (Exception e) {
-                RootContext.unbind();
-                RootContext.unbindBranchType();
-                throw e;
             }
         }
     }
