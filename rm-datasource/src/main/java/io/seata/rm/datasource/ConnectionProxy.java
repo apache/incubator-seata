@@ -356,8 +356,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 } catch (LockConflictException lockConflict) {
                     onException(lockConflict);
                     // AbstractDMLBaseExecutor#executeAutoCommitTrue the local lock is released
-                    if (lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast
-                        && connection.getContext().isAutoCommitChanged()) {
+                    if (connection.getContext().isAutoCommitChanged()
+                        && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
                         lockConflict.setCode(TransactionExceptionCode.LockKeyConflict);
                     }
                     lockRetryController.sleep(lockConflict);
