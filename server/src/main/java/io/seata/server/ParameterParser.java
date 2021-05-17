@@ -19,6 +19,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
@@ -37,26 +38,33 @@ public class ParameterParser {
     private static final String PROGRAM_NAME
         = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     @Parameter(names = "--help", help = true)
     private boolean help;
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
     private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
-    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
+    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db, redis", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
         order = 5)
     private String seataEnv;
+    @Parameter(names = {"--sessionStoreMode", "-ssm"}, description = "session log store mode : file, db, redis",
+        order = 6)
+    private String sessionStoreMode;
+    @Parameter(names = {"--lockStoreMode", "-lsm"}, description = "lock log store mode : file, db, redis", order = 7)
+    private String lockStoreMode;
 
     /**
      * Instantiates a new Parameter parser.
      *
      * @param args the args
      */
-    public ParameterParser(String[] args) {
+    public ParameterParser(String... args) {
         this.init(args);
     }
 
@@ -68,6 +76,8 @@ public class ParameterParser {
                 this.port = ContainerHelper.getPort();
                 this.serverNode = ContainerHelper.getServerNode();
                 this.storeMode = ContainerHelper.getStoreMode();
+                this.sessionStoreMode = ContainerHelper.getSessionStoreMode();
+                this.lockStoreMode = ContainerHelper.getLockStoreMode();
             } else {
                 JCommander jCommander = JCommander.newBuilder().addObject(this).build();
                 jCommander.parse(args);
@@ -81,8 +91,13 @@ public class ParameterParser {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
             if (StringUtils.isBlank(storeMode)) {
-                storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
-                    SERVER_DEFAULT_STORE_MODE);
+                storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+            }
+            if (StringUtils.isBlank(sessionStoreMode)) {
+                sessionStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE, storeMode);
+            }
+            if (StringUtils.isBlank(lockStoreMode)) {
+                lockStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE, storeMode);
             }
         } catch (ParameterException e) {
             printError(e);
@@ -120,8 +135,27 @@ public class ParameterParser {
      *
      * @return the store mode
      */
+    @Deprecated
     public String getStoreMode() {
         return storeMode;
+    }
+
+    /**
+     * Gets lock store mode.
+     *
+     * @return the store mode
+     */
+    public String getLockStoreMode() {
+        return StringUtils.isNotEmpty(lockStoreMode) ? lockStoreMode : storeMode;
+    }
+
+    /**
+     * Gets session store mode.
+     *
+     * @return the store mode
+     */
+    public String getSessionStoreMode() {
+        return StringUtils.isNotEmpty(sessionStoreMode) ? sessionStoreMode : storeMode;
     }
 
     /**

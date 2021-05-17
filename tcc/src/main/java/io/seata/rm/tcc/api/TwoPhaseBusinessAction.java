@@ -51,7 +51,7 @@ public @interface TwoPhaseBusinessAction {
     TCCCommitType commitType() default TCCCommitType.SyncCommit;
 
     /**
-     * commit methed name
+     * commit method name
      *
      * @return the string
      */
@@ -63,4 +63,11 @@ public @interface TwoPhaseBusinessAction {
      * @return the string
      */
     String rollbackMethod() default "rollback";
+
+    /**
+     * delay branch report while sharing params to tcc phase 2 to enhance performance
+     *
+     * @return isDelayReport
+     */
+    boolean isDelayReport() default false;
 }
