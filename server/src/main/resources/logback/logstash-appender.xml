@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <!-- logstash-appender properties -->
+    <property name="LOGSTASH_DESTINATION" value="localhost:4560"/>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- the TCP address of the logstash -->
+        <destination>${LOGSTASH_DESTINATION}</destination>
+
+        <!--<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">-->
+        <encoder charset="UTF-8" class="io.seata.server.logging.logback.appender.EnhancedLogstashEncoder">
+            <!-- the global custom fields -->
+            <customFields>
+                {
+                    "app_name": "${APPLICATION_NAME:-}"
+                }
+            </customFields>
+
+            <!-- exclude the provider of data `@version` -->
+            <excludeProvider>net.logstash.logback.composite.LogstashVersionJsonProvider</excludeProvider>
+            <!-- exclude providers not currently needed, reduce some performance loss. -->
+            <excludeProvider>net.logstash.logback.composite.loggingevent.JsonMessageJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.loggingevent.TagsJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.loggingevent.LogstashMarkersJsonProvider</excludeProvider>
+            <excludeProvider>net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider</excludeProvider>
+        </encoder>
+    </appender>
+</included>

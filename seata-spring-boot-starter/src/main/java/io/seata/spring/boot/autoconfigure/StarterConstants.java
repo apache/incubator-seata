@@ -34,7 +34,10 @@ public interface StarterConstants {
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
-    String LOG_PREFIX = CLIENT_PREFIX + ".log";
+    String LOAD_BALANCE_PREFIX_KEBAB_STYLE = CLIENT_PREFIX + ".load-balance";
+    String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + ".loadBalance";
+    String LOG_PREFIX = SEATA_PREFIX + ".log";
+    String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
     String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
     String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 
@@ -58,8 +61,7 @@ public interface StarterConstants {
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
     int MAP_CAPACITY = 64;
-    HashMap<String, Object> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
-
+    HashMap<String, Class<?>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
     /**
      * The following special keys need to be normalized.
      */

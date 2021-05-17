@@ -172,7 +172,7 @@ public class DefaultCoreTest {
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.XA,
             new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
-        core.doGlobalCommit(globalSession, false);
+        core.doGlobalCommit(globalSession, true);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
 
@@ -348,7 +348,7 @@ public class DefaultCoreTest {
          * @param rollbackStatus the rollback status
          */
         public MockCore(BranchStatus commitStatus, BranchStatus rollbackStatus) {
-            super(null);
+            super(new DefaultCoordinatorTest.MockServerMessageSender());
             this.commitStatus = commitStatus;
             this.rollbackStatus = rollbackStatus;
         }

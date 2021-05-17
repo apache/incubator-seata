@@ -20,13 +20,16 @@ import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.NetUtil;
+import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -42,6 +45,8 @@ import java.util.Map;
 public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
+
+    private static final ThreadLocal<BusinessActionContext> CONTEXT_HOLDER = new ThreadLocal<>();
 
     /**
      * Handler the TCC Aspect
@@ -67,21 +72,33 @@ public class ActionInterceptorHandler {
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);
         actionContext.setBranchId(branchId);
+        //MDC put branchId
+        MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
         //set the parameter whose type is BusinessActionContext
         Class<?>[] types = method.getParameterTypes();
         int argIndex = 0;
         for (Class<?> cls : types) {
-            if (cls.getName().equals(BusinessActionContext.class.getName())) {
+            if (cls.isAssignableFrom(BusinessActionContext.class)) {
                 arguments[argIndex] = actionContext;
                 break;
             }
             argIndex++;
         }
-        //the final parameters of the try method
-        ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
-        //the final result
-        ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+        //share actionContext implicitly
+        ActionInterceptorHandler.setUpContext(actionContext);
+        try {
+            //the final parameters of the try method
+            ret.put(Constants.TCC_METHOD_ARGUMENTS, arguments);
+            //the final result
+            ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
+        } finally {
+            ActionInterceptorHandler.cleanUp();
+            //to report business action context finally.
+            if (businessAction.isDelayReport() && Boolean.TRUE.equals(actionContext.getUpdated())) {
+                BusinessActionContextUtil.reportContext(actionContext);
+            }
+        }
         return ret;
     }
 
@@ -98,7 +115,7 @@ public class ActionInterceptorHandler {
                                          BusinessActionContext actionContext) {
         String actionName = actionContext.getActionName();
         String xid = actionContext.getXid();
-        //
+
         Map<String, Object> context = fetchActionRequestContext(method, arguments);
         context.put(Constants.ACTION_START_TIME, System.currentTimeMillis());
 
@@ -106,6 +123,7 @@ public class ActionInterceptorHandler {
         initBusinessContext(context, method, businessAction);
         //Init running environment context
         initFrameworkContext(context);
+        actionContext.setDelayReport(businessAction.isDelayReport());
         actionContext.setActionContext(context);
 
         //init applicationData
@@ -115,7 +133,7 @@ public class ActionInterceptorHandler {
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, xid,
-                applicationContextStr, null);
+                    applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
             String msg = String.format("TCC branch Register error, xid: %s", xid);
@@ -172,7 +190,7 @@ public class ActionInterceptorHandler {
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter)parameterAnnotations[i][j];
+                    BusinessActionContextParameter param = (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
@@ -181,7 +199,7 @@ public class ActionInterceptorHandler {
                     //List, get by index
                     if (index >= 0) {
                         @SuppressWarnings("unchecked")
-                        Object targetParam = ((List<Object>)paramObject).get(index);
+                        Object targetParam = ((List<Object>) paramObject).get(index);
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
                         } else {
@@ -200,4 +218,15 @@ public class ActionInterceptorHandler {
         return context;
     }
 
+    public static BusinessActionContext getContext() {
+        return CONTEXT_HOLDER.get();
+    }
+
+    private static void cleanUp() {
+        CONTEXT_HOLDER.remove();
+    }
+
+    private static void setUpContext(BusinessActionContext context) {
+        CONTEXT_HOLDER.set(context);
+    }
 }
