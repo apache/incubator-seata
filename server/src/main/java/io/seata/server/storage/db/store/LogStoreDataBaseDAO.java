@@ -201,11 +201,11 @@ public class LogStoreDataBaseDAO implements LogStore {
                 .getQueryGlobalTransactionSQLByXidsAndStatus(globalTable, xidsParamsPlaceHolder, paramsPlaceHolder);
             ps = conn.prepareStatement(sql);
             int i = 0;
-            for (String xid : xids) {
-                ps.setString(++i, xid);
-            }
             for (int status : statuses) {
                 ps.setInt(++i, status);
+            }
+            for (String xid : xids) {
+                ps.setString(++i, xid);
             }
             ps.setInt(++i, limit);
             rs = ps.executeQuery();

@@ -176,8 +176,9 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         for (int i = 0; i < statuses.length; i++) {
             states[i] = statuses[i].getCode();
         }
-        //global transaction
-        List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(xids, states, limit);
+        // global transaction
+        List<GlobalTransactionDO> globalTransactionDOs =
+            logStore.queryGlobalTransactionDO(xids, states, limit == null || limit <= 0 ? logQueryLimit : limit);
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
             return null;
         }

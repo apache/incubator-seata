@@ -411,7 +411,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         List<GlobalSession> requiredGlobalList = null;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipeline = jedis.pipelined()) {
             for (String xid : xids) {
-                pipeline.hgetAll(xid);
+                pipeline.hgetAll(String.valueOf(XID.getTransactionId(xid)));
             }
             List<Object> globals = pipeline.syncAndReturnAll();
             if (CollectionUtils.isEmpty(globals)) {
