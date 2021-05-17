@@ -171,7 +171,6 @@ public class RaftStateMachine extends AbstractRaftStateMachine {
                 globalSessionByteMap.forEach((k, v) -> {
                     GlobalSession session = new GlobalSession();
                     session.decode(v);
-                    session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                     sessionMap.put(k, session);
                 });
                 rootSessionMap.putAll(sessionMap);
