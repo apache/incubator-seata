@@ -65,7 +65,12 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
-        //timestamp type
+        //timestamp type: accurate to millisecond
+        field = new Field("timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2019-08-10 10:49:26.926"));
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+        //timestamp type: accurate to microseconds
         field = new Field("timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2019-08-10 10:49:26.926554"));
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
@@ -83,11 +88,19 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
-        //LocalDateTime type
-        field = new Field("localdatetime_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), LocalDateTime.now());
+        //LocalDateTime type: accurate to millisecond
+        LocalDateTime dateTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0, 111000000);
+        field = new Field("localdatetime_type", JDBCType.DATE.getVendorTypeNumber(), dateTime);
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
-        System.out.println(String.format("LocalDateTime:\r\n%s\r\n%s\r\n", field, sameField));
+        System.out.println(String.format("LocalDateTime(millisecond):\r\n%s\r\n%s\r\n", field, sameField));
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+        //LocalDateTime type: accurate to microseconds
+        dateTime = LocalDateTime.of(2020, 1, 1, 0, 0, 0, 222333000);
+        field = new Field("localdatetime_type2", JDBCType.DATE.getVendorTypeNumber(), dateTime);
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        System.out.println(String.format("LocalDateTime(microseconds):\r\n%s\r\n%s\r\n", field, sameField));
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
     }
 
