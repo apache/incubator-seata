@@ -140,7 +140,7 @@ public class DefaultCoordinatorTest {
             branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
             globalSession = SessionHolder.findGlobalSession(xid);
             globalSession.changeStatus(GlobalStatus.RollbackRetrying);
-            core.branchRegister(BranchType.AT, resourceId, clientId, xid2, applicationData, lockKeys_1);
+            core.branchRegister(BranchType.AT, resourceId, clientId, xid2, "{\"autoCommit\":false}", lockKeys_1);
         } catch (TransactionException e) {
             core.rollback(xid2);
             Assertions.assertTrue(e.getCode() == TransactionExceptionCode.LockKeyConflictFailFast);
