@@ -19,6 +19,8 @@ import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
 import io.seata.rm.BaseDataSourceResource;
+import org.mariadb.jdbc.MariaDbConnection;
+import org.mariadb.jdbc.MariaXaConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,31 +44,32 @@ public class XAUtils {
     }
 
     public static XAConnection createXAConnection(Connection physicalConn, Driver driver, String dbType) throws SQLException {
-        if (JdbcUtils.ORACLE.equals(dbType)) {
-            try {
-                // https://github.com/alibaba/druid/issues/3707
-                // before Druid issue fixed, just make ORACLE XA connection in my way.
-                // return OracleUtils.OracleXAConnection(physicalConn);
-                String physicalConnClassName = physicalConn.getClass().getName();
-                if ("oracle.jdbc.driver.T4CConnection".equals(physicalConnClassName)) {
-                    return createOracleXAConnection(physicalConn, "oracle.jdbc.driver.T4CXAConnection");
-                } else {
-                    return createOracleXAConnection(physicalConn, "oracle.jdbc.xa.client.OracleXAConnection");
-                }
-            } catch (XAException xae) {
-                throw new SQLException("create xaConnection error", xae);
+        if (JdbcUtils.MYSQL.equals(dbType)) {
+            return MySqlUtils.createXAConnection(driver, physicalConn);
+        } else {
+            switch (dbType) {
+                case JdbcUtils.ORACLE:
+                    try {
+                        // https://github.com/alibaba/druid/issues/3707
+                        // before Druid issue fixed, just make ORACLE XA connection in my way.
+                        // return OracleUtils.OracleXAConnection(physicalConn);
+                        String physicalConnClassName = physicalConn.getClass().getName();
+                        if ("oracle.jdbc.driver.T4CConnection".equals(physicalConnClassName)) {
+                            return createOracleXAConnection(physicalConn, "oracle.jdbc.driver.T4CXAConnection");
+                        } else {
+                            return createOracleXAConnection(physicalConn, "oracle.jdbc.xa.client.OracleXAConnection");
+                        }
+                    } catch (XAException xae) {
+                        throw new SQLException("create xaConnection error", xae);
+                    }
+                case JdbcUtils.MARIADB:
+                    return new MariaXaConnection((MariaDbConnection)physicalConn);
+                case JdbcUtils.POSTGRESQL:
+                    return PGUtils.createXAConnection(physicalConn);
+                default:
+                    throw new SQLException("xa not support dbType: " + dbType);
             }
         }
-
-        if (JdbcUtils.MYSQL.equals(dbType) || JdbcUtils.MARIADB.equals(dbType)) {
-            return MySqlUtils.createXAConnection(driver, physicalConn);
-        }
-
-        if (JdbcUtils.POSTGRESQL.equals(dbType)) {
-            return PGUtils.createXAConnection(physicalConn);
-        }
-
-        throw new SQLException("xa not support dbType: " + dbType);
     }
 
     private static XAConnection createOracleXAConnection(Connection physicalConnection, String xaConnectionClassName) throws XAException, SQLException {

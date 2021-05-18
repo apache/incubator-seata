@@ -25,6 +25,8 @@ import io.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mariadb.jdbc.MariaDbConnection;
+import org.mariadb.jdbc.MariaXaConnection;
 import org.mockito.Mockito;
 
 import javax.sql.DataSource;
@@ -86,6 +88,41 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
+        tearDown();
+    }
+
+    @Test
+    public void testGetMariaXaConnection() throws SQLException {
+        // Mock
+        Driver driver = Mockito.mock(Driver.class);
+        MariaDbConnection connection = Mockito.mock(MariaDbConnection.class);
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
+        DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
+        Mockito.when(metaData.getURL()).thenReturn("jdbc:mariadb:xxx");
+        Mockito.when(connection.getMetaData()).thenReturn(metaData);
+        Mockito.when(driver.connect(any(), any())).thenReturn(connection);
+
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setDriver(driver);
+        DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
+        Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+        Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+        RootContext.bind("test");
+        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+
+        Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
+
+        Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
+        Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
+
+        Connection wrappedPhysicalConn = ((PooledConnection)wrappedConnection).getConnection();
+        Assertions.assertTrue(wrappedPhysicalConn == connection);
+
+        XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
+        Connection connectionInXA = xaConnection.getConnection();
+        Assertions.assertTrue(connectionInXA instanceof MariaDbConnection);
+        tearDown();
     }
 
     @AfterAll
