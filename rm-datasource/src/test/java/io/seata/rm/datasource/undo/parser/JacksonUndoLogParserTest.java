@@ -87,6 +87,7 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         field = new Field("localdatetime_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), LocalDateTime.now());
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
+        System.out.println(String.format("LocalDateTime:\r\n%s\r\n%s\r\n", field, sameField));
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
     }
 
