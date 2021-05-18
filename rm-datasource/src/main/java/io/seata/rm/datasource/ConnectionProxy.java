@@ -18,10 +18,10 @@ package io.seata.rm.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -37,6 +37,7 @@ import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.Constants.AUTO_COMMIT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
@@ -277,8 +278,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             return;
         }
         String applicationData = null;
-        if (CollectionUtils.isNotEmpty(context.getApplicationData())) {
-            applicationData = MAPPER.writeValueAsString(context.getApplicationData());
+        if (!context.isAutoCommitChanged()) {
+            Map<String, Object> map = context.getApplicationData();
+            map.computeIfAbsent(AUTO_COMMIT, k -> context.isAutoCommitChanged());
+            applicationData = MAPPER.writeValueAsString(map);
         }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), applicationData, context.buildLockKeys());

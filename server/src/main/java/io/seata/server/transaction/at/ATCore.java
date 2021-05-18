@@ -61,7 +61,7 @@ public class ATCore extends AbstractCore {
     @Override
     protected void branchSessionLock(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         if (!branchSession.lock()) {
-            String applicationData = globalSession.getApplicationData();
+            String applicationData = branchSession.getApplicationData();
             if (StringUtils.isNotBlank(applicationData)) {
                 if (objectMapper == null) {
                     objectMapper = new ObjectMapper();
@@ -69,6 +69,7 @@ public class ATCore extends AbstractCore {
                 try {
                     Map<String, Object> data = objectMapper.readValue(applicationData, HashMap.class);
                     Object autoCommit = data.get(AUTO_COMMIT);
+                    // false indicates that the client started the local transaction
                     if (autoCommit != null && !(boolean)autoCommit) {
                         Set<String> xids = lockManager.getLockOwners(branchSession);
                         if (CollectionUtils.isNotEmpty(xids)) {
