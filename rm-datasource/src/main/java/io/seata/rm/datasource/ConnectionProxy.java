@@ -19,7 +19,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.concurrent.Callable;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -51,6 +53,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private final ConnectionContext context = new ConnectionContext();
 
     private final LockRetryPolicy lockRetryPolicy = new LockRetryPolicy(this);
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_CLIENT_REPORT_RETRY_COUNT);
@@ -249,6 +253,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private void processGlobalTransactionCommit() throws SQLException {
         try {
             register();
+        } catch (JsonProcessingException e) {
+            throw new SQLException(e);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, context.buildLockKeys());
         }
@@ -266,12 +272,16 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         context.reset();
     }
 
-    private void register() throws TransactionException {
+    private void register() throws TransactionException, JsonProcessingException {
         if (!context.hasUndoLog() || !context.hasLockKey()) {
             return;
         }
+        String applicationData = null;
+        if (CollectionUtils.isNotEmpty(context.getApplicationData())) {
+            applicationData = MAPPER.writeValueAsString(context.getApplicationData());
+        }
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), null, context.buildLockKeys());
+            null, context.getXid(), applicationData, context.buildLockKeys());
         context.setBranchId(branchId);
     }
 

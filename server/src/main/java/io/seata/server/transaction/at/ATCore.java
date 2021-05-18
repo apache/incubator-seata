@@ -15,10 +15,15 @@
  */
 package io.seata.server.transaction.at;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
@@ -31,6 +36,7 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 
 
+import static io.seata.common.Constants.AUTO_COMMIT;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
@@ -40,7 +46,9 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFa
  * @author ph3636
  */
 public class ATCore extends AbstractCore {
-
+    
+    private ObjectMapper objectMapper;
+    
     public ATCore(RemotingServer remotingServer) {
         super(remotingServer);
     }
@@ -53,20 +61,35 @@ public class ATCore extends AbstractCore {
     @Override
     protected void branchSessionLock(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         if (!branchSession.lock()) {
-            Set<String> xids = lockManager.getLockOwners(branchSession);
-            if (CollectionUtils.isNotEmpty(xids)) {
-                SessionCondition condition = new SessionCondition();
-                List<String> list = new ArrayList<>();
-                list.addAll(xids);
-                condition.setStatuses(new GlobalStatus[] {GlobalStatus.RollbackRetrying, GlobalStatus.RollbackFailed,
-                    GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying,
-                    GlobalStatus.TimeoutRollbackFailed});
-                condition.setXids(list);
-                condition.setLimit(1);
-                if (CollectionUtils.isNotEmpty(SessionHolder.getRootSessionManager().findGlobalSessions(condition))) {
-                    throw new BranchTransactionException(LockKeyConflictFailFast,
-                        String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
-                            branchSession.getBranchId()));
+            String applicationData = globalSession.getApplicationData();
+            if (StringUtils.isNotBlank(applicationData)) {
+                if (objectMapper == null) {
+                    objectMapper = new ObjectMapper();
+                }
+                try {
+                    Map<String, Object> data = objectMapper.readValue(applicationData, HashMap.class);
+                    Object autoCommit = data.get(AUTO_COMMIT);
+                    if (autoCommit != null && !(boolean)autoCommit) {
+                        Set<String> xids = lockManager.getLockOwners(branchSession);
+                        if (CollectionUtils.isNotEmpty(xids)) {
+                            SessionCondition condition = new SessionCondition();
+                            List<String> list = new ArrayList<>();
+                            list.addAll(xids);
+                            condition.setStatuses(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
+                                GlobalStatus.RollbackFailed, GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking,
+                                GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.TimeoutRollbackFailed});
+                            condition.setXids(list);
+                            condition.setLimit(1);
+                            if (CollectionUtils
+                                .isNotEmpty(SessionHolder.getRootSessionManager().findGlobalSessions(condition))) {
+                                throw new BranchTransactionException(LockKeyConflictFailFast,
+                                    String.format("Global lock acquire failed xid = %s branchId = %s",
+                                        globalSession.getXid(), branchSession.getBranchId()));
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("failed to get application data: {}", e.getMessage(), e);
                 }
             }
             throw new BranchTransactionException(LockKeyConflict,
@@ -85,4 +108,5 @@ public class ATCore extends AbstractCore {
             throws TransactionException {
         return lockManager.isLockable(xid, resourceId, lockKeys);
     }
+
 }
