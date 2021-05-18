@@ -98,7 +98,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 beginTransaction(machineInstance, context);
             }
 
-            Exception ex = null;
             try {
                 if (StringUtils.isEmpty(machineInstance.getId()) && seqGenerator != null) {
                     machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
@@ -116,31 +115,16 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                         FrameworkErrorCode.OperationDenied);
                 }
             } catch (StoreException e) {
-                ex = e;
                 LOGGER.error("Record statemachine start error: {}, StateMachine: {}, XID: {}, Reason: {}",
                     e.getErrcode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
+                this.clearUp();
                 throw e;
-            } catch (RuntimeException e) {
-                ex = e;
-                LOGGER.error("Record statemachine start error: StateMachine: {}, XID: {}, Reason: {}",
-                    machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
-                throw e;
-            } finally {
-                // if thrown exception, do clear
-                if (ex != null) {
-                    RootContext.unbind();
-                    RootContext.unbindBranchType();
-                    if (sagaTransactionalTemplate != null) {
-                        sagaTransactionalTemplate.cleanUp();
-                    }
-                }
             }
         }
     }
 
     protected void beginTransaction(StateMachineInstance machineInstance, ProcessContext context) {
         if (sagaTransactionalTemplate != null) {
-
             StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             TransactionInfo transactionInfo = new TransactionInfo();
@@ -741,6 +725,15 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
         }
         return stateInstanceList;
+    }
+
+    @Override
+    public void clearUp() {
+        RootContext.unbind();
+        RootContext.unbindBranchType();
+        if (sagaTransactionalTemplate != null) {
+            sagaTransactionalTemplate.cleanUp();
+        }
     }
 
     private void putLastStateToMap(Map<String, StateInstance> resultMap, StateInstance newState, String key) {
