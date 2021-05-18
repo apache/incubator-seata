@@ -39,11 +39,18 @@ import com.alibaba.druid.mock.MockSQLXML;
 import com.alibaba.druid.pool.DruidDataSource;
 
 import com.google.common.collect.Lists;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.mock.MockBlob;
 import io.seata.rm.datasource.mock.MockClob;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.SqlParserType;
+import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -84,13 +91,17 @@ public class PreparedStatementProxyTest {
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
 
-        String sql = "update from prepared_statement_proxy set name = ?";
+        String sql = "update prepared_statement_proxy set name = ?";
 
         PreparedStatement preparedStatement = mockDriver.createSeataMockPreparedStatement(
             (MockConnection)connectionProxy.getTargetConnection(), sql);
 
         preparedStatementProxy = new PreparedStatementProxy(connectionProxy, preparedStatement, sql);
         unusedConstructorPreparedStatementProxy = new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
+        EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, JdbcConstants.MYSQL,
+            SQLOperateRecognizerHolderFactory.class.getClassLoader());
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
+            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @Test

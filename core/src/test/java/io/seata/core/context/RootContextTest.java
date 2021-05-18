@@ -44,10 +44,6 @@ public class RootContextTest {
 
         RootContext.unbind();
         assertThat(RootContext.getXID()).isNull();
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bind(null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bind(""));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RootContext.bind("   "));
     }
 
     /**
