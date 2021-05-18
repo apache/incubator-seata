@@ -203,6 +203,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSerializer) throws IOException {
             JsonToken valueShape = JsonToken.VALUE_NUMBER_INT;
+            // if has microseconds, serialized as an array
             if (timestamp.getNanos() % 1000000 > 0) {
                 valueShape = JsonToken.START_ARRAY;
             }
@@ -217,6 +218,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public void serialize(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers) {
             try {
                 gen.writeNumber(timestamp.getTime());
+                // if has microseconds, serialized as an array, write the nanos to the array
                 if (timestamp.getNanos() % 1000000 > 0) {
                     gen.writeNumber(timestamp.getNanos());
                 }
@@ -337,6 +339,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public void serializeWithType(LocalDateTime localDateTime, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSer) throws IOException {
             JsonToken valueShape = JsonToken.VALUE_NUMBER_INT;
+            // if has microseconds, serialized as an array
             if (localDateTime.getNano() % 1000000 > 0) {
                 valueShape = JsonToken.START_ARRAY;
             }
@@ -352,6 +355,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
             try {
                 Instant instant = localDateTime.atZone(zoneId).toInstant();
                 gen.writeNumber(instant.toEpochMilli());
+                // if has microseconds, serialized as an array, write the nano to the array
                 if (instant.getNano() % 1000000 > 0) {
                     gen.writeNumber(instant.getNano());
                 }
