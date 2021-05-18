@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
@@ -362,10 +363,11 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
     /**
      * set zone id
      *
-     * @param zid the zoneId
+     * @param zoneId the zoneId
      */
-    public static void setZoneOffset(ZoneId zid) {
-        zoneId = zid;
+    public static void setZoneOffset(ZoneId zoneId) {
+        Objects.requireNonNull(zoneId, "zoneId must be not null");
+        JacksonUndoLogParser.zoneId = zoneId;
     }
 
 }
