@@ -20,7 +20,9 @@ import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 
@@ -84,7 +86,10 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
         //LocalDateTime type
-        field = new Field("localdatetime_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), LocalDateTime.now());
+        //Only the time accurate to millisecond is tested
+        Instant instant = Instant.ofEpochMilli(System.currentTimeMillis());
+        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        field = new Field("localdatetime_type", JDBCType.DATE.getVendorTypeNumber(), dateTime);
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
         System.out.println(String.format("LocalDateTime:\r\n%s\r\n%s\r\n", field, sameField));
