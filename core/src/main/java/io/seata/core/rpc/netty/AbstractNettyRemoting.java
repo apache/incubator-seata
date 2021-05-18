@@ -89,7 +89,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * The Now mills.
      */
     protected volatile long nowMills = 0;
-    private static final int TIMEOUT_CHECK_INTERNAL = 3000;
+    private static final int TIMEOUT_CHECK_INTERVAL = 3000;
     protected final Object lock = new Object();
     /**
      * The Is sending.
@@ -121,7 +121,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
                 nowMills = System.currentTimeMillis();
             }
-        }, TIMEOUT_CHECK_INTERNAL, TIMEOUT_CHECK_INTERNAL, TimeUnit.MILLISECONDS);
+        }, TIMEOUT_CHECK_INTERVAL, TIMEOUT_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public AbstractNettyRemoting(ThreadPoolExecutor messageExecutor) {
