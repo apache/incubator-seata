@@ -20,10 +20,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
@@ -71,9 +70,9 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonUndoLogParser.class);
 
     /**
-     * the zone offset for LocalDateTime
+     * the zoneId for LocalDateTime
      */
-    private static ZoneOffset zoneOffset = ZoneOffset.ofHours(TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 3600 / 1000);
+    private static ZoneId zoneId = ZoneId.systemDefault();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -333,7 +332,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         @Override
         public void serialize(LocalDateTime localDateTime, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             try {
-                Instant instant = localDateTime.toInstant(zoneOffset);
+                Instant instant = localDateTime.atZone(zoneId).toInstant();
                 long timestamp = instant.toEpochMilli();
                 gen.writeNumber(timestamp);
             } catch (IOException e) {
@@ -351,7 +350,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             try {
                 long timestamp = p.getLongValue();
-                return LocalDateTime.ofEpochSecond(timestamp / 1000, (int)(timestamp % 1000) * 1000000, zoneOffset);
+                Instant instant = Instant.ofEpochMilli(timestamp);
+                return LocalDateTime.ofInstant(instant, zoneId);
             } catch (Exception e) {
                 LOGGER.error("deserialize java.time.LocalDateTime error : {}", e.getMessage(), e);
             }
@@ -360,12 +360,12 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
     }
 
     /**
-     * set zone offset
+     * set zone id
      *
-     * @param offset the offset
+     * @param zid the zoneId
      */
-    public static void setZoneOffset(ZoneOffset offset) {
-        zoneOffset = offset;
+    public static void setZoneOffset(ZoneId zid) {
+        zoneId = zid;
     }
 
 }
