@@ -48,7 +48,7 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @Bean
     RegistryRedisProperties registryRedisProperties() {
-        RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("localhost:123456");
+        RegistryRedisProperties registryRedisProperties = new RegistryRedisProperties().setPassword("123456").setDb(1).setServerAddr("127.0.0.1:123456");
         PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
         return registryRedisProperties;
     }
