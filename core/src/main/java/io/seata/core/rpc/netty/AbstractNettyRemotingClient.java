@@ -267,12 +267,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return NetUtil.toStringAddress(address);
     }
 
-    protected InetSocketAddress doSelect(List<InetSocketAddress> inetSocketAddressList, Object msg) throws Exception {
-        if (CollectionUtils.isNotEmpty(inetSocketAddressList)) {
-            if (inetSocketAddressList.size() > 1) {
-                return LoadBalanceFactory.getInstance().select(inetSocketAddressList, getXid(msg));
+    protected InetSocketAddress doSelect(List<InetSocketAddress> list, Object msg) throws Exception {
+        if (CollectionUtils.isNotEmpty(list)) {
+            if (list.size() > 1) {
+                return LoadBalanceFactory.getInstance().select(list, getXid(msg));
             } else {
-                return inetSocketAddressList.get(0);
+                return list.get(0);
             }
         }
         return null;
