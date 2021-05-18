@@ -236,8 +236,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         public Timestamp deserialize(JsonParser p, DeserializationContext ctxt) {
             try {
                 if (p.isExpectedStartArrayToken()) {
-                    ArrayNode arrayNode;
-                    arrayNode = p.getCodec().readTree(p);
+                    ArrayNode arrayNode = p.getCodec().readTree(p);
                     Timestamp timestamp = new Timestamp(arrayNode.get(0).asLong());
                     timestamp.setNanos(arrayNode.get(1).asInt());
                     return timestamp;
