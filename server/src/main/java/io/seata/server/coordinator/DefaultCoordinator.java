@@ -236,13 +236,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
                         + globalSession.getTimeout());
             }
-            boolean shouldTimeout = SessionHolder.lockAndExecute(globalSession, () -> {
+            SessionHolder.lockAndExecute(globalSession, () -> {
                 if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
                     return false;
                 }
+
+                LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
+
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
-                globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+                globalSession.setStatus(GlobalStatus.TimeoutRollbacking);
+
+                globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+                SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
 
                 // transaction timeout and start rollbacking event
                 eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(),
@@ -254,14 +260,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                 return true;
             });
-            if (!shouldTimeout) {
-                //The function of this 'return' is 'continue'.
-                return;
-            }
-            LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
-
-            globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
         });
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check end. ");
@@ -281,7 +279,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 // prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isDeadSession()) {
                     //The function of this 'return' is 'continue'.
                     return;
                 }
@@ -316,6 +314,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
+                // prevent repeated commit
+                if (committingSession.getStatus().equals(GlobalStatus.Committing) && !committingSession.isDeadSession()) {
+                    //The function of this 'return' is 'continue'.
+                    return;
+                }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())) {
                     /**
                      * Prevent thread safety issues
