@@ -20,6 +20,7 @@ import io.seata.config.ConfigurationChangeEvent;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.model.GlobalLockConfig;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,17 +29,17 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author selfishlover
  */
-class LockRetryControllerTest {
+public class LockRetryControllerTest {
 
     private GlobalLockConfig config;
 
-    private final int defaultRetryInternal = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
+    private final int defaultRetryInterval = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_INTERVAL;
     private final int defaultRetryTimes = DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
 
     @BeforeEach
     void setUp() {
         config = new GlobalLockConfig();
-        config.setLockRetryInternal(10);
+        config.setLockRetryInterval(10);
         config.setLockRetryTimes(3);
         GlobalLockConfigHolder.setAndReturnPrevious(config);
     }
@@ -68,7 +69,7 @@ class LockRetryControllerTest {
         GlobalLockConfigHolder.remove();
         LockRetryController controller = new LockRetryController();
         String message = "should use global config when there is no customized config";
-        assertEquals(defaultRetryInternal, controller.getLockRetryInternal(), message);
+        assertEquals(defaultRetryInterval, controller.getLockRetryInterval(), message);
         assertEquals(defaultRetryTimes, controller.getLockRetryTimes(), message);
     }
 
@@ -82,7 +83,7 @@ class LockRetryControllerTest {
         event.setNewValue(retryInterval + "");
         config.onChangeEvent(event);
         String message1 = "lock config listener fail to update latest value of CLIENT_LOCK_RETRY_INTERVAL";
-        assertEquals(retryInterval, config.getGlobalLockRetryInternal(), message1);
+        assertEquals(retryInterval, config.getGlobalLockRetryInterval(), message1);
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES);
         int retryTimes = 5;
@@ -95,12 +96,17 @@ class LockRetryControllerTest {
         event.setNewValue("not a number");
         config.onChangeEvent(event);
         String message3 = "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_INTERVAL";
-        assertEquals(defaultRetryInternal, config.getGlobalLockRetryInternal(), message3);
+        assertEquals(defaultRetryInterval, config.getGlobalLockRetryInterval(), message3);
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES);
         event.setNewValue("not a number");
         config.onChangeEvent(event);
         String message4 = "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_TIMES";
         assertEquals(defaultRetryTimes, config.getGlobalLockRetryTimes(), message4);
+    }
+
+    @AfterEach
+    void tearDown() {
+        GlobalLockConfigHolder.remove();
     }
 }

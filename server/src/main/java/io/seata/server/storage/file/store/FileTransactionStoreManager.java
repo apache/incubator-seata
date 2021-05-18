@@ -48,6 +48,9 @@ import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.storage.file.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import static io.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
 /**
  * The type File transaction store manager.
@@ -66,7 +69,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private static final int MAX_SHUTDOWN_RETRY = 3;
 
-    private static final int SHUTDOWN_CHECK_INTERNAL = 1 * 1000;
+    private static final int SHUTDOWN_CHECK_INTERVAL = 1 * 1000;
 
     private static final int MAX_WRITE_RETRY = 5;
 
@@ -168,8 +171,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-        writeSessionLock.lock();
         long curFileTrxNum;
+        writeSessionLock.lock();
         try {
             if (!writeDataFile(new TransactionWriteStore(session, logOperation).encode())) {
                 return false;
@@ -177,7 +180,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             lastModifiedTime = System.currentTimeMillis();
             curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
             if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0
-                && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+                    && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
                 return saveHistory();
             }
         } catch (Exception exx) {
@@ -211,9 +214,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         boolean result;
         try {
             result = findTimeoutAndSave();
-            StoreRequest request = new CloseFileRequest(currFileChannel, currRaf);
+            CloseFileRequest request = new CloseFileRequest(currFileChannel, currRaf);
             writeDataFileRunnable.putRequest(request);
-            ((CloseFileRequest)request).waitForClose(MAX_WAIT_FOR_CLOSE_TIME_MILLS);
+            request.waitForClose(MAX_WAIT_FOR_CLOSE_TIME_MILLS);
             Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exx) {
             LOGGER.error("save history data file error, {}", exx.getMessage(), exx);
@@ -283,11 +286,16 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
             if (branchSessIonsOverMaXTimeout != null) {
                 for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
-                    TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
-                        LogOperation.BRANCH_ADD);
-                    data = branchWriteStore.encode();
-                    if (!writeDataFrame(data)) {
-                        return false;
+                    try {
+                        MDC.put(MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
+                        TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
+                            LogOperation.BRANCH_ADD);
+                        data = branchWriteStore.encode();
+                        if (!writeDataFrame(data)) {
+                            return false;
+                        }
+                    } finally {
+                        MDC.remove(MDC_KEY_BRANCH_ID);
                     }
                 }
             }
@@ -318,7 +326,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             while (!fileWriteExecutor.isTerminated() && retry < MAX_SHUTDOWN_RETRY) {
                 ++retry;
                 try {
-                    Thread.sleep(SHUTDOWN_CHECK_INTERNAL);
+                    Thread.sleep(SHUTDOWN_CHECK_INTERVAL);
                 } catch (InterruptedException ignore) {
                 }
             }

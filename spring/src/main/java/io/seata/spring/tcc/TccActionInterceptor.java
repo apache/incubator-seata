@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
@@ -34,17 +35,23 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.core.Ordered;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+
+import static io.seata.core.constants.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 
 /**
  * TCC Interceptor
  *
  * @author zhangsen
  */
-public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener {
+public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
+    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
+            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
@@ -102,6 +109,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 if (BranchType.TCC != previousBranchType) {
                     RootContext.unbindBranchType();
                 }
+                //MDC remove branchId
+                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
         return invocation.proceed();
@@ -165,5 +174,10 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         }
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER_NUM;
     }
 }

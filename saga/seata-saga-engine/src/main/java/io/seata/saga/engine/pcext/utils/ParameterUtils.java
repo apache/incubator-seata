@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
@@ -40,9 +41,8 @@ public class ParameterUtils {
     public static List<Object> createInputParams(ExpressionFactoryManager expressionFactoryManager,
                                                  StateInstanceImpl stateInstance,
                                                  AbstractTaskState serviceTaskState, Object variablesFrom) {
-
         List<Object> inputAssignments = serviceTaskState.getInput();
-        if (inputAssignments == null || inputAssignments.size() == 0) {
+        if (CollectionUtils.isEmpty(inputAssignments)) {
             return new ArrayList<>(0);
         }
 
@@ -70,9 +70,8 @@ public class ParameterUtils {
 
     public static Map<String, Object> createOutputParams(ExpressionFactoryManager expressionFactoryManager,
                                                          AbstractTaskState serviceTaskState, Object variablesFrom) {
-
         Map<String, Object> outputAssignments = serviceTaskState.getOutput();
-        if (outputAssignments == null || outputAssignments.size() == 0) {
+        if (CollectionUtils.isEmpty(outputAssignments)) {
             return new LinkedHashMap<>(0);
         }
 
@@ -82,9 +81,9 @@ public class ParameterUtils {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
-                    for (String paramName : outputAssignments.keySet()) {
-                        outputExpressions.put(paramName,
-                                createValueExpression(expressionFactoryManager, outputAssignments.get(paramName)));
+                    for (Map.Entry<String, Object> entry : outputAssignments.entrySet()) {
+                        outputExpressions.put(entry.getKey(),
+                                createValueExpression(expressionFactoryManager, entry.getValue()));
                     }
                 }
                 serviceTaskState.setOutputExpressions(outputExpressions);
@@ -108,12 +107,12 @@ public class ParameterUtils {
         } else if (valueExpression instanceof Map) {
             Map<String, Object> mapValueExpression = (Map<String, Object>)valueExpression;
             Map<String, Object> mapValue = new LinkedHashMap<>();
-            for (String paramName : mapValueExpression.keySet()) {
-                Object value = getValue(mapValueExpression.get(paramName), variablesFrom, stateInstance);
+            mapValueExpression.forEach((key, value) -> {
+                value = getValue(value, variablesFrom, stateInstance);
                 if (value != null) {
-                    mapValue.put(paramName, value);
+                    mapValue.put(key, value);
                 }
-            }
+            });
             return mapValue;
         } else if (valueExpression instanceof List) {
             List<Object> listValueExpression = (List<Object>)valueExpression;
@@ -137,10 +136,9 @@ public class ParameterUtils {
         } else if (paramAssignment instanceof Map) {
             Map<String, Object> paramMapAssignment = (Map<String, Object>)paramAssignment;
             Map<String, Object> paramMap = new LinkedHashMap<>(paramMapAssignment.size());
-            for (String paramName : paramMapAssignment.keySet()) {
-                Object valueAssignment = paramMapAssignment.get(paramName);
+            paramMapAssignment.forEach((paramName, valueAssignment) -> {
                 paramMap.put(paramName, createValueExpression(expressionFactoryManager, valueAssignment));
-            }
+            });
             valueExpression = paramMap;
         } else if (paramAssignment instanceof List) {
             List<Object> paramListAssignment = (List<Object>)paramAssignment;
