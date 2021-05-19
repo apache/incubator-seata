@@ -223,15 +223,15 @@ public final class ActionContextUtil {
         }
 
         try {
+            return (T)value;
+        } catch (ClassCastException ignore) {
             try {
-                return (T)value;
-            } catch (ClassCastException ignore) {
                 return JSON.parseObject(value.toString(), targetClazz);
+            } catch (RuntimeException e) {
+                String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
+                        key, value.getClass().getName(), targetClazz.getName());
+                throw new FrameworkException(e, errorMsg);
             }
-        } catch (RuntimeException e) {
-            String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
-                    key, value.getClass().getName(), targetClazz.getName());
-            throw new FrameworkException(e, errorMsg);
         }
     }
 }
