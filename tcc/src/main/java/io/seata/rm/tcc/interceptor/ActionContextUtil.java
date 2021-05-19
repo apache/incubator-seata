@@ -104,48 +104,15 @@ public final class ActionContextUtil {
      * @param context    the action context
      */
     public static void loadParamByAnnotationAndPutToContext(@Nonnull String objType, String objName, Object objValue,
-                                                            BusinessActionContextParameter annotation, Map<String, Object> context) {
+            BusinessActionContextParameter annotation, Map<String, Object> context) {
         if (objValue == null) {
             return;
         }
 
-        // If is `List` or `Array`, get by index
+        // If {@code index >= 0}, get by index from the list/array param or field
         int index = annotation.index();
         if (index >= 0) {
-            if (objValue instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> list = (List<Object>)objValue;
-                if (list.isEmpty()) {
-                    return;
-                }
-                if (list.size() <= index) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
-                                " whose size is '{}', so pass this {}", index, objType, objName, list.size(), objType);
-                    }
-                    return;
-                }
-                objValue = list.get(index);
-            } else if (objValue.getClass().isArray()) {
-                // The `index` field supports `Array`
-                // @since above 1.4.2
-                int length = Array.getLength(objValue);
-                if (length == 0) {
-                    return;
-                }
-                if (length <= index) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("The index '{}' is out of bounds for the array {} named '{}'," +
-                                " whose size is '{}', so pass this {}", index, objType, objName, length, objType);
-                    }
-                    return;
-                }
-                objValue = Array.get(objValue, index);
-            } else {
-                LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
-                        objType, objName, BusinessActionContextParameter.class.getSimpleName());
-            }
-
+            objValue = getByIndex(objType, objName, objValue, index);
             if (objValue == null) {
                 return;
             }
@@ -168,6 +135,44 @@ public final class ActionContextUtil {
             }
             context.put(objName, objValue);
         }
+    }
+
+    private static Object getByIndex(String objType, String objName, Object objValue, int index) {
+        if (objValue instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>)objValue;
+            if (list.isEmpty()) {
+                return null;
+            }
+            if (list.size() <= index) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
+                            " whose size is '{}', so pass this {}", index, objType, objName, list.size(), objType);
+                }
+                return null;
+            }
+            objValue = list.get(index);
+        } else if (objValue.getClass().isArray()) {
+            // The `index` field supports `Array`
+            // @since above 1.4.2
+            int length = Array.getLength(objValue);
+            if (length == 0) {
+                return null;
+            }
+            if (length <= index) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("The index '{}' is out of bounds for the array {} named '{}'," +
+                            " whose size is '{}', so pass this {}", index, objType, objName, length, objType);
+                }
+                return null;
+            }
+            objValue = Array.get(objValue, index);
+        } else {
+            LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                    objType, objName, BusinessActionContextParameter.class.getSimpleName());
+        }
+
+        return objValue;
     }
 
     /**
