@@ -234,6 +234,11 @@ public enum FrameworkErrorCode {
     DuplicateKeyException("0504", "Insert tcc fence record duplicate key exception", "Insert tcc fence record duplicate key exception"),
 
     /**
+     * TCC fence transactionManager need injected
+     */
+    TransactionManagerNeedInjected("0505","TCC fence transactionManager need injected","TCC fence transactionManager need injected"),
+
+    /**
      * Undefined error
      */
     UnknownAppError("10000", "Unknown error", "Internal error"),

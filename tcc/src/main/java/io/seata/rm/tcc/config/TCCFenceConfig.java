@@ -27,7 +27,6 @@ import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -63,7 +62,12 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
     /**
      * TCC fence datasource
      */
-    private DataSource dataSource;
+    private final DataSource dataSource;
+
+    /**
+     * TCC fence transactionManager
+     */
+    private final PlatformTransactionManager transactionManager;
 
     /**
      * TCC fence clean scheduled thread pool
@@ -71,12 +75,17 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
     private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("tccFenceClean", 1));
 
+    public TCCFenceConfig(final DataSource dataSource, final PlatformTransactionManager transactionManager) {
+        this.dataSource = dataSource;
+        this.transactionManager = transactionManager;
+    }
+
     public DataSource getDataSource() {
         return dataSource;
     }
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
     }
 
     public void setCleanMode(TCCFenceCleanMode cleanMode) {
@@ -148,11 +157,14 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
         if (dataSource != null) {
             // set dataSource
             TCCFenceHandler.setDataSource(dataSource);
-            // set transaction template
-            PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-            TCCFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
         } else {
             throw new TCCFenceException(FrameworkErrorCode.DateSourceNeedInjected);
+        }
+        if (transactionManager != null) {
+            // set transaction template
+            TCCFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
+        } else {
+            throw new TCCFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
         }
         // init tcc fence clean task
         initCleanTask();

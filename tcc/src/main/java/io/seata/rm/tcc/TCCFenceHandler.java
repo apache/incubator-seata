@@ -41,7 +41,7 @@ import java.util.Date;
 public class TCCFenceHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
 
-    private static TCCFenceStore tccFenceDAO = TCCFenceStoreDataBaseDAO.getInstance();
+    private static final TCCFenceStore TCC_FENCE_DAO = TCCFenceStoreDataBaseDAO.getInstance();
 
     private static DataSource dataSource;
 
@@ -70,7 +70,7 @@ public class TCCFenceHandler {
                 tccFenceDO.setXid(xid);
                 tccFenceDO.setBranchId(branchId);
                 tccFenceDO.setStatus(TCCFenceConstant.STATUS_TRIED);
-                boolean result = tccFenceDAO.insertTCCFenceDO(conn, tccFenceDO);
+                boolean result = TCC_FENCE_DAO.insertTCCFenceDO(conn, tccFenceDO);
                 LOGGER.info("TCC fence prepare result: {}. xid: {}, branchId: {}", result, xid, branchId);
                 if (result) {
                     ret = targetCallback.execute();
@@ -100,7 +100,7 @@ public class TCCFenceHandler {
             boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                TCCFenceDO tccFenceDO = tccFenceDAO.queryTCCFenceDO(conn, xid, branchId);
+                TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
                 if (tccFenceDO == null) {
                     throw new TCCFenceException(String.format("TCC fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
                             FrameworkErrorCode.RecordAlreadyExists);
@@ -139,14 +139,14 @@ public class TCCFenceHandler {
             boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                TCCFenceDO tccFenceDO = tccFenceDAO.queryTCCFenceDO(conn, xid, branchId);
+                TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
                 // non_rollback
                 if (tccFenceDO == null) {
                     tccFenceDO = new TCCFenceDO();
                     tccFenceDO.setXid(xid);
                     tccFenceDO.setBranchId(branchId);
                     tccFenceDO.setStatus(TCCFenceConstant.STATUS_SUSPENDED);
-                    boolean result = tccFenceDAO.insertTCCFenceDO(conn, tccFenceDO);
+                    boolean result = TCC_FENCE_DAO.insertTCCFenceDO(conn, tccFenceDO);
                     LOGGER.info("Insert tcc fence record result: {}. xid: {}, branchId: {}", result, xid, branchId);
                     if (!result) {
                         throw new TCCFenceException(String.format("Insert tcc fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
@@ -186,7 +186,7 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, int status) throws Exception {
-        boolean result = tccFenceDAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
+        boolean result = TCC_FENCE_DAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
         if (result) {
             // invoke two phase method
             Object ret = method.invoke(targetTCCBean, businessActionContext);
@@ -212,7 +212,7 @@ public class TCCFenceHandler {
             boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                ret = tccFenceDAO.deleteTCCFenceDO(conn, xid, branchId);
+                ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
             } catch (Exception e) {
                 status.setRollbackOnly();
             }
@@ -230,7 +230,7 @@ public class TCCFenceHandler {
             boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                ret = tccFenceDAO.deleteTCCFenceDOByDate(conn, datetime);
+                ret = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
             } catch (Exception e) {
                 status.setRollbackOnly();
             }
