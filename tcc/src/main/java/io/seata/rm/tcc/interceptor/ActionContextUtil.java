@@ -226,7 +226,11 @@ public final class ActionContextUtil {
             return (T)value;
         } catch (ClassCastException ignore) {
             try {
-                return JSON.parseObject(value.toString(), targetClazz);
+                if (value instanceof CharSequence) {
+                    return JSON.parseObject(value.toString(), targetClazz);
+                } else {
+                    return JSON.parseObject(JSON.toJSONString(value), targetClazz);
+                }
             } catch (RuntimeException e) {
                 String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
                         key, value.getClass().getName(), targetClazz.getName());
