@@ -92,28 +92,10 @@ public final class ActionContextUtil {
             return;
         }
 
-        // If is `List`, get by index
+        // If {@code index >= 0}, get by index from the list param or field
         int index = annotation.index();
         if (index >= 0) {
-            if (objValue instanceof List) {
-                @SuppressWarnings("unchecked")
-                List<Object> list = (List<Object>)objValue;
-                if (list.isEmpty()) {
-                    return;
-                }
-                if (list.size() <= index) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
-                                " whose size is '{}', so pass this {}", index, objType, objName, list.size(), objType);
-                    }
-                    return;
-                }
-                objValue = list.get(index);
-            } else {
-                LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
-                        objType, objName, BusinessActionContextParameter.class.getSimpleName());
-            }
-
+            objValue = getByIndex(objType, objName, objValue, index);
             if (objValue == null) {
                 return;
             }
@@ -128,6 +110,29 @@ public final class ActionContextUtil {
             }
             context.put(objName, objValue);
         }
+    }
+
+    private static Object getByIndex(String objType, String objName, Object objValue, int index) {
+        if (objValue instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>)objValue;
+            if (list.isEmpty()) {
+                return null;
+            }
+            if (list.size() <= index) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
+                            " whose size is '{}', so pass this {}", index, objType, objName, list.size(), objType);
+                }
+                return null;
+            }
+            objValue = list.get(index);
+        } else {
+            LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                    objType, objName, BusinessActionContextParameter.class.getSimpleName());
+        }
+
+        return objValue;
     }
 
     /**
