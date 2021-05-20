@@ -1,7 +1,10 @@
 package io.seata.server.session.redis;
 
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLocker;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.lock.RedisDistributedLocker;
+import io.seata.server.storage.redis.session.RedisSessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,11 +18,9 @@ import java.io.IOException;
  * @description: redis distributed lock test
  *
  * ！！！！！Please use a true redis server to run the following test case ！！！！！
- * ！！！！！Please use a true redis server to run the following test case ！！！！！
  * The redis mock framework(jedis-mock) can not support set(lockKey, lockValue, SetParams.setParams().nx())，the nx() will not effective.
  * So we can not use mock to test.
  * We need a true redis server to test!
- * ！！！！！Please use a true redis server to run the following test case ！！！！！
  * ！！！！！Please use a true redis server to run the following test case ！！！！！
  *
  * @author: zhongxiang.wang
@@ -31,6 +32,7 @@ public class RedisDistributedLockerTest {
     private String retryRollbacking = "RetryRollbacking";
     private String retryCommiting = "RetryCommiting";
     private String lockValue = "127.1.1.1:9081";
+    private static DistributedLocker distributedLocker;
 
 //    @BeforeAll
     public static void start() throws IOException {
@@ -38,44 +40,57 @@ public class RedisDistributedLockerTest {
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
         jedisPoolInstance = JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000));
+        distributedLocker = RedisDistributedLocker.getInstance();
     }
 
 //    @Test
     public void test_acquireScheduledLock_success() {
-        boolean accquire = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue, 60);
+        boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000l));
         Assertions.assertEquals(true,accquire);
         String lockValueExisted = jedisPoolInstance.getResource().get(retryRollbacking);
         Assertions.assertEquals(lockValue,lockValueExisted);
-        boolean release = RedisDistributedLocker.releaseScheduleLock(retryRollbacking, lockValue);
+        boolean release = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue,null));
         Assertions.assertEquals(true,release);
         Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
     }
 
 //    @Test
-    public void test_acquireScheduledLock_concurrent() {
+    public void test_acquireScheduledLock_success_() {
+        RedisSessionManager redisSessionManager = new RedisSessionManager();
+        boolean accquire = redisSessionManager.scheduledLock(retryRollbacking);
+        Assertions.assertEquals(true,accquire);
+        String lockValueExisted = jedisPoolInstance.getResource().get(retryRollbacking);
+        Assertions.assertEquals("null:0",lockValueExisted);
+        boolean release = redisSessionManager.unScheduledLock(retryRollbacking);
+        Assertions.assertEquals(true,release);
+        Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
+    }
+
+//    @Test
+    public void test_acquireLock_concurrent() {
         //acquire the lock success
-        boolean accquire = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue, 60);
+        boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000l));
         Assertions.assertEquals(true,accquire);
         String lockValueExisted = jedisPoolInstance.getResource().get(retryRollbacking);
         Assertions.assertEquals(lockValue,lockValueExisted);
 
         // concurrent acquire
        for(int i = 0;i < 1000;i++){
-           boolean b = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue + i, 60);
+           boolean b = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + i, 60000l));
            Assertions.assertEquals(false,b);
        }
 
        //release the lock
-       boolean release = RedisDistributedLocker.releaseScheduleLock(retryRollbacking, lockValue);
+       boolean release = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue ,null));
        Assertions.assertEquals(true,release);
        Assertions.assertNull(jedisPoolInstance.getResource().get(retryRollbacking));
 
        // other acquire the lock success
-       boolean c = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue + 1, 60);
+       boolean c = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 1, 60000l));
        Assertions.assertEquals(true,c);
 
         //other2 acquire the lock failed
-        boolean d = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue + 2, 60);
+        boolean d = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000l));
         Assertions.assertEquals(false,d);
 
        //sleep 60s
@@ -86,18 +101,18 @@ public class RedisDistributedLockerTest {
         }
 
         //other2 acquire the lock
-        boolean e = RedisDistributedLocker.acquireScheduledLock(retryRollbacking, lockValue + 2, 60);
+        boolean e = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000l));
         Assertions.assertEquals(true,e);
 
         //clear
-        boolean f = RedisDistributedLocker.releaseScheduleLock(retryRollbacking, lockValue + 2);
+        boolean f = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue + 2,null));
     }
 
 //    @Test
-    public void test_acquireScheduledLock_false() {
+    public void test_acquireLock_false() {
         String set = jedisPoolInstance.getResource().set(retryCommiting, lockValue);
         Assertions.assertEquals("OK",set);
-        boolean acquire = RedisDistributedLocker.acquireScheduledLock(retryCommiting, lockValue, 60);
+        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
         Assertions.assertEquals(false,acquire);
     }
 }

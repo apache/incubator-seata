@@ -15,6 +15,8 @@
  */
 package io.seata.server.storage.redis.lock;
 
+import io.seata.core.store.DistributedLockDO;
+import io.seata.core.store.DistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -27,40 +29,56 @@ import io.seata.server.storage.redis.JedisPooledFactory;
  * @author: zhongxiang.wang
  * @date: 2021-03-02 11:34
  */
-public class RedisDistributedLocker {
+public class RedisDistributedLocker implements DistributedLocker {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RedisDistributedLocker.class);
     private static final String SUCCESS = "OK";
+
+    private static volatile RedisDistributedLocker instance;
+
+    public static DistributedLocker getInstance() {
+        if (instance == null) {
+            synchronized (RedisDistributedLocker.class) {
+                if (instance == null) {
+                    instance = new RedisDistributedLocker();
+                }
+            }
+        }
+        return instance;
+    }
+
     /**
      * Acquire the distributed lock
      *
-     * @param lockKey    the lock key
-     * @param lockValue  the lock value
-     * @param expireTime the expireTime,to prevent the dead lock when current TC who acquired the lock has down
+     * @param distributedLockDO
      * @return
      */
-    public static boolean acquireScheduledLock(String lockKey, String lockValue, Integer expireTime) {
+    @Override
+    public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             //Don't need retry,if can't acquire the lock,let the other get the lock
-            String result = jedis.set(lockKey, lockValue, SetParams.setParams().nx().ex(expireTime));
+            String result = jedis.set(distributedLockDO.getLockKey(), distributedLockDO.getLockValue(), SetParams.setParams().nx().px(distributedLockDO.getExpireTime()));
             if (SUCCESS.equalsIgnoreCase(result)) {
                 return true;
             }
             return false;
         } catch (Exception ex) {
-            LOGGER.error("The {} acquired the {} distributed lock failed.", lockValue, lockKey, ex);
+            LOGGER.error("The {} acquired the {} distributed lock failed.", distributedLockDO.getLockValue(), distributedLockDO.getLockKey(), ex);
             return false;
         }
     }
 
+
     /**
      * Release the distributed lock
      *
-     * @param lockKey   the lock key
-     * @param lockValue the lock value
+     * @param distributedLockDO
      * @return
      */
-    public static boolean releaseScheduleLock(String lockKey, String lockValue) {
+    @Override
+    public boolean releaseLock(DistributedLockDO distributedLockDO) {
+        String lockKey = distributedLockDO.getLockKey();
+        String lockValue = distributedLockDO.getLockValue();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.watch(lockKey);
             //Check the value to prevent release the other's lock
@@ -78,5 +96,4 @@ public class RedisDistributedLocker {
             return false;
         }
     }
-
 }

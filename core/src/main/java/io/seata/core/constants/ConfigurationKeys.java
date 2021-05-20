@@ -606,11 +606,6 @@ public interface ConfigurationKeys {
     String STORE_REDIS_QUERY_LIMIT = STORE_REDIS_PREFIX + "queryLimit";
 
     /**
-     * The constant STORE_REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME.
-     */
-    String STORE_REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME = STORE_REDIS_PREFIX + "distributedLockExpireTime";
-
-    /**
      * The constant REDIS_SENTINEL_MODE.
      */
     String REDIS_SENTINEL_MODE = "sentinel";
