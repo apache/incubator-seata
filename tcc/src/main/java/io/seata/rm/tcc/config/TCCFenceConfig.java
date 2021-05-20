@@ -17,13 +17,13 @@ package io.seata.rm.tcc.config;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.DateUtils;
 import io.seata.core.rpc.Disposable;
 import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.constant.TCCFenceCleanMode;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
 import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -127,11 +127,11 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
             tccFenceClean.scheduleWithFixedDelay(() -> {
                 Date timeBefore;
                 if (TCCFenceCleanMode.Hour.equals(cleanMode)) {
-                    timeBefore = DateUtils.getHourBefore(cleanPeriod);
+                    timeBefore = DateUtils.addHours(new Date(), -cleanPeriod);
                 } else if (TCCFenceCleanMode.Minute.equals(cleanMode)) {
-                    timeBefore = DateUtils.getMinuteBefore(cleanPeriod);
+                    timeBefore = DateUtils.addMinutes(new Date(), -cleanPeriod);
                 } else {
-                    timeBefore = DateUtils.getDayBefore(cleanPeriod);
+                    timeBefore = DateUtils.addDays(new Date(), -cleanPeriod);
                 }
                 boolean result = TCCFenceHandler.deleteFenceByDate(timeBefore);
                 if (!result) {
