@@ -67,7 +67,6 @@ store.redis.maxTotal=100
 store.redis.database=0
 store.redis.password=
 store.redis.queryLimit=100
-store.redis.distributedLockExpireTime=60
 server.recovery.committingRetryPeriod=1000
 server.recovery.asynCommittingRetryPeriod=1000
 server.recovery.rollbackingRetryPeriod=1000
