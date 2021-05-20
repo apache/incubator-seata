@@ -50,6 +50,7 @@
         <module>saga</module>
         <module>sqlparser</module>
         <module>server</module>
+        <module>ext/apm-seata-skywalking-plugin</module>
     </modules>
     <packaging>pom</packaging>
 

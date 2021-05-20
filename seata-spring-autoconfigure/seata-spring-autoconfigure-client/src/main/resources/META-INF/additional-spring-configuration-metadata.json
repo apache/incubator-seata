@@ -56,6 +56,12 @@
       "defaultValue": false
     },
     {
+      "name": "seata.client.rm.table-meta-checker-interval",
+      "type": "java.lang.Long",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": 60000
+    },
+    {
       "name": "seata.client.rm.report-success-enable",
       "type": "java.lang.Boolean",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
