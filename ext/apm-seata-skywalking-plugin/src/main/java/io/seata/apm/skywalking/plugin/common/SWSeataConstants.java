@@ -45,5 +45,9 @@ public class SWSeataConstants {
         OPERATION_NAME_MAPPING.put("GlobalLockQueryResponse", SEATA_NAME + "/RM/" + "GlobalLockQueryResponse");
         OPERATION_NAME_MAPPING.put("UndoLogDeleteRequest", SEATA_NAME + "/RM/" + "UndoLogDeleteRequest");
         OPERATION_NAME_MAPPING.put("UndoLogDeleteResponse", SEATA_NAME + "/RM/" + "UndoLogDeleteResponse");
+        OPERATION_NAME_MAPPING.put("RegisterRMRequest", SEATA_NAME + "/RM/" + "RegisterRMRequest");
+        OPERATION_NAME_MAPPING.put("RegisterRMResponse", SEATA_NAME + "/RM/" + "RegisterRMResponse");
+        OPERATION_NAME_MAPPING.put("RegisterTMRequest", SEATA_NAME + "/RM/" + "RegisterTMRequest");
+        OPERATION_NAME_MAPPING.put("RegisterTMResponse", SEATA_NAME + "/RM/" + "RegisterTMResponse");
     }
 }
