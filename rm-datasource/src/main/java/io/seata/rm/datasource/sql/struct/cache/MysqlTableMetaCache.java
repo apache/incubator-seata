@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.ColumnUtils;
@@ -136,6 +137,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
 
+                if (tm.getAllColumns().containsKey(col.getColumnName())) {
+                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
 
