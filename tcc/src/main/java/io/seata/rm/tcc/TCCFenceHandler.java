@@ -16,6 +16,7 @@
 package io.seata.rm.tcc;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
@@ -63,7 +64,6 @@ public class TCCFenceHandler {
      */
     public static Object prepareFence(String xid, Long branchId, Callback<Object> targetCallback) {
         return transactionTemplate.execute(status -> {
-            Object ret = null;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 TCCFenceDO tccFenceDO = new TCCFenceDO();
@@ -73,16 +73,17 @@ public class TCCFenceHandler {
                 boolean result = TCC_FENCE_DAO.insertTCCFenceDO(conn, tccFenceDO);
                 LOGGER.info("TCC fence prepare result: {}. xid: {}, branchId: {}", result, xid, branchId);
                 if (result) {
-                    ret = targetCallback.execute();
+                    return targetCallback.execute();
                 } else {
                     throw new TCCFenceException(String.format("Insert tcc fence record error, prepare fence failed. xid= %s, branchId= %s", xid, branchId),
                             FrameworkErrorCode.InsertRecordError);
                 }
-            } catch (Throwable e) {
-                LOGGER.error("TCC fence prepare error!", e.fillInStackTrace());
+            } catch (Throwable t) {
+                String msg = String.format("prepare TCC resource error, xid: %s.",  xid);
+                LOGGER.error(msg, t);
                 status.setRollbackOnly();
+                throw new FrameworkException(t, msg);
             }
-            return ret;
         });
     }
 
@@ -97,7 +98,6 @@ public class TCCFenceHandler {
      */
     public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
         return transactionTemplate.execute(status -> {
-            boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
@@ -106,22 +106,22 @@ public class TCCFenceHandler {
                             FrameworkErrorCode.RecordAlreadyExists);
                 }
                 if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
-                    LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}", xid, branchId);
+                    LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
                     return true;
                 }
                 if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}", xid, branchId);
+                        LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
                     }
                     return false;
                 }
-                ret = updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED);
-
-            } catch (Exception e) {
-                LOGGER.error("TCC fence confirm error!", e.fillInStackTrace());
+                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED);
+            } catch (Throwable t) {
+                String msg = String.format("commit TCC resource error, xid: %s.",  xid);
+                LOGGER.error(msg, t);
                 status.setRollbackOnly();
+                throw new FrameworkException(t, msg);
             }
-            return ret;
         });
     }
 
@@ -136,7 +136,6 @@ public class TCCFenceHandler {
      */
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
         return transactionTemplate.execute(status -> {
-            boolean ret = false;
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
@@ -154,24 +153,24 @@ public class TCCFenceHandler {
                     }
                     return true;
                 } else {
+                    if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
+                        LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
+                        return true;
+                    }
                     if (TCCFenceConstant.STATUS_COMMITTED == tccFenceDO.getStatus()) {
                         if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}", xid, branchId);
+                            LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, tccFenceDO.getStatus());
                         }
                         return false;
                     }
-                    if (TCCFenceConstant.STATUS_ROLLBACKED == tccFenceDO.getStatus() || TCCFenceConstant.STATUS_SUSPENDED == tccFenceDO.getStatus()) {
-                        LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}", xid, branchId);
-                        return true;
-                    }
                 }
-                ret = updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED);
-
-            } catch (Exception e) {
-                LOGGER.error("TCC fence rollback error!", e.fillInStackTrace());
+                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED);
+            } catch (Throwable t) {
+                String msg = String.format("rollback TCC resource error,  xid: %s.",  xid);
+                LOGGER.error(msg, t);
                 status.setRollbackOnly();
+                throw new FrameworkException(t, msg);
             }
-            return ret;
         });
     }
 

@@ -97,7 +97,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if (tccResource.isUseTCCFence()) {
+            if ((boolean)businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE)) {
                 result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
             } else {
                 ret = commitMethod.invoke(targetTCCBean, businessActionContext);
@@ -150,7 +150,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if (tccResource.isUseTCCFence()) {
+            if ((boolean)businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE)) {
                 result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
             } else {
                 ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
