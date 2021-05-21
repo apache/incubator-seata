@@ -10,11 +10,11 @@ logging:
   file:
     path: ${user.home}/logs
   extend:
-    kafka-appender:
-      bootstrap-servers: localhost:9092
-      topic: logback_to_logstash
     logstash-appender:
-      destination: localhost:4560
+      destination: 127.0.0.1:4560
+    kafka-appender:
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
 
 seata:
   config:

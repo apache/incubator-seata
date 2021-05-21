@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
     <!-- kafka-appender properties -->
-    <springProperty name="KAFKA_BOOTSTRAP_SERVERS" source="logging.extend.kafka-appender.bootstrap-servers" defaultValue="localhost:9092"/>
-    <springProperty name="KAFKA_TOPIC" source="logging.extend.kafka-appender.topic" defaultValue="logback_to_logstash"/>
+    <springProperty name="KAFKA_BOOTSTRAP_SERVERS" source="logging.extend.kafka-appender.bootstrap-servers"
+                    defaultValue="127.0.0.1:9092"/>
+    <springProperty name="KAFKA_TOPIC" source="logging.extend.kafka-appender.topic"
+                    defaultValue="logback_to_logstash"/>
 
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder>
