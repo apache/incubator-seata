@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.istack.internal.NotNull;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
