@@ -16,8 +16,7 @@
 package io.seata.rm.tcc.interceptor;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,8 @@ import javax.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -52,11 +53,15 @@ public final class ActionContextUtil {
      * @return map map
      */
     public static Map<String, Object> fetchContextFromObject(Object targetParam) {
+        if (targetParam == null) {
+            return Collections.emptyMap();
+        }
+
         try {
             Map<String, Object> context = new HashMap<>(8);
-            List<Field> fields = new ArrayList<>();
-            getAllField(targetParam.getClass(), fields);
 
+            // fetch context from the fields
+            Field[] fields = ReflectionUtil.getAllFields(targetParam.getClass());
             for (Field f : fields) {
                 // get annotation
                 BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
@@ -72,6 +77,7 @@ public final class ActionContextUtil {
                 String fieldName = f.getName();
                 loadParamByAnnotationAndPutToContext("field", fieldName, fieldValue, annotation, context);
             }
+
             return context;
         } catch (Throwable t) {
             throw new FrameworkException(t, "fetchContextFromObject failover");
@@ -104,7 +110,9 @@ public final class ActionContextUtil {
 
         if (annotation.isParamInProperty()) {
             Map<String, Object> paramContext = fetchContextFromObject(objValue);
-            context.putAll(paramContext);
+            if (CollectionUtils.isNotEmpty(paramContext)) {
+                context.putAll(paramContext);
+            }
         } else {
             String paramName = getParamName(annotation);
             if (StringUtils.isNotBlank(paramName)) {
@@ -144,21 +152,6 @@ public final class ActionContextUtil {
         }
 
         return objValue;
-    }
-
-    /**
-     * Gets all field.
-     *
-     * @param interFace the inter face
-     * @param fields    the fields
-     */
-    public static void getAllField(Class<?> interFace, List<Field> fields) {
-        if (interFace == Object.class || interFace.isInterface()) {
-            return;
-        }
-        Field[] field = interFace.getDeclaredFields();
-        fields.addAll(Arrays.asList(field));
-        getAllField(interFace.getSuperclass(), fields);
     }
 
     /**
