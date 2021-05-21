@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSON;
 
 import io.seata.common.Constants;
+import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
@@ -97,8 +98,12 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if ((boolean)businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE)) {
-                result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
+            if (Boolean.TRUE.equals(businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE))) {
+                try {
+                    result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
+                } catch (FrameworkException e) {
+                    throw e.getCause();
+                }
             } else {
                 ret = commitMethod.invoke(targetTCCBean, businessActionContext);
                 if (ret != null) {
@@ -150,8 +155,12 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if ((boolean)businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE)) {
-                result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
+            if (Boolean.TRUE.equals(businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE))) {
+                try {
+                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
+                } catch (FrameworkException e) {
+                    throw e.getCause();
+                }
             } else {
                 ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
                 if (ret != null) {

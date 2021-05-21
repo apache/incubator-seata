@@ -79,10 +79,8 @@ public class TCCFenceHandler {
                             FrameworkErrorCode.InsertRecordError);
                 }
             } catch (Throwable t) {
-                String msg = String.format("prepare TCC resource error, xid: %s.",  xid);
-                LOGGER.error(msg, t);
                 status.setRollbackOnly();
-                throw new FrameworkException(t, msg);
+                throw new FrameworkException(t);
             }
         });
     }
@@ -117,10 +115,8 @@ public class TCCFenceHandler {
                 }
                 return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED);
             } catch (Throwable t) {
-                String msg = String.format("commit TCC resource error, xid: %s.",  xid);
-                LOGGER.error(msg, t);
                 status.setRollbackOnly();
-                throw new FrameworkException(t, msg);
+                throw new FrameworkException(t);
             }
         });
     }
@@ -166,10 +162,8 @@ public class TCCFenceHandler {
                 }
                 return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED);
             } catch (Throwable t) {
-                String msg = String.format("rollback TCC resource error,  xid: %s.",  xid);
-                LOGGER.error(msg, t);
                 status.setRollbackOnly();
-                throw new FrameworkException(t, msg);
+                throw new FrameworkException(t);
             }
         });
     }

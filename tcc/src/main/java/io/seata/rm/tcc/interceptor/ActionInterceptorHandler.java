@@ -95,8 +95,14 @@ public class ActionInterceptorHandler {
             
             // Use TCC Fence
             if (businessAction.useTCCFence()) {
-                Object ans = TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
-                ret.put(Constants.TCC_METHOD_RESULT, ans);
+                try {
+                    Object ans = TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
+                    ret.put(Constants.TCC_METHOD_RESULT, ans);
+                } catch (FrameworkException e) {
+                    String msg = String.format("prepare TCC resource error, xid: %s.", xid);
+                    LOGGER.error(msg, e.getCause());
+                    throw e.getCause();
+                }
             } else {
                 //the final result
                 ret.put(Constants.TCC_METHOD_RESULT, targetCallback.execute());
