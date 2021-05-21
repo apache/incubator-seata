@@ -73,7 +73,7 @@
         </file>
 
         <file>
-            <source>../server/src/main/resources/logback.xml</source>
+            <source>../server/src/main/resources/logback-spring.xml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
     </files>

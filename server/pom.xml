@@ -126,12 +126,6 @@
             <artifactId>guava</artifactId>
         </dependency>
 
-        <!-- logback -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-
         <!-- jedis -->
         <dependency>
             <groupId>redis.clients</groupId>
@@ -149,7 +143,12 @@
             <artifactId>fastjson</artifactId>
         </dependency>
 
-
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+        <!-- logback appenders -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>

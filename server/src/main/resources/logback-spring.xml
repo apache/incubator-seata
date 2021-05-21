@@ -19,13 +19,15 @@
     <!-- Context listeners -->
     <contextListener class="io.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
 
-    <!-- Copied from spring-boot.jar -->
-    <conversionRule conversionWord="clr" converterClass="io.seata.server.logging.logback.ColorConverter"/>
-    <conversionRule conversionWord="wex" converterClass="io.seata.server.logging.logback.WhitespaceThrowableProxyConverter"/>
-    <conversionRule conversionWord="wEx" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+    <!-- The conversion rules are copied from `defaults.xml` in the `spring-boot-xxx.jar` -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    <!-- The custom conversion rules -->
+    <conversionRule conversionWord="wEx2" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
     <!-- common properties -->
-    <property name="APPLICATION_NAME" value="seata-server"/>
+    <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-server"/>
 
 
     <!-- console-appender -->

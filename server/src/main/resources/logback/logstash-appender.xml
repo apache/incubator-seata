@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <included>
     <!-- logstash-appender properties -->
-    <property name="LOGSTASH_DESTINATION" value="localhost:4560"/>
+    <springProperty name="LOGSTASH_DESTINATION" source="logging.extend.logstash-appender.destination" defaultValue="localhost:4560"/>
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <!-- the TCP address of the logstash -->
