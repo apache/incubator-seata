@@ -64,11 +64,11 @@
         </file>
 
         <file>
-            <source>../server/src/main/resources/application.yaml</source>
+            <source>../server/src/main/resources/application.yml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
         <file>
-            <source>../server/src/main/resources/application.example.yaml</source>
+            <source>../server/src/main/resources/application.example.yml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
 
