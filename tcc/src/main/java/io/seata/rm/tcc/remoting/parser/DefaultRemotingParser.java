@@ -188,7 +188,6 @@ public class DefaultRemotingParser {
                         tccResource.setRollbackMethod(ReflectionUtil
                             .getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(),
                                 new Class[] {BusinessActionContext.class}));
-                        tccResource.setUseTCCFence(twoPhaseBusinessAction.useTCCFence());
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }

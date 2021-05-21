@@ -45,8 +45,6 @@ public class TCCResource implements Resource {
 
     private Method rollbackMethod;
 
-    private boolean useTCCFence;
-
     @Override
     public String getResourceGroupId() {
         return resourceGroupId;
@@ -213,22 +211,6 @@ public class TCCResource implements Resource {
      */
     public void setRollbackMethodName(String rollbackMethodName) {
         this.rollbackMethodName = rollbackMethodName;
-    }
-
-    /**
-     * Judge whether or not use TCC fence
-     * @return the useTCCFence value
-     */
-    public boolean isUseTCCFence() {
-        return useTCCFence;
-    }
-
-    /**
-     * Sets UseTCCFence value
-     * @param useTCCFence the useTCCFence value
-     */
-    public void setUseTCCFence(boolean useTCCFence) {
-        this.useTCCFence = useTCCFence;
     }
 
     @Override
