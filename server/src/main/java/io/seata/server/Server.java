@@ -49,7 +49,7 @@ public class Server {
      * @param args the input arguments
      * @throws IOException the io exception
      */
-    public static void main(String[] args) throws IOException {
+    public static void start(String[] args) throws IOException {
         // get port first, use to logback.xml
         int port = PortHelper.getPort(args);
         System.setProperty(ConfigurationKeys.SERVER_PORT, Integer.toString(port));
@@ -95,14 +95,8 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
         ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
+        //127.0.0.1 and 0.0.0.0 are not valid here.
 
-        try {
-            nettyRemotingServer.init();
-        } catch (Throwable e) {
-            logger.error("nettyServer init error:{}", e.getMessage(), e);
-            System.exit(-1);
-        }
-
-        System.exit(0);
+        nettyRemotingServer.init();
     }
 }

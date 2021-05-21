@@ -127,6 +127,7 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <jraft.version>1.3.5</jraft.version>
+        <mariadb.version>2.7.2</mariadb.version>
     </properties>
 
     <dependencyManagement>
@@ -539,11 +540,15 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- jraft  -->
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>jraft-core</artifactId>
                 <version>${jraft.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${mariadb.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
