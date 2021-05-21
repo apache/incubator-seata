@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
@@ -86,8 +87,8 @@ public final class ActionContextUtil {
      * @param annotation the annotation on the param or field
      * @param context    the action context
      */
-    public static void loadParamByAnnotationAndPutToContext(@Nonnull String objType, @Nonnull String objName, Object objValue,
-            @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> context) {
+    public static void loadParamByAnnotationAndPutToContext(@Nonnull final String objType, @Nonnull String objName, Object objValue,
+            @Nonnull final BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> context) {
         if (objValue == null) {
             return;
         }
@@ -121,6 +122,7 @@ public final class ActionContextUtil {
         return paramName;
     }
 
+    @Nullable
     private static Object getByIndex(String objType, String objName, Object objValue, int index) {
         if (objValue instanceof List) {
             @SuppressWarnings("unchecked")
