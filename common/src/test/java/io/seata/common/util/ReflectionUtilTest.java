@@ -118,13 +118,19 @@ public class ReflectionUtilTest {
         this.testGetAllFieldsInternal(TestClass.class, "f1", "f2");
         // TestSuperClass
         this.testGetAllFieldsInternal(TestSuperClass.class, "f2");
+        // EmptyClass
+        this.testGetAllFieldsInternal(Object.class);
         // TestInterface
         this.testGetAllFieldsInternal(TestInterface.class);
         // Object
         this.testGetAllFieldsInternal(Object.class);
 
-        // case: The fields of both Interface and Object are `EMPTY_FIELD_ARRAY`
-        Assertions.assertTrue(ReflectionUtil.getAllFields(TestInterface.class) == ReflectionUtil.getAllFields(Object.class));
+        // case: The fields of EmptyClass is `EMPTY_FIELD_ARRAY`
+        Assertions.assertTrue(ReflectionUtil.getAllFields(EmptyClass.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        // case: The fields of Interface is `EMPTY_FIELD_ARRAY`
+        Assertions.assertTrue(ReflectionUtil.getAllFields(TestInterface.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
+        // case: The fields of Object is `EMPTY_FIELD_ARRAY`
+        Assertions.assertTrue(ReflectionUtil.getAllFields(Object.class) == ReflectionUtil.EMPTY_FIELD_ARRAY);
     }
 
     private void testGetAllFieldsInternal(Class<?> clazz, String... fieldNames) {
@@ -142,6 +148,11 @@ public class ReflectionUtilTest {
         for (Field field : fields) {
             Assertions.assertTrue(fieldNameList.contains(field.getName()));
         }
+    }
+
+    //region the test class and interface
+
+    class EmptyClass {
     }
 
     class TestClass extends TestSuperClass implements TestInterface {
@@ -171,4 +182,6 @@ public class ReflectionUtilTest {
 
     interface TestInterface {
     }
+
+    //endregion
 }

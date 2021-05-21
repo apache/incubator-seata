@@ -46,7 +46,7 @@ public final class ReflectionUtil {
     /**
      * The EMPTY_FIELD_ARRAY
      */
-    private static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
+    public static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
     /**
      * The cache CLASS_FIELDS_CACHE
