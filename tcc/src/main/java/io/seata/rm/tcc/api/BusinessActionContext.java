@@ -196,7 +196,11 @@ public class BusinessActionContext implements Serializable {
         }
 
         Object previousValue = this.actionContext.put(key, value);
-        return !value.equals(previousValue);
+        boolean isChanged = !value.equals(previousValue);
+        if (isChanged) {
+            this.setUpdated(true);
+        }
+        return isChanged;
     }
 
     public Boolean getDelayReport() {
