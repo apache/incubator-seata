@@ -16,6 +16,7 @@
 package io.seata.rm.tcc;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,7 +102,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             if (Boolean.TRUE.equals(businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE))) {
                 try {
                     result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
-                } catch (FrameworkException e) {
+                } catch (FrameworkException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
             } else {
@@ -158,7 +159,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             if (Boolean.TRUE.equals(businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE))) {
                 try {
                     result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
-                } catch (FrameworkException e) {
+                } catch (FrameworkException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
             } else {

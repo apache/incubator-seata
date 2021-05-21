@@ -27,6 +27,7 @@ import io.seata.rm.tcc.store.db.TCCFenceStoreDataBaseDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
@@ -113,7 +114,7 @@ public class TCCFenceHandler {
                     }
                     return false;
                 }
-                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED);
+                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new FrameworkException(t);
@@ -160,7 +161,7 @@ public class TCCFenceHandler {
                         return false;
                     }
                 }
-                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED);
+                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status);
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new FrameworkException(t);
@@ -178,7 +179,7 @@ public class TCCFenceHandler {
      * @param status the tcc fence status
      * @return the boolean
      */
-    private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, int status) throws Exception {
+    private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, int status, TransactionStatus transactionStatus) throws Exception {
         boolean result = TCC_FENCE_DAO.updateTCCFenceDO(conn, xid, branchId, status, TCCFenceConstant.STATUS_TRIED);
         if (result) {
             // invoke two phase method
@@ -188,6 +189,10 @@ public class TCCFenceHandler {
                     result = ((TwoPhaseResult) ret).isSuccess();
                 } else {
                     result = (boolean) ret;
+                }
+                // If the business execution result is false, the transaction will be rolled back
+                if (!result) {
+                    transactionStatus.setRollbackOnly();
                 }
             }
         }

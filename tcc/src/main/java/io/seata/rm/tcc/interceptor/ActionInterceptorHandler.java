@@ -34,6 +34,7 @@ import org.slf4j.MDC;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class ActionInterceptorHandler {
                 try {
                     Object ans = TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
                     ret.put(Constants.TCC_METHOD_RESULT, ans);
-                } catch (FrameworkException e) {
+                } catch (FrameworkException | UndeclaredThrowableException e) {
                     String msg = String.format("prepare TCC resource error, xid: %s.", xid);
                     LOGGER.error(msg, e.getCause());
                     throw e.getCause();
