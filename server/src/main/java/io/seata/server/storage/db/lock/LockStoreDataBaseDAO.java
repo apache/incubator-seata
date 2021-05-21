@@ -278,7 +278,7 @@ public class LockStoreDataBaseDAO implements LockStore {
         try {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            if (!checkLockable(conn, lockDOs)) {
+            if (!getLockOwners(conn, lockDOs)) {
                 return false;
             }
             return true;
@@ -295,7 +295,7 @@ public class LockStoreDataBaseDAO implements LockStore {
         try {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            return checkLockable(conn, lockDOs, false);
+            return getLockOwners(conn, lockDOs, false);
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
@@ -371,8 +371,8 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockDOs the lock do
      * @return the boolean
      */
-    protected boolean checkLockable(Connection conn, List<LockDO> lockDOs) {
-        Set<String> xidOwners = checkLockable(conn, lockDOs, true);
+    protected boolean getLockOwners(Connection conn, List<LockDO> lockDOs) {
+        Set<String> xidOwners = getLockOwners(conn, lockDOs, true);
         return CollectionUtils.isEmpty(xidOwners);
     }
 
@@ -383,7 +383,7 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockDOs the lock do
      * @return the boolean
      */
-    protected Set<String> checkLockable(Connection conn, List<LockDO> lockDOs, boolean failFast) {
+    protected Set<String> getLockOwners(Connection conn, List<LockDO> lockDOs, boolean failFast) {
         Set<String> xidOwners = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

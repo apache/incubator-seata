@@ -125,10 +125,10 @@ public class FileLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> rowLocks) {
-        return CollectionUtils.isEmpty(isLockable(rowLocks, true));
+        return CollectionUtils.isEmpty(getLockOwners(rowLocks, true));
     }
 
-    public Set<String> isLockable(List<RowLock> rowLocks, boolean failFast) {
+    public Set<String> getLockOwners(List<RowLock> rowLocks, boolean failFast) {
         if (CollectionUtils.isEmpty(rowLocks)) {
             // no lock
             return null;
@@ -174,7 +174,7 @@ public class FileLocker extends AbstractLocker {
 
     @Override
     public Set<String> getLockOwners(List<RowLock> rowLock) {
-        return isLockable(rowLock, false);
+        return getLockOwners(rowLock, false);
     }
 
     @Override
