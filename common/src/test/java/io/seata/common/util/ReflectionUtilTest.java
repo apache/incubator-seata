@@ -123,7 +123,7 @@ public class ReflectionUtilTest {
         // Object
         this.testGetAllFieldsInternal(Object.class);
 
-        // case: TestInterface == Object, is the EMPTY_FIELD_ARRAY
+        // case: The fields of both Interface and Object are `EMPTY_FIELD_ARRAY`
         Assertions.assertTrue(ReflectionUtil.getAllFields(TestInterface.class) == ReflectionUtil.getAllFields(Object.class));
     }
 

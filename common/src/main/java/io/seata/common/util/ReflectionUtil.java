@@ -264,7 +264,13 @@ public final class ReflectionUtil {
         }
 
         // list to array
-        Field[] resultFields = fieldList.toArray(new Field[fieldList.size()]);
+        Field[] resultFields;
+        if (!fieldList.isEmpty()) {
+            resultFields = fieldList.toArray(new Field[fieldList.size()]);
+        } else {
+            // Reuse the EMPTY_FIELD_ARRAY
+            resultFields = EMPTY_FIELD_ARRAY;
+        }
 
         // set cache
         CLASS_FIELDS_CACHE.put(clazz, resultFields);
