@@ -32,9 +32,16 @@ import java.lang.annotation.Target;
 public @interface BusinessActionContextParameter {
 
     /**
-     * parameter's name
+     * parameter's name. Synonym for {@link #paramName()}.
      *
-     * @return the string
+     * @return the name of the param or field
+     */
+    String value() default "";
+
+    /**
+     * parameter's name. Synonym for {@link #value()}.
+     *
+     * @return the name of the param or field
      */
     String paramName() default "";
 
@@ -48,7 +55,7 @@ public @interface BusinessActionContextParameter {
     /**
      * Specify the index of the parameter in the List
      *
-     * @return the int
+     * @return the index of the List
      */
     int index() default -1;
 

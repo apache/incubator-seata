@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import com.alibaba.fastjson.JSON;
+import com.sun.istack.internal.NotNull;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -86,8 +87,8 @@ public final class ActionContextUtil {
      * @param annotation the annotation on the param or field
      * @param context    the action context
      */
-    public static void loadParamByAnnotationAndPutToContext(@Nonnull String objType, String objName, Object objValue,
-                                                            BusinessActionContextParameter annotation, Map<String, Object> context) {
+    public static void loadParamByAnnotationAndPutToContext(@Nonnull String objType, @Nonnull String objName, Object objValue,
+            @Nonnull BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> context) {
         if (objValue == null) {
             return;
         }
@@ -105,11 +106,20 @@ public final class ActionContextUtil {
             Map<String, Object> paramContext = fetchContextFromObject(objValue);
             context.putAll(paramContext);
         } else {
-            if (StringUtils.isNotBlank(annotation.paramName())) {
-                objName = annotation.paramName();
+            String paramName = getParamName(annotation);
+            if (StringUtils.isNotBlank(paramName)) {
+                objName = paramName;
             }
             context.put(objName, objValue);
         }
+    }
+
+    private static String getParamName(@Nonnull BusinessActionContextParameter annotation) {
+        String paramName = annotation.paramName();
+        if (StringUtils.isBlank(paramName)) {
+            paramName = annotation.value();
+        }
+        return paramName;
     }
 
     private static Object getByIndex(String objType, String objName, Object objValue, int index) {
