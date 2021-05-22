@@ -235,7 +235,8 @@ public class ActionInterceptorHandler {
                     }
 
                     // if the parameter names is null, print log
-                    if (parameterNames == null && StringUtils.isBlank(annotation.paramName()) && !annotation.isParamInProperty()) {
+                    String paramName = ActionContextUtil.getParamName(annotation);
+                    if (parameterNames == null && StringUtils.isBlank(paramName) && !annotation.isParamInProperty()) {
                         String errorMsg = String.format("Unable to get parameter names from the method `%s.%s(...)`." +
                                         " Please execute 'javac -parameters' to re-compile of the method code," +
                                         " or set the field `paramName` of the `@%s` by yourself",
@@ -244,7 +245,7 @@ public class ActionInterceptorHandler {
                     }
 
                     // load param by the config of annotation, and then put to the context
-                    String paramName = parameterNames != null ? parameterNames[i] : parameters[i].getName();
+                    paramName = parameterNames != null ? parameterNames[i] : parameters[i].getName();
                     ActionContextUtil.loadParamByAnnotationAndPutToContext("param", paramName, paramObject, annotation, context);
                 }
             }

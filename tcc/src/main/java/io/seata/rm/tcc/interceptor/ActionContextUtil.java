@@ -152,7 +152,7 @@ public final class ActionContextUtil {
         }
     }
 
-    private static String getParamName(@Nonnull BusinessActionContextParameter annotation) {
+    public static String getParamName(@Nonnull BusinessActionContextParameter annotation) {
         String paramName = annotation.paramName();
         if (StringUtils.isBlank(paramName)) {
             paramName = annotation.value();
