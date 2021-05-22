@@ -130,17 +130,18 @@ public final class ActionContextUtil {
         // if {@code isParamInProperty == true}, fetch context from objValue
         if (annotation.isParamInProperty()) {
             Map<String, Object> paramContext = fetchContextFromObject(objValue);
-            if (CollectionUtils.isNotEmpty(paramContext)) {
-                String paramName = getParamName(annotation);
-                if (StringUtils.isNotBlank(paramName)) {
-                    // If the `paramName` of "@BusinessActionContextParameter" is not blank, put the param context in it
-                    // @since: above 1.4.2
-                    context.put(paramName, paramContext);
-                } else {
-                    // Merge the param context into context
-                    // Warn: This may cause values with the same name to be overridden
-                    context.putAll(paramContext);
-                }
+            if (CollectionUtils.isEmpty(paramContext)) {
+                return;
+            }
+            String paramName = getParamName(annotation);
+            if (StringUtils.isNotBlank(paramName)) {
+                // If the `paramName` of "@BusinessActionContextParameter" is not blank, put the param context in it
+                // @since: above 1.4.2
+                context.put(paramName, paramContext);
+            } else {
+                // Merge the param context into context
+                // Warn: This may cause values with the same name to be overridden
+                context.putAll(paramContext);
             }
         } else {
             String paramName = getParamName(annotation);
