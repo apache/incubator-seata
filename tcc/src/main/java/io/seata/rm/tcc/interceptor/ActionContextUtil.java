@@ -68,16 +68,20 @@ public final class ActionContextUtil {
      * @param targetParam the target param
      * @return map map
      */
-    public static Map<String, Object> fetchContextFromObject(Object targetParam) {
-        if (targetParam == null) {
-            return Collections.emptyMap();
-        }
-
+    public static Map<String, Object> fetchContextFromObject(@Nonnull Object targetParam) {
         try {
-            Map<String, Object> context = new HashMap<>(8);
+            // get the fields from target param
+            Field[] fields = ReflectionUtil.getAllFields(targetParam.getClass());
+            if (CollectionUtils.isEmpty(fields)) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("The param of type `{}` has no field, please don't use `@{}(isParamInProperty = true)` on it",
+                            targetParam.getClass().getName(), BusinessActionContextParameter.class.getSimpleName());
+                }
+                return Collections.emptyMap();
+            }
 
             // fetch context from the fields
-            Field[] fields = ReflectionUtil.getAllFields(targetParam.getClass());
+            Map<String, Object> context = new HashMap<>(8);
             for (Field f : fields) {
                 // get annotation
                 BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
@@ -93,7 +97,6 @@ public final class ActionContextUtil {
                 String fieldName = f.getName();
                 loadParamByAnnotationAndPutToContext("field", fieldName, fieldValue, annotation, context);
             }
-
             return context;
         } catch (Throwable t) {
             throw new FrameworkException(t, "fetchContextFromObject failover");
@@ -124,6 +127,7 @@ public final class ActionContextUtil {
             }
         }
 
+        // if {@code isParamInProperty == true}, fetch context from objValue
         if (annotation.isParamInProperty()) {
             Map<String, Object> paramContext = fetchContextFromObject(objValue);
             if (CollectionUtils.isNotEmpty(paramContext)) {
