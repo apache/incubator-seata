@@ -168,7 +168,7 @@ public final class ActionContextUtil {
             }
             objValue = Array.get(objValue, index);
         } else {
-            LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+            LOGGER.warn("the {} named '{}' is not a `List` or `Array`, so the 'index' field of '@{}' cannot be used on it",
                     objType, objName, BusinessActionContextParameter.class.getSimpleName());
         }
 
