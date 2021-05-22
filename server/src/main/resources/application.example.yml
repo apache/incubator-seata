@@ -1,10 +1,20 @@
 server:
   port: 9091
 
+spring:
+  application:
+    name: seata-server
+
 logging:
-  config: classpath:logback.xml
+  config: classpath:logback-spring.xml
   file:
     path: ${user.home}/logs
+  extend:
+    logstash-appender:
+      destination: 127.0.0.1:4560
+    kafka-appender:
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
 
 seata:
   config:
