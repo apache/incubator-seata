@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sun.istack.internal.NotNull;
-
 /**
  * Reflection tools
  *
@@ -234,7 +232,6 @@ public final class ReflectionUtil {
      *
      * @param clazz the clazz
      */
-    @NotNull
     public static Field[] getAllFields(Class<?> clazz) {
         if (clazz == Object.class || clazz.isInterface()) {
             return EMPTY_FIELD_ARRAY;
