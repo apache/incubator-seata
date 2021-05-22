@@ -20,16 +20,16 @@ import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-
+import java.time.LocalDateTime;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import io.seata.rm.datasource.sql.struct.Field;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +65,12 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
-        //timestamp type
+        //timestamp type: accurate to millisecond
+        field = new Field("timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2021-05-18 17:23:22.111"));
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+        //timestamp type: accurate to microseconds
         field = new Field("timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2019-08-10 10:49:26.926554"));
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
@@ -79,6 +84,19 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
 
         //clob type
         field = new Field("clob_type", JDBCType.CLOB.getVendorTypeNumber(), new SerialClob("hello".toCharArray()));
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+        //LocalDateTime type: accurate to millisecond
+        LocalDateTime dateTime = LocalDateTime.of(2021, 5, 18, 17, 23, 22, 111000000);
+        field = new Field("localdatetime_type", JDBCType.DATE.getVendorTypeNumber(), dateTime);
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+        //LocalDateTime type: accurate to microseconds
+        dateTime = LocalDateTime.of(2021, 5, 18, 17, 23, 22, 222333000);
+        field = new Field("localdatetime_type2", JDBCType.DATE.getVendorTypeNumber(), dateTime);
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
