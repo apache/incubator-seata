@@ -82,7 +82,7 @@ public class ActionInterceptorHandler {
         } finally {
             BusinessActionContextUtil.clear();
             //to report business action context finally.
-            if (businessAction.isDelayReport() && Boolean.TRUE.equals(actionContext.getUpdated())) {
+            if (businessAction.isDelayReport() || Boolean.TRUE.equals(actionContext.getUpdated())) {
                 BusinessActionContextUtil.reportContext(actionContext);
             }
         }

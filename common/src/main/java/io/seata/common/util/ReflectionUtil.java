@@ -19,21 +19,39 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Reflection tools
  *
  * @author zhangsen
  */
-public class ReflectionUtil {
+public final class ReflectionUtil {
+
+    private ReflectionUtil() {
+    }
 
     /**
      * The constant MAX_NEST_DEPTH.
      */
     public static final int MAX_NEST_DEPTH = 20;
+
+    /**
+     * The EMPTY_FIELD_ARRAY
+     */
+    public static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
+
+    /**
+     * The cache CLASS_FIELDS_CACHE
+     */
+    private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Gets class by name.
@@ -207,5 +225,56 @@ public class ReflectionUtil {
         modifiers.setAccessible(true);
         modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
         field.set(cla, newValue);
+    }
+
+    /**
+     * Gets all fields.
+     *
+     * @param clazz the clazz
+     */
+    public static Field[] getAllFields(Class<?> clazz) {
+        if (clazz == Object.class || clazz.isInterface()) {
+            return EMPTY_FIELD_ARRAY;
+        }
+
+        // get from the the cache
+        Field[] fields = CLASS_FIELDS_CACHE.get(clazz);
+        if (fields != null) {
+            return fields;
+        }
+
+        // load current class declared fields
+        fields = clazz.getDeclaredFields();
+        List<Field> fieldList = new ArrayList<>(Arrays.asList(fields));
+
+        // Remove unwanted fields
+        Field field;
+        for (int i = 0; i < fieldList.size(); ++i) {
+            field = fieldList.get(i);
+            if (field.getName().contains("$")) {
+                fieldList.remove(i);
+                --i;
+            }
+        }
+
+        // load super class all fields, and add to the field list
+        Field[] superFields = getAllFields(clazz.getSuperclass());
+        if (CollectionUtils.isNotEmpty(superFields)) {
+            fieldList.addAll(Arrays.asList(superFields));
+        }
+
+        // list to array
+        Field[] resultFields;
+        if (!fieldList.isEmpty()) {
+            resultFields = fieldList.toArray(new Field[fieldList.size()]);
+        } else {
+            // Reuse the EMPTY_FIELD_ARRAY
+            resultFields = EMPTY_FIELD_ARRAY;
+        }
+
+        // set cache
+        CLASS_FIELDS_CACHE.put(clazz, resultFields);
+
+        return resultFields;
     }
 }

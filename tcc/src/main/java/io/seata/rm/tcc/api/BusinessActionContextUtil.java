@@ -15,7 +15,7 @@
  */
 package io.seata.rm.tcc.api;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
@@ -55,8 +55,7 @@ public final class BusinessActionContextUtil {
             return;
         }
 
-        Map<String, Object> newContext = new HashMap<>(1, 1);
-        newContext.put(key, value);
+        Map<String, Object> newContext = Collections.singletonMap(key, value);
         addContext(newContext);
     }
 
