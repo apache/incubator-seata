@@ -56,7 +56,7 @@ public @interface BusinessActionContextParameter {
     /**
      * Specify the index of the parameter in the List or Array
      *
-     * @return the index of the List
+     * @return the index of the List or Array
      */
     int index() default -1;
 
