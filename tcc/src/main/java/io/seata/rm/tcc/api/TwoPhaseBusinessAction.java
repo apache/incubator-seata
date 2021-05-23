@@ -66,4 +66,11 @@ public @interface TwoPhaseBusinessAction {
      * @return isDelayReport
      */
     boolean isDelayReport() default false;
+
+    /**
+     * whether use TCC fence (idempotent,non_rollback,suspend)
+     *
+     * @return the boolean
+     */
+    boolean useTCCFence() default false;
 }
