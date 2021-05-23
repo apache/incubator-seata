@@ -86,7 +86,9 @@ public class ActionInterceptorHandler {
                     return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     Throwable originException = e.getCause();
-                    LOGGER.error("[{}] prepare TCC resource error: {}", xid, originException.getMessage());
+                    if (originException instanceof FrameworkException) {
+                        LOGGER.error("[{}] prepare TCC fence error", xid, originException);
+                    }
                     throw originException;
                 }
             } else {
