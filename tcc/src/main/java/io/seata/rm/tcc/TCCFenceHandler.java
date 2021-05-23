@@ -15,8 +15,13 @@
  */
 package io.seata.rm.tcc;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.util.Date;
+import javax.sql.DataSource;
+
 import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.exception.FrameworkException;
+import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.constant.TCCFenceConstant;
@@ -29,11 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.util.Date;
 
 /**
  * TCC Fence Handler(idempotent, non_rollback, suspend)
@@ -81,7 +81,7 @@ public class TCCFenceHandler {
                 }
             } catch (Throwable t) {
                 status.setRollbackOnly();
-                throw new FrameworkException(t);
+                throw new SkipCallbackWrapperException(t);
             }
         });
     }
@@ -117,7 +117,7 @@ public class TCCFenceHandler {
                 return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_COMMITTED, status);
             } catch (Throwable t) {
                 status.setRollbackOnly();
-                throw new FrameworkException(t);
+                throw new SkipCallbackWrapperException(t);
             }
         });
     }
@@ -164,7 +164,7 @@ public class TCCFenceHandler {
                 return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, businessActionContext, xid, branchId, TCCFenceConstant.STATUS_ROLLBACKED, status);
             } catch (Throwable t) {
                 status.setRollbackOnly();
-                throw new FrameworkException(t);
+                throw new SkipCallbackWrapperException(t);
             }
         });
     }
