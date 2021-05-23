@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
@@ -30,6 +29,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.TCCFenceHandler;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
@@ -101,10 +101,8 @@ public class ActionInterceptorHandler {
             }
         } finally {
             BusinessActionContextUtil.clear();
-            //to report business action context finally.
-            if (businessAction.isDelayReport() || Boolean.TRUE.equals(actionContext.getUpdated())) {
-                BusinessActionContextUtil.reportContext(actionContext);
-            }
+            //to report business action context finally if necessary
+            BusinessActionContextUtil.reportContext(actionContext);
         }
     }
 

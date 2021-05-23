@@ -230,21 +230,21 @@ public final class ReflectionUtil {
     /**
      * Gets all fields.
      *
-     * @param clazz the clazz
+     * @param targetClazz the target class
      */
-    public static Field[] getAllFields(Class<?> clazz) {
-        if (clazz == Object.class || clazz.isInterface()) {
+    public static Field[] getAllFields(Class<?> targetClazz) {
+        if (targetClazz == Object.class || targetClazz.isInterface()) {
             return EMPTY_FIELD_ARRAY;
         }
 
-        // get from the the cache
-        Field[] fields = CLASS_FIELDS_CACHE.get(clazz);
+        // get from the cache
+        Field[] fields = CLASS_FIELDS_CACHE.get(targetClazz);
         if (fields != null) {
             return fields;
         }
 
         // load current class declared fields
-        fields = clazz.getDeclaredFields();
+        fields = targetClazz.getDeclaredFields();
         List<Field> fieldList = new ArrayList<>(Arrays.asList(fields));
 
         // Remove unwanted fields
@@ -258,7 +258,7 @@ public final class ReflectionUtil {
         }
 
         // load super class all fields, and add to the field list
-        Field[] superFields = getAllFields(clazz.getSuperclass());
+        Field[] superFields = getAllFields(targetClazz.getSuperclass());
         if (CollectionUtils.isNotEmpty(superFields)) {
             fieldList.addAll(Arrays.asList(superFields));
         }
@@ -273,7 +273,7 @@ public final class ReflectionUtil {
         }
 
         // set cache
-        CLASS_FIELDS_CACHE.put(clazz, resultFields);
+        CLASS_FIELDS_CACHE.put(targetClazz, resultFields);
 
         return resultFields;
     }
