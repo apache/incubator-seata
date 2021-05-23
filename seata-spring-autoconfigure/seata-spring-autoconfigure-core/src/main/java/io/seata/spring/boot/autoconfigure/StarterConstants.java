@@ -38,6 +38,8 @@ public interface StarterConstants {
     String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + ".loadBalance";
     String LOG_PREFIX = SEATA_PREFIX + ".log";
     String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
+    String TCC_FENCE_PREFIX_KEBAB_STYLE = SEATA_PREFIX + ".tcc-fence";
+    String TCC_FENCE_CONFIG_PREFIX_KEBAB_STYLE = TCC_FENCE_PREFIX_KEBAB_STYLE + ".config";
     String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
     String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 

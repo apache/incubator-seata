@@ -13,20 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.logging.logback.ansi;
+package io.seata.rm.tcc.constant;
 
 /**
- * An ANSI encodable element.
+ * TCC Fence clean mode
  *
- * @author Phillip Webb
- * @origin Copied from spring-boot.jar by wang.liang
+ * @author kaka2code
  */
-public interface AnsiElement {
+public enum TCCFenceCleanMode {
 
     /**
-     * @return the ANSI escape code
+     * Close auto clean task
      */
-    @Override
-    String toString();
-
+    Close,
+    /**
+     * Clean by days
+     */
+    Day,
+    /**
+     * Clean by hours
+     */
+    Hour,
+    /**
+     * Clean by minutes
+     */
+    Minute;
 }
