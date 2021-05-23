@@ -86,9 +86,9 @@ public class ActionInterceptorHandler {
         //share actionContext implicitly
         BusinessActionContextUtil.setContext(actionContext);
         try {
-            // Use TCC Fence
             if (businessAction.useTCCFence()) {
                 try {
+                    // Use TCC Fence, and return the business result
                     return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
                 } catch (FrameworkException | UndeclaredThrowableException e) {
                     String msg = String.format("prepare TCC resource error, xid: %s.", xid);
@@ -96,12 +96,12 @@ public class ActionInterceptorHandler {
                     throw e.getCause();
                 }
             } else {
-                //Execute business, and return business result
+                //Execute business, and return the business result
                 return targetCallback.execute();
             }
         } finally {
             BusinessActionContextUtil.clear();
-            //to report business action context finally if necessary
+            //to report business action context finally if the actionContext.getUpdated() is true
             BusinessActionContextUtil.reportContext(actionContext);
         }
     }

@@ -50,11 +50,11 @@ public final class ActionContextUtil {
      * Extracting context data from parameters
      *
      * @param targetParam the target param
-     * @return map map
+     * @return map the context
      */
     public static Map<String, Object> fetchContextFromObject(@Nonnull Object targetParam) {
         try {
-            // get the fields from target param
+            // gets the fields from the class of the target parameter
             Field[] fields = ReflectionUtil.getAllFields(targetParam.getClass());
             if (CollectionUtils.isEmpty(fields)) {
                 if (LOGGER.isWarnEnabled()) {
