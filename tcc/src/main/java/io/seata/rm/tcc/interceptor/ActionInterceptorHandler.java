@@ -17,7 +17,9 @@ package io.seata.rm.tcc.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
@@ -80,11 +82,23 @@ public class ActionInterceptorHandler {
             }
             argIndex++;
         }
+
         //share actionContext implicitly
         BusinessActionContextUtil.setContext(actionContext);
         try {
-            //Execute business, and return business result
-            return targetCallback.execute();
+            // Use TCC Fence
+            if (businessAction.useTCCFence()) {
+                try {
+                    return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
+                } catch (FrameworkException | UndeclaredThrowableException e) {
+                    String msg = String.format("prepare TCC resource error, xid: %s.", xid);
+                    LOGGER.error(msg, e.getCause());
+                    throw e.getCause();
+                }
+            } else {
+                //Execute business, and return business result
+                return targetCallback.execute();
+            }
         } finally {
             BusinessActionContextUtil.clear();
             //to report business action context finally.
@@ -165,6 +179,7 @@ public class ActionInterceptorHandler {
             context.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
             context.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
             context.put(Constants.ACTION_NAME, businessAction.name());
+            context.put(Constants.USE_TCC_FENCE, businessAction.useTCCFence());
         }
     }
 
