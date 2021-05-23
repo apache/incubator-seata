@@ -67,6 +67,11 @@ public interface Constants {
     String ACTION_NAME = "actionName";
 
     /**
+     * Use TCC fence
+     */
+    String USE_TCC_FENCE = "useTCCFence";
+
+    /**
      * phase one method name
      */
     String PREPARE_METHOD = "sys::prepare";
