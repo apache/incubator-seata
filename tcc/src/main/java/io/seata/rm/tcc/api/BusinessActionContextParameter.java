@@ -60,7 +60,7 @@ public @interface BusinessActionContextParameter {
     int index() default -1;
 
     /**
-     * if get the parameter from the property of the object ?
+     * whether get the parameter from the property of the object
      *
      * @return the boolean
      */
