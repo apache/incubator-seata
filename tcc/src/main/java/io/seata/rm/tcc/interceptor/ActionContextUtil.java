@@ -126,14 +126,6 @@ public final class ActionContextUtil {
         }
     }
 
-    private static String getParamName(@Nonnull BusinessActionContextParameter annotation) {
-        String paramName = annotation.paramName();
-        if (StringUtils.isBlank(paramName)) {
-            paramName = annotation.value();
-        }
-        return paramName;
-    }
-
     @Nullable
     private static Object getByIndex(String objType, String objName, Object objValue, int index) {
         if (objValue instanceof List) {
@@ -156,6 +148,14 @@ public final class ActionContextUtil {
         }
 
         return objValue;
+    }
+
+    public static String getParamName(@Nonnull BusinessActionContextParameter annotation) {
+        String paramName = annotation.paramName();
+        if (StringUtils.isBlank(paramName)) {
+            paramName = annotation.value();
+        }
+        return paramName;
     }
 
     /**
