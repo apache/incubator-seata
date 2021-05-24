@@ -157,7 +157,8 @@ public class ActionInterceptorHandler {
         //Init running environment context
         initFrameworkContext(context);
         actionContext.setDelayReport(businessAction.isDelayReport());
-        //Merge context and origin context if it exists.  @since above 1.4.2
+        //Merge context and origin context if it exists.
+        //@since: above 1.4.2
         Map<String, Object> originContext = actionContext.getActionContext();
         if (originContext == null) {
             actionContext.setActionContext(context);
