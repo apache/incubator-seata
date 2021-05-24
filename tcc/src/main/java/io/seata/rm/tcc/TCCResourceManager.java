@@ -99,7 +99,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if (Boolean.TRUE.equals(businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE))) {
+            if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
                     result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId);
                 } catch (FrameworkException | UndeclaredThrowableException e) {
@@ -156,7 +156,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object ret;
             boolean result;
             // add idempotent and anti hanging
-            if (Boolean.TRUE.equals(businessActionContext.getActionContext().get(Constants.USE_TCC_FENCE))) {
+            if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
                     result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId);
                 } catch (FrameworkException | UndeclaredThrowableException e) {

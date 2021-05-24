@@ -18,6 +18,7 @@ package io.seata.rm.tcc.interceptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -130,9 +131,8 @@ public class ActionInterceptorHandler {
         actionContext.setDelayReport(businessAction.isDelayReport());
         actionContext.setActionContext(context);
 
-        //init applicationData
-        Map<String, Object> applicationContext = new HashMap<>(4);
-        applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
+        //Init applicationData
+        Map<String, Object> applicationContext = Collections.singletonMap(Constants.TCC_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
             //registry branch record
