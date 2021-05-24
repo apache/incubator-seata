@@ -183,7 +183,7 @@ public final class ActionContextUtil {
      * @param actionContextMap the actionContextMap
      * @return the action context is changed
      */
-    public static boolean putActionContext(Map<String, Object> actionContext, Map<String, Object> actionContextMap) {
+    public static boolean putActionContext(Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
         boolean isChanged = false;
         for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
             if (putActionContext(actionContext, entry.getKey(), entry.getValue())) {
