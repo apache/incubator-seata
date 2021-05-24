@@ -20,6 +20,7 @@ jobs:
       - name: Setup Java JDK
         uses: actions/setup-java@v2.1.0
         with:
+          distribution: 'zulu'
           java-version: ${{ matrix.java }}
       - name: Set up ENV
         # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
