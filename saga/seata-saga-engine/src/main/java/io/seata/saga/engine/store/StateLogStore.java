@@ -104,4 +104,9 @@ public interface StateLogStore {
      * @return
      */
     List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId);
+
+    /**
+     * clear the LocalThread
+     */
+    void clearUp();
 }
