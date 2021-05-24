@@ -194,9 +194,17 @@ public class TCCResourceManager extends AbstractResourceManager {
      */
     protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId,
                                                              String applicationData) {
-        //transfer tcc applicationData to Context
-        Map tccContext = StringUtils.isBlank(applicationData) ? new HashMap() : (Map)JSON.parse(applicationData);
-        Map actionContextMap = (Map)tccContext.get(Constants.TCC_ACTION_CONTEXT);
+        //transfer tcc applicationData to actionContextMap
+        Map actionContextMap = null;
+        if (StringUtils.isNotBlank(applicationData)) {
+            Map tccContext = JSON.parseObject(applicationData, Map.class);
+            actionContextMap = (Map)tccContext.get(Constants.TCC_ACTION_CONTEXT);
+        }
+        if (actionContextMap == null) {
+            actionContextMap = new HashMap<>(2);
+        }
+
+        //instance the action context
         BusinessActionContext businessActionContext = new BusinessActionContext(
             xid, String.valueOf(branchId), actionContextMap);
         businessActionContext.setActionName(resourceId);
