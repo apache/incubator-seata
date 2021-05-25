@@ -28,3 +28,6 @@
 - etcd3: Initialize script for Etcd3
 - consul: Initialize script for consul
 
+## build packege 
+./mvnw -Prelease-seata -Dmaven.test.skip=true clean install -U
+
