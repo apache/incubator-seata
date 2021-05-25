@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 
 import io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyCreator;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -33,6 +34,7 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
  */
 @ConditionalOnBean(DataSource.class)
 @ConditionalOnExpression("${seata.enabled:true} && ${seata.enableAutoDataSourceProxy:true} && ${seata.enable-auto-data-source-proxy:true}")
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class})
 public class SeataDataSourceAutoConfiguration {
 
     /**
