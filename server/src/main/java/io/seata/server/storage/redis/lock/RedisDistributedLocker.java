@@ -15,37 +15,27 @@
  */
 package io.seata.server.storage.redis.lock;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
+import io.seata.server.storage.redis.JedisPooledFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.params.SetParams;
-import io.seata.server.storage.redis.JedisPooledFactory;
 
 /**
  * @description: Redis distributed lock
  * @author: zhongxiang.wang
  * @date: 2021-03-02 11:34
  */
+@LoadLevel(name = "redis", scope = Scope.SINGLETON)
 public class RedisDistributedLocker implements DistributedLocker {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RedisDistributedLocker.class);
     private static final String SUCCESS = "OK";
-
-    private static volatile RedisDistributedLocker instance;
-
-    public static DistributedLocker getInstance() {
-        if (instance == null) {
-            synchronized (RedisDistributedLocker.class) {
-                if (instance == null) {
-                    instance = new RedisDistributedLocker();
-                }
-            }
-        }
-        return instance;
-    }
 
     /**
      * Acquire the distributed lock

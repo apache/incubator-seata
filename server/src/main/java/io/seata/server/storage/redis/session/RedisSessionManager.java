@@ -18,24 +18,19 @@ package io.seata.server.storage.redis.session;
 import java.util.Collection;
 import java.util.List;
 
-import io.seata.common.XID;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.DistributedLockDO;
 import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.redis.lock.RedisDistributedLocker;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
@@ -51,11 +46,6 @@ public class RedisSessionManager extends AbstractSessionManager
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManager.class);
-
-    /**
-     * The redis distributed lock expire time
-     */
-    private static long REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME = ConfigurationFactory.getInstance().getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME,10000);
 
     /**
      * The Task name.
@@ -201,15 +191,4 @@ public class RedisSessionManager extends AbstractSessionManager
         throws TransactionException {
         return lockCallable.call();
     }
-
-    @Override
-    public boolean scheduledLock(String lockKey) {
-        return RedisDistributedLocker.getInstance().acquireLock(new DistributedLockDO(lockKey,XID.getIpAddressAndPort(),REDIS_DISTRIBUTED_LOCK_EXPIRE_TIME));
-    }
-
-    @Override
-    public boolean unScheduledLock(String lockKey) {
-        return RedisDistributedLocker.getInstance().releaseLock(new DistributedLockDO(lockKey,XID.getIpAddressAndPort(),null));
-    }
-
 }
