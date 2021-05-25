@@ -15,6 +15,8 @@
  */
 package io.seata.common;
 
+import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
+
 /**
  * The type Xid.
  *
@@ -51,7 +53,7 @@ public class XID {
      * @return the string
      */
     public static String generateXID(long tranId) {
-        return ipAddress + ":" + port + ":" + tranId;
+        return new StringBuilder().append(ipAddress).append(IP_PORT_SPLIT_CHAR).append(port).append(IP_PORT_SPLIT_CHAR).append(tranId).toString();
     }
 
     /**
@@ -85,5 +87,14 @@ public class XID {
      */
     public static String getIpAddress() {
         return ipAddress;
+    }
+
+    /**
+     * Gets ipAddress:port
+     *
+     * @return eg: 127.0.0.1:8091
+     */
+    public static String getIpAddressAndPort() {
+        return new StringBuilder().append(ipAddress).append(IP_PORT_SPLIT_CHAR).append(port).toString();
     }
 }
