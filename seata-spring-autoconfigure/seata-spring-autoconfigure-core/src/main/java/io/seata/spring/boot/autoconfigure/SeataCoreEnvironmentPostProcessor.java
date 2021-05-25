@@ -38,6 +38,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProper
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
@@ -67,7 +68,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
  * @author xingfudeshi@gmail.com
  * @author wang.liang
  */
-public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -95,5 +96,10 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
         PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
         PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
         PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

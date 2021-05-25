@@ -25,6 +25,7 @@ import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperti
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
@@ -41,7 +42,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
  * @author xingfudeshi@gmail.com
  * @author wang.liang
  */
-public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -54,5 +55,10 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(UNDO_PREFIX, UndoProperties.class);
         PROPERTY_BEAN_MAP.put(COMPRESS_PREFIX, UndoCompressProperties.class);
         PROPERTY_BEAN_MAP.put(LOAD_BALANCE_PREFIX, LoadBalanceProperties.class);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

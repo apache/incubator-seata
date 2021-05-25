@@ -25,6 +25,7 @@ import io.seata.spring.boot.autoconfigure.properties.server.store.StorePropertie
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
@@ -45,7 +46,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_
  * @author xingfudeshi@gmail.com
  * @author wang.liang
  */
-public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProcessor {
+public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -61,5 +62,10 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);
         PROPERTY_BEAN_MAP.put(STORE_REDIS_SINGLE_PREFIX, StoreRedisProperties.Single.class);
         PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
