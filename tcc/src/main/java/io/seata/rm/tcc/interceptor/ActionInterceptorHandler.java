@@ -118,10 +118,13 @@ public class ActionInterceptorHandler {
         for (Class<?> parameterType : parameterTypes) {
             if (BusinessActionContext.class.isAssignableFrom(parameterType)) {
                 actionContext = (BusinessActionContext)arguments[argIndex];
-                //If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
                 if (actionContext == null) {
+                    // If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
                     actionContext = new BusinessActionContext();
                     arguments[argIndex] = actionContext;
+                } else {
+                    // Reset the updated, avoid unnecessary reporting
+                    actionContext.setUpdated(null);
                 }
                 break;
             }
