@@ -91,7 +91,7 @@ public class ActionInterceptorHandler {
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     Throwable originException = e.getCause();
                     if (originException instanceof FrameworkException) {
-                        LOGGER.error("[{}] prepare TCC fence error", xid, originException);
+                        LOGGER.error("[{}] prepare TCC fence error: {}", xid, originException.getMessage());
                     }
                     throw originException;
                 }

@@ -68,11 +68,7 @@ public class TCCFenceHandler {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
-                TCCFenceDO tccFenceDO = new TCCFenceDO();
-                tccFenceDO.setXid(xid);
-                tccFenceDO.setBranchId(branchId);
-                tccFenceDO.setStatus(TCCFenceConstant.STATUS_TRIED);
-                boolean result = TCC_FENCE_DAO.insertTCCFenceDO(conn, tccFenceDO);
+                boolean result = insertTCCFenceLog(conn, xid, branchId, TCCFenceConstant.STATUS_TRIED);
                 LOGGER.info("TCC fence prepare result: {}. xid: {}, branchId: {}", result, xid, branchId);
                 if (result) {
                     return targetCallback.execute();
@@ -141,11 +137,7 @@ public class TCCFenceHandler {
                 TCCFenceDO tccFenceDO = TCC_FENCE_DAO.queryTCCFenceDO(conn, xid, branchId);
                 // non_rollback
                 if (tccFenceDO == null) {
-                    tccFenceDO = new TCCFenceDO();
-                    tccFenceDO.setXid(xid);
-                    tccFenceDO.setBranchId(branchId);
-                    tccFenceDO.setStatus(TCCFenceConstant.STATUS_SUSPENDED);
-                    boolean result = TCC_FENCE_DAO.insertTCCFenceDO(conn, tccFenceDO);
+                    boolean result = insertTCCFenceLog(conn, xid, branchId, TCCFenceConstant.STATUS_SUSPENDED);
                     LOGGER.info("Insert tcc fence record result: {}. xid: {}, branchId: {}", result, xid, branchId);
                     if (!result) {
                         throw new TCCFenceException(String.format("Insert tcc fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
@@ -170,6 +162,23 @@ public class TCCFenceHandler {
                 throw new SkipCallbackWrapperException(t);
             }
         });
+    }
+
+    /**
+     * Insert TCC fence log
+     *
+     * @param conn     the db connection
+     * @param xid      the xid
+     * @param branchId the branchId
+     * @param status   the status
+     * @return the boolean
+     */
+    private static boolean insertTCCFenceLog(Connection conn, String xid, Long branchId, Integer status) {
+        TCCFenceDO tccFenceDO = new TCCFenceDO();
+        tccFenceDO.setXid(xid);
+        tccFenceDO.setBranchId(branchId);
+        tccFenceDO.setStatus(status);
+        return TCC_FENCE_DAO.insertTCCFenceDO(conn, tccFenceDO);
     }
 
     /**

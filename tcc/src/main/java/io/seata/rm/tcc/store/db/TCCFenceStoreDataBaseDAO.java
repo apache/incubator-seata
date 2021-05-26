@@ -62,10 +62,10 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public TCCFenceDO queryTCCFenceDO(Connection conn, String xid, Long branchId) {
-        String sql = TCCFenceStoreSqls.getQuerySQLByBranchIdAndXid(logTableName);
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
+            String sql = TCCFenceStoreSqls.getQuerySQLByBranchIdAndXid(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
@@ -88,15 +88,17 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean insertTCCFenceDO(Connection conn, TCCFenceDO tccFenceDO) {
-        String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(logTableName);
         PreparedStatement ps = null;
         try {
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+
+            String sql = TCCFenceStoreSqls.getInsertLocalTCCLogSQL(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setString(1, tccFenceDO.getXid());
             ps.setLong(2, tccFenceDO.getBranchId());
             ps.setInt(3, tccFenceDO.getStatus());
-            ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            ps.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(4, now);
+            ps.setTimestamp(5, now);
             return ps.executeUpdate() > 0;
         } catch (DuplicateKeyException e) {
             throw new TCCFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", tccFenceDO.getXid(), tccFenceDO.getBranchId()),
@@ -110,9 +112,9 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean updateTCCFenceDO(Connection conn, String xid, Long branchId, int newStatus, int oldStatus) {
-        String sql = TCCFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(logTableName);
         PreparedStatement ps = null;
         try {
+            String sql = TCCFenceStoreSqls.getUpdateStatusSQLByBranchIdAndXid(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setInt(1, newStatus);
             // gmt_modified
@@ -130,26 +132,26 @@ public class TCCFenceStoreDataBaseDAO implements TCCFenceStore {
 
     @Override
     public boolean deleteTCCFenceDO(Connection conn, String xid, Long branchId) {
-        String sql = TCCFenceStoreSqls.getDeleteSQLByBranchIdAndXid(logTableName);
         PreparedStatement ps = null;
         try {
+            String sql = TCCFenceStoreSqls.getDeleteSQLByBranchIdAndXid(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             ps.setLong(2, branchId);
             ps.executeUpdate();
+            return true;
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps);
         }
-        return true;
     }
 
     @Override
     public int deleteTCCFenceDOByDate(Connection conn, Date datetime) {
-        String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
         PreparedStatement ps = null;
         try {
+            String sql = TCCFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
             ps = conn.prepareStatement(sql);
             ps.setTimestamp(1, new Timestamp(datetime.getTime()));
             return ps.executeUpdate();
