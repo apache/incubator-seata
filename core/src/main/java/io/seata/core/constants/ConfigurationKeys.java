@@ -290,9 +290,9 @@ public interface ConfigurationKeys {
     String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
     /**
-     * The constant SERVER_PORT.
+     * The constant SERVER_RPC_PORT.
      */
-    String SERVER_PORT = SERVER_PREFIX + "port";
+    String SERVER_RPC_PORT = SERVER_PREFIX + "rpcPort";
 
     /**
      * The constant RECOVERY_PREFIX.
