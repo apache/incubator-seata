@@ -95,9 +95,11 @@ public class ActionInterceptorHandler {
                     // Use TCC Fence, and return the business result
                     return TCCFenceHandler.prepareFence(xid, Long.valueOf(branchId), targetCallback);
                 } catch (FrameworkException | UndeclaredThrowableException e) {
-                    String msg = String.format("prepare TCC resource error, xid: %s.", xid);
-                    LOGGER.error(msg, e.getCause());
-                    throw e.getCause();
+                    Throwable originException = e.getCause();
+                    if (originException instanceof FrameworkException) {
+                        LOGGER.error("[{}] prepare TCC fence error: {}", xid, originException.getMessage());
+                    }
+                    throw originException;
                 }
             } else {
                 //Execute business, and return the business result
