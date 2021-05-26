@@ -206,17 +206,14 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static boolean deleteFence(String xid, Long branchId) {
-        return transactionTemplate.execute(status -> {
-            boolean ret = false;
-            try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
-            } catch (Exception e) {
-                status.setRollbackOnly();
-                LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
-            }
-            return ret;
-        });
+        boolean ret = false;
+        try {
+            Connection conn = DataSourceUtils.getConnection(dataSource);
+            ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
+        } catch (Exception e) {
+            LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
+        }
+        return ret;
     }
 
     /**
@@ -225,16 +222,13 @@ public class TCCFenceHandler {
      * @return the boolean
      */
     public static boolean deleteFenceByDate(Date datetime) {
-        return transactionTemplate.execute(status -> {
-            boolean ret = false;
-            try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                ret = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
-            } catch (Exception e) {
-                status.setRollbackOnly();
-                LOGGER.error("delete fence log failed, timeBefore: {}", datetime, e);
-            }
-            return ret;
-        });
+        boolean ret = false;
+        try {
+            Connection conn = DataSourceUtils.getConnection(dataSource);
+            ret = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
+        } catch (Exception e) {
+            LOGGER.error("delete fence log failed, timeBefore: {}", datetime, e);
+        }
+        return ret;
     }
 }
