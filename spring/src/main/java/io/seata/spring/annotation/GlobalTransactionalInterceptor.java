@@ -279,10 +279,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             throw new ShouldNeverHappenException("unsupported operation");
         }
     }
+
     /**
      * proxy annotation class
+     *
      * @param annotationClass
-	 * @param annotationConfigObject
+     * @param annotationConfigObject
      * @return T
      * @author xingfudeshi@gmail.com
      */
