@@ -59,7 +59,8 @@ public class TCCFenceHandler {
 
     /**
      * tcc prepare method enhanced
-     * @param xid the global transaction id
+     *
+     * @param xid      the global transaction id
      * @param branchId the branch transaction id
      * @return the boolean
      */
@@ -88,11 +89,12 @@ public class TCCFenceHandler {
 
     /**
      * tcc commit method enhanced
-     * @param commitMethod commit method
-     * @param targetTCCBean target tcc bean
+     *
+     * @param commitMethod          commit method
+     * @param targetTCCBean         target tcc bean
      * @param businessActionContext businessActionContext
-     * @param xid the global transaction id
-     * @param branchId the branch transaction id
+     * @param xid                   the global transaction id
+     * @param branchId              the branch transaction id
      * @return the boolean
      */
     public static boolean commitFence(Method commitMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
@@ -124,11 +126,12 @@ public class TCCFenceHandler {
 
     /**
      * tcc rollback method enhanced
-     * @param rollbackMethod rollback method
-     * @param targetTCCBean target tcc bean
+     *
+     * @param rollbackMethod        rollback method
+     * @param targetTCCBean         target tcc bean
      * @param businessActionContext businessActionContext
-     * @param xid the global transaction id
-     * @param branchId the branch transaction id
+     * @param xid                   the global transaction id
+     * @param branchId              the branch transaction id
      * @return the boolean
      */
     public static boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId) {
@@ -171,12 +174,13 @@ public class TCCFenceHandler {
 
     /**
      * Update TCC Fence status and invoke target method
-     * @param method target method
-     * @param targetTCCBean target bean
+     *
+     * @param method                target method
+     * @param targetTCCBean         target bean
      * @param businessActionContext businessActionContext
-     * @param xid the global transaction id
-     * @param branchId the branch transaction id
-     * @param status the tcc fence status
+     * @param xid                   the global transaction id
+     * @param branchId              the branch transaction id
+     * @param status                the tcc fence status
      * @return the boolean
      */
     private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean, BusinessActionContext businessActionContext, String xid, Long branchId, int status, TransactionStatus transactionStatus) throws Exception {
@@ -201,34 +205,33 @@ public class TCCFenceHandler {
 
     /**
      * Delete TCC Fence
-     * @param xid the global transaction id
+     *
+     * @param xid      the global transaction id
      * @param branchId the branch transaction id
      * @return the boolean
      */
     public static boolean deleteFence(String xid, Long branchId) {
-        boolean ret = false;
-        try {
-            Connection conn = DataSourceUtils.getConnection(dataSource);
-            ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
-        } catch (Exception e) {
-            LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
-        }
-        return ret;
+        return transactionTemplate.execute(status -> {
+            boolean ret = false;
+            try {
+                Connection conn = DataSourceUtils.getConnection(dataSource);
+                ret = TCC_FENCE_DAO.deleteTCCFenceDO(conn, xid, branchId);
+            } catch (RuntimeException e) {
+                status.setRollbackOnly();
+                LOGGER.error("delete fence log failed, xid: {}, branchId: {}", xid, branchId, e);
+            }
+            return ret;
+        });
     }
 
     /**
      * Delete TCC Fence By Datetime
+     *
      * @param datetime datetime
-     * @return the boolean
+     * @return the deleted row count
      */
-    public static boolean deleteFenceByDate(Date datetime) {
-        boolean ret = false;
-        try {
-            Connection conn = DataSourceUtils.getConnection(dataSource);
-            ret = TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
-        } catch (Exception e) {
-            LOGGER.error("delete fence log failed, timeBefore: {}", datetime, e);
-        }
-        return ret;
+    public static int deleteFenceByDate(Date datetime) {
+        Connection conn = DataSourceUtils.getConnection(dataSource);
+        return TCC_FENCE_DAO.deleteTCCFenceDOByDate(conn, datetime);
     }
 }
